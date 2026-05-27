@@ -1,6 +1,8 @@
 # Dependencies
 node_modules/
 .pnpm-store/
+/.pnp
+.pnp.js
 
 # Build output
 dist/
@@ -30,6 +32,9 @@ lerna-debug.log*
 .env.local
 .env.*.local
 
+# i18n (auto-generated artifacts)
+**/i18n/lang/en.json
+
 # Scratch
 .temp/
 tmp/
@@ -37,11 +42,17 @@ tmp/
 # Editor / OS
 .vscode/*
 !.vscode/settings.json
+!.vscode/mcp.json
 !.vscode/extensions.json
 !.vscode/launch.json
 .idea/
 .DS_Store
 Thumbs.db
+*.pem
 
 # Vercel
 .vercel/
+
+**/i18n/compiled/
+**/i18n/missing/
+**/i18n/unused/

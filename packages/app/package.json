@@ -3,23 +3,27 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "next build",
-    "dev": "next dev",
+    "prebuild": "pnpm run i18n",
+    "build": "next build --webpack",
+    "dev": "next dev --webpack",
+    "i18n": "ttoss-i18n",
     "lint": "eslint .",
-    "start": "next start",
-    "typecheck": "tsc --noEmit"
+    "start": "next start"
   },
   "dependencies": {
     "@chakra-ui/react": "^3.35.0",
     "@cozsolidarias/data-gateway": "workspace:*",
-    "@ttoss/fsl-theme": "^1.1.12",
+    "@iconify/react": "^6.0.2",
+    "@ttoss/react-i18n": "^2.2.12",
     "next": "^16.2.6",
     "react": "^19.2.3",
     "react-dom": "^19.2.3"
   },
   "devDependencies": {
+    "@ttoss/i18n-cli": "^0.8.11",
     "@types/node": "^24.0.0",
     "@types/react": "^19.2.3",
-    "@types/react-dom": "^19.2.3"
+    "@types/react-dom": "^19.2.3",
+    "babel-plugin-formatjs": "^11.3.9"
   }
 }

@@ -1,14 +1,30 @@
 'use client';
 
-import { ChakraProvider, defaultSystem } from '@chakra-ui/react';
-import { ThemeProvider } from '@ttoss/fsl-theme/react';
+import { ChakraProvider } from '@chakra-ui/react';
+import type { LoadLocaleData } from '@ttoss/react-i18n';
+import { I18nProvider } from '@ttoss/react-i18n';
 
-import { theme } from './theme';
+import { system } from './theme';
 
-export const Providers = ({ children }: { children: React.ReactNode }) => {
+const loadLocaleData: LoadLocaleData = async (locale) => {
+  switch (locale) {
+    case 'pt-BR':
+      return (await import('../../i18n/compiled/pt-BR.json')).default;
+    default:
+      return (await import('../../i18n/compiled/en.json')).default;
+  }
+};
+
+export const Providers = ({
+  children,
+  locale,
+}: {
+  children: React.ReactNode;
+  locale?: string;
+}) => {
   return (
-    <ThemeProvider theme={theme} defaultMode="system">
-      <ChakraProvider value={defaultSystem}>{children}</ChakraProvider>
-    </ThemeProvider>
+    <I18nProvider locale={locale} loadLocaleData={loadLocaleData}>
+      <ChakraProvider value={system}>{children}</ChakraProvider>
+    </I18nProvider>
   );
 };

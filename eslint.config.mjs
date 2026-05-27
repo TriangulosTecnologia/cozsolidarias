@@ -30,6 +30,25 @@ export default [
           ],
         },
       ],
+      'react-refresh/only-export-components': [
+        'warn',
+        {
+          allowExportNames: [
+            'metadata',
+            'generateMetadata',
+            'viewport',
+            'generateViewport',
+            'dynamic',
+            'dynamicParams',
+            'revalidate',
+            'fetchCache',
+            'runtime',
+            'preferredRegion',
+            'maxDuration',
+            'generateStaticParams',
+          ],
+        },
+      ],
     },
   },
 ];

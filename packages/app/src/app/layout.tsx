@@ -1,24 +1,34 @@
-import { ThemeScript } from '@ttoss/fsl-theme/react';
 import type { Metadata } from 'next';
+import { cookies, headers } from 'next/headers';
 
+import { isLocale } from '../config/locales';
 import { Providers } from './providers';
 
 export const metadata: Metadata = {
-  title: 'Coz Solidárias',
+  title: 'Cozinhas Solidárias',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const cookieStore = await cookies();
+  const cookieLocale = cookieStore.get('locale')?.value;
+
+  const headersList = await headers();
+  const acceptLanguage = headersList.get('accept-language') ?? '';
+
+  const locale = isLocale(cookieLocale)
+    ? cookieLocale
+    : acceptLanguage.toLowerCase().includes('pt')
+      ? 'pt-BR'
+      : 'en';
+
   return (
-    <html lang="pt-BR">
-      <head>
-        <ThemeScript defaultMode="system" />
-      </head>
+    <html lang={locale}>
       <body>
-        <Providers>{children}</Providers>
+        <Providers locale={locale}>{children}</Providers>
       </body>
     </html>
   );

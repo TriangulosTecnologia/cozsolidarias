@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "i18n": "pnpm run -r i18n",
     "prepare": "husky",
     "syncpack:fix": "syncpack fix",
     "syncpack:lint": "syncpack lint"

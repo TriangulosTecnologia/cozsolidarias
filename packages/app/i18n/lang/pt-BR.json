@@ -1,0 +1,58 @@
+{
+  "4HHGTo": {
+    "defaultMessage": "Ir para o conteúdo",
+    "description": "Accessible skip navigation link — the first focusable element on the page."
+  },
+  "5AguHM": {
+    "defaultMessage": "Abrir menu de navegação",
+    "description": "Accessible label for the mobile navigation drawer trigger button."
+  },
+  "6xd01T": {
+    "defaultMessage": "Projeto Cozinhas Solidárias FAPESP",
+    "description": "Full project attribution shown in the footer, including FAPESP as the funding agency."
+  },
+  "DyQXtl": {
+    "defaultMessage": "Sobre",
+    "description": "Main navigation link to the About page."
+  },
+  "GQW43C": {
+    "defaultMessage": "Cookies",
+    "description": "Footer legal link to the Cookies policy page."
+  },
+  "J+z5+E": {
+    "defaultMessage": "Contato",
+    "description": "Main navigation link to the Contact page."
+  },
+  "j0Rix5": {
+    "defaultMessage": "Menu de navegação",
+    "description": "Accessible label for the mobile navigation links list."
+  },
+  "nkqysQ": {
+    "defaultMessage": "Termos de Uso",
+    "description": "Footer legal link to the Terms of Use page."
+  },
+  "/RV/71": {
+    "defaultMessage": "Termos de Uso — em breve.",
+    "description": "Placeholder text for the Terms of Use page while content is being developed."
+  },
+  "6BaB5R": {
+    "defaultMessage": "Sobre — em breve.",
+    "description": "Placeholder text for the About page while content is being developed."
+  },
+  "LiQ+3/": {
+    "defaultMessage": "Contato — em breve.",
+    "description": "Placeholder text for the Contact page while content is being developed."
+  },
+  "Pq7Qu8": {
+    "defaultMessage": "Navegação legal",
+    "description": "Accessible label for the footer legal navigation."
+  },
+  "Q22Hnp": {
+    "defaultMessage": "Política de Cookies — em breve.",
+    "description": "Placeholder text for the Cookie Policy page while content is being developed."
+  },
+  "hnT2sw": {
+    "defaultMessage": "Navegação principal",
+    "description": "Accessible label for the main header navigation."
+  }
+}
