@@ -1,0 +1,34 @@
+{
+  // Mirror lint-staged: prettier formats, eslint fixes
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+
+  // Flat config (eslint.config.mjs)
+  "eslint.useFlatConfig": true,
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
+  "eslint.workingDirectories": [{ "mode": "auto" }],
+
+  // Use workspace TypeScript, not VS Code's bundled version
+  "js/ts.tsdk.path": "node_modules/typescript/lib",
+
+  // Consistent with prettier defaults
+  "files.eol": "\n",
+  "editor.insertFinalNewline": true,
+
+  // Exclude build artifacts from file tree and search
+  "files.exclude": {
+    "**/.next": true
+  },
+  "search.exclude": {
+    "**/.next": true,
+    "**/pnpm-lock.yaml": true
+  }
+}

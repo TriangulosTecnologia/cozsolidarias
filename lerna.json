@@ -1,0 +1,22 @@
+{
+  "$schema": "node_modules/@lerna-lite/cli/schemas/lerna-schema.json",
+  "version": "0.5.8",
+  "npmClient": "pnpm",
+  "stream": true,
+  "command": {
+    "publish": {
+      "allowBranch": "main",
+      "noPrivate": true
+    },
+    "version": {
+      "conventionalCommits": true,
+      "createRelease": "github",
+      "forcePublish": true,
+      "message": "chore(release): publish packages",
+      "syncWorkspaceLock": true,
+      "allowPeerDependenciesUpdate": true
+    }
+  },
+  "ignoreChanges": ["**/__fixtures__/**", "**/tests/**"],
+  "packages": ["packages/*"]
+}

@@ -1,0 +1,25 @@
+{
+  "name": "@cozsolidarias/app",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev",
+    "lint": "eslint .",
+    "start": "next start",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@chakra-ui/react": "^3.35.0",
+    "@cozsolidarias/data-gateway": "workspace:*",
+    "@ttoss/fsl-theme": "^1.1.12",
+    "next": "^16.2.6",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.2.3",
+    "@types/react-dom": "^19.2.3"
+  }
+}
