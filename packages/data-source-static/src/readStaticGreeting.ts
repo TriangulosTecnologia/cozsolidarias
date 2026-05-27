@@ -1,9 +1,5 @@
-import { readFile } from 'node:fs/promises';
-import { join } from 'node:path';
-
+import greetingData from '../data/greeting.json';
 import type { StaticGreetingSource } from './types';
-
-const GREETING_PATH = join(__dirname, '..', 'data', 'greeting.json');
 
 const isStaticGreetingSource = (
   value: unknown
@@ -20,15 +16,14 @@ const isStaticGreetingSource = (
  * Reads and validates the static greeting snapshot.
  *
  * @returns The raw source record from `data/greeting.json`.
- * @throws If the file is missing or does not match the expected shape.
+ * @throws If the data does not match the expected shape.
  *
  * @example
  * const greeting = await readStaticGreeting();
  * // { message: 'Hello from static source', source: 'static-v0' }
  */
 export const readStaticGreeting = async (): Promise<StaticGreetingSource> => {
-  const raw = await readFile(GREETING_PATH, 'utf-8');
-  const parsed: unknown = JSON.parse(raw);
+  const parsed: unknown = greetingData;
 
   if (!isStaticGreetingSource(parsed)) {
     throw new Error(
