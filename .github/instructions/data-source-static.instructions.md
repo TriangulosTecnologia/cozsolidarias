@@ -1,5 +1,5 @@
 ---
-applyTo: 'packages/data-source-static/**'
+applyTo: 'src/data-source-static/**'
 ---
 
 # Package: data-source-static

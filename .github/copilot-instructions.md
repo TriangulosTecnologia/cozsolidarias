@@ -2,7 +2,7 @@
 
 ## Project
 
-Public Next.js monorepo serving a Brazilian audience. Three packages: `app` (UI), `data-gateway` (contract layer), `data-source-static` (static data).
+Public Next.js application serving a Brazilian audience.
 
 ## Constraints
 
@@ -20,54 +20,13 @@ When something breaks:
 4. Fix must be Pareto-optimal. Surface any trade-off before implementing.
 5. Prefer fixes that remove code over fixes that add it.
 
-## Writing — Basis Form
-
-Produce any artifact and interpret prompts based on general principles that guide decisions, rather than listing specific cases.
-
-Vocabulary (do not paraphrase):
-
-- Basis: a statement that is an axis of the decision space, not a point. The reader expands it to the cases.
-- Span: the set of concrete decisions derivable by combining the statements.
-- Irreducible: removing it shrinks the span; no combination of the others recovers it.
-- Orthogonal: statements share no content; removing one does not change what the other covers.
-
-Modes:
-
-- Verbose: enumerates; restates in new words.
-- Vague: abstract but empty ("be consistent").
-- Cryptic: dense but undecodable without context.
-- Dense (target): few statements, irreducible and orthogonal across the span.
-
-Input protocol (before any non-trivial answer):
-
-- Artifact: what shape must the output take?
-- Axes: derive 3–7 axes native to this artifact's decision space.
-- Real question: which decision must this answer close?
-  If any is ambiguous, ask one clarifying question; do not answer with hedges.
-
-Output audit (before delivering):
-
-- Redundancy: can a combination of the others imply this? If yes → delete.
-- Load-bearing: does removing it lose any concrete decision? If no → delete.
-- Class vs. case: class or single case? If single → demote to an example under a basis statement.
-
-Anti-signature: any statement longer than one line signals wrong basis — re-pick axes.
-
 ## Language
 
-All content in this repository must be written in English: code identifiers, comments, commit messages, user-facing strings, documentation, error messages, and logs.
+The website default language is Portuguese (pt-BR), but all content this repository related to coding must be written in English: code identifiers, comments, commit messages, user-facing strings, documentation, error messages, and logs.
 
 ## Function Arguments
 
 Prefer object parameters over multiple positional arguments. Single-parameter functions, trivial utilities (`Math.max`), and standard callbacks (`.map((item, index) => ...)`) are the only exceptions.
-
-```ts
-// ✅ Prefer
-const createUser = (args: { name: string; email: string; age: number }) => { ... };
-
-// ❌ Avoid
-const createUser = (name: string, email: string, age: number) => { ... };
-```
 
 ## Naming Conventions
 
@@ -99,21 +58,24 @@ pnpm eslint --fix
 pnpm test
 ```
 
+### Tests
+
+Unit tests live in `tests/unit/tests/` and mirror the source directory structure. Avoid redundant tests that assert the same behaviour multiple ways. Every public function and exported component must have at least one test.
+
+### Coverage
+
+Coverage must never decrease. After any code change:
+
+1. Run `pnpm test` and read reported coverage.
+2. Update `coverageThreshold.global` in `tests/unit/jest.config.ts` to 0.01–0.1% below the new numbers. Never lower the values.
+
+### JSDoc on Exported Symbols
+
+Every exported type, function, and React component must have JSDoc: parameters, return shape, defaults (`@default`), invariants, and at least one `@example`. Internal helpers do not need JSDoc.
+
 ### TypeScript Type Safety
 
-`as any` and `as unknown` are **strictly forbidden**. They disable type checking and hide bugs. Fix the root cause:
-
-- Improve the type definition (add return types, fix interfaces).
-- Use type narrowing (`typeof`, `in`, `Array.isArray`).
-- Use generics — let the compiler infer or require explicit types.
-- Add type guards: `function isUser(obj: unknown): obj is User { ... }`.
-- For external/dynamic data, use runtime validation (e.g. Zod) instead of casting.
-
-Check before committing:
-
-```bash
-grep -rE " as (any|unknown)\b" src/ --include="*.ts"
-```
+`as any` and `as unknown` are **strictly forbidden**. Fix the root cause: improve the type definition, use type narrowing (`typeof`, `in`, `Array.isArray`), use generics, add type guards, or use runtime validation (e.g. Zod) for external data.
 
 ### No Leftover Debug Output
 

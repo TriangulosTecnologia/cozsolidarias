@@ -1,12 +1,12 @@
 ---
-applyTo: 'packages/app/**'
+applyTo: 'src/app/**,src/components/**,src/config/**,src/gateway.ts'
 ---
 
-# Package: app
+# App
 
 ## Role
 
-This package is the public Next.js application.
+This is the public Next.js application.
 It owns routes, screens, UI composition, Chakra UI theme, map interaction, and user-facing states.
 It consumes data only through HTTP route handlers or data-gateway functions.
 
@@ -35,7 +35,7 @@ Do not use a dark theme. Single theme: light.
 
 ## Allowed dependencies
 
-May import from data-gateway.
+May import from `src/data-gateway`.
 May use Next.js, React, Chakra UI, and the selected map library.
 May expose /api/\* Route Handlers backed by data-gateway.
 
@@ -46,7 +46,7 @@ The browser must never know whether data came from static files, API, database, 
 
 ## Runtime
 
-All Server Components and Route Handlers that call the gateway must run on the Node.js runtime. Do not declare `export const runtime = 'edge'` on any module that imports, transitively or directly, `@cozsolidarias/data-gateway` — current sources (e.g. static) depend on `node:fs`. Edge-compatible sources may be introduced later behind the gateway; until then, Node is the only valid runtime.
+All Server Components and Route Handlers that call the gateway must run on the Node.js runtime. Do not declare `export const runtime = 'edge'` on any module that imports, transitively or directly, `src/data-gateway` — current sources (e.g. static) depend on `node:fs`. Edge-compatible sources may be introduced later behind the gateway; until then, Node is the only valid runtime.
 
 ## Secrets boundary
 

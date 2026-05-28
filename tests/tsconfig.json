@@ -1,0 +1,8 @@
+{
+  "extends": "@ttoss/config/tsconfig.test.json",
+  "compilerOptions": {
+    "paths": {
+      "src/*": ["../src/*"]
+    }
+  }
+}

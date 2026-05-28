@@ -1,12 +1,12 @@
 {
   "servers": {
-    "github": {
-      "type": "http",
-      "url": "https://api.githubcopilot.com/mcp/"
-    },
     "chakra-ui": {
       "command": "npx",
       "args": ["-y", "@chakra-ui/react-mcp"]
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["@playwright/mcp@latest"]
     }
   }
 }

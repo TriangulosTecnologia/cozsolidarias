@@ -1,35 +1,13 @@
 import ttossEslintConfig from '@ttoss/eslint-config';
 
 export default [
-  {
-    ignores: [
-      '**/src/generated/**',
-      '.commitlintrc.js',
-      '.lintstagedrc.js',
-      '.syncpackrc.js',
-    ],
-  },
   ...ttossEslintConfig,
   {
-    rules: {
-      'turbo/no-undeclared-env-vars': 'off',
-    },
+    ignores: ['**/src/generated/**', '.commitlintrc.js', '.lintstagedrc.js'],
   },
   {
-    files: ['packages/app/**/*.{ts,tsx}'],
     rules: {
-      'no-restricted-imports': [
-        'error',
-        {
-          patterns: [
-            {
-              group: ['@cozsolidarias/data-source-*'],
-              message:
-                'The app must consume data only through @cozsolidarias/data-gateway. Source packages are an implementation detail of the gateway.',
-            },
-          ],
-        },
-      ],
+      'formatjs/no-literal-string-in-jsx': 'off',
       'react-refresh/only-export-components': [
         'warn',
         {

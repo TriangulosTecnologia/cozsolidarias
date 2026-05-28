@@ -1,8 +1,8 @@
 ---
-applyTo: 'packages/app/**/*.tsx'
+applyTo: 'src/**/*.tsx'
 ---
 
-# UI components in `packages/app/`
+# UI components in `src/`
 
 **Scope:** anything that renders — Chakra UI, layout, accessibility, map runtime.
 For data loading, route handlers, and gateway calls → see [`app.instructions.md`](./app.instructions.md).

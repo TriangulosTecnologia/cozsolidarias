@@ -56,3 +56,5 @@ Thumbs.db
 **/i18n/compiled/
 **/i18n/missing/
 **/i18n/unused/
+
+.playwright-mcp
