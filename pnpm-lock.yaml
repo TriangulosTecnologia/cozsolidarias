@@ -1,9 +1,5 @@
 lockfileVersion: '9.0'
 
-onlyBuiltDependencies:
-  - sharp
-  - unrs-resolver
-
 settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
