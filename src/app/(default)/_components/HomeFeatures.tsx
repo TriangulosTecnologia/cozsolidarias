@@ -1,4 +1,7 @@
+'use client';
+
 import { Box, Grid, Text } from '@chakra-ui/react';
+import * as React from 'react';
 
 import Container from '../../../components/ui/Container';
 
@@ -36,18 +39,25 @@ type CardProps = {
 };
 
 const PrincipleCard = ({ principle }: CardProps) => {
+  const [hovered, setHovered] = React.useState(false);
+
   return (
     <Box
       p={8}
       bg="ivory.50"
       borderRadius="card"
       cursor="default"
-      data-group
+      boxShadow={hovered ? 'card' : 'none'}
       transition="box-shadow 0.3s ease-out"
-      _hover={{ boxShadow: 'card' }}
+      onMouseEnter={() => {
+        return setHovered(true);
+      }}
+      onMouseLeave={() => {
+        return setHovered(false);
+      }}
     >
       <Box
-        _groupHover={{ transform: 'translateY(-2px)' }}
+        transform={hovered ? 'translateY(-2px)' : 'none'}
         transition="transform 0.3s ease-out"
       >
         <Text textStyle="title-3" color="charcoal.900" mb={4}>
@@ -59,10 +69,9 @@ const PrincipleCard = ({ principle }: CardProps) => {
         <Text
           textStyle="caption"
           color="verde.600"
-          opacity={0}
-          transform="translateY(4px)"
+          opacity={hovered ? 1 : 0}
+          transform={hovered ? 'none' : 'translateY(4px)'}
           transition="opacity 0.3s ease-out, transform 0.3s ease-out"
-          _groupHover={{ opacity: 1, transform: 'none' }}
         >
           {principle.meta}
         </Text>

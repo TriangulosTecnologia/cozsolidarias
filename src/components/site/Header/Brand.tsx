@@ -1,10 +1,11 @@
-import { Link } from '@chakra-ui/react';
+import { Flex, Link } from '@chakra-ui/react';
+import NextImage from 'next/image';
 import NextLink from 'next/link';
 
-const EXPO_OUT = 'cubic-bezier(0.19, 1, 0.22, 1)';
+import { EXPO_OUT } from '../../../config/site';
 
 /**
- * Site wordmark — rendered inside the shared left pill island in the Header.
+ * Site wordmark with icon — rendered inside the shared left pill island in the Header.
  * No individual wrapper; island context is provided by the parent.
  *
  * @example
@@ -24,7 +25,18 @@ const Brand = () => {
       transition={`color 0.3s ${EXPO_OUT}`}
       whiteSpace="nowrap"
     >
-      <NextLink href="/">COZINHAS SOLIDÁRIAS</NextLink>
+      <NextLink href="/">
+        <Flex align="center" gap={2}>
+          <NextImage
+            src="/logo_icon_grayscale.svg"
+            alt=""
+            width={38}
+            height={22}
+            style={{ display: 'block' }}
+          />
+          COZINHA SOLIDÁRIA EM REDE
+        </Flex>
+      </NextLink>
     </Link>
   );
 };

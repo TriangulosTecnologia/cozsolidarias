@@ -3,7 +3,18 @@ import ttossEslintConfig from '@ttoss/eslint-config';
 export default [
   ...ttossEslintConfig,
   {
-    ignores: ['**/src/generated/**', '.commitlintrc.js', '.lintstagedrc.js'],
+    ignores: [
+      '**/src/generated/**',
+      '.commitlintrc.js',
+      '.lintstagedrc.js',
+      '**/coverage/**',
+      '.next/**',
+      'next-env.d.ts',
+      'dist/**',
+      'build/**',
+      'out/**',
+      'public/**',
+    ],
   },
   {
     rules: {

@@ -11,7 +11,7 @@ const interTight = Inter_Tight({
 
 export const metadata: Metadata = {
   title:
-    'Cozinhas Solidárias — Territórios que alimentam. Dados que fortalecem.',
+    'Cozinha Solidária em Rede — Territórios que alimentam. Dados que fortalecem.',
   description:
     'Plataforma de inteligência territorial para mapear, documentar e apoiar Cozinhas Solidárias no Brasil.',
 };
