@@ -1,23 +1,22 @@
 import { Box, Flex, Stack, Text } from '@chakra-ui/react';
 
-import Container from '../../../components/ui/Container';
-import CtaLink from '../../../components/ui/CtaLink';
+import Container from '@/components/ui/Container';
+import CtaLink from '@/components/ui/CtaLink';
 
 /**
- * FinalCtaSection — deep verde.900 contrast section closing the homepage.
- * Typography and negative space carry the section; no illustrations.
- * Laranja CTAs on dark background for maximum attention contrast.
+ * FinalCTA — deep verde.900 section closing the `/sobre` page.
+ * Three actions: primary (laranja), secondary (outlined), tertiary (text link).
  *
  * @example
- * <HomeCallToAction />
+ * <FinalCTA />
  */
-const HomeCallToAction = () => {
+const FinalCTA = () => {
   return (
     <Box
       as="section"
       py="clamp(4rem, calc(3rem + 4vw), 8rem)"
       bg="verde.900"
-      aria-labelledby="cta-heading"
+      aria-labelledby="about-cta-heading"
     >
       <Container>
         <Stack
@@ -26,22 +25,19 @@ const HomeCallToAction = () => {
           textAlign="center"
         >
           <Stack gap={5} align="center">
-            <Text textStyle="eyebrow" color="verde.400">
-              Ação pública
-            </Text>
             <Text
               as="h2"
-              id="cta-heading"
+              id="about-cta-heading"
               textStyle="title-1"
               color="ivory.100"
-              maxW="20ch"
+              maxW="24ch"
             >
-              Informação pública que volta ao território.
+              Informação pública se fortalece com colaboração.
             </Text>
             <Text textStyle="body-lg" color="verde.300" maxW="52ch">
-              Se você atua em uma cozinha, pesquisa o tema, representa uma
-              instituição ou conhece uma fonte relevante, ajude a qualificar
-              esta base.
+              Se você atua em uma cozinha, representa uma instituição, pesquisa
+              o tema ou conhece uma fonte relevante, ajude a qualificar esta
+              base.
             </Text>
           </Stack>
 
@@ -49,12 +45,17 @@ const HomeCallToAction = () => {
             gap={4}
             direction={{ base: 'column', sm: 'row' }}
             align="center"
+            justify="center"
+            wrap="wrap"
           >
-            <CtaLink href="/contato" variant="solid-laranja">
+            <CtaLink href="/contato?assunto=correcao" variant="solid-laranja">
               Colaborar
             </CtaLink>
             <CtaLink href="/contato" variant="outline-dark">
               Entrar em contato
+            </CtaLink>
+            <CtaLink href="/metodologia" variant="ghost">
+              Ver metodologia
             </CtaLink>
           </Flex>
         </Stack>
@@ -63,4 +64,4 @@ const HomeCallToAction = () => {
   );
 };
 
-export default HomeCallToAction;
+export default FinalCTA;

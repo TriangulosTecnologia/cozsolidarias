@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { gateway } from '../../../gateway';
 
 export const metadata: Metadata = {
-  title: 'Mapas — Cozinhas Solidárias',
+  title: 'Mapas — Cozinha Solidária em Rede',
 };
 
 export default async function MapasPage() {

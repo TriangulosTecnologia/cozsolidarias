@@ -1,9 +1,7 @@
-import { Box, Grid, GridItem, Link, Text } from '@chakra-ui/react';
-import NextLink from 'next/link';
+import { Box, Grid, GridItem, Text } from '@chakra-ui/react';
 
 import Container from '../../../components/ui/Container';
-
-const EXPO_OUT = 'cubic-bezier(0.19, 1, 0.22, 1)';
+import CtaLink from '../../../components/ui/CtaLink';
 
 type DataRowProps = { label: string; value: string };
 
@@ -68,30 +66,9 @@ const HomeCatalog = () => {
                 tratamento, limitações e status de validação.
               </Text>
               <Box>
-                <Link
-                  asChild
-                  display="inline-flex"
-                  alignItems="center"
-                  minH="52px"
-                  px={7}
-                  borderRadius="pill"
-                  border="1px solid"
-                  borderColor="ivory.400"
-                  color="charcoal.900"
-                  fontSize="0.875rem"
-                  fontWeight="500"
-                  letterSpacing="0.04em"
-                  textTransform="uppercase"
-                  textDecoration="none"
-                  transition={`all 0.3s ${EXPO_OUT}`}
-                  _hover={{
-                    bg: 'ivory.200',
-                    borderColor: 'charcoal.700',
-                    transform: 'translateY(-1px)',
-                  }}
-                >
-                  <NextLink href="/dados">Ver catálogo de dados</NextLink>
-                </Link>
+                <CtaLink href="/dados" variant="outline">
+                  Ver catálogo de dados
+                </CtaLink>
               </Box>
               <Text textStyle="caption" color="charcoal.500">
                 Informação não identificada permanece visível como lacuna.

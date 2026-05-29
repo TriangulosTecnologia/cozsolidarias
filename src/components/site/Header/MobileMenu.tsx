@@ -5,8 +5,7 @@ import NextLink from 'next/link';
 import * as React from 'react';
 
 import { mainNav } from '../../../config/navigation';
-
-const EXPO_OUT = 'cubic-bezier(0.19, 1, 0.22, 1)';
+import { EXPO_OUT } from '../../../config/site';
 
 /**
  * Full-screen mobile navigation overlay triggered by a hamburger icon.
@@ -159,7 +158,7 @@ const MobileMenu = () => {
           letterSpacing="0.08em"
           textTransform="uppercase"
         >
-          Cozinhas Solidárias
+          Cozinha Solidária em Rede
         </Text>
       </Box>
     </>

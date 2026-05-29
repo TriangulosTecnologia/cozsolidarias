@@ -1,6 +1,6 @@
 import { createSystem, defaultConfig, defineConfig } from '@chakra-ui/react';
 
-const EXPO_OUT = 'cubic-bezier(0.19, 1, 0.22, 1)';
+import { EXPO_OUT } from '../config/site';
 
 const config = defineConfig({
   globalCss: {

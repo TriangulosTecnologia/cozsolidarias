@@ -1,9 +1,7 @@
-import { Box, Grid, GridItem, Link, Stack, Text } from '@chakra-ui/react';
-import NextLink from 'next/link';
+import { Box, Grid, GridItem, Stack, Text } from '@chakra-ui/react';
 
 import Container from '../../../components/ui/Container';
-
-const EXPO_OUT = 'cubic-bezier(0.19, 1, 0.22, 1)';
+import CtaLink from '../../../components/ui/CtaLink';
 
 type StatusEntry = { label: string; color: string };
 
@@ -194,28 +192,7 @@ const HomeAudiences = () => {
                 melhor.
               </Text>
               <Box>
-                <Link
-                  asChild
-                  display="inline-flex"
-                  alignItems="center"
-                  minH="52px"
-                  px={7}
-                  borderRadius="pill"
-                  bg="verde.600"
-                  color="ivory.50"
-                  fontSize="0.875rem"
-                  fontWeight="500"
-                  letterSpacing="0.04em"
-                  textTransform="uppercase"
-                  textDecoration="none"
-                  transition={`all 0.3s ${EXPO_OUT}`}
-                  _hover={{
-                    bg: 'verde.700',
-                    transform: 'translateY(-1px)',
-                  }}
-                >
-                  <NextLink href="/mapas">Abrir mapa</NextLink>
-                </Link>
+                <CtaLink href="/mapas">Abrir mapa</CtaLink>
               </Box>
             </Stack>
           </GridItem>
