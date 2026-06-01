@@ -1,10 +1,10 @@
 import { Box, Grid, GridItem, Link, Stack, Text } from '@chakra-ui/react';
-import NextImage from 'next/image';
 import NextLink from 'next/link';
 
 import { legalNav, mainNav } from '../../../config/navigation';
 import { EXPO_OUT } from '../../../config/site';
 import Container from '../../ui/Container';
+import BrandLogo from '../Header/BrandLogo';
 
 /**
  * SiteFooter — coral.500 background, large brand mark, three nav columns.
@@ -26,24 +26,9 @@ const Footer = () => {
         >
           {/* Brand — cols 1–4 */}
           <GridItem colSpan={{ base: 1, md: 4 }}>
-            <Link
-              asChild
-              display="block"
-              maxW={{ base: '180px', md: '240px' }}
-              textDecoration="none"
-              _hover={{ opacity: 0.8 }}
-              transition={`opacity 0.3s ${EXPO_OUT}`}
-            >
-              <NextLink href="/">
-                <NextImage
-                  src="/logo_h_black.svg"
-                  alt="Cozinha Solidária em Rede"
-                  width={796}
-                  height={313}
-                  style={{ width: '100%', height: 'auto' }}
-                />
-              </NextLink>
-            </Link>
+            <Box maxW={{ base: '180px', md: '240px' }}>
+              <BrandLogo variant="black_horizontal" width={796} height={313} />
+            </Box>
           </GridItem>
 
           {/* Nav links — cols 5–8 */}

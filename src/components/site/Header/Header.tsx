@@ -6,7 +6,7 @@ import * as React from 'react';
 
 import { EXPO_OUT } from '../../../config/site';
 import Container from '../../ui/Container';
-import Brand from './Brand';
+import BrandLogo from './BrandLogo';
 import MobileMenu from './MobileMenu';
 import NavLinks from './NavLinks';
 
@@ -64,9 +64,9 @@ const Header = () => {
             border="1px solid"
             borderColor="ivory.100"
           >
-            {/* Wordmark — padded to match nav link height */}
-            <Box px={3} py="6px" paddingRight={8} whiteSpace="nowrap">
-              <Brand />
+            {/* Brand logo — padded to match nav link height */}
+            <Box px={3} py="6px" paddingRight={8}>
+              <BrandLogo />
             </Box>
 
             {/* Nav links share the same island */}
@@ -84,7 +84,7 @@ const Header = () => {
             border="1px solid"
             borderColor="ivory.400"
           >
-            <Brand />
+            <BrandLogo />
           </Box>
 
           {/* Right: CTA + mobile menu */}
