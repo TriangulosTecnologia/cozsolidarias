@@ -1,7 +1,7 @@
 import { Box, Flex } from '@chakra-ui/react';
 
 import Container from '../../ui/Container';
-import Brand from './Brand';
+import BrandLogo from './BrandLogo';
 
 /**
  * Compact header for legal pages: Brand home link only.
@@ -15,7 +15,7 @@ const LegalHeader = () => {
     <Box as="header" bg="surface.header" borderBottomWidth="1px">
       <Container>
         <Flex h="header.height" align="center">
-          <Brand />
+          <BrandLogo />
         </Flex>
       </Container>
     </Box>
