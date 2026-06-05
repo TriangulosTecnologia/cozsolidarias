@@ -17,12 +17,7 @@ import { join } from 'node:path';
 const IBGE_URL =
   'https://servicodados.ibge.gov.br/api/v1/localidades/estados/35/municipios';
 
-const GEOJSON_PATH = join(
-  process.cwd(),
-  'public',
-  'geo',
-  'municipios-sp.json'
-);
+const GEOJSON_PATH = join(process.cwd(), 'public', 'geo', 'municipios-sp.json');
 const OUTPUT_PATH = join(
   process.cwd(),
   'public',
@@ -47,15 +42,21 @@ const main = async () => {
   // Cross-check against the GeoJSON so a missing/extra code fails loudly here
   // instead of showing a fallback label on the map.
   const geojson = JSON.parse(await readFile(GEOJSON_PATH, 'utf8'));
-  const geoCodes = geojson.features.map((f) => String(f.properties?.codarea));
-  const missing = geoCodes.filter((code) => !nomesPorCodigo[code]);
+  const geoCodes = geojson.features.map((f) => {
+    return String(f.properties?.codarea);
+  });
+  const missing = geoCodes.filter((code) => {
+    return !nomesPorCodigo[code];
+  });
   if (missing.length > 0) {
     throw new Error(`No IBGE name for codarea(s): ${missing.join(', ')}`);
   }
 
   // Sort keys so the committed file has a stable, diff-friendly order.
   const sorted = Object.fromEntries(
-    Object.entries(nomesPorCodigo).sort(([a], [b]) => a.localeCompare(b))
+    Object.entries(nomesPorCodigo).sort(([a], [b]) => {
+      return a.localeCompare(b);
+    })
   );
 
   await writeFile(OUTPUT_PATH, `${JSON.stringify(sorted, null, 2)}\n`, 'utf8');
