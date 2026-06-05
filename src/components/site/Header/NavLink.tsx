@@ -5,8 +5,7 @@ import NextLink from 'next/link';
 import { usePathname } from 'next/navigation';
 
 import type { NavEntry } from '../../../config/navigation';
-
-const EXPO_OUT = 'cubic-bezier(0.19, 1, 0.22, 1)';
+import { EXPO_OUT } from '../../../config/site';
 
 type Props = Pick<NavEntry, 'href' | 'label'>;
 

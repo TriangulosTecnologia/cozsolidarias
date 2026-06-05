@@ -4,13 +4,13 @@ import { Box, Flex, Link } from '@chakra-ui/react';
 import NextLink from 'next/link';
 import * as React from 'react';
 
+import { EXPO_OUT } from '../../../config/site';
 import Container from '../../ui/Container';
-import Brand from './Brand';
+import BrandLogo from './BrandLogo';
 import MobileMenu from './MobileMenu';
 import NavLinks from './NavLinks';
 
 const SCROLL_THRESHOLD = 60;
-const EXPO_OUT = 'cubic-bezier(0.19, 1, 0.22, 1)';
 
 /**
  * Site header: three floating pill islands on a transparent backdrop.
@@ -51,7 +51,7 @@ const Header = () => {
       }}
     >
       <Container>
-        <Flex h="72px" align="center" justify="space-between">
+        <Flex h="header.height" align="center" justify="space-between">
           {/* Left island: Brand + NavLinks in one pill */}
           <Flex
             display={{ base: 'none', md: 'inline-flex' }}
@@ -64,9 +64,9 @@ const Header = () => {
             border="1px solid"
             borderColor="ivory.100"
           >
-            {/* Wordmark — padded to match nav link height */}
-            <Box px={3} py="6px" paddingRight={8} whiteSpace="nowrap">
-              <Brand />
+            {/* Brand logo — padded to match nav link height */}
+            <Box px={3} py="6px" paddingRight={8}>
+              <BrandLogo />
             </Box>
 
             {/* Nav links share the same island */}
@@ -84,7 +84,7 @@ const Header = () => {
             border="1px solid"
             borderColor="ivory.400"
           >
-            <Brand />
+            <BrandLogo />
           </Box>
 
           {/* Right: CTA + mobile menu */}

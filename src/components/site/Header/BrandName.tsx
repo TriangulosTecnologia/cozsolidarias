@@ -1,16 +1,16 @@
 import { Link } from '@chakra-ui/react';
 import NextLink from 'next/link';
 
-const EXPO_OUT = 'cubic-bezier(0.19, 1, 0.22, 1)';
+import { EXPO_OUT } from '../../../config/site';
 
 /**
- * Site wordmark — rendered inside the shared left pill island in the Header.
- * No individual wrapper; island context is provided by the parent.
+ * Site name as a text link, linked to the home page.
+ * Use when the brand name is needed in body copy, footers, or inline contexts.
  *
  * @example
- * <Brand />
+ * <BrandName />
  */
-const Brand = () => {
+const BrandName = () => {
   return (
     <Link
       asChild
@@ -24,9 +24,9 @@ const Brand = () => {
       transition={`color 0.3s ${EXPO_OUT}`}
       whiteSpace="nowrap"
     >
-      <NextLink href="/">COZINHAS SOLIDÁRIAS</NextLink>
+      <NextLink href="/">COZINHA SOLIDÁRIA EM REDE</NextLink>
     </Link>
   );
 };
 
-export default Brand;
+export default BrandName;

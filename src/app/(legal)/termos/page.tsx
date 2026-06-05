@@ -33,10 +33,10 @@ const TermosPage = () => {
             </Heading>
             <Text>
               Os presentes Termos de Uso regem o acesso e a utilização da
-              plataforma Cozinhas Solidárias (&quot;Plataforma&quot;), mantida
-              no âmbito do Projeto Cozinhas Solidárias FAPESP. Ao acessar ou
-              utilizar a Plataforma, o usuário declara ter lido, compreendido e
-              concordado com estes Termos.
+              plataforma Cozinha Solidária em Rede (&quot;Plataforma&quot;),
+              mantida no âmbito do Projeto Cozinhas Solidárias FAPESP. Ao
+              acessar ou utilizar a Plataforma, o usuário declara ter lido,
+              compreendido e concordado com estes Termos.
             </Text>
           </Stack>
 

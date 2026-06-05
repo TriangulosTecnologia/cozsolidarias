@@ -1,8 +1,8 @@
-import { Box, Grid, GridItem, Link, Stack, Text } from '@chakra-ui/react';
+import { Box, Grid, GridItem, Stack, Text } from '@chakra-ui/react';
 import NextImage from 'next/image';
-import NextLink from 'next/link';
 
 import Container from '../../../components/ui/Container';
+import CtaLink from '../../../components/ui/CtaLink';
 
 /**
  * Hero section — 12-col grid, text cols 1–6, image cols 7–12.
@@ -101,51 +101,10 @@ const HeroCTAs = () => {
       animationFillMode="both"
       animationDelay="0.44s"
     >
-      <Link
-        asChild
-        display="inline-flex"
-        alignItems="center"
-        justifyContent="center"
-        minH="52px"
-        px={7}
-        borderRadius="pill"
-        bg="verde.600"
-        color="ivory.50"
-        fontSize="0.875rem"
-        fontWeight="500"
-        letterSpacing="0.04em"
-        textTransform="uppercase"
-        textDecoration="none"
-        transition="all 0.3s ease-out"
-        _hover={{ bg: 'verde.700', transform: 'translateY(-1px)' }}
-      >
-        <NextLink href="/mapas">Explorar mapa</NextLink>
-      </Link>
-      <Link
-        asChild
-        display="inline-flex"
-        alignItems="center"
-        justifyContent="center"
-        minH="52px"
-        px={7}
-        borderRadius="pill"
-        border="1px solid"
-        borderColor="ivory.400"
-        color="charcoal.900"
-        fontSize="0.875rem"
-        fontWeight="500"
-        letterSpacing="0.04em"
-        textTransform="uppercase"
-        textDecoration="none"
-        transition="all 0.3s ease-out"
-        _hover={{
-          bg: 'ivory.200',
-          borderColor: 'charcoal.700',
-          transform: 'translateY(-1px)',
-        }}
-      >
-        <NextLink href="/dados">Ver catálogo de dados</NextLink>
-      </Link>
+      <CtaLink href="/mapas">Explorar mapa</CtaLink>
+      <CtaLink href="/dados" variant="outline">
+        Ver catálogo de dados
+      </CtaLink>
     </Stack>
   );
 };
