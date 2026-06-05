@@ -157,6 +157,51 @@ const toRecord = (cells: string[]): StaticCozinhaSource => {
   return record as StaticCozinhaSource;
 };
 
+/**
+ * Parses and validates the raw "cozinhas solidárias" CSV text into typed
+ * records. Pure (no I/O): the disk read lives in {@link readStaticCozinhas}.
+ *
+ * @param text - Raw CSV text (a leading UTF-8 BOM is tolerated and stripped).
+ * @returns The list of parsed cozinha records.
+ * @throws If the CSV is empty or its header does not match the expected columns.
+ */
+export const parseCozinhasCsv = (text: string): StaticCozinhaSource[] => {
+  // Strip the UTF-8 BOM so the first header matches exactly.
+  const clean = text.charCodeAt(0) === 0xfeff ? text.slice(1) : text;
+  const rows = parseCsv(clean);
+
+  if (rows.length === 0) {
+    throw new Error('[data-source-static] cozinhas CSV is empty.');
+  }
+
+  const [header, ...dataRows] = rows;
+
+  if (header.length !== COLUMNS.length) {
+    throw new Error(
+      `[data-source-static] expected ${COLUMNS.length} columns but found ${header.length}.`
+    );
+  }
+
+  for (const [index, [csvHeader]] of COLUMNS.entries()) {
+    if (header[index] !== csvHeader) {
+      throw new Error(
+        `[data-source-static] column ${index} mismatch: expected "${csvHeader}", found "${header[index]}".`
+      );
+    }
+  }
+
+  return (
+    dataRows
+      // Drop fully empty trailing lines.
+      .filter((cells) => {
+        return cells.some((cell) => {
+          return cell.trim() !== '';
+        });
+      })
+      .map(toRecord)
+  );
+};
+
 let cache: StaticCozinhaSource[] | null = null;
 
 /**
@@ -178,38 +223,8 @@ export const readStaticCozinhas = async (): Promise<StaticCozinhaSource[]> => {
     return cache;
   }
 
-  // Strip the UTF-8 BOM so the first header matches exactly.
-  const raw = (await readFile(CSV_PATH, 'utf8')).replace(/^\uFEFF/, '');
-  const rows = parseCsv(raw);
-
-  if (rows.length === 0) {
-    throw new Error(`[data-source-static] cozinhas CSV is empty: ${CSV_PATH}`);
-  }
-
-  const [header, ...dataRows] = rows;
-
-  if (header.length !== COLUMNS.length) {
-    throw new Error(
-      `[data-source-static] expected ${COLUMNS.length} columns but found ${header.length}.`
-    );
-  }
-
-  for (const [index, [csvHeader]] of COLUMNS.entries()) {
-    if (header[index] !== csvHeader) {
-      throw new Error(
-        `[data-source-static] column ${index} mismatch: expected "${csvHeader}", found "${header[index]}".`
-      );
-    }
-  }
-
-  cache = dataRows
-    // Drop fully empty trailing lines.
-    .filter((cells) => {
-      return cells.some((cell) => {
-        return cell.trim() !== '';
-      });
-    })
-    .map(toRecord);
+  const raw = await readFile(CSV_PATH, 'utf8');
+  cache = parseCozinhasCsv(raw);
 
   return cache;
 };

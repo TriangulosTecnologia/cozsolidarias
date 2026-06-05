@@ -1,3 +1,2 @@
 export { readStaticCozinhas } from './readStaticCozinhas';
-export { readStaticGreeting } from './readStaticGreeting';
-export type { StaticCozinhaSource, StaticGreetingSource } from './types';
+export type { StaticCozinhaSource } from './types';

@@ -23,6 +23,9 @@
   },
   "devDependencies": {
     "@commitlint/cli": "^21.0.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@ttoss/config": "^1.37.11",
     "@ttoss/eslint-config": "^1.27.0",
     "@types/jest": "^30.0.0",
@@ -32,6 +35,7 @@
     "eslint": "^9",
     "husky": "^9.1.7",
     "jest": "^30.4.2",
+    "jest-environment-jsdom": "^30.4.1",
     "lint-staged": "^17.0.5",
     "prettier": "^3.8.3",
     "typescript": "~6.0.3"
