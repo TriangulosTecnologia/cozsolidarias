@@ -3,6 +3,19 @@ import ttossEslintConfig from '@ttoss/eslint-config';
 export default [
   ...ttossEslintConfig,
   {
+    files: ['scripts/**/*.{js,mjs,cjs}'],
+    languageOptions: {
+      globals: {
+        process: 'readonly',
+        console: 'readonly',
+        fetch: 'readonly',
+      },
+    },
+    rules: {
+      'no-console': 'off',
+    },
+  },
+  {
     ignores: [
       '**/src/generated/**',
       '.commitlintrc.js',

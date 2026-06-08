@@ -1,11 +1,15 @@
-import { readStaticGreeting } from '../data-source-static/readStaticGreeting';
-import type { GreetingContract } from './schema';
-import { toAppGreeting } from './transformers/toAppGreeting';
+import { readStaticCozinhas } from '../data-source-static/readStaticCozinhas';
+import { readStaticMunicipiosSp } from '../data-source-static/readStaticMunicipiosSp';
+import type { CozinhasFeatureCollection, kitchenByCity } from './schema';
+import { toCozinhasFeatureCollection } from './transformers/toCozinhasFeatureCollection';
+import { toCozinhasPorMunicipio } from './transformers/toCozinhasPorMunicipio';
 
 /** Gateway interface exposing canonical read functions. */
 export type DataGateway = {
-  /** Returns the canonical greeting. */
-  getGreeting: () => Promise<GreetingContract>;
+  /** Returns cozinha locations as a GeoJSON FeatureCollection of Points. */
+  getCozinhas: () => Promise<CozinhasFeatureCollection>;
+  /** Returns the cozinha count per SP município (for the choropleth map). */
+  getCozinhasPorMunicipio: () => Promise<kitchenByCity[]>;
 };
 
 const KNOWN_SOURCES = ['static'] as const;
@@ -24,8 +28,8 @@ const isKnownSource = (value: string): value is KnownSource => {
  *
  * @example
  * const gateway = createDataGateway();
- * const greeting = await gateway.getGreeting();
- * // { text: 'Hello from static source' }
+ * const cozinhas = await gateway.getCozinhas();
+ * // { type: 'FeatureCollection', features: [...] }
  */
 export const createDataGateway = (): DataGateway => {
   const raw = process.env['DATA_SOURCE'] ?? 'static';
@@ -38,9 +42,16 @@ export const createDataGateway = (): DataGateway => {
 
   if (raw === 'static') {
     return {
-      getGreeting: async () => {
-        const source = await readStaticGreeting();
-        return toAppGreeting(source);
+      getCozinhas: async () => {
+        const sources = await readStaticCozinhas();
+        return toCozinhasFeatureCollection(sources);
+      },
+      getCozinhasPorMunicipio: async () => {
+        const [cozinhas, municipios] = await Promise.all([
+          readStaticCozinhas(),
+          readStaticMunicipiosSp(),
+        ]);
+        return toCozinhasPorMunicipio(cozinhas, municipios);
       },
     };
   }
