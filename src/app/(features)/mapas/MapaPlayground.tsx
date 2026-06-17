@@ -4,20 +4,71 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 
 import { Box, Heading, NativeSelect, Text } from '@chakra-ui/react';
 import {
+  createBoundaryGroup,
   GeoVisCanvas,
   GeoVisHoverTooltip,
   GeoVisLegend,
   GeoVisProvider,
   type MapHoverInfo,
+  useBoundaryToggle,
+  useGeoVis,
 } from '@ttoss/geovis';
+import type { Map as MapLibreMap } from 'maplibre-gl';
 import * as React from 'react';
 
 import type { kitchenByCity } from '@/data-gateway/schema';
 
 import { buildSpec, type MapMode } from './geovisSpec';
 
+const estadosGroup = createBoundaryGroup({
+  id: 'estados-boundary',
+  data: '/geo/estados.json',
+  paint: { lineColor: '#241F21', lineWidth: 0.8 },
+});
+
+const municipiosGroup = createBoundaryGroup({
+  id: 'municipios-boundary',
+  data: '/geo/geojs-100-mun.json',
+  paint: { lineColor: '#B2B2B2', lineWidth: 0.6 },
+});
+
 /** `{ codigoIbge: nome }` for every SP município, keyed by `codarea`. */
 type NomesPorCodigo = Record<string, string>;
+
+const HideBasemapLabels = () => {
+  const { runtime } = useGeoVis();
+
+  React.useEffect(() => {
+    const map = runtime?.getAdapter().getNativeInstance() as
+      | MapLibreMap
+      | null
+      | undefined;
+    if (!map) {
+      return;
+    }
+
+    const hideLabels = () => {
+      const style = map.getStyle();
+      for (const layer of style.layers ?? []) {
+        if (layer.type === 'symbol') {
+          map.setLayoutProperty(layer.id, 'visibility', 'none');
+        }
+      }
+    };
+
+    if (map.loaded()) {
+      hideLabels();
+    } else {
+      map.on('load', hideLabels);
+    }
+
+    return () => {
+      map.off('load', hideLabels);
+    };
+  }, [runtime]);
+
+  return null;
+};
 
 const MapaPlayground = () => {
   const [mounted, setMounted] = React.useState(false);
@@ -61,9 +112,15 @@ const MapaPlayground = () => {
     };
   }, []);
 
-  const spec = React.useMemo(() => {
+  const baseSpec = React.useMemo(() => {
     return buildSpec(kitchenByCity, mode);
   }, [kitchenByCity, mode]);
+
+  const boundaryGroups = React.useMemo(() => {
+    return [estadosGroup, municipiosGroup];
+  }, []);
+
+  const { spec } = useBoundaryToggle(baseSpec, boundaryGroups);
 
   const citiesByCode = React.useMemo(() => {
     return new Map(
@@ -105,6 +162,7 @@ const MapaPlayground = () => {
       {mounted ? (
         <GeoVisProvider spec={spec}>
           <GeoVisCanvas style={{ width: '100%', height: '100%' }} />
+          <HideBasemapLabels />
 
           <Box
             position="absolute"
