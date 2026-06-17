@@ -62,26 +62,11 @@ export const buildSpec = (
   return {
     id: 'mapa-cozinhas-sp',
     engine: 'maplibre',
-    basemap: {
-      styleUrl: 'https://demotiles.maplibre.org/style.json',
-    },
     view: {
       center: [-48.6, -22.3],
       zoom: 6.5,
     },
     sources: [
-      {
-        id: 'estados',
-        type: 'geojson',
-        data: '/geo/estados.json',
-        attribution: '© IBGE — Malhas Territoriais 2022',
-      },
-      {
-        id: 'municipios-sp',
-        type: 'geojson',
-        data: '/geo/municipios-sp.json',
-        attribution: '© IBGE — Malhas Territoriais 2022',
-      },
       {
         id: 'cozinhas',
         type: 'geojson',
@@ -92,7 +77,7 @@ export const buildSpec = (
     mapData: [
       {
         mapDataId: 'cozinhas-por-municipio',
-        mapId: 'municipios-sp',
+        mapId: 'municipios-boundary',
         joinKey: 'codarea',
         title: 'Cozinhas por município',
         data: choroplethData.map((register) => {
@@ -119,34 +104,14 @@ export const buildSpec = (
     ],
     layers: [
       {
-        id: 'municipios-sp-fill',
-        sourceId: 'municipios-sp',
+        id: 'municipios-br-fill',
+        sourceId: 'municipios-boundary',
         geometry: 'polygon',
         mapDataId: 'cozinhas-por-municipio',
         activeLegendId: 'legenda-cozinhas',
         paint: {
           fillOpacity: mapTokens.dataviz.opacity.area,
           lineColor: '#FAF9F7',
-        },
-      },
-      {
-        id: 'municipios-sp-line',
-        sourceId: 'municipios-sp',
-        geometry: 'line',
-        paint: {
-          lineColor: '#241F21',
-          lineWidth: 0.4,
-          lineOpacity: 0.35,
-        },
-      },
-      {
-        id: 'estados-line',
-        sourceId: 'estados',
-        geometry: 'line',
-        paint: {
-          lineColor: '#241F21',
-          lineWidth: 0.6,
-          lineOpacity: 0.6,
         },
       },
       ...(showPoints ? [pointsLayer] : []),

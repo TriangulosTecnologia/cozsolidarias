@@ -25,6 +25,27 @@ jest.mock('@ttoss/geovis', () => {
     GeoVisHoverTooltip: () => {
       return <div data-testid="geovis-tooltip" />;
     },
+    createBoundaryGroup: () => {
+      return { sources: [], layers: [] };
+    },
+    useBoundaryToggle: (baseSpec: unknown) => {
+      return {
+        spec: baseSpec,
+        toggle: jest.fn(),
+        isVisible: jest.fn(() => {
+          return true;
+        }),
+      };
+    },
+    useGeoVis: () => {
+      return {
+        runtime: null,
+        spec: {},
+        applyPatch: jest.fn(),
+        setView: jest.fn(),
+        policyViolations: [],
+      };
+    },
   };
 });
 
