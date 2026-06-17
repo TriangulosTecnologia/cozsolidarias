@@ -77,7 +77,7 @@ export const buildSpec = (
     mapData: [
       {
         mapDataId: 'cozinhas-por-municipio',
-        mapId: 'municipios-sp',
+        mapId: 'municipios-boundary',
         joinKey: 'codarea',
         title: 'Cozinhas por município',
         data: choroplethData.map((register) => {
@@ -104,8 +104,8 @@ export const buildSpec = (
     ],
     layers: [
       {
-        id: 'municipios-sp-fill',
-        sourceId: 'municipios-sp',
+        id: 'municipios-br-fill',
+        sourceId: 'municipios-boundary',
         geometry: 'polygon',
         mapDataId: 'cozinhas-por-municipio',
         activeLegendId: 'legenda-cozinhas',
