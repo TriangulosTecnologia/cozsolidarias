@@ -81,8 +81,9 @@ const Footer = () => {
           py={6}
           textAlign="center"
         >
-          <Text textStyle="caption" color="charcoal.700">
-            Dados, território e cuidado como infraestrutura pública.
+          <Text textStyle="caption" color="charcoal.900">
+            Cozinha Solidária em Rede. Dados, território e cuidado como
+            infraestrutura pública.
           </Text>
         </Box>
       </Container>

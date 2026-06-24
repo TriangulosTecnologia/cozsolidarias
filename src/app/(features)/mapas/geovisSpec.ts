@@ -29,7 +29,6 @@ const WITHOUT_KITCHEN_COLOR = mapTokens.dataviz.color.status.masked;
  */
 export type MapMode = 'coropletico' | 'pontos';
 
-// eslint-disable-next-line max-lines-per-function
 export const buildSpec = (
   byCity: kitchenByCity[],
   mode: MapMode = 'coropletico'
