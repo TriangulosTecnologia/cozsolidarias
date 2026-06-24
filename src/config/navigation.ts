@@ -15,6 +15,7 @@ export const mainNav: NavEntry[] = [
   { id: 'mapa', href: '/mapas', label: 'Mapas' },
   { id: 'sobre', href: '/sobre', label: 'Sobre' },
   { id: 'contato', href: '/contato', label: 'Contato' },
+  { id: 'cursos', href: 'https://cozsolidaria.odoo.com/', label: 'Cursos' },
 ];
 
 /**

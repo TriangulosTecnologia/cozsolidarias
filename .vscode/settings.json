@@ -1,7 +1,12 @@
 {
-  // Mirror lint-staged: prettier formats, eslint fixes
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "editor.formatOnSave": true,
+  // On save (Ctrl+S): source.fixAll.eslint applies every auto-fixable ESLint rule,
+  // including prettier/prettier, which calls Prettier internally. This is identical
+  // to `pnpm run lint --fix` on a single file. formatOnSave is disabled so no
+  // separate formatter runs before the code action and interferes.
+  // eslint.format.enable keeps "Format Document" (Shift+Alt+F) working via ESLint.
+  "eslint.format.enable": true,
+  "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+  "editor.formatOnSave": false,
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
   },
@@ -20,6 +25,8 @@
   "js/ts.tsdk.path": "node_modules/typescript/lib",
 
   // Consistent with prettier defaults
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
   "files.eol": "\n",
   "editor.insertFinalNewline": true,
 

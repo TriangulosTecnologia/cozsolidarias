@@ -65,8 +65,8 @@ const Header = () => {
             borderColor="ivory.100"
           >
             {/* Brand logo — padded to match nav link height */}
-            <Box px={3} py="6px" paddingRight={8}>
-              <BrandLogo />
+            <Box px={3} py="0px" paddingRight={8}>
+              <BrandLogo variant="default_horizontal" width={102} height={43} />
             </Box>
 
             {/* Nav links share the same island */}
