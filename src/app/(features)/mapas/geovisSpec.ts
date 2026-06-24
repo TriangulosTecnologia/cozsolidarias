@@ -1,4 +1,4 @@
-import type { VisualizationSpec } from '@ttoss/geovis';
+import type { HoverTooltipConfig, VisualizationSpec } from '@ttoss/geovis';
 
 import { mapTokens } from '@/config/theme';
 import type { kitchenByCity } from '@/data-gateway/schema';
@@ -19,6 +19,40 @@ const COLORS = sampleRamp(
 
 const WITHOUT_KITCHEN_COLOR = mapTokens.dataviz.color.status.masked;
 
+/** A single swatch for the workspace's right-sidebar legend. */
+export type LegendItem = { color: string; label: string };
+
+/**
+ * Legend swatches for the right sidebar, derived from the same `THRESHOLDS` and
+ * `COLORS` that drive the choropleth — so the sidebar legend can never drift
+ * from the map coloring.
+ *
+ * `COLORS[0]` (values `< 1`, i.e. zero) is folded into the "Sem cozinha" swatch
+ * (the `defaultColor` used by municípios with no data), so the visible count
+ * ranges start at `COLORS[1]`.
+ */
+export const buildLegendItems = (): LegendItem[] => {
+  const semCozinha: LegendItem = {
+    color: WITHOUT_KITCHEN_COLOR,
+    label: 'Sem cozinha',
+  };
+
+  const ranges = THRESHOLDS.map((lower, index): LegendItem => {
+    const upper = THRESHOLDS[index + 1];
+    const color = COLORS[index + 1];
+
+    if (upper === undefined) {
+      return { color, label: `${lower}+` };
+    }
+    if (upper - lower === 1) {
+      return { color, label: `${lower}` };
+    }
+    return { color, label: `${lower}–${upper - 1}` };
+  });
+
+  return [semCozinha, ...ranges];
+};
+
 /**
  * What the municipality fill encodes:
  * - `coropletico`: data-driven choropleth (cozinhas por município);
@@ -29,9 +63,27 @@ const WITHOUT_KITCHEN_COLOR = mapTokens.dataviz.color.status.masked;
  */
 export type MapMode = 'coropletico' | 'pontos';
 
+/**
+ * The kitchen points layer. Static (no data-driven paint), so it lives at module
+ * scope and is only appended to the spec's `layers` in `pontos` mode.
+ */
+const POINTS_LAYER = {
+  id: 'cozinhas-pts',
+  sourceId: 'cozinhas',
+  geometry: 'point',
+  paint: {
+    circleColor: '#E4572E',
+    circleRadius: 2.4,
+    circleOpacity: 0.7,
+    circleStrokeColor: '#FAF9F7',
+    circleStrokeWidth: 0.5,
+  },
+} as const;
+
 export const buildSpec = (
   byCity: kitchenByCity[],
-  mode: MapMode = 'coropletico'
+  mode: MapMode = 'coropletico',
+  hoverTooltipRender?: HoverTooltipConfig['render']
 ): VisualizationSpec => {
   const showPoints = mode === 'pontos';
 
@@ -44,19 +96,6 @@ export const buildSpec = (
   // `defaultColor` (`WITHOUT_KITCHEN_COLOR`) — the exact same flat SP background
   // the no-kitchen municipalities already show in `coropletico` mode.
   const choroplethData = mode === 'coropletico' ? byCity : [];
-
-  const pointsLayer = {
-    id: 'cozinhas-pts',
-    sourceId: 'cozinhas',
-    geometry: 'point',
-    paint: {
-      circleColor: '#E4572E',
-      circleRadius: 2.4,
-      circleOpacity: 0.7,
-      circleStrokeColor: '#FAF9F7',
-      circleStrokeWidth: 0.5,
-    },
-  } as const;
 
   return {
     id: 'mapa-cozinhas-sp',
@@ -90,7 +129,7 @@ export const buildSpec = (
     legends: [
       {
         id: 'legenda-cozinhas',
-        label: 'Cozinhas por município',
+        title: 'Cozinhas por município',
         colorBy: {
           type: 'quantitative',
           property: 'value',
@@ -112,8 +151,13 @@ export const buildSpec = (
           fillOpacity: mapTokens.dataviz.opacity.area,
           lineColor: '#FAF9F7',
         },
+        // Spec-driven tooltip: `<GeoVisProvider>` renders the `<GeoVisHoverTooltip>`
+        // itself, so it works inside the closed `<GeovisWorkspace>` (no children).
+        ...(hoverTooltipRender
+          ? { hoverTooltip: { render: hoverTooltipRender } }
+          : {}),
       },
-      ...(showPoints ? [pointsLayer] : []),
+      ...(showPoints ? [POINTS_LAYER] : []),
     ],
   };
 };

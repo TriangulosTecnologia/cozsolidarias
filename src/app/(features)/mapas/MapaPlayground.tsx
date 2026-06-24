@@ -2,23 +2,25 @@
 
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-import { Box, Heading, NativeSelect, Text } from '@chakra-ui/react';
+import { Box, Text } from '@chakra-ui/react';
 import {
   createBoundaryGroup,
-  GeoVisCanvas,
-  GeoVisHoverTooltip,
-  GeoVisLegend,
-  GeoVisProvider,
   type MapHoverInfo,
   useBoundaryToggle,
-  useGeoVis,
 } from '@ttoss/geovis';
-import type { Map as MapLibreMap } from 'maplibre-gl';
+import {
+  GeovisWorkspace,
+  type GeovisWorkspaceConfig,
+  type GeovisWorkspaceSelection,
+  getInitialSelection,
+} from '@ttoss/geovis-workspace';
+import { I18nProvider } from '@ttoss/react-i18n';
+import { ThemeProvider } from '@ttoss/ui';
 import * as React from 'react';
 
 import type { kitchenByCity } from '@/data-gateway/schema';
 
-import { buildSpec, type MapMode } from './geovisSpec';
+import { buildLegendItems, buildSpec, type MapMode } from './geovisSpec';
 
 const estadosGroup = createBoundaryGroup({
   id: 'estados-boundary',
@@ -32,42 +34,62 @@ const municipiosGroup = createBoundaryGroup({
   paint: { lineColor: '#B2B2B2', lineWidth: 0.6 },
 });
 
-/** `{ codigoIbge: nome }` for every SP município, keyed by `codarea`. */
+/** `{ codigoIbge: nome }` for every Brazilian município, keyed by `codarea`. */
 type NomesPorCodigo = Record<string, string>;
 
-const HideBasemapLabels = () => {
-  const { runtime } = useGeoVis();
+/** Id of the left-sidebar menu group that drives the visualization mode. */
+const MODE_MENU_ID = 'visualizacao';
 
-  React.useEffect(() => {
-    const map = runtime?.getAdapter().getNativeInstance() as
-      | MapLibreMap
-      | null
-      | undefined;
-    if (!map) {
-      return;
-    }
+/** Left sidebar is static — only the right sidebar changes with the mode. */
+const LEFT_SIDEBAR: NonNullable<GeovisWorkspaceConfig['leftSidebar']> = {
+  menus: [
+    {
+      id: MODE_MENU_ID,
+      title: 'Visualização',
+      defaultValue: 'coropletico',
+      items: [
+        { value: 'coropletico', label: 'Mapa coroplético' },
+        { value: 'pontos', label: 'Pontos das cozinhas' },
+      ],
+    },
+  ],
+};
 
-    const hideLabels = () => {
-      const style = map.getStyle();
-      for (const layer of style.layers ?? []) {
-        if (layer.type === 'symbol') {
-          map.setLayoutProperty(layer.id, 'visibility', 'none');
-        }
-      }
-    };
+const DESCRIPTIONS: Record<MapMode, string> = {
+  coropletico:
+    'Quanto mais escuro o município, mais cozinhas cadastradas ali. Passe o mouse sobre um município para ver o nome e a quantidade.',
+  pontos: 'Cada ponto é uma cozinha solidária cadastrada.',
+};
 
-    if (map.loaded()) {
-      hideLabels();
-    } else {
-      map.on('load', hideLabels);
-    }
+const LEGEND_ITEMS = buildLegendItems();
 
-    return () => {
-      map.off('load', hideLabels);
-    };
-  }, [runtime]);
-
-  return null;
+/**
+ * Builds the workspace config for a given mode. The legend swatches only show in
+ * `coropletico` mode (in `pontos` mode the fill is flat), matching the previous
+ * behaviour where the legend was hidden for the points view.
+ */
+const buildConfig = (mode: MapMode): GeovisWorkspaceConfig => {
+  return {
+    leftSidebar: LEFT_SIDEBAR,
+    rightSidebar: {
+      title: 'Cozinhas Solidárias',
+      legendWithColor: {
+        description: DESCRIPTIONS[mode],
+        ...(mode === 'coropletico'
+          ? {
+              legend: {
+                title: 'Cozinhas por município',
+                items: LEGEND_ITEMS,
+              },
+            }
+          : {}),
+        sources: {
+          title: 'Fonte dos dados:',
+          items: [{ label: '© Cozinhas Solidárias' }],
+        },
+      },
+    },
+  };
 };
 
 const MapaPlayground = () => {
@@ -76,7 +98,13 @@ const MapaPlayground = () => {
   const [nomesPorCodigo, setNomesPorCodigo] = React.useState<NomesPorCodigo>(
     {}
   );
-  const [mode, setMode] = React.useState<MapMode>('coropletico');
+  const [selection, setSelection] = React.useState<GeovisWorkspaceSelection>(
+    () => {
+      return getInitialSelection({ config: { leftSidebar: LEFT_SIDEBAR } });
+    }
+  );
+
+  const mode = (selection[MODE_MENU_ID] ?? 'coropletico') as MapMode;
 
   React.useEffect(() => {
     let cancelled = false;
@@ -94,7 +122,7 @@ const MapaPlayground = () => {
       fetch('/api/cozinhas/por-municipio').then((response) => {
         return response.json() as Promise<kitchenByCity[]>;
       }),
-      fetch('/geo/municipios-sp-nomes.json').then((response) => {
+      fetch('/geo/municipios-nomes.json').then((response) => {
         return response.json() as Promise<NomesPorCodigo>;
       }),
     ])
@@ -112,16 +140,6 @@ const MapaPlayground = () => {
     };
   }, []);
 
-  const baseSpec = React.useMemo(() => {
-    return buildSpec(kitchenByCity, mode);
-  }, [kitchenByCity, mode]);
-
-  const boundaryGroups = React.useMemo(() => {
-    return [estadosGroup, municipiosGroup];
-  }, []);
-
-  const { spec } = useBoundaryToggle(baseSpec, boundaryGroups);
-
   const citiesByCode = React.useMemo(() => {
     return new Map(
       kitchenByCity.map((registro) => {
@@ -134,8 +152,9 @@ const MapaPlayground = () => {
     (info: MapHoverInfo) => {
       const code = String(info.featureId);
       const register = citiesByCode.get(code);
-      // Nome vem do catálogo completo (645 municípios); a contagem, dos dados de
-      // cozinha (ausente => 0). Fallback só se o catálogo não tiver o código.
+      // Nome vem do catálogo completo (todos os municípios do Brasil); a
+      // contagem, dos dados de cozinha (ausente => 0). Fallback só se o catálogo
+      // não tiver o código.
       const name =
         nomesPorCodigo[code] ?? register?.municipio ?? `Município ${code}`;
       const quantity =
@@ -157,65 +176,53 @@ const MapaPlayground = () => {
     [citiesByCode, nomesPorCodigo]
   );
 
+  const baseSpec = React.useMemo(() => {
+    return buildSpec(kitchenByCity, mode, hoverTooltip);
+  }, [kitchenByCity, mode, hoverTooltip]);
+
+  const boundaryGroups = React.useMemo(() => {
+    return [estadosGroup, municipiosGroup];
+  }, []);
+
+  const { spec } = useBoundaryToggle(baseSpec, boundaryGroups);
+
+  const config = React.useMemo(() => {
+    return buildConfig(mode);
+  }, [mode]);
+
   return (
-    <Box position="relative" h="calc(100vh - 72px)" w="100%" bg="ivory.200">
+    <Box
+      position="relative"
+      h="calc(100vh - 72px)"
+      w="100%"
+      bg="ivory.200"
+      // The `<GeovisWorkspace>` root is a flex container with only `minHeight`
+      // (no `height`), so it collapses instead of filling this box. It's a
+      // closed component, so we stretch its direct child to fill the available
+      // space and drop its card border/radius for a full-bleed map.
+      css={{
+        '& > *': {
+          height: '100%',
+          width: '100%',
+          border: 'none',
+          borderRadius: 0,
+        },
+      }}
+    >
       {mounted ? (
-        <GeoVisProvider spec={spec}>
-          <GeoVisCanvas style={{ width: '100%', height: '100%' }} />
-          <HideBasemapLabels />
-
-          <Box
-            position="absolute"
-            top={4}
-            left={4}
-            bg="ivory.50"
-            px={4}
-            py={3}
-            borderRadius="card"
-            shadow="card"
-            maxW="280px"
-          >
-            <Heading as="h2" textStyle="title-4" color="text.primary" mb={1}>
-              Cozinhas Solidárias
-            </Heading>
-            <Text textStyle="body-sm" color="text.secondary" mb={3}>
-              {mode === 'coropletico'
-                ? 'Quanto mais escuro o município, mais cozinhas cadastradas ali. Passe o mouse sobre um município para ver o nome e a quantidade.'
-                : 'Cada ponto é uma cozinha solidária cadastrada.'}
-            </Text>
-
-            <NativeSelect.Root size="sm">
-              <NativeSelect.Field
-                value={mode}
-                onChange={(event) => {
-                  setMode(event.currentTarget.value as MapMode);
-                }}
-                aria-label="Visualização do mapa"
-              >
-                <option value="coropletico">Mapa coroplético</option>
-                <option value="pontos">Pontos das cozinhas</option>
-              </NativeSelect.Field>
-              <NativeSelect.Indicator />
-            </NativeSelect.Root>
-          </Box>
-
-          {mode === 'coropletico' ? (
-            <Box
-              position="absolute"
-              bottom={4}
-              left={4}
-              bg="ivory.50"
-              px={4}
-              py={3}
-              borderRadius="card"
-              shadow="card"
-            >
-              <GeoVisLegend legendId="legenda-cozinhas" />
-            </Box>
-          ) : null}
-
-          <GeoVisHoverTooltip render={hoverTooltip} />
-        </GeoVisProvider>
+        // `<GeovisWorkspace>` renders `@ttoss/ui` (theme-ui) and
+        // `@ttoss/react-i18n` components internally, so it needs both the
+        // `<ThemeProvider>` and `<I18nProvider>` ancestors.
+        <ThemeProvider>
+          <I18nProvider locale="pt-BR">
+            <GeovisWorkspace
+              config={config}
+              visualizationSpec={spec}
+              variables={selection}
+              onVariableChange={setSelection}
+            />
+          </I18nProvider>
+        </ThemeProvider>
       ) : (
         <Box
           position="absolute"

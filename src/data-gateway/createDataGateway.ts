@@ -1,5 +1,5 @@
 import { readStaticCozinhas } from '../data-source-static/readStaticCozinhas';
-import { readStaticMunicipiosSp } from '../data-source-static/readStaticMunicipiosSp';
+import { readStaticMunicipios } from '../data-source-static/readStaticMunicipios';
 import type { CozinhasFeatureCollection, kitchenByCity } from './schema';
 import { toCozinhasFeatureCollection } from './transformers/toCozinhasFeatureCollection';
 import { toCozinhasPorMunicipio } from './transformers/toCozinhasPorMunicipio';
@@ -8,7 +8,7 @@ import { toCozinhasPorMunicipio } from './transformers/toCozinhasPorMunicipio';
 export type DataGateway = {
   /** Returns cozinha locations as a GeoJSON FeatureCollection of Points. */
   getCozinhas: () => Promise<CozinhasFeatureCollection>;
-  /** Returns the cozinha count per SP município (for the choropleth map). */
+  /** Returns the cozinha count per município (for the choropleth map). */
   getCozinhasPorMunicipio: () => Promise<kitchenByCity[]>;
 };
 
@@ -49,7 +49,7 @@ export const createDataGateway = (): DataGateway => {
       getCozinhasPorMunicipio: async () => {
         const [cozinhas, municipios] = await Promise.all([
           readStaticCozinhas(),
-          readStaticMunicipiosSp(),
+          readStaticMunicipios(),
         ]);
         return toCozinhasPorMunicipio(cozinhas, municipios);
       },

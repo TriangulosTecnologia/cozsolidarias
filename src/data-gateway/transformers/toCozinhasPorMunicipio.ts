@@ -164,10 +164,10 @@ const mostVotedName = (nameVotes: Map<string, number>): string => {
 /**
  * Aggregates cozinhas into per-município counts via point-in-polygon.
  *
- * Each cozinha with coordinates is located inside one SP município polygon
+ * Each cozinha with coordinates is located inside one município polygon
  * (matched by `codarea`), and counts are tallied per code. Cozinhas without
- * coordinates, or whose point falls outside every SP polygon (e.g. other
- * states), are dropped.
+ * coordinates, or whose point falls outside every município polygon, are
+ * dropped.
  *
  * The join key (`codigoIbge`) comes from the geometry and is authoritative. The
  * display `municipio` name comes from the source records, which can be dirty
@@ -176,7 +176,8 @@ const mostVotedName = (nameVotes: Map<string, number>): string => {
  * than the first one.
  *
  * @param cozinhas - Raw cozinha records from data-source-static.
- * @param municipios - SP municipalities GeoJSON (`public/geo/municipios-sp.json`).
+ * @param municipios - Brazilian municipalities GeoJSON
+ * (`public/geo/geojs-100-mun.json`).
  * @returns One {@link kitchenByCity} per município that has ≥1 cozinha.
  */
 export const toCozinhasPorMunicipio = (
