@@ -19,13 +19,13 @@ import { join } from 'node:path';
  *     node scripts/generate-municipios-nomes.mjs
  */
 
-const GEOJSON_PATH = join(
+const GEOJSON_PATH = join(process.cwd(), 'public', 'geo', 'geojs-100-mun.json');
+const OUTPUT_PATH = join(
   process.cwd(),
   'public',
   'geo',
-  'geojs-100-mun.json'
+  'municipios-nomes.json'
 );
-const OUTPUT_PATH = join(process.cwd(), 'public', 'geo', 'municipios-nomes.json');
 
 const main = async () => {
   /** @type {{ features: Array<{ properties?: { codarea?: string; name?: string } }> }} */
