@@ -1,0 +1,1655 @@
+{
+  "type": "FeatureCollection",
+  "metadata": {
+    "provider": "osm",
+    "cozinhaId": "CS016720",
+    "center": {
+      "latitude": -15.89371,
+      "longitude": -52.25873
+    },
+    "radiusMeters": 3000,
+    "generatedAt": "2026-07-02T06:10:22.597Z",
+    "attribution": "© OpenStreetMap contributors",
+    "truncatedCategories": []
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2589396,
+          -15.8925959
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3684232482",
+        "name": "Clínica Gênesis",
+        "category": "saude",
+        "sourceType": "amenity=clinic",
+        "distanceMeters": 126,
+        "ring": 500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2599919,
+          -15.892845
+        ]
+      },
+      "properties": {
+        "id": "osm:node/2838366452",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 166,
+        "ring": 500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.260665,
+          -15.8925242
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3644660282",
+        "name": "Drogacenter",
+        "category": "saude",
+        "sourceType": "amenity=pharmacy",
+        "distanceMeters": 245,
+        "ring": 500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2611727,
+          -15.8930521
+        ]
+      },
+      "properties": {
+        "id": "osm:node/2838366453",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 271,
+        "ring": 500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2614773,
+          -15.8931131
+        ]
+      },
+      "properties": {
+        "id": "osm:node/2823714114",
+        "name": "Centro de Saúde Uady Câmara Lopes",
+        "category": "saude",
+        "sourceType": "amenity=hospital",
+        "distanceMeters": 301,
+        "ring": 500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2564887,
+          -15.8954224
+        ]
+      },
+      "properties": {
+        "id": "osm:node/13765348486",
+        "name": "Posto Fiscal Renato Simião",
+        "category": "assistencia",
+        "sourceType": "office=government",
+        "distanceMeters": 306,
+        "ring": 500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2588352,
+          -15.8908476
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1531413710",
+        "name": "Escola Estadual Antônio Cristino Cortes",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 318,
+        "ring": 500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.256079,
+          -15.8922452
+        ]
+      },
+      "properties": {
+        "id": "osm:node/2823691157",
+        "name": "Cartório do Primeiro Ofício",
+        "category": "assistencia",
+        "sourceType": "office=government",
+        "distanceMeters": 327,
+        "ring": 500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2619843,
+          -15.8925249
+        ]
+      },
+      "properties": {
+        "id": "osm:node/2823714113",
+        "name": "Escola Filinto Muller",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 372,
+        "ring": 500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2615668,
+          -15.8957489
+        ]
+      },
+      "properties": {
+        "id": "osm:node/2846030774",
+        "name": "Level Up",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 379,
+        "ring": 500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2586227,
+          -15.8902373
+        ]
+      },
+      "properties": {
+        "id": "osm:node/2838366456",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 386,
+        "ring": 500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2622993,
+          -15.8922732
+        ]
+      },
+      "properties": {
+        "id": "osm:node/2838366454",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 414,
+        "ring": 500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2623817,
+          -15.8949481
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3373476514",
+        "name": "Clínica GASTROMED",
+        "category": "saude",
+        "sourceType": "amenity=clinic",
+        "distanceMeters": 414,
+        "ring": 500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2575286,
+          -15.8900603
+        ]
+      },
+      "properties": {
+        "id": "osm:node/4266835796",
+        "name": "Pão de Mel",
+        "category": "abastecimento",
+        "sourceType": "shop=bakery",
+        "distanceMeters": 426,
+        "ring": 500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2622346,
+          -15.8918377
+        ]
+      },
+      "properties": {
+        "id": "osm:node/2823678612",
+        "name": "Mendonça Super Center",
+        "category": "abastecimento",
+        "sourceType": "shop=supermarket",
+        "distanceMeters": 429,
+        "ring": 500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2621723,
+          -15.8913884
+        ]
+      },
+      "properties": {
+        "id": "osm:node/2838366455",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 450,
+        "ring": 500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2606816,
+          -15.8973448
+        ]
+      },
+      "properties": {
+        "id": "osm:node/5902354726",
+        "name": null,
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 455,
+        "ring": 500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2567065,
+          -15.8897885
+        ]
+      },
+      "properties": {
+        "id": "osm:node/2838376523",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 487,
+        "ring": 500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2632573,
+          -15.8924661
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3676550021",
+        "name": "Dr. Clodoaldo Pirani - Neurologista",
+        "category": "saude",
+        "sourceType": "amenity=clinic",
+        "distanceMeters": 504,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2577975,
+          -15.889154
+        ]
+      },
+      "properties": {
+        "id": "osm:node/2834850992",
+        "name": "Cartório do Segundo Ofício",
+        "category": "assistencia",
+        "sourceType": "office=government",
+        "distanceMeters": 516,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2593109,
+          -15.8891028
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1531413711",
+        "name": "Instituto Madre Marta Cerutti",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 516,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2565728,
+          -15.8892638
+        ]
+      },
+      "properties": {
+        "id": "osm:node/5902565548",
+        "name": "Igreja Metodista em Barra do Garças",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 546,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2559351,
+          -15.8895339
+        ]
+      },
+      "properties": {
+        "id": "osm:node/4583123182",
+        "name": "Clínica Centermed",
+        "category": "saude",
+        "sourceType": "amenity=clinic",
+        "distanceMeters": 552,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.257324,
+          -15.8888382
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3790769090",
+        "name": "Igreja Matriz de Santo Antônio",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 562,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2631892,
+          -15.89087
+        ]
+      },
+      "properties": {
+        "id": "osm:node/4738772733",
+        "name": "Drogaria Poupe Já",
+        "category": "saude",
+        "sourceType": "amenity=pharmacy",
+        "distanceMeters": 572,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2571694,
+          -15.8887805
+        ]
+      },
+      "properties": {
+        "id": "osm:node/5902565550",
+        "name": null,
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 573,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2639995,
+          -15.8949952
+        ]
+      },
+      "properties": {
+        "id": "osm:node/2823702226",
+        "name": "Escola Heronides Araujo",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 581,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2558359,
+          -15.889263
+        ]
+      },
+      "properties": {
+        "id": "osm:node/4583131154",
+        "name": "Dra. Sandra Regina Silva - Cardiologista e Clínica Médica",
+        "category": "saude",
+        "sourceType": "amenity=clinic",
+        "distanceMeters": 583,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2638878,
+          -15.8955418
+        ]
+      },
+      "properties": {
+        "id": "osm:node/4260758847",
+        "name": "Núcleo de Dermatologia e Cirurgia Plástica",
+        "category": "saude",
+        "sourceType": "amenity=clinic",
+        "distanceMeters": 588,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2572489,
+          -15.8988385
+        ]
+      },
+      "properties": {
+        "id": "osm:node/13762171709",
+        "name": "Igreja de São Miguel Arcanjo",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 592,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2640093,
+          -15.8920683
+        ]
+      },
+      "properties": {
+        "id": "osm:node/2823714116",
+        "name": "Hospital Cristo Redentor",
+        "category": "saude",
+        "sourceType": "amenity=hospital",
+        "distanceMeters": 593,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2576186,
+          -15.8881842
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1531487116",
+        "name": "Escola Municipal Dom Bosco",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 626,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2646259,
+          -15.8938462
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1530355639",
+        "name": null,
+        "category": "assistencia",
+        "sourceType": "office=government",
+        "distanceMeters": 631,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2647049,
+          -15.8937273
+        ]
+      },
+      "properties": {
+        "id": "osm:node/2802686685",
+        "name": "Secretaria de Planejamento e Finanças",
+        "category": "assistencia",
+        "sourceType": "office=government",
+        "distanceMeters": 639,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2647109,
+          -15.8941255
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1530355636",
+        "name": "Anfiteatro Vilmar Peres",
+        "category": "assistencia",
+        "sourceType": "office=government",
+        "distanceMeters": 641,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2648121,
+          -15.8942711
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1530355637",
+        "name": null,
+        "category": "assistencia",
+        "sourceType": "office=government",
+        "distanceMeters": 653,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2650406,
+          -15.8944247
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1530355638",
+        "name": "Biblioteca Municipal",
+        "category": "assistencia",
+        "sourceType": "office=government",
+        "distanceMeters": 680,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2639749,
+          -15.8900297
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3644650984",
+        "name": "Drogaria Nossa Senhora Aparecida",
+        "category": "saude",
+        "sourceType": "amenity=pharmacy",
+        "distanceMeters": 694,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2650751,
+          -15.8916777
+        ]
+      },
+      "properties": {
+        "id": "osm:node/2823678624",
+        "name": "Supermercado Catarinense",
+        "category": "abastecimento",
+        "sourceType": "shop=supermarket",
+        "distanceMeters": 715,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2540985,
+          -15.888902
+        ]
+      },
+      "properties": {
+        "id": "osm:node/5902572343",
+        "name": null,
+        "category": "abastecimento",
+        "sourceType": "shop=butcher",
+        "distanceMeters": 729,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2512959,
+          -15.8956335
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3470454800",
+        "name": "Hypermercado Megafrutt",
+        "category": "abastecimento",
+        "sourceType": "shop=supermarket",
+        "distanceMeters": 823,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2664001,
+          -15.8907284
+        ]
+      },
+      "properties": {
+        "id": "osm:node/2823678618",
+        "name": "Supermercado Cogal",
+        "category": "abastecimento",
+        "sourceType": "shop=supermarket",
+        "distanceMeters": 885,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.266472,
+          -15.8905224
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3644625905",
+        "name": "Drogaria Ativa",
+        "category": "saude",
+        "sourceType": "amenity=pharmacy",
+        "distanceMeters": 901,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2571525,
+          -15.9022116
+        ]
+      },
+      "properties": {
+        "id": "osm:node/13762171706",
+        "name": "Igreja Cristã Maranata",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 960,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2612938,
+          -15.883942
+        ]
+      },
+      "properties": {
+        "id": "osm:node/5902388257",
+        "name": "Feira Municipal",
+        "category": "abastecimento",
+        "sourceType": "amenity=marketplace",
+        "distanceMeters": 1120,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2681606,
+          -15.8873249
+        ]
+      },
+      "properties": {
+        "id": "osm:node/2838376524",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 1233,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.256996,
+          -15.9048389
+        ]
+      },
+      "properties": {
+        "id": "osm:way/635104296",
+        "name": "Feira do Produto",
+        "category": "abastecimento",
+        "sourceType": "amenity=marketplace",
+        "distanceMeters": 1251,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2681477,
+          -15.8869541
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1530327011",
+        "name": "Escola Estadual Marechal Eurico Gaspar Dutra",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 1256,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2660434,
+          -15.8848362
+        ]
+      },
+      "properties": {
+        "id": "osm:node/2823678625",
+        "name": "Supermercado Nilo",
+        "category": "abastecimento",
+        "sourceType": "shop=supermarket",
+        "distanceMeters": 1259,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2703732,
+          -15.8877543
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1530327014",
+        "name": "Escola Estadual Nossa Senhora da Guia",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 1410,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.247335,
+          -15.8870239
+        ]
+      },
+      "properties": {
+        "id": "osm:node/2823678617",
+        "name": "Supermercado Mendonça",
+        "category": "abastecimento",
+        "sourceType": "shop=supermarket",
+        "distanceMeters": 1428,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2723602,
+          -15.895308
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1531410164",
+        "name": "Escola Estadual Professora Marisa Mariano",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 1468,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2616212,
+          -15.8807225
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1531487115",
+        "name": "Escola Estadual Irmã Diva Pimentel",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 1477,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2483972,
+          -15.9037053
+        ]
+      },
+      "properties": {
+        "id": "osm:way/378346516",
+        "name": "Colegio Estadual Dr. Rubens Corrêa de Aguirre",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 1567,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2495579,
+          -15.9049878
+        ]
+      },
+      "properties": {
+        "id": "osm:way/378346515",
+        "name": "CASA DO ÍNDIO",
+        "category": "assistencia",
+        "sourceType": "office=government",
+        "distanceMeters": 1592,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.273519,
+          -15.8910687
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1531410171",
+        "name": "Centro Municipal de Educação Infantil Izaurina Abreu Luz",
+        "category": "educacao",
+        "sourceType": "amenity=kindergarten",
+        "distanceMeters": 1609,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2612563,
+          -15.9084036
+        ]
+      },
+      "properties": {
+        "id": "osm:node/13762171704",
+        "name": "Escola Estadual São Miguel",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 1656,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2737966,
+          -15.8902364
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1531410170",
+        "name": "Escola Estadual José Ângelo",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 1657,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2471087,
+          -15.8837538
+        ]
+      },
+      "properties": {
+        "id": "osm:node/2823714115",
+        "name": "Pronto Socorro Municipal",
+        "category": "saude",
+        "sourceType": "amenity=hospital",
+        "distanceMeters": 1664,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2484374,
+          -15.9050302
+        ]
+      },
+      "properties": {
+        "id": "osm:way/378346517",
+        "name": "Colegio Estadual Mercedes Zétola",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 1672,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2725606,
+          -15.8854425
+        ]
+      },
+      "properties": {
+        "id": "osm:node/2823678604",
+        "name": "Nilo Supermercado",
+        "category": "abastecimento",
+        "sourceType": "shop=supermarket",
+        "distanceMeters": 1742,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2600405,
+          -15.9094333
+        ]
+      },
+      "properties": {
+        "id": "osm:node/13762171702",
+        "name": "Igreja Adventista do Sétimo Dia",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 1754,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2615421,
+          -15.8775931
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1531487114",
+        "name": "Escola Estadual Militar Tiradentes",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 1817,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2758174,
+          -15.8986216
+        ]
+      },
+      "properties": {
+        "id": "osm:node/13957809250",
+        "name": "Centro Municipal de Educação Infantil Padre Daniel Badiali",
+        "category": "educacao",
+        "sourceType": "amenity=kindergarten",
+        "distanceMeters": 1907,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.276433,
+          -15.8975248
+        ]
+      },
+      "properties": {
+        "id": "osm:node/2838261298",
+        "name": "Segunda Subseção de Barra do Garças",
+        "category": "assistencia",
+        "sourceType": "office=government",
+        "distanceMeters": 1940,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2587567,
+          -15.9112292
+        ]
+      },
+      "properties": {
+        "id": "osm:node/13762170799",
+        "name": "Igreja de Nossa Senhora Aparecida",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 1948,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2767173,
+          -15.8979277
+        ]
+      },
+      "properties": {
+        "id": "osm:node/2838261297",
+        "name": "Promotorias de Justiça de Barra do Garças",
+        "category": "assistencia",
+        "sourceType": "office=government",
+        "distanceMeters": 1980,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2628387,
+          -15.8757691
+        ]
+      },
+      "properties": {
+        "id": "osm:node/13958489757",
+        "name": "Centro de Atenção Psicossocial",
+        "category": "saude",
+        "sourceType": "amenity=clinic",
+        "distanceMeters": 2043,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2777373,
+          -15.8907767
+        ]
+      },
+      "properties": {
+        "id": "osm:relation/14524863",
+        "name": null,
+        "category": "educacao",
+        "sourceType": "amenity=university",
+        "distanceMeters": 2059,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.260506,
+          -15.9124021
+        ]
+      },
+      "properties": {
+        "id": "osm:node/13767639110",
+        "name": "Escola Municipal São Jorge",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2087,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2449769,
+          -15.9074575
+        ]
+      },
+      "properties": {
+        "id": "osm:node/10879459715",
+        "name": "Farmacia Hospitalar de Aragarças",
+        "category": "saude",
+        "sourceType": "amenity=pharmacy",
+        "distanceMeters": 2121,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2444445,
+          -15.9072269
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1090746763",
+        "name": "Hospital Municipal Getúlio Vargas",
+        "category": "saude",
+        "sourceType": "amenity=hospital",
+        "distanceMeters": 2143,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2604203,
+          -15.9130267
+        ]
+      },
+      "properties": {
+        "id": "osm:node/13767639109",
+        "name": "Escola Municipal de Educação Infantil Isaías Pereira dos Santos",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2156,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2642215,
+          -15.8749546
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1531487112",
+        "name": "Centro Municipal de Educação Infantil Professora Esmeralda Gomes de Carvalho",
+        "category": "educacao",
+        "sourceType": "amenity=kindergarten",
+        "distanceMeters": 2167,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2424978,
+          -15.905404
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3470454796",
+        "name": "Skinão",
+        "category": "abastecimento",
+        "sourceType": "shop=supermarket",
+        "distanceMeters": 2169,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2648885,
+          -15.8750037
+        ]
+      },
+      "properties": {
+        "id": "osm:node/13958489741",
+        "name": "Igreja de Nossa Senhora Auxiliadora",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 2182,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2652585,
+          -15.8750692
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1531487111",
+        "name": "Escola Estadual Francisco Antônio Marcucci",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2187,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2649078,
+          -15.874319
+        ]
+      },
+      "properties": {
+        "id": "osm:node/13958489752",
+        "name": "Unidade Básica de Saúde Santo Antônio Três",
+        "category": "saude",
+        "sourceType": "amenity=clinic",
+        "distanceMeters": 2255,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2413015,
+          -15.9061018
+        ]
+      },
+      "properties": {
+        "id": "osm:way/378346502",
+        "name": "Igreja Católica",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 2318,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.236812,
+          -15.8972019
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3470454806",
+        "name": "Colegio Estadual Melquiades Victor de Oliveira",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2376,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2412763,
+          -15.9076426
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3470454391",
+        "name": "Drogafacil",
+        "category": "saude",
+        "sourceType": "amenity=pharmacy",
+        "distanceMeters": 2426,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2410262,
+          -15.9074684
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3416172738",
+        "name": "Mega frutt 2",
+        "category": "abastecimento",
+        "sourceType": "shop=supermarket",
+        "distanceMeters": 2434,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2794651,
+          -15.8845989
+        ]
+      },
+      "properties": {
+        "id": "osm:node/2823702228",
+        "name": "UNOPAR Eng Civil",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2438,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.241053,
+          -15.9078217
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3416172737",
+        "name": "Supermercado Araguaia",
+        "category": "abastecimento",
+        "sourceType": "shop=supermarket",
+        "distanceMeters": 2457,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2428201,
+          -15.9105226
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3470454808",
+        "name": "Colegio Estadual Pompeo de Pina",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2528,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2379524,
+          -15.9051391
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3416172736",
+        "name": "Escola Estadual Luiz Dias Paes Lemes",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2560,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2339717,
+          -15.8970396
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3416788858",
+        "name": "Extra Forte",
+        "category": "abastecimento",
+        "sourceType": "shop=supermarket",
+        "distanceMeters": 2673,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2361693,
+          -15.9040829
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3470454387",
+        "name": "Goianão",
+        "category": "abastecimento",
+        "sourceType": "shop=supermarket",
+        "distanceMeters": 2674,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2354789,
+          -15.906468
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3470454811",
+        "name": "Mercearia Iza",
+        "category": "abastecimento",
+        "sourceType": "shop=supermarket",
+        "distanceMeters": 2863,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2349854,
+          -15.9067569
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3470454812",
+        "name": "Mercado União",
+        "category": "abastecimento",
+        "sourceType": "shop=supermarket",
+        "distanceMeters": 2924,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.2333809,
+          -15.9049683
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3470454794",
+        "name": "Escola Municipal Sebastião Granja",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2986,
+        "ring": 3000
+      }
+    }
+  ]
+}

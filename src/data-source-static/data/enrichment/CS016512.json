@@ -1,0 +1,70 @@
+{
+  "cozinhaId": "CS016512",
+  "generatedAt": "2025-11-04",
+  "status": {
+    "situacao": {
+      "value": "Habilitada",
+      "source": "Banco de Cozinhas Solidárias (03/11/2025) — coluna 'Situação'"
+    },
+    "emFuncionamento": {
+      "value": "Sim, está funcionando normalmente",
+      "source": "Banco de Cozinhas Solidárias (03/11/2025) — coluna 'A cozinha está em funcionamento atualmente?'"
+    },
+    "refeicoesPorDia": {
+      "value": null,
+      "source": "Banco de Cozinhas Solidárias (03/11/2025) — coluna 'Quantidade refeições produzidas por dia'"
+    }
+  },
+  "sourcing": {
+    "comoAdquire": {
+      "value": "1 - Doações de entidades/associações, 2 - Compra em supermercados/feiras, 3 - Direto do produtor",
+      "source": "Mapeamento de Cozinhas (Formulário, 2024) — autodeclarado — 'Onde/como são adquiridos os alimentos'",
+      "note": "autodeclarado (2024)"
+    },
+    "gastoMensalTexto": {
+      "value": "38400",
+      "source": "Mapeamento de Cozinhas (Formulário, 2024) — autodeclarado — 'valor médio mensal com alimentos'",
+      "note": "autodeclarado (2024)"
+    },
+    "trabalhadores": {
+      "value": "25 pessoas",
+      "source": "Mapeamento de Cozinhas (Formulário, 2024) — autodeclarado — 'Quantas pessoas trabalham na Cozinha'",
+      "note": "autodeclarado (2024)"
+    }
+  },
+  "supplyNetwork": {
+    "municipio": "Goiânia",
+    "paaReceivingUnits": {
+      "value": 15,
+      "source": "CONAB/PAA 2025 (Programa de Aquisição de Alimentos — Cozinhas) — aba 'UNIDADES RECEBEDORAS', contagem por 'Município Consumidor'"
+    },
+    "isPaaReceiver": {
+      "value": false,
+      "source": "CONAB/PAA 2025 (Programa de Aquisição de Alimentos — Cozinhas) — 'UNIDADES RECEBEDORAS', cruzamento por CNPJ da cozinha"
+    },
+    "paaProducts": {
+      "value": [
+        {
+          "produto": "ARROZ",
+          "kg": 7021
+        },
+        {
+          "produto": "FEIJAO",
+          "kg": 2907
+        }
+      ],
+      "source": "CONAB/PAA 2025 (Programa de Aquisição de Alimentos — Cozinhas) — aba 'PRODUTOS', soma de kg por produto no município"
+    },
+    "cafOrganizations": {
+      "value": 2,
+      "source": "CAF-PJ — Cadastro Nacional da Agricultura Familiar (pessoa jurídica) — contagem de organizações no município"
+    },
+    "cafExamples": {
+      "value": [
+        "FEDERACAO DE COOPERATIVAS DA AGRICULTURA FAMILIAR E ECONOMIA SOLIDARIA DO ESTADO DO GOIAS",
+        "COOPERATIVA MISTA DE AGRICULTORES FAMILIARES DE GOIANIA E REGIAO - COOMAFAG"
+      ],
+      "source": "CAF-PJ — Cadastro Nacional da Agricultura Familiar (pessoa jurídica) — razão social das organizações no município"
+    }
+  }
+}

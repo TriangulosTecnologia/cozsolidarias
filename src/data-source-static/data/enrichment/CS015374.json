@@ -1,0 +1,58 @@
+{
+  "cozinhaId": "CS015374",
+  "generatedAt": "2025-11-04",
+  "status": {
+    "situacao": {
+      "value": "Habilitada",
+      "source": "Banco de Cozinhas Solidárias (03/11/2025) — coluna 'Situação'"
+    },
+    "emFuncionamento": {
+      "value": "Sim, está funcionando normalmente",
+      "source": "Banco de Cozinhas Solidárias (03/11/2025) — coluna 'A cozinha está em funcionamento atualmente?'"
+    },
+    "refeicoesPorDia": {
+      "value": null,
+      "source": "Banco de Cozinhas Solidárias (03/11/2025) — coluna 'Quantidade refeições produzidas por dia'"
+    }
+  },
+  "sourcing": {
+    "comoAdquire": {
+      "value": "2 - Compra em supermercados/feiras, 3 - Direto do produtor",
+      "source": "Mapeamento de Cozinhas (Formulário, 2024) — autodeclarado — 'Onde/como são adquiridos os alimentos'",
+      "note": "autodeclarado (2024)"
+    },
+    "gastoMensalTexto": {
+      "value": "Na media de 2500 reais",
+      "source": "Mapeamento de Cozinhas (Formulário, 2024) — autodeclarado — 'valor médio mensal com alimentos'",
+      "note": "autodeclarado (2024)"
+    },
+    "trabalhadores": {
+      "value": "5 pessoas voluntárias",
+      "source": "Mapeamento de Cozinhas (Formulário, 2024) — autodeclarado — 'Quantas pessoas trabalham na Cozinha'",
+      "note": "autodeclarado (2024)"
+    }
+  },
+  "supplyNetwork": {
+    "municipio": "Antônio Carlos",
+    "paaReceivingUnits": {
+      "value": 0,
+      "source": "CONAB/PAA 2025 (Programa de Aquisição de Alimentos — Cozinhas) — aba 'UNIDADES RECEBEDORAS', contagem por 'Município Consumidor'"
+    },
+    "isPaaReceiver": {
+      "value": false,
+      "source": "CONAB/PAA 2025 (Programa de Aquisição de Alimentos — Cozinhas) — 'UNIDADES RECEBEDORAS', cruzamento por CNPJ da cozinha"
+    },
+    "paaProducts": {
+      "value": [],
+      "source": "CONAB/PAA 2025 (Programa de Aquisição de Alimentos — Cozinhas) — aba 'PRODUTOS', soma de kg por produto no município"
+    },
+    "cafOrganizations": {
+      "value": 0,
+      "source": "CAF-PJ — Cadastro Nacional da Agricultura Familiar (pessoa jurídica) — contagem de organizações no município"
+    },
+    "cafExamples": {
+      "value": [],
+      "source": "CAF-PJ — Cadastro Nacional da Agricultura Familiar (pessoa jurídica) — razão social das organizações no município"
+    }
+  }
+}

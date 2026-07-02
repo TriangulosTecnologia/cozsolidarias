@@ -1,0 +1,16 @@
+{
+  "type": "FeatureCollection",
+  "metadata": {
+    "provider": "osm",
+    "cozinhaId": "CS015374",
+    "center": {
+      "latitude": -27.52316,
+      "longitude": -48.80113
+    },
+    "radiusMeters": 3000,
+    "generatedAt": "2026-07-02T06:13:31.348Z",
+    "attribution": "© OpenStreetMap contributors",
+    "truncatedCategories": []
+  },
+  "features": []
+}

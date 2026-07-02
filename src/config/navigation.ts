@@ -13,6 +13,7 @@ export type NavEntry = {
  */
 export const mainNav: NavEntry[] = [
   { id: 'mapa', href: '/mapas', label: 'Mapas' },
+  { id: 'minha-cozinha', href: '/minha-cozinha', label: 'Minha Cozinha' },
   { id: 'sobre', href: '/sobre', label: 'Sobre' },
   { id: 'contato', href: '/contato', label: 'Contato' },
   { id: 'cursos', href: 'https://cozsolidaria.odoo.com/', label: 'Cursos' },

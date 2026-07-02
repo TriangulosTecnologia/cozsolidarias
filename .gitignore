@@ -39,6 +39,9 @@ lerna-debug.log*
 .temp/
 tmp/
 
+# Google POI snapshots must not be committed (Places ToS). OSM (ODbL) is fine.
+src/data-source-static/data/nearby/google/
+
 # Editor / OS
 .vscode/*
 !.vscode/settings.json

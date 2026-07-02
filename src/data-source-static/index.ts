@@ -1,2 +1,6 @@
 export { readStaticCozinhas } from './readStaticCozinhas';
-export type { StaticCozinhaSource } from './types';
+export {
+  listStaticNearbyCozinhaIds,
+  readStaticNearbyPlaces,
+} from './readStaticNearbyPlaces';
+export type { StaticCozinhaSource, StaticNearbyPlacesSource } from './types';

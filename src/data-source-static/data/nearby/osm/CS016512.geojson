@@ -1,0 +1,1241 @@
+{
+  "type": "FeatureCollection",
+  "metadata": {
+    "provider": "osm",
+    "cozinhaId": "CS016512",
+    "center": {
+      "latitude": -16.71002,
+      "longitude": -49.33405
+    },
+    "radiusMeters": 3000,
+    "generatedAt": "2026-07-02T06:10:16.471Z",
+    "attribution": "© OpenStreetMap contributors",
+    "truncatedCategories": []
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3306576,
+          -16.7143951
+        ]
+      },
+      "properties": {
+        "id": "osm:way/688908373",
+        "name": "Centro de Convivência do Granville",
+        "category": "assistencia",
+        "sourceType": "amenity=community_centre",
+        "distanceMeters": 606,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3280775,
+          -16.7074417
+        ]
+      },
+      "properties": {
+        "id": "osm:node/2878999292",
+        "name": "Plaza D'oro Shopping",
+        "category": "abastecimento",
+        "sourceType": "shop=supermarket",
+        "distanceMeters": 698,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3277806,
+          -16.7075506
+        ]
+      },
+      "properties": {
+        "id": "osm:node/2919528465",
+        "name": "Rede Store Supermercado",
+        "category": "abastecimento",
+        "sourceType": "shop=supermarket",
+        "distanceMeters": 722,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3323555,
+          -16.7176768
+        ]
+      },
+      "properties": {
+        "id": "osm:way/465795116",
+        "name": "Escola Estadual Deputado José Luciano",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 870,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3279852,
+          -16.7226837
+        ]
+      },
+      "properties": {
+        "id": "osm:node/4583907740",
+        "name": "Casa de Eurípedes",
+        "category": "saude",
+        "sourceType": "amenity=hospital",
+        "distanceMeters": 1549,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3224371,
+          -16.7189209
+        ]
+      },
+      "properties": {
+        "id": "osm:node/4582165115",
+        "name": "Colégio Meta Brasil",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 1584,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3189184,
+          -16.7129405
+        ]
+      },
+      "properties": {
+        "id": "osm:node/10115360316",
+        "name": "Secretária Municipal de Parques e Jardins",
+        "category": "assistencia",
+        "sourceType": "office=government",
+        "distanceMeters": 1644,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3192041,
+          -16.7151694
+        ]
+      },
+      "properties": {
+        "id": "osm:node/13379103727",
+        "name": "Av. Cesar Lates (00390)",
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 1682,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3189971,
+          -16.7152213
+        ]
+      },
+      "properties": {
+        "id": "osm:node/13379103726",
+        "name": "Av. Cesar Lates (00391)",
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 1704,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.320435,
+          -16.7185569
+        ]
+      },
+      "properties": {
+        "id": "osm:node/13379103724",
+        "name": "Av. Cesar Lates (00427)",
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 1733,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3201713,
+          -16.7183303
+        ]
+      },
+      "properties": {
+        "id": "osm:node/13379103725",
+        "name": "Av. Cesar Lates (00428)",
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 1743,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3181776,
+          -16.713951
+        ]
+      },
+      "properties": {
+        "id": "osm:node/4583871850",
+        "name": "Colégio Estadual Novo Horizonte",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 1746,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3208647,
+          -16.7194955
+        ]
+      },
+      "properties": {
+        "id": "osm:node/4595547423",
+        "name": "Petit Pão",
+        "category": "abastecimento",
+        "sourceType": "shop=bakery",
+        "distanceMeters": 1756,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3209135,
+          -16.719624
+        ]
+      },
+      "properties": {
+        "id": "osm:node/4595547421",
+        "name": "Supermercado Ribeiro",
+        "category": "abastecimento",
+        "sourceType": "shop=supermarket",
+        "distanceMeters": 1760,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.321009,
+          -16.7198615
+        ]
+      },
+      "properties": {
+        "id": "osm:node/4595547418",
+        "name": "Drogaria Santa Marta",
+        "category": "saude",
+        "sourceType": "amenity=pharmacy",
+        "distanceMeters": 1768,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3203421,
+          -16.7190986
+        ]
+      },
+      "properties": {
+        "id": "osm:node/4595547424",
+        "name": "Drogaria Atual",
+        "category": "saude",
+        "sourceType": "amenity=pharmacy",
+        "distanceMeters": 1775,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3214934,
+          -16.721392
+        ]
+      },
+      "properties": {
+        "id": "osm:node/13379103723",
+        "name": "Av. Cesar Lates (00426)",
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 1840,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3166549,
+          -16.7122174
+        ]
+      },
+      "properties": {
+        "id": "osm:node/13379103728",
+        "name": "Av. dos Alpes (00388)",
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 1869,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3214594,
+          -16.7218055
+        ]
+      },
+      "properties": {
+        "id": "osm:node/13379103722",
+        "name": "Av. Cesar Lates (00425)",
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 1875,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3211969,
+          -16.7215592
+        ]
+      },
+      "properties": {
+        "id": "osm:node/4595547416",
+        "name": "Alex Farma",
+        "category": "saude",
+        "sourceType": "amenity=pharmacy",
+        "distanceMeters": 1876,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.316237,
+          -16.7122672
+        ]
+      },
+      "properties": {
+        "id": "osm:node/13379103729",
+        "name": "Av. dos Alpes (00389)",
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 1913,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3225206,
+          -16.7233929
+        ]
+      },
+      "properties": {
+        "id": "osm:node/4582662050",
+        "name": "Centro de Recuperação de Alcóolatras Cerea",
+        "category": "saude",
+        "sourceType": "amenity=clinic",
+        "distanceMeters": 1928,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3228728,
+          -16.7244282
+        ]
+      },
+      "properties": {
+        "id": "osm:node/4582161745",
+        "name": "Colégio Meta Júnior",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 1996,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3226231,
+          -16.7245328
+        ]
+      },
+      "properties": {
+        "id": "osm:node/13379103721",
+        "name": "Av. Cesar Lates (00411)",
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2021,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3213379,
+          -16.7237487
+        ]
+      },
+      "properties": {
+        "id": "osm:node/10225563195",
+        "name": "Santa Lúzia",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 2040,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.346977,
+          -16.6963986
+        ]
+      },
+      "properties": {
+        "id": "osm:node/10116336448",
+        "name": "CSF Goiania Viva",
+        "category": "saude",
+        "sourceType": "amenity=clinic",
+        "distanceMeters": 2047,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3184042,
+          -16.7207073
+        ]
+      },
+      "properties": {
+        "id": "osm:way/253368651",
+        "name": "CAIS Novo Horizonte",
+        "category": "saude",
+        "sourceType": "amenity=clinic",
+        "distanceMeters": 2047,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3226126,
+          -16.7249343
+        ]
+      },
+      "properties": {
+        "id": "osm:node/13379103720",
+        "name": "Av. Cesar Lates (00410)",
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2058,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3208501,
+          -16.7244102
+        ]
+      },
+      "properties": {
+        "id": "osm:node/10223449731",
+        "name": "Assembleia de Deus - Campo de Campinas",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 2130,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3152197,
+          -16.7030268
+        ]
+      },
+      "properties": {
+        "id": "osm:node/10115324539",
+        "name": "Centro de Saúde Vila Mauá",
+        "category": "saude",
+        "sourceType": "amenity=clinic",
+        "distanceMeters": 2151,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3202991,
+          -16.7247456
+        ]
+      },
+      "properties": {
+        "id": "osm:node/10223449730",
+        "name": null,
+        "category": "saude",
+        "sourceType": "amenity=pharmacy",
+        "distanceMeters": 2197,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3170652,
+          -16.7212737
+        ]
+      },
+      "properties": {
+        "id": "osm:node/10225563197",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2199,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3131358,
+          -16.7108998
+        ]
+      },
+      "properties": {
+        "id": "osm:node/13379103730",
+        "name": "Av. dos Alpes (00387)",
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2229,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3237784,
+          -16.7274955
+        ]
+      },
+      "properties": {
+        "id": "osm:node/13379103718",
+        "name": "Av. Cesar Lates (00392)",
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2230,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3236178,
+          -16.7276618
+        ]
+      },
+      "properties": {
+        "id": "osm:node/13379103719",
+        "name": "Av. Cesar Lates (00393)",
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2254,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3207519,
+          -16.7259156
+        ]
+      },
+      "properties": {
+        "id": "osm:way/474665952",
+        "name": "Meta Brasil",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2265,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3126399,
+          -16.7109278
+        ]
+      },
+      "properties": {
+        "id": "osm:node/13379103731",
+        "name": "Av. dos Alpes (00386)",
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2282,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3136746,
+          -16.7035549
+        ]
+      },
+      "properties": {
+        "id": "osm:way/681605114",
+        "name": "Colégio Estadual Jardim Europa",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2286,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3384208,
+          -16.6898652
+        ]
+      },
+      "properties": {
+        "id": "osm:node/10116285246",
+        "name": "UBS Jardim Mirabel",
+        "category": "saude",
+        "sourceType": "amenity=clinic",
+        "distanceMeters": 2289,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3127638,
+          -16.7132144
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1104530069",
+        "name": null,
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2295,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3392791,
+          -16.6894978
+        ]
+      },
+      "properties": {
+        "id": "osm:node/10116318456",
+        "name": "CSF Jardim Mirabel",
+        "category": "saude",
+        "sourceType": "amenity=clinic",
+        "distanceMeters": 2349,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3118228,
+          -16.7098678
+        ]
+      },
+      "properties": {
+        "id": "osm:way/498963678",
+        "name": "Assaí",
+        "category": "abastecimento",
+        "sourceType": "shop=supermarket",
+        "distanceMeters": 2367,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3205703,
+          -16.7269631
+        ]
+      },
+      "properties": {
+        "id": "osm:way/474665948",
+        "name": "Meta Júnior",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2369,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3133772,
+          -16.7020099
+        ]
+      },
+      "properties": {
+        "id": "osm:way/736490315",
+        "name": "Centro Espírita Obreiros do Caminho",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 2375,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3261378,
+          -16.7300731
+        ]
+      },
+      "properties": {
+        "id": "osm:way/757092856",
+        "name": "Atacadão",
+        "category": "abastecimento",
+        "sourceType": "shop=supermarket",
+        "distanceMeters": 2384,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3545574,
+          -16.7003603
+        ]
+      },
+      "properties": {
+        "id": "osm:node/6419864285",
+        "name": "Escola Municipal César da Cunha Bastos",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2434,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3181556,
+          -16.7260873
+        ]
+      },
+      "properties": {
+        "id": "osm:node/10223449729",
+        "name": null,
+        "category": "abastecimento",
+        "sourceType": "shop=supermarket",
+        "distanceMeters": 2461,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3197128,
+          -16.7278141
+        ]
+      },
+      "properties": {
+        "id": "osm:way/820427924",
+        "name": "Master",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2499,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3109387,
+          -16.7057797
+        ]
+      },
+      "properties": {
+        "id": "osm:node/11169441926",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2506,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3141506,
+          -16.6976267
+        ]
+      },
+      "properties": {
+        "id": "osm:way/316981076",
+        "name": "Bretas",
+        "category": "abastecimento",
+        "sourceType": "shop=supermarket",
+        "distanceMeters": 2528,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3203375,
+          -16.7288902
+        ]
+      },
+      "properties": {
+        "id": "osm:node/4595547412",
+        "name": "Droga Mar",
+        "category": "saude",
+        "sourceType": "amenity=pharmacy",
+        "distanceMeters": 2556,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3109764,
+          -16.7032709
+        ]
+      },
+      "properties": {
+        "id": "osm:node/10110051226",
+        "name": "Escola Encanto das Letras",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2569,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3316927,
+          -16.6869294
+        ]
+      },
+      "properties": {
+        "id": "osm:node/10115380081",
+        "name": "CSF Bairro Goia",
+        "category": "saude",
+        "sourceType": "amenity=clinic",
+        "distanceMeters": 2580,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3225211,
+          -16.7309765
+        ]
+      },
+      "properties": {
+        "id": "osm:node/4583831573",
+        "name": "Escola Municipal Deputado Jamel Cecílio",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2634,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3216553,
+          -16.7308053
+        ]
+      },
+      "properties": {
+        "id": "osm:node/4583831572",
+        "name": "Colégio Estadual Jardim Vila Boa",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2662,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3110104,
+          -16.7006004
+        ]
+      },
+      "properties": {
+        "id": "osm:way/681603958",
+        "name": "Capela Sant'Ana e Santa Lúcia",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 2668,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3254239,
+          -16.7326235
+        ]
+      },
+      "properties": {
+        "id": "osm:node/13379103717",
+        "name": "Av. Pres. Juscelino Kubitschek (00395)",
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2676,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3258329,
+          -16.733029
+        ]
+      },
+      "properties": {
+        "id": "osm:node/13379103716",
+        "name": "Av. Pres. Juscelino Kubitschek (07031)",
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2704,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3180682,
+          -16.7297872
+        ]
+      },
+      "properties": {
+        "id": "osm:node/4582168809",
+        "name": "CMEI Mateus Barcelos Barretos.",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2780,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3238457,
+          -16.7333802
+        ]
+      },
+      "properties": {
+        "id": "osm:node/10115322322",
+        "name": "Residencia Terapeutica Beija Flor - FEM",
+        "category": "assistencia",
+        "sourceType": "amenity=social_facility",
+        "distanceMeters": 2816,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3173829,
+          -16.7296959
+        ]
+      },
+      "properties": {
+        "id": "osm:node/4595547409",
+        "name": "Farmácia Popular",
+        "category": "saude",
+        "sourceType": "amenity=pharmacy",
+        "distanceMeters": 2817,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3172399,
+          -16.7300152
+        ]
+      },
+      "properties": {
+        "id": "osm:node/4595547408",
+        "name": "Droga Márys",
+        "category": "saude",
+        "sourceType": "amenity=pharmacy",
+        "distanceMeters": 2854,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3231873,
+          -16.7336047
+        ]
+      },
+      "properties": {
+        "id": "osm:way/757092857",
+        "name": "Escola Monteiro Lobato",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2866,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.316938,
+          -16.7300071
+        ]
+      },
+      "properties": {
+        "id": "osm:node/4583366979",
+        "name": "Panificadora Malta",
+        "category": "abastecimento",
+        "sourceType": "shop=bakery",
+        "distanceMeters": 2874,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3283491,
+          -16.6847061
+        ]
+      },
+      "properties": {
+        "id": "osm:node/10116311457",
+        "name": "Farmacia Distrital Oeste",
+        "category": "saude",
+        "sourceType": "amenity=pharmacy",
+        "distanceMeters": 2880,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3071578,
+          -16.7051013
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1189024578",
+        "name": null,
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 2916,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.3105786,
+          -16.6964227
+        ]
+      },
+      "properties": {
+        "id": "osm:way/736490314",
+        "name": "Asembléia De Deus Da Familia",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 2921,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -49.306342,
+          -16.7121954
+        ]
+      },
+      "properties": {
+        "id": "osm:node/13379094285",
+        "name": "Av. T 9 (00108)",
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2961,
+        "ring": 3000
+      }
+    }
+  ]
+}

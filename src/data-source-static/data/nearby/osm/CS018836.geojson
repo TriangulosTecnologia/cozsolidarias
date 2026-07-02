@@ -1,0 +1,701 @@
+{
+  "type": "FeatureCollection",
+  "metadata": {
+    "provider": "osm",
+    "cozinhaId": "CS018836",
+    "center": {
+      "latitude": -8.05467,
+      "longitude": -48.49771
+    },
+    "radiusMeters": 3000,
+    "generatedAt": "2026-07-02T06:09:06.526Z",
+    "attribution": "© OpenStreetMap contributors",
+    "truncatedCategories": []
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -48.4998773,
+          -8.0544418
+        ]
+      },
+      "properties": {
+        "id": "osm:node/9503665804",
+        "name": "Congregação Cristã no Brasil",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 240,
+        "ring": 500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -48.5006771,
+          -8.0547764
+        ]
+      },
+      "properties": {
+        "id": "osm:node/9503665803",
+        "name": "Escola Municipal José Teodoro Rodrigues",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 327,
+        "ring": 500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -48.4993172,
+          -8.0605734
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1037832054",
+        "name": "Creche Municipal Maria Valdirene Lustosa S de Souza",
+        "category": "educacao",
+        "sourceType": "amenity=kindergarten",
+        "distanceMeters": 680,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -48.4907797,
+          -8.0510274
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1037831860",
+        "name": "Escola Estadual Francisco Pereira Felício",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 864,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -48.4908334,
+          -8.0589846
+        ]
+      },
+      "properties": {
+        "id": "osm:way/696135458",
+        "name": "Prefeitura Municipal Anexo 2",
+        "category": "assistencia",
+        "sourceType": "office=government",
+        "distanceMeters": 896,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -48.49209,
+          -8.0486703
+        ]
+      },
+      "properties": {
+        "id": "osm:node/9559218392",
+        "name": "Creche Municipal Dona Elídia Fim Ferrari",
+        "category": "educacao",
+        "sourceType": "amenity=kindergarten",
+        "distanceMeters": 910,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -48.4894546,
+          -8.0585803
+        ]
+      },
+      "properties": {
+        "id": "osm:way/696135460",
+        "name": "Escola Especial Gotas de Esperança - APAE",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 1008,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -48.4889093,
+          -8.0599256
+        ]
+      },
+      "properties": {
+        "id": "osm:way/696135459",
+        "name": "Centro Vocacional Tecnologico",
+        "category": "assistencia",
+        "sourceType": "office=government",
+        "distanceMeters": 1132,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -48.4896035,
+          -8.047752
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1037831080",
+        "name": "Escola Municipal Dr Pedro Ludovico Teixeira",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 1178,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -48.4865299,
+          -8.0533671
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3064156994",
+        "name": "Algo Mais",
+        "category": "abastecimento",
+        "sourceType": "shop=convenience",
+        "distanceMeters": 1239,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -48.4855561,
+          -8.0564756
+        ]
+      },
+      "properties": {
+        "id": "osm:node/9559220048",
+        "name": "Rede de Ensino Propósito - REP",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 1353,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -48.4835688,
+          -8.0547959
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3064288982",
+        "name": "Farmacia Econômica",
+        "category": "saude",
+        "sourceType": "amenity=pharmacy",
+        "distanceMeters": 1557,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -48.4836255,
+          -8.0531161
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1037830922",
+        "name": "Escola Municipal Cantinho da Alegria",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 1560,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -48.4835165,
+          -8.0545689
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3064288981",
+        "name": "Panificadora União",
+        "category": "abastecimento",
+        "sourceType": "shop=bakery",
+        "distanceMeters": 1563,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -48.4835042,
+          -8.0558127
+        ]
+      },
+      "properties": {
+        "id": "osm:way/696137293",
+        "name": "Prefeitura Municipal de Colinas Anexo1",
+        "category": "assistencia",
+        "sourceType": "office=government",
+        "distanceMeters": 1569,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -48.4834011,
+          -8.0549114
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3064288983",
+        "name": "Supermercado Rocha",
+        "category": "abastecimento",
+        "sourceType": "shop=supermarket",
+        "distanceMeters": 1576,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -48.4819628,
+          -8.0569026
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1037830478",
+        "name": "Colégio Estadual Girassol de Tempo Integral Ernesto Barros",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 1751,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -48.4811515,
+          -8.0585867
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1037829875",
+        "name": "Colégio Albert Einstein",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 1874,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -48.4806186,
+          -8.055003
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1456786256",
+        "name": "Escola Paroquial Nossa Senhora Aparecida",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 1882,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -48.4803056,
+          -8.0574928
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1037830407",
+        "name": "Escola Municipal Nossa Senhora Aparecida",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 1942,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -48.4800752,
+          -8.0568687
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3064288995",
+        "name": "Farmácia dos Trabalhadores",
+        "category": "saude",
+        "sourceType": "amenity=pharmacy",
+        "distanceMeters": 1957,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -48.4798472,
+          -8.0566828
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3064288996",
+        "name": "Igreja Universal do Reino de Deus",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 1979,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -48.4786778,
+          -8.0576734
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3064289002",
+        "name": "Casa de Carnes 2 Irmãos",
+        "category": "abastecimento",
+        "sourceType": "shop=butcher",
+        "distanceMeters": 2122,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -48.4795185,
+          -8.0480688
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1037830985",
+        "name": "Escola Municipal Professor Odimar Lopes da Silva",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2133,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -48.4780356,
+          -8.0568936
+        ]
+      },
+      "properties": {
+        "id": "osm:way/981251987",
+        "name": null,
+        "category": "abastecimento",
+        "sourceType": "amenity=marketplace",
+        "distanceMeters": 2180,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -48.4774064,
+          -8.058178
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3064289011",
+        "name": "Cartório de Registro Civil",
+        "category": "assistencia",
+        "sourceType": "office=government",
+        "distanceMeters": 2269,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -48.4763751,
+          -8.0590982
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3064224437",
+        "name": "Igreja Mundial do Poder de Deus",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 2400,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -48.4772427,
+          -8.0629331
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1037828910",
+        "name": "Escola Municipal Eurípedes Barsanulfo",
+        "category": "educacao",
+        "sourceType": "amenity=kindergarten",
+        "distanceMeters": 2434,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -48.4745697,
+          -8.0579333
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1037827276",
+        "name": "Escola Presbiteriana de Colinas",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2573,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -48.474727,
+          -8.0591392
+        ]
+      },
+      "properties": {
+        "id": "osm:way/677200166",
+        "name": "Paróquia Nossa Senhora Aparecida",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 2579,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -48.4741124,
+          -8.0515996
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1037827198",
+        "name": "Creche Josefa de Almeida Costa",
+        "category": "educacao",
+        "sourceType": "amenity=kindergarten",
+        "distanceMeters": 2620,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -48.4742683,
+          -8.0597028
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1037828453",
+        "name": "Colégio Militar do Estado do Tocantins - João XXIII",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2641,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -48.4743277,
+          -8.0602965
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3064314097",
+        "name": "Droga Santos",
+        "category": "saude",
+        "sourceType": "amenity=pharmacy",
+        "distanceMeters": 2649,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -48.4746333,
+          -8.0621728
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1037828720",
+        "name": "Centro de Ensino Médio Presidente Castelo Branco",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2674,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -48.473818,
+          -8.0606204
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3064156987",
+        "name": "Mercado Avenida",
+        "category": "abastecimento",
+        "sourceType": "shop=convenience",
+        "distanceMeters": 2712,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -48.4730959,
+          -8.0560613
+        ]
+      },
+      "properties": {
+        "id": "osm:node/13360493306",
+        "name": "Creche Municipal Cacauzinha",
+        "category": "educacao",
+        "sourceType": "amenity=kindergarten",
+        "distanceMeters": 2714,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -48.4724037,
+          -8.0615125
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3064314103",
+        "name": "Pão da Vida",
+        "category": "abastecimento",
+        "sourceType": "shop=bakery",
+        "distanceMeters": 2888,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -48.4722706,
+          -8.0613345
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3064314104",
+        "name": "Mercadinho Castro",
+        "category": "abastecimento",
+        "sourceType": "shop=convenience",
+        "distanceMeters": 2897,
+        "ring": 3000
+      }
+    }
+  ]
+}
