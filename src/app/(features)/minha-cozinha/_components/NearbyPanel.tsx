@@ -1,13 +1,10 @@
 import {
-  Badge,
   Box,
   Button,
   Heading,
   HStack,
   NativeSelect,
-  Stack,
   Text,
-  VStack,
 } from '@chakra-ui/react';
 
 import type {
@@ -16,18 +13,15 @@ import type {
   NearbyProvider,
 } from '@/data-gateway/schema';
 
+import { computeIndicators } from '../indicators';
 import { CATEGORY_META, type NearbyGroup } from '../nearbySpec';
+import KitchenIdentity from './KitchenIdentity';
+import NearbyIndicators from './NearbyIndicators';
+import NearbyList from './NearbyList';
 
 const PROVIDER_LABEL: Record<NearbyProvider, string> = {
   osm: 'OpenStreetMap',
   google: 'Google Maps',
-};
-
-const formatDistance = (meters: number): string => {
-  if (meters < 1000) {
-    return `${meters} m`;
-  }
-  return `${(meters / 1000).toFixed(1).replace('.', ',')} km`;
 };
 
 type NearbyPanelProps = {
@@ -41,9 +35,8 @@ type NearbyPanelProps = {
 };
 
 /**
- * Right-hand overlay panel for a selected kitchen: header with close button,
- * provider toggle, category legend, truncation notice, per-category POI list,
- * and source attribution.
+ * Right-hand overlay panel for a selected kitchen: identity header, provider
+ * toggle, illustrative indices, truncation notice and the per-category list.
  *
  * @example
  * <NearbyPanel selected={k} provider="osm" status="idle" nearby={data}
@@ -59,6 +52,7 @@ const NearbyPanel = ({
   onClear,
 }: NearbyPanelProps) => {
   const truncated = nearby?.metadata.truncatedCategories ?? [];
+  const indicators = nearby ? computeIndicators(nearby.features) : null;
 
   return (
     <Box
@@ -73,15 +67,10 @@ const NearbyPanel = ({
       p={5}
       zIndex={1}
     >
-      <HStack justify="space-between" align="start" mb={4} gap={3}>
-        <Box>
-          <Heading as="h2" textStyle="title-4" color="text.primary">
-            {selected.nome || selected.codigo}
-          </Heading>
-          <Text textStyle="caption" color="text.secondary">
-            {selected.municipio} — {selected.uf}
-          </Text>
-        </Box>
+      <HStack justify="space-between" align="start" mb={3} gap={3}>
+        <Heading as="h2" textStyle="title-4" color="text.primary">
+          {selected.nome || selected.codigo}
+        </Heading>
         <Button
           aria-label="Fechar painel"
           size="xs"
@@ -91,6 +80,8 @@ const NearbyPanel = ({
           ✕
         </Button>
       </HStack>
+
+      <KitchenIdentity kitchen={selected} />
 
       <NativeSelect.Root size="sm" mb={4}>
         <NativeSelect.Field
@@ -113,92 +104,28 @@ const NearbyPanel = ({
         </Text>
       ) : null}
 
+      {indicators ? <NearbyIndicators indicators={indicators} /> : null}
+
+      {truncated.length > 0 ? (
+        <Text textStyle="caption" color="action.fg" mb={4}>
+          Contagem parcial (limite de 20 por categoria atingido):{' '}
+          {truncated
+            .map((category) => {
+              return CATEGORY_META[category].label;
+            })
+            .join(', ')}
+          .
+        </Text>
+      ) : null}
+
+      {nearby ? <NearbyList groups={groups} /> : null}
+
       {nearby ? (
-        <Stack gap={4}>
-          <HStack wrap="wrap" gap={3}>
-            {groups.map((group) => {
-              return (
-                <HStack key={group.category} gap={1.5}>
-                  <Box w="10px" h="10px" borderRadius="pill" bg={group.color} />
-                  <Text textStyle="caption" color="text.secondary">
-                    {group.label} ({group.items.length})
-                  </Text>
-                </HStack>
-              );
-            })}
-          </HStack>
-
-          {truncated.length > 0 ? (
-            <Text textStyle="caption" color="action.fg">
-              Contagem parcial (limite de 20 por categoria atingido):{' '}
-              {truncated
-                .map((category) => {
-                  return CATEGORY_META[category].label;
-                })
-                .join(', ')}
-              .
-            </Text>
-          ) : null}
-
-          <Stack gap={5}>
-            {groups
-              .filter((group) => {
-                return group.items.length > 0;
-              })
-              .map((group) => {
-                return (
-                  <Box key={group.category}>
-                    <HStack gap={2} mb={2}>
-                      <Box
-                        w="10px"
-                        h="10px"
-                        borderRadius="pill"
-                        bg={group.color}
-                      />
-                      <Heading as="h3" textStyle="body" color="text.primary">
-                        {group.label}
-                      </Heading>
-                      <Text textStyle="body-sm" color="text.secondary">
-                        {group.items.length}
-                      </Text>
-                    </HStack>
-                    <VStack align="stretch" gap={1}>
-                      {group.items.map((item) => {
-                        return (
-                          <HStack
-                            key={item.properties.id}
-                            justify="space-between"
-                            gap={3}
-                            py={1}
-                            borderBottomWidth="1px"
-                            borderColor="ivory.300"
-                          >
-                            <Text textStyle="body-sm" color="text.primary">
-                              {item.properties.name ?? '(sem nome)'}
-                            </Text>
-                            <HStack gap={2} flexShrink={0}>
-                              <Text textStyle="caption" color="text.secondary">
-                                {formatDistance(item.properties.distanceMeters)}
-                              </Text>
-                              <Badge size="sm" variant="surface">
-                                {item.properties.ring} m
-                              </Badge>
-                            </HStack>
-                          </HStack>
-                        );
-                      })}
-                    </VStack>
-                  </Box>
-                );
-              })}
-          </Stack>
-
-          <Text textStyle="caption" color="text.secondary">
-            Fonte: {nearby.metadata.attribution} · raio{' '}
-            {nearby.metadata.radiusMeters} m · gerado em{' '}
-            {new Date(nearby.metadata.generatedAt).toLocaleDateString('pt-BR')}.
-          </Text>
-        </Stack>
+        <Text textStyle="caption" color="text.secondary" mt={4}>
+          Fonte: {nearby.metadata.attribution} · raio{' '}
+          {nearby.metadata.radiusMeters} m · gerado em{' '}
+          {new Date(nearby.metadata.generatedAt).toLocaleDateString('pt-BR')}.
+        </Text>
       ) : null}
     </Box>
   );

@@ -26,7 +26,8 @@ export type NearbyRing = 500 | 1500 | 3000;
 
 /**
  * A cozinha that has a nearby snapshot available, with the identity/location
- * fields the Minha Cozinha selector needs.
+ * fields the Minha Cozinha page needs. Identity strings come straight from the
+ * source CSV and may be empty when the source left them blank.
  *
  * @example
  * const kitchen: NearbyKitchen = {
@@ -36,6 +37,13 @@ export type NearbyRing = 500 | 1500 | 3000;
  *   uf: 'RS',
  *   latitude: -30.06995,
  *   longitude: -51.22246,
+ *   situacao: 'Habilitada',
+ *   emFuncionamento: 'Sim',
+ *   diasFuncionamento: '5',
+ *   bairro: 'Santa Tereza',
+ *   endereco: 'Rua Corrêa Lima, 1200',
+ *   publicoAtendido: 'Pessoas em situação de rua; idosos',
+ *   publicoTotalAtendido: '200',
  * };
  */
 export type NearbyKitchen = {
@@ -45,6 +53,18 @@ export type NearbyKitchen = {
   uf: string;
   latitude: number;
   longitude: number;
+  /** Programme status (e.g. `Habilitada`); empty when unknown. */
+  situacao: string;
+  /** Whether the kitchen is currently operating (source's free text). */
+  emFuncionamento: string;
+  /** Days per week it operates (source's free text). */
+  diasFuncionamento: string;
+  bairro: string;
+  endereco: string;
+  /** Vulnerable groups served (source's free text). */
+  publicoAtendido: string;
+  /** Total people served (source's free text). */
+  publicoTotalAtendido: string;
 };
 
 /**

@@ -19,6 +19,13 @@ describe('GET /api/minha-cozinha', () => {
         uf: 'RS',
         latitude: -30.06995,
         longitude: -51.22246,
+        situacao: 'Habilitada',
+        emFuncionamento: 'Sim',
+        diasFuncionamento: '5',
+        bairro: 'Santa Tereza',
+        endereco: 'Rua Corrêa Lima, 1200',
+        publicoAtendido: 'Pessoas em situação de rua',
+        publicoTotalAtendido: '200',
       },
     ];
     const spy = jest

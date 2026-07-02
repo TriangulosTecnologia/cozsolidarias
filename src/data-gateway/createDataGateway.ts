@@ -112,6 +112,13 @@ export const createDataGateway = (): DataGateway => {
               uf: cozinha.uf,
               latitude: cozinha.latitude,
               longitude: cozinha.longitude,
+              situacao: cozinha.situacao,
+              emFuncionamento: cozinha.emFuncionamento,
+              diasFuncionamento: cozinha.diasFuncionamento,
+              bairro: cozinha.bairro,
+              endereco: cozinha.endereco,
+              publicoAtendido: cozinha.publicoAtendido,
+              publicoTotalAtendido: cozinha.publicoTotalAtendido,
             },
           ];
         });

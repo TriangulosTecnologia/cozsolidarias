@@ -10,8 +10,31 @@ import {
 } from 'src/app/(features)/minha-cozinha/nearbySpec';
 import type {
   NearbyCategory,
+  NearbyKitchen,
   NearbyPlaceFeature,
 } from 'src/data-gateway/schema';
+
+const kitchen = (
+  codigo: string,
+  latitude: number,
+  longitude: number
+): NearbyKitchen => {
+  return {
+    codigo,
+    nome: codigo,
+    municipio: 'M',
+    uf: 'RS',
+    latitude,
+    longitude,
+    situacao: 'Habilitada',
+    emFuncionamento: 'Sim',
+    diasFuncionamento: '5',
+    bairro: 'Centro',
+    endereco: 'Rua X, 1',
+    publicoAtendido: 'Diversos',
+    publicoTotalAtendido: '100',
+  };
+};
 
 const center = { latitude: -30.06995, longitude: -51.22246 };
 
@@ -124,22 +147,8 @@ describe('buildNearbySpec', () => {
 describe('buildOverviewSpec', () => {
   test('maps every kitchen to a point in the overview source', () => {
     const spec = buildOverviewSpec([
-      {
-        codigo: 'A',
-        nome: 'A',
-        municipio: 'M',
-        uf: 'RS',
-        latitude: -30,
-        longitude: -51,
-      },
-      {
-        codigo: 'B',
-        nome: 'B',
-        municipio: 'N',
-        uf: 'SP',
-        latitude: -23,
-        longitude: -46,
-      },
+      kitchen('A', -30, -51),
+      kitchen('B', -23, -46),
     ]);
 
     expect(spec.sources[0].id).toBe('kitchens');
