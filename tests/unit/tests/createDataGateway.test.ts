@@ -25,6 +25,21 @@ describe('createDataGateway', () => {
     }
   });
 
+  test('returns one bubble Point feature per municipality from the default static source', async () => {
+    const gateway = createDataGateway();
+
+    const bubbles = await gateway.getCozinhasBubbles();
+
+    expect(bubbles.type).toBe('FeatureCollection');
+    expect(bubbles.features.length).toBeGreaterThan(0);
+
+    for (const feature of bubbles.features) {
+      expect(feature.geometry.type).toBe('Point');
+      expect(typeof feature.properties.codarea).toBe('string');
+      expect(feature.properties.quantidade).toBeGreaterThan(0);
+    }
+  });
+
   test('throws on an unknown DATA_SOURCE', () => {
     const previous = process.env['DATA_SOURCE'];
     process.env['DATA_SOURCE'] = 'bogus';
