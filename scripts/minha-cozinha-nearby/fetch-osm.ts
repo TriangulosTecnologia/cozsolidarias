@@ -23,6 +23,7 @@ import { KITCHENS, type Kitchen } from './kitchens.ts';
 const OVERPASS_URL =
   process.env.OVERPASS_URL ?? 'https://overpass-api.de/api/interpreter';
 const ATTRIBUTION = '© OpenStreetMap contributors';
+const MAX_RETRIES = 5;
 
 type OverpassElement = {
   type: 'node' | 'way' | 'relation';
@@ -79,34 +80,61 @@ const isDuplicate = (feature: NearbyFeature, kept: NearbyFeature[]): boolean => 
   });
 };
 
-const fetchKitchen = async (kitchen: Kitchen): Promise<void> => {
-  const response = await fetch(OVERPASS_URL, {
-    method: 'POST',
-    headers: {
-      // Overpass (Apache/mod_security) answers 406 to requests sent as raw
-      // text/plain or without a User-Agent; use the documented form encoding.
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'User-Agent': 'cozsolidarias-nearby-experiment/1.0',
-    },
-    body: new URLSearchParams({
-      data: buildQuery(kitchen.latitude, kitchen.longitude),
-    }).toString(),
-  });
+/**
+ * Runs the query, retrying on Overpass rate limiting (429) and gateway
+ * timeouts (504) with backoff — dense areas (e.g. São Paulo) exhaust the
+ * per-IP slots and just need a short wait for one to free up.
+ */
+const queryOverpass = async (kitchen: Kitchen): Promise<OverpassElement[]> => {
+  const body = new URLSearchParams({
+    data: buildQuery(kitchen.latitude, kitchen.longitude),
+  }).toString();
 
-  if (!response.ok) {
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt += 1) {
+    const response = await fetch(OVERPASS_URL, {
+      method: 'POST',
+      headers: {
+        // Overpass (Apache/mod_security) answers 406 to requests sent as raw
+        // text/plain or without a User-Agent; use the documented form encoding.
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'User-Agent': 'cozsolidarias-nearby-experiment/1.0',
+      },
+      body,
+    });
+
+    if (response.ok) {
+      const data = (await response.json()) as { elements: OverpassElement[] };
+      return data.elements;
+    }
+
+    const text = await response.text();
+    const rateLimited = response.status === 429 || response.status === 504;
+    if (rateLimited && attempt < MAX_RETRIES) {
+      const waitSeconds = (attempt + 1) * 30;
+      console.warn(
+        `osm    ${kitchen.codigo}: ${response.status} rate limited, waiting ${waitSeconds}s (attempt ${attempt + 1}/${MAX_RETRIES})`
+      );
+      await sleep(waitSeconds * 1000);
+      continue;
+    }
+
     throw new Error(
-      `Overpass ${response.status} for ${kitchen.codigo}: ${await response.text()}`
+      `Overpass ${response.status} for ${kitchen.codigo}: ${text}`
     );
   }
 
-  const data = (await response.json()) as { elements: OverpassElement[] };
+  throw new Error(`Overpass: retries exhausted for ${kitchen.codigo}`);
+};
+
+const fetchKitchen = async (kitchen: Kitchen): Promise<void> => {
+  const elements = await queryOverpass(kitchen);
   const center: LatLng = {
     latitude: kitchen.latitude,
     longitude: kitchen.longitude,
   };
 
   // Process nodes before ways/relations so the latter dedup against the former.
-  const ordered = [...data.elements].sort(
+  const ordered = [...elements].sort(
     (a, b) => Number(a.type !== 'node') - Number(b.type !== 'node')
   );
 
@@ -160,7 +188,8 @@ const fetchKitchen = async (kitchen: Kitchen): Promise<void> => {
 const main = async (): Promise<void> => {
   for (const kitchen of KITCHENS) {
     await fetchKitchen(kitchen);
-    await sleep(1000);
+    // Space out requests so we don't trip the per-IP slot limit as easily.
+    await sleep(3000);
   }
 };
 
