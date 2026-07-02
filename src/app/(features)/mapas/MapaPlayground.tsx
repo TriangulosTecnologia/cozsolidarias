@@ -15,12 +15,13 @@ import {
   getInitialSelection,
 } from '@ttoss/geovis-workspace';
 import { I18nProvider } from '@ttoss/react-i18n';
-import { ThemeProvider } from '@ttoss/ui';
+import { BruttalTheme } from '@ttoss/theme/Bruttal';
 import * as React from 'react';
+import { ThemeUIProvider } from 'theme-ui';
 
 import type { kitchenByCity } from '@/data-gateway/schema';
 
-import { buildLegendItems, buildSpec, type MapMode } from './geovisSpec';
+import { buildSpec, type MapMode } from './geovisSpec';
 
 const estadosGroup = createBoundaryGroup({
   id: 'estados-boundary',
@@ -40,56 +41,53 @@ type NomesPorCodigo = Record<string, string>;
 /** Id of the left-sidebar menu group that drives the visualization mode. */
 const MODE_MENU_ID = 'visualizacao';
 
-/** Left sidebar is static — only the right sidebar changes with the mode. */
+/** Left sidebar drives the visualization mode. */
 const LEFT_SIDEBAR: NonNullable<GeovisWorkspaceConfig['leftSidebar']> = {
+  initialState: 'open',
   menus: [
     {
       id: MODE_MENU_ID,
       title: 'Visualização',
       defaultValue: 'coropletico',
       items: [
-        { value: 'coropletico', label: 'Mapa coroplético' },
-        { value: 'pontos', label: 'Pontos das cozinhas' },
+        { value: 'coropletico', label: 'Cozinhas por município (coroplético)' },
+        { value: 'pontos', label: 'Localização das cozinhas' },
+        { value: 'circulos', label: 'Cozinhas por município' },
       ],
     },
   ],
 };
 
-const DESCRIPTIONS: Record<MapMode, string> = {
-  coropletico:
-    'Quanto mais escuro o município, mais cozinhas cadastradas ali. Passe o mouse sobre um município para ver o nome e a quantidade.',
-  pontos: 'Cada ponto é uma cozinha solidária cadastrada.',
+/**
+ * Bruttal theme scoped for the GeovisWorkspace sidebars only.
+ *
+ * theme-ui's <ThemeUIProvider>, when top-level (our app root is Chakra, not
+ * theme-ui), renders <RootStyles> which injects the theme's `styles.root` onto
+ * the document GLOBALLY — `* { box-sizing }`, `html { ...styles.root }` and,
+ * crucially, `html a { font-family, color, text-decoration }`. That leaks into
+ * sibling components like the header.
+ *
+ * `config.useRootStyles: false` makes theme-ui skip that global injection
+ * entirely (it returns null). The sidebars style themselves via `sx` against
+ * the theme context, so they keep their look; only the page-wide root styles
+ * are suppressed. Color custom properties (`--theme-ui-*`, namespaced) stay on
+ * so sidebar colors still resolve.
+ */
+const scopedSidebarTheme = {
+  ...BruttalTheme,
+  config: {
+    ...BruttalTheme.config,
+    useRootStyles: false,
+  },
 };
 
-const LEGEND_ITEMS = buildLegendItems();
-
 /**
- * Builds the workspace config for a given mode. The legend swatches only show in
- * `coropletico` mode (in `pontos` mode the fill is flat), matching the previous
- * behaviour where the legend was hidden for the points view.
+ * Workspace config: only the left sidebar (the mode switcher). The legend and
+ * data source now live on the map itself, configured via the geovis spec (see
+ * `buildLegends` in `geovisSpec.ts`), so no right sidebar is needed.
  */
-const buildConfig = (mode: MapMode): GeovisWorkspaceConfig => {
-  return {
-    leftSidebar: LEFT_SIDEBAR,
-    rightSidebar: {
-      title: 'Cozinhas Solidárias',
-      legendWithColor: {
-        description: DESCRIPTIONS[mode],
-        ...(mode === 'coropletico'
-          ? {
-              legend: {
-                title: 'Cozinhas por município',
-                items: LEGEND_ITEMS,
-              },
-            }
-          : {}),
-        sources: {
-          title: 'Fonte dos dados:',
-          items: [{ label: '© Cozinhas Solidárias' }],
-        },
-      },
-    },
-  };
+const CONFIG: GeovisWorkspaceConfig = {
+  leftSidebar: LEFT_SIDEBAR,
 };
 
 const MapaPlayground = () => {
@@ -186,10 +184,6 @@ const MapaPlayground = () => {
 
   const { spec } = useBoundaryToggle(baseSpec, boundaryGroups);
 
-  const config = React.useMemo(() => {
-    return buildConfig(mode);
-  }, [mode]);
-
   return (
     <Box
       position="relative"
@@ -207,22 +201,38 @@ const MapaPlayground = () => {
           border: 'none',
           borderRadius: 0,
         },
+        // geovis' provider auto-renders the choropleth legend with a fixed 10px
+        // inset from the map corner (`GeoVisLegend`'s corner position isn't
+        // further configurable via the spec). Nudge it inward so it doesn't
+        // crowd the edges. Selected by the legend list's aria-label (its title).
+        '& div:has(> ul[aria-label="Cozinhas por município"])': {
+          bottom: '44px !important',
+          right: '44px !important',
+        },
       }}
     >
       {mounted ? (
-        // `<GeovisWorkspace>` renders `@ttoss/ui` (theme-ui) and
-        // `@ttoss/react-i18n` components internally, so it needs both the
-        // `<ThemeProvider>` and `<I18nProvider>` ancestors.
-        <ThemeProvider>
-          <I18nProvider locale="pt-BR">
+        // `<GeovisWorkspace>` renders theme-ui and `@ttoss/react-i18n`
+        // components internally, so it needs both a theme-ui provider and the
+        // `<I18nProvider>` ancestor.
+        <I18nProvider locale="pt-BR">
+          {/*
+           * Scope the GeovisWorkspace sidebars to theme-ui's provider ONLY, with
+           * global root styles disabled (see scopedSidebarTheme). @ttoss/ui's own
+           * <ThemeProvider> is avoided because it also mounts a second Chakra v3
+           * system whose global `--chakra-*` variables clobber the app's tokens
+           * and break the header. The sidebars only use theme-ui primitives, so
+           * the theme-ui context is all they need.
+           */}
+          <ThemeUIProvider theme={scopedSidebarTheme}>
             <GeovisWorkspace
-              config={config}
+              config={CONFIG}
               visualizationSpec={spec}
               variables={selection}
               onVariableChange={setSelection}
             />
-          </I18nProvider>
-        </ThemeProvider>
+          </ThemeUIProvider>
+        </I18nProvider>
       ) : (
         <Box
           position="absolute"
