@@ -25,6 +25,29 @@ export type NearbyCategory =
 export type NearbyRing = 500 | 1500 | 3000;
 
 /**
+ * A cozinha that has a nearby snapshot available, with the identity/location
+ * fields the Minha Cozinha selector needs.
+ *
+ * @example
+ * const kitchen: NearbyKitchen = {
+ *   codigo: 'CS014558',
+ *   nome: 'Casa da Tia Grazi',
+ *   municipio: 'Porto Alegre',
+ *   uf: 'RS',
+ *   latitude: -30.06995,
+ *   longitude: -51.22246,
+ * };
+ */
+export type NearbyKitchen = {
+  codigo: string;
+  nome: string;
+  municipio: string;
+  uf: string;
+  latitude: number;
+  longitude: number;
+};
+
+/**
  * A single nearby POI as a GeoJSON Point feature.
  *
  * @example

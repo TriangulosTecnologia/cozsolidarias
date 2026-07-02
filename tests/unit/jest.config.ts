@@ -10,7 +10,12 @@ export default jestUnitConfig({
   },
   // MapaPlayground is covered by behavior (the mode toggle), not line coverage:
   // its error/tooltip branches aren't exercised, so keep it out of the gate.
-  coveragePathIgnorePatterns: ['/node_modules/', 'MapaPlayground\\.tsx$'],
+  coveragePathIgnorePatterns: [
+    '/node_modules/',
+    'MapaPlayground\\.tsx$',
+    // Minha Cozinha client components render the map; covered by behaviour, not lines.
+    'minha-cozinha/.*\\.tsx$',
+  ],
   coverageThreshold: {
     global: {
       branches: 95.6,

@@ -5,6 +5,7 @@ export type {
 export type { kitchenByCity } from './kitchenByCity';
 export type {
   NearbyCategory,
+  NearbyKitchen,
   NearbyPlaceFeature,
   NearbyPlacesContract,
   NearbyPlacesMetadata,

@@ -1,9 +1,14 @@
 import { readStaticCozinhas } from '../data-source-static/readStaticCozinhas';
 import { readStaticMunicipiosSp } from '../data-source-static/readStaticMunicipiosSp';
-import { readStaticNearbyPlaces } from '../data-source-static/readStaticNearbyPlaces';
+import {
+  listStaticNearbyCozinhaIds,
+  readStaticNearbyPlaces,
+} from '../data-source-static/readStaticNearbyPlaces';
+import type { StaticCozinhaSource } from '../data-source-static/types';
 import type {
   CozinhasFeatureCollection,
   kitchenByCity,
+  NearbyKitchen,
   NearbyPlacesContract,
   NearbyProvider,
 } from './schema';
@@ -13,6 +18,13 @@ import { toCozinhasPorMunicipio } from './transformers/toCozinhasPorMunicipio';
 
 /** Kitchen codes look like `CS014558`; the pattern also blocks path traversal. */
 const COZINHA_ID_PATTERN = /^CS\d+$/;
+
+/** Narrows a cozinha record to one with usable coordinates. */
+const hasCoordinates = (
+  cozinha: StaticCozinhaSource
+): cozinha is StaticCozinhaSource & { latitude: number; longitude: number } => {
+  return cozinha.latitude !== null && cozinha.longitude !== null;
+};
 
 /** Gateway interface exposing canonical read functions. */
 export type DataGateway = {
@@ -25,6 +37,8 @@ export type DataGateway = {
     cozinhaId: string;
     provider: NearbyProvider;
   }) => Promise<NearbyPlacesContract>;
+  /** Returns the cozinhas that have a nearby snapshot available. */
+  getNearbyKitchens: () => Promise<NearbyKitchen[]>;
 };
 
 const KNOWN_SOURCES = ['static'] as const;
@@ -74,6 +88,33 @@ export const createDataGateway = (): DataGateway => {
         }
         const source = await readStaticNearbyPlaces({ provider, cozinhaId });
         return toAppNearbyPlaces(source, { provider, cozinhaId });
+      },
+      getNearbyKitchens: async () => {
+        const [ids, cozinhas] = await Promise.all([
+          listStaticNearbyCozinhaIds('osm'),
+          readStaticCozinhas(),
+        ]);
+        const byCode = new Map(
+          cozinhas.filter(hasCoordinates).map((cozinha) => {
+            return [cozinha.codigo, cozinha];
+          })
+        );
+        return ids.flatMap((codigo) => {
+          const cozinha = byCode.get(codigo);
+          if (!cozinha) {
+            return [];
+          }
+          return [
+            {
+              codigo,
+              nome: cozinha.nome,
+              municipio: cozinha.municipio,
+              uf: cozinha.uf,
+              latitude: cozinha.latitude,
+              longitude: cozinha.longitude,
+            },
+          ];
+        });
       },
     };
   }

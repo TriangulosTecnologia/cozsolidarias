@@ -1,7 +1,10 @@
 import { mkdir, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-import { readStaticNearbyPlaces } from 'src/data-source-static/readStaticNearbyPlaces';
+import {
+  listStaticNearbyCozinhaIds,
+  readStaticNearbyPlaces,
+} from 'src/data-source-static/readStaticNearbyPlaces';
 
 const DIR = join(
   process.cwd(),
@@ -41,5 +44,17 @@ describe('readStaticNearbyPlaces', () => {
     await expect(
       readStaticNearbyPlaces({ provider: 'osm', cozinhaId: 'CS000404' })
     ).rejects.toThrow(/not found/);
+  });
+
+  test('lists the cozinha ids present for a provider', async () => {
+    const ids = await listStaticNearbyCozinhaIds('osm');
+
+    expect(ids).toContain(ID);
+  });
+
+  test('returns an array (empty when the provider folder is absent)', async () => {
+    const ids = await listStaticNearbyCozinhaIds('google');
+
+    expect(Array.isArray(ids)).toBe(true);
   });
 });

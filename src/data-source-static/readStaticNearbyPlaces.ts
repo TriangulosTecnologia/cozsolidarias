@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import type { StaticNearbyPlacesSource } from './types';
@@ -44,4 +44,35 @@ export const readStaticNearbyPlaces = async (params: {
   }
 
   return JSON.parse(raw) as StaticNearbyPlacesSource;
+};
+
+/**
+ * Lists the cozinha codes that have a nearby snapshot for the given provider,
+ * derived from the `.geojson` filenames. Returns an empty array when the
+ * provider folder does not exist yet.
+ *
+ * @param provider - `osm` | `google`.
+ * @returns Sorted cozinha codes (e.g. `['CS014558', 'CS015938']`).
+ *
+ * @example
+ * const ids = await listStaticNearbyCozinhaIds('osm');
+ */
+export const listStaticNearbyCozinhaIds = async (
+  provider: 'osm' | 'google'
+): Promise<string[]> => {
+  let entries: string[];
+  try {
+    entries = await readdir(join(NEARBY_DIR, provider));
+  } catch {
+    return [];
+  }
+
+  return entries
+    .filter((name) => {
+      return name.endsWith('.geojson');
+    })
+    .map((name) => {
+      return name.replace(/\.geojson$/, '');
+    })
+    .sort();
 };

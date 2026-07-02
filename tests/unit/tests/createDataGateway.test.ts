@@ -103,3 +103,58 @@ describe('createDataGateway.getNearbyPlaces', () => {
     ).rejects.toThrow(/Invalid cozinhaId/);
   });
 });
+
+describe('createDataGateway.getNearbyKitchens', () => {
+  // A real kitchen code present in the CSV snapshot (Porto Alegre).
+  const REAL_ID = 'CS014558';
+  const DIR = join(
+    process.cwd(),
+    'src',
+    'data-source-static',
+    'data',
+    'nearby',
+    'osm'
+  );
+  const FILE = join(DIR, `${REAL_ID}.geojson`);
+  // A snapshot whose code is not in the CSV — exercises the "skip unknown" path.
+  const UNKNOWN_ID = 'CS999998';
+  const UNKNOWN_FILE = join(DIR, `${UNKNOWN_ID}.geojson`);
+
+  beforeAll(async () => {
+    await mkdir(DIR, { recursive: true });
+    const empty = JSON.stringify({ type: 'FeatureCollection', features: [] });
+    await writeFile(FILE, empty, 'utf8');
+    await writeFile(UNKNOWN_FILE, empty, 'utf8');
+  });
+
+  afterAll(async () => {
+    await rm(FILE, { force: true });
+    await rm(UNKNOWN_FILE, { force: true });
+  });
+
+  test('joins available snapshots with kitchen name and coordinates', async () => {
+    const gateway = createDataGateway();
+
+    const kitchens = await gateway.getNearbyKitchens();
+    const entry = kitchens.find((kitchen) => {
+      return kitchen.codigo === REAL_ID;
+    });
+
+    expect(entry).toBeDefined();
+    expect(entry?.municipio).toBe('Porto Alegre');
+    expect(typeof entry?.latitude).toBe('number');
+    expect(typeof entry?.longitude).toBe('number');
+  });
+
+  test('skips snapshots whose code is not in the CSV', async () => {
+    const gateway = createDataGateway();
+
+    const kitchens = await gateway.getNearbyKitchens();
+
+    expect(
+      kitchens.find((kitchen) => {
+        return kitchen.codigo === UNKNOWN_ID;
+      })
+    ).toBeUndefined();
+  });
+});
