@@ -12,7 +12,7 @@
 import {
   CATEGORIES,
   GOOGLE_TYPES,
-  googleTypesToCategory,
+  googlePlaceToCategory,
   type NearbyCategory,
 } from './crosswalk.ts';
 import {
@@ -103,7 +103,9 @@ const fetchKitchen = async (kitchen: Kitchen): Promise<void> => {
         buildFeature({
           id: place.id,
           name: place.displayName?.text ?? null,
-          category: googleTypesToCategory(place.types ?? []) ?? category,
+          category:
+            googlePlaceToCategory(place.primaryType, place.types ?? []) ??
+            category,
           sourceType: place.primaryType ?? place.types?.[0] ?? category,
           center,
           location: place.location,

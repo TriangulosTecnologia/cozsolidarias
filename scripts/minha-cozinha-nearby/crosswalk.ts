@@ -91,9 +91,34 @@ export const matchOsmElement = (
   return null;
 };
 
-/** First category whose Google type list intersects a place's `types`. */
-export const googleTypesToCategory = (types: string[]): NearbyCategory | null => {
-  for (const category of CATEGORIES) {
+// The generic government bucket (assistencia) is resolved LAST so that public
+// schools/clinics — which also carry government types in `types` — land in
+// educacao/saude instead of being shadowed by assistencia.
+const CATEGORY_RESOLUTION_ORDER: NearbyCategory[] = [
+  'abastecimento',
+  'saude',
+  'educacao',
+  'transporte',
+  'assistencia',
+];
+
+/**
+ * Resolves a Google place to a domain category, preferring the single
+ * `primaryType` (Google's best signal) and only then scanning all `types`,
+ * both in specificity order. Returns null when nothing matches.
+ */
+export const googlePlaceToCategory = (
+  primaryType: string | undefined,
+  types: string[]
+): NearbyCategory | null => {
+  if (primaryType) {
+    for (const category of CATEGORY_RESOLUTION_ORDER) {
+      if (GOOGLE_TYPES[category].includes(primaryType)) {
+        return category;
+      }
+    }
+  }
+  for (const category of CATEGORY_RESOLUTION_ORDER) {
     if (GOOGLE_TYPES[category].some((type) => types.includes(type))) {
       return category;
     }
