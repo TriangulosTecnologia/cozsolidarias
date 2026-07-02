@@ -82,8 +82,15 @@ const isDuplicate = (feature: NearbyFeature, kept: NearbyFeature[]): boolean => 
 const fetchKitchen = async (kitchen: Kitchen): Promise<void> => {
   const response = await fetch(OVERPASS_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'text/plain' },
-    body: buildQuery(kitchen.latitude, kitchen.longitude),
+    headers: {
+      // Overpass (Apache/mod_security) answers 406 to requests sent as raw
+      // text/plain or without a User-Agent; use the documented form encoding.
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'User-Agent': 'cozsolidarias-nearby-experiment/1.0',
+    },
+    body: new URLSearchParams({
+      data: buildQuery(kitchen.latitude, kitchen.longitude),
+    }).toString(),
   });
 
   if (!response.ok) {
