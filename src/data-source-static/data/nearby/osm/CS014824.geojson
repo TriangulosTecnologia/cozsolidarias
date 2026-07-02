@@ -1,0 +1,323 @@
+{
+  "type": "FeatureCollection",
+  "metadata": {
+    "provider": "osm",
+    "cozinhaId": "CS014824",
+    "center": {
+      "latitude": -21.4198,
+      "longitude": -45.97771
+    },
+    "radiusMeters": 3000,
+    "generatedAt": "2026-07-02T06:12:29.038Z",
+    "attribution": "© OpenStreetMap contributors",
+    "truncatedCategories": []
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -45.9750655,
+          -21.4228167
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1255996115",
+        "name": "Assembleia de Deus",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 433,
+        "ring": 500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -45.9776422,
+          -21.4158529
+        ]
+      },
+      "properties": {
+        "id": "osm:way/412727287",
+        "name": null,
+        "category": "assistencia",
+        "sourceType": "amenity=social_facility",
+        "distanceMeters": 439,
+        "ring": 500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -45.9777362,
+          -21.4158175
+        ]
+      },
+      "properties": {
+        "id": "osm:way/412727290",
+        "name": "Centro Espírita Seara do Mestre",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 443,
+        "ring": 500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -45.9836584,
+          -21.4196095
+        ]
+      },
+      "properties": {
+        "id": "osm:way/547364294",
+        "name": "Universidade Federal de Alfenas - Campus 2",
+        "category": "educacao",
+        "sourceType": "amenity=university",
+        "distanceMeters": 616,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -45.9674859,
+          -21.4244144
+        ]
+      },
+      "properties": {
+        "id": "osm:way/830827438",
+        "name": "EPA Supermecado",
+        "category": "abastecimento",
+        "sourceType": "shop=supermarket",
+        "distanceMeters": 1176,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -45.9671222,
+          -21.4237372
+        ]
+      },
+      "properties": {
+        "id": "osm:relation/6297069",
+        "name": "Supermercado Pinheiros",
+        "category": "abastecimento",
+        "sourceType": "shop=supermarket",
+        "distanceMeters": 1180,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -45.9621188,
+          -21.4314846
+        ]
+      },
+      "properties": {
+        "id": "osm:relation/8535689",
+        "name": "IMESA",
+        "category": "saude",
+        "sourceType": "amenity=hospital",
+        "distanceMeters": 2072,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -45.9606418,
+          -21.4084314
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1079817153",
+        "name": null,
+        "category": "assistencia",
+        "sourceType": "amenity=community_centre",
+        "distanceMeters": 2173,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -45.9601087,
+          -21.4088798
+        ]
+      },
+      "properties": {
+        "id": "osm:node/9897893284",
+        "name": "Igreja Nova Matriz São Pedro Apóstolo",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 2190,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -45.9545504,
+          -21.4207696
+        ]
+      },
+      "properties": {
+        "id": "osm:way/547361731",
+        "name": "Colegio CRA",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2400,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -45.9545027,
+          -21.4259912
+        ]
+      },
+      "properties": {
+        "id": "osm:node/4263423842",
+        "name": "Igreja Nossa Senhora Aparecida",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 2499,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -45.9563243,
+          -21.430623
+        ]
+      },
+      "properties": {
+        "id": "osm:node/11119831205",
+        "name": "Espaço REM",
+        "category": "saude",
+        "sourceType": "amenity=hospital",
+        "distanceMeters": 2520,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -45.9533845,
+          -21.4188531
+        ]
+      },
+      "properties": {
+        "id": "osm:way/412727289",
+        "name": "Centro Espírita A Caminho da Luz",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 2520,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -45.9540158,
+          -21.4131698
+        ]
+      },
+      "properties": {
+        "id": "osm:way/544680810",
+        "name": "São Pedro",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 2561,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -45.9537579,
+          -21.4312593
+        ]
+      },
+      "properties": {
+        "id": "osm:node/11119831305",
+        "name": null,
+        "category": "saude",
+        "sourceType": "amenity=clinic",
+        "distanceMeters": 2788,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -45.9504135,
+          -21.4240505
+        ]
+      },
+      "properties": {
+        "id": "osm:way/547373967",
+        "name": "Colegio Sagrado Coração De Jesus",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2865,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -45.9488132,
+          -21.4200794
+        ]
+      },
+      "properties": {
+        "id": "osm:relation/6167365",
+        "name": "Universidade Federal de Alfenas",
+        "category": "educacao",
+        "sourceType": "amenity=university",
+        "distanceMeters": 2991,
+        "ring": 3000
+      }
+    }
+  ]
+}

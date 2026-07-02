@@ -1,0 +1,4895 @@
+{
+  "type": "FeatureCollection",
+  "metadata": {
+    "provider": "osm",
+    "cozinhaId": "CS016009",
+    "center": {
+      "latitude": -3.7917,
+      "longitude": -38.6258
+    },
+    "radiusMeters": 3000,
+    "generatedAt": "2026-07-02T06:09:22.961Z",
+    "attribution": "© OpenStreetMap contributors",
+    "truncatedCategories": []
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6246206,
+          -3.7910218
+        ]
+      },
+      "properties": {
+        "id": "osm:way/965170933",
+        "name": "UPA 24h - Granja Lisboa",
+        "category": "saude",
+        "sourceType": "amenity=hospital",
+        "distanceMeters": 151,
+        "ring": 500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6247518,
+          -3.7904559
+        ]
+      },
+      "properties": {
+        "id": "osm:way/965170934",
+        "name": "Escola Professora Antônia Maria de Lima",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 181,
+        "ring": 500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6246803,
+          -3.7931498
+        ]
+      },
+      "properties": {
+        "id": "osm:relation/7837583",
+        "name": "EMEIF Raquel Viana Martins",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 204,
+        "ring": 500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6253343,
+          -3.789858
+        ]
+      },
+      "properties": {
+        "id": "osm:node/4873152176",
+        "name": "Escola Sonho de Criança",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 211,
+        "ring": 500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6282033,
+          -3.7883092
+        ]
+      },
+      "properties": {
+        "id": "osm:node/4874019309",
+        "name": "Mercadinho Deus Te Pague",
+        "category": "abastecimento",
+        "sourceType": "shop=supermarket",
+        "distanceMeters": 462,
+        "ring": 500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6244976,
+          -3.7873995
+        ]
+      },
+      "properties": {
+        "id": "osm:node/11115217692",
+        "name": "Anali Supermercado",
+        "category": "abastecimento",
+        "sourceType": "shop=supermarket",
+        "distanceMeters": 500,
+        "ring": 500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6295155,
+          -3.7889824
+        ]
+      },
+      "properties": {
+        "id": "osm:node/9434464019",
+        "name": "Escola Municipal João Mendes de Andrade",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 511,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.629868,
+          -3.7891972
+        ]
+      },
+      "properties": {
+        "id": "osm:node/9434464018",
+        "name": "Creche João Mendes de Andrade",
+        "category": "educacao",
+        "sourceType": "amenity=kindergarten",
+        "distanceMeters": 530,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.630174,
+          -3.7896872
+        ]
+      },
+      "properties": {
+        "id": "osm:way/926252671",
+        "name": "Escola Poeta Patativa do Assaré",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 534,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6190948,
+          -3.7908991
+        ]
+      },
+      "properties": {
+        "id": "osm:relation/8787098",
+        "name": "EMEIF Manoel Malveira Maia",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 749,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6190984,
+          -3.7897876
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1472845499",
+        "name": "Escola Professora Maria Mirtes Bastos Mangeira",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 773,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6287864,
+          -3.7979958
+        ]
+      },
+      "properties": {
+        "id": "osm:node/11287008543",
+        "name": "FL-337",
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 775,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6267714,
+          -3.7846626
+        ]
+      },
+      "properties": {
+        "id": "osm:way/631652897",
+        "name": "Escola Dom Antônio de Almeida Lustosa",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 790,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6230801,
+          -3.7851258
+        ]
+      },
+      "properties": {
+        "id": "osm:node/11115225545",
+        "name": "Canadá Supermercados",
+        "category": "abastecimento",
+        "sourceType": "shop=supermarket",
+        "distanceMeters": 791,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6272428,
+          -3.784674
+        ]
+      },
+      "properties": {
+        "id": "osm:way/958597155",
+        "name": "Posto de Saúde Dom Antônio de Almeida Lustosa",
+        "category": "saude",
+        "sourceType": "amenity=clinic",
+        "distanceMeters": 797,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6271744,
+          -3.7843707
+        ]
+      },
+      "properties": {
+        "id": "osm:way/958597156",
+        "name": "Creche Dom Antônio de Almeida Lustosa",
+        "category": "educacao",
+        "sourceType": "amenity=kindergarten",
+        "distanceMeters": 829,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6205949,
+          -3.7858183
+        ]
+      },
+      "properties": {
+        "id": "osm:way/495739479",
+        "name": "Posto de Saúde Guarany Mont'Alverne",
+        "category": "saude",
+        "sourceType": "amenity=clinic",
+        "distanceMeters": 873,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6220111,
+          -3.7846358
+        ]
+      },
+      "properties": {
+        "id": "osm:node/11117154321",
+        "name": "Igreja de Santa Paula Frassinetti",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 891,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6249257,
+          -3.7999777
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1168553874",
+        "name": "AD Templo Central - 7 de Setembro 1",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 926,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6259744,
+          -3.7831057
+        ]
+      },
+      "properties": {
+        "id": "osm:node/11287008540",
+        "name": "FL-333/335",
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 956,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6174245,
+          -3.7894184
+        ]
+      },
+      "properties": {
+        "id": "osm:way/631652852",
+        "name": "Creche conveniada Espaço Da Criança",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 963,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6187126,
+          -3.7858779
+        ]
+      },
+      "properties": {
+        "id": "osm:node/5682983439",
+        "name": "Bom Jardim I / Bom Jardim Centro",
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 1019,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6212108,
+          -3.7836082
+        ]
+      },
+      "properties": {
+        "id": "osm:node/5685133734",
+        "name": "Ponto do Frango",
+        "category": "abastecimento",
+        "sourceType": "shop=supermarket",
+        "distanceMeters": 1034,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6187788,
+          -3.7850155
+        ]
+      },
+      "properties": {
+        "id": "osm:node/5682983440",
+        "name": "Bom Jardim I",
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 1077,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6180622,
+          -3.7857078
+        ]
+      },
+      "properties": {
+        "id": "osm:way/596625163",
+        "name": "EEFM Michelson Nobre da Silva",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 1087,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6243692,
+          -3.7817183
+        ]
+      },
+      "properties": {
+        "id": "osm:node/9434360662",
+        "name": "Escola Maria Dolores Petrola de Melo Jorge",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 1121,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6241248,
+          -3.781566
+        ]
+      },
+      "properties": {
+        "id": "osm:node/9434360663",
+        "name": "Creche Maria Dolores Petrola de Melo Jorge",
+        "category": "educacao",
+        "sourceType": "amenity=kindergarten",
+        "distanceMeters": 1142,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6155871,
+          -3.7938027
+        ]
+      },
+      "properties": {
+        "id": "osm:way/631652854",
+        "name": "Escola de Tempo Parcial Ulysses Guimarães",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 1157,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6166711,
+          -3.796927
+        ]
+      },
+      "properties": {
+        "id": "osm:node/11287008542",
+        "name": "FL-336",
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 1168,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6189731,
+          -3.7833593
+        ]
+      },
+      "properties": {
+        "id": "osm:way/564820741",
+        "name": "Centros de Atenção Integral à Criança e ao Adolescente Maria Alves Carioca",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 1197,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6198406,
+          -3.8010804
+        ]
+      },
+      "properties": {
+        "id": "osm:node/11286900878",
+        "name": "FL-326",
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 1235,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6197274,
+          -3.8029533
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1157779650",
+        "name": "Posto de Saúde Doutor Henrique Mota Neto",
+        "category": "saude",
+        "sourceType": "amenity=clinic",
+        "distanceMeters": 1421,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6199656,
+          -3.8033469
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1157779651",
+        "name": null,
+        "category": "educacao",
+        "sourceType": "amenity=kindergarten",
+        "distanceMeters": 1448,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6135645,
+          -3.7965779
+        ]
+      },
+      "properties": {
+        "id": "osm:relation/8787093",
+        "name": "Escola de Tempo Parcial Raimundo Moreira Sena",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 1462,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6133163,
+          -3.7871012
+        ]
+      },
+      "properties": {
+        "id": "osm:way/357291230",
+        "name": "Araripe Supermercado",
+        "category": "abastecimento",
+        "sourceType": "shop=supermarket",
+        "distanceMeters": 1476,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6271332,
+          -3.8049717
+        ]
+      },
+      "properties": {
+        "id": "osm:node/6967597165",
+        "name": "Escola de ensino fundamental e médio Paulo Elpídio",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 1483,
+        "ring": 1500
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6231117,
+          -3.8053461
+        ]
+      },
+      "properties": {
+        "id": "osm:way/958529495",
+        "name": "Escola Professor José Círio Pereira Filho",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 1546,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6225446,
+          -3.8053647
+        ]
+      },
+      "properties": {
+        "id": "osm:way/958529497",
+        "name": "Posto de Saúde Doutor João Barbosa Pires de Paula Pessoa",
+        "category": "saude",
+        "sourceType": "amenity=clinic",
+        "distanceMeters": 1562,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6289534,
+          -3.7778784
+        ]
+      },
+      "properties": {
+        "id": "osm:way/592878358",
+        "name": "CRAS Pedro Tomé Rodrigues",
+        "category": "assistencia",
+        "sourceType": "amenity=social_facility",
+        "distanceMeters": 1576,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6227157,
+          -3.8058447
+        ]
+      },
+      "properties": {
+        "id": "osm:way/958529496",
+        "name": "Creche Professor José Círio Pereira Filho",
+        "category": "educacao",
+        "sourceType": "amenity=kindergarten",
+        "distanceMeters": 1610,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6208981,
+          -3.7772205
+        ]
+      },
+      "properties": {
+        "id": "osm:node/4477521195",
+        "name": "A Igreja de Jesus Cristo dos Santos dos Últimos Dias (Mórmon Conjunto Ceará)",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 1699,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6105461,
+          -3.7901955
+        ]
+      },
+      "properties": {
+        "id": "osm:way/713569573",
+        "name": "CRAS Bom Jardim",
+        "category": "assistencia",
+        "sourceType": "amenity=social_facility",
+        "distanceMeters": 1701,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6143723,
+          -3.8019636
+        ]
+      },
+      "properties": {
+        "id": "osm:way/547145512",
+        "name": "Escola Edilson Brasil Soares",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 1706,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6296837,
+          -3.776673
+        ]
+      },
+      "properties": {
+        "id": "osm:node/5810981553",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 1726,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.621359,
+          -3.776766
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3942753711",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 1732,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.620254,
+          -3.7770149
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3942753713",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 1745,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6101394,
+          -3.7933697
+        ]
+      },
+      "properties": {
+        "id": "osm:node/5370549378",
+        "name": "Grupo Familia Debaixo da Graça",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 1747,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6206138,
+          -3.7768378
+        ]
+      },
+      "properties": {
+        "id": "osm:node/4477509350",
+        "name": "Marinheiro Popeye Baby",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 1750,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6204604,
+          -3.7768722
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3942753712",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 1752,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6100115,
+          -3.7904202
+        ]
+      },
+      "properties": {
+        "id": "osm:way/547145183",
+        "name": "Igreja de Santa Cecília",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 1758,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6203885,
+          -3.7767816
+        ]
+      },
+      "properties": {
+        "id": "osm:node/4477509343",
+        "name": "Igreja Evangélica Bethshalom",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 1764,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6212978,
+          -3.7763801
+        ]
+      },
+      "properties": {
+        "id": "osm:node/4477561840",
+        "name": "Colegio Batista Monte Sinai CBMS",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 1775,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6200184,
+          -3.7767629
+        ]
+      },
+      "properties": {
+        "id": "osm:node/4477509344",
+        "name": "Comunidade Cristã Pentecostal Rei dos Reis",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 1781,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6105235,
+          -3.7864518
+        ]
+      },
+      "properties": {
+        "id": "osm:way/631652868",
+        "name": "Escola de Tempo Parcial Doutor Sérvulo Mendes Barroso",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 1793,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6098272,
+          -3.788235
+        ]
+      },
+      "properties": {
+        "id": "osm:relation/8787086",
+        "name": "Escola de Tempo Parcial Professora Lireda Facó",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 1814,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6094625,
+          -3.7906551
+        ]
+      },
+      "properties": {
+        "id": "osm:node/6709194310",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 1816,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6192861,
+          -3.7766826
+        ]
+      },
+      "properties": {
+        "id": "osm:node/4477509341",
+        "name": "Super Conquista Supermercado",
+        "category": "abastecimento",
+        "sourceType": "shop=supermarket",
+        "distanceMeters": 1820,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6177871,
+          -3.7773718
+        ]
+      },
+      "properties": {
+        "id": "osm:relation/5793443",
+        "name": "Capela Sagrada Familia (do Cearazinho)",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 1824,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6104551,
+          -3.7857177
+        ]
+      },
+      "properties": {
+        "id": "osm:way/631652867",
+        "name": "Escola Estadual de Educação Profissional Icaro de Sousa Moreira",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 1828,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6092936,
+          -3.7914477
+        ]
+      },
+      "properties": {
+        "id": "osm:way/713707804",
+        "name": "Igreja de Jesus Cristo dos Santos dos Últimos Dias",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 1832,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6095206,
+          -3.7881592
+        ]
+      },
+      "properties": {
+        "id": "osm:relation/8787087",
+        "name": "Centro de Educação Infantil Professora Lireda Facó",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 1849,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6178242,
+          -3.7770256
+        ]
+      },
+      "properties": {
+        "id": "osm:way/958458141",
+        "name": "Posto de Saúde Edmilson Pinheiro",
+        "category": "saude",
+        "sourceType": "amenity=clinic",
+        "distanceMeters": 1856,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6180901,
+          -3.7767825
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3942753710",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 1866,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6181719,
+          -3.7766371
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3942753709",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 1877,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.620723,
+          -3.775575
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3942753700",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 1879,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6172418,
+          -3.7768795
+        ]
+      },
+      "properties": {
+        "id": "osm:relation/5793441",
+        "name": "Escola Municipal Francisco Edmilson Pinheiro",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 1902,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6263438,
+          -3.7745439
+        ]
+      },
+      "properties": {
+        "id": "osm:way/478500733",
+        "name": "Conselho Tutelar Rubens Vaz da Costa",
+        "category": "assistencia",
+        "sourceType": "amenity=social_facility",
+        "distanceMeters": 1909,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6240903,
+          -3.7746089
+        ]
+      },
+      "properties": {
+        "id": "osm:way/963251147",
+        "name": "Centro Integrado de Desenvolvimento Infantil",
+        "category": "saude",
+        "sourceType": "amenity=clinic",
+        "distanceMeters": 1910,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6264915,
+          -3.7743597
+        ]
+      },
+      "properties": {
+        "id": "osm:way/478500728",
+        "name": "NEDI Tia Deinha",
+        "category": "educacao",
+        "sourceType": "amenity=kindergarten",
+        "distanceMeters": 1930,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6187083,
+          -3.7757736
+        ]
+      },
+      "properties": {
+        "id": "osm:node/10207787351",
+        "name": null,
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 1938,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6231188,
+          -3.7744645
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1338368854",
+        "name": "Paróquia de Santa Terezinha do Menino Jesus",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 1939,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6231488,
+          -3.7744556
+        ]
+      },
+      "properties": {
+        "id": "osm:node/12379718475",
+        "name": "Paróquia de Sta. Terezinha do Menino Jesus",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 1940,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6259041,
+          -3.7742283
+        ]
+      },
+      "properties": {
+        "id": "osm:relation/12938488",
+        "name": "EEIEF Economista Rubens Vaz",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 1943,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6194151,
+          -3.7752497
+        ]
+      },
+      "properties": {
+        "id": "osm:node/10207787350",
+        "name": null,
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 1962,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6177109,
+          -3.8076245
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1166293815",
+        "name": "EMTI Professor Expedito Parente",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 1985,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6283951,
+          -3.7740087
+        ]
+      },
+      "properties": {
+        "id": "osm:way/699224229",
+        "name": "Shopping Jurema",
+        "category": "abastecimento",
+        "sourceType": "shop=supermarket",
+        "distanceMeters": 1988,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6201163,
+          -3.7746245
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3942753692",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2001,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6159956,
+          -3.7765678
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3942753708",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2004,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6162606,
+          -3.7763694
+        ]
+      },
+      "properties": {
+        "id": "osm:node/4477509342",
+        "name": "Igreja Universal do Reino de Deus",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 2007,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6278599,
+          -3.7737182
+        ]
+      },
+      "properties": {
+        "id": "osm:node/604159753",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2013,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.615916,
+          -3.7764113
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3942753707",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2023,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.627222,
+          -3.7735508
+        ]
+      },
+      "properties": {
+        "id": "osm:node/8842696273",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2024,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6163773,
+          -3.7760905
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3942753703",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2026,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6084712,
+          -3.797753
+        ]
+      },
+      "properties": {
+        "id": "osm:node/5283035243",
+        "name": null,
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 2037,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6271523,
+          -3.7734106
+        ]
+      },
+      "properties": {
+        "id": "osm:node/6902884076",
+        "name": "Compre Max",
+        "category": "abastecimento",
+        "sourceType": "shop=supermarket",
+        "distanceMeters": 2039,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6082753,
+          -3.7975416
+        ]
+      },
+      "properties": {
+        "id": "osm:node/5283035244",
+        "name": null,
+        "category": "saude",
+        "sourceType": "amenity=pharmacy",
+        "distanceMeters": 2050,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6082378,
+          -3.7977289
+        ]
+      },
+      "properties": {
+        "id": "osm:node/5283023076",
+        "name": "Mercadinho IP Albuquerque",
+        "category": "abastecimento",
+        "sourceType": "shop=supermarket",
+        "distanceMeters": 2061,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.608097,
+          -3.797668
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3658077598",
+        "name": "4368",
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2073,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6080044,
+          -3.7974613
+        ]
+      },
+      "properties": {
+        "id": "osm:node/5283035238",
+        "name": "E.E.F.M Herbert De Sousa",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2076,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6079293,
+          -3.7975175
+        ]
+      },
+      "properties": {
+        "id": "osm:node/5283023074",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2086,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6184065,
+          -3.774412
+        ]
+      },
+      "properties": {
+        "id": "osm:relation/10175276",
+        "name": "Centro de Educação Infantil Antônia Nathália Cristina Chaves Maciel",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2090,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.626357,
+          -3.772802
+        ]
+      },
+      "properties": {
+        "id": "osm:node/8843372619",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2102,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6286896,
+          -3.7729883
+        ]
+      },
+      "properties": {
+        "id": "osm:node/8842696272",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2105,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6196887,
+          -3.7737488
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3942753686",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2108,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6076799,
+          -3.7974827
+        ]
+      },
+      "properties": {
+        "id": "osm:node/5283101676",
+        "name": null,
+        "category": "abastecimento",
+        "sourceType": "shop=convenience",
+        "distanceMeters": 2111,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6173689,
+          -3.8087153
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1092764460",
+        "name": "Centro Cearense de Modelismo",
+        "category": "educacao",
+        "sourceType": "amenity=college",
+        "distanceMeters": 2111,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.617823,
+          -3.7744092
+        ]
+      },
+      "properties": {
+        "id": "osm:relation/5704553",
+        "name": "EEFM Professora Maria Antonieta Nunes",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2117,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6426359,
+          -3.8008752
+        ]
+      },
+      "properties": {
+        "id": "osm:node/9970313700",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2128,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.619645,
+          -3.773484
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3942753685",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2138,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6143321,
+          -3.7762385
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3942753705",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2139,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.61412,
+          -3.776398
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3942753706",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2139,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6279093,
+          -3.810882
+        ]
+      },
+      "properties": {
+        "id": "osm:way/627855870",
+        "name": "EMEF do Jatobá",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2146,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6261193,
+          -3.7723025
+        ]
+      },
+      "properties": {
+        "id": "osm:node/8843372618",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2157,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6257045,
+          -3.7722955
+        ]
+      },
+      "properties": {
+        "id": "osm:relation/12938536",
+        "name": "Unidade Básica de Saúde Francisco Paulo Pontes",
+        "category": "saude",
+        "sourceType": "amenity=clinic",
+        "distanceMeters": 2158,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6189256,
+          -3.7735333
+        ]
+      },
+      "properties": {
+        "id": "osm:way/384704020",
+        "name": "Capela Santa Luzia",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 2159,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6450965,
+          -3.7891602
+        ]
+      },
+      "properties": {
+        "id": "osm:node/9970313699",
+        "name": "Início / Final de linha Urucutuba",
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2160,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6258794,
+          -3.7722348
+        ]
+      },
+      "properties": {
+        "id": "osm:node/8843372617",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2164,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6390492,
+          -3.8059864
+        ]
+      },
+      "properties": {
+        "id": "osm:node/9970313702",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2164,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6118845,
+          -3.8054498
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1191586554",
+        "name": "Escola de tipo integral Professor Alexandre Rodrigues de Albuquerque",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2173,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6289707,
+          -3.8110194
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1138989294",
+        "name": "Igreja de São Sebastião",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 2177,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6430605,
+          -3.8011006
+        ]
+      },
+      "properties": {
+        "id": "osm:node/9970313701",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2182,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6284303,
+          -3.772156
+        ]
+      },
+      "properties": {
+        "id": "osm:node/6380882554",
+        "name": "Cristo É Vida",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 2193,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.630159,
+          -3.7723319
+        ]
+      },
+      "properties": {
+        "id": "osm:node/8842696270",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2207,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6298181,
+          -3.7722503
+        ]
+      },
+      "properties": {
+        "id": "osm:node/8842696271",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2208,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6066392,
+          -3.7973382
+        ]
+      },
+      "properties": {
+        "id": "osm:node/5283023077",
+        "name": "Mercadinho J.C",
+        "category": "abastecimento",
+        "sourceType": "shop=supermarket",
+        "distanceMeters": 2216,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6157505,
+          -3.7744703
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3942753690",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2217,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6266411,
+          -3.7717696
+        ]
+      },
+      "properties": {
+        "id": "osm:way/699224230",
+        "name": "Maternidade Santa Terezinha",
+        "category": "saude",
+        "sourceType": "amenity=hospital",
+        "distanceMeters": 2218,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6158269,
+          -3.7741312
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3942753688",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2245,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6129268,
+          -3.7761123
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3942753704",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2246,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6063495,
+          -3.7974532
+        ]
+      },
+      "properties": {
+        "id": "osm:node/5283023068",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2251,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6296743,
+          -3.7717864
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1002821702",
+        "name": "Igreja Cristã Maranata",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 2256,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6189416,
+          -3.772388
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3942753682",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2278,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6057782,
+          -3.7972284
+        ]
+      },
+      "properties": {
+        "id": "osm:node/5283035234",
+        "name": "IGREJA ASSEMBLÉIA DE DEUS MONTESE",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 2305,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.618861,
+          -3.772009
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3942753678",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2321,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6055743,
+          -3.7972043
+        ]
+      },
+      "properties": {
+        "id": "osm:node/5283023072",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2326,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6311155,
+          -3.7714141
+        ]
+      },
+      "properties": {
+        "id": "osm:node/8842696264",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2332,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6314517,
+          -3.7714957
+        ]
+      },
+      "properties": {
+        "id": "osm:node/8842696265",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2332,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6169828,
+          -3.7725617
+        ]
+      },
+      "properties": {
+        "id": "osm:relation/5722854",
+        "name": null,
+        "category": "educacao",
+        "sourceType": "amenity=kindergarten",
+        "distanceMeters": 2342,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.605349,
+          -3.7972793
+        ]
+      },
+      "properties": {
+        "id": "osm:node/5283040693",
+        "name": "Igreja Nacional Do Amor De Deus",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 2352,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6053897,
+          -3.7858624
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1117345143",
+        "name": "Escola Professor Francimar Mangueira",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2356,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.611421,
+          -3.7760688
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3942753702",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2359,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6054375,
+          -3.7977985
+        ]
+      },
+      "properties": {
+        "id": "osm:node/5283071719",
+        "name": null,
+        "category": "abastecimento",
+        "sourceType": "shop=bakery",
+        "distanceMeters": 2359,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6113703,
+          -3.7759013
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3942753701",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2377,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6086932,
+          -3.804696
+        ]
+      },
+      "properties": {
+        "id": "osm:way/964674374",
+        "name": "Posto de Saúde Doutor Abner Cavalcante Brasil",
+        "category": "saude",
+        "sourceType": "amenity=clinic",
+        "distanceMeters": 2386,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6139026,
+          -3.7736299
+        ]
+      },
+      "properties": {
+        "id": "osm:relation/5706607",
+        "name": "E.M.E.I.F. Edilson Brasil Soarez (UV3)",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2404,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6048725,
+          -3.7860248
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1117345142",
+        "name": "Creche Professor Mirton La’Marques",
+        "category": "educacao",
+        "sourceType": "amenity=kindergarten",
+        "distanceMeters": 2406,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6322743,
+          -3.770917
+        ]
+      },
+      "properties": {
+        "id": "osm:node/8842696262",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2420,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6239029,
+          -3.7699471
+        ]
+      },
+      "properties": {
+        "id": "osm:node/8843325015",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2428,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6152235,
+          -3.7725561
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3942753681",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2431,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6240919,
+          -3.7698822
+        ]
+      },
+      "properties": {
+        "id": "osm:node/8843325016",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2433,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6039186,
+          -3.7898319
+        ]
+      },
+      "properties": {
+        "id": "osm:node/6622027838",
+        "name": "Mercadinho Jaguaretama",
+        "category": "abastecimento",
+        "sourceType": "amenity=marketplace",
+        "distanceMeters": 2437,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6321264,
+          -3.7707049
+        ]
+      },
+      "properties": {
+        "id": "osm:node/8842696263",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2438,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6167588,
+          -3.7715565
+        ]
+      },
+      "properties": {
+        "id": "osm:way/384731824",
+        "name": "SuperMartri Martri",
+        "category": "abastecimento",
+        "sourceType": "shop=supermarket",
+        "distanceMeters": 2454,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6164649,
+          -3.7716585
+        ]
+      },
+      "properties": {
+        "id": "osm:node/4477561841",
+        "name": "Panificadora Bom Pão",
+        "category": "abastecimento",
+        "sourceType": "shop=bakery",
+        "distanceMeters": 2457,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6181936,
+          -3.7709284
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3942753671",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2459,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6224257,
+          -3.7694835
+        ]
+      },
+      "properties": {
+        "id": "osm:way/478462212",
+        "name": "Jurema",
+        "category": "transporte",
+        "sourceType": "public_transport=platform",
+        "distanceMeters": 2499,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6283143,
+          -3.8140399
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1138989292",
+        "name": "Comunidade Católica Jesus é o Senhor",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 2500,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6228192,
+          -3.7693834
+        ]
+      },
+      "properties": {
+        "id": "osm:node/4718998735",
+        "name": "Jurema",
+        "category": "transporte",
+        "sourceType": "railway=station",
+        "distanceMeters": 2503,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6162539,
+          -3.7707342
+        ]
+      },
+      "properties": {
+        "id": "osm:way/965219166",
+        "name": "Hospital Distrital Nossa Senhora da Conceição",
+        "category": "saude",
+        "sourceType": "amenity=hospital",
+        "distanceMeters": 2561,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6228906,
+          -3.768728
+        ]
+      },
+      "properties": {
+        "id": "osm:node/8843325013",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2575,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6042788,
+          -3.800432
+        ]
+      },
+      "properties": {
+        "id": "osm:node/5283101674",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2578,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6144091,
+          -3.7714266
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3942753675",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2584,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6230207,
+          -3.7686307
+        ]
+      },
+      "properties": {
+        "id": "osm:node/8843325014",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2584,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6167177,
+          -3.7701918
+        ]
+      },
+      "properties": {
+        "id": "osm:way/388091187",
+        "name": "Farmácia Jacqueline",
+        "category": "saude",
+        "sourceType": "amenity=pharmacy",
+        "distanceMeters": 2595,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6023529,
+          -3.792381
+        ]
+      },
+      "properties": {
+        "id": "osm:way/710823236",
+        "name": "Clínica Popular Joaquim Alves",
+        "category": "saude",
+        "sourceType": "amenity=clinic",
+        "distanceMeters": 2603,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6023311,
+          -3.7938678
+        ]
+      },
+      "properties": {
+        "id": "osm:way/710823849",
+        "name": "Centro de Atenção Psicossocial Geral",
+        "category": "saude",
+        "sourceType": "amenity=clinic",
+        "distanceMeters": 2615,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6104963,
+          -3.7737984
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3942753687",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2616,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6022138,
+          -3.7920649
+        ]
+      },
+      "properties": {
+        "id": "osm:way/708616086",
+        "name": "Posto de Saúde Argeu Herbster",
+        "category": "saude",
+        "sourceType": "amenity=clinic",
+        "distanceMeters": 2617,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6187156,
+          -3.8142527
+        ]
+      },
+      "properties": {
+        "id": "osm:way/956115787",
+        "name": "Posto de Saúde Siqueira",
+        "category": "saude",
+        "sourceType": "amenity=clinic",
+        "distanceMeters": 2628,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.602135,
+          -3.7902357
+        ]
+      },
+      "properties": {
+        "id": "osm:node/6622027831",
+        "name": "Panificadora Vitória",
+        "category": "abastecimento",
+        "sourceType": "shop=bakery",
+        "distanceMeters": 2631,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6021489,
+          -3.7936117
+        ]
+      },
+      "properties": {
+        "id": "osm:way/964684290",
+        "name": "Movimento Saúde Mental",
+        "category": "saude",
+        "sourceType": "amenity=clinic",
+        "distanceMeters": 2633,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.605756,
+          -3.804433
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1154097641",
+        "name": "Escola Tomaz Muniz",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2636,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6131279,
+          -3.7716376
+        ]
+      },
+      "properties": {
+        "id": "osm:node/4477589839",
+        "name": "Igreja Batista El Shadai",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 2637,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6341984,
+          -3.7694916
+        ]
+      },
+      "properties": {
+        "id": "osm:node/6902826599",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2639,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.621566,
+          -3.7682606
+        ]
+      },
+      "properties": {
+        "id": "osm:way/447610106",
+        "name": "Colégio Pleno",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2648,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6223769,
+          -3.7681177
+        ]
+      },
+      "properties": {
+        "id": "osm:node/13620854902",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2650,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6018698,
+          -3.7923409
+        ]
+      },
+      "properties": {
+        "id": "osm:way/961421236",
+        "name": "Escola Sebastião de Abreu",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2656,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6171352,
+          -3.7694132
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3942753658",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2658,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6325855,
+          -3.7687633
+        ]
+      },
+      "properties": {
+        "id": "osm:node/6902826597",
+        "name": "Escola Brasileirinho",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2659,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6340937,
+          -3.7692556
+        ]
+      },
+      "properties": {
+        "id": "osm:node/8842696261",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2660,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6039419,
+          -3.8016285
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1154097643",
+        "name": null,
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2665,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6020891,
+          -3.7956165
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1207170822",
+        "name": "E.E.F.M Santo Amaro",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2667,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6347272,
+          -3.7694203
+        ]
+      },
+      "properties": {
+        "id": "osm:way/955412054",
+        "name": null,
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2668,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.634573,
+          -3.7692594
+        ]
+      },
+      "properties": {
+        "id": "osm:node/6902884075",
+        "name": "Escola São Raimundo",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2678,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6136679,
+          -3.7707756
+        ]
+      },
+      "properties": {
+        "id": "osm:relation/5767963",
+        "name": "EEF João Paulo II",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2688,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6015288,
+          -3.7905847
+        ]
+      },
+      "properties": {
+        "id": "osm:node/6622027836",
+        "name": "Mercantil Melo",
+        "category": "abastecimento",
+        "sourceType": "amenity=marketplace",
+        "distanceMeters": 2696,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6036153,
+          -3.801743
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1154097642",
+        "name": "Colégio Vencer",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2703,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.611069,
+          -3.772286
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3942753679",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2708,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.607698,
+          -3.7752227
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3942753698",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2719,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6016395,
+          -3.796083
+        ]
+      },
+      "properties": {
+        "id": "osm:node/5283035240",
+        "name": null,
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2725,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6219773,
+          -3.815956
+        ]
+      },
+      "properties": {
+        "id": "osm:node/7005327259",
+        "name": "Praça da Tebas",
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2730,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6048047,
+          -3.804525
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1154097639",
+        "name": null,
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 2731,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.604635,
+          -3.8042811
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1154097640",
+        "name": null,
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2733,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6362036,
+          -3.813991
+        ]
+      },
+      "properties": {
+        "id": "osm:node/11287008544",
+        "name": "FL-338",
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2734,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6029404,
+          -3.8009137
+        ]
+      },
+      "properties": {
+        "id": "osm:node/5283101680",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2735,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6257959,
+          -3.8163644
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1138989293",
+        "name": "Igreja de São João Batista",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 2743,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.607244,
+          -3.77532
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3942753699",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2749,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6033625,
+          -3.7811544
+        ]
+      },
+      "properties": {
+        "id": "osm:node/4477970086",
+        "name": "FinoPan",
+        "category": "abastecimento",
+        "sourceType": "shop=bakery",
+        "distanceMeters": 2752,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6069188,
+          -3.8078256
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1191588022",
+        "name": "Escola de ensino fundamental e médio Senador Osires Pontes",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2757,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6015364,
+          -3.7863374
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1193828378",
+        "name": "Escola de ensino fundamental e médio Professor Jocie Caminha de Menezes",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2757,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6018648,
+          -3.7986442
+        ]
+      },
+      "properties": {
+        "id": "osm:node/5283101683",
+        "name": "Escola Municipal José Ferreira de Alencar",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2766,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6351896,
+          -3.7686448
+        ]
+      },
+      "properties": {
+        "id": "osm:node/604159751",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2767,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.600955,
+          -3.7940076
+        ]
+      },
+      "properties": {
+        "id": "osm:way/685034893",
+        "name": "Supermercado Ana Risorlange",
+        "category": "abastecimento",
+        "sourceType": "shop=supermarket",
+        "distanceMeters": 2769,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6047816,
+          -3.7781966
+        ]
+      },
+      "properties": {
+        "id": "osm:node/4477971991",
+        "name": "Assembléia de Deus (Granja Portugal)",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 2774,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6013606,
+          -3.7969447
+        ]
+      },
+      "properties": {
+        "id": "osm:node/5283074222",
+        "name": "Assembleia de Deus Bom Jesus Congregação - VII",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 2774,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6029408,
+          -3.7815125
+        ]
+      },
+      "properties": {
+        "id": "osm:way/970755074",
+        "name": "Escola Creusa do Carmo Rocha",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2778,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6065248,
+          -3.7757157
+        ]
+      },
+      "properties": {
+        "id": "osm:node/8584499710",
+        "name": "Igreja de Cristo Conjunto Ceará (ICCC)",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 2781,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6350775,
+          -3.7684608
+        ]
+      },
+      "properties": {
+        "id": "osm:node/604159790",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2782,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6149015,
+          -3.814262
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1233165936",
+        "name": "ETI Prof. Agerson Tabosa Filho",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2785,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6025476,
+          -3.7817794
+        ]
+      },
+      "properties": {
+        "id": "osm:way/970755070",
+        "name": "Creche Reitor Antônio Martins Filho - Unidade II",
+        "category": "educacao",
+        "sourceType": "amenity=kindergarten",
+        "distanceMeters": 2806,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6006724,
+          -3.7948202
+        ]
+      },
+      "properties": {
+        "id": "osm:node/6618235365",
+        "name": "Panificadora Nova República",
+        "category": "abastecimento",
+        "sourceType": "shop=bakery",
+        "distanceMeters": 2809,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6006061,
+          -3.7942428
+        ]
+      },
+      "properties": {
+        "id": "osm:node/6618235363",
+        "name": "Padaria Ana Risorlange",
+        "category": "abastecimento",
+        "sourceType": "shop=bakery",
+        "distanceMeters": 2810,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6006436,
+          -3.7946957
+        ]
+      },
+      "properties": {
+        "id": "osm:node/6618235364",
+        "name": "Farmácia Droga Sales",
+        "category": "saude",
+        "sourceType": "amenity=pharmacy",
+        "distanceMeters": 2811,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6005043,
+          -3.7931038
+        ]
+      },
+      "properties": {
+        "id": "osm:node/6841989160",
+        "name": "Consultório Odontológico Benjamin",
+        "category": "saude",
+        "sourceType": "amenity=doctors",
+        "distanceMeters": 2811,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6135235,
+          -3.7695621
+        ]
+      },
+      "properties": {
+        "id": "osm:node/4477793260",
+        "name": "Igreja Assembleia de Deus Agape",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 2813,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6059698,
+          -3.7759193
+        ]
+      },
+      "properties": {
+        "id": "osm:node/4477889893",
+        "name": "Supermercado Telefrango",
+        "category": "abastecimento",
+        "sourceType": "shop=supermarket",
+        "distanceMeters": 2814,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6358104,
+          -3.7684075
+        ]
+      },
+      "properties": {
+        "id": "osm:relation/12695837",
+        "name": "Polo UAB Caucaia Araturi/Jurema",
+        "category": "educacao",
+        "sourceType": "amenity=university",
+        "distanceMeters": 2818,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6091773,
+          -3.8108861
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1095392126",
+        "name": "Cometa Supermercados | Osório de Paiva",
+        "category": "abastecimento",
+        "sourceType": "shop=supermarket",
+        "distanceMeters": 2820,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6160444,
+          -3.8151474
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1154254158",
+        "name": "Creche Francisca de Abreu Lima",
+        "category": "educacao",
+        "sourceType": "amenity=kindergarten",
+        "distanceMeters": 2823,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6004212,
+          -3.7942735
+        ]
+      },
+      "properties": {
+        "id": "osm:node/6717699942",
+        "name": "Farmácia Popular do Bom Jardim",
+        "category": "saude",
+        "sourceType": "amenity=pharmacy",
+        "distanceMeters": 2830,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6022552,
+          -3.7818634
+        ]
+      },
+      "properties": {
+        "id": "osm:way/970755072",
+        "name": "Creche Reitor Antônio Martins Filho",
+        "category": "educacao",
+        "sourceType": "amenity=kindergarten",
+        "distanceMeters": 2832,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6003193,
+          -3.7933045
+        ]
+      },
+      "properties": {
+        "id": "osm:way/730952859",
+        "name": "Mercadinho Portela",
+        "category": "abastecimento",
+        "sourceType": "shop=convenience",
+        "distanceMeters": 2833,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6007456,
+          -3.796704
+        ]
+      },
+      "properties": {
+        "id": "osm:node/11165098036",
+        "name": "Supermercado São Francisco",
+        "category": "abastecimento",
+        "sourceType": "shop=supermarket",
+        "distanceMeters": 2835,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6150683,
+          -3.7685439
+        ]
+      },
+      "properties": {
+        "id": "osm:way/965219165",
+        "name": "Escola Professor Edmilson Guimarães de Almeida",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2837,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6026466,
+          -3.8026051
+        ]
+      },
+      "properties": {
+        "id": "osm:node/6967597201",
+        "name": "Escola de ensino fundamental São Vicente",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2841,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6135905,
+          -3.7692333
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3942752955",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2842,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6134277,
+          -3.7692701
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3942752956",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2847,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6016405,
+          -3.7828726
+        ]
+      },
+      "properties": {
+        "id": "osm:node/4477970088",
+        "name": "Super Portela",
+        "category": "abastecimento",
+        "sourceType": "shop=supermarket",
+        "distanceMeters": 2855,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6084294,
+          -3.8106421
+        ]
+      },
+      "properties": {
+        "id": "osm:node/6786601134",
+        "name": "Centro Socio Educativo Canindezinho",
+        "category": "assistencia",
+        "sourceType": "amenity=community_centre",
+        "distanceMeters": 2855,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6008821,
+          -3.7983678
+        ]
+      },
+      "properties": {
+        "id": "osm:node/5283035235",
+        "name": "Igreja de Santo Amaro",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 2862,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6260283,
+          -3.817435
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1139008501",
+        "name": "Igreja Evangélica",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 2862,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6019182,
+          -3.7818901
+        ]
+      },
+      "properties": {
+        "id": "osm:way/970755077",
+        "name": "CRAS Granja Portugal",
+        "category": "assistencia",
+        "sourceType": "amenity=social_facility",
+        "distanceMeters": 2865,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6019632,
+          -3.7816235
+        ]
+      },
+      "properties": {
+        "id": "osm:way/970755069",
+        "name": "Centro de Atenção Psicossocial Álcool e Drogas",
+        "category": "saude",
+        "sourceType": "amenity=clinic",
+        "distanceMeters": 2872,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.599845,
+          -3.7909716
+        ]
+      },
+      "properties": {
+        "id": "osm:node/6708869509",
+        "name": "Comercial Morgana",
+        "category": "abastecimento",
+        "sourceType": "shop=convenience",
+        "distanceMeters": 2881,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6007981,
+          -3.7987735
+        ]
+      },
+      "properties": {
+        "id": "osm:relation/9991740",
+        "name": "Instituto Educacional Castros",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2883,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.5998141,
+          -3.7921002
+        ]
+      },
+      "properties": {
+        "id": "osm:node/6660358701",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2884,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6228227,
+          -3.7658543
+        ]
+      },
+      "properties": {
+        "id": "osm:way/591288882",
+        "name": "UBS Francisca de Fátima Lucas da Costa",
+        "category": "saude",
+        "sourceType": "amenity=clinic",
+        "distanceMeters": 2893,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6112953,
+          -3.77004
+        ]
+      },
+      "properties": {
+        "id": "osm:relation/5704563",
+        "name": "EEEP Professor César Campelo",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2897,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6022735,
+          -3.7803568
+        ]
+      },
+      "properties": {
+        "id": "osm:node/4477970087",
+        "name": "Igreja Cristã Gileade",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 2899,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6043392,
+          -3.7768087
+        ]
+      },
+      "properties": {
+        "id": "osm:node/4477971992",
+        "name": "Igreja Universal do Reino de Deus (Granja Portugal)",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 2900,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6056495,
+          -3.7750457
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3942753695",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2903,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6015372,
+          -3.7819246
+        ]
+      },
+      "properties": {
+        "id": "osm:way/970755068",
+        "name": "Casa Brasil",
+        "category": "assistencia",
+        "sourceType": "amenity=social_facility",
+        "distanceMeters": 2903,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6055024,
+          -3.7752089
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3942753697",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2904,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6009526,
+          -3.7999194
+        ]
+      },
+      "properties": {
+        "id": "osm:node/6967597172",
+        "name": "Escola de tempo parcial Catarina Lima da Silva",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2904,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.5995895,
+          -3.7912034
+        ]
+      },
+      "properties": {
+        "id": "osm:node/6618235350",
+        "name": "Compre Farma",
+        "category": "saude",
+        "sourceType": "amenity=pharmacy",
+        "distanceMeters": 2909,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6095916,
+          -3.7711301
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3942753674",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2910,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.605855,
+          -3.774619
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3942753691",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2916,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.5995176,
+          -3.7916586
+        ]
+      },
+      "properties": {
+        "id": "osm:way/715650246",
+        "name": "Mercadinho Nezim",
+        "category": "abastecimento",
+        "sourceType": "shop=convenience",
+        "distanceMeters": 2916,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.5995157,
+          -3.7910907
+        ]
+      },
+      "properties": {
+        "id": "osm:node/6618216279",
+        "name": "Farmácia Brasil",
+        "category": "saude",
+        "sourceType": "amenity=pharmacy",
+        "distanceMeters": 2917,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.601845,
+          -3.7808612
+        ]
+      },
+      "properties": {
+        "id": "osm:way/961683127",
+        "name": "Posto de Saúde Fernando César Vieira Diógenes",
+        "category": "saude",
+        "sourceType": "amenity=clinic",
+        "distanceMeters": 2918,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6108223,
+          -3.7701029
+        ]
+      },
+      "properties": {
+        "id": "osm:way/387376539",
+        "name": "Posto de Saúde José Pontes Neto",
+        "category": "saude",
+        "sourceType": "amenity=clinic",
+        "distanceMeters": 2920,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6072294,
+          -3.8103228
+        ]
+      },
+      "properties": {
+        "id": "osm:node/6698105307",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2921,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.5994737,
+          -3.7915271
+        ]
+      },
+      "properties": {
+        "id": "osm:way/715650249",
+        "name": "Ponto do Bazar",
+        "category": "abastecimento",
+        "sourceType": "amenity=marketplace",
+        "distanceMeters": 2921,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6016367,
+          -3.7812483
+        ]
+      },
+      "properties": {
+        "id": "osm:way/970755076",
+        "name": "Escola Reitor Antônio Martins Filho",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2922,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.5995753,
+          -3.7888817
+        ]
+      },
+      "properties": {
+        "id": "osm:node/6624873246",
+        "name": "Bodega da Rosa",
+        "category": "abastecimento",
+        "sourceType": "shop=convenience",
+        "distanceMeters": 2927,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.615945,
+          -3.7672664
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3942752950",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2929,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6113267,
+          -3.8137424
+        ]
+      },
+      "properties": {
+        "id": "osm:node/11062549460",
+        "name": "Posto Siqueira",
+        "category": "abastecimento",
+        "sourceType": "shop=convenience",
+        "distanceMeters": 2930,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.5993962,
+          -3.7918225
+        ]
+      },
+      "properties": {
+        "id": "osm:way/715650244",
+        "name": "Igreja Verbo da Vida",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 2930,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.5993826,
+          -3.7912529
+        ]
+      },
+      "properties": {
+        "id": "osm:node/6618216278",
+        "name": "Farmácia do Trabalhador",
+        "category": "saude",
+        "sourceType": "amenity=pharmacy",
+        "distanceMeters": 2931,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.5993863,
+          -3.7911308
+        ]
+      },
+      "properties": {
+        "id": "osm:node/6660361340",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2931,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6044987,
+          -3.7760195
+        ]
+      },
+      "properties": {
+        "id": "osm:node/4477889895",
+        "name": "Solmar",
+        "category": "abastecimento",
+        "sourceType": "shop=supermarket",
+        "distanceMeters": 2937,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6370231,
+          -3.7677793
+        ]
+      },
+      "properties": {
+        "id": "osm:node/8762636533",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2937,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6240718,
+          -3.7653111
+        ]
+      },
+      "properties": {
+        "id": "osm:node/13284213525",
+        "name": "Educandário são francisco eeief",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2941,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6241915,
+          -3.7652935
+        ]
+      },
+      "properties": {
+        "id": "osm:node/13772935401",
+        "name": "Educandário São Francisco - frente (próx. a educandário são francisco)",
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2942,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6207481,
+          -3.765718
+        ]
+      },
+      "properties": {
+        "id": "osm:way/785740178",
+        "name": "Pague Menos",
+        "category": "saude",
+        "sourceType": "amenity=pharmacy",
+        "distanceMeters": 2943,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6120703,
+          -3.8144165
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1095392122",
+        "name": "Baratão Supermercados | Siqueira",
+        "category": "abastecimento",
+        "sourceType": "shop=supermarket",
+        "distanceMeters": 2950,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6359555,
+          -3.7671814
+        ]
+      },
+      "properties": {
+        "id": "osm:relation/12545101",
+        "name": "NEDI Edson Queiroz",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2950,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6362404,
+          -3.7672791
+        ]
+      },
+      "properties": {
+        "id": "osm:node/8842738775",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2952,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6266188,
+          -3.8182888
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1139008500",
+        "name": "Igreja Evangélica",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 2958,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6055896,
+          -3.7743394
+        ]
+      },
+      "properties": {
+        "id": "osm:node/3942753689",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2959,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.5990997,
+          -3.7921232
+        ]
+      },
+      "properties": {
+        "id": "osm:node/6660361339",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2963,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.637043,
+          -3.7675278
+        ]
+      },
+      "properties": {
+        "id": "osm:node/8762636534",
+        "name": null,
+        "category": "transporte",
+        "sourceType": "highway=bus_stop",
+        "distanceMeters": 2963,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6077261,
+          -3.7720576
+        ]
+      },
+      "properties": {
+        "id": "osm:relation/5704552",
+        "name": "E.M.E.I.F. Governador Faustino de Albuquerque (UV1)",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2965,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6358027,
+          -3.7668849
+        ]
+      },
+      "properties": {
+        "id": "osm:relation/12545102",
+        "name": "U.B.S Antônio Jander Pereira de Machado",
+        "category": "saude",
+        "sourceType": "amenity=clinic",
+        "distanceMeters": 2974,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6226597,
+          -3.8182877
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1092975520",
+        "name": "Escola Professora Eudes Veras",
+        "category": "educacao",
+        "sourceType": "amenity=school",
+        "distanceMeters": 2977,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.5990152,
+          -3.7898046
+        ]
+      },
+      "properties": {
+        "id": "osm:node/6621455534",
+        "name": "Mercadinho Rossivando Pinheiro",
+        "category": "abastecimento",
+        "sourceType": "amenity=marketplace",
+        "distanceMeters": 2979,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.5990367,
+          -3.7895504
+        ]
+      },
+      "properties": {
+        "id": "osm:node/6621455535",
+        "name": "Farmácia do Antônio",
+        "category": "saude",
+        "sourceType": "amenity=pharmacy",
+        "distanceMeters": 2979,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6434364,
+          -3.7714943
+        ]
+      },
+      "properties": {
+        "id": "osm:way/305796710",
+        "name": "Pequeno Cotolengo Dom Orione",
+        "category": "assistencia",
+        "sourceType": "amenity=place_of_worship",
+        "distanceMeters": 2979,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6056622,
+          -3.8096177
+        ]
+      },
+      "properties": {
+        "id": "osm:way/1095392131",
+        "name": "Centro Cultural | Canindezinho",
+        "category": "assistencia",
+        "sourceType": "office=government",
+        "distanceMeters": 2994,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6259174,
+          -3.7647709
+        ]
+      },
+      "properties": {
+        "id": "osm:relation/10979161",
+        "name": "Policlínica Jurema",
+        "category": "saude",
+        "sourceType": "amenity=clinic",
+        "distanceMeters": 2994,
+        "ring": 3000
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -38.6064415,
+          -3.8104985
+        ]
+      },
+      "properties": {
+        "id": "osm:way/730336952",
+        "name": "Atacadão",
+        "category": "abastecimento",
+        "sourceType": "shop=supermarket",
+        "distanceMeters": 2997,
+        "ring": 3000
+      }
+    }
+  ]
+}
