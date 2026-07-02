@@ -1,11 +1,4 @@
-import {
-  Box,
-  Button,
-  Heading,
-  HStack,
-  NativeSelect,
-  Text,
-} from '@chakra-ui/react';
+import { Box, Button, Heading, HStack, Text } from '@chakra-ui/react';
 
 import type {
   NearbyKitchen,
@@ -13,7 +6,7 @@ import type {
   NearbyProvider,
 } from '@/data-gateway/schema';
 
-import { computeIndicators } from '../indicators';
+import { type NearbyIndicators as Indicators } from '../indicators';
 import { CATEGORY_META, type NearbyGroup } from '../nearbySpec';
 import KitchenIdentity from './KitchenIdentity';
 import NearbyIndicators from './NearbyIndicators';
@@ -30,17 +23,18 @@ type NearbyPanelProps = {
   status: 'idle' | 'loading' | 'error';
   nearby: NearbyPlacesContract | null;
   groups: NearbyGroup[];
-  onProviderChange: (provider: NearbyProvider) => void;
+  indicators: Indicators | null;
   onClear: () => void;
 };
 
 /**
- * Right-hand overlay panel for a selected kitchen: identity header, provider
- * toggle, illustrative indices, truncation notice and the per-category list.
+ * Right-hand panel for a selected kitchen (a flex sibling of the map, not an
+ * overlay): identity header, illustrative indices, truncation notice and the
+ * per-category list.
  *
  * @example
  * <NearbyPanel selected={k} provider="osm" status="idle" nearby={data}
- *   groups={groups} onProviderChange={load} onClear={clear} />
+ *   groups={groups} indicators={indicators} onClear={clear} />
  */
 const NearbyPanel = ({
   selected,
@@ -48,24 +42,23 @@ const NearbyPanel = ({
   status,
   nearby,
   groups,
-  onProviderChange,
+  indicators,
   onClear,
 }: NearbyPanelProps) => {
   const truncated = nearby?.metadata.truncatedCategories ?? [];
-  const indicators = nearby ? computeIndicators(nearby.features) : null;
 
   return (
     <Box
-      position="absolute"
-      top={0}
-      right={0}
-      bottom={0}
       w={{ base: '100%', md: '380px' }}
-      bg="surface.card"
-      shadow="card"
+      flexShrink={0}
+      maxH={{ base: '45%', md: 'none' }}
+      h={{ md: '100%' }}
       overflowY="auto"
+      bg="surface.card"
+      borderTopWidth={{ base: '1px', md: '0' }}
+      borderLeftWidth={{ base: '0', md: '1px' }}
+      borderColor="ivory.300"
       p={5}
-      zIndex={1}
     >
       <HStack justify="space-between" align="start" mb={3} gap={3}>
         <Heading as="h2" textStyle="title-4" color="text.primary">
@@ -82,20 +75,6 @@ const NearbyPanel = ({
       </HStack>
 
       <KitchenIdentity kitchen={selected} />
-
-      <NativeSelect.Root size="sm" mb={4}>
-        <NativeSelect.Field
-          value={provider}
-          onChange={(event) => {
-            onProviderChange(event.currentTarget.value as NearbyProvider);
-          }}
-          aria-label="Fonte dos dados"
-        >
-          <option value="osm">OpenStreetMap</option>
-          <option value="google">Google Maps</option>
-        </NativeSelect.Field>
-        <NativeSelect.Indicator />
-      </NativeSelect.Root>
 
       {status === 'error' ? (
         <Text textStyle="body-sm" color="action.fg">

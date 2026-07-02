@@ -4,24 +4,20 @@ import type {
   VisualizationSpec,
 } from '@ttoss/geovis';
 
-import type {
-  NearbyCategory,
-  NearbyKitchen,
-  NearbyPlaceFeature,
-  NearbyProvider,
+import {
+  NEARBY_CATEGORIES,
+  NEARBY_RINGS,
+  type NearbyCategory,
+  type NearbyKitchen,
+  type NearbyPlaceFeature,
+  type NearbyProvider,
 } from '@/data-gateway/schema';
 
-/** The concentric analysis rings, in metres. */
-export const RING_RADII = [500, 1500, 3000] as const;
+/** The concentric analysis rings, in metres (single source: `NEARBY_RINGS`). */
+export const RING_RADII = NEARBY_RINGS;
 
-/** Categories in display order. */
-export const CATEGORY_ORDER: NearbyCategory[] = [
-  'abastecimento',
-  'assistencia',
-  'saude',
-  'educacao',
-  'transporte',
-];
+/** Categories in display order (single source: `NEARBY_CATEGORIES`). */
+export const CATEGORY_ORDER: NearbyCategory[] = [...NEARBY_CATEGORIES];
 
 /** Label + map colour per category (brand palette, used as intentional map colours). */
 export const CATEGORY_META: Record<
@@ -93,7 +89,12 @@ const pointFeature = (longitude: number, latitude: number): GeoJSONFeature => {
   };
 };
 
-/** The 3 concentric rings (500/1500/3000 m) as a line FeatureCollection. */
+/**
+ * The 3 concentric rings (500/1500/3000 m) as a line FeatureCollection.
+ *
+ * @example
+ * const rings = buildRingsCollection({ latitude: -30, longitude: -51 });
+ */
 export const buildRingsCollection = (
   center: Center
 ): GeoJSONFeatureCollection => {
@@ -186,7 +187,12 @@ export const buildNearbySpec = (params: {
   };
 };
 
-/** Builds the overview spec: every available kitchen as a point over Brazil. */
+/**
+ * Builds the overview spec: every available kitchen as a point over Brazil.
+ *
+ * @example
+ * const spec = buildOverviewSpec(kitchens);
+ */
 export const buildOverviewSpec = (
   kitchens: NearbyKitchen[]
 ): VisualizationSpec => {

@@ -7,6 +7,7 @@ type KitchenComboboxProps = {
   kitchens: NearbyKitchen[];
   selectedCodigo: string | null;
   onSelect: (kitchen: NearbyKitchen) => void;
+  onClear: () => void;
 };
 
 const label = (kitchen: NearbyKitchen): string => {
@@ -31,6 +32,7 @@ const KitchenCombobox = ({
   kitchens,
   selectedCodigo,
   onSelect,
+  onClear,
 }: KitchenComboboxProps) => {
   const [term, setTerm] = React.useState('');
 
@@ -54,13 +56,17 @@ const KitchenCombobox = ({
     <Combobox.Root
       collection={collection}
       value={selectedCodigo ? [selectedCodigo] : []}
-      inputValue={term}
       onInputValueChange={(details) => {
         setTerm(details.inputValue);
       }}
       onValueChange={(details) => {
+        const code = details.value[0];
+        if (!code) {
+          onClear();
+          return;
+        }
         const kitchen = kitchens.find((candidate) => {
-          return candidate.codigo === details.value[0];
+          return candidate.codigo === code;
         });
         if (kitchen) {
           onSelect(kitchen);

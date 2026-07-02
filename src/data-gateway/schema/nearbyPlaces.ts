@@ -10,19 +10,35 @@
 export type NearbyProvider = 'osm' | 'google';
 
 /**
- * Domain category of a nearby point of interest, already normalized from the
- * provider's native type via the generation crosswalk. CRAS is not modelled
- * here yet (no reliable API classification).
+ * Domain categories in display order — the single source of truth from which
+ * {@link NearbyCategory} and the runtime guards are derived. CRAS is not
+ * modelled yet (no reliable API classification).
+ *
+ * @example
+ * NEARBY_CATEGORIES.includes('saude'); // true
  */
-export type NearbyCategory =
-  | 'abastecimento'
-  | 'assistencia'
-  | 'saude'
-  | 'educacao'
-  | 'transporte';
+export const NEARBY_CATEGORIES = [
+  'abastecimento',
+  'assistencia',
+  'saude',
+  'educacao',
+  'transporte',
+] as const;
+
+/** Domain category of a nearby point of interest (normalized via the crosswalk). */
+export type NearbyCategory = (typeof NEARBY_CATEGORIES)[number];
+
+/**
+ * Concentric ring radii in metres — the single source from which
+ * {@link NearbyRing} and the runtime guards are derived.
+ *
+ * @example
+ * NEARBY_RINGS[0]; // 500
+ */
+export const NEARBY_RINGS = [500, 1500, 3000] as const;
 
 /** Concentric ring (metres from the kitchen) a POI falls into. */
-export type NearbyRing = 500 | 1500 | 3000;
+export type NearbyRing = (typeof NEARBY_RINGS)[number];
 
 /**
  * A cozinha that has a nearby snapshot available, with the identity/location

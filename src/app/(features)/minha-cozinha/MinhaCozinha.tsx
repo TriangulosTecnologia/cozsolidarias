@@ -2,7 +2,7 @@
 
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-import { Box, Heading, HStack, Spinner, Text } from '@chakra-ui/react';
+import { Box, Heading, Spinner, Text } from '@chakra-ui/react';
 import { GeoVisCanvas, GeoVisProvider } from '@ttoss/geovis';
 import * as React from 'react';
 
@@ -12,8 +12,9 @@ import type {
   NearbyProvider,
 } from '@/data-gateway/schema';
 
-import KitchenCombobox from './_components/KitchenCombobox';
+import FiltersBar from './_components/FiltersBar';
 import NearbyPanel from './_components/NearbyPanel';
+import { computeIndicators } from './indicators';
 import {
   buildNearbySpec,
   buildOverviewSpec,
@@ -87,10 +88,17 @@ const MinhaCozinha = () => {
       });
   };
 
+  const handleProviderChange = (next: NearbyProvider) => {
+    if (selected) {
+      loadNearby(selected, next);
+    } else {
+      setProvider(next);
+    }
+  };
+
   const clearSelection = () => {
     requestRef.current += 1;
     setSelected(null);
-    setProvider('osm');
     setNearby(null);
     setStatus('idle');
   };
@@ -110,56 +118,58 @@ const MinhaCozinha = () => {
     return nearby ? groupByCategory(nearby.features) : [];
   }, [nearby]);
 
+  const indicators = React.useMemo(() => {
+    return nearby ? computeIndicators(nearby.features) : null;
+  }, [nearby]);
+
   return (
     <Box h="calc(100vh - 4.5rem)" display="flex" flexDirection="column">
-      <HStack
-        as="header"
-        wrap="wrap"
-        gap={4}
-        px={{ base: 4, md: 8 }}
-        py={3}
-        borderBottomWidth="1px"
-        borderColor="ivory.300"
-        bg="surface.card"
+      <Heading as="h1" srOnly>
+        Minha Cozinha
+      </Heading>
+
+      <FiltersBar
+        kitchens={kitchens}
+        selectedCodigo={selected?.codigo ?? null}
+        provider={provider}
+        onSelect={(kitchen) => {
+          loadNearby(kitchen, provider);
+        }}
+        onClear={clearSelection}
+        onProviderChange={handleProviderChange}
+      />
+
+      <Box
+        flex="1"
+        minH={0}
+        display="flex"
+        flexDirection={{ base: 'column', md: 'row' }}
       >
-        <Heading as="h1" textStyle="title-4" color="text.primary">
-          Minha Cozinha
-        </Heading>
-        <Box flex="1" minW="240px" maxW="480px">
-          <KitchenCombobox
-            kitchens={kitchens}
-            selectedCodigo={selected?.codigo ?? null}
-            onSelect={(kitchen) => {
-              loadNearby(kitchen, provider);
-            }}
-          />
+        <Box position="relative" flex="1" minH={0} minW={0} bg="ivory.200">
+          {mounted ? (
+            <GeoVisProvider spec={spec}>
+              <GeoVisCanvas style={{ width: '100%', height: '100%' }} />
+            </GeoVisProvider>
+          ) : (
+            <Box
+              position="absolute"
+              inset={0}
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+            >
+              <Text textStyle="body-sm" color="text.secondary">
+                Carregando mapa…
+              </Text>
+            </Box>
+          )}
+
+          {status === 'loading' ? (
+            <Box position="absolute" top={3} left={3} zIndex={1}>
+              <Spinner size="sm" color="brand.solid" />
+            </Box>
+          ) : null}
         </Box>
-      </HStack>
-
-      <Box position="relative" flex="1" minH={0} bg="ivory.200">
-        {mounted ? (
-          <GeoVisProvider spec={spec}>
-            <GeoVisCanvas style={{ width: '100%', height: '100%' }} />
-          </GeoVisProvider>
-        ) : (
-          <Box
-            position="absolute"
-            inset={0}
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-          >
-            <Text textStyle="body-sm" color="text.secondary">
-              Carregando mapa…
-            </Text>
-          </Box>
-        )}
-
-        {status === 'loading' ? (
-          <Box position="absolute" top={3} left={3} zIndex={1}>
-            <Spinner size="sm" color="brand.solid" />
-          </Box>
-        ) : null}
 
         {selected ? (
           <NearbyPanel
@@ -168,9 +178,7 @@ const MinhaCozinha = () => {
             status={status}
             nearby={nearby}
             groups={groups}
-            onProviderChange={(next) => {
-              loadNearby(selected, next);
-            }}
+            indicators={indicators}
             onClear={clearSelection}
           />
         ) : null}

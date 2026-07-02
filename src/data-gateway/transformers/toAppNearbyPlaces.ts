@@ -1,28 +1,20 @@
 import type { StaticNearbyPlacesSource } from '../../data-source-static/types';
-import type {
-  NearbyCategory,
-  NearbyPlaceFeature,
-  NearbyPlacesContract,
-  NearbyProvider,
-  NearbyRing,
+import {
+  NEARBY_CATEGORIES,
+  NEARBY_RINGS,
+  type NearbyCategory,
+  type NearbyPlaceFeature,
+  type NearbyPlacesContract,
+  type NearbyProvider,
+  type NearbyRing,
 } from '../schema';
 
-const CATEGORIES: readonly NearbyCategory[] = [
-  'abastecimento',
-  'assistencia',
-  'saude',
-  'educacao',
-  'transporte',
-];
-
-const RINGS: readonly NearbyRing[] = [500, 1500, 3000];
-
 const isNearbyCategory = (value: string): value is NearbyCategory => {
-  return (CATEGORIES as readonly string[]).includes(value);
+  return (NEARBY_CATEGORIES as readonly string[]).includes(value);
 };
 
 const isNearbyRing = (value: number): value is NearbyRing => {
-  return (RINGS as readonly number[]).includes(value);
+  return (NEARBY_RINGS as readonly number[]).includes(value);
 };
 
 /** Validates a single source feature and narrows it to the app contract. */
@@ -82,6 +74,9 @@ export const toAppNearbyPlaces = (
   }
 
   const metadata = source.metadata;
+  if (!metadata || !Array.isArray(metadata.truncatedCategories)) {
+    throw new Error(`[data-gateway] ${label}: malformed or missing metadata.`);
+  }
   if (metadata.provider !== 'osm' && metadata.provider !== 'google') {
     throw new Error(
       `[data-gateway] ${label}: unknown provider "${metadata.provider}".`

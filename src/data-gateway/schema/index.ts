@@ -12,3 +12,4 @@ export type {
   NearbyProvider,
   NearbyRing,
 } from './nearbyPlaces';
+export { NEARBY_CATEGORIES, NEARBY_RINGS } from './nearbyPlaces';
