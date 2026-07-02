@@ -27,6 +27,8 @@ export default [
       'build/**',
       'out/**',
       'public/**',
+      // Throwaway data-generation experiment, kept out of the app's gates.
+      'scripts/minha-cozinha-nearby/**',
     ],
   },
   {
