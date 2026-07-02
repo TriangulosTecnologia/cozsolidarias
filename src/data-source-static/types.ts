@@ -34,3 +34,34 @@ export type StaticCozinhaSource = {
   statusFotoGeo: string;
   enderecoCompleto: string;
 };
+
+/**
+ * Raw nearby-POI snapshot as read from disk, before validation. Produced by the
+ * `scripts/minha-cozinha-nearby` generators. `category`/`ring` arrive as plain
+ * `string`/`number` and are narrowed to their unions inside the gateway
+ * transformer; nothing is trusted until then.
+ */
+export type StaticNearbyPlacesSource = {
+  type: string;
+  metadata: {
+    provider: string;
+    cozinhaId: string;
+    center: { latitude: number; longitude: number };
+    radiusMeters: number;
+    generatedAt: string;
+    attribution: string;
+    truncatedCategories: string[];
+  };
+  features: Array<{
+    type: string;
+    geometry: { type: string; coordinates: [number, number] };
+    properties: {
+      id: string;
+      name: string | null;
+      category: string;
+      sourceType: string;
+      distanceMeters: number;
+      ring: number;
+    };
+  }>;
+};

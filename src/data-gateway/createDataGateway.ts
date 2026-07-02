@@ -1,8 +1,18 @@
 import { readStaticCozinhas } from '../data-source-static/readStaticCozinhas';
 import { readStaticMunicipiosSp } from '../data-source-static/readStaticMunicipiosSp';
-import type { CozinhasFeatureCollection, kitchenByCity } from './schema';
+import { readStaticNearbyPlaces } from '../data-source-static/readStaticNearbyPlaces';
+import type {
+  CozinhasFeatureCollection,
+  kitchenByCity,
+  NearbyPlacesContract,
+  NearbyProvider,
+} from './schema';
+import { toAppNearbyPlaces } from './transformers/toAppNearbyPlaces';
 import { toCozinhasFeatureCollection } from './transformers/toCozinhasFeatureCollection';
 import { toCozinhasPorMunicipio } from './transformers/toCozinhasPorMunicipio';
+
+/** Kitchen codes look like `CS014558`; the pattern also blocks path traversal. */
+const COZINHA_ID_PATTERN = /^CS\d+$/;
 
 /** Gateway interface exposing canonical read functions. */
 export type DataGateway = {
@@ -10,6 +20,11 @@ export type DataGateway = {
   getCozinhas: () => Promise<CozinhasFeatureCollection>;
   /** Returns the cozinha count per SP município (for the choropleth map). */
   getCozinhasPorMunicipio: () => Promise<kitchenByCity[]>;
+  /** Returns the nearby POIs around a cozinha for the given provider. */
+  getNearbyPlaces: (args: {
+    cozinhaId: string;
+    provider: NearbyProvider;
+  }) => Promise<NearbyPlacesContract>;
 };
 
 const KNOWN_SOURCES = ['static'] as const;
@@ -52,6 +67,13 @@ export const createDataGateway = (): DataGateway => {
           readStaticMunicipiosSp(),
         ]);
         return toCozinhasPorMunicipio(cozinhas, municipios);
+      },
+      getNearbyPlaces: async ({ cozinhaId, provider }) => {
+        if (!COZINHA_ID_PATTERN.test(cozinhaId)) {
+          throw new Error(`[data-gateway] Invalid cozinhaId: "${cozinhaId}".`);
+        }
+        const source = await readStaticNearbyPlaces({ provider, cozinhaId });
+        return toAppNearbyPlaces(source, { provider, cozinhaId });
       },
     };
   }

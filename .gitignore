@@ -39,8 +39,8 @@ lerna-debug.log*
 .temp/
 tmp/
 
-# Throwaway experiment output (Google POI data must not be committed)
-scripts/minha-cozinha-nearby/output/
+# Google POI snapshots must not be committed (Places ToS). OSM (ODbL) is fine.
+src/data-source-static/data/nearby/google/
 
 # Editor / OS
 .vscode/*

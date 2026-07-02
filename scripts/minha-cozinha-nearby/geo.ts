@@ -102,12 +102,25 @@ export const buildFeature = (input: {
 };
 
 const HERE = dirname(fileURLToPath(import.meta.url));
+// scripts/minha-cozinha-nearby -> repo root
+const REPO_ROOT = join(HERE, '..', '..');
 
-/** Writes a collection to `output/<provider>/<cozinhaId>.geojson`. */
+/**
+ * Writes a collection to the static source the app reads from:
+ * `src/data-source-static/data/nearby/<provider>/<cozinhaId>.geojson`.
+ * OSM output is committable (ODbL); the Google folder is gitignored.
+ */
 export const writeCollection = async (
   collection: NearbyFeatureCollection
 ): Promise<string> => {
-  const dir = join(HERE, 'output', collection.metadata.provider);
+  const dir = join(
+    REPO_ROOT,
+    'src',
+    'data-source-static',
+    'data',
+    'nearby',
+    collection.metadata.provider
+  );
   await mkdir(dir, { recursive: true });
   const path = join(dir, `${collection.metadata.cozinhaId}.geojson`);
   await writeFile(path, `${JSON.stringify(collection, null, 2)}\n`, 'utf8');

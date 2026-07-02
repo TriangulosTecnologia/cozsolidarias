@@ -15,10 +15,11 @@ the decision is made.
 kitchens.ts     10 sample kitchens (5 regions, capital + interior each)
 crosswalk.ts    domain category -> OSM tags / Google place types (CRAS excluded)
 geo.ts          haversine, ring bucketing, GeoJSON shapes, output writer
-fetch-osm.ts    Overpass -> output/osm/<codigo>.geojson
-fetch-google.ts Places (New) -> output/google/<codigo>.geojson
-output/         generated GeoJSON (gitignored)
+fetch-osm.ts    Overpass -> src/data-source-static/data/nearby/osm/<codigo>.geojson
+fetch-google.ts Places (New) -> src/data-source-static/data/nearby/google/<codigo>.geojson
 ```
+
+Output goes straight into the static source the app reads (`data/nearby/<provider>/`).
 
 ## Running
 
@@ -39,7 +40,7 @@ Runs on Node 22.18+ (native TypeScript type stripping); no build step. The folde
 
 - **OSM** output is ODbL: fine to commit. Attribution: `© OpenStreetMap contributors`.
 - **Google** output must **not** be cached long-term, committed, or published (only
-  `place_id` may be stored). `output/google/` is gitignored; keep it local.
+  `place_id` may be stored). `data/nearby/google/` is gitignored; keep it local.
 
 ## Output shape
 
