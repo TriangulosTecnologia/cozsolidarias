@@ -65,3 +65,39 @@ export type StaticNearbyPlacesSource = {
     };
   }>;
 };
+
+/**
+ * Raw kitchen-enrichment snapshot as read from disk, before validation.
+ * Produced by `scripts/minha-cozinha-enrichment/generate.py` (PII-free). Every
+ * datum is `{ value, source, note? }`; `value` may be `null` when the source
+ * has no entry. Nothing is trusted until the gateway transformer validates it.
+ */
+export type StaticEnrichmentSource = {
+  cozinhaId: string;
+  generatedAt: string;
+  status: {
+    situacao: StaticSourcedValue<string>;
+    emFuncionamento: StaticSourcedValue<string>;
+    refeicoesPorDia: StaticSourcedValue<number>;
+  };
+  sourcing: {
+    comoAdquire: StaticSourcedValue<string>;
+    gastoMensalTexto: StaticSourcedValue<string>;
+    trabalhadores: StaticSourcedValue<string>;
+  } | null;
+  supplyNetwork: {
+    municipio: string;
+    paaReceivingUnits: StaticSourcedValue<number>;
+    isPaaReceiver: StaticSourcedValue<boolean>;
+    paaProducts: StaticSourcedValue<Array<{ produto: string; kg: number }>>;
+    cafOrganizations: StaticSourcedValue<number>;
+    cafExamples: StaticSourcedValue<string[]>;
+  };
+};
+
+/** A single sourced datum in the raw enrichment snapshot. */
+type StaticSourcedValue<T> = {
+  value: T | null;
+  source: string;
+  note?: string;
+};

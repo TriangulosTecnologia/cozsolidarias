@@ -105,7 +105,9 @@ describe('createDataGateway.getNearbyPlaces', () => {
 });
 
 describe('createDataGateway.getNearbyKitchens', () => {
-  // A real kitchen code present in the CSV snapshot (Porto Alegre).
+  // A real kitchen code present in the CSV snapshot (Porto Alegre). Its OSM
+  // snapshot is already committed, so the test relies on it — it must NOT write
+  // or delete this file (doing so would clobber committed data).
   const REAL_ID = 'CS014558';
   const DIR = join(
     process.cwd(),
@@ -115,7 +117,6 @@ describe('createDataGateway.getNearbyKitchens', () => {
     'nearby',
     'osm'
   );
-  const FILE = join(DIR, `${REAL_ID}.geojson`);
   // A snapshot whose code is not in the CSV — exercises the "skip unknown" path.
   const UNKNOWN_ID = 'CS999998';
   const UNKNOWN_FILE = join(DIR, `${UNKNOWN_ID}.geojson`);
@@ -123,12 +124,10 @@ describe('createDataGateway.getNearbyKitchens', () => {
   beforeAll(async () => {
     await mkdir(DIR, { recursive: true });
     const empty = JSON.stringify({ type: 'FeatureCollection', features: [] });
-    await writeFile(FILE, empty, 'utf8');
     await writeFile(UNKNOWN_FILE, empty, 'utf8');
   });
 
   afterAll(async () => {
-    await rm(FILE, { force: true });
     await rm(UNKNOWN_FILE, { force: true });
   });
 
@@ -156,5 +155,65 @@ describe('createDataGateway.getNearbyKitchens', () => {
         return kitchen.codigo === UNKNOWN_ID;
       })
     ).toBeUndefined();
+  });
+});
+
+describe('createDataGateway.getKitchenEnrichment', () => {
+  const ID = 'CS999004';
+  const DIR = join(
+    process.cwd(),
+    'src',
+    'data-source-static',
+    'data',
+    'enrichment'
+  );
+  const FILE = join(DIR, `${ID}.json`);
+
+  beforeAll(async () => {
+    await mkdir(DIR, { recursive: true });
+    await writeFile(
+      FILE,
+      JSON.stringify({
+        cozinhaId: ID,
+        generatedAt: '2025-11-04',
+        status: {
+          situacao: { value: 'Habilitada', source: 'Banco' },
+          emFuncionamento: { value: 'Sim', source: 'Banco' },
+          refeicoesPorDia: { value: null, source: 'Banco' },
+        },
+        sourcing: null,
+        supplyNetwork: {
+          municipio: 'Porto Alegre',
+          paaReceivingUnits: { value: 126, source: 'PAA' },
+          isPaaReceiver: { value: false, source: 'PAA' },
+          paaProducts: { value: [], source: 'PAA' },
+          cafOrganizations: { value: 0, source: 'CAF' },
+          cafExamples: { value: [], source: 'CAF' },
+        },
+      }),
+      'utf8'
+    );
+  });
+
+  afterAll(async () => {
+    await rm(FILE, { force: true });
+  });
+
+  test('returns the enrichment contract for a valid cozinha', async () => {
+    const gateway = createDataGateway();
+
+    const result = await gateway.getKitchenEnrichment({ cozinhaId: ID });
+
+    expect(result.cozinhaId).toBe(ID);
+    expect(result.supplyNetwork.municipio).toBe('Porto Alegre');
+    expect(result.sourcing).toBeNull();
+  });
+
+  test('rejects an invalid cozinhaId (path traversal guard)', async () => {
+    const gateway = createDataGateway();
+
+    await expect(
+      gateway.getKitchenEnrichment({ cozinhaId: '../secrets' })
+    ).rejects.toThrow(/Invalid cozinhaId/);
   });
 });

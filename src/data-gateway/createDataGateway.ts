@@ -1,4 +1,5 @@
 import { readStaticCozinhas } from '../data-source-static/readStaticCozinhas';
+import { readStaticEnrichment } from '../data-source-static/readStaticEnrichment';
 import { readStaticMunicipiosSp } from '../data-source-static/readStaticMunicipiosSp';
 import {
   listStaticNearbyCozinhaIds,
@@ -8,10 +9,12 @@ import type { StaticCozinhaSource } from '../data-source-static/types';
 import type {
   CozinhasFeatureCollection,
   kitchenByCity,
+  KitchenEnrichment,
   NearbyKitchen,
   NearbyPlacesContract,
   NearbyProvider,
 } from './schema';
+import { toAppKitchenEnrichment } from './transformers/toAppKitchenEnrichment';
 import { toAppNearbyPlaces } from './transformers/toAppNearbyPlaces';
 import { toCozinhasFeatureCollection } from './transformers/toCozinhasFeatureCollection';
 import { toCozinhasPorMunicipio } from './transformers/toCozinhasPorMunicipio';
@@ -39,6 +42,10 @@ export type DataGateway = {
   }) => Promise<NearbyPlacesContract>;
   /** Returns the cozinhas that have a nearby snapshot available. */
   getNearbyKitchens: () => Promise<NearbyKitchen[]>;
+  /** Returns the supply/public-policy enrichment for a cozinha. */
+  getKitchenEnrichment: (args: {
+    cozinhaId: string;
+  }) => Promise<KitchenEnrichment>;
 };
 
 const KNOWN_SOURCES = ['static'] as const;
@@ -88,6 +95,13 @@ export const createDataGateway = (): DataGateway => {
         }
         const source = await readStaticNearbyPlaces({ provider, cozinhaId });
         return toAppNearbyPlaces(source, { provider, cozinhaId });
+      },
+      getKitchenEnrichment: async ({ cozinhaId }) => {
+        if (!COZINHA_ID_PATTERN.test(cozinhaId)) {
+          throw new Error(`[data-gateway] Invalid cozinhaId: "${cozinhaId}".`);
+        }
+        const source = await readStaticEnrichment({ cozinhaId });
+        return toAppKitchenEnrichment(source, { cozinhaId });
       },
       getNearbyKitchens: async () => {
         const [ids, cozinhas] = await Promise.all([

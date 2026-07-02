@@ -4,6 +4,14 @@ export type {
 } from './cozinha';
 export type { kitchenByCity } from './kitchenByCity';
 export type {
+  KitchenEnrichment,
+  KitchenSourcing,
+  KitchenStatus,
+  KitchenSupplyNetwork,
+  PaaProduct,
+  SourcedValue,
+} from './kitchenEnrichment';
+export type {
   NearbyCategory,
   NearbyKitchen,
   NearbyPlaceFeature,

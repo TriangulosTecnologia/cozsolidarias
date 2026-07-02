@@ -1,0 +1,2 @@
+# Raw source spreadsheets contain PII (CPF, personal names/phones) — never commit.
+source-xlsx/

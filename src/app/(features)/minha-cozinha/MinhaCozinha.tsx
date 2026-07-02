@@ -7,6 +7,7 @@ import { GeoVisCanvas, GeoVisProvider } from '@ttoss/geovis';
 import * as React from 'react';
 
 import type {
+  KitchenEnrichment,
   NearbyKitchen,
   NearbyPlacesContract,
   NearbyProvider,
@@ -21,17 +22,24 @@ import {
   groupByCategory,
 } from './nearbySpec';
 
-const MinhaCozinha = () => {
+// All state, data fetching and derived values for the page. Kept as a
+// co-located hook so the component body stays presentational.
+const useMinhaCozinhaData = () => {
   const [mounted, setMounted] = React.useState(false);
   const [kitchens, setKitchens] = React.useState<NearbyKitchen[]>([]);
   const [selected, setSelected] = React.useState<NearbyKitchen | null>(null);
   const [provider, setProvider] = React.useState<NearbyProvider>('osm');
   const [nearby, setNearby] = React.useState<NearbyPlacesContract | null>(null);
+  const [enrichment, setEnrichment] = React.useState<KitchenEnrichment | null>(
+    null
+  );
   const [status, setStatus] = React.useState<'idle' | 'loading' | 'error'>(
     'idle'
   );
   // Guards against out-of-order responses when the user switches fast.
   const requestRef = React.useRef(0);
+  // Enrichment is tied to the kitchen (not the provider); its own token guard.
+  const enrichmentRef = React.useRef(0);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -88,6 +96,37 @@ const MinhaCozinha = () => {
       });
   };
 
+  // Enrichment does not depend on the provider, so it is fetched once per
+  // selection (not on provider toggles).
+  const loadEnrichment = (kitchen: NearbyKitchen) => {
+    const token = enrichmentRef.current + 1;
+    enrichmentRef.current = token;
+    setEnrichment(null);
+
+    fetch(`/api/minha-cozinha/${kitchen.codigo}/enrichment`)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`status ${response.status}`);
+        }
+        return response.json() as Promise<KitchenEnrichment>;
+      })
+      .then((data) => {
+        if (enrichmentRef.current === token) {
+          setEnrichment(data);
+        }
+      })
+      .catch(() => {
+        if (enrichmentRef.current === token) {
+          setEnrichment(null);
+        }
+      });
+  };
+
+  const handleSelect = (kitchen: NearbyKitchen) => {
+    loadNearby(kitchen, provider);
+    loadEnrichment(kitchen);
+  };
+
   const handleProviderChange = (next: NearbyProvider) => {
     if (selected) {
       loadNearby(selected, next);
@@ -98,8 +137,10 @@ const MinhaCozinha = () => {
 
   const clearSelection = () => {
     requestRef.current += 1;
+    enrichmentRef.current += 1;
     setSelected(null);
     setNearby(null);
+    setEnrichment(null);
     setStatus('idle');
   };
 
@@ -122,6 +163,40 @@ const MinhaCozinha = () => {
     return nearby ? computeIndicators(nearby.features) : null;
   }, [nearby]);
 
+  return {
+    mounted,
+    kitchens,
+    selected,
+    provider,
+    nearby,
+    enrichment,
+    status,
+    spec,
+    groups,
+    indicators,
+    handleSelect,
+    handleProviderChange,
+    clearSelection,
+  };
+};
+
+const MinhaCozinha = () => {
+  const {
+    mounted,
+    kitchens,
+    selected,
+    provider,
+    nearby,
+    enrichment,
+    status,
+    spec,
+    groups,
+    indicators,
+    handleSelect,
+    handleProviderChange,
+    clearSelection,
+  } = useMinhaCozinhaData();
+
   return (
     <Box h="calc(100vh - 4.5rem)" display="flex" flexDirection="column">
       <Heading as="h1" srOnly>
@@ -132,9 +207,7 @@ const MinhaCozinha = () => {
         kitchens={kitchens}
         selectedCodigo={selected?.codigo ?? null}
         provider={provider}
-        onSelect={(kitchen) => {
-          loadNearby(kitchen, provider);
-        }}
+        onSelect={handleSelect}
         onClear={clearSelection}
         onProviderChange={handleProviderChange}
       />
@@ -177,6 +250,7 @@ const MinhaCozinha = () => {
             provider={provider}
             status={status}
             nearby={nearby}
+            enrichment={enrichment}
             groups={groups}
             indicators={indicators}
             onClear={clearSelection}

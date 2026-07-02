@@ -1,0 +1,82 @@
+{
+  "cozinhaId": "CS015938",
+  "generatedAt": "2025-11-04",
+  "status": {
+    "situacao": {
+      "value": "Habilitada",
+      "source": "Banco de Cozinhas Solidárias (03/11/2025) — coluna 'Situação'"
+    },
+    "emFuncionamento": {
+      "value": "Sim, está funcionando normalmente",
+      "source": "Banco de Cozinhas Solidárias (03/11/2025) — coluna 'A cozinha está em funcionamento atualmente?'"
+    },
+    "refeicoesPorDia": {
+      "value": null,
+      "source": "Banco de Cozinhas Solidárias (03/11/2025) — coluna 'Quantidade refeições produzidas por dia'"
+    }
+  },
+  "sourcing": {
+    "comoAdquire": {
+      "value": "2 - Compra em supermercados/feiras, a parte de hortaliças, verduras, legumes e frutas é produzida na horta coletiva que existe dentro da comunidade",
+      "source": "Mapeamento de Cozinhas (Formulário, 2024) — autodeclarado — 'Onde/como são adquiridos os alimentos'",
+      "note": "autodeclarado (2024)"
+    },
+    "gastoMensalTexto": {
+      "value": "1900",
+      "source": "Mapeamento de Cozinhas (Formulário, 2024) — autodeclarado — 'valor médio mensal com alimentos'",
+      "note": "autodeclarado (2024)"
+    },
+    "trabalhadores": {
+      "value": "3",
+      "source": "Mapeamento de Cozinhas (Formulário, 2024) — autodeclarado — 'Quantas pessoas trabalham na Cozinha'",
+      "note": "autodeclarado (2024)"
+    }
+  },
+  "supplyNetwork": {
+    "municipio": "São Paulo",
+    "paaReceivingUnits": {
+      "value": 20,
+      "source": "CONAB/PAA 2025 (Programa de Aquisição de Alimentos — Cozinhas) — aba 'UNIDADES RECEBEDORAS', contagem por 'Município Consumidor'"
+    },
+    "isPaaReceiver": {
+      "value": false,
+      "source": "CONAB/PAA 2025 (Programa de Aquisição de Alimentos — Cozinhas) — 'UNIDADES RECEBEDORAS', cruzamento por CNPJ da cozinha"
+    },
+    "paaProducts": {
+      "value": [
+        {
+          "produto": "FUBA DE MILHO",
+          "kg": 66666
+        },
+        {
+          "produto": "FARINHA DE MANDIOCA",
+          "kg": 18093
+        },
+        {
+          "produto": "BANANA",
+          "kg": 5799
+        },
+        {
+          "produto": "ABOBRINHA",
+          "kg": 4001
+        },
+        {
+          "produto": "ABOBORA",
+          "kg": 4000
+        }
+      ],
+      "source": "CONAB/PAA 2025 (Programa de Aquisição de Alimentos — Cozinhas) — aba 'PRODUTOS', soma de kg por produto no município"
+    },
+    "cafOrganizations": {
+      "value": 2,
+      "source": "CAF-PJ — Cadastro Nacional da Agricultura Familiar (pessoa jurídica) — contagem de organizações no município"
+    },
+    "cafExamples": {
+      "value": [
+        "COOPERATIVA MULTIPROFISSIONAL DE ASSESSORIA, PRODUCAO, INDUSTRIALIZACAO E COMERCIALIZACAO DOS ASSENTAMENTOS DE REFORMA AGRARIA - COOTRASP",
+        "ASSOCIACAO CIDADAO SUSTENTAVEL"
+      ],
+      "source": "CAF-PJ — Cadastro Nacional da Agricultura Familiar (pessoa jurídica) — razão social das organizações no município"
+    }
+  }
+}

@@ -1,6 +1,7 @@
 import { Box, Button, Heading, HStack, Text } from '@chakra-ui/react';
 
 import type {
+  KitchenEnrichment,
   NearbyKitchen,
   NearbyPlacesContract,
   NearbyProvider,
@@ -8,6 +9,7 @@ import type {
 
 import { type NearbyIndicators as Indicators } from '../indicators';
 import { CATEGORY_META, type NearbyGroup } from '../nearbySpec';
+import KitchenDossier from './KitchenDossier';
 import KitchenIdentity from './KitchenIdentity';
 import NearbyIndicators from './NearbyIndicators';
 import NearbyList from './NearbyList';
@@ -22,6 +24,7 @@ type NearbyPanelProps = {
   provider: NearbyProvider;
   status: 'idle' | 'loading' | 'error';
   nearby: NearbyPlacesContract | null;
+  enrichment: KitchenEnrichment | null;
   groups: NearbyGroup[];
   indicators: Indicators | null;
   onClear: () => void;
@@ -41,6 +44,7 @@ const NearbyPanel = ({
   provider,
   status,
   nearby,
+  enrichment,
   groups,
   indicators,
   onClear,
@@ -75,6 +79,8 @@ const NearbyPanel = ({
       </HStack>
 
       <KitchenIdentity kitchen={selected} />
+
+      {enrichment ? <KitchenDossier enrichment={enrichment} /> : null}
 
       {status === 'error' ? (
         <Text textStyle="body-sm" color="action.fg">
