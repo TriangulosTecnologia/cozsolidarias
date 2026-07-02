@@ -8,43 +8,108 @@ import type { kitchenByCity } from 'src/data-gateway/schema';
 import { renderWithChakra } from './renderWithChakra';
 
 // MapLibre needs a real canvas/WebGL context that jsdom lacks, so the geovis
-// render layer is stubbed with plain divs. We only care that the legend (which
-// is choropleth-only) appears/disappears as the mode changes.
+// render layer is stubbed. We only exercise the component's own logic: the
+// visualization mode drives which layers `buildSpec` puts on the map.
 jest.mock('@ttoss/geovis', () => {
   return {
     __esModule: true,
-    GeoVisProvider: ({ children }: { children: React.ReactNode }) => {
-      return <div data-testid="geovis-provider">{children}</div>;
-    },
-    GeoVisCanvas: () => {
-      return <div data-testid="geovis-canvas" />;
-    },
-    GeoVisLegend: () => {
-      return <div data-testid="geovis-legend" />;
-    },
-    GeoVisHoverTooltip: () => {
-      return <div data-testid="geovis-tooltip" />;
-    },
     createBoundaryGroup: () => {
       return { sources: [], layers: [] };
     },
+    // Passthrough: the boundary toggle doesn't change the spec's data layers,
+    // so the test can inspect the base spec straight through.
     useBoundaryToggle: (baseSpec: unknown) => {
-      return {
-        spec: baseSpec,
-        toggle: jest.fn(),
-        isVisible: jest.fn(() => {
-          return true;
-        }),
-      };
+      return { spec: baseSpec };
     },
-    useGeoVis: () => {
-      return {
-        runtime: null,
-        spec: {},
-        applyPatch: jest.fn(),
-        setView: jest.fn(),
-        policyViolations: [],
+  };
+});
+
+// `<GeovisWorkspace>` is a closed, ESM-only 3rd-party component (theme-ui +
+// MapLibre inside). Stub it with a plain `<select>` built from the config's
+// left-sidebar menu, and surface the received spec's layer ids so the test can
+// assert what each mode renders.
+jest.mock('@ttoss/geovis-workspace', () => {
+  return {
+    __esModule: true,
+    getInitialSelection: ({
+      config,
+    }: {
+      config: {
+        leftSidebar: { menus: { id: string; items: { value: string }[] }[] };
       };
+    }) => {
+      const menu = config.leftSidebar.menus[0];
+      return { [menu.id]: menu.items[0].value };
+    },
+    GeovisWorkspace: ({
+      config,
+      visualizationSpec,
+      variables,
+      onVariableChange,
+    }: {
+      config: {
+        leftSidebar: {
+          menus: {
+            id: string;
+            title: string;
+            items: { value: string; label: string }[];
+          }[];
+        };
+      };
+      visualizationSpec: { layers?: { id: string }[] };
+      variables: Record<string, string>;
+      onVariableChange: (next: Record<string, string>) => void;
+    }) => {
+      const menu = config.leftSidebar.menus[0];
+      const layerIds = (visualizationSpec.layers ?? [])
+        .map((layer) => {
+          return layer.id;
+        })
+        .join(',');
+      return (
+        <div data-testid="geovis-workspace">
+          <div data-testid="layer-ids">{layerIds}</div>
+          <select
+            aria-label={menu.title}
+            value={variables[menu.id]}
+            onChange={(event) => {
+              return onVariableChange({
+                ...variables,
+                [menu.id]: event.target.value,
+              });
+            }}
+          >
+            {menu.items.map((item) => {
+              return (
+                <option key={item.value} value={item.value}>
+                  {item.label}
+                </option>
+              );
+            })}
+          </select>
+        </div>
+      );
+    },
+  };
+});
+
+// The theme/i18n providers are ESM-only and irrelevant to the logic under test.
+jest.mock('@ttoss/react-i18n', () => {
+  return {
+    __esModule: true,
+    I18nProvider: ({ children }: { children: React.ReactNode }) => {
+      return <>{children}</>;
+    },
+  };
+});
+jest.mock('@ttoss/theme/Bruttal', () => {
+  return { __esModule: true, BruttalTheme: { config: {} } };
+});
+jest.mock('theme-ui', () => {
+  return {
+    __esModule: true,
+    ThemeUIProvider: ({ children }: { children: React.ReactNode }) => {
+      return <>{children}</>;
     },
   };
 });
@@ -67,26 +132,31 @@ beforeEach(() => {
 });
 
 describe('MapaPlayground — visualization toggle', () => {
-  test('the dropdown switches the map from choropleth to kitchen points', async () => {
+  test('switching the sidebar mode changes which layers the map spec renders', async () => {
     renderWithChakra(<MapaPlayground />);
 
-    // Initial state: choropleth mode (legend visible + choropleth copy). The
-    // matched strings are the component's real (Portuguese) UI text.
-    await screen.findByText('Cozinhas Solidárias');
-    expect(
-      screen.getByText(/Quanto mais escuro o município/)
-    ).toBeInTheDocument();
-    expect(screen.getByTestId('geovis-legend')).toBeInTheDocument();
+    // Waits out the mount fetch, then the workspace (and its spec) render.
+    const layerIds = await screen.findByTestId('layer-ids');
 
-    // Action: switch the dropdown to the points option.
-    fireEvent.change(screen.getByLabelText('Visualização do mapa'), {
+    // Default (choropleth): the fill layer only, no points/bubbles overlay.
+    expect(layerIds).not.toHaveTextContent('cozinhas-pts');
+    expect(layerIds).not.toHaveTextContent('cozinhas-bolhas');
+
+    // Points mode adds the per-cozinha points layer.
+    fireEvent.change(screen.getByLabelText('Visualização'), {
       target: { value: 'pontos' },
     });
+    expect(screen.getByTestId('layer-ids')).toHaveTextContent('cozinhas-pts');
 
-    // Points mode: the copy changes and the choropleth legend disappears.
-    expect(
-      await screen.findByText('Cada ponto é uma cozinha solidária cadastrada.')
-    ).toBeInTheDocument();
-    expect(screen.queryByTestId('geovis-legend')).not.toBeInTheDocument();
+    // Bubbles mode swaps it for the proportional-circle layer.
+    fireEvent.change(screen.getByLabelText('Visualização'), {
+      target: { value: 'circulos' },
+    });
+    expect(screen.getByTestId('layer-ids')).toHaveTextContent(
+      'cozinhas-bolhas'
+    );
+    expect(screen.getByTestId('layer-ids')).not.toHaveTextContent(
+      'cozinhas-pts'
+    );
   });
 });

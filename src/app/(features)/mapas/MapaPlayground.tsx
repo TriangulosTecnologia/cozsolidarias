@@ -2,19 +2,22 @@
 
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-import { Box, Heading, NativeSelect, Text } from '@chakra-ui/react';
+import { Box, Text } from '@chakra-ui/react';
 import {
   createBoundaryGroup,
-  GeoVisCanvas,
-  GeoVisHoverTooltip,
-  GeoVisLegend,
-  GeoVisProvider,
   type MapHoverInfo,
   useBoundaryToggle,
-  useGeoVis,
 } from '@ttoss/geovis';
-import type { Map as MapLibreMap } from 'maplibre-gl';
+import {
+  GeovisWorkspace,
+  type GeovisWorkspaceConfig,
+  type GeovisWorkspaceSelection,
+  getInitialSelection,
+} from '@ttoss/geovis-workspace';
+import { I18nProvider } from '@ttoss/react-i18n';
+import { BruttalTheme } from '@ttoss/theme/Bruttal';
 import * as React from 'react';
+import { ThemeUIProvider } from 'theme-ui';
 
 import type { kitchenByCity } from '@/data-gateway/schema';
 
@@ -32,42 +35,59 @@ const municipiosGroup = createBoundaryGroup({
   paint: { lineColor: '#B2B2B2', lineWidth: 0.6 },
 });
 
-/** `{ codigoIbge: nome }` for every SP município, keyed by `codarea`. */
+/** `{ codigoIbge: nome }` for every Brazilian município, keyed by `codarea`. */
 type NomesPorCodigo = Record<string, string>;
 
-const HideBasemapLabels = () => {
-  const { runtime } = useGeoVis();
+/** Id of the left-sidebar menu group that drives the visualization mode. */
+const MODE_MENU_ID = 'visualizacao';
 
-  React.useEffect(() => {
-    const map = runtime?.getAdapter().getNativeInstance() as
-      | MapLibreMap
-      | null
-      | undefined;
-    if (!map) {
-      return;
-    }
+/** Left sidebar drives the visualization mode. */
+const LEFT_SIDEBAR: NonNullable<GeovisWorkspaceConfig['leftSidebar']> = {
+  initialState: 'open',
+  menus: [
+    {
+      id: MODE_MENU_ID,
+      title: 'Visualização',
+      defaultValue: 'coropletico',
+      items: [
+        { value: 'coropletico', label: 'Cozinhas por município (coroplético)' },
+        { value: 'pontos', label: 'Localização das cozinhas' },
+        { value: 'circulos', label: 'Cozinhas por município' },
+      ],
+    },
+  ],
+};
 
-    const hideLabels = () => {
-      const style = map.getStyle();
-      for (const layer of style.layers ?? []) {
-        if (layer.type === 'symbol') {
-          map.setLayoutProperty(layer.id, 'visibility', 'none');
-        }
-      }
-    };
+/**
+ * Bruttal theme scoped for the GeovisWorkspace sidebars only.
+ *
+ * theme-ui's <ThemeUIProvider>, when top-level (our app root is Chakra, not
+ * theme-ui), renders <RootStyles> which injects the theme's `styles.root` onto
+ * the document GLOBALLY — `* { box-sizing }`, `html { ...styles.root }` and,
+ * crucially, `html a { font-family, color, text-decoration }`. That leaks into
+ * sibling components like the header.
+ *
+ * `config.useRootStyles: false` makes theme-ui skip that global injection
+ * entirely (it returns null). The sidebars style themselves via `sx` against
+ * the theme context, so they keep their look; only the page-wide root styles
+ * are suppressed. Color custom properties (`--theme-ui-*`, namespaced) stay on
+ * so sidebar colors still resolve.
+ */
+const scopedSidebarTheme = {
+  ...BruttalTheme,
+  config: {
+    ...BruttalTheme.config,
+    useRootStyles: false,
+  },
+};
 
-    if (map.loaded()) {
-      hideLabels();
-    } else {
-      map.on('load', hideLabels);
-    }
-
-    return () => {
-      map.off('load', hideLabels);
-    };
-  }, [runtime]);
-
-  return null;
+/**
+ * Workspace config: only the left sidebar (the mode switcher). The legend and
+ * data source now live on the map itself, configured via the geovis spec (see
+ * `buildLegends` in `geovisSpec.ts`), so no right sidebar is needed.
+ */
+const CONFIG: GeovisWorkspaceConfig = {
+  leftSidebar: LEFT_SIDEBAR,
 };
 
 const MapaPlayground = () => {
@@ -76,7 +96,13 @@ const MapaPlayground = () => {
   const [nomesPorCodigo, setNomesPorCodigo] = React.useState<NomesPorCodigo>(
     {}
   );
-  const [mode, setMode] = React.useState<MapMode>('coropletico');
+  const [selection, setSelection] = React.useState<GeovisWorkspaceSelection>(
+    () => {
+      return getInitialSelection({ config: { leftSidebar: LEFT_SIDEBAR } });
+    }
+  );
+
+  const mode = (selection[MODE_MENU_ID] ?? 'coropletico') as MapMode;
 
   React.useEffect(() => {
     let cancelled = false;
@@ -94,7 +120,7 @@ const MapaPlayground = () => {
       fetch('/api/cozinhas/por-municipio').then((response) => {
         return response.json() as Promise<kitchenByCity[]>;
       }),
-      fetch('/geo/municipios-sp-nomes.json').then((response) => {
+      fetch('/geo/municipios-nomes.json').then((response) => {
         return response.json() as Promise<NomesPorCodigo>;
       }),
     ])
@@ -112,16 +138,6 @@ const MapaPlayground = () => {
     };
   }, []);
 
-  const baseSpec = React.useMemo(() => {
-    return buildSpec(kitchenByCity, mode);
-  }, [kitchenByCity, mode]);
-
-  const boundaryGroups = React.useMemo(() => {
-    return [estadosGroup, municipiosGroup];
-  }, []);
-
-  const { spec } = useBoundaryToggle(baseSpec, boundaryGroups);
-
   const citiesByCode = React.useMemo(() => {
     return new Map(
       kitchenByCity.map((registro) => {
@@ -134,8 +150,9 @@ const MapaPlayground = () => {
     (info: MapHoverInfo) => {
       const code = String(info.featureId);
       const register = citiesByCode.get(code);
-      // Nome vem do catálogo completo (645 municípios); a contagem, dos dados de
-      // cozinha (ausente => 0). Fallback só se o catálogo não tiver o código.
+      // Nome vem do catálogo completo (todos os municípios do Brasil); a
+      // contagem, dos dados de cozinha (ausente => 0). Fallback só se o catálogo
+      // não tiver o código.
       const name =
         nomesPorCodigo[code] ?? register?.municipio ?? `Município ${code}`;
       const quantity =
@@ -157,65 +174,65 @@ const MapaPlayground = () => {
     [citiesByCode, nomesPorCodigo]
   );
 
+  const baseSpec = React.useMemo(() => {
+    return buildSpec(kitchenByCity, mode, hoverTooltip);
+  }, [kitchenByCity, mode, hoverTooltip]);
+
+  const boundaryGroups = React.useMemo(() => {
+    return [estadosGroup, municipiosGroup];
+  }, []);
+
+  const { spec } = useBoundaryToggle(baseSpec, boundaryGroups);
+
   return (
-    <Box position="relative" h="calc(100vh - 72px)" w="100%" bg="ivory.200">
+    <Box
+      position="relative"
+      h="calc(100vh - 72px)"
+      w="100%"
+      bg="ivory.200"
+      // The `<GeovisWorkspace>` root is a flex container with only `minHeight`
+      // (no `height`), so it collapses instead of filling this box. It's a
+      // closed component, so we stretch its direct child to fill the available
+      // space and drop its card border/radius for a full-bleed map.
+      css={{
+        '& > *': {
+          height: '100%',
+          width: '100%',
+          border: 'none',
+          borderRadius: 0,
+        },
+        // geovis' provider auto-renders the choropleth legend with a fixed 10px
+        // inset from the map corner (`GeoVisLegend`'s corner position isn't
+        // further configurable via the spec). Nudge it inward so it doesn't
+        // crowd the edges. Selected by the legend list's aria-label (its title).
+        '& div:has(> ul[aria-label="Cozinhas por município"])': {
+          bottom: '44px !important',
+          right: '44px !important',
+        },
+      }}
+    >
       {mounted ? (
-        <GeoVisProvider spec={spec}>
-          <GeoVisCanvas style={{ width: '100%', height: '100%' }} />
-          <HideBasemapLabels />
-
-          <Box
-            position="absolute"
-            top={4}
-            left={4}
-            bg="ivory.50"
-            px={4}
-            py={3}
-            borderRadius="card"
-            shadow="card"
-            maxW="280px"
-          >
-            <Heading as="h2" textStyle="title-4" color="text.primary" mb={1}>
-              Cozinhas Solidárias
-            </Heading>
-            <Text textStyle="body-sm" color="text.secondary" mb={3}>
-              {mode === 'coropletico'
-                ? 'Quanto mais escuro o município, mais cozinhas cadastradas ali. Passe o mouse sobre um município para ver o nome e a quantidade.'
-                : 'Cada ponto é uma cozinha solidária cadastrada.'}
-            </Text>
-
-            <NativeSelect.Root size="sm">
-              <NativeSelect.Field
-                value={mode}
-                onChange={(event) => {
-                  setMode(event.currentTarget.value as MapMode);
-                }}
-                aria-label="Visualização do mapa"
-              >
-                <option value="coropletico">Mapa coroplético</option>
-                <option value="pontos">Pontos das cozinhas</option>
-              </NativeSelect.Field>
-              <NativeSelect.Indicator />
-            </NativeSelect.Root>
-          </Box>
-
-          {mode === 'coropletico' ? (
-            <Box
-              position="absolute"
-              bottom={4}
-              left={4}
-              bg="ivory.50"
-              px={4}
-              py={3}
-              borderRadius="card"
-              shadow="card"
-            >
-              <GeoVisLegend legendId="legenda-cozinhas" />
-            </Box>
-          ) : null}
-
-          <GeoVisHoverTooltip render={hoverTooltip} />
-        </GeoVisProvider>
+        // `<GeovisWorkspace>` renders theme-ui and `@ttoss/react-i18n`
+        // components internally, so it needs both a theme-ui provider and the
+        // `<I18nProvider>` ancestor.
+        <I18nProvider locale="pt-BR">
+          {/*
+           * Scope the GeovisWorkspace sidebars to theme-ui's provider ONLY, with
+           * global root styles disabled (see scopedSidebarTheme). @ttoss/ui's own
+           * <ThemeProvider> is avoided because it also mounts a second Chakra v3
+           * system whose global `--chakra-*` variables clobber the app's tokens
+           * and break the header. The sidebars only use theme-ui primitives, so
+           * the theme-ui context is all they need.
+           */}
+          <ThemeUIProvider theme={scopedSidebarTheme}>
+            <GeovisWorkspace
+              config={CONFIG}
+              visualizationSpec={spec}
+              variables={selection}
+              onVariableChange={setSelection}
+            />
+          </ThemeUIProvider>
+        </I18nProvider>
       ) : (
         <Box
           position="absolute"

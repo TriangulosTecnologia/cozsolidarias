@@ -161,13 +161,24 @@ const mostVotedName = (nameVotes: Map<string, number>): string => {
   return best;
 };
 
+/** A município with its cozinha count plus a representative anchor point. */
+export type MunicipioAggregate = kitchenByCity & {
+  /**
+   * Representative point for the município, as the mean of its member cozinha
+   * coordinates (`[lng, lat]`). Always lands among the actual cozinhas, so it's
+   * a good anchor for a proportional-symbol (bubble) marker.
+   */
+  centroid: [number, number];
+};
+
 /**
- * Aggregates cozinhas into per-município counts via point-in-polygon.
+ * Aggregates cozinhas into per-município buckets via point-in-polygon.
  *
- * Each cozinha with coordinates is located inside one SP município polygon
- * (matched by `codarea`), and counts are tallied per code. Cozinhas without
- * coordinates, or whose point falls outside every SP polygon (e.g. other
- * states), are dropped.
+ * Each cozinha with coordinates is located inside one município polygon
+ * (matched by `codarea`); counts are tallied per code and the member
+ * coordinates are summed so a representative `centroid` (their mean) can be
+ * derived. Cozinhas without coordinates, or whose point falls outside every
+ * município polygon, are dropped.
  *
  * The join key (`codigoIbge`) comes from the geometry and is authoritative. The
  * display `municipio` name comes from the source records, which can be dirty
@@ -176,17 +187,23 @@ const mostVotedName = (nameVotes: Map<string, number>): string => {
  * than the first one.
  *
  * @param cozinhas - Raw cozinha records from data-source-static.
- * @param municipios - SP municipalities GeoJSON (`public/geo/municipios-sp.json`).
- * @returns One {@link kitchenByCity} per município that has ≥1 cozinha.
+ * @param municipios - Brazilian municipalities GeoJSON
+ * (`public/geo/geojs-100-mun.json`).
+ * @returns One {@link MunicipioAggregate} per município that has ≥1 cozinha.
  */
-export const toCozinhasPorMunicipio = (
+export const aggregateCozinhasPorMunicipio = (
   cozinhas: StaticCozinhaSource[],
   municipios: GeoJSONFeatureCollection
-): kitchenByCity[] => {
+): MunicipioAggregate[] => {
   const index = indexMunicipios(municipios);
   const counts = new Map<
     string,
-    { quantidade: number; nameVotes: Map<string, number> }
+    {
+      quantidade: number;
+      nameVotes: Map<string, number>;
+      sumLng: number;
+      sumLat: number;
+    }
   >();
 
   for (const cozinha of cozinhas) {
@@ -208,20 +225,47 @@ export const toCozinhasPorMunicipio = (
 
     let current = counts.get(match.codigoIbge);
     if (!current) {
-      current = { quantidade: 0, nameVotes: new Map() };
+      current = { quantidade: 0, nameVotes: new Map(), sumLng: 0, sumLat: 0 };
       counts.set(match.codigoIbge, current);
     }
 
     current.quantidade += 1;
+    current.sumLng += cozinha.longitude;
+    current.sumLat += cozinha.latitude;
     const name = cozinha.municipio;
     current.nameVotes.set(name, (current.nameVotes.get(name) ?? 0) + 1);
   }
 
-  return [...counts].map(([codigoIbge, { quantidade, nameVotes }]) => {
-    return {
-      codigoIbge,
-      municipio: mostVotedName(nameVotes),
-      quantidade,
-    };
-  });
+  return [...counts].map(
+    ([codigoIbge, { quantidade, nameVotes, sumLng, sumLat }]) => {
+      return {
+        codigoIbge,
+        municipio: mostVotedName(nameVotes),
+        quantidade,
+        centroid: [sumLng / quantidade, sumLat / quantidade] as [
+          number,
+          number,
+        ],
+      };
+    }
+  );
+};
+
+/**
+ * Aggregates cozinhas into per-município counts via point-in-polygon.
+ *
+ * Thin projection of {@link aggregateCozinhasPorMunicipio} that drops the
+ * geometry anchor, for consumers (the choropleth) that only need the counts.
+ *
+ * @returns One {@link kitchenByCity} per município that has ≥1 cozinha.
+ */
+export const toCozinhasPorMunicipio = (
+  cozinhas: StaticCozinhaSource[],
+  municipios: GeoJSONFeatureCollection
+): kitchenByCity[] => {
+  return aggregateCozinhasPorMunicipio(cozinhas, municipios).map(
+    ({ codigoIbge, municipio, quantidade }) => {
+      return { codigoIbge, municipio, quantidade };
+    }
+  );
 };

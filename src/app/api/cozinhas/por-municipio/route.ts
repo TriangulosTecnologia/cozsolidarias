@@ -1,7 +1,7 @@
 import { gateway } from '../../../../gateway';
 
 /**
- * Returns the cozinha count per SP município as an array of
+ * Returns the cozinha count per município (Brazil-wide) as an array of
  * `{ codigoIbge, municipio, quantidade }`, ready to feed the choropleth map's
  * `mapData` (join `geometryId: codigoIbge` ↔ `feature.properties.codarea`).
  */

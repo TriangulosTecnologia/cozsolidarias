@@ -3,7 +3,7 @@
  * choropleth map.
  *
  * `codigoIbge` is the 7-digit IBGE municipality code (matches `codarea` in
- * `public/geo/municipios-sp.json`) and is what the map uses to join the value
+ * `public/geo/geojs-100-mun.json`) and is what the map uses to join the value
  * to a polygon. `municipio` carries the human-readable name for tooltips/labels.
  */
 

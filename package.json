@@ -15,11 +15,16 @@
     "@chakra-ui/react": "^3.35.0",
     "@emotion/react": "^11.14.0",
     "@iconify/react": "^6.0.2",
-    "@ttoss/geovis": "^0.2.0",
+    "@ttoss/geovis": "^0.8.1",
+    "@ttoss/geovis-workspace": "^0.2.7",
+    "@ttoss/react-i18n": "^2.3.0",
+    "@ttoss/theme": "^2.12.0",
+    "@ttoss/ui": "^6.9.28",
     "maplibre-gl": "^5.24.0",
     "next": "^16.2.6",
     "react": "^19.2.3",
-    "react-dom": "^19.2.3"
+    "react-dom": "^19.2.3",
+    "theme-ui": "^0.17.4"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.0.1",
