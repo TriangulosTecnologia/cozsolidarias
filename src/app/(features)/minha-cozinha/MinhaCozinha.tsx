@@ -40,6 +40,19 @@ const useMinhaCozinhaData = () => {
   const requestRef = React.useRef(0);
   // Enrichment is tied to the kitchen (not the provider); its own token guard.
   const enrichmentRef = React.useRef(0);
+  // True once the nearby map sources (rings/center/categories) have been
+  // added to the live map for the current, uninterrupted selection. `spec`
+  // reads this to avoid adding them with empty data before the first fetch
+  // resolves: @ttoss/geovis's MapLibre adapter gates every sync on
+  // `map.isStyleLoaded()` and, when it's false, defers to a `style.load`
+  // event that never fires again in this app (the basemap URL never
+  // changes) — so a `setData` issued right after those sources are first
+  // added can be silently dropped forever. Shipping the real data at
+  // creation time (by waiting for it) sidesteps that race; once the sources
+  // are known to be live, later reloads (kitchen or provider switches) can
+  // safely go through the empty-then-filled path, since by then they are
+  // long settled and the follow-up `setData` lands outside the race window.
+  const [nearbySourcesLive, setNearbySourcesLive] = React.useState(false);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -86,6 +99,7 @@ const useMinhaCozinhaData = () => {
       .then((data) => {
         if (requestRef.current === token) {
           setNearby(data);
+          setNearbySourcesLive(true);
           setStatus('idle');
         }
       })
@@ -138,6 +152,7 @@ const useMinhaCozinhaData = () => {
   const clearSelection = () => {
     requestRef.current += 1;
     enrichmentRef.current += 1;
+    setNearbySourcesLive(false);
     setSelected(null);
     setNearby(null);
     setEnrichment(null);
@@ -145,15 +160,22 @@ const useMinhaCozinhaData = () => {
   };
 
   const spec = React.useMemo(() => {
-    if (selected) {
-      return buildNearbySpec({
-        center: { latitude: selected.latitude, longitude: selected.longitude },
-        features: nearby?.features ?? [],
-        provider,
-      });
+    if (!selected) {
+      return buildOverviewSpec(kitchens);
     }
-    return buildOverviewSpec(kitchens);
-  }, [selected, nearby, provider, kitchens]);
+    // First fetch for a fresh selection: wait for it so the map sources are
+    // created already populated, instead of empty-then-filled (see
+    // nearbySourcesLive). Once settled (data arrived, or the fetch failed
+    // and nothing more is coming), always show the kitchen's rings.
+    if (!nearbySourcesLive && status === 'loading') {
+      return buildOverviewSpec(kitchens);
+    }
+    return buildNearbySpec({
+      center: { latitude: selected.latitude, longitude: selected.longitude },
+      features: nearby?.features ?? [],
+      provider,
+    });
+  }, [selected, nearby, provider, kitchens, status, nearbySourcesLive]);
 
   const groups = React.useMemo(() => {
     return nearby ? groupByCategory(nearby.features) : [];
