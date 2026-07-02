@@ -41,12 +41,9 @@ type NearbyPanelProps = {
 };
 
 /**
- * Analysis panel for a selected kitchen: provider toggle, category legend,
- * truncation notice, the per-category POI list, and source attribution.
- *
- * @param props - The `selected` kitchen, current `provider`/`status`, the
- * loaded `nearby` collection, precomputed `groups`, and the `onProviderChange`
- * / `onClear` callbacks.
+ * Right-hand overlay panel for a selected kitchen: header with close button,
+ * provider toggle, category legend, truncation notice, per-category POI list,
+ * and source attribution.
  *
  * @example
  * <NearbyPanel selected={k} provider="osm" status="idle" nearby={data}
@@ -64,35 +61,50 @@ const NearbyPanel = ({
   const truncated = nearby?.metadata.truncatedCategories ?? [];
 
   return (
-    <Box mt={4}>
-      <HStack justify="space-between" wrap="wrap" gap={3} mb={3}>
+    <Box
+      position="absolute"
+      top={0}
+      right={0}
+      bottom={0}
+      w={{ base: '100%', md: '380px' }}
+      bg="surface.card"
+      shadow="card"
+      overflowY="auto"
+      p={5}
+      zIndex={1}
+    >
+      <HStack justify="space-between" align="start" mb={4} gap={3}>
         <Box>
-          <Text textStyle="body" fontWeight="600" color="text.primary">
+          <Heading as="h2" textStyle="title-4" color="text.primary">
             {selected.nome || selected.codigo}
-          </Text>
+          </Heading>
           <Text textStyle="caption" color="text.secondary">
             {selected.municipio} — {selected.uf}
           </Text>
         </Box>
-        <HStack gap={3}>
-          <NativeSelect.Root size="sm" w="auto">
-            <NativeSelect.Field
-              value={provider}
-              onChange={(event) => {
-                onProviderChange(event.currentTarget.value as NearbyProvider);
-              }}
-              aria-label="Fonte dos dados"
-            >
-              <option value="osm">OpenStreetMap</option>
-              <option value="google">Google Maps</option>
-            </NativeSelect.Field>
-            <NativeSelect.Indicator />
-          </NativeSelect.Root>
-          <Button size="sm" variant="ghost" onClick={onClear}>
-            Ver todas
-          </Button>
-        </HStack>
+        <Button
+          aria-label="Fechar painel"
+          size="xs"
+          variant="ghost"
+          onClick={onClear}
+        >
+          ✕
+        </Button>
       </HStack>
+
+      <NativeSelect.Root size="sm" mb={4}>
+        <NativeSelect.Field
+          value={provider}
+          onChange={(event) => {
+            onProviderChange(event.currentTarget.value as NearbyProvider);
+          }}
+          aria-label="Fonte dos dados"
+        >
+          <option value="osm">OpenStreetMap</option>
+          <option value="google">Google Maps</option>
+        </NativeSelect.Field>
+        <NativeSelect.Indicator />
+      </NativeSelect.Root>
 
       {status === 'error' ? (
         <Text textStyle="body-sm" color="action.fg">
@@ -143,7 +155,7 @@ const NearbyPanel = ({
                         borderRadius="pill"
                         bg={group.color}
                       />
-                      <Heading as="h2" textStyle="title-4" color="text.primary">
+                      <Heading as="h3" textStyle="body" color="text.primary">
                         {group.label}
                       </Heading>
                       <Text textStyle="body-sm" color="text.secondary">

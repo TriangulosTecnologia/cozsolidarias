@@ -40,20 +40,21 @@ const PROVIDER_ATTRIBUTION: Record<NearbyProvider, string> = {
   google: 'Google Maps',
 };
 
-const RING_LINE_COLOR = '#7A716D';
+const RING_LINE_COLOR = '#524945';
 const CENTER_COLOR = '#241F21';
 const IVORY = '#FAF9F7';
 
 type Center = { latitude: number; longitude: number };
 
 /**
- * GeoJSON Polygon approximating a circle of `radiusMeters` around `center`, as
- * an equirectangular ellipse — accurate enough for display at city scale.
+ * GeoJSON `LineString` outlining a circle of `radiusMeters` around `center`, as
+ * an equirectangular ellipse — accurate enough for display at city scale. A
+ * line (not a polygon) so the map draws a visible contour with no fill.
  *
  * @example
- * const ring = circlePolygon({ latitude: -30, longitude: -51 }, 500);
+ * const ring = circleRing({ latitude: -30, longitude: -51 }, 500);
  */
-export const circlePolygon = (
+export const circleRing = (
   center: Center,
   radiusMeters: number,
   steps = 64
@@ -74,7 +75,7 @@ export const circlePolygon = (
   return {
     type: 'Feature',
     properties: { radiusMeters },
-    geometry: { type: 'Polygon', coordinates: [ring] },
+    geometry: { type: 'LineString', coordinates: ring },
   };
 };
 
@@ -92,13 +93,13 @@ const pointFeature = (longitude: number, latitude: number): GeoJSONFeature => {
   };
 };
 
-/** The 3 concentric rings (500/1500/3000 m) as a polygon FeatureCollection. */
+/** The 3 concentric rings (500/1500/3000 m) as a line FeatureCollection. */
 export const buildRingsCollection = (
   center: Center
 ): GeoJSONFeatureCollection => {
   return featureCollection(
     RING_RADII.map((radius) => {
-      return circlePolygon(center, radius);
+      return circleRing(center, radius);
     })
   );
 };
@@ -166,8 +167,8 @@ export const buildNearbySpec = (params: {
       {
         id: 'rings-line',
         sourceId: 'rings',
-        geometry: 'polygon',
-        paint: { fillOpacity: 0, lineColor: RING_LINE_COLOR },
+        geometry: 'line',
+        paint: { lineColor: RING_LINE_COLOR, lineWidth: 1.5 },
       },
       ...categoryLayers,
       {

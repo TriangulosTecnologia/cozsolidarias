@@ -4,7 +4,7 @@ import {
   buildRingsCollection,
   CATEGORY_META,
   CATEGORY_ORDER,
-  circlePolygon,
+  circleRing,
   groupByCategory,
   RING_RADII,
 } from 'src/app/(features)/minha-cozinha/nearbySpec';
@@ -46,32 +46,32 @@ describe('nearbySpec constants', () => {
   });
 });
 
-describe('circlePolygon', () => {
-  test('returns a closed polygon ring with steps + 1 vertices', () => {
-    const feature = circlePolygon(center, 500);
+describe('circleRing', () => {
+  test('returns a closed line ring with steps + 1 vertices', () => {
+    const feature = circleRing(center, 500);
 
     expect(feature.type).toBe('Feature');
-    expect(feature.geometry.type).toBe('Polygon');
-    if (feature.geometry.type !== 'Polygon') {
-      throw new Error('expected a Polygon geometry');
+    expect(feature.geometry.type).toBe('LineString');
+    if (feature.geometry.type !== 'LineString') {
+      throw new Error('expected a LineString geometry');
     }
-    const outer = feature.geometry.coordinates[0];
-    expect(outer).toHaveLength(65);
-    expect(outer[0]).toEqual(outer[outer.length - 1]);
+    const points = feature.geometry.coordinates;
+    expect(points).toHaveLength(65);
+    expect(points[0]).toEqual(points[points.length - 1]);
   });
 
   test('scales with the radius', () => {
-    const small = circlePolygon(center, 500);
-    const large = circlePolygon(center, 3000);
+    const small = circleRing(center, 500);
+    const large = circleRing(center, 3000);
     if (
-      small.geometry.type !== 'Polygon' ||
-      large.geometry.type !== 'Polygon'
+      small.geometry.type !== 'LineString' ||
+      large.geometry.type !== 'LineString'
     ) {
-      throw new Error('expected Polygon geometries');
+      throw new Error('expected LineString geometries');
     }
     // Vertex 0 is at theta=0 (cos=1, sin=0): its longitude offset equals lonDegrees.
-    const smallSpanLon = small.geometry.coordinates[0][0][0] - center.longitude;
-    const largeSpanLon = large.geometry.coordinates[0][0][0] - center.longitude;
+    const smallSpanLon = small.geometry.coordinates[0][0] - center.longitude;
+    const largeSpanLon = large.geometry.coordinates[0][0] - center.longitude;
     expect(Math.abs(largeSpanLon)).toBeGreaterThan(Math.abs(smallSpanLon));
   });
 });
