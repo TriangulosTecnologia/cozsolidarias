@@ -29,7 +29,7 @@ human review, risk-tiered                                                       
 1. Evidence over confidence.
 2. Enforcement over prose.
 3. Small, reversible fixes.
-4. Read-only by default (`plan`, `review`, `pr`, `audit`, `docs review` diagnose).
+4. Read-only by default (`plan`, `review`, `pr`, `audit`, and `docs review`/`docs instructions` diagnose).
 5. One finding per `improve`.
 6. No style-only blocking.
 7. No documentation for its own sake.
@@ -44,11 +44,11 @@ human review, risk-tiered                                                       
 
 ## Argument parsing
 
-The first token of `$ARGUMENTS` selects the mode: `plan|review|pr|audit|improve|docs`. If absent: a git diff exists → `review`; no diff → ask for a mode. Never run `audit` without a bounded scope (path/package/domain). Never run `improve` without one explicit finding ID.
+The first token of `$ARGUMENTS` selects the mode: `plan|review|pr|audit|improve|docs`. For `docs`, a second token selects the submode (`review|improve|instructions|jsdoc`; default `review`): `review` and `instructions` are read-only; `improve` and `jsdoc` may edit one surface at a time after the change is approved. If the first token is not a known mode, treat the whole `$ARGUMENTS` as a task for `plan`, or ask which mode to run. If absent: a git diff exists → `review`; no diff → ask for a mode. Never run `audit` without a bounded scope (path/package/domain). Never run `improve` without one explicit finding ID.
 
 ## Tool policy
 
-This multipurpose skill declares no broad `allowed-tools`. For `plan/review/pr/audit/docs review`, use read-only tools and read-only Bash. For `improve`, use edit tools only after one finding is approved. Keep discovery read-only (`reference/baseline.md`).
+This multipurpose skill declares no broad `allowed-tools`. For `plan/review/pr/audit` and `docs review`/`docs instructions`, use read-only tools and read-only Bash. For `improve` and `docs improve`/`docs jsdoc`, use edit tools only after one finding or surface is approved. Keep discovery read-only (`reference/baseline.md`).
 
 ## Severity, verdicts, findings
 
@@ -68,11 +68,11 @@ Finding format (stable IDs so `audit → improve` can reference them):
   Evidence / Risk / Fix
 ```
 
-Fields: severity, `G-NNN`, dimension, target ladder rung (`enforcement|path-scoped-context|procedure|prose`).
+Fields: severity, `G-NNN`, dimension (one of the 8 canonical slugs in `reference/methodology.md`), target ladder rung (`enforcement|path-scoped-context|procedure|prose`). Finding IDs reference findings within the current conversation; in a new session, paste the finding text instead of an ID.
 
 ## Modes — load only what the mode needs
 
-Files below live in this skill's directory (`${CLAUDE_SKILL_DIR}`). Read them on demand:
+Files below live in this skill's directory; read each as `${CLAUDE_SKILL_DIR}/<path>`, on demand:
 
 | Mode    | Read                                                                                              |
 | ------- | ------------------------------------------------------------------------------------------------- |

@@ -2,14 +2,12 @@
 
 ## Promotion path (the ratchet)
 
-Push recurring findings up the ladder. Judge recurrence from available evidence (git history, existing findings, TODOs):
+Promote by class and by observable evidence — never by a remembered count you cannot verify.
 
-```txt
-seen once        → P2 suggestion
-seen twice       → propose codification (test/type/schema/lint)
-seen three times → recommend a durable gate (lint/typecheck/test/CI/hook)
-high-risk class  → propose deterministic enforcement immediately
-```
+- Any mechanizable finding → propose codification now (test/type/schema/lint).
+- High-risk class (security/auth/billing/permissions/data/migrations) → propose deterministic enforcement immediately (lint/typecheck/test/CI/hook).
+- Observable repetition (the same issue across several files in this diff, a prior finding in this conversation, or an existing issue/TODO) → strengthen from a suggestion to a durable gate, and cite the evidence.
+- Do not assert a recurrence count you cannot point to.
 
 ## Enforcement type by target
 

@@ -1,6 +1,6 @@
 # Mode: improve
 
-Fix exactly one approved finding (by ID), by ladder position (`reference/enforcement.md`).
+Fix exactly one approved finding (by ID), by ladder position (`${CLAUDE_SKILL_DIR}/reference/enforcement.md`).
 
 - **Mechanizable** → codify the enforcement (lint/type/schema/test/coverage gate), not just patch the instance; first check the rule/plugin is already available; if a new dep or hook/CI change is needed, stop and propose.
 - **Not mechanizable** → smallest correct prose/spec change, or produce a `plan` if it needs architectural/product judgment.
