@@ -7,7 +7,9 @@ argument-hint: 'plan|review|pr|audit|improve|docs [task|path|finding-id]'
 
 # Guardian
 
-Guardian keeps this repository an **AI Repo**: one where a correct change is made with low context cost, low ambiguity, low architectural risk, and high automatic verification — for humans and agents alike. It does not guarantee quality by being prose; it guarantees by **migrating rules up the durability ladder** into enforcement.
+Guardian keeps this repository an **AI Repo**: one whose structure, code, scripts, and instructions are written as a **basis** (the axes of the decision space), not as **cases** (enumerated points). A good basis is irreducible (no duplication), orthogonal (one concern, one place), spanning (every case has a defined decision), and decodable (idiomatic to the reader). Its observable consequences: the repo is compressible (a change fits few axes), contractual (intent lives in types/schemas/tests), verifiable (the basis is mechanically checked), and safe (points off every axis are quarantined). **basis-form** is this standard; see `reference/basis-form.md`.
+
+Guardian does not guarantee this by being prose. It **acts** on the repo — detecting, editing, restructuring, and propagating the basis into the repo's durable surfaces — and migrates rules up the durability ladder into enforcement.
 
 ```txt
 deterministic enforcement   types, schemas, lint, tests, coverage gates, CI, hooks   ← strongest, prefer
@@ -74,13 +76,13 @@ Fields: severity, `G-NNN`, dimension (one of the 8 canonical slugs in `reference
 
 Files below live in this skill's directory; read each as `${CLAUDE_SKILL_DIR}/<path>`, on demand:
 
-| Mode    | Read                                                                                              |
-| ------- | ------------------------------------------------------------------------------------------------- |
-| plan    | `modes/plan.md`                                                                                   |
-| review  | `reference/baseline.md`, `reference/methodology.md`, `modes/review.md`                            |
-| pr      | `modes/pr.md`                                                                                     |
-| audit   | `reference/baseline.md`, `reference/methodology.md`, `reference/enforcement.md`, `modes/audit.md` |
-| improve | `reference/enforcement.md`, `modes/improve.md`                                                    |
-| docs    | `reference/methodology.md`, `reference/baseline.md`, `modes/docs.md`                              |
+| Mode    | Read                                                                                                                         |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| plan    | `reference/basis-form.md`, `modes/plan.md`                                                                                   |
+| review  | `reference/basis-form.md`, `reference/baseline.md`, `reference/methodology.md`, `modes/review.md`                            |
+| pr      | `modes/pr.md`                                                                                                                |
+| audit   | `reference/basis-form.md`, `reference/baseline.md`, `reference/methodology.md`, `reference/enforcement.md`, `modes/audit.md` |
+| improve | `reference/basis-form.md`, `reference/enforcement.md`, `modes/improve.md`                                                    |
+| docs    | `reference/basis-form.md`, `reference/methodology.md`, `reference/baseline.md`, `modes/docs.md`                              |
 
 End every run with one actionable next step: a correction prompt, a verification command, the first safe improvement, or a clear PASS.

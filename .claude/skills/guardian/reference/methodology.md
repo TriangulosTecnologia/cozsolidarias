@@ -2,7 +2,7 @@
 
 ## AI Repo dimensions
 
-Review only relevant dimensions; never flag what the baseline shows already enforced.
+Review only relevant dimensions; never flag what the baseline shows already enforced. These dimensions are projections of basis-form (`basis-form.md`) — the axes along which a basis-vs-cases repo is observed.
 
 1. **Context compressibility** (`compressibility`) — can the change be explained through a small, bounded context packet? Bad: small behavior needs whole-system understanding; logic spread across layers; new cross-cutting knowledge with no contract; a large file becoming a gravity well.
 2. **Executable specification** (`executable-spec`) — is important intent in tests, types, schemas, validators, or specs (not just conversation)? Bad: new behavior without acceptance tests; business rule hidden in a conditional; requirement only in an issue comment; spec duplicating code-readable facts instead of intent/boundaries/non-goals.
