@@ -20,20 +20,15 @@ Never create an axis speculatively; never leave a visible axis as cases. This gu
 
 ## Syndrome → enforcement (climb the ladder)
 
-The essence — are these the domain's true axes? — is judgment; propose it, let the human confirm at the edges. The syndromes are mechanizable and general to any toolchain — promote them into the repo's own enforcement:
+The essence — are these the domain's true axes? — is judgment; propose it, let the human confirm at the edges. The syndromes are mechanizable: each maps to a check in `enforcement.md`. Promote them into the repo's own enforcement.
 
-```txt
-case-enumeration      → cyclomatic/cognitive complexity limit, fan-out limit
-non-irreducible (dup) → duplication detector
-non-orthogonal        → import-restriction / dependency-cycle check
-non-spanning          → type exhaustiveness (never), schema validation
-```
+Tag basis-form findings by projection: case-enumeration → `pattern-hygiene`, empty-axis → `compressibility`, non-orthogonal → `boundary-integrity`, non-spanning → `verification-loop`.
 
 ## Surfaces (basis-form applies uniformly)
 
 - **structure** — folders are axes, files are points; "where does X go?" and "what do I change for Y?" have one obvious answer.
 - **code / scripts** — functions, parameters, and types over branches, duplication, and partial cases.
-- **instructions** — `CLAUDE.md`/`.claude/rules`/`AGENTS.md` must themselves be written in basis-form (axes, not case-lists). Where a basis-form rule belongs in a durable surface and is missing, **propagate it there** (write it), then promote its syndrome to enforcement where one exists.
+- **instructions** — the repo's instruction surfaces (per `bindings.md`) must themselves be written in basis-form (axes, not case-lists). Where a basis-form rule belongs in a durable surface and is missing, **propagate it there** (write it), then promote its syndrome to enforcement where one exists.
 
 ## How Guardian applies it
 
