@@ -5,20 +5,27 @@
 Promote by class and by observable evidence — never by a remembered count you cannot verify.
 
 - Any mechanizable finding → propose codification now (test/type/schema/lint).
-- High-risk class (security/auth/billing/permissions/data/migrations) → propose deterministic enforcement immediately (lint/typecheck/test/CI/hook).
+- The high-risk class → propose deterministic enforcement immediately (lint/typecheck/test/CI/hook).
 - Observable repetition (the same issue across several files in this diff, a prior finding in this conversation, or an existing issue/TODO) → strengthen from a suggestion to a durable gate, and cite the evidence.
 - Do not assert a recurrence count you cannot point to.
 
 ## Enforcement type by target
 
 ```txt
-before a dangerous action      → PreToolUse hook (exit 2 blocks)
-before stopping without checks  → Stop hook
-after an edit, to flag/suggest  → PostToolUse hook (cannot prevent; advisory)
-at PR/merge                     → CI
-static rule                     → lint / typecheck
-behavior                        → test
-domain contract                 → spec + test
+static rule       → lint / typecheck
+behavior          → test
+domain contract   → spec + test
+at PR/merge       → CI
+before an action / on stop / after an edit → platform hooks (see bindings.md)
+```
+
+## Syndrome → check (from basis-form)
+
+```txt
+case-enumeration      → cyclomatic/cognitive complexity limit, fan-out limit
+non-irreducible (dup) → duplication detector
+non-orthogonal        → import-restriction / dependency-cycle check
+non-spanning          → type exhaustiveness, schema validation
 ```
 
 ## Before codifying a prose rule, confirm
