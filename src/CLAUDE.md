@@ -39,4 +39,4 @@ Use `Stack` / `HStack` / `VStack` + `gap` for spacing. No margin tricks.
 
 ## Chakra UI v3 Reference
 
-For building with Chakra UI v3 (layouts, forms, tokens, responsive styles, recipes, charts, theming), read @.agents/skills/chakra-ui-builder/SKILL.md before building.
+For building with Chakra UI v3 (layouts, forms, tokens, responsive styles, recipes, charts, theming), use the `chakra-ui-builder` skill before building.
