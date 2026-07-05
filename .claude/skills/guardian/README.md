@@ -1,6 +1,6 @@
 # Guardian — an Agent Skill
 
-Guardian keeps a repository in **basis-form**: its structure, code, scripts, and instructions written as a _basis_ (the axes of the decision space), not as enumerated _cases_. It reviews and improves a repo's AI-readiness and migrates quality rules from prose into deterministic enforcement (lint, types, tests, CI, hooks).
+Guardian keeps a repository in **basis-form**: its structure, code, scripts, and instructions written as a *basis* (the axes of the decision space), not as enumerated *cases*. It reviews and improves a repo's AI-readiness and migrates quality rules from prose into deterministic enforcement (lint, types, tests, CI, hooks).
 
 Cross-agent — built on the [Agent Skills](https://agentskills.io) standard. Only `reference/bindings.md` is Claude Code-specific; swap that one file to port Guardian to another coding agent.
 
@@ -18,23 +18,23 @@ Manual only (`disable-model-invocation`). The first token selects the mode:
 /guardian <mode> [task | path | finding-id]
 ```
 
-| Mode      | Does                                                                 | Argument                       | Writes              |
-| --------- | -------------------------------------------------------------------- | ------------------------------ | ------------------- |
-| `plan`    | task → bounded, verifiable plan (axes, scope, risk class, tests)     | task                           | no                  |
-| `review`  | review the current diff before commit (findings + correction prompt) | — (uses the diff)              | no                  |
-| `pr`      | prepare a reviewable PR package (does not replace `review`)          | —                              | no                  |
-| `audit`   | bounded repo-health audit of a scope                                 | path/package/domain (required) | no                  |
-| `improve` | fix one approved finding; promote case→basis and prose→enforcement   | one finding-id (required)      | yes, after approval |
-| `docs`    | review/improve instruction surfaces                                  | submode (below)                | submode-dependent   |
+| Mode      | Does                                                             | Argument                       | Writes              |
+| --------- | --------------------------------------------------------------- | ------------------------------ | ------------------- |
+| `plan`    | task → bounded, verifiable plan (axes, scope, risk class, tests) | task                           | no                  |
+| `review`  | review the current diff before commit (findings + correction prompt) | — (uses the diff)          | no                  |
+| `pr`      | prepare a reviewable PR package (does not replace `review`)      | —                              | no                  |
+| `audit`   | bounded repo-health audit of a scope                            | path/package/domain (required) | no                  |
+| `improve` | fix one approved finding; promote case→basis and prose→enforcement | one finding-id (required)    | yes, after approval |
+| `docs`    | review/improve instruction surfaces                             | submode (below)                | submode-dependent   |
 
 `docs` submode (second token, default `review`):
 
-| Submode        | Does                                  | Writes              |
-| -------------- | ------------------------------------- | ------------------- |
-| `review`       | diagnose one surface                  | no                  |
-| `instructions` | diagnose all surfaces (Deep baseline) | no                  |
-| `improve`      | edit one surface                      | yes, after approval |
-| `jsdoc`        | edit JSDoc/TSDoc                      | yes, after approval |
+| Submode        | Does                                   | Writes              |
+| -------------- | -------------------------------------- | ------------------- |
+| `review`       | diagnose one surface                   | no                  |
+| `instructions` | diagnose all surfaces (Deep baseline)  | no                  |
+| `improve`      | edit one surface                       | yes, after approval |
+| `jsdoc`        | edit JSDoc/TSDoc                        | yes, after approval |
 
 Contracts:
 
