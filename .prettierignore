@@ -1,1 +1,5 @@
 pnpm-lock.yaml
+
+# Managed skills (owned by their source repos via skills-lock.json — do not reformat locally)
+.claude/skills/**
+.agents/skills/**

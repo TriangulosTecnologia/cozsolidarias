@@ -1,6 +1,10 @@
 ---
-name: Guardian
+name: guardian
 description: Guard and improve a repository's AI-readiness. Run /guardian plan, review, pr, audit, improve, or docs to keep it in basis-form (a basis of decisions, not a list of cases) — compressible, contractual, verifiable, safe — and to migrate rules from prose into deterministic enforcement.
+license: MIT
+metadata:
+  author: ttoss
+  version: 0.1.1
 disable-model-invocation: true
 argument-hint: 'plan|review|pr|audit|improve|docs [task|path|finding-id]'
 ---
@@ -76,7 +80,7 @@ Fields: severity, `G-NNN`, dimension (one of the 8 canonical slugs in `reference
 
 ## Modes — load only what the mode needs
 
-Files below live in this skill's directory; read each as `${CLAUDE_SKILL_DIR}/<path>`, on demand:
+Files below live in this skill's directory; read each relative to it, on demand:
 
 | Mode    | Read                                                                                                                                                  |
 | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |

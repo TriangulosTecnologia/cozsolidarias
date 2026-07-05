@@ -1,6 +1,6 @@
 # Mode: review
 
-Use after implementation, before commit. Apply the trivial fast path first. Otherwise run the Light baseline (escalate to Deep per triggers), review relevant dimensions (`${CLAUDE_SKILL_DIR}/reference/methodology.md`), flag basis-form drift in both directions (case-enumeration where an axis is visible; empty/speculative axis — `${CLAUDE_SKILL_DIR}/reference/basis-form.md`), reconcile touched rules (`${CLAUDE_SKILL_DIR}/reference/baseline.md`), classify with the finding format, note missing verification, write a correction prompt.
+Use after implementation, before commit. Apply the trivial fast path first. Otherwise run the Light baseline (escalate to Deep per triggers), review relevant dimensions (`reference/methodology.md`), flag basis-form drift in both directions (case-enumeration where an axis is visible; empty/speculative axis — `reference/basis-form.md`), reconcile touched rules (`reference/baseline.md`), classify with the finding format, note missing verification, write a correction prompt.
 
 ```md
 ### Verdict PASS | PASS_WITH_FIXES | PASS_WITH_ACCEPTED_RISK | BLOCK
