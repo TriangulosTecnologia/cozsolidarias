@@ -14,7 +14,7 @@ const PartnersIntro = () => {
     <Box
       as="section"
       py="clamp(2.5rem, calc(2rem + 2vw), 5rem)"
-      bg="ivory.50"
+      bg="ivory.100"
       aria-labelledby="partners-title"
     >
       <Container>

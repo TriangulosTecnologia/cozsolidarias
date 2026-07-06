@@ -15,8 +15,6 @@ type PartnersSectionProps = {
   description: string;
   /** Partners rendered as cards in this section. */
   partners: Partner[];
-  /** Section background, alternated between sections for visual rhythm. */
-  bg: string;
 };
 
 /**
@@ -32,7 +30,6 @@ type PartnersSectionProps = {
  *   title="Vínculo institucional"
  *   description="Instituições e redes de pesquisa às quais o projeto está vinculado."
  *   partners={INTERNAL_PARTNERS}
- *   bg="ivory.100"
  * />
  */
 const PartnersSection = ({
@@ -41,7 +38,6 @@ const PartnersSection = ({
   title,
   description,
   partners,
-  bg,
 }: PartnersSectionProps) => {
   const headingId = `${id}-heading`;
 
@@ -49,7 +45,7 @@ const PartnersSection = ({
     <Box
       as="section"
       py="clamp(3rem, calc(2.25rem + 3vw), 6rem)"
-      bg={bg}
+      bg="ivory.100"
       aria-labelledby={headingId}
     >
       <Container>

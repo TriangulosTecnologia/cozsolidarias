@@ -24,7 +24,6 @@ describe('PartnersSection', () => {
         title="Vínculo institucional"
         description="Instituições vinculadas ao projeto."
         partners={PARTNERS}
-        bg="ivory.100"
       />
     );
 

@@ -59,7 +59,6 @@ export default function ParceirosPage() {
         title="Vínculo institucional"
         description="Instituições e redes de pesquisa às quais o projeto está diretamente vinculado."
         partners={INTERNAL_PARTNERS}
-        bg="ivory.100"
       />
       <PartnersSection
         id="external-partners"
@@ -67,7 +66,6 @@ export default function ParceirosPage() {
         title="Financiamento"
         description="Agências de fomento que financiam o desenvolvimento do projeto."
         partners={EXTERNAL_PARTNERS}
-        bg="ivory.50"
       />
     </>
   );
