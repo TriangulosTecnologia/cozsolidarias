@@ -23,6 +23,7 @@ import type { kitchenRateByCity } from '@/data-gateway/schema';
 
 import {
   buildSpec,
+  colorForPercentual,
   colorForQuantidade,
   colorForTaxa,
   type MapMode,
@@ -59,6 +60,10 @@ const LEFT_SIDEBAR: NonNullable<GeovisWorkspaceConfig['leftSidebar']> = {
         {
           value: 'coropletico-taxa',
           label: 'nº coz. no município / 100.000 hab.',
+        },
+        {
+          value: 'coropletico-percentual',
+          label: '% das cozinhas do Brasil no município',
         },
         { value: 'pontos', label: 'Localização das cozinhas' },
         { value: 'circulos', label: 'Cozinhas por município' },
@@ -197,6 +202,36 @@ const renderCountTooltip = ({
   );
 };
 
+/** Share-mode tooltip: swatch da fatia + "X% das cozinhas do Brasil" + linha auxiliar. */
+const renderPercentTooltip = ({
+  name,
+  register,
+}: {
+  name: string;
+  register?: kitchenRateByCity;
+}) => {
+  const percentual = register?.percentualDoBrasil ?? 0;
+  const quantidade = register?.quantidade ?? 0;
+
+  const primary =
+    percentual <= 0
+      ? 'Sem cozinha registrada'
+      : `${percentual.toLocaleString('pt-BR', {
+          maximumFractionDigits: 2,
+        })}% das cozinhas do Brasil`;
+
+  const secondary = percentual > 0 ? formatCozinhas(quantidade) : undefined;
+
+  return (
+    <TooltipCard
+      name={name}
+      swatchColor={colorForPercentual(percentual)}
+      primary={primary}
+      secondary={secondary}
+    />
+  );
+};
+
 const MapaPlayground = () => {
   const [mounted, setMounted] = React.useState(false);
   const [kitchenByCity, setKitchenByCity] = React.useState<kitchenRateByCity[]>(
@@ -268,6 +303,10 @@ const MapaPlayground = () => {
         return renderRateTooltip({ name, register });
       }
 
+      if (mode === 'coropletico-percentual') {
+        return renderPercentTooltip({ name, register });
+      }
+
       // Contagem bruta: vem do feature-state quando presente, senão dos dados
       // (ausente => 0).
       const quantity =
@@ -311,8 +350,8 @@ const MapaPlayground = () => {
         // inset from the map corner (`GeoVisLegend`'s corner position isn't
         // further configurable via the spec). Nudge it inward so it doesn't
         // crowd the edges. Selected by the legend list's aria-label (its title),
-        // one selector per choropleth legend (count and rate).
-        '& div:has(> ul[aria-label="Cozinhas por município"]), & div:has(> ul[aria-label="nº coz. no município / 100.000 hab."])':
+        // one selector per choropleth legend (count, rate and share).
+        '& div:has(> ul[aria-label="Cozinhas por município"]), & div:has(> ul[aria-label="nº coz. no município / 100.000 hab."]), & div:has(> ul[aria-label="% das cozinhas do Brasil no município"])':
           {
             bottom: '44px !important',
             right: '44px !important',

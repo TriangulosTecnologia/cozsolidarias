@@ -121,6 +121,7 @@ const BY_CITY: kitchenRateByCity[] = [
     quantidade: 5,
     populacao: 11_451_999,
     porCemMil: 0.04,
+    percentualDoBrasil: 100,
   },
 ];
 
@@ -151,6 +152,17 @@ describe('MapaPlayground — visualization toggle', () => {
     // Rate mode keeps the single choropleth fill, no points/bubbles overlay.
     fireEvent.change(screen.getByLabelText('Visualização'), {
       target: { value: 'coropletico-taxa' },
+    });
+    expect(screen.getByTestId('layer-ids')).not.toHaveTextContent(
+      'cozinhas-pts'
+    );
+    expect(screen.getByTestId('layer-ids')).not.toHaveTextContent(
+      'cozinhas-bolhas'
+    );
+
+    // Share (%) mode also keeps the single choropleth fill, no overlay.
+    fireEvent.change(screen.getByLabelText('Visualização'), {
+      target: { value: 'coropletico-percentual' },
     });
     expect(screen.getByTestId('layer-ids')).not.toHaveTextContent(
       'cozinhas-pts'

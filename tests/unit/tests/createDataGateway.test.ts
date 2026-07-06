@@ -30,6 +30,10 @@ describe('createDataGateway', () => {
       expect(
         entry.porCemMil === null || typeof entry.porCemMil === 'number'
       ).toBe(true);
+      // Every município carries its share (%) of Brazil's cozinhas, derived
+      // from the national total — always a positive number here (quantidade ≥ 1).
+      expect(typeof entry.percentualDoBrasil).toBe('number');
+      expect(entry.percentualDoBrasil).toBeGreaterThan(0);
     }
 
     // At least one município joins a population and yields a positive rate.
@@ -38,6 +42,15 @@ describe('createDataGateway', () => {
         return entry.porCemMil !== null && entry.porCemMil > 0;
       })
     ).toBe(true);
+
+    // The shares add up to ~100% of what the choropleth paints. The tolerance is
+    // wide because rounding each of ~870 shares to two decimals — many just above
+    // 0.019% → 0.02% — systematically drifts the sum a percent or so above 100.
+    const totalShare = byCity.reduce((sum, entry) => {
+      return sum + entry.percentualDoBrasil;
+    }, 0);
+    expect(totalShare).toBeGreaterThan(97);
+    expect(totalShare).toBeLessThan(103);
   });
 
   test('returns one bubble Point feature per municipality from the default static source', async () => {

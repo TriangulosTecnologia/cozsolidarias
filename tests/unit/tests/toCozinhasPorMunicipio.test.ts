@@ -1,6 +1,7 @@
 import type { GeoJSONFeature, GeoJSONFeatureCollection } from '@ttoss/geovis';
 import type { MunicipioAggregate } from 'src/data-gateway/transformers/toCozinhasPorMunicipio';
 import {
+  cozinhasPercentualDoBrasil,
   cozinhasPorCemMil,
   projectComTaxa,
   toCozinhasPorMunicipio,
@@ -253,6 +254,22 @@ describe('cozinhasPorCemMil', () => {
   });
 });
 
+describe('cozinhasPercentualDoBrasil', () => {
+  test('computes (quantidade / total) * 100', () => {
+    expect(cozinhasPercentualDoBrasil({ quantidade: 5, total: 5000 })).toBe(
+      0.1
+    );
+  });
+
+  test('rounds to two decimals', () => {
+    expect(cozinhasPercentualDoBrasil({ quantidade: 1, total: 7 })).toBe(14.29);
+  });
+
+  test('returns 0 for a non-positive total (no cozinhas to take a share of)', () => {
+    expect(cozinhasPercentualDoBrasil({ quantidade: 0, total: 0 })).toBe(0);
+  });
+});
+
 describe('projectComTaxa', () => {
   const aggregate: MunicipioAggregate[] = [
     {
@@ -269,12 +286,13 @@ describe('projectComTaxa', () => {
     },
   ];
 
-  test('joins population by IBGE code and derives the rate', () => {
+  test('joins population by IBGE code and derives the rate and national share', () => {
     const result = projectComTaxa({
       aggregate,
       populacao: { '111': 100_000 },
     });
 
+    // total = 5 + 2 = 7, so shares are 5/7 and 2/7 (rounded to two decimals).
     expect(result).toEqual([
       {
         codigoIbge: '111',
@@ -282,14 +300,17 @@ describe('projectComTaxa', () => {
         quantidade: 5,
         populacao: 100_000,
         porCemMil: 5,
+        percentualDoBrasil: 71.43,
       },
-      // Beta has no population entry: population and rate fall back to null.
+      // Beta has no population entry: population and rate fall back to null, but
+      // its national share is still derived from the aggregate total.
       {
         codigoIbge: '222',
         municipio: 'Beta',
         quantidade: 2,
         populacao: null,
         porCemMil: null,
+        percentualDoBrasil: 28.57,
       },
     ]);
   });
