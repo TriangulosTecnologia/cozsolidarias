@@ -26,7 +26,16 @@ const OUTPUT_PATH = join(
   'municipios-populacao.json'
 );
 
-const main = async () => {
+/**
+ * Fetches the IBGE SIDRA payload and returns its município series, failing
+ * loudly on an HTTP error or an empty series.
+ *
+ * @returns {Promise<Array<{
+ *   localidade: { id?: string };
+ *   serie: Record<string, string>;
+ * }>>}
+ */
+const fetchSeries = async () => {
   const response = await fetch(IBGE_URL);
 
   if (!response.ok) {
@@ -44,7 +53,6 @@ const main = async () => {
    * }>}
    */
   const payload = await response.json();
-
   const series = payload[0]?.resultados?.[0]?.series ?? [];
 
   if (series.length === 0) {
@@ -53,6 +61,21 @@ const main = async () => {
     );
   }
 
+  return series;
+};
+
+/**
+ * Reduces the raw series into a `{ codigoIbge: habitantes }` map, failing
+ * loudly if any município is missing its code or a numeric population (either
+ * would silently create a hole in the per-100k-inhabitants map later).
+ *
+ * @param {Array<{
+ *   localidade: { id?: string };
+ *   serie: Record<string, string>;
+ * }>} series
+ * @returns {Record<string, number>}
+ */
+const parsePopulacao = (series) => {
   /** @type {Record<string, number>} */
   const populacaoPorCodigo = {};
   /** @type {string[]} */
@@ -61,11 +84,8 @@ const main = async () => {
   for (const entry of series) {
     const codigo = entry.localidade?.id;
     // The series is keyed by year; Censo 2022 exposes a single "2022" value.
-    const bruto = Object.values(entry.serie ?? {})[0];
-    const habitantes = Number(bruto);
+    const habitantes = Number(Object.values(entry.serie ?? {})[0]);
 
-    // Fail loudly: a município missing its code or a numeric population would
-    // silently create a hole in the per-100k-inhabitants map later.
     if (!codigo || !Number.isFinite(habitantes)) {
       invalid.push(JSON.stringify(entry.localidade ?? null));
       continue;
@@ -80,6 +100,13 @@ const main = async () => {
         (invalid.length > 5 ? ` (+${invalid.length - 5} more)` : '')
     );
   }
+
+  return populacaoPorCodigo;
+};
+
+const main = async () => {
+  const series = await fetchSeries();
+  const populacaoPorCodigo = parsePopulacao(series);
 
   // Sort by code so the committed file has a stable, diff-friendly order.
   const sorted = Object.fromEntries(
