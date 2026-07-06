@@ -9,7 +9,7 @@ import type {
 } from '@ttoss/geovis';
 
 import { mapTokens } from '@/config/theme';
-import type { kitchenByCity } from '@/data-gateway/schema';
+import type { kitchenByCity, kitchenRateByCity } from '@/data-gateway/schema';
 
 const sampleRamp = (ramp: readonly string[], count: number): string[] => {
   return Array.from({ length: count }, (_, index) => {
@@ -26,6 +26,80 @@ const COLORS = sampleRamp(
 );
 
 const WITHOUT_KITCHEN_COLOR = mapTokens.dataviz.color.status.masked;
+
+/**
+ * Resolves the choropleth band color for a kitchen count, mirroring the
+ * `threshold` scale that paints the fill (`THRESHOLDS`/`COLORS`). Municípios with
+ * no kitchens (`<= 0`) resolve to `WITHOUT_KITCHEN_COLOR` — the same flat fill the
+ * map uses — so the hover-tooltip swatch always matches what's on the map.
+ */
+export const colorForQuantidade = (quantidade: number): string => {
+  if (quantidade <= 0) {
+    return WITHOUT_KITCHEN_COLOR;
+  }
+  const index = THRESHOLDS.findIndex((threshold) => {
+    return quantidade < threshold;
+  });
+  return index === -1 ? COLORS[COLORS.length - 1] : COLORS[index];
+};
+
+/**
+ * Break points for the "cozinhas per 100k inhabitants" rate choropleth, chosen
+ * from the real distribution of the 870 municípios with ≥1 cozinha (median
+ * ≈ 4.6, p90 ≈ 19). The lowest bin (`< 1`) is a real, painted band here — unlike
+ * the count scale, where no município ever falls below 1 — so its color is the
+ * lightest ramp step (`COLORS[0]`), distinct from the grey "sem dado" fill.
+ */
+const RATE_THRESHOLDS = [1, 3, 6, 12, 24];
+
+/**
+ * Resolves the rate-choropleth band color for a cozinhas-per-100k rate,
+ * mirroring the `threshold` scale that paints the fill (`RATE_THRESHOLDS` over
+ * the shared `COLORS` ramp). A `null` rate (município missing from the
+ * population snapshot) resolves to `WITHOUT_KITCHEN_COLOR` so the hover-tooltip
+ * swatch matches the "sem dado" fill.
+ */
+export const colorForTaxa = (taxa: number | null): string => {
+  if (taxa === null) {
+    return WITHOUT_KITCHEN_COLOR;
+  }
+  const index = RATE_THRESHOLDS.findIndex((threshold) => {
+    return taxa < threshold;
+  });
+  return index === -1 ? COLORS[COLORS.length - 1] : COLORS[index];
+};
+
+/**
+ * Explicit labels for the rate legend's threshold bins, one per bin
+ * (`RATE_THRESHOLDS.length + 1`), derived from `RATE_THRESHOLDS` so they can't
+ * drift. The "sem dado" swatch is rendered separately via the legend's
+ * `noDataLabel`, not folded into a bin.
+ */
+const RATE_LEGEND_LABELS = [
+  `< ${RATE_THRESHOLDS[0]}`,
+  ...RATE_THRESHOLDS.map((lower, index) => {
+    const upper = RATE_THRESHOLDS[index + 1];
+    return upper === undefined ? `${lower}+` : `${lower} – ${upper}`;
+  }),
+];
+
+/**
+ * Card styling for the spec-driven hover tooltip — a warm ivory surface with a
+ * subtle border and elevation so it reads as a floating card above the map.
+ * Values reference the Chakra design tokens (exposed as `--chakra-*` custom
+ * properties on the document root by `<ChakraProvider>`), keeping the tooltip in
+ * step with the app's visual language. The tooltip *content* (name + count) is
+ * built with Chakra components in `MapaPlayground`.
+ */
+const TOOLTIP_STYLE: NonNullable<HoverTooltipConfig['style']> = {
+  background: 'var(--chakra-colors-ivory-50)',
+  color: 'var(--chakra-colors-charcoal-900)',
+  border: '1px solid var(--chakra-colors-ivory-300)',
+  borderRadius: 'var(--chakra-radii-lg)',
+  boxShadow: '0 4px 16px rgba(36, 31, 33, 0.12)',
+  padding: 'var(--chakra-spacing-2) var(--chakra-spacing-3)',
+  zIndex: 50,
+};
 
 /** A single swatch for the workspace's right-sidebar legend. */
 export type LegendItem = { color: string; label: string };
@@ -63,7 +137,9 @@ export const buildLegendItems = (): LegendItem[] => {
 
 /**
  * What the municipality fill encodes:
- * - `coropletico`: data-driven choropleth (cozinhas por município);
+ * - `coropletico`: data-driven choropleth (cozinhas por município, raw count);
+ * - `coropletico-taxa`: data-driven choropleth of the cozinhas-per-100k-
+ *   inhabitants rate (darker = higher density);
  * - `pontos`: flat background so the individual kitchen points stand out;
  * - `circulos`: flat background with one proportional circle per município
  *   (radius encodes the kitchen count).
@@ -72,7 +148,11 @@ export const buildLegendItems = (): LegendItem[] => {
  * same across modes — only the data coloring and the points/circles overlays
  * change.
  */
-export type MapMode = 'coropletico' | 'pontos' | 'circulos';
+export type MapMode =
+  | 'coropletico'
+  | 'coropletico-taxa'
+  | 'pontos'
+  | 'circulos';
 
 /**
  * The kitchen points layer. Static (no data-driven paint), so it lives at module
@@ -145,6 +225,10 @@ const SOURCES: GeoJSONSource[] = [
 ];
 
 const CHOROPLETH_LEGEND_ID = 'legenda-cozinhas';
+const RATE_LEGEND_ID = 'legenda-taxa';
+
+/** Title of the rate legend; also the fill's `activeLegendId` in rate mode. */
+const RATE_LEGEND_TITLE = 'nº coz. no município / 100.000 hab.';
 
 /**
  * Swatch labels for the legend, derived from the same `THRESHOLDS`/`COLORS` as
@@ -186,6 +270,26 @@ const buildLegends = (mode: MapMode): LegendSpec[] => {
       labelFormat: { type: 'labels', labels: LEGEND_BIN_LABELS },
       reference: 'Fonte dos dados: © Cozinhas Solidárias',
     },
+    {
+      id: RATE_LEGEND_ID,
+      title: RATE_LEGEND_TITLE,
+      subtitle:
+        'Quanto mais escuro o município, mais cozinhas por 100 mil habitantes.',
+      ...(mode === 'coropletico-taxa'
+        ? { position: 'bottom-right' as const }
+        : {}),
+      colorBy: {
+        type: 'quantitative',
+        property: 'value',
+        scale: 'threshold',
+        thresholds: RATE_THRESHOLDS,
+        colors: COLORS,
+        defaultColor: WITHOUT_KITCHEN_COLOR,
+      },
+      labelFormat: { type: 'labels', labels: RATE_LEGEND_LABELS },
+      noDataLabel: 'Sem dado',
+      reference: 'Fontes: © Cozinhas Solidárias · IBGE (Censo 2022)',
+    },
   ];
 };
 
@@ -197,12 +301,26 @@ const toValueRows = (byCity: kitchenByCity[]): MapDataRow[] => {
 };
 
 /**
+ * Maps per-município rates to geovis `mapData` value rows, dropping municípios
+ * with an unknown rate (`porCemMil === null`) so they fall back to the legend's
+ * `defaultColor` ("sem dado") instead of being colored as a low rate.
+ */
+const toRateRows = (byCity: kitchenRateByCity[]): MapDataRow[] => {
+  return byCity.flatMap((register) => {
+    return register.porCemMil === null
+      ? []
+      : [{ geometryId: register.codigoIbge, value: register.porCemMil }];
+  });
+};
+
+/**
  * The município fill layer — identical across modes (keeps its `mapDataId` +
  * `activeLegendId`), so the hover tooltip, which only tracks polygon layers
  * with an `activeLegendId`, keeps working everywhere. Only the *data* fed to it
  * changes between modes.
  */
 const buildFillLayer = (
+  mode: MapMode,
   hoverTooltipRender?: HoverTooltipConfig['render']
 ): VisualizationLayer => {
   return {
@@ -210,7 +328,8 @@ const buildFillLayer = (
     sourceId: 'municipios-boundary',
     geometry: 'polygon',
     mapDataId: 'cozinhas-por-municipio',
-    activeLegendId: 'legenda-cozinhas',
+    activeLegendId:
+      mode === 'coropletico-taxa' ? RATE_LEGEND_ID : CHOROPLETH_LEGEND_ID,
     paint: {
       fillOpacity: 1,
       lineColor: '#FAF9F7',
@@ -218,23 +337,30 @@ const buildFillLayer = (
     // Spec-driven tooltip: `<GeoVisProvider>` renders the `<GeoVisHoverTooltip>`
     // itself, so it works inside the closed `<GeovisWorkspace>` (no children).
     ...(hoverTooltipRender
-      ? { hoverTooltip: { render: hoverTooltipRender } }
+      ? { hoverTooltip: { render: hoverTooltipRender, style: TOOLTIP_STYLE } }
       : {}),
   };
 };
 
 export const buildSpec = (
-  byCity: kitchenByCity[],
+  byCity: kitchenRateByCity[],
   mode: MapMode = 'coropletico',
   hoverTooltipRender?: HoverTooltipConfig['render']
 ): VisualizationSpec => {
   const showPoints = mode === 'pontos';
   const showBubbles = mode === 'circulos';
 
-  // Outside `coropletico` mode we feed the choropleth nothing, so every
-  // município falls back to the legend's `defaultColor` (`WITHOUT_KITCHEN_COLOR`)
-  // — the same flat background the no-kitchen municipalities already show.
-  const choroplethData = mode === 'coropletico' ? byCity : [];
+  // The choropleth value rows depend on the mode: raw counts in `coropletico`,
+  // the per-100k rate in `coropletico-taxa`. In the overlay modes (`pontos`,
+  // `circulos`) we feed the choropleth nothing, so every município falls back to
+  // the legend's `defaultColor` (`WITHOUT_KITCHEN_COLOR`) — the same flat
+  // background the no-kitchen municipalities already show.
+  const choroplethRows =
+    mode === 'coropletico'
+      ? toValueRows(byCity)
+      : mode === 'coropletico-taxa'
+        ? toRateRows(byCity)
+        : [];
 
   // Bounds for the circle-size scale: the largest per-município count. Falls
   // back to 1 when there's no data so `buildBubblesLayer` can still clamp it.
@@ -281,13 +407,13 @@ export const buildSpec = (
         mapId: 'municipios-boundary',
         joinKey: 'codarea',
         title: 'Cozinhas por município',
-        data: toValueRows(choroplethData),
+        data: choroplethRows,
       },
       ...bubblesMapData,
     ],
     legends: buildLegends(mode),
     layers: [
-      buildFillLayer(hoverTooltipRender),
+      buildFillLayer(mode, hoverTooltipRender),
       ...(showPoints ? [POINTS_LAYER] : []),
       ...(showBubbles ? [buildBubblesLayer(maxQuantidade)] : []),
     ],

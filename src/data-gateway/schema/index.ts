@@ -4,4 +4,4 @@ export type {
   CozinhasBubblesFeatureCollection,
   CozinhasFeatureCollection,
 } from './cozinha';
-export type { kitchenByCity } from './kitchenByCity';
+export type { kitchenByCity, kitchenRateByCity } from './kitchenByCity';
