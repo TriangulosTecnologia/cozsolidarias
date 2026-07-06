@@ -5,7 +5,7 @@ import type {
 } from '@ttoss/geovis';
 
 import type { StaticCozinhaSource } from '../../data-source-static/types';
-import type { kitchenByCity } from '../schema';
+import type { kitchenByCity, kitchenRateByCity } from '../schema';
 
 /** Axis-aligned bounding box: `[minLng, minLat, maxLng, maxLat]`. */
 type BBox = [number, number, number, number];
@@ -268,4 +268,69 @@ export const toCozinhasPorMunicipio = (
       return { codigoIbge, municipio, quantidade };
     }
   );
+};
+
+/**
+ * Cozinhas per 100,000 inhabitants for a single município:
+ * `(quantidade / populacao) * 100_000`, rounded to two decimals.
+ *
+ * @param params.quantidade - Cozinha count in the município (≥ 0).
+ * @param params.populacao - Resident population, or `null`/`undefined` when the
+ * município is missing from the population snapshot.
+ * @returns The rounded rate, or `null` when the population is unknown or
+ * non-positive (no valid denominator).
+ *
+ * @example
+ * cozinhasPorCemMil({ quantidade: 10, populacao: 250_000 }); // 4
+ * cozinhasPorCemMil({ quantidade: 3, populacao: null }); // null
+ */
+export const cozinhasPorCemMil = ({
+  quantidade,
+  populacao,
+}: {
+  quantidade: number;
+  populacao: number | null | undefined;
+}): number | null => {
+  if (populacao === null || populacao === undefined || populacao <= 0) {
+    return null;
+  }
+
+  return Math.round((quantidade / populacao) * 100_000 * 100) / 100;
+};
+
+/**
+ * Projects the per-município aggregate into the rate-enriched canonical
+ * contract, joining each município's Census population by IBGE code and
+ * deriving the cozinhas-per-100k-inhabitants rate.
+ *
+ * Kept separate from {@link aggregateCozinhasPorMunicipio} (the expensive
+ * point-in-polygon step) so the gateway can memoize the aggregate once and
+ * project it cheaply.
+ *
+ * @param params.aggregate - Per-município aggregate from
+ * {@link aggregateCozinhasPorMunicipio}.
+ * @param params.populacao - Flat `{ codigoIbge: habitantes }` snapshot.
+ * @returns One {@link kitchenRateByCity} per município in the aggregate.
+ *
+ * @example
+ * projectComTaxa({ aggregate, populacao });
+ * // [{ codigoIbge, municipio, quantidade, populacao, porCemMil }, ...]
+ */
+export const projectComTaxa = ({
+  aggregate,
+  populacao,
+}: {
+  aggregate: MunicipioAggregate[];
+  populacao: Record<string, number>;
+}): kitchenRateByCity[] => {
+  return aggregate.map(({ codigoIbge, municipio, quantidade }) => {
+    const habitantes = populacao[codigoIbge] ?? null;
+    return {
+      codigoIbge,
+      municipio,
+      quantidade,
+      populacao: habitantes,
+      porCemMil: cozinhasPorCemMil({ quantidade, populacao: habitantes }),
+    };
+  });
 };

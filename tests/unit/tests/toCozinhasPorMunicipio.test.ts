@@ -1,5 +1,10 @@
 import type { GeoJSONFeature, GeoJSONFeatureCollection } from '@ttoss/geovis';
-import { toCozinhasPorMunicipio } from 'src/data-gateway/transformers/toCozinhasPorMunicipio';
+import type { MunicipioAggregate } from 'src/data-gateway/transformers/toCozinhasPorMunicipio';
+import {
+  cozinhasPorCemMil,
+  projectComTaxa,
+  toCozinhasPorMunicipio,
+} from 'src/data-gateway/transformers/toCozinhasPorMunicipio';
 import type { StaticCozinhaSource } from 'src/data-source-static/types';
 
 /** A kitchen record reduced to the fields the transformer reads. */
@@ -224,5 +229,68 @@ describe('toCozinhasPorMunicipio', () => {
     );
 
     expect(result).toEqual([]);
+  });
+});
+
+describe('cozinhasPorCemMil', () => {
+  test('computes (quantidade / populacao) * 100000', () => {
+    expect(cozinhasPorCemMil({ quantidade: 10, populacao: 250_000 })).toBe(4);
+  });
+
+  test('rounds to two decimals', () => {
+    expect(cozinhasPorCemMil({ quantidade: 1, populacao: 30_000 })).toBe(3.33);
+  });
+
+  test('returns null when the population is unknown', () => {
+    expect(cozinhasPorCemMil({ quantidade: 3, populacao: null })).toBeNull();
+    expect(
+      cozinhasPorCemMil({ quantidade: 3, populacao: undefined })
+    ).toBeNull();
+  });
+
+  test('returns null for a non-positive population (no valid denominator)', () => {
+    expect(cozinhasPorCemMil({ quantidade: 3, populacao: 0 })).toBeNull();
+  });
+});
+
+describe('projectComTaxa', () => {
+  const aggregate: MunicipioAggregate[] = [
+    {
+      codigoIbge: '111',
+      municipio: 'Alpha',
+      quantidade: 5,
+      centroid: [0, 0],
+    },
+    {
+      codigoIbge: '222',
+      municipio: 'Beta',
+      quantidade: 2,
+      centroid: [1, 1],
+    },
+  ];
+
+  test('joins population by IBGE code and derives the rate', () => {
+    const result = projectComTaxa({
+      aggregate,
+      populacao: { '111': 100_000 },
+    });
+
+    expect(result).toEqual([
+      {
+        codigoIbge: '111',
+        municipio: 'Alpha',
+        quantidade: 5,
+        populacao: 100_000,
+        porCemMil: 5,
+      },
+      // Beta has no population entry: population and rate fall back to null.
+      {
+        codigoIbge: '222',
+        municipio: 'Beta',
+        quantidade: 2,
+        populacao: null,
+        porCemMil: null,
+      },
+    ]);
   });
 });

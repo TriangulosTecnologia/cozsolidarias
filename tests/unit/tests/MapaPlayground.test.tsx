@@ -3,7 +3,7 @@ import '@testing-library/jest-dom';
 import { fireEvent, screen } from '@testing-library/react';
 import type * as React from 'react';
 import MapaPlayground from 'src/app/(features)/mapas/MapaPlayground';
-import type { kitchenByCity } from 'src/data-gateway/schema';
+import type { kitchenRateByCity } from 'src/data-gateway/schema';
 
 import { renderWithChakra } from './renderWithChakra';
 
@@ -114,8 +114,14 @@ jest.mock('theme-ui', () => {
   };
 });
 
-const BY_CITY: kitchenByCity[] = [
-  { codigoIbge: '3550308', municipio: 'São Paulo', quantidade: 5 },
+const BY_CITY: kitchenRateByCity[] = [
+  {
+    codigoIbge: '3550308',
+    municipio: 'São Paulo',
+    quantidade: 5,
+    populacao: 11_451_999,
+    porCemMil: 0.04,
+  },
 ];
 
 beforeEach(() => {
@@ -141,6 +147,17 @@ describe('MapaPlayground — visualization toggle', () => {
     // Default (choropleth): the fill layer only, no points/bubbles overlay.
     expect(layerIds).not.toHaveTextContent('cozinhas-pts');
     expect(layerIds).not.toHaveTextContent('cozinhas-bolhas');
+
+    // Rate mode keeps the single choropleth fill, no points/bubbles overlay.
+    fireEvent.change(screen.getByLabelText('Visualização'), {
+      target: { value: 'coropletico-taxa' },
+    });
+    expect(screen.getByTestId('layer-ids')).not.toHaveTextContent(
+      'cozinhas-pts'
+    );
+    expect(screen.getByTestId('layer-ids')).not.toHaveTextContent(
+      'cozinhas-bolhas'
+    );
 
     // Points mode adds the per-cozinha points layer.
     fireEvent.change(screen.getByLabelText('Visualização'), {

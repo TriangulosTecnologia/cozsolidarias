@@ -1,23 +1,29 @@
 import { readStaticCozinhas } from '../data-source-static/readStaticCozinhas';
 import { readStaticMunicipios } from '../data-source-static/readStaticMunicipios';
+import { readStaticPopulacao } from '../data-source-static/readStaticPopulacao';
 import type {
   CozinhasBubblesFeatureCollection,
   CozinhasFeatureCollection,
-  kitchenByCity,
+  kitchenRateByCity,
 } from './schema';
 import { toCozinhasBubbles } from './transformers/toCozinhasBubbles';
 import { toCozinhasFeatureCollection } from './transformers/toCozinhasFeatureCollection';
 import {
   aggregateCozinhasPorMunicipio,
   type MunicipioAggregate,
+  projectComTaxa,
 } from './transformers/toCozinhasPorMunicipio';
 
 /** Gateway interface exposing canonical read functions. */
 export type DataGateway = {
   /** Returns cozinha locations as a GeoJSON FeatureCollection of Points. */
   getCozinhas: () => Promise<CozinhasFeatureCollection>;
-  /** Returns the cozinha count per município (for the choropleth map). */
-  getCozinhasPorMunicipio: () => Promise<kitchenByCity[]>;
+  /**
+   * Returns one row per município with its cozinha count, Census population and
+   * the derived cozinhas-per-100k-inhabitants rate (for the choropleth map's
+   * raw-count and rate variants).
+   */
+  getCozinhasPorMunicipio: () => Promise<kitchenRateByCity[]>;
   /**
    * Returns one anchor Point per município with its cozinha count (for the
    * proportional-circle map).
@@ -78,10 +84,11 @@ export const createDataGateway = (): DataGateway => {
         return toCozinhasFeatureCollection(sources);
       },
       getCozinhasPorMunicipio: async () => {
-        const byCity = await getAggregate();
-        return byCity.map(({ codigoIbge, municipio, quantidade }) => {
-          return { codigoIbge, municipio, quantidade };
-        });
+        const [aggregate, populacao] = await Promise.all([
+          getAggregate(),
+          readStaticPopulacao(),
+        ]);
+        return projectComTaxa({ aggregate, populacao });
       },
       getCozinhasBubbles: async () => {
         return toCozinhasBubbles(await getAggregate());

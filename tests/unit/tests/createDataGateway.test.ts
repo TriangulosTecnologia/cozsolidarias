@@ -22,7 +22,22 @@ describe('createDataGateway', () => {
       expect(typeof entry.codigoIbge).toBe('string');
       expect(typeof entry.municipio).toBe('string');
       expect(entry.quantidade).toBeGreaterThan(0);
+      // Population and the derived rate join from the Census snapshot; both are
+      // nullable when a município is missing from it.
+      expect(
+        entry.populacao === null || typeof entry.populacao === 'number'
+      ).toBe(true);
+      expect(
+        entry.porCemMil === null || typeof entry.porCemMil === 'number'
+      ).toBe(true);
     }
+
+    // At least one município joins a population and yields a positive rate.
+    expect(
+      byCity.some((entry) => {
+        return entry.porCemMil !== null && entry.porCemMil > 0;
+      })
+    ).toBe(true);
   });
 
   test('returns one bubble Point feature per municipality from the default static source', async () => {

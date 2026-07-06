@@ -19,9 +19,14 @@ import { BruttalTheme } from '@ttoss/theme/Bruttal';
 import * as React from 'react';
 import { ThemeUIProvider } from 'theme-ui';
 
-import type { kitchenByCity } from '@/data-gateway/schema';
+import type { kitchenRateByCity } from '@/data-gateway/schema';
 
-import { buildSpec, type MapMode } from './geovisSpec';
+import {
+  buildSpec,
+  colorForQuantidade,
+  colorForTaxa,
+  type MapMode,
+} from './geovisSpec';
 
 const estadosGroup = createBoundaryGroup({
   id: 'estados-boundary',
@@ -51,6 +56,10 @@ const LEFT_SIDEBAR: NonNullable<GeovisWorkspaceConfig['leftSidebar']> = {
       defaultValue: 'coropletico',
       items: [
         { value: 'coropletico', label: 'Cozinhas por município (coroplético)' },
+        {
+          value: 'coropletico-taxa',
+          label: 'nº coz. no município / 100.000 hab.',
+        },
         { value: 'pontos', label: 'Localização das cozinhas' },
         { value: 'circulos', label: 'Cozinhas por município' },
       ],
@@ -90,9 +99,109 @@ const CONFIG: GeovisWorkspaceConfig = {
   leftSidebar: LEFT_SIDEBAR,
 };
 
+/** `"N cozinhas"` / `"1 cozinha"`, com o número no formato pt-BR. */
+const formatCozinhas = (quantidade: number): string => {
+  return `${quantidade.toLocaleString('pt-BR')} ${
+    quantidade === 1 ? 'cozinha' : 'cozinhas'
+  }`;
+};
+
+/** Card do tooltip: título + swatch da faixa + rótulo, com linha auxiliar opcional. */
+const TooltipCard = ({
+  name,
+  swatchColor,
+  primary,
+  secondary,
+}: {
+  name: string;
+  swatchColor: string;
+  primary: string;
+  secondary?: string;
+}) => {
+  return (
+    <Box display="flex" flexDirection="column" gap="1.5" minW="180px">
+      <Text fontWeight="bold" fontSize="sm" lineHeight="tight">
+        {name}
+      </Text>
+      <Box display="flex" alignItems="center" gap="2">
+        <Box
+          w="12px"
+          h="12px"
+          borderRadius="sm"
+          flexShrink={0}
+          bg={swatchColor}
+        />
+        <Text fontSize="xs" color="text.secondary" lineHeight="tight">
+          {primary}
+        </Text>
+      </Box>
+      {secondary === undefined ? null : (
+        <Text fontSize="xs" color="text.secondary" lineHeight="tight">
+          {secondary}
+        </Text>
+      )}
+    </Box>
+  );
+};
+
+/** Rate-mode tooltip: swatch da taxa + "N por 100 mil hab." + linha auxiliar. */
+const renderRateTooltip = ({
+  name,
+  register,
+}: {
+  name: string;
+  register?: kitchenRateByCity;
+}) => {
+  const taxa = register?.porCemMil ?? null;
+  const populacao = register?.populacao ?? null;
+  const quantidade = register?.quantidade ?? 0;
+
+  const primary =
+    taxa === null
+      ? 'Sem cozinha registrada'
+      : `${taxa.toLocaleString('pt-BR', {
+          maximumFractionDigits: 1,
+        })} por 100 mil hab.`;
+
+  const secondary =
+    taxa !== null && populacao !== null
+      ? `${formatCozinhas(quantidade)} · ${populacao.toLocaleString('pt-BR')} hab.`
+      : undefined;
+
+  return (
+    <TooltipCard
+      name={name}
+      swatchColor={colorForTaxa(taxa)}
+      primary={primary}
+      secondary={secondary}
+    />
+  );
+};
+
+/** Count-mode tooltip (modos `coropletico`, `pontos`, `circulos`): swatch + "N cozinhas". */
+const renderCountTooltip = ({
+  name,
+  quantity,
+}: {
+  name: string;
+  quantity: number;
+}) => {
+  return (
+    <TooltipCard
+      name={name}
+      swatchColor={colorForQuantidade(quantity)}
+      primary={
+        quantity === 0 ? 'Sem cozinha registrada' : formatCozinhas(quantity)
+      }
+    />
+  );
+};
+
 const MapaPlayground = () => {
   const [mounted, setMounted] = React.useState(false);
-  const [kitchenByCity, setKitchenByCity] = React.useState<kitchenByCity[]>([]);
+  const [kitchenByCity, setKitchenByCity] = React.useState<kitchenRateByCity[]>(
+    []
+  );
   const [nomesPorCodigo, setNomesPorCodigo] = React.useState<NomesPorCodigo>(
     {}
   );
@@ -107,7 +216,7 @@ const MapaPlayground = () => {
   React.useEffect(() => {
     let cancelled = false;
 
-    const finish = (data: kitchenByCity[], nomes: NomesPorCodigo) => {
+    const finish = (data: kitchenRateByCity[], nomes: NomesPorCodigo) => {
       if (cancelled) {
         return;
       }
@@ -118,7 +227,7 @@ const MapaPlayground = () => {
 
     Promise.all([
       fetch('/api/cozinhas/por-municipio').then((response) => {
-        return response.json() as Promise<kitchenByCity[]>;
+        return response.json() as Promise<kitchenRateByCity[]>;
       }),
       fetch('/geo/municipios-nomes.json').then((response) => {
         return response.json() as Promise<NomesPorCodigo>;
@@ -150,28 +259,25 @@ const MapaPlayground = () => {
     (info: MapHoverInfo) => {
       const code = String(info.featureId);
       const register = citiesByCode.get(code);
-      // Nome vem do catálogo completo (todos os municípios do Brasil); a
-      // contagem, dos dados de cozinha (ausente => 0). Fallback só se o catálogo
-      // não tiver o código.
+      // Nome vem do catálogo completo (todos os municípios do Brasil). Fallback
+      // só se o catálogo não tiver o código.
       const name =
         nomesPorCodigo[code] ?? register?.municipio ?? `Município ${code}`;
+
+      if (mode === 'coropletico-taxa') {
+        return renderRateTooltip({ name, register });
+      }
+
+      // Contagem bruta: vem do feature-state quando presente, senão dos dados
+      // (ausente => 0).
       const quantity =
         typeof info.value === 'number'
           ? info.value
           : (register?.quantidade ?? 0);
 
-      return (
-        <div>
-          <div style={{ fontWeight: 600 }}>{name}</div>
-          <div>
-            {quantity === 0
-              ? ''
-              : `${quantity} ${quantity === 1 ? 'cozinha' : 'cozinhas'}`}
-          </div>
-        </div>
-      );
+      return renderCountTooltip({ name, quantity });
     },
-    [citiesByCode, nomesPorCodigo]
+    [citiesByCode, nomesPorCodigo, mode]
   );
 
   const baseSpec = React.useMemo(() => {
@@ -204,11 +310,13 @@ const MapaPlayground = () => {
         // geovis' provider auto-renders the choropleth legend with a fixed 10px
         // inset from the map corner (`GeoVisLegend`'s corner position isn't
         // further configurable via the spec). Nudge it inward so it doesn't
-        // crowd the edges. Selected by the legend list's aria-label (its title).
-        '& div:has(> ul[aria-label="Cozinhas por município"])': {
-          bottom: '44px !important',
-          right: '44px !important',
-        },
+        // crowd the edges. Selected by the legend list's aria-label (its title),
+        // one selector per choropleth legend (count and rate).
+        '& div:has(> ul[aria-label="Cozinhas por município"]), & div:has(> ul[aria-label="nº coz. no município / 100.000 hab."])':
+          {
+            bottom: '44px !important',
+            right: '44px !important',
+          },
       }}
     >
       {mounted ? (
