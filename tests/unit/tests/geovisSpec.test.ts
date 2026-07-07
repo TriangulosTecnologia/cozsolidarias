@@ -1,6 +1,7 @@
 import {
   buildLegendItems,
   buildSpec,
+  colorForPercentual,
   colorForQuantidade,
   colorForTaxa,
 } from 'src/app/(features)/mapas/geovisSpec';
@@ -13,6 +14,7 @@ const BY_CITY: kitchenRateByCity[] = [
     quantidade: 5,
     populacao: 100_000,
     porCemMil: 5,
+    percentualDoBrasil: 71.43,
   },
   {
     codigoIbge: '222',
@@ -20,6 +22,7 @@ const BY_CITY: kitchenRateByCity[] = [
     quantidade: 2,
     populacao: null,
     porCemMil: null,
+    percentualDoBrasil: 28.57,
   },
 ];
 
@@ -72,6 +75,27 @@ describe('colorForTaxa', () => {
   });
 });
 
+describe('colorForPercentual', () => {
+  test('a município with no cozinha (share 0) resolves to the "sem cozinha" fill', () => {
+    expect(colorForPercentual(0)).toBe(colorForQuantidade(0));
+  });
+
+  test('any positive share, however small, is a painted band distinct from "sem cozinha"', () => {
+    // Regression: shares below the old first break (0.05%) — e.g. Ourinhos at
+    // 0.04% — must be blue, not grey.
+    expect(colorForPercentual(0.02)).not.toBe(colorForPercentual(0));
+    expect(colorForPercentual(0.04)).not.toBe(colorForPercentual(0));
+  });
+
+  test('shares above the top threshold share the darkest band', () => {
+    expect(colorForPercentual(50)).toBe(colorForPercentual(5));
+  });
+
+  test('higher shares map to a different (darker) band than lower shares', () => {
+    expect(colorForPercentual(0.02)).not.toBe(colorForPercentual(2));
+  });
+});
+
 describe('buildLegendItems', () => {
   test('leads with the "Sem cozinha" swatch', () => {
     expect(buildLegendItems()[0].label).toBe('Sem cozinha');
@@ -115,6 +139,33 @@ describe('buildSpec', () => {
       return layer.id === 'municipios-br-fill';
     });
     expect(fill?.activeLegendId).toBe('legenda-taxa');
+  });
+
+  test('coropletico-percentual feeds shares and positions the share legend', () => {
+    const spec = buildSpec(BY_CITY, 'coropletico-percentual');
+
+    // Every município is kept (percentualDoBrasil is never null).
+    expect(mapDataById(spec, 'cozinhas-por-municipio')?.data).toEqual([
+      { geometryId: '111', value: 71.43 },
+      { geometryId: '222', value: 28.57 },
+    ]);
+
+    const percentLegend = spec.legends?.find((legend) => {
+      return legend.id === 'legenda-percentual';
+    });
+    expect(percentLegend?.position).toBe('bottom-right');
+    // The first break is a floor (0.01) below the smallest real share, so geovis
+    // paints only municípios with no cozinha (coalesced 0) in the grey bin.
+    expect(percentLegend?.colorBy.thresholds?.[0]).toBe(0.01);
+    // The grey "below first break" swatch is labelled "Sem cozinha".
+    if (percentLegend?.labelFormat?.type === 'labels') {
+      expect(percentLegend.labelFormat.labels[0]).toBe('Sem cozinha');
+    }
+
+    const fill = spec.layers.find((layer) => {
+      return layer.id === 'municipios-br-fill';
+    });
+    expect(fill?.activeLegendId).toBe('legenda-percentual');
   });
 
   test('pontos renders the points overlay and feeds the choropleth nothing', () => {

@@ -299,13 +299,43 @@ export const cozinhasPorCemMil = ({
 };
 
 /**
- * Projects the per-município aggregate into the rate-enriched canonical
- * contract, joining each município's Census population by IBGE code and
- * deriving the cozinhas-per-100k-inhabitants rate.
+ * Share (%) of all Brazilian cozinhas located in a single município:
+ * `(quantidade / total) * 100`, rounded to two decimals.
+ *
+ * @param params.quantidade - Cozinha count in the município (≥ 0).
+ * @param params.total - National total (sum of `quantidade` across every
+ * município).
+ * @returns The rounded share, or `0` when `total` is non-positive (no cozinhas
+ * to take a share of).
+ *
+ * @example
+ * cozinhasPercentualDoBrasil({ quantidade: 5, total: 5000 }); // 0.1
+ * cozinhasPercentualDoBrasil({ quantidade: 2, total: 0 }); // 0
+ */
+export const cozinhasPercentualDoBrasil = ({
+  quantidade,
+  total,
+}: {
+  quantidade: number;
+  total: number;
+}): number => {
+  if (total <= 0) {
+    return 0;
+  }
+
+  return Math.round((quantidade / total) * 100 * 100) / 100;
+};
+
+/**
+ * Projects the per-município aggregate into the enriched canonical contract,
+ * joining each município's Census population by IBGE code and deriving both the
+ * cozinhas-per-100k-inhabitants rate and its share (%) of Brazil's cozinhas.
  *
  * Kept separate from {@link aggregateCozinhasPorMunicipio} (the expensive
  * point-in-polygon step) so the gateway can memoize the aggregate once and
- * project it cheaply.
+ * project it cheaply. The national total (the share denominator) is the sum of
+ * the aggregate's counts, so the shares add up to 100% of what the choropleth
+ * paints.
  *
  * @param params.aggregate - Per-município aggregate from
  * {@link aggregateCozinhasPorMunicipio}.
@@ -314,7 +344,7 @@ export const cozinhasPorCemMil = ({
  *
  * @example
  * projectComTaxa({ aggregate, populacao });
- * // [{ codigoIbge, municipio, quantidade, populacao, porCemMil }, ...]
+ * // [{ codigoIbge, municipio, quantidade, populacao, porCemMil, percentualDoBrasil }, ...]
  */
 export const projectComTaxa = ({
   aggregate,
@@ -323,6 +353,10 @@ export const projectComTaxa = ({
   aggregate: MunicipioAggregate[];
   populacao: Record<string, number>;
 }): kitchenRateByCity[] => {
+  const total = aggregate.reduce((sum, { quantidade }) => {
+    return sum + quantidade;
+  }, 0);
+
   return aggregate.map(({ codigoIbge, municipio, quantidade }) => {
     const habitantes = populacao[codigoIbge] ?? null;
     return {
@@ -331,6 +365,7 @@ export const projectComTaxa = ({
       quantidade,
       populacao: habitantes,
       porCemMil: cozinhasPorCemMil({ quantidade, populacao: habitantes }),
+      percentualDoBrasil: cozinhasPercentualDoBrasil({ quantidade, total }),
     };
   });
 };

@@ -18,12 +18,13 @@ export type kitchenByCity = {
 };
 
 /**
- * A município row enriched with its IBGE Census 2022 population and the derived
- * cozinhas-per-100k-inhabitants rate — the shape served by
- * `/api/cozinhas/por-municipio` and consumed by the choropleth map (both the
- * raw-count and the rate variants). The rate variant colors the fill by
- * {@link kitchenRateByCity.porCemMil}; the count variant ignores the two extra
- * fields.
+ * A município row enriched with its IBGE Census 2022 population and two derived
+ * choropleth metrics — the shape served by `/api/cozinhas/por-municipio` and
+ * consumed by every choropleth variant. The count variant colors the fill by
+ * {@link kitchenByCity.quantidade}, the rate variant by
+ * {@link kitchenRateByCity.porCemMil}, and the share variant by
+ * {@link kitchenRateByCity.percentualDoBrasil}; each variant ignores the fields
+ * it doesn't use.
  */
 export type kitchenRateByCity = kitchenByCity & {
   /**
@@ -37,4 +38,13 @@ export type kitchenRateByCity = kitchenByCity & {
    * choropleth treats the município as "sem dado".
    */
   porCemMil: number | null;
+  /**
+   * Share of all Brazilian cozinhas located in this município:
+   * `(quantidade / totalBrasil) * 100`, rounded to two decimals, where
+   * `totalBrasil` is the sum of `quantidade` across every município (the
+   * national total the choropleth paints). Always a number (never `null`)
+   * because every row has `quantidade >= 1`; `0` only in the degenerate case of
+   * no cozinhas at all.
+   */
+  percentualDoBrasil: number;
 };

@@ -84,6 +84,74 @@ const RATE_LEGEND_LABELS = [
 ];
 
 /**
+ * Break points (in %) for the "share of Brazil's cozinhas" choropleth. The
+ * meaningful cutpoints are `0.05 / 0.1 / 0.3 / 1 / 3`, chosen from the real
+ * distribution of the 870 municípios with ≥1 cozinha (shares are tiny and
+ * heavily skewed — one cozinha is ≈ 0.02%, the median município sits at ≈ 0.02%
+ * and only a handful of capitais exceed 3%).
+ *
+ * The leading `0.01` is a **floor, not a real cutpoint**: geovis' `step`
+ * expression paints every value *below the first break* with the legend's
+ * `defaultColor` (the grey "sem cozinha" fill), so the first break must sit
+ * below the smallest real share (≈ 0.02%). Without it, municípios like Ourinhos
+ * (0.04%) would fall below `0.05` and render grey as if they had no cozinha.
+ * With the floor, only the coalesced `0` of municípios with no cozinha lands in
+ * that grey bin; every município with ≥1 cozinha gets a visible blue band.
+ */
+const PERCENT_THRESHOLDS = [0.01, 0.05, 0.1, 0.3, 1, 3];
+
+/**
+ * Color ramp for the share choropleth — `PERCENT_THRESHOLDS.length + 1` steps
+ * sampled from the same sequential ramp as `COLORS`. Only `PERCENT_COLORS[1..]`
+ * are ever painted: geovis maps the below-first-break bin to `defaultColor`, so
+ * `PERCENT_COLORS[0]` is vestigial (the count scale wastes its first step the
+ * same way). `PERCENT_COLORS[1]` — the lowest painted band (`< 0.05%`, where the
+ * bulk of municípios sit) — is a light but visibly blue step.
+ */
+const PERCENT_COLORS = sampleRamp(
+  mapTokens.dataviz.color.sequential[1],
+  PERCENT_THRESHOLDS.length + 1
+);
+
+/**
+ * Resolves the share-choropleth band color for a município's % of Brazil's
+ * cozinhas, mirroring geovis' `step` fill exactly: any value below the first
+ * break (`PERCENT_THRESHOLDS[0]` — i.e. a município with no cozinha) resolves to
+ * `WITHOUT_KITCHEN_COLOR`, and every band `[break[i-1], break[i])` to
+ * `PERCENT_COLORS[i]`, so the hover-tooltip swatch always matches the map. Any
+ * positive share, however small, gets a visible blue band.
+ */
+export const colorForPercentual = (percentual: number): string => {
+  const index = PERCENT_THRESHOLDS.findIndex((threshold) => {
+    return percentual < threshold;
+  });
+  if (index === 0) {
+    return WITHOUT_KITCHEN_COLOR;
+  }
+  return index === -1
+    ? PERCENT_COLORS[PERCENT_COLORS.length - 1]
+    : PERCENT_COLORS[index];
+};
+
+/**
+ * Labels for the share legend, one per rendered swatch
+ * (`PERCENT_THRESHOLDS.length + 1`). The first swatch is the `defaultColor`
+ * (grey) bin geovis paints below the first break, so it's labelled "Sem
+ * cozinha"; the rest are derived from the meaningful cutpoints
+ * (`PERCENT_THRESHOLDS` without the `0.01` floor) so they can't drift.
+ */
+const PERCENT_LEGEND_LABELS = [
+  'Sem cozinha',
+  `< ${PERCENT_THRESHOLDS[1].toLocaleString('pt-BR')}%`,
+  ...PERCENT_THRESHOLDS.slice(1).map((lower, index) => {
+    const upper = PERCENT_THRESHOLDS[index + 2];
+    return upper === undefined
+      ? `${lower.toLocaleString('pt-BR')}%+`
+      : `${lower.toLocaleString('pt-BR')} – ${upper.toLocaleString('pt-BR')}%`;
+  }),
+];
+
+/**
  * Card styling for the spec-driven hover tooltip — a warm ivory surface with a
  * subtle border and elevation so it reads as a floating card above the map.
  * Values reference the Chakra design tokens (exposed as `--chakra-*` custom
@@ -140,6 +208,8 @@ export const buildLegendItems = (): LegendItem[] => {
  * - `coropletico`: data-driven choropleth (cozinhas por município, raw count);
  * - `coropletico-taxa`: data-driven choropleth of the cozinhas-per-100k-
  *   inhabitants rate (darker = higher density);
+ * - `coropletico-percentual`: data-driven choropleth of each município's share
+ *   (%) of all Brazilian cozinhas (darker = larger share);
  * - `pontos`: flat background so the individual kitchen points stand out;
  * - `circulos`: flat background with one proportional circle per município
  *   (radius encodes the kitchen count).
@@ -151,6 +221,7 @@ export const buildLegendItems = (): LegendItem[] => {
 export type MapMode =
   | 'coropletico'
   | 'coropletico-taxa'
+  | 'coropletico-percentual'
   | 'pontos'
   | 'circulos';
 
@@ -226,9 +297,13 @@ const SOURCES: GeoJSONSource[] = [
 
 const CHOROPLETH_LEGEND_ID = 'legenda-cozinhas';
 const RATE_LEGEND_ID = 'legenda-taxa';
+const PERCENT_LEGEND_ID = 'legenda-percentual';
 
 /** Title of the rate legend; also the fill's `activeLegendId` in rate mode. */
 const RATE_LEGEND_TITLE = 'nº coz. no município / 100.000 hab.';
+
+/** Title of the share legend; also the fill's `activeLegendId` in share mode. */
+const PERCENT_LEGEND_TITLE = '% das cozinhas do Brasil no município';
 
 /**
  * Swatch labels for the legend, derived from the same `THRESHOLDS`/`COLORS` as
@@ -290,6 +365,25 @@ const buildLegends = (mode: MapMode): LegendSpec[] => {
       noDataLabel: 'Sem dado',
       reference: 'Fontes: © Cozinhas Solidárias · IBGE (Censo 2022)',
     },
+    {
+      id: PERCENT_LEGEND_ID,
+      title: PERCENT_LEGEND_TITLE,
+      subtitle:
+        'Quanto mais escuro o município, maior a fatia das cozinhas do Brasil ali.',
+      ...(mode === 'coropletico-percentual'
+        ? { position: 'bottom-right' as const }
+        : {}),
+      colorBy: {
+        type: 'quantitative',
+        property: 'value',
+        scale: 'threshold',
+        thresholds: PERCENT_THRESHOLDS,
+        colors: PERCENT_COLORS,
+        defaultColor: WITHOUT_KITCHEN_COLOR,
+      },
+      labelFormat: { type: 'labels', labels: PERCENT_LEGEND_LABELS },
+      reference: 'Fonte dos dados: © Cozinhas Solidárias',
+    },
   ];
 };
 
@@ -314,6 +408,21 @@ const toRateRows = (byCity: kitchenRateByCity[]): MapDataRow[] => {
 };
 
 /**
+ * Maps per-município shares (%) to geovis `mapData` value rows. Every row is
+ * kept — `percentualDoBrasil` is never `null` — so municípios absent from the
+ * data (no cozinha) are the only ones that fall back to the legend's
+ * `defaultColor` ("sem cozinha").
+ */
+const toPercentRows = (byCity: kitchenRateByCity[]): MapDataRow[] => {
+  return byCity.map((register) => {
+    return {
+      geometryId: register.codigoIbge,
+      value: register.percentualDoBrasil,
+    };
+  });
+};
+
+/**
  * The município fill layer — identical across modes (keeps its `mapDataId` +
  * `activeLegendId`), so the hover tooltip, which only tracks polygon layers
  * with an `activeLegendId`, keeps working everywhere. Only the *data* fed to it
@@ -329,7 +438,11 @@ const buildFillLayer = (
     geometry: 'polygon',
     mapDataId: 'cozinhas-por-municipio',
     activeLegendId:
-      mode === 'coropletico-taxa' ? RATE_LEGEND_ID : CHOROPLETH_LEGEND_ID,
+      mode === 'coropletico-taxa'
+        ? RATE_LEGEND_ID
+        : mode === 'coropletico-percentual'
+          ? PERCENT_LEGEND_ID
+          : CHOROPLETH_LEGEND_ID,
     paint: {
       fillOpacity: 1,
       lineColor: '#FAF9F7',
@@ -351,16 +464,19 @@ export const buildSpec = (
   const showBubbles = mode === 'circulos';
 
   // The choropleth value rows depend on the mode: raw counts in `coropletico`,
-  // the per-100k rate in `coropletico-taxa`. In the overlay modes (`pontos`,
-  // `circulos`) we feed the choropleth nothing, so every município falls back to
-  // the legend's `defaultColor` (`WITHOUT_KITCHEN_COLOR`) — the same flat
-  // background the no-kitchen municipalities already show.
+  // the per-100k rate in `coropletico-taxa`, the share (%) of Brazil in
+  // `coropletico-percentual`. In the overlay modes (`pontos`, `circulos`) we
+  // feed the choropleth nothing, so every município falls back to the legend's
+  // `defaultColor` (`WITHOUT_KITCHEN_COLOR`) — the same flat background the
+  // no-kitchen municipalities already show.
   const choroplethRows =
     mode === 'coropletico'
       ? toValueRows(byCity)
       : mode === 'coropletico-taxa'
         ? toRateRows(byCity)
-        : [];
+        : mode === 'coropletico-percentual'
+          ? toPercentRows(byCity)
+          : [];
 
   // Bounds for the circle-size scale: the largest per-município count. Falls
   // back to 1 when there's no data so `buildBubblesLayer` can still clamp it.
