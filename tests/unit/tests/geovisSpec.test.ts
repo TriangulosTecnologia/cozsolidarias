@@ -1,10 +1,12 @@
 import {
   buildLegendItems,
-  buildSpec,
+  colorForCadUnico,
   colorForPercentual,
+  colorForPessoasPorCozinha,
   colorForQuantidade,
   colorForTaxa,
-} from 'src/app/(features)/mapas/geovisSpec';
+} from 'src/app/(features)/mapas/geovisScales';
+import { buildSpec } from 'src/app/(features)/mapas/geovisSpec';
 import type { kitchenRateByCity } from 'src/data-gateway/schema';
 
 const BY_CITY: kitchenRateByCity[] = [
@@ -15,6 +17,9 @@ const BY_CITY: kitchenRateByCity[] = [
     populacao: 100_000,
     porCemMil: 5,
     percentualDoBrasil: 71.43,
+    pessoasCadUnico: 50_000,
+    porDezMilCadUnico: 1,
+    pessoasPorCozinha: 10_000,
   },
   {
     codigoIbge: '222',
@@ -23,6 +28,9 @@ const BY_CITY: kitchenRateByCity[] = [
     populacao: null,
     porCemMil: null,
     percentualDoBrasil: 28.57,
+    pessoasCadUnico: null,
+    porDezMilCadUnico: null,
+    pessoasPorCozinha: null,
   },
 ];
 
@@ -96,6 +104,56 @@ describe('colorForPercentual', () => {
   });
 });
 
+describe('colorForCadUnico', () => {
+  test('an unknown rate resolves to the "sem dado" fill', () => {
+    expect(colorForCadUnico(null)).toBe(colorForQuantidade(0));
+  });
+
+  test('a rate below the first break (no cozinha) resolves to the "sem cozinha" fill', () => {
+    expect(colorForCadUnico(0.005)).toBe(colorForQuantidade(0));
+  });
+
+  test('any rate at or above the first break is a painted band distinct from "sem cozinha"', () => {
+    expect(colorForCadUnico(0.1)).not.toBe(colorForCadUnico(null));
+  });
+
+  test('rates above the top threshold share the darkest band', () => {
+    expect(colorForCadUnico(10)).toBe(colorForCadUnico(5));
+  });
+
+  test('higher rates map to a different (darker) band than lower rates', () => {
+    expect(colorForCadUnico(0.1)).not.toBe(colorForCadUnico(3));
+  });
+});
+
+describe('colorForPessoasPorCozinha', () => {
+  test('an unknown value resolves to the "sem dado" fill', () => {
+    expect(colorForPessoasPorCozinha(null)).toBe(colorForQuantidade(0));
+  });
+
+  test('a value below the first break (no cozinha) resolves to the "sem cozinha" fill', () => {
+    expect(colorForPessoasPorCozinha(0.5)).toBe(colorForQuantidade(0));
+  });
+
+  test('any value at or above the first break is a painted band distinct from "sem cozinha"', () => {
+    expect(colorForPessoasPorCozinha(3_000)).not.toBe(
+      colorForPessoasPorCozinha(null)
+    );
+  });
+
+  test('values above the top threshold share the darkest band', () => {
+    expect(colorForPessoasPorCozinha(100_000)).toBe(
+      colorForPessoasPorCozinha(90_000)
+    );
+  });
+
+  test('more people per cozinha map to a different (darker) band', () => {
+    expect(colorForPessoasPorCozinha(3_000)).not.toBe(
+      colorForPessoasPorCozinha(50_000)
+    );
+  });
+});
+
 describe('buildLegendItems', () => {
   test('leads with the "Sem cozinha" swatch', () => {
     expect(buildLegendItems()[0].label).toBe('Sem cozinha');
@@ -166,6 +224,44 @@ describe('buildSpec', () => {
       return layer.id === 'municipios-br-fill';
     });
     expect(fill?.activeLegendId).toBe('legenda-percentual');
+  });
+
+  test('coropletico-cadunico feeds CadÚnico rates, drops unknown rates, positions its legend', () => {
+    const spec = buildSpec(BY_CITY, 'coropletico-cadunico');
+
+    // Beta (porDezMilCadUnico === null) is dropped so it falls back to "sem dado".
+    expect(mapDataById(spec, 'cozinhas-por-municipio')?.data).toEqual([
+      { geometryId: '111', value: 1 },
+    ]);
+
+    const cadUnicoLegend = spec.legends?.find((legend) => {
+      return legend.id === 'legenda-cadunico';
+    });
+    expect(cadUnicoLegend?.position).toBe('bottom-right');
+
+    const fill = spec.layers.find((layer) => {
+      return layer.id === 'municipios-br-fill';
+    });
+    expect(fill?.activeLegendId).toBe('legenda-cadunico');
+  });
+
+  test('coropletico-pessoas-cozinha feeds coverage values, drops unknown, positions its legend', () => {
+    const spec = buildSpec(BY_CITY, 'coropletico-pessoas-cozinha');
+
+    // Beta (pessoasPorCozinha === null) is dropped so it falls back to "sem dado".
+    expect(mapDataById(spec, 'cozinhas-por-municipio')?.data).toEqual([
+      { geometryId: '111', value: 10_000 },
+    ]);
+
+    const coverageLegend = spec.legends?.find((legend) => {
+      return legend.id === 'legenda-pessoas-cozinha';
+    });
+    expect(coverageLegend?.position).toBe('bottom-right');
+
+    const fill = spec.layers.find((layer) => {
+      return layer.id === 'municipios-br-fill';
+    });
+    expect(fill?.activeLegendId).toBe('legenda-pessoas-cozinha');
   });
 
   test('pontos renders the points overlay and feeds the choropleth nothing', () => {

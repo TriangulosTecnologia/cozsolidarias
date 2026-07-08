@@ -21,13 +21,8 @@ import { ThemeUIProvider } from 'theme-ui';
 
 import type { kitchenRateByCity } from '@/data-gateway/schema';
 
-import {
-  buildSpec,
-  colorForPercentual,
-  colorForQuantidade,
-  colorForTaxa,
-  type MapMode,
-} from './geovisSpec';
+import { buildSpec, type MapMode } from './geovisSpec';
+import { renderMunicipioTooltip } from './mapaTooltips';
 
 const estadosGroup = createBoundaryGroup({
   id: 'estados-boundary',
@@ -64,6 +59,14 @@ const LEFT_SIDEBAR: NonNullable<GeovisWorkspaceConfig['leftSidebar']> = {
         {
           value: 'coropletico-percentual',
           label: '% das cozinhas do Brasil no município',
+        },
+        {
+          value: 'coropletico-cadunico',
+          label: 'nº coz. / 10 mil pessoas no CadÚnico',
+        },
+        {
+          value: 'coropletico-pessoas-cozinha',
+          label: 'pessoas no CadÚnico por cozinha',
         },
         { value: 'pontos', label: 'Localização das cozinhas' },
         { value: 'circulos', label: 'Cozinhas por município' },
@@ -102,134 +105,6 @@ const scopedSidebarTheme = {
  */
 const CONFIG: GeovisWorkspaceConfig = {
   leftSidebar: LEFT_SIDEBAR,
-};
-
-/** `"N cozinhas"` / `"1 cozinha"`, com o número no formato pt-BR. */
-const formatCozinhas = (quantidade: number): string => {
-  return `${quantidade.toLocaleString('pt-BR')} ${
-    quantidade === 1 ? 'cozinha' : 'cozinhas'
-  }`;
-};
-
-/** Card do tooltip: título + swatch da faixa + rótulo, com linha auxiliar opcional. */
-const TooltipCard = ({
-  name,
-  swatchColor,
-  primary,
-  secondary,
-}: {
-  name: string;
-  swatchColor: string;
-  primary: string;
-  secondary?: string;
-}) => {
-  return (
-    <Box display="flex" flexDirection="column" gap="1.5" minW="180px">
-      <Text fontWeight="bold" fontSize="sm" lineHeight="tight">
-        {name}
-      </Text>
-      <Box display="flex" alignItems="center" gap="2">
-        <Box
-          w="12px"
-          h="12px"
-          borderRadius="sm"
-          flexShrink={0}
-          bg={swatchColor}
-        />
-        <Text fontSize="xs" color="text.secondary" lineHeight="tight">
-          {primary}
-        </Text>
-      </Box>
-      {secondary === undefined ? null : (
-        <Text fontSize="xs" color="text.secondary" lineHeight="tight">
-          {secondary}
-        </Text>
-      )}
-    </Box>
-  );
-};
-
-/** Rate-mode tooltip: swatch da taxa + "N por 100 mil hab." + linha auxiliar. */
-const renderRateTooltip = ({
-  name,
-  register,
-}: {
-  name: string;
-  register?: kitchenRateByCity;
-}) => {
-  const taxa = register?.porCemMil ?? null;
-  const populacao = register?.populacao ?? null;
-  const quantidade = register?.quantidade ?? 0;
-
-  const primary =
-    taxa === null
-      ? 'Sem cozinha registrada'
-      : `${taxa.toLocaleString('pt-BR', {
-          maximumFractionDigits: 1,
-        })} por 100 mil hab.`;
-
-  const secondary =
-    taxa !== null && populacao !== null
-      ? `${formatCozinhas(quantidade)} · ${populacao.toLocaleString('pt-BR')} hab.`
-      : undefined;
-
-  return (
-    <TooltipCard
-      name={name}
-      swatchColor={colorForTaxa(taxa)}
-      primary={primary}
-      secondary={secondary}
-    />
-  );
-};
-
-/** Count-mode tooltip (modos `coropletico`, `pontos`, `circulos`): swatch + "N cozinhas". */
-const renderCountTooltip = ({
-  name,
-  quantity,
-}: {
-  name: string;
-  quantity: number;
-}) => {
-  return (
-    <TooltipCard
-      name={name}
-      swatchColor={colorForQuantidade(quantity)}
-      primary={
-        quantity === 0 ? 'Sem cozinha registrada' : formatCozinhas(quantity)
-      }
-    />
-  );
-};
-
-/** Share-mode tooltip: swatch da fatia + "X% das cozinhas do Brasil" + linha auxiliar. */
-const renderPercentTooltip = ({
-  name,
-  register,
-}: {
-  name: string;
-  register?: kitchenRateByCity;
-}) => {
-  const percentual = register?.percentualDoBrasil ?? 0;
-  const quantidade = register?.quantidade ?? 0;
-
-  const primary =
-    percentual <= 0
-      ? 'Sem cozinha registrada'
-      : `${percentual.toLocaleString('pt-BR', {
-          maximumFractionDigits: 2,
-        })}% das cozinhas do Brasil`;
-
-  const secondary = percentual > 0 ? formatCozinhas(quantidade) : undefined;
-
-  return (
-    <TooltipCard
-      name={name}
-      swatchColor={colorForPercentual(percentual)}
-      primary={primary}
-      secondary={secondary}
-    />
-  );
 };
 
 const MapaPlayground = () => {
@@ -299,22 +174,12 @@ const MapaPlayground = () => {
       const name =
         nomesPorCodigo[code] ?? register?.municipio ?? `Município ${code}`;
 
-      if (mode === 'coropletico-taxa') {
-        return renderRateTooltip({ name, register });
-      }
-
-      if (mode === 'coropletico-percentual') {
-        return renderPercentTooltip({ name, register });
-      }
-
-      // Contagem bruta: vem do feature-state quando presente, senão dos dados
-      // (ausente => 0).
-      const quantity =
-        typeof info.value === 'number'
-          ? info.value
-          : (register?.quantidade ?? 0);
-
-      return renderCountTooltip({ name, quantity });
+      return renderMunicipioTooltip({
+        mode,
+        name,
+        register,
+        value: info.value,
+      });
     },
     [citiesByCode, nomesPorCodigo, mode]
   );
@@ -350,8 +215,9 @@ const MapaPlayground = () => {
         // inset from the map corner (`GeoVisLegend`'s corner position isn't
         // further configurable via the spec). Nudge it inward so it doesn't
         // crowd the edges. Selected by the legend list's aria-label (its title),
-        // one selector per choropleth legend (count, rate and share).
-        '& div:has(> ul[aria-label="Cozinhas por município"]), & div:has(> ul[aria-label="nº coz. no município / 100.000 hab."]), & div:has(> ul[aria-label="% das cozinhas do Brasil no município"])':
+        // one selector per choropleth legend (count, rate, share, CadÚnico,
+        // coverage).
+        '& div:has(> ul[aria-label="Cozinhas por município"]), & div:has(> ul[aria-label="nº coz. no município / 100.000 hab."]), & div:has(> ul[aria-label="% das cozinhas do Brasil no município"]), & div:has(> ul[aria-label="nº coz. / 10 mil pessoas no CadÚnico"]), & div:has(> ul[aria-label="pessoas no CadÚnico por cozinha"])':
           {
             bottom: '44px !important',
             right: '44px !important',

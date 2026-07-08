@@ -34,12 +34,33 @@ describe('createDataGateway', () => {
       // from the national total — always a positive number here (quantidade ≥ 1).
       expect(typeof entry.percentualDoBrasil).toBe('number');
       expect(entry.percentualDoBrasil).toBeGreaterThan(0);
+      // CadÚnico registrations and their derived metrics join from the MDS/SAGI
+      // snapshot; all three are nullable when a município is missing from it.
+      expect(
+        entry.pessoasCadUnico === null ||
+          typeof entry.pessoasCadUnico === 'number'
+      ).toBe(true);
+      expect(
+        entry.porDezMilCadUnico === null ||
+          typeof entry.porDezMilCadUnico === 'number'
+      ).toBe(true);
+      expect(
+        entry.pessoasPorCozinha === null ||
+          typeof entry.pessoasPorCozinha === 'number'
+      ).toBe(true);
     }
 
     // At least one município joins a population and yields a positive rate.
     expect(
       byCity.some((entry) => {
         return entry.porCemMil !== null && entry.porCemMil > 0;
+      })
+    ).toBe(true);
+
+    // At least one município joins the CadÚnico snapshot and yields a positive rate.
+    expect(
+      byCity.some((entry) => {
+        return entry.porDezMilCadUnico !== null && entry.porDezMilCadUnico > 0;
       })
     ).toBe(true);
 
@@ -51,6 +72,17 @@ describe('createDataGateway', () => {
     }, 0);
     expect(totalShare).toBeGreaterThan(97);
     expect(totalShare).toBeLessThan(103);
+  });
+
+  test('returns the same canonical rows across repeated calls (snapshots are memoized)', async () => {
+    const gateway = createDataGateway();
+
+    const first = await gateway.getCozinhasPorMunicipio();
+    const second = await gateway.getCozinhasPorMunicipio();
+
+    // The population and CadÚnico snapshots are cached for the process lifetime,
+    // so a second read returns the cached map and the projection is identical.
+    expect(second).toEqual(first);
   });
 
   test('returns one bubble Point feature per municipality from the default static source', async () => {
