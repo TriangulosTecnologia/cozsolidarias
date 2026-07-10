@@ -6,14 +6,18 @@ import type { kitchenRateByCity } from '@/data-gateway/schema';
 
 import {
   colorForCadUnico,
-  colorForIvs,
   colorForPercentual,
   colorForPessoasPorCozinha,
   colorForQuantidade,
   colorForTaxa,
-  ivsFaixaLabel,
   type MapMode,
 } from './geovisScales';
+import {
+  colorForIdhm,
+  colorForIvs,
+  idhmFaixaLabel,
+  ivsFaixaLabel,
+} from './geovisScoreScales';
 
 /** `"N cozinhas"` / `"1 cozinha"`, com o número no formato pt-BR. */
 const formatCozinhas = (quantidade: number): string => {
@@ -209,52 +213,111 @@ const renderPessoasPorCozinhaTooltip = ({
   );
 };
 
+/** A score family's tooltip copy + scale resolvers, shared by every member. */
+type ScoreTooltip = {
+  label: string;
+  colorFor: (value: number | null) => string;
+  faixaLabel: (value: number | null) => string | null;
+};
+
 /**
- * IVS-family tooltip: swatch da faixa + "<label> 0,xxx · <faixa>". Serve o IVS
- * geral e cada subíndice (mesma escala e faixas IPEA), variando só o `label`. O
- * valor vem do feature-state do mapa (o índice já unido ao polígono); municípios
- * ausentes do recorte caem em "Sem dado de <label>".
+ * Score-family tooltip (IVS or IDHM): swatch da faixa + "<label> 0,xxx ·
+ * <faixa>". Serve qualquer índice na escala `[0, 1]`, variando o `label` e os
+ * resolvedores de cor/faixa. O valor vem do feature-state do mapa (o índice já
+ * unido ao polígono); municípios ausentes do recorte caem em "Sem dado de
+ * <label>".
  */
-const renderIvsTooltip = ({
+const renderScoreTooltip = ({
   name,
   value,
-  label,
+  score,
 }: {
   name: string;
   value: MapHoverInfo['value'];
-  label: string;
+  score: ScoreTooltip;
 }) => {
-  const ivs = typeof value === 'number' ? value : null;
-  const faixa = ivsFaixaLabel(ivs);
+  const numeric = typeof value === 'number' ? value : null;
+  const faixa = score.faixaLabel(numeric);
 
   const primary =
-    ivs === null || faixa === null
-      ? `Sem dado de ${label}`
-      : `${label} ${ivs.toLocaleString('pt-BR', {
+    numeric === null || faixa === null
+      ? `Sem dado de ${score.label}`
+      : `${score.label} ${numeric.toLocaleString('pt-BR', {
           minimumFractionDigits: 3,
           maximumFractionDigits: 3,
         })} · ${faixa}`;
 
   return (
-    <TooltipCard name={name} swatchColor={colorForIvs(ivs)} primary={primary} />
+    <TooltipCard
+      name={name}
+      swatchColor={score.colorFor(numeric)}
+      primary={primary}
+    />
   );
 };
 
 /**
- * IVS-family modes and the metric label their tooltip shows. Keyed by
- * {@link MapMode} so the dispatcher resolves the whole family in one lookup.
+ * IVS- and IDHM-family modes and each one's tooltip copy + scale resolvers.
+ * Keyed by {@link MapMode} so the dispatcher resolves the whole family in one
+ * lookup.
  */
-const IVS_TOOLTIP_LABELS: Partial<Record<MapMode, string>> = {
-  'coropletico-ivs': 'IVS',
-  'coropletico-ivs-infraestrutura': 'Infraestrutura urbana',
-  'coropletico-ivs-capital-humano': 'Capital humano',
-  'coropletico-ivs-renda-trabalho': 'Renda e trabalho',
+const SCORE_TOOLTIPS: Partial<Record<MapMode, ScoreTooltip>> = {
+  'coropletico-ivs': {
+    label: 'IVS',
+    colorFor: colorForIvs,
+    faixaLabel: ivsFaixaLabel,
+  },
+  'coropletico-ivs-infraestrutura': {
+    label: 'Infraestrutura urbana',
+    colorFor: colorForIvs,
+    faixaLabel: ivsFaixaLabel,
+  },
+  'coropletico-ivs-capital-humano': {
+    label: 'Capital humano',
+    colorFor: colorForIvs,
+    faixaLabel: ivsFaixaLabel,
+  },
+  'coropletico-ivs-renda-trabalho': {
+    label: 'Renda e trabalho',
+    colorFor: colorForIvs,
+    faixaLabel: ivsFaixaLabel,
+  },
+  'coropletico-idhm': {
+    label: 'IDHM',
+    colorFor: colorForIdhm,
+    faixaLabel: idhmFaixaLabel,
+  },
+  'coropletico-idhm-longevidade': {
+    label: 'IDHM Longevidade',
+    colorFor: colorForIdhm,
+    faixaLabel: idhmFaixaLabel,
+  },
+  'coropletico-idhm-educacao': {
+    label: 'IDHM Educação',
+    colorFor: colorForIdhm,
+    faixaLabel: idhmFaixaLabel,
+  },
+  'coropletico-idhm-renda': {
+    label: 'IDHM Renda',
+    colorFor: colorForIdhm,
+    faixaLabel: idhmFaixaLabel,
+  },
+  'coropletico-idhm-educacao-escolaridade': {
+    label: 'IDHM Escolaridade',
+    colorFor: colorForIdhm,
+    faixaLabel: idhmFaixaLabel,
+  },
+  'coropletico-idhm-educacao-frequencia': {
+    label: 'IDHM Frequência escolar',
+    colorFor: colorForIdhm,
+    faixaLabel: idhmFaixaLabel,
+  },
 };
 
 /**
  * Resolves the hover-tooltip content for a município, dispatching on the active
  * map mode. Each choropleth mode renders the metric it colors by (rate, share,
- * CadÚnico rate, coverage, overall IVS and each IVS sub-index); every other mode
+ * CadÚnico rate, coverage, any IVS- or IDHM-family score); every other mode
  * (`coropletico`, `pontos`, `circulos`) falls back to the raw kitchen count,
  * taken from the map's feature-state `value` when present, otherwise from the
  * joined `register`.
@@ -299,9 +362,9 @@ export const renderMunicipioTooltip = ({
     return renderPessoasPorCozinhaTooltip({ name, register });
   }
 
-  const ivsLabel = IVS_TOOLTIP_LABELS[mode];
-  if (ivsLabel) {
-    return renderIvsTooltip({ name, value, label: ivsLabel });
+  const score = SCORE_TOOLTIPS[mode];
+  if (score) {
+    return renderScoreTooltip({ name, value, score });
   }
 
   // Contagem bruta: vem do feature-state quando presente, senão dos dados

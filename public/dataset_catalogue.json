@@ -446,7 +446,7 @@
       "collection_id": "ipea",
       "slug": "municipios-ivs",
       "title": "Índice de Vulnerabilidade Social por município (Atlas IVS, 2010)",
-      "description": "Todos os 5.565 municípios do Brasil com o Índice de Vulnerabilidade Social (IVS), seus subíndices e os índices IDHM, extraídos dos dados brutos do Atlas da Vulnerabilidade Social do IPEA. Recorte: ano 2010, nível município, totais de cor/sexo/situação de domicílio. Alimenta as variantes coropléticas do mapa — IVS geral e os três subíndices (infraestrutura urbana, capital humano, renda e trabalho) — via join pela coluna `municipio` (código IBGE de 7 dígitos ↔ `codarea`).",
+      "description": "Todos os 5.565 municípios do Brasil com o Índice de Vulnerabilidade Social (IVS), seus subíndices e os índices IDHM, extraídos dos dados brutos do Atlas da Vulnerabilidade Social do IPEA. Recorte: ano 2010, nível município, totais de cor/sexo/situação de domicílio. Alimenta as variantes coropléticas do mapa — IVS geral e seus três subíndices (infraestrutura urbana, capital humano, renda e trabalho) e o IDHM geral com suas dimensões (longevidade, educação, renda) e subcomponentes de educação (escolaridade, frequência escolar) — via join pela coluna `municipio` (código IBGE de 7 dígitos ↔ `codarea`).",
       "file": "src/data-source-static/data/atlasivs_municipios_2010.csv",
       "format": "CSV",
       "source": {

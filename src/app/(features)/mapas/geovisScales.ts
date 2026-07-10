@@ -2,6 +2,17 @@ import type { LegendSpec } from '@ttoss/geovis';
 
 import { mapTokens } from '@/config/theme';
 
+import {
+  IDHM_FAMILY_COLORS,
+  IDHM_FAMILY_REFERENCE,
+  IDHM_FAMILY_THRESHOLDS,
+  IDHM_LEGEND_LABELS,
+  IVS_FAMILY_COLORS,
+  IVS_FAMILY_REFERENCE,
+  IVS_FAMILY_THRESHOLDS,
+  IVS_LEGEND_LABELS,
+} from './geovisScoreScales';
+
 const sampleRamp = (ramp: readonly string[], count: number): string[] => {
   return Array.from({ length: count }, (_, index) => {
     const position = Math.round((index * (ramp.length - 1)) / (count - 1));
@@ -296,131 +307,6 @@ const PESSOAS_COZINHA_LEGEND_LABELS = [
   }),
 ];
 
-/**
- * IVS faixas oficiais do Atlas da Vulnerabilidade Social (IPEA): five fixed
- * classes on the `[0, 1]` index. Break points are the class upper bounds, so
- * `value < 0.2` → "muito baixa", `[0.2, 0.3)` → "baixa", …, `>= 0.5` → "muito
- * alta". Every band is a real painted class; a município only goes grey when
- * it's absent from the IVS snapshot (see {@link IVS_FLOOR}). These four cutpoints
- * drive the tooltip (`colorForIvs` / `ivsFaixaLabel`); the fill legend prepends
- * {@link IVS_FLOOR} so "muito baixa" isn't swallowed by geovis' grey base bin.
- */
-const IVS_THRESHOLDS = [0.2, 0.3, 0.4, 0.5];
-
-/**
- * Leading **floor**, not a real cutpoint (see {@link PERCENT_THRESHOLDS}): geovis'
- * `step` fill paints every value *below the first break* with the grey
- * `defaultColor`, and missing municípios coalesce to `0`. Without a floor the
- * whole "muito baixa" class (`< 0.2`) would fall in that bin and render as "sem
- * dado". Set just above `0` so every positive score is painted; the shared IVS
- * family scale reuses it, and `ivs_infraestrutura_urbana` has real `0.0` values
- * (44 municípios) that are indistinguishable from the coalesced-`0` missing
- * sentinel, so those unavoidably stay grey.
- */
-const IVS_FLOOR = 0.001;
-
-/** Faixa names, one per band (`IVS_THRESHOLDS.length + 1`), low → high. */
-const IVS_FAIXA_LABELS = [
-  'Muito baixa',
-  'Baixa',
-  'Média',
-  'Alta',
-  'Muito alta',
-];
-
-/**
- * Legend swatch labels, one per rendered bin (`IVS_THRESHOLDS.length + 2`): the
- * first is the grey `defaultColor` base bin (município absent from the snapshot),
- * labelled "Sem dado"; the rest are the faixa name + its official IPEA class
- * range (`0,201` etc.), so they read as the canonical classification.
- */
-const IVS_LEGEND_LABELS = [
-  'Sem dado',
-  'Muito baixa (≤ 0,200)',
-  'Baixa (0,201–0,300)',
-  'Média (0,301–0,400)',
-  'Alta (0,401–0,500)',
-  'Muito alta (≥ 0,501)',
-];
-
-/**
- * Single-hue red ramp for the IVS faixas (`IVS_THRESHOLDS.length + 1` steps):
- * light red = low vulnerability, dark red = high. Sampled at evenly spaced
- * indices of the brand `red` sequential ramp so the scale reads as a
- * monochromatic light→dark gradient — the more reddish the município, the higher
- * its social vulnerability.
- */
-const IVS_COLORS = [
-  mapTokens.dataviz.color.sequential[5][0], // muito baixa — light red
-  mapTokens.dataviz.color.sequential[5][3], // baixa
-  mapTokens.dataviz.color.sequential[5][6], // média
-  mapTokens.dataviz.color.sequential[5][9], // alta
-  mapTokens.dataviz.color.sequential[5][13], // muito alta — dark red
-];
-
-/**
- * Resolves the IVS-choropleth band color for an overall IVS score, mirroring the
- * `threshold` scale that paints the fill (`IVS_THRESHOLDS`/`IVS_COLORS`). A
- * `null` score (município missing from the IVS snapshot) resolves to
- * `WITHOUT_KITCHEN_COLOR` so the hover-tooltip swatch matches the "sem dado"
- * fill.
- *
- * @param ivs - Overall IVS score in `[0, 1]`, or `null` when unknown.
- * @returns The hex color for the score's faixa.
- *
- * @example
- * colorForIvs(null); // WITHOUT_KITCHEN_COLOR (grey "sem dado")
- * colorForIvs(0.15); // the "muito baixa" light-red band
- * colorForIvs(0.55); // the "muito alta" dark-red band
- */
-export const colorForIvs = (ivs: number | null): string => {
-  if (ivs === null) {
-    return WITHOUT_KITCHEN_COLOR;
-  }
-  const index = IVS_THRESHOLDS.findIndex((threshold) => {
-    return ivs < threshold;
-  });
-  return index === -1 ? IVS_COLORS[IVS_COLORS.length - 1] : IVS_COLORS[index];
-};
-
-/**
- * Resolves the IVS faixa name for a score (see {@link IVS_FAIXA_LABELS}), or
- * `null` when the score is unknown. Shared by the tooltip so the faixa it shows
- * can't drift from the band {@link colorForIvs} paints (both read
- * `IVS_THRESHOLDS`).
- *
- * @param ivs - Overall IVS score in `[0, 1]`, or `null` when unknown.
- * @returns The faixa name (e.g. `'Média'`), or `null`.
- *
- * @example
- * ivsFaixaLabel(0.35); // 'Média'
- * ivsFaixaLabel(null); // null
- */
-export const ivsFaixaLabel = (ivs: number | null): string | null => {
-  if (ivs === null) {
-    return null;
-  }
-  const index = IVS_THRESHOLDS.findIndex((threshold) => {
-    return ivs < threshold;
-  });
-  return index === -1
-    ? IVS_FAIXA_LABELS[IVS_FAIXA_LABELS.length - 1]
-    : IVS_FAIXA_LABELS[index];
-};
-
-/**
- * Shared fill scale for the whole IVS family (overall IVS + the three
- * sub-indices): every one lives on the same `[0, 1]` IPEA scale, faixas and
- * colors, so they reuse a single floor-prefixed threshold/color pair and only
- * differ in copy. See {@link IVS_FLOOR} for why the floor leads the breaks.
- */
-const IVS_FAMILY_THRESHOLDS = [IVS_FLOOR, ...IVS_THRESHOLDS];
-const IVS_FAMILY_COLORS = [WITHOUT_KITCHEN_COLOR, ...IVS_COLORS];
-
-/** Source note shared by the IVS-family legends: data vintage + IPEA classification. */
-const IVS_FAMILY_REFERENCE =
-  'Fonte dos dados: Atlas da Vulnerabilidade Social — IPEA (2010). Faixas de classificação conforme IPEA, Atlas da Vulnerabilidade Social nos Municípios Brasileiros (2015), seção “Como ler o IVS”.';
-
 /** A single swatch for the workspace's right-sidebar legend. */
 export type LegendItem = { color: string; label: string };
 
@@ -502,6 +388,12 @@ export type MapMode =
   | 'coropletico-ivs-infraestrutura'
   | 'coropletico-ivs-capital-humano'
   | 'coropletico-ivs-renda-trabalho'
+  | 'coropletico-idhm'
+  | 'coropletico-idhm-longevidade'
+  | 'coropletico-idhm-educacao'
+  | 'coropletico-idhm-renda'
+  | 'coropletico-idhm-educacao-escolaridade'
+  | 'coropletico-idhm-educacao-frequencia'
   | 'pontos'
   | 'circulos';
 
@@ -514,6 +406,12 @@ const IVS_LEGEND_ID = 'legenda-ivs';
 const IVS_INFRA_LEGEND_ID = 'legenda-ivs-infraestrutura';
 const IVS_CAPITAL_LEGEND_ID = 'legenda-ivs-capital-humano';
 const IVS_RENDA_LEGEND_ID = 'legenda-ivs-renda-trabalho';
+const IDHM_LEGEND_ID = 'legenda-idhm';
+const IDHM_LONG_LEGEND_ID = 'legenda-idhm-longevidade';
+const IDHM_EDUC_LEGEND_ID = 'legenda-idhm-educacao';
+const IDHM_RENDA_LEGEND_ID = 'legenda-idhm-renda';
+const IDHM_EDUC_ESC_LEGEND_ID = 'legenda-idhm-educacao-escolaridade';
+const IDHM_EDUC_FREQ_LEGEND_ID = 'legenda-idhm-educacao-frequencia';
 
 /** Title of the rate legend; also the fill's `activeLegendId` in rate mode. */
 const RATE_LEGEND_TITLE = 'nº coz. no município / 100.000 hab.';
@@ -534,6 +432,14 @@ const IVS_LEGEND_TITLE = 'Índice de vulnerabilidade social';
 const IVS_INFRA_LEGEND_TITLE = 'IVS Infraestrutura Urbana';
 const IVS_CAPITAL_LEGEND_TITLE = 'IVS Capital Humano';
 const IVS_RENDA_LEGEND_TITLE = 'IVS Renda e Trabalho';
+
+/** Titles of the IDHM legends; also their menu labels. */
+const IDHM_LEGEND_TITLE = 'Índice de Desenvolvimento Humano Municipal';
+const IDHM_LONG_LEGEND_TITLE = 'IDHM Longevidade';
+const IDHM_EDUC_LEGEND_TITLE = 'IDHM Educação';
+const IDHM_RENDA_LEGEND_TITLE = 'IDHM Renda';
+const IDHM_EDUC_ESC_LEGEND_TITLE = 'IDHM Educação — Escolaridade';
+const IDHM_EDUC_FREQ_LEGEND_TITLE = 'IDHM Educação — Frequência Escolar';
 
 /**
  * Per-variant legend config. `mode` is the {@link MapMode} that positions (and
@@ -614,8 +520,8 @@ const LEGEND_CONFIGS: LegendConfig[] = [
     title: IVS_LEGEND_TITLE,
     subtitle:
       'Quanto mais avermelhado o município, maior a vulnerabilidade social (IVS).',
-    // Floor-prefixed so geovis paints all five faixas: the base bin (`< IVS_FLOOR`)
-    // is the grey "sem dado" swatch, and `[IVS_FLOOR, 0.2)` → the muito-baixa color.
+    // Floor-prefixed so geovis paints all five faixas: the base bin (`< SCORE_FLOOR`)
+    // is the grey "sem dado" swatch, and `[SCORE_FLOOR, 0.2)` → the muito-baixa color.
     thresholds: IVS_FAMILY_THRESHOLDS,
     colors: IVS_FAMILY_COLORS,
     labels: IVS_LEGEND_LABELS,
@@ -653,6 +559,74 @@ const LEGEND_CONFIGS: LegendConfig[] = [
     colors: IVS_FAMILY_COLORS,
     labels: IVS_LEGEND_LABELS,
     reference: IVS_FAMILY_REFERENCE,
+  },
+  {
+    id: IDHM_LEGEND_ID,
+    mode: 'coropletico-idhm',
+    title: IDHM_LEGEND_TITLE,
+    subtitle:
+      'Quanto mais escuro (verde) o município, maior o desenvolvimento humano (IDHM).',
+    // Floor-prefixed so geovis paints all five faixas: the base bin (`< SCORE_FLOOR`)
+    // is the grey "sem dado" swatch, and `[SCORE_FLOOR, 0.5)` → the muito-baixo color.
+    thresholds: IDHM_FAMILY_THRESHOLDS,
+    colors: IDHM_FAMILY_COLORS,
+    labels: IDHM_LEGEND_LABELS,
+    reference: IDHM_FAMILY_REFERENCE,
+  },
+  {
+    id: IDHM_LONG_LEGEND_ID,
+    mode: 'coropletico-idhm-longevidade',
+    title: IDHM_LONG_LEGEND_TITLE,
+    subtitle:
+      'Quanto mais escuro (verde) o município, maior o desenvolvimento em longevidade.',
+    thresholds: IDHM_FAMILY_THRESHOLDS,
+    colors: IDHM_FAMILY_COLORS,
+    labels: IDHM_LEGEND_LABELS,
+    reference: IDHM_FAMILY_REFERENCE,
+  },
+  {
+    id: IDHM_EDUC_LEGEND_ID,
+    mode: 'coropletico-idhm-educacao',
+    title: IDHM_EDUC_LEGEND_TITLE,
+    subtitle:
+      'Quanto mais escuro (verde) o município, maior o desenvolvimento em educação.',
+    thresholds: IDHM_FAMILY_THRESHOLDS,
+    colors: IDHM_FAMILY_COLORS,
+    labels: IDHM_LEGEND_LABELS,
+    reference: IDHM_FAMILY_REFERENCE,
+  },
+  {
+    id: IDHM_RENDA_LEGEND_ID,
+    mode: 'coropletico-idhm-renda',
+    title: IDHM_RENDA_LEGEND_TITLE,
+    subtitle:
+      'Quanto mais escuro (verde) o município, maior o desenvolvimento em renda.',
+    thresholds: IDHM_FAMILY_THRESHOLDS,
+    colors: IDHM_FAMILY_COLORS,
+    labels: IDHM_LEGEND_LABELS,
+    reference: IDHM_FAMILY_REFERENCE,
+  },
+  {
+    id: IDHM_EDUC_ESC_LEGEND_ID,
+    mode: 'coropletico-idhm-educacao-escolaridade',
+    title: IDHM_EDUC_ESC_LEGEND_TITLE,
+    subtitle:
+      'Quanto mais escuro (verde) o município, maior o subíndice de escolaridade da educação.',
+    thresholds: IDHM_FAMILY_THRESHOLDS,
+    colors: IDHM_FAMILY_COLORS,
+    labels: IDHM_LEGEND_LABELS,
+    reference: IDHM_FAMILY_REFERENCE,
+  },
+  {
+    id: IDHM_EDUC_FREQ_LEGEND_ID,
+    mode: 'coropletico-idhm-educacao-frequencia',
+    title: IDHM_EDUC_FREQ_LEGEND_TITLE,
+    subtitle:
+      'Quanto mais escuro (verde) o município, maior o subíndice de frequência escolar da educação.',
+    thresholds: IDHM_FAMILY_THRESHOLDS,
+    colors: IDHM_FAMILY_COLORS,
+    labels: IDHM_LEGEND_LABELS,
+    reference: IDHM_FAMILY_REFERENCE,
   },
 ];
 

@@ -13,15 +13,15 @@ const inRange = (value: number): boolean => {
  * Projects the source-native Atlas IVS rows into the canonical
  * {@link MunicipioIvs} contract consumed by the choropleth family.
  *
- * Deterministic and pure. Rows whose `codigoIbge` is blank or whose `ivs` or any
- * sub-index falls outside the valid `[0, 1]` interval are dropped rather than
- * coerced — the map then treats those municípios as "sem dado" instead of
- * painting a fabricated band. The 7-digit `codigoIbge` is passed through
- * unchanged, so it joins directly to `feature.properties.codarea`.
+ * Deterministic and pure. Rows whose `codigoIbge` is blank or whose `ivs`, any
+ * IVS sub-index or any IDHM score falls outside the valid `[0, 1]` interval are
+ * dropped rather than coerced — the map then treats those municípios as "sem
+ * dado" instead of painting a fabricated band. The 7-digit `codigoIbge` is
+ * passed through unchanged, so it joins directly to `feature.properties.codarea`.
  *
  * @param sources - Source-native IVS records (from `readStaticIvs`).
- * @returns One canonical row per município whose every IVS-family score is
- * valid, in input order.
+ * @returns One canonical row per município whose every IVS/IDHM score is valid,
+ * in input order.
  *
  * @example
  * toMunicipioIvs([{ codigoIbge: '5300108', municipio: 'Brasília (DF)', ivs: 0.294,
@@ -31,12 +31,19 @@ const inRange = (value: number): boolean => {
  */
 export const toMunicipioIvs = (sources: StaticIvsSource[]): MunicipioIvs[] => {
   return sources.flatMap((source): MunicipioIvs[] => {
-    const valid =
-      source.codigoIbge !== '' &&
-      inRange(source.ivs) &&
-      inRange(source.ivsInfraestruturaUrbana) &&
-      inRange(source.ivsCapitalHumano) &&
-      inRange(source.ivsRendaETrabalho);
+    const scores = [
+      source.ivs,
+      source.ivsInfraestruturaUrbana,
+      source.ivsCapitalHumano,
+      source.ivsRendaETrabalho,
+      source.idhm,
+      source.idhmLongevidade,
+      source.idhmEducacao,
+      source.idhmRenda,
+      source.idhmEducacaoEscolaridade,
+      source.idhmEducacaoFrequencia,
+    ];
+    const valid = source.codigoIbge !== '' && scores.every(inRange);
 
     return valid
       ? [
@@ -47,6 +54,12 @@ export const toMunicipioIvs = (sources: StaticIvsSource[]): MunicipioIvs[] => {
             ivsInfraestruturaUrbana: source.ivsInfraestruturaUrbana,
             ivsCapitalHumano: source.ivsCapitalHumano,
             ivsRendaETrabalho: source.ivsRendaETrabalho,
+            idhm: source.idhm,
+            idhmLongevidade: source.idhmLongevidade,
+            idhmEducacao: source.idhmEducacao,
+            idhmRenda: source.idhmRenda,
+            idhmEducacaoEscolaridade: source.idhmEducacaoEscolaridade,
+            idhmEducacaoFrequencia: source.idhmEducacaoFrequencia,
           },
         ]
       : [];

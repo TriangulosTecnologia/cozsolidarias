@@ -13,10 +13,10 @@ export default jestUnitConfig({
   coveragePathIgnorePatterns: ['/node_modules/', 'MapaPlayground\\.tsx$'],
   coverageThreshold: {
     global: {
-      branches: 97.7,
+      branches: 97.8,
       functions: 99.99,
-      lines: 99.2,
-      statements: 99.2,
+      lines: 99.3,
+      statements: 99.3,
     },
   },
 });

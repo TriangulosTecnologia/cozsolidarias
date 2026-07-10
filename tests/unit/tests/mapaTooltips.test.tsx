@@ -142,4 +142,45 @@ describe('renderMunicipioTooltip', () => {
 
     expect(screen.getByText('Sem dado de Capital humano')).toBeInTheDocument();
   });
+
+  test('IDHM mode shows the score and its (inverse) faixa', () => {
+    renderTooltip({ mode: 'coropletico-idhm', value: 0.75 });
+
+    expect(screen.getByText(/IDHM 0,750 · Alto/)).toBeInTheDocument();
+  });
+
+  test.each([
+    {
+      mode: 'coropletico-idhm-longevidade' as const,
+      label: 'IDHM Longevidade',
+    },
+    {
+      mode: 'coropletico-idhm-educacao' as const,
+      label: 'IDHM Educação',
+    },
+    {
+      mode: 'coropletico-idhm-renda' as const,
+      label: 'IDHM Renda',
+    },
+    {
+      mode: 'coropletico-idhm-educacao-escolaridade' as const,
+      label: 'IDHM Escolaridade',
+    },
+    {
+      mode: 'coropletico-idhm-educacao-frequencia' as const,
+      label: 'IDHM Frequência escolar',
+    },
+  ])('$mode labels the IDHM dimension and its faixa', ({ mode, label }) => {
+    renderTooltip({ mode, value: 0.45 });
+
+    expect(
+      screen.getByText(new RegExp(`${label} 0,450 · Muito baixo`))
+    ).toBeInTheDocument();
+  });
+
+  test('IDHM mode reads "sem dado" without a joined value', () => {
+    renderTooltip({ mode: 'coropletico-idhm-renda', value: null });
+
+    expect(screen.getByText('Sem dado de IDHM Renda')).toBeInTheDocument();
+  });
 });
