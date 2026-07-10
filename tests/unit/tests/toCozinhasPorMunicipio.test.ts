@@ -3,6 +3,8 @@ import type { MunicipioAggregate } from 'src/data-gateway/transformers/toCozinha
 import {
   cozinhasPercentualDoBrasil,
   cozinhasPorCemMil,
+  cozinhasPorDezMilCadUnico,
+  pessoasCadUnicoPorCozinha,
   projectComTaxa,
   toCozinhasPorMunicipio,
 } from 'src/data-gateway/transformers/toCozinhasPorMunicipio';
@@ -254,6 +256,56 @@ describe('cozinhasPorCemMil', () => {
   });
 });
 
+describe('cozinhasPorDezMilCadUnico', () => {
+  test('computes (quantidade / pessoas) * 10000', () => {
+    expect(
+      cozinhasPorDezMilCadUnico({ quantidade: 573, pessoas: 3_884_884 })
+    ).toBe(1.47);
+  });
+
+  test('rounds to two decimals', () => {
+    expect(cozinhasPorDezMilCadUnico({ quantidade: 1, pessoas: 30_000 })).toBe(
+      0.33
+    );
+  });
+
+  test('returns null when the CadÚnico count is unknown', () => {
+    expect(
+      cozinhasPorDezMilCadUnico({ quantidade: 3, pessoas: null })
+    ).toBeNull();
+    expect(
+      cozinhasPorDezMilCadUnico({ quantidade: 3, pessoas: undefined })
+    ).toBeNull();
+  });
+
+  test('returns null for a non-positive CadÚnico count (no valid denominator)', () => {
+    expect(cozinhasPorDezMilCadUnico({ quantidade: 3, pessoas: 0 })).toBeNull();
+  });
+});
+
+describe('pessoasCadUnicoPorCozinha', () => {
+  test('computes pessoas / quantidade rounded to a whole person', () => {
+    expect(
+      pessoasCadUnicoPorCozinha({ pessoas: 3_884_884, quantidade: 573 })
+    ).toBe(6780);
+  });
+
+  test('returns null when the CadÚnico count is unknown', () => {
+    expect(
+      pessoasCadUnicoPorCozinha({ pessoas: null, quantidade: 3 })
+    ).toBeNull();
+    expect(
+      pessoasCadUnicoPorCozinha({ pessoas: undefined, quantidade: 3 })
+    ).toBeNull();
+  });
+
+  test('returns null for a non-positive quantidade (no valid ratio)', () => {
+    expect(
+      pessoasCadUnicoPorCozinha({ pessoas: 10_000, quantidade: 0 })
+    ).toBeNull();
+  });
+});
+
 describe('cozinhasPercentualDoBrasil', () => {
   test('computes (quantidade / total) * 100', () => {
     expect(cozinhasPercentualDoBrasil({ quantidade: 5, total: 5000 })).toBe(
@@ -286,10 +338,11 @@ describe('projectComTaxa', () => {
     },
   ];
 
-  test('joins population by IBGE code and derives the rate and national share', () => {
+  test('joins population and CadÚnico by IBGE code and derives every metric', () => {
     const result = projectComTaxa({
       aggregate,
       populacao: { '111': 100_000 },
+      cadunico: { '111': 50_000 },
     });
 
     // total = 5 + 2 = 7, so shares are 5/7 and 2/7 (rounded to two decimals).
@@ -301,9 +354,14 @@ describe('projectComTaxa', () => {
         populacao: 100_000,
         porCemMil: 5,
         percentualDoBrasil: 71.43,
+        // CadÚnico joins: 50k people → (5/50000)*10000 = 1 coz/10k; 50000/5 = 10000 pessoas/coz.
+        pessoasCadUnico: 50_000,
+        porDezMilCadUnico: 1,
+        pessoasPorCozinha: 10_000,
       },
-      // Beta has no population entry: population and rate fall back to null, but
-      // its national share is still derived from the aggregate total.
+      // Beta has neither a population nor a CadÚnico entry: those and their
+      // derived metrics fall back to null, but its national share is still
+      // derived from the aggregate total.
       {
         codigoIbge: '222',
         municipio: 'Beta',
@@ -311,6 +369,9 @@ describe('projectComTaxa', () => {
         populacao: null,
         porCemMil: null,
         percentualDoBrasil: 28.57,
+        pessoasCadUnico: null,
+        porDezMilCadUnico: null,
+        pessoasPorCozinha: null,
       },
     ]);
   });

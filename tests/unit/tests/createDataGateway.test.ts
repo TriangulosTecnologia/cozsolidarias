@@ -34,12 +34,33 @@ describe('createDataGateway', () => {
       // from the national total — always a positive number here (quantidade ≥ 1).
       expect(typeof entry.percentualDoBrasil).toBe('number');
       expect(entry.percentualDoBrasil).toBeGreaterThan(0);
+      // CadÚnico registrations and their derived metrics join from the MDS/SAGI
+      // snapshot; all three are nullable when a município is missing from it.
+      expect(
+        entry.pessoasCadUnico === null ||
+          typeof entry.pessoasCadUnico === 'number'
+      ).toBe(true);
+      expect(
+        entry.porDezMilCadUnico === null ||
+          typeof entry.porDezMilCadUnico === 'number'
+      ).toBe(true);
+      expect(
+        entry.pessoasPorCozinha === null ||
+          typeof entry.pessoasPorCozinha === 'number'
+      ).toBe(true);
     }
 
     // At least one município joins a population and yields a positive rate.
     expect(
       byCity.some((entry) => {
         return entry.porCemMil !== null && entry.porCemMil > 0;
+      })
+    ).toBe(true);
+
+    // At least one município joins the CadÚnico snapshot and yields a positive rate.
+    expect(
+      byCity.some((entry) => {
+        return entry.porDezMilCadUnico !== null && entry.porDezMilCadUnico > 0;
       })
     ).toBe(true);
 
@@ -51,6 +72,17 @@ describe('createDataGateway', () => {
     }, 0);
     expect(totalShare).toBeGreaterThan(97);
     expect(totalShare).toBeLessThan(103);
+  });
+
+  test('returns the same canonical rows across repeated calls (snapshots are memoized)', async () => {
+    const gateway = createDataGateway();
+
+    const first = await gateway.getCozinhasPorMunicipio();
+    const second = await gateway.getCozinhasPorMunicipio();
+
+    // The population and CadÚnico snapshots are cached for the process lifetime,
+    // so a second read returns the cached map and the projection is identical.
+    expect(second).toEqual(first);
   });
 
   test('returns one bubble Point feature per municipality from the default static source', async () => {
@@ -65,6 +97,24 @@ describe('createDataGateway', () => {
       expect(feature.geometry.type).toBe('Point');
       expect(typeof feature.properties.codarea).toBe('string');
       expect(feature.properties.quantidade).toBeGreaterThan(0);
+    }
+  });
+
+  test('returns one IVS row per município with a valid score from the default static source', async () => {
+    const gateway = createDataGateway();
+
+    const ivs = await gateway.getIvsPorMunicipio();
+
+    expect(Array.isArray(ivs)).toBe(true);
+    expect(ivs.length).toBeGreaterThan(0);
+
+    for (const entry of ivs) {
+      expect(typeof entry.codigoIbge).toBe('string');
+      expect(entry.codigoIbge).not.toBe('');
+      expect(typeof entry.municipio).toBe('string');
+      // The index is defined on the closed interval [0, 1].
+      expect(entry.ivs).toBeGreaterThanOrEqual(0);
+      expect(entry.ivs).toBeLessThanOrEqual(1);
     }
   });
 

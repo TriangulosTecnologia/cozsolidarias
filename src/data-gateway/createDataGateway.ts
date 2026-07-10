@@ -1,10 +1,13 @@
+import { readStaticCadUnico } from '../data-source-static/readStaticCadUnico';
 import { readStaticCozinhas } from '../data-source-static/readStaticCozinhas';
+import { readStaticIvs } from '../data-source-static/readStaticIvs';
 import { readStaticMunicipios } from '../data-source-static/readStaticMunicipios';
 import { readStaticPopulacao } from '../data-source-static/readStaticPopulacao';
 import type {
   CozinhasBubblesFeatureCollection,
   CozinhasFeatureCollection,
   kitchenRateByCity,
+  MunicipioIvs,
 } from './schema';
 import { toCozinhasBubbles } from './transformers/toCozinhasBubbles';
 import { toCozinhasFeatureCollection } from './transformers/toCozinhasFeatureCollection';
@@ -13,15 +16,16 @@ import {
   type MunicipioAggregate,
   projectComTaxa,
 } from './transformers/toCozinhasPorMunicipio';
+import { toMunicipioIvs } from './transformers/toMunicipioIvs';
 
 /** Gateway interface exposing canonical read functions. */
 export type DataGateway = {
   /** Returns cozinha locations as a GeoJSON FeatureCollection of Points. */
   getCozinhas: () => Promise<CozinhasFeatureCollection>;
   /**
-   * Returns one row per município with its cozinha count, Census population and
-   * the derived cozinhas-per-100k-inhabitants rate (for the choropleth map's
-   * raw-count and rate variants).
+   * Returns one row per município with its cozinha count, Census population,
+   * Cadastro Único registrations and the derived metrics (per-100k-inhabitants
+   * rate, share of Brazil, per-100k-CadÚnico rate) for the choropleth variants.
    */
   getCozinhasPorMunicipio: () => Promise<kitchenRateByCity[]>;
   /**
@@ -29,6 +33,13 @@ export type DataGateway = {
    * proportional-circle map).
    */
   getCozinhasBubbles: () => Promise<CozinhasBubblesFeatureCollection>;
+  /**
+   * Returns one row per município with a valid overall IVS score (Atlas da
+   * Vulnerabilidade Social, IPEA) for the social-vulnerability choropleth.
+   * Independent of the cozinha data — it covers every município in the IVS
+   * snapshot, whether or not it has a cozinha.
+   */
+  getIvsPorMunicipio: () => Promise<MunicipioIvs[]>;
 };
 
 const KNOWN_SOURCES = ['static'] as const;
@@ -84,14 +95,18 @@ export const createDataGateway = (): DataGateway => {
         return toCozinhasFeatureCollection(sources);
       },
       getCozinhasPorMunicipio: async () => {
-        const [aggregate, populacao] = await Promise.all([
+        const [aggregate, populacao, cadunico] = await Promise.all([
           getAggregate(),
           readStaticPopulacao(),
+          readStaticCadUnico(),
         ]);
-        return projectComTaxa({ aggregate, populacao });
+        return projectComTaxa({ aggregate, populacao, cadunico });
       },
       getCozinhasBubbles: async () => {
         return toCozinhasBubbles(await getAggregate());
+      },
+      getIvsPorMunicipio: async () => {
+        return toMunicipioIvs(await readStaticIvs());
       },
     };
   }

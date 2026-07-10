@@ -299,6 +299,62 @@ export const cozinhasPorCemMil = ({
 };
 
 /**
+ * Cozinhas per 10,000 people registered in the Cadastro Único:
+ * `(quantidade / pessoas) * 10_000`, rounded to two decimals.
+ *
+ * @param params.quantidade - Cozinha count in the município (≥ 0).
+ * @param params.pessoas - People registered in the Cadastro Único, or
+ * `null`/`undefined` when the município is missing from the snapshot.
+ * @returns The rounded rate, or `null` when the denominator is unknown or
+ * non-positive (no valid denominator).
+ *
+ * @example
+ * cozinhasPorDezMilCadUnico({ quantidade: 573, pessoas: 3_884_884 }); // 1.47
+ * cozinhasPorDezMilCadUnico({ quantidade: 3, pessoas: null }); // null
+ */
+export const cozinhasPorDezMilCadUnico = ({
+  quantidade,
+  pessoas,
+}: {
+  quantidade: number;
+  pessoas: number | null | undefined;
+}): number | null => {
+  if (pessoas === null || pessoas === undefined || pessoas <= 0) {
+    return null;
+  }
+
+  return Math.round((quantidade / pessoas) * 10_000 * 100) / 100;
+};
+
+/**
+ * People registered in the Cadastro Único per cozinha — the inverse coverage
+ * ratio `pessoas / quantidade`, rounded to a whole person.
+ *
+ * @param params.pessoas - People registered in the Cadastro Único, or
+ * `null`/`undefined` when the município is missing from the snapshot.
+ * @param params.quantidade - Cozinha count in the município.
+ * @returns The rounded people-per-cozinha, or `null` when `pessoas` is unknown
+ * or `quantidade` is non-positive (no valid ratio).
+ *
+ * @example
+ * pessoasCadUnicoPorCozinha({ pessoas: 3_884_884, quantidade: 573 }); // 6780
+ * pessoasCadUnicoPorCozinha({ pessoas: null, quantidade: 3 }); // null
+ */
+export const pessoasCadUnicoPorCozinha = ({
+  pessoas,
+  quantidade,
+}: {
+  pessoas: number | null | undefined;
+  quantidade: number;
+}): number | null => {
+  if (pessoas === null || pessoas === undefined || quantidade <= 0) {
+    return null;
+  }
+
+  return Math.round(pessoas / quantidade);
+};
+
+/**
  * Share (%) of all Brazilian cozinhas located in a single município:
  * `(quantidade / total) * 100`, rounded to two decimals.
  *
@@ -328,8 +384,9 @@ export const cozinhasPercentualDoBrasil = ({
 
 /**
  * Projects the per-município aggregate into the enriched canonical contract,
- * joining each município's Census population by IBGE code and deriving both the
- * cozinhas-per-100k-inhabitants rate and its share (%) of Brazil's cozinhas.
+ * joining each município's Census population and Cadastro Único registrations by
+ * IBGE code and deriving the two per-100k rates plus the share (%) of Brazil's
+ * cozinhas.
  *
  * Kept separate from {@link aggregateCozinhasPorMunicipio} (the expensive
  * point-in-polygon step) so the gateway can memoize the aggregate once and
@@ -340,18 +397,21 @@ export const cozinhasPercentualDoBrasil = ({
  * @param params.aggregate - Per-município aggregate from
  * {@link aggregateCozinhasPorMunicipio}.
  * @param params.populacao - Flat `{ codigoIbge: habitantes }` snapshot.
+ * @param params.cadunico - Flat `{ codigoIbge: pessoasCadastradas }` snapshot.
  * @returns One {@link kitchenRateByCity} per município in the aggregate.
  *
  * @example
- * projectComTaxa({ aggregate, populacao });
- * // [{ codigoIbge, municipio, quantidade, populacao, porCemMil, percentualDoBrasil }, ...]
+ * projectComTaxa({ aggregate, populacao, cadunico });
+ * // [{ codigoIbge, ..., porDezMilCadUnico, pessoasPorCozinha }, ...]
  */
 export const projectComTaxa = ({
   aggregate,
   populacao,
+  cadunico,
 }: {
   aggregate: MunicipioAggregate[];
   populacao: Record<string, number>;
+  cadunico: Record<string, number>;
 }): kitchenRateByCity[] => {
   const total = aggregate.reduce((sum, { quantidade }) => {
     return sum + quantidade;
@@ -359,6 +419,7 @@ export const projectComTaxa = ({
 
   return aggregate.map(({ codigoIbge, municipio, quantidade }) => {
     const habitantes = populacao[codigoIbge] ?? null;
+    const pessoasCadUnico = cadunico[codigoIbge] ?? null;
     return {
       codigoIbge,
       municipio,
@@ -366,6 +427,15 @@ export const projectComTaxa = ({
       populacao: habitantes,
       porCemMil: cozinhasPorCemMil({ quantidade, populacao: habitantes }),
       percentualDoBrasil: cozinhasPercentualDoBrasil({ quantidade, total }),
+      pessoasCadUnico,
+      porDezMilCadUnico: cozinhasPorDezMilCadUnico({
+        quantidade,
+        pessoas: pessoasCadUnico,
+      }),
+      pessoasPorCozinha: pessoasCadUnicoPorCozinha({
+        pessoas: pessoasCadUnico,
+        quantidade,
+      }),
     };
   });
 };
