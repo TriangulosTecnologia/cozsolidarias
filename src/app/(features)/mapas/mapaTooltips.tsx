@@ -6,10 +6,12 @@ import type { kitchenRateByCity } from '@/data-gateway/schema';
 
 import {
   colorForCadUnico,
+  colorForIvs,
   colorForPercentual,
   colorForPessoasPorCozinha,
   colorForQuantidade,
   colorForTaxa,
+  ivsFaixaLabel,
   type MapMode,
 } from './geovisScales';
 
@@ -208,11 +210,54 @@ const renderPessoasPorCozinhaTooltip = ({
 };
 
 /**
+ * IVS-family tooltip: swatch da faixa + "<label> 0,xxx · <faixa>". Serve o IVS
+ * geral e cada subíndice (mesma escala e faixas IPEA), variando só o `label`. O
+ * valor vem do feature-state do mapa (o índice já unido ao polígono); municípios
+ * ausentes do recorte caem em "Sem dado de <label>".
+ */
+const renderIvsTooltip = ({
+  name,
+  value,
+  label,
+}: {
+  name: string;
+  value: MapHoverInfo['value'];
+  label: string;
+}) => {
+  const ivs = typeof value === 'number' ? value : null;
+  const faixa = ivsFaixaLabel(ivs);
+
+  const primary =
+    ivs === null || faixa === null
+      ? `Sem dado de ${label}`
+      : `${label} ${ivs.toLocaleString('pt-BR', {
+          minimumFractionDigits: 3,
+          maximumFractionDigits: 3,
+        })} · ${faixa}`;
+
+  return (
+    <TooltipCard name={name} swatchColor={colorForIvs(ivs)} primary={primary} />
+  );
+};
+
+/**
+ * IVS-family modes and the metric label their tooltip shows. Keyed by
+ * {@link MapMode} so the dispatcher resolves the whole family in one lookup.
+ */
+const IVS_TOOLTIP_LABELS: Partial<Record<MapMode, string>> = {
+  'coropletico-ivs': 'IVS',
+  'coropletico-ivs-infraestrutura': 'Infraestrutura urbana',
+  'coropletico-ivs-capital-humano': 'Capital humano',
+  'coropletico-ivs-renda-trabalho': 'Renda e trabalho',
+};
+
+/**
  * Resolves the hover-tooltip content for a município, dispatching on the active
  * map mode. Each choropleth mode renders the metric it colors by (rate, share,
- * CadÚnico rate, coverage); every other mode (`coropletico`, `pontos`,
- * `circulos`) falls back to the raw kitchen count, taken from the map's
- * feature-state `value` when present, otherwise from the joined `register`.
+ * CadÚnico rate, coverage, overall IVS and each IVS sub-index); every other mode
+ * (`coropletico`, `pontos`, `circulos`) falls back to the raw kitchen count,
+ * taken from the map's feature-state `value` when present, otherwise from the
+ * joined `register`.
  *
  * @param params.mode - Active {@link MapMode} driving which metric is shown.
  * @param params.name - Resolved município display name (already falls back to
@@ -252,6 +297,11 @@ export const renderMunicipioTooltip = ({
 
   if (mode === 'coropletico-pessoas-cozinha') {
     return renderPessoasPorCozinhaTooltip({ name, register });
+  }
+
+  const ivsLabel = IVS_TOOLTIP_LABELS[mode];
+  if (ivsLabel) {
+    return renderIvsTooltip({ name, value, label: ivsLabel });
   }
 
   // Contagem bruta: vem do feature-state quando presente, senão dos dados

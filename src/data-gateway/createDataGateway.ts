@@ -1,11 +1,13 @@
 import { readStaticCadUnico } from '../data-source-static/readStaticCadUnico';
 import { readStaticCozinhas } from '../data-source-static/readStaticCozinhas';
+import { readStaticIvs } from '../data-source-static/readStaticIvs';
 import { readStaticMunicipios } from '../data-source-static/readStaticMunicipios';
 import { readStaticPopulacao } from '../data-source-static/readStaticPopulacao';
 import type {
   CozinhasBubblesFeatureCollection,
   CozinhasFeatureCollection,
   kitchenRateByCity,
+  MunicipioIvs,
 } from './schema';
 import { toCozinhasBubbles } from './transformers/toCozinhasBubbles';
 import { toCozinhasFeatureCollection } from './transformers/toCozinhasFeatureCollection';
@@ -14,6 +16,7 @@ import {
   type MunicipioAggregate,
   projectComTaxa,
 } from './transformers/toCozinhasPorMunicipio';
+import { toMunicipioIvs } from './transformers/toMunicipioIvs';
 
 /** Gateway interface exposing canonical read functions. */
 export type DataGateway = {
@@ -30,6 +33,13 @@ export type DataGateway = {
    * proportional-circle map).
    */
   getCozinhasBubbles: () => Promise<CozinhasBubblesFeatureCollection>;
+  /**
+   * Returns one row per município with a valid overall IVS score (Atlas da
+   * Vulnerabilidade Social, IPEA) for the social-vulnerability choropleth.
+   * Independent of the cozinha data — it covers every município in the IVS
+   * snapshot, whether or not it has a cozinha.
+   */
+  getIvsPorMunicipio: () => Promise<MunicipioIvs[]>;
 };
 
 const KNOWN_SOURCES = ['static'] as const;
@@ -94,6 +104,9 @@ export const createDataGateway = (): DataGateway => {
       },
       getCozinhasBubbles: async () => {
         return toCozinhasBubbles(await getAggregate());
+      },
+      getIvsPorMunicipio: async () => {
+        return toMunicipioIvs(await readStaticIvs());
       },
     };
   }

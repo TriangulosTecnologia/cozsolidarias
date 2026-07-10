@@ -14,6 +14,8 @@ export type {
 export type { StaticCadUnico } from './readStaticCadUnico';
 export { readStaticCadUnico } from './readStaticCadUnico';
 export { readStaticCozinhas } from './readStaticCozinhas';
+export type { StaticIvsSource } from './readStaticIvs';
+export { parseIvsCsv, readStaticIvs } from './readStaticIvs';
 export type { StaticPopulacao } from './readStaticPopulacao';
 export { readStaticPopulacao } from './readStaticPopulacao';
 export type { StaticCozinhaSource } from './types';

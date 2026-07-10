@@ -1,13 +1,15 @@
 import {
   buildLegendItems,
   colorForCadUnico,
+  colorForIvs,
   colorForPercentual,
   colorForPessoasPorCozinha,
   colorForQuantidade,
   colorForTaxa,
+  ivsFaixaLabel,
 } from 'src/app/(features)/mapas/geovisScales';
 import { buildSpec } from 'src/app/(features)/mapas/geovisSpec';
-import type { kitchenRateByCity } from 'src/data-gateway/schema';
+import type { kitchenRateByCity, MunicipioIvs } from 'src/data-gateway/schema';
 
 const BY_CITY: kitchenRateByCity[] = [
   {
@@ -31,6 +33,25 @@ const BY_CITY: kitchenRateByCity[] = [
     pessoasCadUnico: null,
     porDezMilCadUnico: null,
     pessoasPorCozinha: null,
+  },
+];
+
+const IVS_BY_CITY: MunicipioIvs[] = [
+  {
+    codigoIbge: '111',
+    municipio: 'Alpha',
+    ivs: 0.15,
+    ivsInfraestruturaUrbana: 0.1,
+    ivsCapitalHumano: 0.35,
+    ivsRendaETrabalho: 0.45,
+  },
+  {
+    codigoIbge: '222',
+    municipio: 'Beta',
+    ivs: 0.55,
+    ivsInfraestruturaUrbana: 0.6,
+    ivsCapitalHumano: 0.25,
+    ivsRendaETrabalho: 0.7,
   },
 ];
 
@@ -154,6 +175,38 @@ describe('colorForPessoasPorCozinha', () => {
   });
 });
 
+describe('colorForIvs', () => {
+  test('an unknown score resolves to the "sem dado" fill', () => {
+    expect(colorForIvs(null)).toBe(colorForQuantidade(0));
+  });
+
+  test('the lowest faixa is a real painted band, distinct from "sem dado"', () => {
+    expect(colorForIvs(0.1)).not.toBe(colorForIvs(null));
+  });
+
+  test('scores at or above the top break share the darkest (muito alta) band', () => {
+    expect(colorForIvs(0.9)).toBe(colorForIvs(0.5));
+  });
+
+  test('higher vulnerability maps to a different band than lower', () => {
+    expect(colorForIvs(0.1)).not.toBe(colorForIvs(0.45));
+  });
+});
+
+describe('ivsFaixaLabel', () => {
+  test('maps each faixa boundary to its official name', () => {
+    expect(ivsFaixaLabel(0.15)).toBe('Muito baixa');
+    expect(ivsFaixaLabel(0.25)).toBe('Baixa');
+    expect(ivsFaixaLabel(0.35)).toBe('Média');
+    expect(ivsFaixaLabel(0.45)).toBe('Alta');
+    expect(ivsFaixaLabel(0.6)).toBe('Muito alta');
+  });
+
+  test('returns null for an unknown score', () => {
+    expect(ivsFaixaLabel(null)).toBeNull();
+  });
+});
+
 describe('buildLegendItems', () => {
   test('leads with the "Sem cozinha" swatch', () => {
     expect(buildLegendItems()[0].label).toBe('Sem cozinha');
@@ -262,6 +315,77 @@ describe('buildSpec', () => {
       return layer.id === 'municipios-br-fill';
     });
     expect(fill?.activeLegendId).toBe('legenda-pessoas-cozinha');
+  });
+
+  test('coropletico-ivs feeds IVS scores from the IVS data and positions the IVS legend', () => {
+    const spec = buildSpec(BY_CITY, 'coropletico-ivs', undefined, IVS_BY_CITY);
+
+    // The choropleth reads the separate IVS dataset, not the kitchen rows.
+    expect(mapDataById(spec, 'cozinhas-por-municipio')?.data).toEqual([
+      { geometryId: '111', value: 0.15 },
+      { geometryId: '222', value: 0.55 },
+    ]);
+
+    const ivsLegend = spec.legends?.find((legend) => {
+      return legend.id === 'legenda-ivs';
+    });
+    expect(ivsLegend?.position).toBe('bottom-right');
+    // A leading floor break keeps the "muito baixa" class (ivs < 0.2) out of
+    // geovis' grey base bin; that base bin is the folded "Sem dado" swatch.
+    expect(ivsLegend?.colorBy.thresholds?.[0]).toBe(0.001);
+    expect(ivsLegend?.colorBy.colors?.length).toBe(6);
+
+    const fill = spec.layers.find((layer) => {
+      return layer.id === 'municipios-br-fill';
+    });
+    expect(fill?.activeLegendId).toBe('legenda-ivs');
+  });
+
+  test.each([
+    {
+      mode: 'coropletico-ivs-infraestrutura' as const,
+      legendId: 'legenda-ivs-infraestrutura',
+      values: [0.1, 0.6],
+    },
+    {
+      mode: 'coropletico-ivs-capital-humano' as const,
+      legendId: 'legenda-ivs-capital-humano',
+      values: [0.35, 0.25],
+    },
+    {
+      mode: 'coropletico-ivs-renda-trabalho' as const,
+      legendId: 'legenda-ivs-renda-trabalho',
+      values: [0.45, 0.7],
+    },
+  ])(
+    '$mode feeds its sub-index column and positions its legend',
+    ({ mode, legendId, values }) => {
+      const spec = buildSpec(BY_CITY, mode, undefined, IVS_BY_CITY);
+
+      expect(mapDataById(spec, 'cozinhas-por-municipio')?.data).toEqual([
+        { geometryId: '111', value: values[0] },
+        { geometryId: '222', value: values[1] },
+      ]);
+
+      const legend = spec.legends?.find((entry) => {
+        return entry.id === legendId;
+      });
+      expect(legend?.position).toBe('bottom-right');
+      // All IVS-family scales share the floor-prefixed threshold/color pair.
+      expect(legend?.colorBy.thresholds?.[0]).toBe(0.001);
+      expect(legend?.colorBy.colors?.length).toBe(6);
+
+      const fill = spec.layers.find((layer) => {
+        return layer.id === 'municipios-br-fill';
+      });
+      expect(fill?.activeLegendId).toBe(legendId);
+    }
+  );
+
+  test('coropletico-ivs feeds nothing when no IVS data is provided', () => {
+    const spec = buildSpec(BY_CITY, 'coropletico-ivs');
+
+    expect(mapDataById(spec, 'cozinhas-por-municipio')?.data).toEqual([]);
   });
 
   test('pontos renders the points overlay and feeds the choropleth nothing', () => {

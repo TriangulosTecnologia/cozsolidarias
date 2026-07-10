@@ -19,7 +19,7 @@ import { BruttalTheme } from '@ttoss/theme/Bruttal';
 import * as React from 'react';
 import { ThemeUIProvider } from 'theme-ui';
 
-import type { kitchenRateByCity } from '@/data-gateway/schema';
+import type { kitchenRateByCity, MunicipioIvs } from '@/data-gateway/schema';
 
 import { buildSpec, type MapMode } from './geovisSpec';
 import { renderMunicipioTooltip } from './mapaTooltips';
@@ -68,6 +68,22 @@ const LEFT_SIDEBAR: NonNullable<GeovisWorkspaceConfig['leftSidebar']> = {
           value: 'coropletico-pessoas-cozinha',
           label: 'pessoas no CadÚnico por cozinha',
         },
+        {
+          value: 'coropletico-ivs',
+          label: 'Índice de vulnerabilidade social',
+        },
+        {
+          value: 'coropletico-ivs-infraestrutura',
+          label: 'IVS Infraestrutura Urbana',
+        },
+        {
+          value: 'coropletico-ivs-capital-humano',
+          label: 'IVS Capital Humano',
+        },
+        {
+          value: 'coropletico-ivs-renda-trabalho',
+          label: 'IVS Renda e Trabalho',
+        },
         { value: 'pontos', label: 'Localização das cozinhas' },
         { value: 'circulos', label: 'Cozinhas por município' },
       ],
@@ -112,6 +128,7 @@ const MapaPlayground = () => {
   const [kitchenByCity, setKitchenByCity] = React.useState<kitchenRateByCity[]>(
     []
   );
+  const [ivsByCity, setIvsByCity] = React.useState<MunicipioIvs[]>([]);
   const [nomesPorCodigo, setNomesPorCodigo] = React.useState<NomesPorCodigo>(
     {}
   );
@@ -126,11 +143,16 @@ const MapaPlayground = () => {
   React.useEffect(() => {
     let cancelled = false;
 
-    const finish = (data: kitchenRateByCity[], nomes: NomesPorCodigo) => {
+    const finish = (
+      data: kitchenRateByCity[],
+      ivs: MunicipioIvs[],
+      nomes: NomesPorCodigo
+    ) => {
       if (cancelled) {
         return;
       }
       setKitchenByCity(data);
+      setIvsByCity(ivs);
       setNomesPorCodigo(nomes);
       setMounted(true);
     };
@@ -139,17 +161,20 @@ const MapaPlayground = () => {
       fetch('/api/cozinhas/por-municipio').then((response) => {
         return response.json() as Promise<kitchenRateByCity[]>;
       }),
+      fetch('/api/municipios/ivs').then((response) => {
+        return response.json() as Promise<MunicipioIvs[]>;
+      }),
       fetch('/geo/municipios-nomes.json').then((response) => {
         return response.json() as Promise<NomesPorCodigo>;
       }),
     ])
-      .then(([data, nomes]) => {
-        finish(data, nomes);
+      .then(([data, ivs, nomes]) => {
+        finish(data, ivs, nomes);
       })
       .catch(() => {
-        // Falha silenciosa: o mapa renderiza todo na cor "sem cozinha" e o
+        // Falha silenciosa: o mapa renderiza todo na cor "sem dado" e o
         // tooltip cai no rótulo de fallback "Município <código>".
-        finish([], {});
+        finish([], [], {});
       });
 
     return () => {
@@ -185,8 +210,8 @@ const MapaPlayground = () => {
   );
 
   const baseSpec = React.useMemo(() => {
-    return buildSpec(kitchenByCity, mode, hoverTooltip);
-  }, [kitchenByCity, mode, hoverTooltip]);
+    return buildSpec(kitchenByCity, mode, hoverTooltip, ivsByCity);
+  }, [kitchenByCity, mode, hoverTooltip, ivsByCity]);
 
   const boundaryGroups = React.useMemo(() => {
     return [estadosGroup, municipiosGroup];
@@ -216,8 +241,8 @@ const MapaPlayground = () => {
         // further configurable via the spec). Nudge it inward so it doesn't
         // crowd the edges. Selected by the legend list's aria-label (its title),
         // one selector per choropleth legend (count, rate, share, CadÚnico,
-        // coverage).
-        '& div:has(> ul[aria-label="Cozinhas por município"]), & div:has(> ul[aria-label="nº coz. no município / 100.000 hab."]), & div:has(> ul[aria-label="% das cozinhas do Brasil no município"]), & div:has(> ul[aria-label="nº coz. / 10 mil pessoas no CadÚnico"]), & div:has(> ul[aria-label="pessoas no CadÚnico por cozinha"])':
+        // coverage, IVS).
+        '& div:has(> ul[aria-label="Cozinhas por município"]), & div:has(> ul[aria-label="nº coz. no município / 100.000 hab."]), & div:has(> ul[aria-label="% das cozinhas do Brasil no município"]), & div:has(> ul[aria-label="nº coz. / 10 mil pessoas no CadÚnico"]), & div:has(> ul[aria-label="pessoas no CadÚnico por cozinha"]), & div:has(> ul[aria-label="Índice de vulnerabilidade social"])':
           {
             bottom: '44px !important',
             right: '44px !important',

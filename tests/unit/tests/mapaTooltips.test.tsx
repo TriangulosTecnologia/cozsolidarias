@@ -109,4 +109,37 @@ describe('renderMunicipioTooltip', () => {
 
     expect(screen.getByText('Sem cozinha registrada')).toBeInTheDocument();
   });
+
+  test('IVS mode shows the score and its faixa', () => {
+    renderTooltip({ mode: 'coropletico-ivs', value: 0.15 });
+
+    expect(screen.getByText(/IVS 0,150 · Muito baixa/)).toBeInTheDocument();
+  });
+
+  test.each([
+    {
+      mode: 'coropletico-ivs-infraestrutura' as const,
+      label: 'Infraestrutura urbana',
+    },
+    {
+      mode: 'coropletico-ivs-capital-humano' as const,
+      label: 'Capital humano',
+    },
+    {
+      mode: 'coropletico-ivs-renda-trabalho' as const,
+      label: 'Renda e trabalho',
+    },
+  ])('$mode labels the sub-index and its faixa', ({ mode, label }) => {
+    renderTooltip({ mode, value: 0.6 });
+
+    expect(
+      screen.getByText(new RegExp(`${label} 0,600 · Muito alta`))
+    ).toBeInTheDocument();
+  });
+
+  test('IVS-family mode reads "sem dado" without a joined value', () => {
+    renderTooltip({ mode: 'coropletico-ivs-capital-humano', value: null });
+
+    expect(screen.getByText('Sem dado de Capital humano')).toBeInTheDocument();
+  });
 });

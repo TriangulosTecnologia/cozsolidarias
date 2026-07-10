@@ -100,6 +100,24 @@ describe('createDataGateway', () => {
     }
   });
 
+  test('returns one IVS row per município with a valid score from the default static source', async () => {
+    const gateway = createDataGateway();
+
+    const ivs = await gateway.getIvsPorMunicipio();
+
+    expect(Array.isArray(ivs)).toBe(true);
+    expect(ivs.length).toBeGreaterThan(0);
+
+    for (const entry of ivs) {
+      expect(typeof entry.codigoIbge).toBe('string');
+      expect(entry.codigoIbge).not.toBe('');
+      expect(typeof entry.municipio).toBe('string');
+      // The index is defined on the closed interval [0, 1].
+      expect(entry.ivs).toBeGreaterThanOrEqual(0);
+      expect(entry.ivs).toBeLessThanOrEqual(1);
+    }
+  });
+
   test('throws on an unknown DATA_SOURCE', () => {
     const previous = process.env['DATA_SOURCE'];
     process.env['DATA_SOURCE'] = 'bogus';

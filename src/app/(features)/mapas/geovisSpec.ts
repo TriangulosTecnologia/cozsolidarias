@@ -7,7 +7,11 @@ import type {
   VisualizationSpec,
 } from '@ttoss/geovis';
 
-import type { kitchenByCity, kitchenRateByCity } from '@/data-gateway/schema';
+import type {
+  kitchenByCity,
+  kitchenRateByCity,
+  MunicipioIvs,
+} from '@/data-gateway/schema';
 
 import { buildLegends, legendIdForMode, type MapMode } from './geovisScales';
 
@@ -174,6 +178,59 @@ const toPessoasPorCozinhaRows = (byCity: kitchenRateByCity[]): MapDataRow[] => {
 };
 
 /**
+ * Maps an IVS-family score (overall IVS or a sub-index, selected by `pick`) to
+ * geovis `mapData` value rows. Every row is kept — the gateway already dropped
+ * municípios with an invalid/absent score, so the only municípios that fall back
+ * to the legend's `defaultColor` ("sem dado") are those missing from the IVS
+ * snapshot entirely.
+ */
+const toIvsRows = (
+  ivsByCity: MunicipioIvs[],
+  pick: (register: MunicipioIvs) => number
+): MapDataRow[] => {
+  return ivsByCity.map((register) => {
+    return { geometryId: register.codigoIbge, value: pick(register) };
+  });
+};
+
+/**
+ * The IVS-family modes and the score each one paints. Keyed by {@link MapMode}
+ * so `buildSpec` resolves the whole family in one lookup instead of a branch per
+ * sub-index. Every value lives on the same `[0, 1]` IPEA scale.
+ */
+const IVS_PICKERS: Partial<
+  Record<MapMode, (register: MunicipioIvs) => number>
+> = {
+  'coropletico-ivs': (register) => {
+    return register.ivs;
+  },
+  'coropletico-ivs-infraestrutura': (register) => {
+    return register.ivsInfraestruturaUrbana;
+  },
+  'coropletico-ivs-capital-humano': (register) => {
+    return register.ivsCapitalHumano;
+  },
+  'coropletico-ivs-renda-trabalho': (register) => {
+    return register.ivsRendaETrabalho;
+  },
+};
+
+/**
+ * The cozinha-based choropleth modes and the value rows each one paints. Keyed
+ * by {@link MapMode} so `buildSpec` resolves them in one lookup; the IVS family
+ * is handled separately via {@link IVS_PICKERS}.
+ */
+const CHOROPLETH_ROW_BUILDERS: Partial<
+  Record<MapMode, (byCity: kitchenRateByCity[]) => MapDataRow[]>
+> = {
+  coropletico: toValueRows,
+  'coropletico-taxa': toRateRows,
+  'coropletico-percentual': toPercentRows,
+  'coropletico-cadunico': toCadUnicoRows,
+  'coropletico-pessoas-cozinha': toPessoasPorCozinhaRows,
+};
+
+/**
  * The município fill layer — identical across modes (keeps its `mapDataId` +
  * `activeLegendId`), so the hover tooltip, which only tracks polygon layers
  * with an `activeLegendId`, keeps working everywhere. Only the *data* fed to it
@@ -207,37 +264,39 @@ const buildFillLayer = (
  * `coropletico`, the per-100k-inhabitants rate in `coropletico-taxa`, the share
  * (%) of Brazil in `coropletico-percentual`, the per-10k-CadÚnico rate in
  * `coropletico-cadunico`, the people-per-cozinha value in
- * `coropletico-pessoas-cozinha`, and nothing in the overlay modes (`pontos`,
- * `circulos`), where every município falls back to the legend's `defaultColor`.
+ * `coropletico-pessoas-cozinha`, the overall IVS in `coropletico-ivs` and each
+ * IVS sub-index in `coropletico-ivs-infraestrutura` / `-capital-humano` /
+ * `-renda-trabalho`, and nothing in the overlay modes (`pontos`, `circulos`),
+ * where every município falls back to the legend's `defaultColor`.
  *
- * @param byCity - Per-município canonical rows (from the gateway).
+ * @param byCity - Per-município canonical cozinha rows (from the gateway).
  * @param mode - Active {@link MapMode}. Defaults to `'coropletico'`.
  * @param hoverTooltipRender - Optional spec-driven hover-tooltip renderer.
+ * @param ivsByCity - Per-município IVS rows (from the gateway); read in the
+ * `coropletico-ivs` mode and the three IVS sub-index modes. Defaults to `[]`.
  * @returns The geovis visualization spec (sources, mapData, legends, layers).
  *
  * @example
  * buildSpec(byCity, 'coropletico-taxa');
+ * buildSpec(byCity, 'coropletico-ivs', undefined, ivsByCity);
  */
 export const buildSpec = (
   byCity: kitchenRateByCity[],
   mode: MapMode = 'coropletico',
-  hoverTooltipRender?: HoverTooltipConfig['render']
+  hoverTooltipRender?: HoverTooltipConfig['render'],
+  ivsByCity: MunicipioIvs[] = []
 ): VisualizationSpec => {
   const showPoints = mode === 'pontos';
   const showBubbles = mode === 'circulos';
 
-  const choroplethRows =
-    mode === 'coropletico'
-      ? toValueRows(byCity)
-      : mode === 'coropletico-taxa'
-        ? toRateRows(byCity)
-        : mode === 'coropletico-percentual'
-          ? toPercentRows(byCity)
-          : mode === 'coropletico-cadunico'
-            ? toCadUnicoRows(byCity)
-            : mode === 'coropletico-pessoas-cozinha'
-              ? toPessoasPorCozinhaRows(byCity)
-              : [];
+  const ivsPick = IVS_PICKERS[mode];
+  const buildRows = CHOROPLETH_ROW_BUILDERS[mode];
+
+  const choroplethRows = ivsPick
+    ? toIvsRows(ivsByCity, ivsPick)
+    : buildRows
+      ? buildRows(byCity)
+      : [];
 
   // Bounds for the circle-size scale: the largest per-município count. Falls
   // back to 1 when there's no data so `buildBubblesLayer` can still clamp it.
