@@ -417,63 +417,48 @@ export const HABILITADA_COLOR = mapTokens.dataviz.color.sequential[2][3];
  */
 export const NAO_HABILITADA_COLOR = mapTokens.dataviz.color.sequential[5][6];
 
-// /**
-//  * Point color for the "Mapeada" status — orange indicates a mapped kitchen.
-//  */
-// const MAPEADA_COLOR = mapTokens.dataviz.color.sequential[4][5];
+/** Point color for the "Mapeada" status — orange indicates a mapped kitchen. */
+const MAPEADA_COLOR = mapTokens.dataviz.color.sequential[4][5];
 
-// /**
-//  * Point color for the "Retirada" status — warm gray indicates a removed kitchen.
-//  */
-// const RETIRADA_COLOR = mapTokens.dataviz.color.categorical[1][7];
+/** Point color for the "Retirada" status — warm gray indicates a removed kitchen. */
+const RETIRADA_COLOR = mapTokens.dataviz.color.categorical[1][7];
 
-// /**
-//  * Point color for the "Em análise" status — amber indicates pending analysis.
-//  */
-// const EM_ANALISE_COLOR = mapTokens.dataviz.color.sequential[3][2];
+/** Point color for the "Em análise" status — amber indicates pending analysis. */
+const EM_ANALISE_COLOR = mapTokens.dataviz.color.sequential[3][2];
 
-// /**
-//  * Point color for the "Homologada para Habilitação" status — teal indicates
-//  * approved for activation.
-//  */
-// const HOMOLOGADA_HABILITACAO_COLOR = mapTokens.dataviz.color.sequential[6][6];
+/** Point color for the "Homologada para Habilitação" status — teal indicates approved for activation. */
+const HOMOLOGADA_HABILITACAO_COLOR = mapTokens.dataviz.color.sequential[6][6];
 
-// /**
-//  * Point color for the "Pendência emitida pelo MDS" status — dusty purple
-//  * indicates a pending issue.
-//  */
-// const PENDENCIA_MDS_COLOR = mapTokens.dataviz.color.categorical[1][3];
+/** Point color for the "Pendência emitida pelo MDS" status — dusty purple indicates a pending issue. */
+const PENDENCIA_MDS_COLOR = mapTokens.dataviz.color.categorical[1][3];
 
-// /**
-//  * Point color for the "Enviada para análise" status — steel blue indicates
-//  * submitted for review.
-//  */
-// const ENVIADA_ANALISE_COLOR = mapTokens.dataviz.color.categorical[1][8];
+/** Point color for the "Enviada para análise" status — steel blue indicates submitted for review. */
+const ENVIADA_ANALISE_COLOR = mapTokens.dataviz.color.categorical[1][8];
 
-// /**
-//  * Point color for the "Homologada para Retirada" status — dark teal indicates
-//  * approved for removal.
-//  */
-// const HOMOLOGADA_RETIRADA_COLOR = mapTokens.dataviz.color.sequential[6][10];
+/** Point color for the "Homologada para Retirada" status — dark teal indicates approved for removal. */
+const HOMOLOGADA_RETIRADA_COLOR = mapTokens.dataviz.color.sequential[6][10];
 
 /**
- * Point color per cozinha status, drawn from the theme's categorical ramp:
- * forest green reads as the "active" state (Habilitada), sienna/clay as the
- * attention state (Não Habilitada). Drives both the map's `match` expression
- * (via the legend's `colorBy.mapping`) and the tooltip swatch, so they can
- * never drift.
+ * Point color per cozinha status, drawn from the theme's ramp — forest green
+ * for the "active" state (Habilitada), sienna/clay for the attention state
+ * (Não Habilitada), and a distinct hue per remaining status. Drives both the
+ * map's `match` expression (via the legend's `colorBy.mapping`) and the
+ * tooltip swatch, so they can never drift.
+ *
+ * Every canonical status (see {@link COZINHA_SITUACOES}) has an entry here;
+ * all of them render on the status map.
  */
 const SITUACAO_COLORS: Record<CozinhaSituacao, string> = {
   Habilitada: HABILITADA_COLOR,
   'Não Habilitada': NAO_HABILITADA_COLOR,
-  // Mapeada: MAPEADA_COLOR,
-  // Retirada: RETIRADA_COLOR,
-  // 'Em análise': EM_ANALISE_COLOR,
-  // 'Homologada para Habilitação': HOMOLOGADA_HABILITACAO_COLOR,
-  // 'Pendência emitida pelo MDS (Prazo para adequações 15 dias)':
-  //   PENDENCIA_MDS_COLOR,
-  // 'Enviada para análise': ENVIADA_ANALISE_COLOR,
-  // 'Homologada para Retirada': HOMOLOGADA_RETIRADA_COLOR,
+  Mapeada: MAPEADA_COLOR,
+  Retirada: RETIRADA_COLOR,
+  'Em análise': EM_ANALISE_COLOR,
+  'Homologada para Habilitação': HOMOLOGADA_HABILITACAO_COLOR,
+  'Pendência emitida pelo MDS (Prazo para adequações 15 dias)':
+    PENDENCIA_MDS_COLOR,
+  'Enviada para análise': ENVIADA_ANALISE_COLOR,
+  'Homologada para Retirada': HOMOLOGADA_RETIRADA_COLOR,
 };
 
 /**
@@ -758,8 +743,9 @@ export const buildPontosFillLegend = (): LegendSpec => {
  * The categorical status legend for `pontos-status` mode. `colorBy.mapping`
  * drives both the legend swatches and the layer's `match` color expression
  * (the adapter reads the joined `situacao` from feature-state), so the legend
- * can never drift from the point colors. Statuses outside the mapping never
- * reach the map — the gateway transformer drops them.
+ * can never drift from the point colors. Every canonical status (see
+ * {@link COZINHA_SITUACOES}) renders — its color comes from
+ * {@link SITUACAO_COLORS}.
  *
  * @returns the status points `LegendSpec`.
  *
@@ -767,6 +753,7 @@ export const buildPontosFillLegend = (): LegendSpec => {
  * buildPointsStatusLegend().id; // → POINTS_STATUS_LEGEND_ID
  */
 export const buildPointsStatusLegend = (): LegendSpec => {
+  const mapping: Record<CozinhaSituacao, string> = { ...SITUACAO_COLORS };
   return {
     id: POINTS_STATUS_LEGEND_ID,
     title: 'Localização das cozinhas com status',
@@ -775,7 +762,7 @@ export const buildPointsStatusLegend = (): LegendSpec => {
     colorBy: {
       type: 'categorical',
       property: 'value',
-      mapping: { ...SITUACAO_COLORS },
+      mapping,
       defaultColor: WITHOUT_KITCHEN_COLOR,
     },
     reference: DATA_REFERENCE,

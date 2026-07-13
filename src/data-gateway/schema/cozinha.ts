@@ -57,9 +57,12 @@ export type CozinhasBubblesFeatureCollection = {
 };
 
 /**
- * Cozinha status categories shown on the status points map. Values match the
- * source's `Situação` column verbatim; records with any other status
- * (empty, workflow states not listed) are **dropped** by the transformer.
+ * Cozinha status categories recognised by the app. Values match the source's
+ * `Situação` column verbatim; records with any other status (empty, or a
+ * workflow state not listed here) are **dropped** by the transformer.
+ *
+ * This is the full canonical set — every status listed here renders on the
+ * status map, coloured via {@link SITUACAO_COLORS} in `legendsBuilders`.
  *
  * @example
  * COZINHA_SITUACOES.includes('Habilitada'); // → true
@@ -67,13 +70,13 @@ export type CozinhasBubblesFeatureCollection = {
 export const COZINHA_SITUACOES = [
   'Habilitada',
   'Não Habilitada',
-  // 'Mapeada',
-  // 'Retirada',
-  // 'Em análise',
-  // 'Homologada para Habilitação',
-  // 'Pendência emitida pelo MDS (Prazo para adequações 15 dias)',
-  // 'Enviada para análise',
-  // 'Homologada para Retirada',
+  'Mapeada',
+  'Retirada',
+  'Em análise',
+  'Homologada para Habilitação',
+  'Pendência emitida pelo MDS (Prazo para adequações 15 dias)',
+  'Enviada para análise',
+  'Homologada para Retirada',
 ] as const;
 
 /**
