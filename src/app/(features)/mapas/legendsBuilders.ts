@@ -33,6 +33,20 @@ const COLORS = sampleRamp(
 export const WITHOUT_KITCHEN_COLOR = mapTokens.dataviz.color.status.masked;
 
 /**
+ * Fill color for the proportional-circle overlay (`circulos` mode). The
+ * `proportionalCircles` resolver's own defaults
+ * (`PROPORTIONAL_CIRCLES_DEFAULTS`) cover opacity/stroke but never
+ * `circleColor` — leaving it unset renders MapLibre's own paint default
+ * (opaque black), which reads as noise rather than data. Reuses the
+ * mid-tone of the shared sequential ramp so the circles read as the same
+ * "cozinhas" blue family as the choropleth.
+ *
+ * @example
+ * paint: { circleColor: BUBBLES_COLOR }
+ */
+export const BUBBLES_COLOR = mapTokens.dataviz.color.sequential[1][6];
+
+/**
  * Resolves the choropleth band color for a kitchen count, mirroring the
  * `threshold` scale that paints the fill (`THRESHOLDS`/`COLORS`). Municípios with
  * no kitchens (`<= 0`) resolve to `WITHOUT_KITCHEN_COLOR` — the same flat fill the

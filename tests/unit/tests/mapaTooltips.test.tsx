@@ -194,8 +194,8 @@ describe('renderFillTooltip', () => {
     expect(screen.getByText('Sem dado de IVS')).toBeInTheDocument();
   });
 
-  test('pontos and circulos also fall back to the raw count', () => {
-    renderWithChakra(
+  test('pontos and circulos also fall back to the raw count, without a color swatch', () => {
+    const { container } = renderWithChakra(
       <>
         {renderFillTooltip({
           mode: 'circulos',
@@ -207,6 +207,27 @@ describe('renderFillTooltip', () => {
     );
 
     expect(screen.getByText('5 cozinhas')).toBeInTheDocument();
+    expect(
+      container.querySelector('[data-testid="tooltip-swatch"]')
+    ).toBeNull();
+  });
+
+  test('coropletico keeps the color swatch', () => {
+    const { container } = renderWithChakra(
+      <>
+        {renderFillTooltip({
+          mode: 'coropletico',
+          name: 'São Paulo',
+          register: REGISTER,
+          value: 5,
+        })}
+      </>
+    );
+
+    expect(screen.getByText('5 cozinhas')).toBeInTheDocument();
+    expect(
+      container.querySelector('[data-testid="tooltip-swatch"]')
+    ).not.toBeNull();
   });
 });
 

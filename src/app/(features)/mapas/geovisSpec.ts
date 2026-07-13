@@ -15,6 +15,7 @@ import type {
 } from '@/data-gateway/schema';
 
 import {
+  BUBBLES_COLOR,
   buildBubblesLegend,
   buildCadUnicoLegend,
   buildChoroplethLegend,
@@ -147,6 +148,7 @@ const buildBubblesOverrideLayer = (
     sourceId: BUBBLES_SOURCE_ID,
     geometry: 'point',
     sizeBy: { range: BUBBLES_RADIUS_RANGE },
+    paint: { circleColor: BUBBLES_COLOR },
     hoverTooltip,
   };
 };

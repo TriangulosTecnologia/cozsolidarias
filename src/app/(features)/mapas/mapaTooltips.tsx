@@ -60,7 +60,13 @@ const formatCozinhas = (quantidade: number): string => {
   }`;
 };
 
-/** Card do tooltip: título + swatch da faixa + rótulo, com linha auxiliar opcional. */
+/**
+ * Card do tooltip: título + rótulo, com swatch de cor e linha auxiliar
+ * opcionais. `swatchColor` fica de fora quando a cor não carrega significado
+ * — por exemplo o preenchimento neutro dos modos de sobreposição (`pontos`,
+ * `pontos-status`, `circulos`), onde o município não é colorido por dado
+ * algum.
+ */
 export const TooltipCard = ({
   name,
   swatchColor,
@@ -68,7 +74,7 @@ export const TooltipCard = ({
   secondary,
 }: {
   name: string;
-  swatchColor: string;
+  swatchColor?: string;
   primary: string;
   secondary?: string;
 }) => {
@@ -78,13 +84,16 @@ export const TooltipCard = ({
         {name}
       </Text>
       <Box display="flex" alignItems="center" gap="2">
-        <Box
-          w="12px"
-          h="12px"
-          borderRadius="sm"
-          flexShrink={0}
-          bg={swatchColor}
-        />
+        {swatchColor === undefined ? null : (
+          <Box
+            data-testid="tooltip-swatch"
+            w="12px"
+            h="12px"
+            borderRadius="sm"
+            flexShrink={0}
+            bg={swatchColor}
+          />
+        )}
         <Text fontSize="xs" color="text.secondary" lineHeight="tight">
           {primary}
         </Text>
@@ -132,18 +141,25 @@ export const renderRateTooltip = ({
   );
 };
 
-/** Count-mode tooltip (modos `coropletico`, `pontos`, `circulos`): swatch + "N cozinhas". */
+/**
+ * Count-mode tooltip: "N cozinhas". Only `coropletico` colors the fill by this
+ * count, so `withSwatch` gates the swatch box — the overlay modes
+ * (`pontos`, `pontos-status`, `circulos`) that also fall back to this
+ * tooltip render the same text without implying a color-coded fill.
+ */
 export const renderCountTooltip = ({
   name,
   quantity,
+  withSwatch = true,
 }: {
   name: string;
   quantity: number;
+  withSwatch?: boolean;
 }) => {
   return (
     <TooltipCard
       name={name}
-      swatchColor={colorForQuantidade(quantity)}
+      swatchColor={withSwatch ? colorForQuantidade(quantity) : undefined}
       primary={
         quantity === 0 ? 'Sem cozinha registrada' : formatCozinhas(quantity)
       }
@@ -362,7 +378,14 @@ export const renderFillTooltip = ({
     return renderIvsTooltip({ name, value, label: ivsLabel });
   }
 
+  // Overlay modes (pontos, pontos-status, circulos) show the fill's count
+  // tooltip as plain information, without a swatch — their fill isn't
+  // colored by this count (or by anything at all).
   const quantity =
     typeof value === 'number' ? value : (register?.quantidade ?? 0);
-  return renderCountTooltip({ name, quantity });
+  return renderCountTooltip({
+    name,
+    quantity,
+    withSwatch: mode === 'coropletico',
+  });
 };
