@@ -2,6 +2,7 @@ import type { LegendSpec } from '@ttoss/geovis';
 
 import { mapTokens } from '@/config/theme';
 
+import { buildAssentamentoLegend } from './geovisAssentamentosScales';
 import {
   IDHM_FAMILY_COLORS,
   IDHM_FAMILY_REFERENCE,
@@ -325,11 +326,6 @@ export type LegendItem = { color: string; label: string };
  * buildLegendItems()[0]; // { color: WITHOUT_KITCHEN_COLOR, label: 'Sem cozinha' }
  */
 export const buildLegendItems = (): LegendItem[] => {
-  const semCozinha: LegendItem = {
-    color: WITHOUT_KITCHEN_COLOR,
-    label: 'Sem cozinha',
-  };
-
   const ranges = THRESHOLDS.map((lower, index): LegendItem => {
     const upper = THRESHOLDS[index + 1];
     const color = COLORS[index + 1];
@@ -343,18 +339,8 @@ export const buildLegendItems = (): LegendItem[] => {
     return { color, label: `${lower}–${upper - 1}` };
   });
 
-  return [semCozinha, ...ranges];
+  return [{ color: WITHOUT_KITCHEN_COLOR, label: 'Sem cozinha' }, ...ranges];
 };
-
-/**
- * Swatch labels for the count legend, derived from the same `THRESHOLDS`/`COLORS`
- * as the fill (via {@link buildLegendItems}) so they can never drift. Index 0 is
- * the `< 1` bin — which resolves to `defaultColor` (`WITHOUT_KITCHEN_COLOR`) and
- * so doubles as the "Sem cozinha" swatch — followed by one label per range.
- */
-const LEGEND_BIN_LABELS = buildLegendItems().map((item) => {
-  return item.label;
-});
 
 /**
  * What the municipality fill encodes:
@@ -400,75 +386,6 @@ export type MapMode =
   | 'circulos'
   | 'assentamentos';
 
-/**
- * Registration-status classes of a SICAR settlement (`ind_status`), with the
- * human label the map colors and labels by. The map's categorical join uses the
- * **label** (not the code) as the joined value, so the legend swatch labels and
- * the tooltip text read straight from it. `code → label` is the only mapping
- * that must stay in sync with the source's `ind_status` domain.
- */
-const ASSENTAMENTO_STATUS = [
-  { code: 'AT', label: 'Ativo' },
-  { code: 'CA', label: 'Cancelado' },
-  { code: 'PE', label: 'Pendente' },
-] as const;
-
-/** Discrete brand categorical hues (nominal), reused for the status classes. */
-const ASSENTAMENTO_CATEGORICAL = mapTokens.dataviz.color.categorical[1];
-
-/**
- * Status label → fill color. Green = active, brick-red = cancelled, amber =
- * pending, drawn from the brand categorical palette. Keyed by label because the
- * categorical `colorBy.mapping` and the join value are both label-based.
- */
-const ASSENTAMENTO_STATUS_COLORS: Record<string, string> = {
-  Ativo: ASSENTAMENTO_CATEGORICAL[2],
-  Cancelado: ASSENTAMENTO_CATEGORICAL[6],
-  Pendente: ASSENTAMENTO_CATEGORICAL[4],
-};
-
-/** Fallback fill for a settlement whose status is outside the known domain. */
-const ASSENTAMENTO_DEFAULT_COLOR = mapTokens.dataviz.color.status.masked;
-
-/**
- * Maps a SICAR `ind_status` code to its human label. Unknown codes return
- * `'Outros'` so they still color/join to the fallback swatch instead of leaking
- * the raw code.
- *
- * @param code - Raw `ind_status` from the source (e.g. `'AT'`).
- * @returns The human label (e.g. `'Ativo'`), or `'Outros'` when unknown.
- *
- * @example
- * assentamentoStatusLabel('AT'); // 'Ativo'
- * assentamentoStatusLabel('ZZ'); // 'Outros'
- */
-export const assentamentoStatusLabel = (code: string): string => {
-  const match = ASSENTAMENTO_STATUS.find((entry) => {
-    return entry.code === code;
-  });
-  return match?.label ?? 'Outros';
-};
-
-/**
- * Resolves the fill color for a settlement status label, mirroring the
- * categorical `colorBy.mapping` that paints the polygons so the tooltip swatch
- * can't drift. Any label outside {@link ASSENTAMENTO_STATUS_COLORS} (including
- * `null`) resolves to the masked fallback.
- *
- * @param label - Status label (e.g. `'Ativo'`), or `null` when unknown.
- * @returns The hex color for the status.
- *
- * @example
- * colorForAssentamentoStatus('Cancelado'); // brick-red
- * colorForAssentamentoStatus(null); // masked fallback
- */
-export const colorForAssentamentoStatus = (label: string | null): string => {
-  if (label === null) {
-    return ASSENTAMENTO_DEFAULT_COLOR;
-  }
-  return ASSENTAMENTO_STATUS_COLORS[label] ?? ASSENTAMENTO_DEFAULT_COLOR;
-};
-
 const CHOROPLETH_LEGEND_ID = 'legenda-cozinhas';
 const RATE_LEGEND_ID = 'legenda-taxa';
 const PERCENT_LEGEND_ID = 'legenda-percentual';
@@ -484,12 +401,6 @@ const IDHM_EDUC_LEGEND_ID = 'legenda-idhm-educacao';
 const IDHM_RENDA_LEGEND_ID = 'legenda-idhm-renda';
 const IDHM_EDUC_ESC_LEGEND_ID = 'legenda-idhm-educacao-escolaridade';
 const IDHM_EDUC_FREQ_LEGEND_ID = 'legenda-idhm-educacao-frequencia';
-
-/** Id of the categorical settlement legend; the assentamentos fill's `activeLegendId`. */
-export const ASSENTAMENTO_LEGEND_ID = 'legenda-assentamentos';
-
-/** Title of the settlement legend; also the menu label for the assentamentos mode. */
-const ASSENTAMENTO_LEGEND_TITLE = 'Assentamentos rurais';
 
 /** Title of the rate legend; also the fill's `activeLegendId` in rate mode. */
 const RATE_LEGEND_TITLE = 'nº coz. no município / 100.000 hab.';
@@ -544,7 +455,9 @@ const LEGEND_CONFIGS: LegendConfig[] = [
     subtitle: 'Quanto mais escuro o município, mais cozinhas cadastradas ali.',
     thresholds: THRESHOLDS,
     colors: COLORS,
-    labels: LEGEND_BIN_LABELS,
+    labels: buildLegendItems().map((item) => {
+      return item.label;
+    }),
     reference: 'Fonte dos dados: © Cozinhas Solidárias',
   },
   {
@@ -747,22 +660,7 @@ export const buildLegends = (mode: MapMode): LegendSpec[] => {
     };
   });
 
-  const assentamentos: LegendSpec = {
-    id: ASSENTAMENTO_LEGEND_ID,
-    title: ASSENTAMENTO_LEGEND_TITLE,
-    subtitle: 'Cor pela situação do cadastro do assentamento no CAR.',
-    ...(mode === 'assentamentos' ? { position: 'bottom-right' as const } : {}),
-    colorBy: {
-      type: 'categorical',
-      property: 'value',
-      mapping: ASSENTAMENTO_STATUS_COLORS,
-      defaultColor: ASSENTAMENTO_DEFAULT_COLOR,
-    },
-    reference:
-      'Fonte dos dados: SICAR / Serviço Florestal Brasileiro — {link:consulta.car.gov.br|https://consulta.car.gov.br/geoservices}',
-  };
-
-  return [...choropleths, assentamentos];
+  return [...choropleths, buildAssentamentoLegend(mode === 'assentamentos')];
 };
 
 /**

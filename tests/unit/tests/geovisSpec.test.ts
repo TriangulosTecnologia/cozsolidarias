@@ -1,7 +1,9 @@
 import {
   assentamentoStatusLabel,
-  buildLegendItems,
   colorForAssentamentoStatus,
+} from 'src/app/(features)/mapas/geovisAssentamentosScales';
+import {
+  buildLegendItems,
   colorForCadUnico,
   colorForPercentual,
   colorForPessoasPorCozinha,

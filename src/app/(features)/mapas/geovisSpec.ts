@@ -16,10 +16,8 @@ import type {
 import {
   ASSENTAMENTO_LEGEND_ID,
   assentamentoStatusLabel,
-  buildLegends,
-  legendIdForMode,
-  type MapMode,
-} from './geovisScales';
+} from './geovisAssentamentosScales';
+import { buildLegends, legendIdForMode, type MapMode } from './geovisScales';
 
 /** Re-exported so consumers keep importing the map's mode type from here. */
 export type { MapMode };

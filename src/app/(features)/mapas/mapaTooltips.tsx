@@ -7,6 +7,8 @@ import type { kitchenRateByCity } from '@/data-gateway/schema';
 import {
   assentamentoStatusLabel,
   colorForAssentamentoStatus,
+} from './geovisAssentamentosScales';
+import {
   colorForCadUnico,
   colorForPercentual,
   colorForPessoasPorCozinha,
