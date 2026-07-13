@@ -914,13 +914,23 @@ export const buildIvsLegend = (legendId: string): LegendSpec => {
 /**
  * The `dotDensity` legend for `pontos` mode. `resolveDotDensity` never
  * auto-generates a legend (each point carries no size/color-by value), so
- * this is hand-authored. The `1 ponto = 1 cozinha` key is a categorical
- * swatch in the points' own color — a legend without any color/circle item
- * renders nothing (`GeoVisLegend` returns null on empty items), so the key
- * must be an item, not a subtitle. The mapping never drives paint: the default circle color is used in the layer.
+ * this is hand-authored — deliberately WITHOUT `colorBy`, even though a
+ * legend with no color/circle item renders nothing (`GeoVisLegend` returns
+ * null on empty items; confirmed visually — this legend shows no swatch).
+ *
+ * KNOWN LIMITATION, confirmed by experiment (not a stale guess): adding a
+ * categorical `colorBy` here (even a single `{ Cozinha: <the resolver's own
+ * default color> }` entry with a matching `defaultColor`, so the `match`
+ * expression can never actually change what color a point paints) still
+ * breaks the map — the município FILL layer, which shares this same
+ * `activeLegendId` in `pontos` mode, picks up the categorical color and
+ * paints the entire country in that one color instead of its neutral
+ * `WITHOUT_KITCHEN_COLOR`. `buildFillLayer`'s explicit `paint.fillColor`
+ * does NOT win over it. Reproduced and reverted in this codebase's history;
+ * do not retry without also decoupling the fill's `activeLegendId` from this
+ * legend in `pontos` mode.
  *
  * @returns the dot-density `LegendSpec`.
- *
  */
 export const buildDotDensityLegend = (): LegendSpec => {
   return {
@@ -928,7 +938,6 @@ export const buildDotDensityLegend = (): LegendSpec => {
     title: 'Localização das cozinhas',
     subtitle: '1 ponto = 1 cozinha',
     position: 'bottom-right',
-    // Do not revert to colorBy
     reference: DATA_REFERENCE,
   };
 };

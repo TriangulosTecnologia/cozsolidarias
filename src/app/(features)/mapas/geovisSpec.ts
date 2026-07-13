@@ -139,6 +139,17 @@ const BUBBLES_RADIUS_RANGE: [number, number] = [4, 38];
  * their ids from `codarea` — geovis derives the source's `promoteId` from the
  * bubbles `mapData` entry's `joinKey` (`resolvePromoteIdForSource`) — so the
  * tooltip callback's `info.featureId` → município lookup works unchanged.
+ *
+ * KNOWN UPSTREAM BUG (`@ttoss/geovis` 0.9.0 and 0.10.0): the circles
+ * themselves never paint on the map, even though the auto-generated size
+ * legend (reference circles + `scaleMaxValue` ceiling) resolves correctly.
+ * Confirmed with zero app-side customization — dropping this override
+ * entirely and using the library's own minimal `proportionalCircles`
+ * example verbatim (from its README) still renders no circles, while the
+ * `dotDensity` circle layers (`pontos`, `pontos-status`) render fine, which
+ * narrows the bug to the `sizeBy`-driven `circle-radius` expression path
+ * specifically. Not fixable from this app without patching the library;
+ * tracked as a known limitation rather than blocking this feature area.
  */
 const buildBubblesOverrideLayer = (
   hoverTooltip?: HoverTooltipConfig
