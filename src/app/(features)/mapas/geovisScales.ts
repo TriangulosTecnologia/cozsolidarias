@@ -372,7 +372,9 @@ const LEGEND_BIN_LABELS = buildLegendItems().map((item) => {
  *   red = high vulnerability);
  * - `pontos`: flat background so the individual kitchen points stand out;
  * - `circulos`: flat background with one proportional circle per município
- *   (radius encodes the kitchen count).
+ *   (radius encodes the kitchen count);
+ * - `assentamentos`: SICAR rural-settlement (AST) polygons of SP, filled and
+ *   colored by registration status, with the kitchen points overlaid on top.
  *
  * The fill, the municipality/state borders and the background color stay the
  * same across modes — only the data coloring and the points/circles overlays
@@ -395,7 +397,77 @@ export type MapMode =
   | 'coropletico-idhm-educacao-escolaridade'
   | 'coropletico-idhm-educacao-frequencia'
   | 'pontos'
-  | 'circulos';
+  | 'circulos'
+  | 'assentamentos';
+
+/**
+ * Registration-status classes of a SICAR settlement (`ind_status`), with the
+ * human label the map colors and labels by. The map's categorical join uses the
+ * **label** (not the code) as the joined value, so the legend swatch labels and
+ * the tooltip text read straight from it. `code → label` is the only mapping
+ * that must stay in sync with the source's `ind_status` domain.
+ */
+const ASSENTAMENTO_STATUS = [
+  { code: 'AT', label: 'Ativo' },
+  { code: 'CA', label: 'Cancelado' },
+  { code: 'PE', label: 'Pendente' },
+] as const;
+
+/** Discrete brand categorical hues (nominal), reused for the status classes. */
+const ASSENTAMENTO_CATEGORICAL = mapTokens.dataviz.color.categorical[1];
+
+/**
+ * Status label → fill color. Green = active, brick-red = cancelled, amber =
+ * pending, drawn from the brand categorical palette. Keyed by label because the
+ * categorical `colorBy.mapping` and the join value are both label-based.
+ */
+const ASSENTAMENTO_STATUS_COLORS: Record<string, string> = {
+  Ativo: ASSENTAMENTO_CATEGORICAL[2],
+  Cancelado: ASSENTAMENTO_CATEGORICAL[6],
+  Pendente: ASSENTAMENTO_CATEGORICAL[4],
+};
+
+/** Fallback fill for a settlement whose status is outside the known domain. */
+const ASSENTAMENTO_DEFAULT_COLOR = mapTokens.dataviz.color.status.masked;
+
+/**
+ * Maps a SICAR `ind_status` code to its human label. Unknown codes return
+ * `'Outros'` so they still color/join to the fallback swatch instead of leaking
+ * the raw code.
+ *
+ * @param code - Raw `ind_status` from the source (e.g. `'AT'`).
+ * @returns The human label (e.g. `'Ativo'`), or `'Outros'` when unknown.
+ *
+ * @example
+ * assentamentoStatusLabel('AT'); // 'Ativo'
+ * assentamentoStatusLabel('ZZ'); // 'Outros'
+ */
+export const assentamentoStatusLabel = (code: string): string => {
+  const match = ASSENTAMENTO_STATUS.find((entry) => {
+    return entry.code === code;
+  });
+  return match?.label ?? 'Outros';
+};
+
+/**
+ * Resolves the fill color for a settlement status label, mirroring the
+ * categorical `colorBy.mapping` that paints the polygons so the tooltip swatch
+ * can't drift. Any label outside {@link ASSENTAMENTO_STATUS_COLORS} (including
+ * `null`) resolves to the masked fallback.
+ *
+ * @param label - Status label (e.g. `'Ativo'`), or `null` when unknown.
+ * @returns The hex color for the status.
+ *
+ * @example
+ * colorForAssentamentoStatus('Cancelado'); // brick-red
+ * colorForAssentamentoStatus(null); // masked fallback
+ */
+export const colorForAssentamentoStatus = (label: string | null): string => {
+  if (label === null) {
+    return ASSENTAMENTO_DEFAULT_COLOR;
+  }
+  return ASSENTAMENTO_STATUS_COLORS[label] ?? ASSENTAMENTO_DEFAULT_COLOR;
+};
 
 const CHOROPLETH_LEGEND_ID = 'legenda-cozinhas';
 const RATE_LEGEND_ID = 'legenda-taxa';
@@ -412,6 +484,12 @@ const IDHM_EDUC_LEGEND_ID = 'legenda-idhm-educacao';
 const IDHM_RENDA_LEGEND_ID = 'legenda-idhm-renda';
 const IDHM_EDUC_ESC_LEGEND_ID = 'legenda-idhm-educacao-escolaridade';
 const IDHM_EDUC_FREQ_LEGEND_ID = 'legenda-idhm-educacao-frequencia';
+
+/** Id of the categorical settlement legend; the assentamentos fill's `activeLegendId`. */
+export const ASSENTAMENTO_LEGEND_ID = 'legenda-assentamentos';
+
+/** Title of the settlement legend; also the menu label for the assentamentos mode. */
+const ASSENTAMENTO_LEGEND_TITLE = 'Assentamentos rurais';
 
 /** Title of the rate legend; also the fill's `activeLegendId` in rate mode. */
 const RATE_LEGEND_TITLE = 'nº coz. no município / 100.000 hab.';
@@ -637,14 +715,19 @@ const LEGEND_CONFIGS: LegendConfig[] = [
  * rendered); the others keep the same `colorBy` (still driving fill/tooltip) but
  * stay hidden.
  *
+ * The `assentamentos` mode positions a **categorical** legend (status → color)
+ * instead of a quantitative one; it's appended after the choropleth legends and
+ * only positioned when its mode is active.
+ *
  * @param mode - Active {@link MapMode}; positions the matching legend.
- * @returns One {@link LegendSpec} per choropleth variant.
+ * @returns One {@link LegendSpec} per choropleth variant, plus the settlement one.
  *
  * @example
  * buildLegends('coropletico-taxa').find((l) => l.position); // the rate legend
+ * buildLegends('assentamentos').find((l) => l.position); // the settlement legend
  */
 export const buildLegends = (mode: MapMode): LegendSpec[] => {
-  return LEGEND_CONFIGS.map((config): LegendSpec => {
+  const choropleths = LEGEND_CONFIGS.map((config): LegendSpec => {
     return {
       id: config.id,
       title: config.title,
@@ -663,6 +746,23 @@ export const buildLegends = (mode: MapMode): LegendSpec[] => {
       reference: config.reference,
     };
   });
+
+  const assentamentos: LegendSpec = {
+    id: ASSENTAMENTO_LEGEND_ID,
+    title: ASSENTAMENTO_LEGEND_TITLE,
+    subtitle: 'Cor pela situação do cadastro do assentamento no CAR.',
+    ...(mode === 'assentamentos' ? { position: 'bottom-right' as const } : {}),
+    colorBy: {
+      type: 'categorical',
+      property: 'value',
+      mapping: ASSENTAMENTO_STATUS_COLORS,
+      defaultColor: ASSENTAMENTO_DEFAULT_COLOR,
+    },
+    reference:
+      'Fonte dos dados: SICAR / Serviço Florestal Brasileiro — {link:consulta.car.gov.br|https://consulta.car.gov.br/geoservices}',
+  };
+
+  return [...choropleths, assentamentos];
 };
 
 /**

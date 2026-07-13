@@ -21,8 +21,15 @@ import { ThemeUIProvider } from 'theme-ui';
 
 import type { kitchenRateByCity, MunicipioIvs } from '@/data-gateway/schema';
 
-import { buildSpec, type MapMode } from './geovisSpec';
-import { renderMunicipioTooltip } from './mapaTooltips';
+import {
+  type AssentamentoAtributo,
+  buildSpec,
+  type MapMode,
+} from './geovisSpec';
+import {
+  renderAssentamentoTooltip,
+  renderMunicipioTooltip,
+} from './mapaTooltips';
 
 const estadosGroup = createBoundaryGroup({
   id: 'estados-boundary',
@@ -110,6 +117,7 @@ const LEFT_SIDEBAR: NonNullable<GeovisWorkspaceConfig['leftSidebar']> = {
         },
         { value: 'pontos', label: 'Localização das cozinhas' },
         { value: 'circulos', label: 'Cozinhas por município' },
+        { value: 'assentamentos', label: 'Assentamentos e cozinhas' },
       ],
     },
   ],
@@ -147,6 +155,50 @@ const CONFIG: GeovisWorkspaceConfig = {
   leftSidebar: LEFT_SIDEBAR,
 };
 
+/** Everything the map loads once at mount. */
+type MapBootstrap = {
+  data: kitchenRateByCity[];
+  ivs: MunicipioIvs[];
+  nomes: NomesPorCodigo;
+  settlements: AssentamentoAtributo[];
+};
+
+const EMPTY_BOOTSTRAP: MapBootstrap = {
+  data: [],
+  ivs: [],
+  nomes: {},
+  settlements: [],
+};
+
+/**
+ * Fetches the map's mount-time data in parallel. The assentamentos attribute
+ * sidecar (~560 KB) is loaded here; the multi-MB geometry is fetched lazily by
+ * the map source only when the user switches to the assentamentos mode. On any
+ * failure it resolves to empty data — the map renders in the "sem dado" color
+ * and tooltips fall back to their default labels.
+ */
+const fetchMapData = async (): Promise<MapBootstrap> => {
+  try {
+    const [data, ivs, nomes, settlements] = await Promise.all([
+      fetch('/api/cozinhas/por-municipio').then((response) => {
+        return response.json() as Promise<kitchenRateByCity[]>;
+      }),
+      fetch('/api/municipios/ivs').then((response) => {
+        return response.json() as Promise<MunicipioIvs[]>;
+      }),
+      fetch('/geo/municipios-nomes.json').then((response) => {
+        return response.json() as Promise<NomesPorCodigo>;
+      }),
+      fetch('/geo/assentamentos-atributos.json').then((response) => {
+        return response.json() as Promise<AssentamentoAtributo[]>;
+      }),
+    ]);
+    return { data, ivs, nomes, settlements };
+  } catch {
+    return EMPTY_BOOTSTRAP;
+  }
+};
+
 const MapaPlayground = () => {
   const [mounted, setMounted] = React.useState(false);
   const [kitchenByCity, setKitchenByCity] = React.useState<kitchenRateByCity[]>(
@@ -156,6 +208,9 @@ const MapaPlayground = () => {
   const [nomesPorCodigo, setNomesPorCodigo] = React.useState<NomesPorCodigo>(
     {}
   );
+  const [assentamentos, setAssentamentos] = React.useState<
+    AssentamentoAtributo[]
+  >([]);
   const [selection, setSelection] = React.useState<GeovisWorkspaceSelection>(
     () => {
       return getInitialSelection({ config: { leftSidebar: LEFT_SIDEBAR } });
@@ -167,39 +222,16 @@ const MapaPlayground = () => {
   React.useEffect(() => {
     let cancelled = false;
 
-    const finish = (
-      data: kitchenRateByCity[],
-      ivs: MunicipioIvs[],
-      nomes: NomesPorCodigo
-    ) => {
+    fetchMapData().then((bootstrap) => {
       if (cancelled) {
         return;
       }
-      setKitchenByCity(data);
-      setIvsByCity(ivs);
-      setNomesPorCodigo(nomes);
+      setKitchenByCity(bootstrap.data);
+      setIvsByCity(bootstrap.ivs);
+      setNomesPorCodigo(bootstrap.nomes);
+      setAssentamentos(bootstrap.settlements);
       setMounted(true);
-    };
-
-    Promise.all([
-      fetch('/api/cozinhas/por-municipio').then((response) => {
-        return response.json() as Promise<kitchenRateByCity[]>;
-      }),
-      fetch('/api/municipios/ivs').then((response) => {
-        return response.json() as Promise<MunicipioIvs[]>;
-      }),
-      fetch('/geo/municipios-nomes.json').then((response) => {
-        return response.json() as Promise<NomesPorCodigo>;
-      }),
-    ])
-      .then(([data, ivs, nomes]) => {
-        finish(data, ivs, nomes);
-      })
-      .catch(() => {
-        // Falha silenciosa: o mapa renderiza todo na cor "sem dado" e o
-        // tooltip cai no rótulo de fallback "Município <código>".
-        finish([], [], {});
-      });
+    });
 
     return () => {
       cancelled = true;
@@ -233,13 +265,47 @@ const MapaPlayground = () => {
     [citiesByCode, nomesPorCodigo, mode]
   );
 
-  const baseSpec = React.useMemo(() => {
-    return buildSpec(kitchenByCity, mode, hoverTooltip, ivsByCity);
-  }, [kitchenByCity, mode, hoverTooltip, ivsByCity]);
+  const assentamentosByCode = React.useMemo(() => {
+    return new Map(
+      assentamentos.map((atributo) => {
+        return [atributo.codImovel, atributo];
+      })
+    );
+  }, [assentamentos]);
 
+  const assentamentoTooltip = React.useCallback(
+    (info: MapHoverInfo) => {
+      return renderAssentamentoTooltip({
+        atributo: assentamentosByCode.get(String(info.featureId)),
+        value: info.value,
+      });
+    },
+    [assentamentosByCode]
+  );
+
+  const baseSpec = React.useMemo(() => {
+    return buildSpec(kitchenByCity, mode, hoverTooltip, ivsByCity, {
+      assentamentos: {
+        atributos: assentamentos,
+        hoverRender: assentamentoTooltip,
+      },
+    });
+  }, [
+    kitchenByCity,
+    mode,
+    hoverTooltip,
+    ivsByCity,
+    assentamentos,
+    assentamentoTooltip,
+  ]);
+
+  // Assentamentos mode hides the município layers entirely — drop the município
+  // boundary outline too, keeping only the state outlines for context.
   const boundaryGroups = React.useMemo(() => {
-    return [estadosGroup, municipiosGroup];
-  }, []);
+    return mode === 'assentamentos'
+      ? [estadosGroup]
+      : [estadosGroup, municipiosGroup];
+  }, [mode]);
 
   const { spec } = useBoundaryToggle(baseSpec, boundaryGroups);
 
@@ -265,8 +331,8 @@ const MapaPlayground = () => {
         // further configurable via the spec). Nudge it inward so it doesn't
         // crowd the edges. Selected by the legend list's aria-label (its title),
         // one selector per choropleth legend (count, rate, share, CadÚnico,
-        // coverage, IVS).
-        '& div:has(> ul[aria-label="Cozinhas por município"]), & div:has(> ul[aria-label="nº coz. no município / 100.000 hab."]), & div:has(> ul[aria-label="% das cozinhas do Brasil no município"]), & div:has(> ul[aria-label="nº coz. / 10 mil pessoas no CadÚnico"]), & div:has(> ul[aria-label="pessoas no CadÚnico por cozinha"]), & div:has(> ul[aria-label="Índice de vulnerabilidade social"])':
+        // coverage, IVS) plus the categorical settlement legend.
+        '& div:has(> ul[aria-label="Cozinhas por município"]), & div:has(> ul[aria-label="nº coz. no município / 100.000 hab."]), & div:has(> ul[aria-label="% das cozinhas do Brasil no município"]), & div:has(> ul[aria-label="nº coz. / 10 mil pessoas no CadÚnico"]), & div:has(> ul[aria-label="pessoas no CadÚnico por cozinha"]), & div:has(> ul[aria-label="Índice de vulnerabilidade social"]), & div:has(> ul[aria-label="Assentamentos rurais"])':
           {
             bottom: '44px !important',
             right: '44px !important',
