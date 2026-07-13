@@ -15,26 +15,30 @@ import type {
 } from '@/data-gateway/schema';
 
 import {
+  buildIvsLegend,
+  IVS_CAPITAL_LEGEND_ID,
+  IVS_INFRA_LEGEND_ID,
+  IVS_LEGEND_ID,
+  IVS_RENDA_LEGEND_ID,
+} from './ivsLegends';
+import {
   BUBBLES_COLOR,
   buildBubblesLegend,
   buildCadUnicoLegend,
   buildChoroplethLegend,
   buildDotDensityLegend,
-  buildIvsLegend,
   buildPercentLegend,
   buildPessoasPorCozinhaLegend,
   buildPointsStatusLegend,
+  buildPontosFillLegend,
   buildRateLegend,
   CADUNICO_LEGEND_ID,
   CHOROPLETH_LEGEND_ID,
   DOT_DENSITY_LEGEND_ID,
-  IVS_CAPITAL_LEGEND_ID,
-  IVS_INFRA_LEGEND_ID,
-  IVS_LEGEND_ID,
-  IVS_RENDA_LEGEND_ID,
   PERCENT_LEGEND_ID,
   PESSOAS_COZINHA_LEGEND_ID,
   POINTS_STATUS_LEGEND_ID,
+  PONTOS_FILL_LEGEND_ID,
   RATE_LEGEND_ID,
   WITHOUT_KITCHEN_COLOR,
 } from './legendsBuilders';
@@ -50,17 +54,16 @@ import {
   POINTS_STATUS_SOURCE_ID,
 } from './mapDataBuilders';
 
+export { colorForIvs, ivsFaixaLabel } from './ivsLegends';
 export {
   buildLegendItems,
   colorForCadUnico,
-  colorForIvs,
   colorForPercentual,
   colorForPessoasPorCozinha,
   colorForQuantidade,
   colorForSituacao,
   colorForTaxa,
   HABILITADA_COLOR,
-  ivsFaixaLabel,
   NAO_HABILITADA_COLOR,
 } from './legendsBuilders';
 export type { MapMode } from './mapDataBuilders';
@@ -140,16 +143,12 @@ const BUBBLES_RADIUS_RANGE: [number, number] = [4, 38];
  * bubbles `mapData` entry's `joinKey` (`resolvePromoteIdForSource`) — so the
  * tooltip callback's `info.featureId` → município lookup works unchanged.
  *
- * KNOWN UPSTREAM BUG (`@ttoss/geovis` 0.9.0 and 0.10.0): the circles
- * themselves never paint on the map, even though the auto-generated size
- * legend (reference circles + `scaleMaxValue` ceiling) resolves correctly.
- * Confirmed with zero app-side customization — dropping this override
- * entirely and using the library's own minimal `proportionalCircles`
- * example verbatim (from its README) still renders no circles, while the
- * `dotDensity` circle layers (`pontos`, `pontos-status`) render fine, which
- * narrows the bug to the `sizeBy`-driven `circle-radius` expression path
- * specifically. Not fixable from this app without patching the library;
- * tracked as a known limitation rather than blocking this feature area.
+ * `sizeBy.transform: 'sqrt'` is also what makes circles render at all: it
+ * puts the resolver on the `scaleMaxValue` proportional-ceiling path
+ * (`usesProportionalCeiling`); without it every circle silently paints at
+ * `zeroRadiusPx`. Dropping `paint.circleColor` altogether would similarly
+ * leave circles with an undefined (opaque black) fill — `PROPORTIONAL_CIRCLES_DEFAULTS`
+ * only covers opacity/stroke, never a color.
  */
 const buildBubblesOverrideLayer = (
   hoverTooltip?: HoverTooltipConfig
@@ -199,7 +198,6 @@ const SOURCES: GeoJSONSource[] = [
  * `buildLegends`.
  */
 const LEGEND_BUILDER_BY_MODE: Partial<Record<MapMode, () => LegendSpec>> = {
-  pontos: buildDotDensityLegend,
   'pontos-status': buildPointsStatusLegend,
   circulos: buildBubblesLegend,
   'coropletico-taxa': buildRateLegend,
@@ -220,17 +218,28 @@ const LEGEND_BUILDER_BY_MODE: Partial<Record<MapMode, () => LegendSpec>> = {
   },
 };
 
-/** Builds legends for the given mode via `LEGEND_BUILDER_BY_MODE`. */
+/**
+ * Builds legends for the given mode via `LEGEND_BUILDER_BY_MODE`. `pontos` is
+ * the one exception carrying two: the visible `buildDotDensityLegend` (has
+ * `colorBy` + `position`) and the invisible `buildPontosFillLegend` (no
+ * `colorBy`, no `position`) — see `PONTOS_FILL_LEGEND_ID` for why the fill
+ * needs its own, uncolored legend entry instead of sharing the points' one.
+ */
 const buildLegends = (mode: MapMode): LegendSpec[] => {
+  if (mode === 'pontos') {
+    return [buildDotDensityLegend(), buildPontosFillLegend()];
+  }
   const build = LEGEND_BUILDER_BY_MODE[mode] ?? buildChoroplethLegend;
   return [build()];
 };
 
 /**
  * Fill layer's `activeLegendId` per mode. Choropleth modes resolve to their
- * legend so the adapter drives data-driven paint; overlay modes resolve to the
- * mode's own legend so geovis renders it, while the adapter falls back to
- * `fillColor` for the paint (no `colorBy` on the fill).
+ * legend so the adapter drives data-driven paint; overlay modes resolve to a
+ * legend with no `colorBy` (rendering nothing, existing only so hover
+ * tracking has a real legend to reference), while the adapter falls back to
+ * the layer's own explicit `fillColor` for paint. `pontos` cannot reuse
+ * `DOT_DENSITY_LEGEND_ID` here — see `PONTOS_FILL_LEGEND_ID`.
  */
 const FILL_LEGEND_ID_BY_MODE: { [key in MapMode]: string | undefined } = {
   coropletico: CHOROPLETH_LEGEND_ID,
@@ -242,7 +251,7 @@ const FILL_LEGEND_ID_BY_MODE: { [key in MapMode]: string | undefined } = {
   'coropletico-ivs-infraestrutura': IVS_INFRA_LEGEND_ID,
   'coropletico-ivs-capital-humano': IVS_CAPITAL_LEGEND_ID,
   'coropletico-ivs-renda-trabalho': IVS_RENDA_LEGEND_ID,
-  pontos: DOT_DENSITY_LEGEND_ID,
+  pontos: PONTOS_FILL_LEGEND_ID,
   'pontos-status': POINTS_STATUS_LEGEND_ID,
   circulos: undefined,
 };

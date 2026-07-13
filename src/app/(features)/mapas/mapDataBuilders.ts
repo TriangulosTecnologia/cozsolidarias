@@ -371,14 +371,26 @@ export const buildMapData = ({
     data: cozinhasStatus ? toStatusRows(cozinhasStatus) : [],
   };
 
+  // `BUBBLES_SOURCE_ID` is always declared in `SOURCES` (see geovisSpec.ts),
+  // fetched eagerly on mount regardless of mode — but geovis only promotes a
+  // source's `codarea` property to `feature.id` (`resolvePromoteIdForSource`)
+  // when it finds a `mapData` entry whose `mapId` matches AND carries a
+  // `joinKey`, evaluated against whatever spec is active at the time the
+  // source is first added to the map. Without `bubblesEntry` present from the
+  // very first render (default mode is `coropletico`), the bubbles source
+  // gets added with no promoted id; switching to `circulos` later can't
+  // retroactively fix that, so `setFeatureState` never matches a real
+  // feature and every circle silently renders at `zeroRadiusPx`. Appending it
+  // — never as the FIRST entry outside `circulos` itself — keeps every other
+  // mode's `mapData[0]` (the one `findMatchSourceId` reads) unchanged.
   if (mode === 'circulos') {
     return [bubblesEntry];
   }
   if (mode === 'pontos') {
-    return [pointsEntry];
+    return [pointsEntry, bubblesEntry];
   }
   if (mode === 'pontos-status') {
-    return [statusEntry];
+    return [statusEntry, bubblesEntry];
   }
-  return [choroplethEntry];
+  return [choroplethEntry, bubblesEntry];
 };

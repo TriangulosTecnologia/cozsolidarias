@@ -455,6 +455,46 @@ describe('buildSpec', () => {
     ]);
   });
 
+  test('pontos positions its own legend with a swatch, decoupled from the fill', () => {
+    const spec = buildSpec({
+      byCity: BY_CITY,
+      mode: 'pontos',
+      cozinhas: COZINHAS,
+    });
+
+    const pointsLegend = spec.legends?.find((legend) => {
+      return legend.id === 'legenda-cozinhas-pontos';
+    });
+    expect(pointsLegend?.position).toBe('bottom-right');
+    expect(pointsLegend?.colorBy?.type).toBe('categorical');
+
+    // The fill's own legend exists (for hover tracking) but never renders
+    // (no position) and carries no colorBy (so it never drives fill-color).
+    const fillLegend = spec.legends?.find((legend) => {
+      return legend.id === 'legenda-cozinhas-pontos-fill';
+    });
+    expect(fillLegend?.position).toBeUndefined();
+    expect(fillLegend?.colorBy).toBeUndefined();
+
+    const fill = spec.layers.find((layer) => {
+      return layer.id === 'municipios-br-fill';
+    });
+    expect(fill?.activeLegendId).toBe('legenda-cozinhas-pontos-fill');
+  });
+
+  test('pontos always feeds the bubbles join too, so its source promotes codarea from first mount', () => {
+    const spec = buildSpec({
+      byCity: BY_CITY,
+      mode: 'pontos',
+      cozinhas: COZINHAS,
+    });
+
+    expect(mapDataById(spec, 'cozinhas-bolhas-data')?.data).toEqual([
+      { geometryId: '111', value: 5 },
+      { geometryId: '222', value: 2 },
+    ]);
+  });
+
   test('pontos-status configures dotDensity mapType, joins situacao rows first, positions the status legend', () => {
     const status: CozinhasStatusFeatureCollection = {
       type: 'FeatureCollection',
