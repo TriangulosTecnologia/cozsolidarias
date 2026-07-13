@@ -16,10 +16,8 @@ import type {
 import {
   ASSENTAMENTO_LEGEND_ID,
   assentamentoStatusLabel,
-  buildLegends,
-  legendIdForMode,
-  type MapMode,
-} from './geovisScales';
+} from './geovisAssentamentosScales';
+import { buildLegends, legendIdForMode, type MapMode } from './geovisScales';
 
 /** Re-exported so consumers keep importing the map's mode type from here. */
 export type { MapMode };
@@ -347,13 +345,13 @@ const toPessoasPorCozinhaRows = (byCity: kitchenRateByCity[]): MapDataRow[] => {
 };
 
 /**
- * Maps an IVS-family score (overall IVS or a sub-index, selected by `pick`) to
- * geovis `mapData` value rows. Every row is kept — the gateway already dropped
+ * Maps a per-município score (any IVS- or IDHM-family value, selected by `pick`)
+ * to geovis `mapData` value rows. Every row is kept — the gateway already dropped
  * municípios with an invalid/absent score, so the only municípios that fall back
  * to the legend's `defaultColor` ("sem dado") are those missing from the IVS
  * snapshot entirely.
  */
-const toIvsRows = (
+const toScoreRows = (
   ivsByCity: MunicipioIvs[],
   pick: (register: MunicipioIvs) => number
 ): MapDataRow[] => {
@@ -363,11 +361,12 @@ const toIvsRows = (
 };
 
 /**
- * The IVS-family modes and the score each one paints. Keyed by {@link MapMode}
- * so `buildSpec` resolves the whole family in one lookup instead of a branch per
- * sub-index. Every value lives on the same `[0, 1]` IPEA scale.
+ * The IVS- and IDHM-family modes and the score each one paints, all read from
+ * the per-município {@link MunicipioIvs} snapshot. Keyed by {@link MapMode} so
+ * `buildSpec` resolves every family member in one lookup instead of a branch per
+ * dimension.
  */
-const IVS_PICKERS: Partial<
+const SCORE_PICKERS: Partial<
   Record<MapMode, (register: MunicipioIvs) => number>
 > = {
   'coropletico-ivs': (register) => {
@@ -382,12 +381,30 @@ const IVS_PICKERS: Partial<
   'coropletico-ivs-renda-trabalho': (register) => {
     return register.ivsRendaETrabalho;
   },
+  'coropletico-idhm': (register) => {
+    return register.idhm;
+  },
+  'coropletico-idhm-longevidade': (register) => {
+    return register.idhmLongevidade;
+  },
+  'coropletico-idhm-educacao': (register) => {
+    return register.idhmEducacao;
+  },
+  'coropletico-idhm-renda': (register) => {
+    return register.idhmRenda;
+  },
+  'coropletico-idhm-educacao-escolaridade': (register) => {
+    return register.idhmEducacaoEscolaridade;
+  },
+  'coropletico-idhm-educacao-frequencia': (register) => {
+    return register.idhmEducacaoFrequencia;
+  },
 };
 
 /**
  * The cozinha-based choropleth modes and the value rows each one paints. Keyed
- * by {@link MapMode} so `buildSpec` resolves them in one lookup; the IVS family
- * is handled separately via {@link IVS_PICKERS}.
+ * by {@link MapMode} so `buildSpec` resolves them in one lookup; the score
+ * families are handled separately via {@link SCORE_PICKERS}.
  */
 const CHOROPLETH_ROW_BUILDERS: Partial<
   Record<MapMode, (byCity: kitchenRateByCity[]) => MapDataRow[]>
@@ -400,19 +417,20 @@ const CHOROPLETH_ROW_BUILDERS: Partial<
 };
 
 /**
- * Resolves the município choropleth value rows for the active mode: the IVS
- * family reads the IVS dataset (via {@link IVS_PICKERS}), the cozinha-based
- * choropleths use their row builder (via {@link CHOROPLETH_ROW_BUILDERS}), and
- * every other mode (overlays) feeds nothing so the fill stays neutral.
+ * Resolves the município choropleth value rows for the active mode: the IVS- and
+ * IDHM-families read the score snapshot (via {@link SCORE_PICKERS}), the
+ * cozinha-based choropleths use their row builder (via
+ * {@link CHOROPLETH_ROW_BUILDERS}), and every other mode (overlays) feeds nothing
+ * so the fill stays neutral.
  */
 const resolveChoroplethRows = (
   mode: MapMode,
   byCity: kitchenRateByCity[],
   ivsByCity: MunicipioIvs[]
 ): MapDataRow[] => {
-  const ivsPick = IVS_PICKERS[mode];
-  if (ivsPick) {
-    return toIvsRows(ivsByCity, ivsPick);
+  const scorePick = SCORE_PICKERS[mode];
+  if (scorePick) {
+    return toScoreRows(ivsByCity, scorePick);
   }
   const buildRows = CHOROPLETH_ROW_BUILDERS[mode];
   return buildRows ? buildRows(byCity) : [];
@@ -538,16 +556,16 @@ const buildMapData = ({
  * `coropletico`, the per-100k-inhabitants rate in `coropletico-taxa`, the share
  * (%) of Brazil in `coropletico-percentual`, the per-10k-CadÚnico rate in
  * `coropletico-cadunico`, the people-per-cozinha value in
- * `coropletico-pessoas-cozinha`, the overall IVS in `coropletico-ivs` and each
- * IVS sub-index in `coropletico-ivs-infraestrutura` / `-capital-humano` /
- * `-renda-trabalho`, and nothing in the overlay modes (`pontos`, `circulos`),
- * where every município falls back to the legend's `defaultColor`.
+ * `coropletico-pessoas-cozinha`, any IVS- or IDHM-family score in the
+ * `coropletico-ivs*` / `coropletico-idhm*` modes, and nothing in the overlay
+ * modes (`pontos`, `circulos`), where every município falls back to the legend's
+ * `defaultColor`.
  *
  * @param byCity - Per-município canonical cozinha rows (from the gateway).
  * @param mode - Active {@link MapMode}. Defaults to `'coropletico'`.
  * @param hoverTooltipRender - Optional spec-driven hover-tooltip renderer.
- * @param ivsByCity - Per-município IVS rows (from the gateway); read in the
- * `coropletico-ivs` mode and the three IVS sub-index modes. Defaults to `[]`.
+ * @param ivsByCity - Per-município IVS/IDHM rows (from the gateway); read in the
+ * `coropletico-ivs*` and `coropletico-idhm*` modes. Defaults to `[]`.
  * @param overlays - Overlay config for the assentamentos mode:
  * `assentamentos.atributos` color the polygons by status and `hoverRender` draws
  * their tooltip. Defaults to `{}`.

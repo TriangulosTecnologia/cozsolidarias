@@ -1,15 +1,21 @@
 import {
   assentamentoStatusLabel,
-  buildLegendItems,
   colorForAssentamentoStatus,
+} from 'src/app/(features)/mapas/geovisAssentamentosScales';
+import {
+  buildLegendItems,
   colorForCadUnico,
-  colorForIvs,
   colorForPercentual,
   colorForPessoasPorCozinha,
   colorForQuantidade,
   colorForTaxa,
-  ivsFaixaLabel,
 } from 'src/app/(features)/mapas/geovisScales';
+import {
+  colorForIdhm,
+  colorForIvs,
+  idhmFaixaLabel,
+  ivsFaixaLabel,
+} from 'src/app/(features)/mapas/geovisScoreScales';
 import {
   type AssentamentoAtributo,
   buildSpec,
@@ -49,6 +55,12 @@ const IVS_BY_CITY: MunicipioIvs[] = [
     ivsInfraestruturaUrbana: 0.1,
     ivsCapitalHumano: 0.35,
     ivsRendaETrabalho: 0.45,
+    idhm: 0.45,
+    idhmLongevidade: 0.55,
+    idhmEducacao: 0.65,
+    idhmRenda: 0.75,
+    idhmEducacaoEscolaridade: 0.85,
+    idhmEducacaoFrequencia: 0.95,
   },
   {
     codigoIbge: '222',
@@ -57,6 +69,12 @@ const IVS_BY_CITY: MunicipioIvs[] = [
     ivsInfraestruturaUrbana: 0.6,
     ivsCapitalHumano: 0.25,
     ivsRendaETrabalho: 0.7,
+    idhm: 0.72,
+    idhmLongevidade: 0.68,
+    idhmEducacao: 0.58,
+    idhmRenda: 0.48,
+    idhmEducacaoEscolaridade: 0.38,
+    idhmEducacaoFrequencia: 0.28,
   },
 ];
 
@@ -245,6 +263,38 @@ describe('ivsFaixaLabel', () => {
 
   test('returns null for an unknown score', () => {
     expect(ivsFaixaLabel(null)).toBeNull();
+  });
+});
+
+describe('colorForIdhm', () => {
+  test('an unknown score resolves to the "sem dado" fill', () => {
+    expect(colorForIdhm(null)).toBe(colorForQuantidade(0));
+  });
+
+  test('the lowest faixa is a real painted band, distinct from "sem dado"', () => {
+    expect(colorForIdhm(0.45)).not.toBe(colorForIdhm(null));
+  });
+
+  test('scores at or above the top break share the darkest (muito alto) band', () => {
+    expect(colorForIdhm(0.95)).toBe(colorForIdhm(0.8));
+  });
+
+  test('higher development maps to a different band than lower', () => {
+    expect(colorForIdhm(0.45)).not.toBe(colorForIdhm(0.75));
+  });
+});
+
+describe('idhmFaixaLabel', () => {
+  test('maps each faixa boundary to its official name', () => {
+    expect(idhmFaixaLabel(0.45)).toBe('Muito baixo');
+    expect(idhmFaixaLabel(0.55)).toBe('Baixo');
+    expect(idhmFaixaLabel(0.65)).toBe('Médio');
+    expect(idhmFaixaLabel(0.75)).toBe('Alto');
+    expect(idhmFaixaLabel(0.85)).toBe('Muito alto');
+  });
+
+  test('returns null for an unknown score', () => {
+    expect(idhmFaixaLabel(null)).toBeNull();
   });
 });
 
@@ -447,6 +497,62 @@ describe('buildSpec', () => {
       });
       expect(legend?.position).toBe('bottom-right');
       // All IVS-family scales share the floor-prefixed threshold/color pair.
+      expect(legend?.colorBy.thresholds?.[0]).toBe(0.001);
+      expect(legend?.colorBy.colors?.length).toBe(6);
+
+      const fill = spec.layers.find((layer) => {
+        return layer.id === 'municipios-br-fill';
+      });
+      expect(fill?.activeLegendId).toBe(legendId);
+    }
+  );
+
+  test.each([
+    {
+      mode: 'coropletico-idhm' as const,
+      legendId: 'legenda-idhm',
+      values: [0.45, 0.72],
+    },
+    {
+      mode: 'coropletico-idhm-longevidade' as const,
+      legendId: 'legenda-idhm-longevidade',
+      values: [0.55, 0.68],
+    },
+    {
+      mode: 'coropletico-idhm-educacao' as const,
+      legendId: 'legenda-idhm-educacao',
+      values: [0.65, 0.58],
+    },
+    {
+      mode: 'coropletico-idhm-renda' as const,
+      legendId: 'legenda-idhm-renda',
+      values: [0.75, 0.48],
+    },
+    {
+      mode: 'coropletico-idhm-educacao-escolaridade' as const,
+      legendId: 'legenda-idhm-educacao-escolaridade',
+      values: [0.85, 0.38],
+    },
+    {
+      mode: 'coropletico-idhm-educacao-frequencia' as const,
+      legendId: 'legenda-idhm-educacao-frequencia',
+      values: [0.95, 0.28],
+    },
+  ])(
+    '$mode feeds its IDHM column and positions its legend',
+    ({ mode, legendId, values }) => {
+      const spec = buildSpec(BY_CITY, mode, undefined, IVS_BY_CITY);
+
+      expect(mapDataById(spec, 'cozinhas-por-municipio')?.data).toEqual([
+        { geometryId: '111', value: values[0] },
+        { geometryId: '222', value: values[1] },
+      ]);
+
+      const legend = spec.legends?.find((entry) => {
+        return entry.id === legendId;
+      });
+      expect(legend?.position).toBe('bottom-right');
+      // All IDHM-family scales share the floor-prefixed threshold/color pair.
       expect(legend?.colorBy.thresholds?.[0]).toBe(0.001);
       expect(legend?.colorBy.colors?.length).toBe(6);
 

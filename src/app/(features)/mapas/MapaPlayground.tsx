@@ -91,6 +91,30 @@ const LEFT_SIDEBAR: NonNullable<GeovisWorkspaceConfig['leftSidebar']> = {
           value: 'coropletico-ivs-renda-trabalho',
           label: 'IVS Renda e Trabalho',
         },
+        {
+          value: 'coropletico-idhm',
+          label: 'Índice de Desenvolvimento Humano Municipal',
+        },
+        {
+          value: 'coropletico-idhm-longevidade',
+          label: 'IDHM Longevidade',
+        },
+        {
+          value: 'coropletico-idhm-educacao',
+          label: 'IDHM Educação',
+        },
+        {
+          value: 'coropletico-idhm-renda',
+          label: 'IDHM Renda',
+        },
+        {
+          value: 'coropletico-idhm-educacao-escolaridade',
+          label: 'IDHM Educação — Escolaridade',
+        },
+        {
+          value: 'coropletico-idhm-educacao-frequencia',
+          label: 'IDHM Educação — Frequência Escolar',
+        },
         { value: 'pontos', label: 'Localização das cozinhas' },
         { value: 'circulos', label: 'Cozinhas por município' },
         { value: 'assentamentos', label: 'Assentamentos e cozinhas' },

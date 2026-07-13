@@ -20,6 +20,18 @@ export type StaticIvsSource = {
   ivsCapitalHumano: number;
   /** IVS Renda e Trabalho sub-index, 0–1 (source column `ivs_renda_e_trabalho`). */
   ivsRendaETrabalho: number;
+  /** Overall Municipal Human Development Index, 0–1 (source column `idhm`); higher = better. */
+  idhm: number;
+  /** IDHM Longevidade dimension, 0–1 (source column `idhm_long`). */
+  idhmLongevidade: number;
+  /** IDHM Educação dimension, 0–1 (source column `idhm_educ`). */
+  idhmEducacao: number;
+  /** IDHM Renda dimension, 0–1 (source column `idhm_renda`). */
+  idhmRenda: number;
+  /** IDHM Educação escolaridade sub-component, 0–1 (source column `idhm_educ_sub_esc`). */
+  idhmEducacaoEscolaridade: number;
+  /** IDHM Educação frequência escolar sub-component, 0–1 (source column `idhm_educ_sub_freq`). */
+  idhmEducacaoFrequencia: number;
 };
 
 const CSV_PATH = join(
@@ -42,6 +54,18 @@ const IVS_INFRA_COLUMN = 'ivs_infraestrutura_urbana';
 const IVS_CAPITAL_COLUMN = 'ivs_capital_humano';
 /** Source column header holding the IVS Renda e Trabalho sub-index. */
 const IVS_RENDA_COLUMN = 'ivs_renda_e_trabalho';
+/** Source column header holding the overall IDHM. */
+const IDHM_COLUMN = 'idhm';
+/** Source column header holding the IDHM Longevidade dimension. */
+const IDHM_LONG_COLUMN = 'idhm_long';
+/** Source column header holding the IDHM Educação dimension. */
+const IDHM_EDUC_COLUMN = 'idhm_educ';
+/** Source column header holding the IDHM Renda dimension. */
+const IDHM_RENDA_COLUMN = 'idhm_renda';
+/** Source column header holding the IDHM Educação escolaridade sub-component. */
+const IDHM_EDUC_ESC_COLUMN = 'idhm_educ_sub_esc';
+/** Source column header holding the IDHM Educação school-attendance sub-component. */
+const IDHM_EDUC_FREQ_COLUMN = 'idhm_educ_sub_freq';
 
 /** Mutable cursor threaded through {@link parseCsv} as it scans the text. */
 type CsvParseState = {
@@ -164,6 +188,12 @@ export const parseIvsCsv = (text: string): StaticIvsSource[] => {
   const infraIndex = columnIndex(header, IVS_INFRA_COLUMN);
   const capitalIndex = columnIndex(header, IVS_CAPITAL_COLUMN);
   const rendaIndex = columnIndex(header, IVS_RENDA_COLUMN);
+  const idhmIndex = columnIndex(header, IDHM_COLUMN);
+  const idhmLongIndex = columnIndex(header, IDHM_LONG_COLUMN);
+  const idhmEducIndex = columnIndex(header, IDHM_EDUC_COLUMN);
+  const idhmRendaIndex = columnIndex(header, IDHM_RENDA_COLUMN);
+  const idhmEducEscIndex = columnIndex(header, IDHM_EDUC_ESC_COLUMN);
+  const idhmEducFreqIndex = columnIndex(header, IDHM_EDUC_FREQ_COLUMN);
 
   return dataRows
     .filter((cells) => {
@@ -195,6 +225,18 @@ export const parseIvsCsv = (text: string): StaticIvsSource[] => {
         ivsInfraestruturaUrbana: numericCell(infraIndex, IVS_INFRA_COLUMN),
         ivsCapitalHumano: numericCell(capitalIndex, IVS_CAPITAL_COLUMN),
         ivsRendaETrabalho: numericCell(rendaIndex, IVS_RENDA_COLUMN),
+        idhm: numericCell(idhmIndex, IDHM_COLUMN),
+        idhmLongevidade: numericCell(idhmLongIndex, IDHM_LONG_COLUMN),
+        idhmEducacao: numericCell(idhmEducIndex, IDHM_EDUC_COLUMN),
+        idhmRenda: numericCell(idhmRendaIndex, IDHM_RENDA_COLUMN),
+        idhmEducacaoEscolaridade: numericCell(
+          idhmEducEscIndex,
+          IDHM_EDUC_ESC_COLUMN
+        ),
+        idhmEducacaoFrequencia: numericCell(
+          idhmEducFreqIndex,
+          IDHM_EDUC_FREQ_COLUMN
+        ),
       };
     });
 };

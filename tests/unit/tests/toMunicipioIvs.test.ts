@@ -10,8 +10,24 @@ const source = (overrides: Partial<StaticIvsSource> = {}): StaticIvsSource => {
     ivsInfraestruturaUrbana: 0.412,
     ivsCapitalHumano: 0.265,
     ivsRendaETrabalho: 0.204,
+    idhm: 0.824,
+    idhmLongevidade: 0.873,
+    idhmEducacao: 0.742,
+    idhmRenda: 0.863,
+    idhmEducacaoEscolaridade: 0.723,
+    idhmEducacaoFrequencia: 0.751,
     ...overrides,
   };
+};
+
+/** The valid IDHM-family defaults every passed-through row echoes back. */
+const IDHM_DEFAULTS = {
+  idhm: 0.824,
+  idhmLongevidade: 0.873,
+  idhmEducacao: 0.742,
+  idhmRenda: 0.863,
+  idhmEducacaoEscolaridade: 0.723,
+  idhmEducacaoFrequencia: 0.751,
 };
 
 describe('toMunicipioIvs', () => {
@@ -29,6 +45,7 @@ describe('toMunicipioIvs', () => {
         ivsInfraestruturaUrbana: 0.412,
         ivsCapitalHumano: 0.265,
         ivsRendaETrabalho: 0.204,
+        ...IDHM_DEFAULTS,
       },
       {
         codigoIbge: '222',
@@ -37,6 +54,7 @@ describe('toMunicipioIvs', () => {
         ivsInfraestruturaUrbana: 0.412,
         ivsCapitalHumano: 0.265,
         ivsRendaETrabalho: 0.204,
+        ...IDHM_DEFAULTS,
       },
     ]);
   });
@@ -73,6 +91,21 @@ describe('toMunicipioIvs', () => {
       source({ codigoIbge: '111', ivsInfraestruturaUrbana: 1.2 }),
       source({ codigoIbge: '222', ivsCapitalHumano: -0.3 }),
       source({ codigoIbge: '333', ivsRendaETrabalho: 2 }),
+      source({ codigoIbge: '444' }),
+    ]);
+
+    expect(
+      result.map((row) => {
+        return row.codigoIbge;
+      })
+    ).toEqual(['444']);
+  });
+
+  test('drops rows with an out-of-range IDHM score', () => {
+    const result = toMunicipioIvs([
+      source({ codigoIbge: '111', idhm: 1.4 }),
+      source({ codigoIbge: '222', idhmLongevidade: -0.2 }),
+      source({ codigoIbge: '333', idhmEducacaoFrequencia: 3 }),
       source({ codigoIbge: '444' }),
     ]);
 
