@@ -553,26 +553,26 @@
         ]
       }
     },
-    "assentamentos_sp": {
-      "id": "assentamentos_sp",
+    "assentamentos": {
+      "id": "assentamentos",
       "collection_id": "sicar",
-      "slug": "assentamentos-sp",
-      "title": "Assentamentos rurais de São Paulo (SICAR)",
-      "description": "Perímetros (polígonos) dos assentamentos rurais (tipo de imóvel AST) cadastrados no CAR em São Paulo, filtrados da base estadual AREA_IMOVEL. Base do modo de mapa \"Assentamentos e cozinhas (SP)\"; colorido pela situação do cadastro (ind_status). Coordenadas em SIRGAS 2000 (EPSG:4674), arredondadas a 6 casas decimais.",
-      "file": "public/geo/assentamentos-sp.json",
+      "slug": "assentamentos",
+      "title": "Assentamentos rurais (SICAR)",
+      "description": "Perímetros (polígonos) dos assentamentos rurais (tipo de imóvel AST) cadastrados no CAR, filtrados das bases estaduais AREA_IMOVEL e mesclados. Base do modo de mapa \"Assentamentos e cozinhas\"; colorido pela situação do cadastro (ind_status). Coordenadas em SIRGAS 2000 (EPSG:4674), arredondadas a 6 casas decimais.",
+      "file": "public/geo/assentamentos.json",
       "format": "GeoJSON",
       "source": {
         "organization": "Serviço Florestal Brasileiro (SFB) — SICAR",
         "url": "https://consulta.car.gov.br/geoservices",
-        "notes": "Extraído da base estadual AREA_IMOVEL de SP (todos os imóveis rurais), mantendo apenas as feições com ind_tipo = AST."
+        "notes": "Extraído das bases estaduais AREA_IMOVEL (todos os imóveis rurais), mantendo apenas as feições com ind_tipo = AST. Estados incluídos: SP, MG, RJ, ES."
       },
-      "generated_by": "scripts/generate-assentamentos-sp.mjs",
+      "generated_by": "scripts/generate-assentamentos.mjs",
       "temporal": {
         "reference_period": "2026-06",
         "retrieved_at": "2026-07-13"
       },
       "spatial": {
-        "coverage": "São Paulo",
+        "coverage": "SP, MG, RJ, ES",
         "unit": "assentamento (polígono)",
         "key": "cod_imovel"
       },
@@ -581,9 +581,9 @@
         "contains_personal_data": false
       },
       "stats": {
-        "features": 1345,
-        "size_bytes": 3814556,
-        "checkSum": "sha256:57b8a0e945027ee709415aa842cebf3aa4a728bb842b9ab53f90baedca0cd693"
+        "features": 1825,
+        "size_bytes": 12630947,
+        "checkSum": "sha256:c126b53ec52dfb813689d5d0c9c9bee84630d42b8e0133f564723a4348887985"
       },
       "schema": {
         "fields": [
@@ -598,12 +598,17 @@
           },
           {
             "name": "cod_estado",
-            "description": "Unidade federativa (sempre SP nesta base)"
+            "description": "Unidade federativa (SP, MG, RJ ou ES)"
           },
           {
             "name": "num_area_ha",
             "description": "Área total do imóvel",
             "unit": "hectare"
+          },
+          {
+            "name": "mod_fiscal",
+            "description": "Tamanho do imóvel em módulos fiscais",
+            "unit": "módulo fiscal"
           },
           {
             "name": "ind_status",
@@ -629,26 +634,26 @@
         ]
       }
     },
-    "assentamentos_sp_atributos": {
-      "id": "assentamentos_sp_atributos",
+    "assentamentos_atributos": {
+      "id": "assentamentos_atributos",
       "collection_id": "sicar",
-      "slug": "assentamentos-sp-atributos",
-      "title": "Assentamentos de SP — atributos (sidecar)",
-      "description": "Sidecar sem geometria (uma linha por assentamento) derivado de assentamentos-sp.json. Usado pelo mapa para colorir os polígonos por situação (junção categórica por cod_imovel) e preencher o tooltip, sem reprocessar o arquivo de geometria.",
-      "file": "public/geo/assentamentos-sp-atributos.json",
+      "slug": "assentamentos-atributos",
+      "title": "Assentamentos — atributos (sidecar)",
+      "description": "Sidecar sem geometria (uma linha por assentamento) derivado de assentamentos.json. Usado pelo mapa para colorir os polígonos por situação (junção categórica por cod_imovel) e preencher o tooltip, sem reprocessar o arquivo de geometria.",
+      "file": "public/geo/assentamentos-atributos.json",
       "format": "JSON",
       "source": {
         "organization": "Serviço Florestal Brasileiro (SFB) — SICAR",
         "url": "https://consulta.car.gov.br/geoservices",
-        "notes": "Derivado de assentamentos-sp.json (mesma extração); atributos em camelCase."
+        "notes": "Derivado de assentamentos.json (mesma extração); atributos em camelCase."
       },
-      "generated_by": "scripts/generate-assentamentos-sp.mjs",
+      "generated_by": "scripts/generate-assentamentos.mjs",
       "temporal": {
         "reference_period": "2026-06",
         "retrieved_at": "2026-07-13"
       },
       "spatial": {
-        "coverage": "São Paulo",
+        "coverage": "SP, MG, RJ, ES",
         "unit": "assentamento",
         "key": "codImovel"
       },
@@ -657,9 +662,9 @@
         "contains_personal_data": false
       },
       "stats": {
-        "rows": 1345,
-        "size_bytes": 266237,
-        "checkSum": "sha256:0289260489ab36642a13886a8271d0083d3e01975136bb410792248e63a04789"
+        "rows": 1825,
+        "size_bytes": 563847,
+        "checkSum": "sha256:1a4adfc906e2c738b28a4c923b628935e5a0be08c039f216663d8ea8b34716e3"
       },
       "schema": {
         "fields": [
@@ -673,9 +678,18 @@
             "description": "Município do imóvel (grafia da fonte, sem acentos)"
           },
           {
+            "name": "uf",
+            "description": "Unidade federativa (SP, MG, RJ ou ES)"
+          },
+          {
             "name": "areaHa",
             "description": "Área total do imóvel",
             "unit": "hectare"
+          },
+          {
+            "name": "modulosFiscais",
+            "description": "Tamanho do imóvel em módulos fiscais",
+            "unit": "módulo fiscal"
           },
           {
             "name": "status",
@@ -684,6 +698,14 @@
           {
             "name": "condicao",
             "description": "Condição da análise ambiental do imóvel"
+          },
+          {
+            "name": "dtCriacao",
+            "description": "Data de criação do registro (DD/MM/AAAA)"
+          },
+          {
+            "name": "dtAtualizacao",
+            "description": "Data da última atualização do registro (DD/MM/AAAA)"
           }
         ]
       }

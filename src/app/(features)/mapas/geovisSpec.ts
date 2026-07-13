@@ -26,21 +26,41 @@ export type { MapMode };
 
 /**
  * One SICAR settlement's map-facing attributes, from the
- * `/geo/assentamentos-sp-atributos.json` sidecar. Geometry-free: it drives the
+ * `/geo/assentamentos-atributos.json` sidecar. Geometry-free: it drives the
  * categorical status join (color) and the hover tooltip; the geometry lives in
- * the companion `assentamentos-sp.json` GeoJSON, matched by `codImovel`.
+ * the companion `assentamentos.json` GeoJSON, matched by `codImovel`.
  */
 export type AssentamentoAtributo = {
   /** SICAR property code (`cod_imovel`); the geometry join key. */
   codImovel: string;
   /** Município name (source-native spelling). */
   municipio: string;
+  /** State (UF) the settlement belongs to. */
+  uf: string;
   /** Total property area, in hectares. */
   areaHa: number;
+  /** Property size in fiscal modules (unit varies by município). */
+  modulosFiscais: number;
   /** Raw registration status code (`AT` / `CA` / `PE`). */
   status: string;
   /** Environmental-analysis condition (`des_condicao_ambiental`). */
   condicao: string;
+  /** Registration creation date (`DD/MM/AAAA`). */
+  dtCriacao: string;
+  /** Last update date (`DD/MM/AAAA`). */
+  dtAtualizacao: string;
+};
+
+/**
+ * Optional overlay config passed to {@link buildSpec} for the assentamentos
+ * mode: `atributos` color the settlement polygons by status and `hoverRender`
+ * renders their spec-driven hover tooltip.
+ */
+type MapOverlays = {
+  assentamentos?: {
+    atributos?: AssentamentoAtributo[];
+    hoverRender?: HoverTooltipConfig['render'];
+  };
 };
 
 /**
@@ -62,38 +82,38 @@ const TOOLTIP_STYLE: NonNullable<HoverTooltipConfig['style']> = {
 };
 
 /**
- * The kitchen points layer. Static (no data-driven paint), so it lives at module
- * scope and is only appended to the spec's `layers` in `pontos` mode.
+ * The kitchen points layer. Larger, more opaque dots with a thick light halo so
+ * each kitchen reads over the pale basemap and the settlement polygons. Static
+ * (no data-driven paint), rendered in `pontos` and `assentamentos` modes.
  */
-const POINTS_LAYER = {
+const POINTS_LAYER: VisualizationLayer = {
   id: 'cozinhas-pts',
   sourceId: 'cozinhas',
   geometry: 'point',
   paint: {
     circleColor: '#E4572E',
-    // Larger, more opaque dots with a thicker light halo so each kitchen reads
-    // clearly over both the pale basemap and the colored settlement polygons.
     circleRadius: 4,
     circleOpacity: 0.9,
     circleStrokeColor: '#FAF9F7',
     circleStrokeWidth: 1.2,
   },
-} as const;
+};
 
 /** GeoJSON source + categorical status join for the assentamentos overlay. */
 const ASSENTAMENTOS_SOURCE_ID = 'assentamentos';
 const ASSENTAMENTOS_MAP_DATA_ID = 'assentamentos-status';
 
 /**
- * The assentamentos GeoJSON source (SICAR AST perimeters of SP). Unlike the
- * always-on cozinha sources, it's added to the spec only in `assentamentos` mode
- * so the multi-MB geometry isn't fetched on other map views; the adapter's
- * source sync adds/removes it (with the `cod_imovel` join key) on mode switch.
+ * The assentamentos GeoJSON source (SICAR AST perimeters, all covered states).
+ * Unlike the always-on cozinha sources, it's added to the spec only in
+ * `assentamentos` mode so the multi-MB geometry isn't fetched on other map
+ * views; the adapter's source sync adds/removes it (with the `cod_imovel` join
+ * key) on mode switch.
  */
 const ASSENTAMENTOS_SOURCE: GeoJSONSource = {
   id: ASSENTAMENTOS_SOURCE_ID,
   type: 'geojson',
-  data: '/geo/assentamentos-sp.json',
+  data: '/geo/assentamentos.json',
   attribution: '© SICAR / Serviço Florestal Brasileiro',
 };
 
@@ -196,12 +216,16 @@ const SOURCES: GeoJSONSource[] = [
 /** Default camera: the whole of Brazil (all cozinha-based modes). */
 const BRAZIL_VIEW = { center: [-53.0, -14.5] as [number, number], zoom: 4 };
 
-/** Camera for the assentamentos mode: framed on São Paulo, where the data lives. */
-const SAO_PAULO_VIEW = { center: [-48.6, -22.3] as [number, number], zoom: 6 };
+/**
+ * Camera for the assentamentos mode: framed on the Southeast, which covers the
+ * currently included states (SP, MG, RJ, ES). Widen/re-center as coverage grows
+ * (and revert to {@link BRAZIL_VIEW} once it's national).
+ */
+const SUDESTE_VIEW = { center: [-45.5, -20.0] as [number, number], zoom: 5 };
 
-/** Picks the camera for the active mode (São Paulo for assentamentos, else Brazil). */
+/** Picks the camera for the active mode (Southeast for assentamentos, else Brazil). */
 const resolveView = (showAssentamentos: boolean) => {
-  return showAssentamentos ? SAO_PAULO_VIEW : BRAZIL_VIEW;
+  return showAssentamentos ? SUDESTE_VIEW : BRAZIL_VIEW;
 };
 
 /** Maps per-município counts to geovis `mapData` value rows. */
@@ -376,6 +400,88 @@ const buildFillLayer = (
 };
 
 /**
+ * Assembles the layers for the active mode. The município fill is present in
+ * every mode **except** `assentamentos` (where municípios are hidden). The
+ * kitchen points sit on top in `pontos` and `assentamentos`; `circulos` shows
+ * the proportional-circle overlay instead.
+ */
+const buildOverlayLayers = ({
+  mode,
+  maxQuantidade,
+  hoverTooltipRender,
+  overlays,
+}: {
+  mode: MapMode;
+  maxQuantidade: number;
+  hoverTooltipRender?: HoverTooltipConfig['render'];
+  overlays: MapOverlays;
+}): VisualizationLayer[] => {
+  const layers: VisualizationLayer[] = [];
+  if (mode !== 'assentamentos') {
+    layers.push(buildFillLayer(mode, hoverTooltipRender));
+  }
+  if (mode === 'pontos') {
+    layers.push(POINTS_LAYER);
+  }
+  if (mode === 'circulos') {
+    layers.push(buildBubblesLayer(maxQuantidade));
+  }
+  if (mode === 'assentamentos') {
+    layers.push(buildAssentamentosLayer(overlays.assentamentos?.hoverRender));
+    layers.push(POINTS_LAYER);
+  }
+  return layers;
+};
+
+/**
+ * Assembles the spec's `mapData` joins. The bubble join is ALWAYS present so its
+ * (always-on) source picks up `promoteId: 'codarea'` at mount, feeding the
+ * circle size. The município choropleth join is omitted in `assentamentos` mode
+ * (no município fill there); the settlement status join is added only in that
+ * mode, alongside its gated source.
+ */
+const buildMapData = ({
+  byCity,
+  choroplethRows,
+  showAssentamentos,
+  overlays,
+}: {
+  byCity: kitchenRateByCity[];
+  choroplethRows: MapDataRow[];
+  showAssentamentos: boolean;
+  overlays: MapOverlays;
+}): MapData[] => {
+  const data: MapData[] = [
+    {
+      mapDataId: BUBBLES_MAP_DATA_ID,
+      mapId: BUBBLES_SOURCE_ID,
+      joinKey: 'codarea',
+      title: 'Cozinhas por município',
+      data: toValueRows(byCity),
+    },
+  ];
+
+  if (!showAssentamentos) {
+    data.push({
+      mapDataId: 'cozinhas-por-municipio',
+      mapId: 'municipios-boundary',
+      joinKey: 'codarea',
+      title: 'Cozinhas por município',
+      data: choroplethRows,
+    });
+  } else {
+    data.push({
+      mapDataId: ASSENTAMENTOS_MAP_DATA_ID,
+      mapId: ASSENTAMENTOS_SOURCE_ID,
+      joinKey: 'cod_imovel',
+      title: 'Assentamentos por situação',
+      data: toAssentamentoStatusRows(overlays.assentamentos?.atributos ?? []),
+    });
+  }
+  return data;
+};
+
+/**
  * Assembles the full geovis {@link VisualizationSpec} for the given data and
  * mode. The choropleth value rows depend on the mode: raw counts in
  * `coropletico`, the per-100k-inhabitants rate in `coropletico-taxa`, the share
@@ -391,28 +497,23 @@ const buildFillLayer = (
  * @param hoverTooltipRender - Optional spec-driven hover-tooltip renderer.
  * @param ivsByCity - Per-município IVS rows (from the gateway); read in the
  * `coropletico-ivs` mode and the three IVS sub-index modes. Defaults to `[]`.
- * @param assentamentos - Settlement overlay config, read only in `assentamentos`
- * mode: `atributos` (from the map's sidecar) color the polygons by status and
- * `hoverRender` renders their tooltip. Defaults to `{}`.
+ * @param overlays - Overlay config for the assentamentos mode:
+ * `assentamentos.atributos` color the polygons by status and `hoverRender` draws
+ * their tooltip. Defaults to `{}`.
  * @returns The geovis visualization spec (sources, mapData, legends, layers).
  *
  * @example
  * buildSpec(byCity, 'coropletico-taxa');
  * buildSpec(byCity, 'coropletico-ivs', undefined, ivsByCity);
- * buildSpec(byCity, 'assentamentos', undefined, [], { atributos });
+ * buildSpec(byCity, 'assentamentos', undefined, [], { assentamentos: { atributos } });
  */
 export const buildSpec = (
   byCity: kitchenRateByCity[],
   mode: MapMode = 'coropletico',
   hoverTooltipRender?: HoverTooltipConfig['render'],
   ivsByCity: MunicipioIvs[] = [],
-  assentamentos: {
-    atributos?: AssentamentoAtributo[];
-    hoverRender?: HoverTooltipConfig['render'];
-  } = {}
+  overlays: MapOverlays = {}
 ): VisualizationSpec => {
-  const showPoints = mode === 'pontos';
-  const showBubbles = mode === 'circulos';
   const showAssentamentos = mode === 'assentamentos';
 
   const choroplethRows = resolveChoroplethRows(mode, byCity, ivsByCity);
@@ -423,74 +524,28 @@ export const buildSpec = (
     return Math.max(max, register.quantidade);
   }, 1);
 
-  // Joins the kitchen count to each bubble feature (`codarea`), feeding the
-  // `sizeBy` scale via feature-state.
-  //
-  // ALWAYS present, even outside `circulos` mode: the bubble source is added to
-  // the map at mount (it lives in `SOURCES` unconditionally), and the adapter
-  // resolves the source's MapLibre `promoteId` from whichever `mapData` entry
-  // targets it *at add time* — that promoted `feature.id` (`codarea`) is what
-  // `setFeatureState` keys the join value on. If this entry only appeared in
-  // `circulos` mode, the source would already be on the map without a
-  // `promoteId`, and switching modes never re-adds it, so the join value would
-  // never attach and every circle would collapse to the fallback radius.
-  // Declaring it always makes the source pick up `promoteId: 'codarea'` at
-  // mount; the bubble *layer* below stays gated on the mode, so nothing renders
-  // outside `circulos`.
-  const bubblesMapData: MapData[] = [
-    {
-      mapDataId: BUBBLES_MAP_DATA_ID,
-      mapId: BUBBLES_SOURCE_ID,
-      joinKey: 'codarea',
-      title: 'Cozinhas por município',
-      data: toValueRows(byCity),
-    },
-  ];
-
-  // Gated on the mode (unlike the always-on cozinha sources): the adapter's
-  // source sync adds the source + this join (with `cod_imovel` as `promoteId`)
-  // when entering the mode and removes them when leaving, so the multi-MB
-  // geometry never loads on other views.
-  const assentamentosMapData: MapData[] = showAssentamentos
-    ? [
-        {
-          mapDataId: ASSENTAMENTOS_MAP_DATA_ID,
-          mapId: ASSENTAMENTOS_SOURCE_ID,
-          joinKey: 'cod_imovel',
-          title: 'Assentamentos por situação',
-          data: toAssentamentoStatusRows(assentamentos.atributos ?? []),
-        },
-      ]
-    : [];
-
   return {
     id: 'mapa-cozinhas-sp',
     engine: 'maplibre',
-    // The assentamentos data is São Paulo-only, so frame the state when that mode
-    // is active; every other (Brazil-wide) mode keeps the national view.
+    // The assentamentos data covers only some states, so frame that region when
+    // the mode is active; every other (Brazil-wide) mode keeps the national view.
     view: resolveView(showAssentamentos),
     basemap: { labels: false },
+    // The multi-MB assentamentos geometry is added only in its mode, so other
+    // views never fetch it; the adapter's source sync adds/removes it on switch.
     sources: showAssentamentos ? [...SOURCES, ASSENTAMENTOS_SOURCE] : SOURCES,
-    mapData: [
-      {
-        mapDataId: 'cozinhas-por-municipio',
-        mapId: 'municipios-boundary',
-        joinKey: 'codarea',
-        title: 'Cozinhas por município',
-        data: choroplethRows,
-      },
-      ...bubblesMapData,
-      ...assentamentosMapData,
-    ],
+    mapData: buildMapData({
+      byCity,
+      choroplethRows,
+      showAssentamentos,
+      overlays,
+    }),
     legends: buildLegends(mode),
-    layers: [
-      buildFillLayer(mode, hoverTooltipRender),
-      ...(showPoints ? [POINTS_LAYER] : []),
-      ...(showBubbles ? [buildBubblesLayer(maxQuantidade)] : []),
-      // Points on top of the settlement polygons so kitchens stay visible.
-      ...(showAssentamentos
-        ? [buildAssentamentosLayer(assentamentos.hoverRender), POINTS_LAYER]
-        : []),
-    ],
+    layers: buildOverlayLayers({
+      mode,
+      maxQuantidade,
+      hoverTooltipRender,
+      overlays,
+    }),
   };
 };

@@ -591,7 +591,7 @@ const IVS_RENDA_LEGEND_ID = 'legenda-ivs-renda-trabalho';
 export const ASSENTAMENTO_LEGEND_ID = 'legenda-assentamentos';
 
 /** Title of the settlement legend; also the menu label for the assentamentos mode. */
-const ASSENTAMENTO_LEGEND_TITLE = 'Assentamentos rurais (SP)';
+const ASSENTAMENTO_LEGEND_TITLE = 'Assentamentos rurais';
 
 /** Title of the rate legend; also the fill's `activeLegendId` in rate mode. */
 const RATE_LEGEND_TITLE = 'nº coz. no município / 100.000 hab.';

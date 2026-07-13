@@ -93,7 +93,7 @@ const LEFT_SIDEBAR: NonNullable<GeovisWorkspaceConfig['leftSidebar']> = {
         },
         { value: 'pontos', label: 'Localização das cozinhas' },
         { value: 'circulos', label: 'Cozinhas por município' },
-        { value: 'assentamentos', label: 'Assentamentos e cozinhas (SP)' },
+        { value: 'assentamentos', label: 'Assentamentos e cozinhas' },
       ],
     },
   ],
@@ -148,7 +148,7 @@ const EMPTY_BOOTSTRAP: MapBootstrap = {
 
 /**
  * Fetches the map's mount-time data in parallel. The assentamentos attribute
- * sidecar (~250 KB) is loaded here; the multi-MB geometry is fetched lazily by
+ * sidecar (~560 KB) is loaded here; the multi-MB geometry is fetched lazily by
  * the map source only when the user switches to the assentamentos mode. On any
  * failure it resolves to empty data — the map renders in the "sem dado" color
  * and tooltips fall back to their default labels.
@@ -165,7 +165,7 @@ const fetchMapData = async (): Promise<MapBootstrap> => {
       fetch('/geo/municipios-nomes.json').then((response) => {
         return response.json() as Promise<NomesPorCodigo>;
       }),
-      fetch('/geo/assentamentos-sp-atributos.json').then((response) => {
+      fetch('/geo/assentamentos-atributos.json').then((response) => {
         return response.json() as Promise<AssentamentoAtributo[]>;
       }),
     ]);
@@ -261,8 +261,10 @@ const MapaPlayground = () => {
 
   const baseSpec = React.useMemo(() => {
     return buildSpec(kitchenByCity, mode, hoverTooltip, ivsByCity, {
-      atributos: assentamentos,
-      hoverRender: assentamentoTooltip,
+      assentamentos: {
+        atributos: assentamentos,
+        hoverRender: assentamentoTooltip,
+      },
     });
   }, [
     kitchenByCity,
@@ -273,9 +275,13 @@ const MapaPlayground = () => {
     assentamentoTooltip,
   ]);
 
+  // Assentamentos mode hides the município layers entirely — drop the município
+  // boundary outline too, keeping only the state outlines for context.
   const boundaryGroups = React.useMemo(() => {
-    return [estadosGroup, municipiosGroup];
-  }, []);
+    return mode === 'assentamentos'
+      ? [estadosGroup]
+      : [estadosGroup, municipiosGroup];
+  }, [mode]);
 
   const { spec } = useBoundaryToggle(baseSpec, boundaryGroups);
 
@@ -302,7 +308,7 @@ const MapaPlayground = () => {
         // crowd the edges. Selected by the legend list's aria-label (its title),
         // one selector per choropleth legend (count, rate, share, CadÚnico,
         // coverage, IVS) plus the categorical settlement legend.
-        '& div:has(> ul[aria-label="Cozinhas por município"]), & div:has(> ul[aria-label="nº coz. no município / 100.000 hab."]), & div:has(> ul[aria-label="% das cozinhas do Brasil no município"]), & div:has(> ul[aria-label="nº coz. / 10 mil pessoas no CadÚnico"]), & div:has(> ul[aria-label="pessoas no CadÚnico por cozinha"]), & div:has(> ul[aria-label="Índice de vulnerabilidade social"]), & div:has(> ul[aria-label="Assentamentos rurais (SP)"])':
+        '& div:has(> ul[aria-label="Cozinhas por município"]), & div:has(> ul[aria-label="nº coz. no município / 100.000 hab."]), & div:has(> ul[aria-label="% das cozinhas do Brasil no município"]), & div:has(> ul[aria-label="nº coz. / 10 mil pessoas no CadÚnico"]), & div:has(> ul[aria-label="pessoas no CadÚnico por cozinha"]), & div:has(> ul[aria-label="Índice de vulnerabilidade social"]), & div:has(> ul[aria-label="Assentamentos rurais"])':
           {
             bottom: '44px !important',
             right: '44px !important',

@@ -64,23 +64,35 @@ const ASSENTAMENTOS: AssentamentoAtributo[] = [
   {
     codImovel: 'SP-1-AAA',
     municipio: 'Alpha',
+    uf: 'SP',
     areaHa: 100,
+    modulosFiscais: 5,
     status: 'AT',
     condicao: 'Aguardando analise',
+    dtCriacao: '01/01/2020',
+    dtAtualizacao: '02/02/2021',
   },
   {
-    codImovel: 'SP-2-BBB',
+    codImovel: 'MG-2-BBB',
     municipio: 'Beta',
+    uf: 'MG',
     areaHa: 50,
+    modulosFiscais: 2,
     status: 'CA',
     condicao: 'Cancelado por decisao administrativa',
+    dtCriacao: '03/03/2019',
+    dtAtualizacao: '04/04/2022',
   },
   {
-    codImovel: 'SP-3-CCC',
+    codImovel: 'RJ-3-CCC',
     municipio: 'Gama',
+    uf: 'RJ',
     areaHa: 20,
+    modulosFiscais: 1,
     status: 'ZZ',
     condicao: 'Desconhecida',
+    dtCriacao: '05/05/2018',
+    dtAtualizacao: '06/06/2023',
   },
 ];
 
@@ -465,15 +477,23 @@ describe('buildSpec', () => {
     expect(layerIds(spec)).not.toContain('cozinhas-pts');
   });
 
-  test('assentamentos overlays the settlement polygons and the kitchen points', () => {
+  test('assentamentos overlays the settlement polygons and points, and hides municípios', () => {
     const spec = buildSpec(BY_CITY, 'assentamentos', undefined, [], {
-      atributos: ASSENTAMENTOS,
+      assentamentos: { atributos: ASSENTAMENTOS },
     });
 
     // Filled polygons + points on top; no bubble overlay.
     expect(layerIds(spec)).toContain('assentamentos-poly');
     expect(layerIds(spec)).toContain('cozinhas-pts');
     expect(layerIds(spec)).not.toContain('cozinhas-bolhas');
+
+    // Municípios are hidden entirely: no fill layer, no choropleth join.
+    expect(layerIds(spec)).not.toContain('municipios-br-fill');
+    expect(
+      spec.mapData?.some((entry) => {
+        return entry.mapDataId === 'cozinhas-por-municipio';
+      })
+    ).toBe(false);
 
     // The geometry source is added only in this mode.
     expect(
@@ -488,8 +508,8 @@ describe('buildSpec', () => {
     })?.data;
     expect(statusData).toEqual([
       { geometryId: 'SP-1-AAA', value: 'Ativo' },
-      { geometryId: 'SP-2-BBB', value: 'Cancelado' },
-      { geometryId: 'SP-3-CCC', value: 'Outros' },
+      { geometryId: 'MG-2-BBB', value: 'Cancelado' },
+      { geometryId: 'RJ-3-CCC', value: 'Outros' },
     ]);
 
     // The categorical settlement legend is the positioned one.
@@ -498,9 +518,6 @@ describe('buildSpec', () => {
     });
     expect(legend?.position).toBe('bottom-right');
     expect(legend?.colorBy?.type).toBe('categorical');
-
-    // The município fill stays neutral (no choropleth data) in this mode.
-    expect(mapDataById(spec, 'cozinhas-por-municipio')?.data).toEqual([]);
   });
 
   test('assentamentos mode with no attributes feeds an empty status join', () => {
@@ -516,7 +533,7 @@ describe('buildSpec', () => {
 
   test('non-assentamentos modes add no settlement source, join or layer', () => {
     const spec = buildSpec(BY_CITY, 'coropletico', undefined, [], {
-      atributos: ASSENTAMENTOS,
+      assentamentos: { atributos: ASSENTAMENTOS },
     });
 
     expect(layerIds(spec)).not.toContain('assentamentos-poly');

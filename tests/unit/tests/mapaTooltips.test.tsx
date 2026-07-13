@@ -153,21 +153,33 @@ describe('renderMunicipioTooltip', () => {
 const ATRIBUTO: AssentamentoAtributo = {
   codImovel: 'SP-1-AAA',
   municipio: 'Alpha',
+  uf: 'SP',
   areaHa: 274.3,
+  modulosFiscais: 1.5,
   status: 'AT',
   condicao: 'Aguardando analise',
+  dtCriacao: '01/01/2020',
+  dtAtualizacao: '02/02/2021',
 };
 
 describe('renderAssentamentoTooltip', () => {
-  test('shows the município, the painted status and the area/condition line', () => {
+  test('titles with cod_imovel and lists status + settlement details', () => {
     renderWithChakra(
       <>{renderAssentamentoTooltip({ atributo: ATRIBUTO, value: 'Ativo' })}</>
     );
 
-    expect(screen.getByText('Alpha')).toBeInTheDocument();
+    // The raw base has no settlement name, so the code is the title.
+    expect(screen.getByText('SP-1-AAA')).toBeInTheDocument();
     expect(screen.getByText('Situação: Ativo')).toBeInTheDocument();
+    expect(screen.getByText('Alpha — SP')).toBeInTheDocument();
     expect(
-      screen.getByText(/274,3 ha · Aguardando analise/)
+      screen.getByText(/274,3 ha · 1,5 módulos fiscais/)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Condição: Aguardando analise')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Criado em 01\/01\/2020 · atualizado em 02\/02\/2021/)
     ).toBeInTheDocument();
   });
 

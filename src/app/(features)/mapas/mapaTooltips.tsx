@@ -25,17 +25,22 @@ const formatCozinhas = (quantidade: number): string => {
   }`;
 };
 
-/** Card do tooltip: título + swatch da faixa + rótulo, com linha auxiliar opcional. */
+/**
+ * Card do tooltip: título + swatch da faixa + rótulo, com linha auxiliar
+ * opcional e linhas de detalhe extras opcionais.
+ */
 const TooltipCard = ({
   name,
   swatchColor,
   primary,
   secondary,
+  details,
 }: {
   name: string;
   swatchColor: string;
   primary: string;
   secondary?: string;
+  details?: string[];
 }) => {
   return (
     <Box display="flex" flexDirection="column" gap="1.5" minW="180px">
@@ -59,6 +64,18 @@ const TooltipCard = ({
           {secondary}
         </Text>
       )}
+      {details?.map((line) => {
+        return (
+          <Text
+            key={line}
+            fontSize="xs"
+            color="text.secondary"
+            lineHeight="tight"
+          >
+            {line}
+          </Text>
+        );
+      })}
     </Box>
   );
 };
@@ -243,12 +260,28 @@ const renderIvsTooltip = ({
   );
 };
 
+/** Linhas de detalhe do tooltip de assentamento, a partir dos atributos do bruto. */
+const assentamentoDetails = (atributo: AssentamentoAtributo): string[] => {
+  const area = atributo.areaHa.toLocaleString('pt-BR', {
+    maximumFractionDigits: 1,
+  });
+  const modulos = atributo.modulosFiscais.toLocaleString('pt-BR', {
+    maximumFractionDigits: 2,
+  });
+  return [
+    `${atributo.municipio} — ${atributo.uf}`,
+    `Área: ${area} ha · ${modulos} módulos fiscais`,
+    `Condição: ${atributo.condicao}`,
+    `Criado em ${atributo.dtCriacao} · atualizado em ${atributo.dtAtualizacao}`,
+  ];
+};
+
 /**
- * Assentamentos-mode tooltip: título = município, swatch da situação + "Situação:
- * <label>" e uma linha auxiliar com a área (ha) e a condição ambiental. O rótulo
+ * Assentamentos-mode tooltip: título = `cod_imovel` (a base bruta não tem nome
+ * de assentamento), swatch da situação + "Situação: <label>" e linhas de detalhe
+ * com município/UF, área, módulos fiscais, condição ambiental e datas. O rótulo
  * de situação vem do `value` do feature-state (o que o mapa pintou) quando
- * presente; senão é derivado do `atributo`. Assentamentos sem atributo no sidecar
- * caem em "Assentamento" + "Situação desconhecida".
+ * presente; senão é derivado do `atributo`.
  *
  * @param params.atributo - Atributos do assentamento sob o cursor, ou
  * `undefined` quando o `cod_imovel` não está no sidecar.
@@ -257,7 +290,7 @@ const renderIvsTooltip = ({
  *
  * @example
  * renderAssentamentoTooltip({ atributo, value: 'Ativo' });
- * // <TooltipCard> com "Situação: Ativo"
+ * // <TooltipCard> com "Situação: Ativo" e os detalhes do imóvel
  */
 export const renderAssentamentoTooltip = ({
   atributo,
@@ -273,22 +306,18 @@ export const renderAssentamentoTooltip = ({
         ? assentamentoStatusLabel(atributo.status)
         : null;
 
-  const name = atributo?.municipio ?? 'Assentamento';
+  const name = atributo?.codImovel ?? 'Assentamento';
   const primary =
     label === null ? 'Situação desconhecida' : `Situação: ${label}`;
-  const secondary =
-    atributo === undefined
-      ? undefined
-      : `${atributo.areaHa.toLocaleString('pt-BR', {
-          maximumFractionDigits: 1,
-        })} ha · ${atributo.condicao}`;
 
   return (
     <TooltipCard
       name={name}
       swatchColor={colorForAssentamentoStatus(label)}
       primary={primary}
-      secondary={secondary}
+      details={
+        atributo === undefined ? undefined : assentamentoDetails(atributo)
+      }
     />
   );
 };

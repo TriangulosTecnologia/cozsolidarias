@@ -132,25 +132,34 @@ const ASSENTAMENTOS = [
   {
     codImovel: 'SP-1-AAA',
     municipio: 'Alpha',
+    uf: 'SP',
     areaHa: 100,
+    modulosFiscais: 2,
     status: 'AT',
     condicao: 'Aguardando analise',
+    dtCriacao: '01/01/2020',
+    dtAtualizacao: '02/02/2021',
   },
 ];
 
+/** Resolves each mount-time fetch to the right shape for the URL. */
+const bodyForUrl = (url: string) => {
+  if (url.includes('por-municipio')) {
+    return BY_CITY;
+  }
+  if (url.includes('assentamentos-atributos')) {
+    return ASSENTAMENTOS;
+  }
+  return {};
+};
+
 beforeEach(() => {
-  // The component fetches the counts, names catalog and the assentamentos
-  // attribute sidecar on mount; serve each with the right shape.
+  // The component fetches the counts, catalogs and the assentamentos attribute
+  // sidecar on mount; serve each shape.
   global.fetch = jest.fn((input: RequestInfo | URL) => {
-    const url = String(input);
-    const body = url.includes('por-municipio')
-      ? BY_CITY
-      : url.includes('assentamentos-sp-atributos')
-        ? ASSENTAMENTOS
-        : {};
     return Promise.resolve({
       json: () => {
-        return Promise.resolve(body);
+        return Promise.resolve(bodyForUrl(String(input)));
       },
     } as Response);
   }) as jest.Mock;
@@ -239,6 +248,10 @@ describe('MapaPlayground — visualization toggle', () => {
     expect(screen.getByTestId('layer-ids')).toHaveTextContent('cozinhas-pts');
     expect(screen.getByTestId('layer-ids')).not.toHaveTextContent(
       'cozinhas-bolhas'
+    );
+    // Municípios are hidden in this mode — no município fill layer.
+    expect(screen.getByTestId('layer-ids')).not.toHaveTextContent(
+      'municipios-br-fill'
     );
   });
 });
