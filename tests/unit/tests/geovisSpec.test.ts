@@ -582,13 +582,14 @@ describe('buildSpec', () => {
     expect(statusLegend?.position).toBe('bottom-right');
     expect(statusLegend?.colorBy?.type).toBe('categorical');
 
-    // The layer keeps the dot look but leaves circleColor for the status
-    // legend's match expression — an explicit color would flatten it.
+    // The layer keeps the dot look (POINTS_PAINT) but omits circleColor so
+    // the adapter resolves the color from the status legend's match expression —
+    // an explicit color would flatten every status point.
     const statusLayer = spec.layers.find((layer) => {
       return layer.id === 'cozinhas-status-pts';
     });
     expect(statusLayer?.paint?.circleColor).toBeUndefined();
-    expect(statusLayer?.paint?.circleRadius).toBe(2.4);
+    expect(statusLayer?.paint?.circleRadius).toBe(4);
     expect(statusLayer?.activeLegendId).toBe('legenda-cozinhas-status');
   });
 

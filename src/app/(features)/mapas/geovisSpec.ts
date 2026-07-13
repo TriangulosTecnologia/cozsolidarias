@@ -49,7 +49,6 @@ import {
   CHOROPLETH_SOURCE_ID,
   type MapMode,
   POINTS_SOURCE_ID,
-  POINTS_STATUS_MAP_DATA_ID,
   POINTS_STATUS_SOURCE_ID,
 } from './mapDataBuilders';
 
@@ -86,27 +85,34 @@ const POINTS_PAINT = {
 } satisfies VisualizationLayer['paint'];
 
 /**
- * Builds a minimal override for a point layer with the shared `POINTS_PAINT`.
+ * Builds the minimal overrides for both point layers (`pontos` and
+ * `pontos-status`) sharing {@link POINTS_PAINT}. Both are returned together so
+ * the spec always carries the status-colored layer alongside the density one;
+ * the resolver fills in `mapDataId`/`activeLegendId`/`circleColor` for each
+ * from the resolved layers (matched on `sourceId`/`geometry` via
+ * `mergeResolvedLayers`).
  */
 
-const buildPointsLayerOverride = (): VisualizationLayer => {
-  return {
-    id: 'cozinhas-pts',
-    sourceId: POINTS_SOURCE_ID,
-    geometry: 'point',
-    paint: POINTS_PAINT,
-  } satisfies VisualizationLayer;
-};
-
-const buildPointsStatusLayerOverride = (): VisualizationLayer => {
-  return {
-    id: 'cozinhas-status-pts',
-    sourceId: POINTS_STATUS_SOURCE_ID,
-    geometry: 'point',
-    mapDataId: POINTS_STATUS_MAP_DATA_ID,
-    activeLegendId: POINTS_STATUS_LEGEND_ID,
-    paint: POINTS_PAINT,
-  } satisfies VisualizationLayer;
+const buildPointsLayerOverride = (): VisualizationLayer[] => {
+  return [
+    {
+      id: 'cozinhas-pts-overrides',
+      sourceId: POINTS_SOURCE_ID,
+      geometry: 'point',
+      paint: POINTS_PAINT,
+    },
+    {
+      id: 'cozinhas-status-pts',
+      sourceId: POINTS_STATUS_SOURCE_ID,
+      geometry: 'point',
+      // References the status legend so the adapter resolves its categorical
+      // `match` over the joined `situacao` feature-state; `paint` omits
+      // `circleColor` so the legend expression wins (an explicit color would
+      // flatten every status point).
+      activeLegendId: POINTS_STATUS_LEGEND_ID,
+      paint: POINTS_PAINT,
+    },
+  ] satisfies VisualizationLayer[];
 };
 
 /**
@@ -378,7 +384,6 @@ export const buildSpec = (
     byCity: kitchenRateByCity[];
   }
 ): VisualizationSpec => {
-  const showPoints = mode === 'pontos';
   const showPointsStatus = mode === 'pontos-status';
   const showBubbles = mode === 'circulos';
 
@@ -409,8 +414,13 @@ export const buildSpec = (
     legends: buildLegends(mode),
     layers: [
       buildFillLayer(mode, fillHoverTooltip),
-      ...(showPoints ? [buildPointsLayerOverride()] : []),
-      ...(showPointsStatus ? [buildPointsStatusLayerOverride()] : []),
+      // `pontos-status` carries both point layers (density + status) built by
+      // `buildPointsLayerOverride`, sharing POINTS_PAINT. The status layer
+      // references the categorical status legend (no `circleColor`), so the
+      // adapter falls back to its `match` over the joined `situacao`
+      // feature-state. This only holds because `pontos-status` sets no
+      // `mapType` (see MAP_TYPE_BY_MODE).
+      ...(showPointsStatus ? buildPointsLayerOverride() : []),
       ...(showBubbles ? [buildBubblesOverrideLayer()] : []),
     ],
     ...(showBubbles ? { scaleMaxValue: maxQuantidade } : {}),
