@@ -147,7 +147,7 @@ const buildBubblesOverrideLayer = (
     id: 'cozinhas-bolhas-overrides',
     sourceId: BUBBLES_SOURCE_ID,
     geometry: 'point',
-    sizeBy: { range: BUBBLES_RADIUS_RANGE },
+    sizeBy: { range: BUBBLES_RADIUS_RANGE, transform: 'sqrt' },
     paint: { circleColor: BUBBLES_COLOR },
     hoverTooltip,
   };
