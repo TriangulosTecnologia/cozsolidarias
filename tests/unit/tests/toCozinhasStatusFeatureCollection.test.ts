@@ -46,26 +46,12 @@ describe('toCozinhaSituacao', () => {
   test('passes canonical statuses through verbatim', () => {
     expect(toCozinhaSituacao('Habilitada')).toBe('Habilitada');
     expect(toCozinhaSituacao('Não Habilitada')).toBe('Não Habilitada');
-    expect(toCozinhaSituacao('Mapeada')).toBe('Mapeada');
-    expect(toCozinhaSituacao('Retirada')).toBe('Retirada');
-    expect(toCozinhaSituacao('Em análise')).toBe('Em análise');
-    expect(toCozinhaSituacao('Homologada para Habilitação')).toBe(
-      'Homologada para Habilitação'
-    );
-    expect(
-      toCozinhaSituacao(
-        'Pendência emitida pelo MDS (Prazo para adequações 15 dias)'
-      )
-    ).toBe('Pendência emitida pelo MDS (Prazo para adequações 15 dias)');
-    expect(toCozinhaSituacao('Enviada para análise')).toBe(
-      'Enviada para análise'
-    );
-    expect(toCozinhaSituacao('Homologada para Retirada')).toBe(
-      'Homologada para Retirada'
-    );
   });
 
-  test('returns null for unknown statuses and empty string', () => {
+  test('returns null for non-canonical statuses, unknowns and empty string', () => {
+    // Workflow states outside COZINHA_SITUACOES are deliberately dropped.
+    expect(toCozinhaSituacao('Mapeada')).toBeNull();
+    expect(toCozinhaSituacao('Em análise')).toBeNull();
     expect(toCozinhaSituacao('Status Inexistente')).toBeNull();
     expect(toCozinhaSituacao('')).toBeNull();
   });
@@ -134,11 +120,11 @@ describe('toCozinhasStatusFeatureCollection', () => {
       source({ situacao: '', latitude: -23.5, longitude: -46.6 }),
     ]);
 
-    expect(result.features).toHaveLength(3);
+    expect(result.features).toHaveLength(2);
     expect(
       result.features.map((f) => {
         return f.properties.codigo;
       })
-    ).toEqual(['CS1', 'CS2', 'CS3']);
+    ).toEqual(['CS1', 'CS2']);
   });
 });

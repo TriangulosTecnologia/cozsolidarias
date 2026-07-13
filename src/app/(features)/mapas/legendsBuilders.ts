@@ -33,18 +33,31 @@ const COLORS = sampleRamp(
 export const WITHOUT_KITCHEN_COLOR = mapTokens.dataviz.color.status.masked;
 
 /**
+ * Point color for the plain `pontos` mode — the `dotDensity` resolver's own
+ * flat default (`DEFAULT_DOT_DENSITY_PAINT.circleColor`), mirrored here so
+ * {@link buildDotDensityLegend}'s swatch never drifts from it. Every point's
+ * join value is `null` (see `toKitchenRows`), so the legend's categorical
+ * `match` never finds the `Cozinha` key and always falls through to
+ * `defaultColor` — set to this same value, the layer's paint is unaffected.
+ *
+ * @example
+ * paint.circleColor; // → DOT_DENSITY_COLOR (implicit, from the resolver)
+ */
+export const DOT_DENSITY_COLOR = '#E4572E';
+
+/**
  * Fill color for the proportional-circle overlay (`circulos` mode). The
  * `proportionalCircles` resolver's own defaults
  * (`PROPORTIONAL_CIRCLES_DEFAULTS`) cover opacity/stroke but never
  * `circleColor` — leaving it unset renders MapLibre's own paint default
- * (opaque black), which reads as noise rather than data. Reuses the
- * mid-tone of the shared sequential ramp so the circles read as the same
- * "cozinhas" blue family as the choropleth.
+ * (opaque black), which reads as noise rather than data. Reuses
+ * {@link DOT_DENSITY_COLOR} — the same default orange the point modes paint —
+ * so circles, their legend swatches and the points all share one data color.
  *
  * @example
  * paint: { circleColor: BUBBLES_COLOR }
  */
-export const BUBBLES_COLOR = mapTokens.dataviz.color.sequential[1][6];
+export const BUBBLES_COLOR = DOT_DENSITY_COLOR;
 
 /**
  * Resolves the choropleth band color for a kitchen count, mirroring the
@@ -772,9 +785,17 @@ export const buildPointsStatusLegend = (): LegendSpec => {
 /**
  * The `proportionalCircles` legend for `circulos` mode. `BUBBLES_LEGEND_ID`
  * matches the resolver's auto-generated id so `mergeLegendsByIdOnly` merges
- * them into one legend: the resolver's `colorBy` (all bins same color) is
- * injected, `shouldAutoGenerateColorItems` suppresses color bands, and
- * `shouldShowCircleItems` renders the circle-size reference rows.
+ * them into one legend and `shouldShowCircleItems` renders the circle-size
+ * reference rows.
+ *
+ * The categorical `colorBy` is load-bearing: without one, the merge injects
+ * the resolver's auto-generated quantitative `colorBy` (Jenks breaks over the
+ * library's default blue ramp), rendering blue color bands that contradict
+ * the single-color orange circles. `mergeLegendsByIdOnly` only merges
+ * quantitative-into-quantitative — a user categorical `colorBy` is kept
+ * as-is — so this pins the legend to one {@link BUBBLES_COLOR} swatch. It
+ * never drives the circle paint either: the override layer declares
+ * `paint.circleColor` explicitly, which wins in the adapter.
  *
  * @returns the proportional-circles `LegendSpec`.
  *
@@ -787,6 +808,12 @@ export const buildBubblesLegend = (): LegendSpec => {
     title: 'Cozinhas por município',
     subtitle: 'O tamanho do círculo indica a quantidade de cozinhas.',
     position: 'bottom-right',
+    colorBy: {
+      type: 'categorical',
+      property: 'value',
+      mapping: { Cozinhas: BUBBLES_COLOR },
+      defaultColor: BUBBLES_COLOR,
+    },
     reference: DATA_REFERENCE,
   };
 };

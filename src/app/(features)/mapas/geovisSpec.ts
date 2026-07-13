@@ -90,11 +90,15 @@ const buildPointsLayer = (
 };
 
 /**
- * The status-colored points layer for `pontos-status` mode. No `paint` is
- * declared: the `dotDensity` resolver's own circle defaults (radius, opacity,
- * stroke) apply untouched, and `circleColor` is left for the status legend's
- * categorical `match` expression (over the joined `situacao` feature-state) to
- * drive — an explicit `paint.circleColor` here would silently win over it.
+ * The status-colored points layer for `pontos-status` mode. `paint` mirrors
+ * geovis' `DEFAULT_DOT_DENSITY_PAINT` (radius, stroke) so these points look
+ * identical to the `pontos` ones, but deliberately omits `circleColor`: the
+ * adapter resolves a point's color from explicit paint FIRST
+ * (`resolveCircleColor`), only falling back to the `activeLegendId`'s
+ * categorical `match` expression (over the joined `situacao` feature-state)
+ * when the paint has none. This only holds because `pontos-status` sets no
+ * `mapType` (see {@link MAP_TYPE_BY_MODE}) — the `dotDensity` resolver would
+ * merge its own `circleColor` into this paint and flatten every point.
  */
 const buildPointsStatusLayer = (
   hoverTooltip?: HoverTooltipConfig
@@ -105,6 +109,11 @@ const buildPointsStatusLayer = (
     geometry: 'point',
     mapDataId: POINTS_STATUS_MAP_DATA_ID,
     activeLegendId: POINTS_STATUS_LEGEND_ID,
+    paint: {
+      circleRadius: 2.4,
+      circleStrokeColor: '#FAF9F7',
+      circleStrokeWidth: 0.5,
+    },
     hoverTooltip,
   };
 };
@@ -290,8 +299,19 @@ const buildFillLayer = (
   };
 };
 
-/** Pre-configured geovis `mapType` for each visualization mode. */
-const MAP_TYPE_BY_MODE: { [key in MapMode]: MapType } = {
+/**
+ * Pre-configured geovis `mapType` for each visualization mode. `undefined`
+ * skips the library's mapType resolution entirely — the mode's layers and
+ * legends are then used exactly as authored here.
+ *
+ * `pontos-status` must stay `undefined`: `resolveDotDensity` merges
+ * `DEFAULT_DOT_DENSITY_PAINT` (including `circleColor: '#E4572E'`) into any
+ * point layer on its target source (`injectResolvedFields`), and the adapter
+ * lets an explicit `paint.circleColor` win over the `activeLegendId`'s
+ * categorical expression (`resolveCircleColor`) — so with `'dotDensity'` every
+ * status point silently paints flat orange instead of its situação color.
+ */
+const MAP_TYPE_BY_MODE: { [key in MapMode]: MapType | undefined } = {
   coropletico: 'choropleth',
   'coropletico-taxa': 'choropleth',
   'coropletico-percentual': 'choropleth',
@@ -302,7 +322,7 @@ const MAP_TYPE_BY_MODE: { [key in MapMode]: MapType } = {
   'coropletico-ivs-capital-humano': 'choropleth',
   'coropletico-ivs-renda-trabalho': 'choropleth',
   pontos: 'dotDensity',
-  'pontos-status': 'dotDensity',
+  'pontos-status': undefined,
   circulos: 'proportionalCircles',
 };
 
@@ -370,9 +390,11 @@ export const buildSpec = (
     return Math.max(max, register.quantidade);
   }, 1);
 
+  const mapType = MAP_TYPE_BY_MODE[mode];
+
   return {
     engine: 'maplibre',
-    mapType: MAP_TYPE_BY_MODE[mode],
+    ...(mapType === undefined ? {} : { mapType }),
     view: {
       center: [-53.0, -14.5],
       zoom: 4,
