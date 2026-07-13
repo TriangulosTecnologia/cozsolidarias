@@ -71,10 +71,12 @@ const POINTS_LAYER = {
   geometry: 'point',
   paint: {
     circleColor: '#E4572E',
-    circleRadius: 2.4,
-    circleOpacity: 0.7,
+    // Larger, more opaque dots with a thicker light halo so each kitchen reads
+    // clearly over both the pale basemap and the colored settlement polygons.
+    circleRadius: 4,
+    circleOpacity: 0.9,
     circleStrokeColor: '#FAF9F7',
-    circleStrokeWidth: 0.5,
+    circleStrokeWidth: 1.2,
   },
 } as const;
 
@@ -127,7 +129,9 @@ const buildAssentamentosLayer = (
     mapDataId: ASSENTAMENTOS_MAP_DATA_ID,
     activeLegendId: ASSENTAMENTO_LEGEND_ID,
     paint: {
-      fillOpacity: 0.5,
+      // Lighter fill so the kitchen points overlaid on top stay legible; the
+      // dark contour still outlines each perimeter.
+      fillOpacity: 0.3,
       lineColor: '#241F21',
     },
     ...(hoverTooltipRender
@@ -188,6 +192,17 @@ const SOURCES: GeoJSONSource[] = [
     attribution: '© Cozinhas Solidárias',
   },
 ];
+
+/** Default camera: the whole of Brazil (all cozinha-based modes). */
+const BRAZIL_VIEW = { center: [-53.0, -14.5] as [number, number], zoom: 4 };
+
+/** Camera for the assentamentos mode: framed on São Paulo, where the data lives. */
+const SAO_PAULO_VIEW = { center: [-48.6, -22.3] as [number, number], zoom: 6 };
+
+/** Picks the camera for the active mode (São Paulo for assentamentos, else Brazil). */
+const resolveView = (showAssentamentos: boolean) => {
+  return showAssentamentos ? SAO_PAULO_VIEW : BRAZIL_VIEW;
+};
 
 /** Maps per-município counts to geovis `mapData` value rows. */
 const toValueRows = (byCity: kitchenByCity[]): MapDataRow[] => {
@@ -451,10 +466,9 @@ export const buildSpec = (
   return {
     id: 'mapa-cozinhas-sp',
     engine: 'maplibre',
-    view: {
-      center: [-53.0, -14.5],
-      zoom: 4,
-    },
+    // The assentamentos data is São Paulo-only, so frame the state when that mode
+    // is active; every other (Brazil-wide) mode keeps the national view.
+    view: resolveView(showAssentamentos),
     basemap: { labels: false },
     sources: showAssentamentos ? [...SOURCES, ASSENTAMENTOS_SOURCE] : SOURCES,
     mapData: [
