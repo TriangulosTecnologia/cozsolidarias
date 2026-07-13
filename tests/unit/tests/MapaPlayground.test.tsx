@@ -128,11 +128,26 @@ const BY_CITY: kitchenRateByCity[] = [
   },
 ];
 
+const ASSENTAMENTOS = [
+  {
+    codImovel: 'SP-1-AAA',
+    municipio: 'Alpha',
+    areaHa: 100,
+    status: 'AT',
+    condicao: 'Aguardando analise',
+  },
+];
+
 beforeEach(() => {
-  // The component fetches the counts + names catalog on mount; serve both.
+  // The component fetches the counts, names catalog and the assentamentos
+  // attribute sidecar on mount; serve each with the right shape.
   global.fetch = jest.fn((input: RequestInfo | URL) => {
     const url = String(input);
-    const body = url.includes('por-municipio') ? BY_CITY : {};
+    const body = url.includes('por-municipio')
+      ? BY_CITY
+      : url.includes('assentamentos-sp-atributos')
+        ? ASSENTAMENTOS
+        : {};
     return Promise.resolve({
       json: () => {
         return Promise.resolve(body);
@@ -211,6 +226,19 @@ describe('MapaPlayground — visualization toggle', () => {
     );
     expect(screen.getByTestId('layer-ids')).not.toHaveTextContent(
       'cozinhas-pts'
+    );
+
+    // Assentamentos mode adds the settlement polygons with the kitchen points
+    // on top, and drops the bubble overlay.
+    fireEvent.change(screen.getByLabelText('Visualização'), {
+      target: { value: 'assentamentos' },
+    });
+    expect(screen.getByTestId('layer-ids')).toHaveTextContent(
+      'assentamentos-poly'
+    );
+    expect(screen.getByTestId('layer-ids')).toHaveTextContent('cozinhas-pts');
+    expect(screen.getByTestId('layer-ids')).not.toHaveTextContent(
+      'cozinhas-bolhas'
     );
   });
 });

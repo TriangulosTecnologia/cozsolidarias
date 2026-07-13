@@ -1,5 +1,7 @@
 import {
+  assentamentoStatusLabel,
   buildLegendItems,
+  colorForAssentamentoStatus,
   colorForCadUnico,
   colorForIvs,
   colorForPercentual,
@@ -8,7 +10,10 @@ import {
   colorForTaxa,
   ivsFaixaLabel,
 } from 'src/app/(features)/mapas/geovisScales';
-import { buildSpec } from 'src/app/(features)/mapas/geovisSpec';
+import {
+  type AssentamentoAtributo,
+  buildSpec,
+} from 'src/app/(features)/mapas/geovisSpec';
 import type { kitchenRateByCity, MunicipioIvs } from 'src/data-gateway/schema';
 
 const BY_CITY: kitchenRateByCity[] = [
@@ -52,6 +57,30 @@ const IVS_BY_CITY: MunicipioIvs[] = [
     ivsInfraestruturaUrbana: 0.6,
     ivsCapitalHumano: 0.25,
     ivsRendaETrabalho: 0.7,
+  },
+];
+
+const ASSENTAMENTOS: AssentamentoAtributo[] = [
+  {
+    codImovel: 'SP-1-AAA',
+    municipio: 'Alpha',
+    areaHa: 100,
+    status: 'AT',
+    condicao: 'Aguardando analise',
+  },
+  {
+    codImovel: 'SP-2-BBB',
+    municipio: 'Beta',
+    areaHa: 50,
+    status: 'CA',
+    condicao: 'Cancelado por decisao administrativa',
+  },
+  {
+    codImovel: 'SP-3-CCC',
+    municipio: 'Gama',
+    areaHa: 20,
+    status: 'ZZ',
+    condicao: 'Desconhecida',
   },
 ];
 
@@ -210,6 +239,40 @@ describe('ivsFaixaLabel', () => {
 describe('buildLegendItems', () => {
   test('leads with the "Sem cozinha" swatch', () => {
     expect(buildLegendItems()[0].label).toBe('Sem cozinha');
+  });
+});
+
+describe('assentamentoStatusLabel', () => {
+  test('maps each known status code to its human label', () => {
+    expect(assentamentoStatusLabel('AT')).toBe('Ativo');
+    expect(assentamentoStatusLabel('CA')).toBe('Cancelado');
+    expect(assentamentoStatusLabel('PE')).toBe('Pendente');
+  });
+
+  test('maps an unknown code to "Outros"', () => {
+    expect(assentamentoStatusLabel('ZZ')).toBe('Outros');
+  });
+});
+
+describe('colorForAssentamentoStatus', () => {
+  test('a null label resolves to the masked "sem dado" fill', () => {
+    expect(colorForAssentamentoStatus(null)).toBe(colorForQuantidade(0));
+  });
+
+  test('an unknown label falls back to the masked fill', () => {
+    expect(colorForAssentamentoStatus('Outros')).toBe(
+      colorForAssentamentoStatus(null)
+    );
+  });
+
+  test('each known status gets a distinct painted color', () => {
+    const colors = new Set([
+      colorForAssentamentoStatus('Ativo'),
+      colorForAssentamentoStatus('Cancelado'),
+      colorForAssentamentoStatus('Pendente'),
+    ]);
+    expect(colors.size).toBe(3);
+    expect(colors.has(colorForAssentamentoStatus(null))).toBe(false);
   });
 });
 
@@ -400,6 +463,73 @@ describe('buildSpec', () => {
 
     expect(layerIds(spec)).toContain('cozinhas-bolhas');
     expect(layerIds(spec)).not.toContain('cozinhas-pts');
+  });
+
+  test('assentamentos overlays the settlement polygons and the kitchen points', () => {
+    const spec = buildSpec(BY_CITY, 'assentamentos', undefined, [], {
+      atributos: ASSENTAMENTOS,
+    });
+
+    // Filled polygons + points on top; no bubble overlay.
+    expect(layerIds(spec)).toContain('assentamentos-poly');
+    expect(layerIds(spec)).toContain('cozinhas-pts');
+    expect(layerIds(spec)).not.toContain('cozinhas-bolhas');
+
+    // The geometry source is added only in this mode.
+    expect(
+      spec.sources.some((source) => {
+        return source.id === 'assentamentos';
+      })
+    ).toBe(true);
+
+    // Status join: value is the human label, unknown codes fold to "Outros".
+    const statusData = spec.mapData?.find((entry) => {
+      return entry.mapDataId === 'assentamentos-status';
+    })?.data;
+    expect(statusData).toEqual([
+      { geometryId: 'SP-1-AAA', value: 'Ativo' },
+      { geometryId: 'SP-2-BBB', value: 'Cancelado' },
+      { geometryId: 'SP-3-CCC', value: 'Outros' },
+    ]);
+
+    // The categorical settlement legend is the positioned one.
+    const legend = spec.legends?.find((entry) => {
+      return entry.id === 'legenda-assentamentos';
+    });
+    expect(legend?.position).toBe('bottom-right');
+    expect(legend?.colorBy?.type).toBe('categorical');
+
+    // The município fill stays neutral (no choropleth data) in this mode.
+    expect(mapDataById(spec, 'cozinhas-por-municipio')?.data).toEqual([]);
+  });
+
+  test('assentamentos mode with no attributes feeds an empty status join', () => {
+    const spec = buildSpec(BY_CITY, 'assentamentos');
+
+    expect(layerIds(spec)).toContain('assentamentos-poly');
+    expect(
+      spec.mapData?.find((entry) => {
+        return entry.mapDataId === 'assentamentos-status';
+      })?.data
+    ).toEqual([]);
+  });
+
+  test('non-assentamentos modes add no settlement source, join or layer', () => {
+    const spec = buildSpec(BY_CITY, 'coropletico', undefined, [], {
+      atributos: ASSENTAMENTOS,
+    });
+
+    expect(layerIds(spec)).not.toContain('assentamentos-poly');
+    expect(
+      spec.sources.some((source) => {
+        return source.id === 'assentamentos';
+      })
+    ).toBe(false);
+    expect(
+      spec.mapData?.some((entry) => {
+        return entry.mapDataId === 'assentamentos-status';
+      })
+    ).toBe(false);
   });
 
   test('defaults to coropletico when no mode is given', () => {

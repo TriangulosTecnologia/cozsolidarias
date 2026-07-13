@@ -5,6 +5,8 @@ import type * as React from 'react';
 import type { kitchenRateByCity } from '@/data-gateway/schema';
 
 import {
+  assentamentoStatusLabel,
+  colorForAssentamentoStatus,
   colorForCadUnico,
   colorForIvs,
   colorForPercentual,
@@ -14,6 +16,7 @@ import {
   ivsFaixaLabel,
   type MapMode,
 } from './geovisScales';
+import type { AssentamentoAtributo } from './geovisSpec';
 
 /** `"N cozinhas"` / `"1 cozinha"`, com o número no formato pt-BR. */
 const formatCozinhas = (quantidade: number): string => {
@@ -237,6 +240,56 @@ const renderIvsTooltip = ({
 
   return (
     <TooltipCard name={name} swatchColor={colorForIvs(ivs)} primary={primary} />
+  );
+};
+
+/**
+ * Assentamentos-mode tooltip: título = município, swatch da situação + "Situação:
+ * <label>" e uma linha auxiliar com a área (ha) e a condição ambiental. O rótulo
+ * de situação vem do `value` do feature-state (o que o mapa pintou) quando
+ * presente; senão é derivado do `atributo`. Assentamentos sem atributo no sidecar
+ * caem em "Assentamento" + "Situação desconhecida".
+ *
+ * @param params.atributo - Atributos do assentamento sob o cursor, ou
+ * `undefined` quando o `cod_imovel` não está no sidecar.
+ * @param params.value - `value` do feature-state (o rótulo de situação pintado).
+ * @returns O card de tooltip do assentamento.
+ *
+ * @example
+ * renderAssentamentoTooltip({ atributo, value: 'Ativo' });
+ * // <TooltipCard> com "Situação: Ativo"
+ */
+export const renderAssentamentoTooltip = ({
+  atributo,
+  value,
+}: {
+  atributo?: AssentamentoAtributo;
+  value: MapHoverInfo['value'];
+}): React.ReactNode => {
+  const label =
+    typeof value === 'string'
+      ? value
+      : atributo
+        ? assentamentoStatusLabel(atributo.status)
+        : null;
+
+  const name = atributo?.municipio ?? 'Assentamento';
+  const primary =
+    label === null ? 'Situação desconhecida' : `Situação: ${label}`;
+  const secondary =
+    atributo === undefined
+      ? undefined
+      : `${atributo.areaHa.toLocaleString('pt-BR', {
+          maximumFractionDigits: 1,
+        })} ha · ${atributo.condicao}`;
+
+  return (
+    <TooltipCard
+      name={name}
+      swatchColor={colorForAssentamentoStatus(label)}
+      primary={primary}
+      secondary={secondary}
+    />
   );
 };
 
