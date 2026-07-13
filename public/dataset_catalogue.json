@@ -7,7 +7,7 @@
     "language": "pt-BR",
     "status": "draft",
     "created_at": "2026-07-07",
-    "updated_at": "2026-07-07",
+    "updated_at": "2026-07-13",
     "typing_reference": "src/data-source-static/dataCatalogue.ts",
     "quality_notes": [
       {
@@ -83,6 +83,24 @@
         "atlas",
         "municipios",
         "brasil",
+        "dados-publicos"
+      ]
+    },
+    "sicar": {
+      "id": "sicar",
+      "slug": "sicar",
+      "title": "SICAR",
+      "description": "Base geográfica do Sistema Nacional de Cadastro Ambiental Rural (perímetros dos imóveis rurais), publicada pelo Serviço Florestal Brasileiro.",
+      "organization": "Serviço Florestal Brasileiro (SFB) — SICAR",
+      "source_url": "https://consulta.car.gov.br/geoservices",
+      "public_reference_url": "https://consulta.car.gov.br",
+      "tags": [
+        "sicar",
+        "car",
+        "assentamentos",
+        "imoveis-rurais",
+        "perimetros",
+        "sao-paulo",
         "dados-publicos"
       ]
     }
@@ -531,6 +549,163 @@
             "name": "idhm_educ_sub_freq",
             "description": "Subcomponente de frequência escolar do IDHM Educação (0–1)",
             "unit": "índice"
+          }
+        ]
+      }
+    },
+    "assentamentos": {
+      "id": "assentamentos",
+      "collection_id": "sicar",
+      "slug": "assentamentos",
+      "title": "Assentamentos rurais (SICAR)",
+      "description": "Perímetros (polígonos) dos assentamentos rurais (tipo de imóvel AST) cadastrados no CAR, filtrados das bases estaduais AREA_IMOVEL e mesclados. Base do modo de mapa \"Assentamentos e cozinhas\"; colorido pela situação do cadastro (ind_status). Coordenadas em SIRGAS 2000 (EPSG:4674), arredondadas a 6 casas decimais.",
+      "file": "public/geo/assentamentos.json",
+      "format": "GeoJSON",
+      "source": {
+        "organization": "Serviço Florestal Brasileiro (SFB) — SICAR",
+        "url": "https://consulta.car.gov.br/geoservices",
+        "notes": "Extraído das bases estaduais AREA_IMOVEL (todos os imóveis rurais), mantendo apenas as feições com ind_tipo = AST. Estados incluídos: SP, MG, RJ, ES."
+      },
+      "generated_by": "scripts/generate-assentamentos.mjs",
+      "temporal": {
+        "reference_period": "2026-06",
+        "retrieved_at": "2026-07-13"
+      },
+      "spatial": {
+        "coverage": "SP, MG, RJ, ES",
+        "unit": "assentamento (polígono)",
+        "key": "cod_imovel"
+      },
+      "access": {
+        "level": "public",
+        "contains_personal_data": false
+      },
+      "stats": {
+        "features": 1825,
+        "size_bytes": 12630947,
+        "checkSum": "sha256:c126b53ec52dfb813689d5d0c9c9bee84630d42b8e0133f564723a4348887985"
+      },
+      "schema": {
+        "fields": [
+          {
+            "name": "cod_imovel",
+            "description": "Código do imóvel no CAR (UF-códigoIBGE-UUID); chave de junção do mapa",
+            "role": "identifier"
+          },
+          {
+            "name": "municipio",
+            "description": "Município do imóvel (grafia da fonte, sem acentos)"
+          },
+          {
+            "name": "cod_estado",
+            "description": "Unidade federativa (SP, MG, RJ ou ES)"
+          },
+          {
+            "name": "num_area_ha",
+            "description": "Área total do imóvel",
+            "unit": "hectare"
+          },
+          {
+            "name": "mod_fiscal",
+            "description": "Tamanho do imóvel em módulos fiscais",
+            "unit": "módulo fiscal"
+          },
+          {
+            "name": "ind_status",
+            "description": "Situação do cadastro: AT (ativo), CA (cancelado), PE (pendente)"
+          },
+          {
+            "name": "des_condicao_ambiental",
+            "description": "Condição da análise ambiental do imóvel"
+          },
+          {
+            "name": "dat_criacao",
+            "description": "Data de criação do registro (DD/MM/AAAA)"
+          },
+          {
+            "name": "dat_atualizacao",
+            "description": "Data da última atualização do registro (DD/MM/AAAA)"
+          },
+          {
+            "name": "geometry",
+            "description": "Polígono/MultiPolígono do perímetro do assentamento",
+            "role": "geometry"
+          }
+        ]
+      }
+    },
+    "assentamentos_atributos": {
+      "id": "assentamentos_atributos",
+      "collection_id": "sicar",
+      "slug": "assentamentos-atributos",
+      "title": "Assentamentos — atributos (sidecar)",
+      "description": "Sidecar sem geometria (uma linha por assentamento) derivado de assentamentos.json. Usado pelo mapa para colorir os polígonos por situação (junção categórica por cod_imovel) e preencher o tooltip, sem reprocessar o arquivo de geometria.",
+      "file": "public/geo/assentamentos-atributos.json",
+      "format": "JSON",
+      "source": {
+        "organization": "Serviço Florestal Brasileiro (SFB) — SICAR",
+        "url": "https://consulta.car.gov.br/geoservices",
+        "notes": "Derivado de assentamentos.json (mesma extração); atributos em camelCase."
+      },
+      "generated_by": "scripts/generate-assentamentos.mjs",
+      "temporal": {
+        "reference_period": "2026-06",
+        "retrieved_at": "2026-07-13"
+      },
+      "spatial": {
+        "coverage": "SP, MG, RJ, ES",
+        "unit": "assentamento",
+        "key": "codImovel"
+      },
+      "access": {
+        "level": "public",
+        "contains_personal_data": false
+      },
+      "stats": {
+        "rows": 1825,
+        "size_bytes": 563847,
+        "checkSum": "sha256:1a4adfc906e2c738b28a4c923b628935e5a0be08c039f216663d8ea8b34716e3"
+      },
+      "schema": {
+        "fields": [
+          {
+            "name": "codImovel",
+            "description": "Código do imóvel no CAR; junção com a geometria",
+            "role": "identifier"
+          },
+          {
+            "name": "municipio",
+            "description": "Município do imóvel (grafia da fonte, sem acentos)"
+          },
+          {
+            "name": "uf",
+            "description": "Unidade federativa (SP, MG, RJ ou ES)"
+          },
+          {
+            "name": "areaHa",
+            "description": "Área total do imóvel",
+            "unit": "hectare"
+          },
+          {
+            "name": "modulosFiscais",
+            "description": "Tamanho do imóvel em módulos fiscais",
+            "unit": "módulo fiscal"
+          },
+          {
+            "name": "status",
+            "description": "Situação do cadastro: AT (ativo), CA (cancelado), PE (pendente)"
+          },
+          {
+            "name": "condicao",
+            "description": "Condição da análise ambiental do imóvel"
+          },
+          {
+            "name": "dtCriacao",
+            "description": "Data de criação do registro (DD/MM/AAAA)"
+          },
+          {
+            "name": "dtAtualizacao",
+            "description": "Data da última atualização do registro (DD/MM/AAAA)"
           }
         ]
       }
