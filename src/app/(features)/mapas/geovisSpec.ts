@@ -65,30 +65,15 @@ export {
 export type { MapMode } from './mapDataBuilders';
 
 /**
- * Card styling for the spec-driven hover tooltip — a warm ivory surface with a
- * subtle border and elevation so it reads as a floating card above the map.
- * Values reference the Chakra design tokens (exposed as `--chakra-*` custom
- * properties on the document root by `<ChakraProvider>`), keeping the tooltip in
- * step with the app's visual language. The tooltip *content* (name + count) is
- * built with Chakra components in `MapaPlayground`.
- */
-const TOOLTIP_STYLE: NonNullable<HoverTooltipConfig['style']> = {
-  background: 'var(--chakra-colors-ivory-50)',
-  color: 'var(--chakra-colors-charcoal-900)',
-  border: '1px solid var(--chakra-colors-ivory-300)',
-  borderRadius: 'var(--chakra-radii-lg)',
-  boxShadow: '0 4px 16px rgba(36, 31, 33, 0.12)',
-  padding: 'var(--chakra-spacing-2) var(--chakra-spacing-3)',
-  zIndex: 50,
-};
-
-/**
  * The plain-points layer for `pontos` mode. Renders one circle per cozinha
- * location with uniform color. The hover tooltip identifies the kitchen by
- * reading `feature.properties.nome` from the GeoJSON source.
+ * location with uniform color, left at the `dotDensity` resolver's defaults
+ * (`circleColor`/`circleRadius`/etc.) — no `paint` override needed since every
+ * point looks the same. `hoverTooltip` is a ready-made config (render + style),
+ * built by callers via `toHoverTooltip` in `mapaTooltips` — this module only
+ * plumbs it onto the layer.
  */
 const buildPointsLayer = (
-  hoverTooltipRender?: HoverTooltipConfig['render']
+  hoverTooltip?: HoverTooltipConfig
 ): VisualizationLayer => {
   return {
     id: 'cozinhas-pts',
@@ -96,27 +81,19 @@ const buildPointsLayer = (
     geometry: 'point',
     mapDataId: POINTS_MAP_DATA_ID,
     activeLegendId: DOT_DENSITY_LEGEND_ID,
-    ...(hoverTooltipRender
-      ? { hoverTooltip: { render: hoverTooltipRender, style: TOOLTIP_STYLE } }
-      : {}),
+    hoverTooltip,
   };
 };
 
 /**
- * The status-colored points layer for `pontos-status` mode. The color comes
- * from the status legend's categorical `match` expression over the joined
- * `situacao` feature-state — an explicit paint color would silently win over
- * it (`resolveCircleColor` returns `cp.circleColor` first). `circleColor` is
- * declared as an explicit `undefined` because the mode's `dotDensity`
- * resolver merges its default paint (`circleColor: '#E4572E'`) under ours
- * (`next.paint = { ...rl.paint, ...match.paint }`): the present-but-undefined
- * key overrides the resolver's orange and keeps the legend expression in
- * charge. The hover tooltip is attached here so hovering a point identifies
- * the cozinha and its status; hover tracking works because the layer carries
- * an `activeLegendId`.
+ * The status-colored points layer for `pontos-status` mode. No `paint` is
+ * declared: the `dotDensity` resolver's own circle defaults (radius, opacity,
+ * stroke) apply untouched, and `circleColor` is left for the status legend's
+ * categorical `match` expression (over the joined `situacao` feature-state) to
+ * drive — an explicit `paint.circleColor` here would silently win over it.
  */
 const buildPointsStatusLayer = (
-  hoverTooltipRender?: HoverTooltipConfig['render']
+  hoverTooltip?: HoverTooltipConfig
 ): VisualizationLayer => {
   return {
     id: 'cozinhas-status-pts',
@@ -124,15 +101,7 @@ const buildPointsStatusLayer = (
     geometry: 'point',
     mapDataId: POINTS_STATUS_MAP_DATA_ID,
     activeLegendId: POINTS_STATUS_LEGEND_ID,
-    paint: {
-      circleRadius: 3,
-      circleOpacity: 0.85,
-      circleStrokeColor: '#FAF9F7',
-      circleStrokeWidth: 0.5,
-    },
-    ...(hoverTooltipRender
-      ? { hoverTooltip: { render: hoverTooltipRender, style: TOOLTIP_STYLE } }
-      : {}),
+    hoverTooltip,
   };
 };
 
@@ -171,16 +140,14 @@ const BUBBLES_RADIUS_RANGE: [number, number] = [4, 38];
  * tooltip callback's `info.featureId` → município lookup works unchanged.
  */
 const buildBubblesOverrideLayer = (
-  hoverTooltipRender?: HoverTooltipConfig['render']
+  hoverTooltip?: HoverTooltipConfig
 ): VisualizationLayer => {
   return {
     id: 'cozinhas-bolhas-overrides',
     sourceId: BUBBLES_SOURCE_ID,
     geometry: 'point',
     sizeBy: { range: BUBBLES_RADIUS_RANGE },
-    ...(hoverTooltipRender
-      ? { hoverTooltip: { render: hoverTooltipRender, style: TOOLTIP_STYLE } }
-      : {}),
+    hoverTooltip,
   };
 };
 
@@ -284,10 +251,8 @@ const FILL_LEGEND_ID_BY_MODE: { [key in MapMode]: string | undefined } = {
  */
 const buildFillLayer = (
   mode: MapMode,
-  hoverTooltipRender?: HoverTooltipConfig['render']
+  hoverTooltip?: HoverTooltipConfig
 ): VisualizationLayer => {
-  const fillHoverTooltipRender =
-    mode === 'circulos' ? undefined : hoverTooltipRender;
   return {
     id: 'municipios-br-fill',
     sourceId: CHOROPLETH_SOURCE_ID,
@@ -299,14 +264,7 @@ const buildFillLayer = (
       lineColor: '#FAF9F7',
       fillColor: WITHOUT_KITCHEN_COLOR,
     },
-    ...(fillHoverTooltipRender
-      ? {
-          hoverTooltip: {
-            render: fillHoverTooltipRender,
-            style: TOOLTIP_STYLE,
-          },
-        }
-      : {}),
+    hoverTooltip: mode === 'circulos' ? undefined : hoverTooltip,
   };
 };
 
@@ -347,8 +305,13 @@ const MAP_TYPE_BY_MODE: { [key in MapMode]: MapType } = {
  *
  * @returns the spec consumed by `<GeovisWorkspace>`.
  *
+ * `fillHoverTooltip`/`pontosHoverTooltip`/`pontosStatusHoverTooltip` are
+ * ready-made `HoverTooltipConfig` objects (render + shared card style) built
+ * by callers via `toHoverTooltip` in `mapaTooltips` — this module only plumbs
+ * them onto the matching layer, it never constructs tooltip style itself.
+ *
  * @example
- * const spec = buildSpec({ byCity, mode: 'circulos', fillHoverRender: renderTooltip });
+ * const spec = buildSpec({ byCity, mode: 'circulos', fillHoverTooltip: toHoverTooltip(renderTooltip) });
  * @example
  * const spec = buildSpec({ byCity, mode: 'coropletico-ivs', ivsByCity });
  */
@@ -356,20 +319,20 @@ export const buildSpec = (
   {
     byCity,
     mode = 'coropletico',
-    fillHoverRender,
+    fillHoverTooltip,
     cozinhas,
     cozinhasStatus,
-    pontosHoverRender,
-    pontosStatusHoverRender,
+    pontosHoverTooltip,
+    pontosStatusHoverTooltip,
     ivsByCity,
   }: {
     byCity: kitchenRateByCity[];
     mode?: MapMode;
-    fillHoverRender?: HoverTooltipConfig['render'];
+    fillHoverTooltip?: HoverTooltipConfig;
     cozinhas?: CozinhasFeatureCollection;
     cozinhasStatus?: CozinhasStatusFeatureCollection;
-    pontosHoverRender?: HoverTooltipConfig['render'];
-    pontosStatusHoverRender?: HoverTooltipConfig['render'];
+    pontosHoverTooltip?: HoverTooltipConfig;
+    pontosStatusHoverTooltip?: HoverTooltipConfig;
     ivsByCity?: MunicipioIvs[];
   } = {} as {
     byCity: kitchenRateByCity[];
@@ -403,12 +366,12 @@ export const buildSpec = (
     }),
     legends: buildLegends(mode),
     layers: [
-      buildFillLayer(mode, fillHoverRender),
-      ...(showPoints ? [buildPointsLayer(pontosHoverRender)] : []),
+      buildFillLayer(mode, fillHoverTooltip),
+      ...(showPoints ? [buildPointsLayer(pontosHoverTooltip)] : []),
       ...(showPointsStatus
-        ? [buildPointsStatusLayer(pontosStatusHoverRender)]
+        ? [buildPointsStatusLayer(pontosStatusHoverTooltip)]
         : []),
-      ...(showBubbles ? [buildBubblesOverrideLayer(fillHoverRender)] : []),
+      ...(showBubbles ? [buildBubblesOverrideLayer(fillHoverTooltip)] : []),
     ],
     ...(showBubbles ? { scaleMaxValue: maxQuantidade } : {}),
   };

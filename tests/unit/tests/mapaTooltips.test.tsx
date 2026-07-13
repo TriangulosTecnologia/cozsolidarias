@@ -4,11 +4,28 @@ import { screen } from '@testing-library/react';
 import {
   renderFillTooltip,
   renderStatusTooltip,
+  toHoverTooltip,
   TooltipCard,
-} from 'src/app/(features)/mapas/tooltipRenderers';
+} from 'src/app/(features)/mapas/mapaTooltips';
 import type { kitchenRateByCity } from 'src/data-gateway/schema';
 
 import { renderWithChakra } from './renderWithChakra';
+
+describe('toHoverTooltip', () => {
+  test('wraps a render callback with the shared card style', () => {
+    const render = () => {
+      return null;
+    };
+    const config = toHoverTooltip(render);
+
+    expect(config?.render).toBe(render);
+    expect(config?.style).toBeDefined();
+  });
+
+  test('returns undefined when no render callback is given', () => {
+    expect(toHoverTooltip(undefined)).toBeUndefined();
+  });
+});
 
 const REGISTER: kitchenRateByCity = {
   codigoIbge: '3550308',

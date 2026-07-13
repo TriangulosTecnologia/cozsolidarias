@@ -25,8 +25,9 @@ import { buildSpec, type MapMode } from './geovisSpec';
 import {
   renderFillTooltip,
   renderStatusTooltip,
+  toHoverTooltip,
   TooltipCard,
-} from './tooltipRenderers';
+} from './mapaTooltips';
 import { useMapaData } from './useMapaData';
 
 const estadosGroup = createBoundaryGroup({
@@ -202,18 +203,17 @@ const MapaPlayground = () => {
       })
     );
   }, [cozinhas]);
-  const fillHoverTooltip = React.useCallback(
-    (info: MapHoverInfo) => {
+  const fillHoverTooltip = React.useMemo(() => {
+    return toHoverTooltip((info: MapHoverInfo) => {
       const code = String(info.featureId);
       const register = citiesByCode.get(code);
       const name =
         nomesPorCodigo[code] ?? register?.municipio ?? `Município ${code}`;
       return renderFillTooltip({ mode, name, register, value: info.value });
-    },
-    [citiesByCode, nomesPorCodigo, mode]
-  );
-  const pontosHoverTooltip = React.useCallback(
-    (info: MapHoverInfo) => {
+    });
+  }, [citiesByCode, nomesPorCodigo, mode]);
+  const pontosHoverTooltip = React.useMemo(() => {
+    return toHoverTooltip((info: MapHoverInfo) => {
       const code = String(info.featureId);
       const register = cozinhasByCodigo.get(code);
       return (
@@ -223,25 +223,23 @@ const MapaPlayground = () => {
           primary={register?.codigo ?? code}
         />
       );
-    },
-    [cozinhasByCodigo]
-  );
-  const pontosStatusHoverTooltip = React.useCallback(
-    (info: MapHoverInfo) => {
+    });
+  }, [cozinhasByCodigo]);
+  const pontosStatusHoverTooltip = React.useMemo(() => {
+    return toHoverTooltip((info: MapHoverInfo) => {
       const code = String(info.featureId);
       return renderStatusTooltip({ code, register: statusByCode.get(code) });
-    },
-    [statusByCode]
-  );
+    });
+  }, [statusByCode]);
   const baseSpec = React.useMemo(() => {
     return buildSpec({
       byCity: kitchenByCity,
       mode,
-      fillHoverRender: fillHoverTooltip,
+      fillHoverTooltip,
       cozinhas,
       cozinhasStatus,
-      pontosHoverRender: pontosHoverTooltip,
-      pontosStatusHoverRender: pontosStatusHoverTooltip,
+      pontosHoverTooltip,
+      pontosStatusHoverTooltip,
       ivsByCity,
     });
   }, [

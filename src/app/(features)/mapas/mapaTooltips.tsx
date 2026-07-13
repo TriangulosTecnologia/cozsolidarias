@@ -1,6 +1,7 @@
 'use client';
 
 import { Box, Text } from '@chakra-ui/react';
+import type { HoverTooltipConfig } from '@ttoss/geovis';
 import type * as React from 'react';
 
 import type { CozinhaSituacao, kitchenRateByCity } from '@/data-gateway/schema';
@@ -16,6 +17,41 @@ import {
   ivsFaixaLabel,
 } from './geovisSpec';
 import type { MapMode } from './mapDataBuilders';
+
+/**
+ * Card styling for every spec-driven hover tooltip — a warm ivory surface with
+ * a subtle border and elevation so it reads as a floating card above the map.
+ * Values reference the Chakra design tokens (exposed as `--chakra-*` custom
+ * properties on the document root by `<ChakraProvider>`), keeping the tooltip
+ * in step with the app's visual language.
+ */
+const TOOLTIP_STYLE: NonNullable<HoverTooltipConfig['style']> = {
+  background: 'var(--chakra-colors-ivory-50)',
+  color: 'var(--chakra-colors-charcoal-900)',
+  border: '1px solid var(--chakra-colors-ivory-300)',
+  borderRadius: 'var(--chakra-radii-lg)',
+  boxShadow: '0 4px 16px rgba(36, 31, 33, 0.12)',
+  padding: 'var(--chakra-spacing-2) var(--chakra-spacing-3)',
+  zIndex: 50,
+};
+
+/**
+ * Wraps a hover-tooltip render callback into the full spec-driven
+ * `HoverTooltip` config (render + shared card style), or `undefined` when no
+ * callback is given — the single place layer builders in `geovisSpec` reach
+ * for to attach a tooltip, so none of them construct `style` themselves.
+ *
+ * @param render tooltip content renderer, or `undefined` to attach nothing.
+ * @returns the `HoverTooltipConfig`, or `undefined`.
+ *
+ * @example
+ * toHoverTooltip(renderFillTooltip); // → { render, style: TOOLTIP_STYLE }
+ */
+export const toHoverTooltip = (
+  render?: HoverTooltipConfig['render']
+): HoverTooltipConfig | undefined => {
+  return render ? { render, style: TOOLTIP_STYLE } : undefined;
+};
 
 /** `"N cozinhas"` / `"1 cozinha"`, com o número no formato pt-BR. */
 const formatCozinhas = (quantidade: number): string => {
