@@ -19,16 +19,9 @@ import { BruttalTheme } from '@ttoss/theme/Bruttal';
 import * as React from 'react';
 import { ThemeUIProvider } from 'theme-ui';
 
-import type { CozinhaSituacao } from '@/data-gateway/schema';
-
 import { buildSpec, type MapMode } from './geovisSpec';
-import { BUBBLES_COLOR } from './legendsBuilders';
-import {
-  renderFillTooltip,
-  renderStatusTooltip,
-  toHoverTooltip,
-  TooltipCard,
-} from './mapaTooltips';
+import { BUBBLES_CIRCLE_OPACITY } from './legendsBuilders';
+import { renderFillTooltip, toHoverTooltip } from './mapaTooltips';
 import { useMapaData } from './useMapaData';
 
 const estadosGroup = createBoundaryGroup({
@@ -42,12 +35,6 @@ const municipiosGroup = createBoundaryGroup({
   data: '/geo/geojs-100-mun.json',
   paint: { lineColor: '#B2B2B2', lineWidth: 0.6 },
 });
-
-/** Per-cozinha display data for the status tooltip, keyed by `codigo`. */
-type StatusPorCodigo = Map<string, { nome: string; situacao: CozinhaSituacao }>;
-
-/** Per-cozinha display data for the plain-points tooltip, keyed by `codigo`. */
-type CozinhasPorCodigo = Map<string, { nome: string; codigo: string }>;
 
 /** Id of the left-sidebar menu group that drives the visualization mode. */
 const MODE_MENU_ID = 'visualizacao';
@@ -157,17 +144,18 @@ const MAP_CONTAINER_CSS: Record<string, unknown> = {
 };
 
 /**
- * Recolors the circle-size reference rows of the `circulos` legend to the same
- * orange the map circles paint. geovis' `CirclesLegendItems` hardcodes the
- * swatch `backgroundColor` (`#6b7280` gray) with no spec-level override, so
- * the app repaints it from outside; `!important` is required to beat the
- * inline style. Applied ONLY in `circulos` mode (see `containerCss`): the
- * count choropleth's legend shares the exact same `aria-label` title, and a
- * static rule would repaint its blue band swatches too.
+ * Fades the circle-size reference rows of the `circulos` legend to the same
+ * opacity the map circles paint with (`BUBBLES_CIRCLE_OPACITY`, also declared
+ * on the layer's `circleOpacity`). The swatch COLOR already matches — geovis
+ * derives it from the legend's `colorBy.defaultColor` (`BUBBLES_COLOR`) — but
+ * `CirclesLegendItems` renders it fully opaque with no spec-level override,
+ * so the app fades it from outside. Applied ONLY in `circulos` mode (see
+ * `containerCss`): the count choropleth's legend shares the exact same
+ * `aria-label` title, and a static rule would fade its band swatches too.
  */
 const BUBBLES_LEGEND_CIRCLES_CSS: Record<string, unknown> = {
   '& ul[aria-label="Cozinhas por município"] li > span[aria-hidden="true"]': {
-    backgroundColor: `${BUBBLES_COLOR} !important`,
+    opacity: BUBBLES_CIRCLE_OPACITY,
   },
 };
 
@@ -206,26 +194,6 @@ const MapaPlayground = () => {
       })
     );
   }, [kitchenByCity]);
-  const statusByCode = React.useMemo((): StatusPorCodigo => {
-    return new Map(
-      cozinhasStatus.features.map((f) => {
-        return [
-          f.properties.codigo,
-          { nome: f.properties.nome, situacao: f.properties.situacao },
-        ];
-      })
-    );
-  }, [cozinhasStatus]);
-  const cozinhasByCodigo = React.useMemo((): CozinhasPorCodigo => {
-    return new Map(
-      cozinhas.features.map((f) => {
-        return [
-          f.properties.codigo,
-          { nome: f.properties.nome, codigo: f.properties.codigo },
-        ];
-      })
-    );
-  }, [cozinhas]);
   const fillHoverTooltip = React.useMemo(() => {
     return toHoverTooltip((info: MapHoverInfo) => {
       const code = String(info.featureId);
@@ -235,25 +203,6 @@ const MapaPlayground = () => {
       return renderFillTooltip({ mode, name, register, value: info.value });
     });
   }, [citiesByCode, nomesPorCodigo, mode]);
-  const pontosHoverTooltip = React.useMemo(() => {
-    return toHoverTooltip((info: MapHoverInfo) => {
-      const code = String(info.featureId);
-      const register = cozinhasByCodigo.get(code);
-      return (
-        <TooltipCard
-          name={register?.nome ?? `Cozinha ${code}`}
-          swatchColor="var(--chakra-colors-tertiary-500)"
-          primary={register?.codigo ?? code}
-        />
-      );
-    });
-  }, [cozinhasByCodigo]);
-  const pontosStatusHoverTooltip = React.useMemo(() => {
-    return toHoverTooltip((info: MapHoverInfo) => {
-      const code = String(info.featureId);
-      return renderStatusTooltip({ code, register: statusByCode.get(code) });
-    });
-  }, [statusByCode]);
   const baseSpec = React.useMemo(() => {
     return buildSpec({
       byCity: kitchenByCity,
@@ -261,8 +210,6 @@ const MapaPlayground = () => {
       fillHoverTooltip,
       cozinhas,
       cozinhasStatus,
-      pontosHoverTooltip,
-      pontosStatusHoverTooltip,
       ivsByCity,
     });
   }, [
@@ -271,8 +218,6 @@ const MapaPlayground = () => {
     fillHoverTooltip,
     cozinhas,
     cozinhasStatus,
-    pontosHoverTooltip,
-    pontosStatusHoverTooltip,
     ivsByCity,
   ]);
   const { spec: toggledSpec } = useBoundaryToggle(baseSpec, [

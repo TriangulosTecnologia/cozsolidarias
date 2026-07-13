@@ -46,12 +46,13 @@ describe('toCozinhaSituacao', () => {
   test('passes canonical statuses through verbatim', () => {
     expect(toCozinhaSituacao('Habilitada')).toBe('Habilitada');
     expect(toCozinhaSituacao('Não Habilitada')).toBe('Não Habilitada');
+    // Every workflow state is canonical (see COZINHA_SITUACOES) — all of
+    // them render on the status map.
+    expect(toCozinhaSituacao('Mapeada')).toBe('Mapeada');
+    expect(toCozinhaSituacao('Em análise')).toBe('Em análise');
   });
 
-  test('returns null for non-canonical statuses, unknowns and empty string', () => {
-    // Workflow states outside COZINHA_SITUACOES are deliberately dropped.
-    expect(toCozinhaSituacao('Mapeada')).toBeNull();
-    expect(toCozinhaSituacao('Em análise')).toBeNull();
+  test('returns null for unknown statuses and empty string', () => {
     expect(toCozinhaSituacao('Status Inexistente')).toBeNull();
     expect(toCozinhaSituacao('')).toBeNull();
   });
@@ -120,11 +121,12 @@ describe('toCozinhasStatusFeatureCollection', () => {
       source({ situacao: '', latitude: -23.5, longitude: -46.6 }),
     ]);
 
-    expect(result.features).toHaveLength(2);
+    // Every canonical workflow state is kept; only unknown/empty drop.
+    expect(result.features).toHaveLength(3);
     expect(
       result.features.map((f) => {
         return f.properties.codigo;
       })
-    ).toEqual(['CS1', 'CS2']);
+    ).toEqual(['CS1', 'CS2', 'CS3']);
   });
 });

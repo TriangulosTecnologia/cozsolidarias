@@ -301,15 +301,15 @@ const toChoroplethRows = ({
  * the single origin of every `MapData` entry.
  *
  * Invariants:
- * - Each mode returns only the entries it needs. Overlay modes (`pontos`,
- *   `pontos-status`, `circulos`) do not include the choropleth entry — the fill
- *   layer falls back to `defaultColor` via its `activeLegendId`.
- * - **The active mode's entry comes first (and is the only entry in overlay
- *   modes).** geovis' `mapType` resolvers pick their target source from
- *   `spec.mapData[0]` (`findMatchSourceId`); with the wrong entry first,
- *   `resolveProportionalCircles` builds its circle layer against the wrong
- *   source, never merges with the app's override layer, and appends a
- *   duplicate layer + legend — breaking circle hover and doubling the legend.
+ * - **Every entry is present in every mode** (see the promoteId note below);
+ *   only the choropleth entry's rows vary by mode (empty in the overlay
+ *   modes, where the fill falls back to `defaultColor`).
+ * - **The active mode's entry comes first.** geovis' `mapType` resolvers pick
+ *   their target source from `spec.mapData[0]` (`findMatchSourceId`); with the
+ *   wrong entry first, `resolveProportionalCircles` builds its circle layer
+ *   against the wrong source, never merges with the app's override layer, and
+ *   appends a duplicate layer + legend — breaking circle hover and doubling
+ *   the legend.
  *
  * @param byCity per-município aggregation (counts, rate and share variants).
  * @param mode active visualization mode.
@@ -371,26 +371,29 @@ export const buildMapData = ({
     data: cozinhasStatus ? toStatusRows(cozinhasStatus) : [],
   };
 
-  // `BUBBLES_SOURCE_ID` is always declared in `SOURCES` (see geovisSpec.ts),
-  // fetched eagerly on mount regardless of mode — but geovis only promotes a
-  // source's `codarea` property to `feature.id` (`resolvePromoteIdForSource`)
-  // when it finds a `mapData` entry whose `mapId` matches AND carries a
-  // `joinKey`, evaluated against whatever spec is active at the time the
-  // source is first added to the map. Without `bubblesEntry` present from the
-  // very first render (default mode is `coropletico`), the bubbles source
-  // gets added with no promoted id; switching to `circulos` later can't
-  // retroactively fix that, so `setFeatureState` never matches a real
-  // feature and every circle silently renders at `zeroRadiusPx`. Appending it
-  // — never as the FIRST entry outside `circulos` itself — keeps every other
-  // mode's `mapData[0]` (the one `findMatchSourceId` reads) unchanged.
-  if (mode === 'circulos') {
-    return [bubblesEntry];
-  }
-  if (mode === 'pontos') {
-    return [pointsEntry, bubblesEntry];
-  }
-  if (mode === 'pontos-status') {
-    return [statusEntry, bubblesEntry];
-  }
-  return [choroplethEntry, bubblesEntry];
+  // Every source is declared in `SOURCES` (see geovisSpec.ts) and fetched at
+  // mount regardless of mode — but geovis only promotes a source's `joinKey`
+  // property to `feature.id` (`resolvePromoteIdForSource`) when it finds a
+  // `mapData` entry whose `mapId` matches AND carries a `joinKey`, evaluated
+  // against whatever spec is active at the time the source is first added to
+  // the map. Without an entry present from the very first render (default
+  // mode is `coropletico`), a source gets added with no promoted id and
+  // switching modes later can't retroactively fix that — `setFeatureState`
+  // then never matches a real feature: circles silently render at
+  // `zeroRadiusPx` and status points all paint the legend's `defaultColor`
+  // instead of their situação color. So EVERY entry ships in EVERY mode; the
+  // active mode's entry leads because `findMatchSourceId` reads `mapData[0]`.
+  const primaryByMode: Partial<Record<MapMode, MapData>> = {
+    circulos: bubblesEntry,
+    pontos: pointsEntry,
+    'pontos-status': statusEntry,
+  };
+  const primary = primaryByMode[mode] ?? choroplethEntry;
+  const others = [choroplethEntry, bubblesEntry, pointsEntry, statusEntry];
+  return [
+    primary,
+    ...others.filter((entry) => {
+      return entry !== primary;
+    }),
+  ];
 };

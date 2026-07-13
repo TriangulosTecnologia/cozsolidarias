@@ -60,6 +60,18 @@ export const DOT_DENSITY_COLOR = '#E4572E';
 export const BUBBLES_COLOR = DOT_DENSITY_COLOR;
 
 /**
+ * Fill opacity of the proportional circles in `circulos` mode. Mirrors geovis'
+ * `PROPORTIONAL_CIRCLES_DEFAULTS.circleOpacity` but is declared explicitly on
+ * the override layer's paint so the value is pinned in app code — the legend's
+ * circle swatches (repainted via CSS in `MapaPlayground`) reuse this same
+ * constant, so the legend and the map circles can never drift apart.
+ *
+ * @example
+ * paint: { circleColor: BUBBLES_COLOR, circleOpacity: BUBBLES_CIRCLE_OPACITY }
+ */
+export const BUBBLES_CIRCLE_OPACITY = 0.72;
+
+/**
  * Resolves the choropleth band color for a kitchen count, mirroring the
  * `threshold` scale that paints the fill (`THRESHOLDS`/`COLORS`). Municípios with
  * no kitchens (`<= 0`) resolve to `WITHOUT_KITCHEN_COLOR` — the same flat fill the
@@ -732,17 +744,18 @@ export const buildDotDensityLegend = (): LegendSpec => {
 };
 
 /**
- * The município fill's own legend for `pontos` mode — see
+ * The município fill's own legend for the `pontos` and `circulos` modes — see
  * {@link PONTOS_FILL_LEGEND_ID} for why it must stay a SEPARATE id from
  * {@link buildDotDensityLegend}. Deliberately carries no `colorBy` and no
  * `position`: it exists only so the fill layer's `activeLegendId` resolves
- * to a real legend entry (enabling hover tracking) without the adapter
- * ever computing a legend-driven `fill-color` from it — `buildPolygon`
- * falls back to the layer's own explicit `paint.fillColor`
- * (`WITHOUT_KITCHEN_COLOR`) whenever the referenced legend has no
- * `colorBy`. Never rendered in the sidebar (no `position`).
+ * to a real legend entry (enabling hover tracking, and with it the município
+ * hover tooltip) without the adapter ever computing a legend-driven
+ * `fill-color` from it — `buildPolygon` falls back to the layer's own
+ * explicit `paint.fillColor` (`WITHOUT_KITCHEN_COLOR`) whenever the
+ * referenced legend has no `colorBy`. Never rendered in the sidebar (no
+ * `position`).
  *
- * @returns the neutral fill `LegendSpec` for `pontos` mode.
+ * @returns the neutral fill `LegendSpec` for the overlay modes.
  */
 export const buildPontosFillLegend = (): LegendSpec => {
   return {

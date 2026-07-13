@@ -22,6 +22,7 @@ import {
   IVS_RENDA_LEGEND_ID,
 } from './ivsLegends';
 import {
+  BUBBLES_CIRCLE_OPACITY,
   BUBBLES_COLOR,
   buildBubblesLegend,
   buildCadUnicoLegend,
@@ -34,7 +35,6 @@ import {
   buildRateLegend,
   CADUNICO_LEGEND_ID,
   CHOROPLETH_LEGEND_ID,
-  DOT_DENSITY_LEGEND_ID,
   PERCENT_LEGEND_ID,
   PESSOAS_COZINHA_LEGEND_ID,
   POINTS_STATUS_LEGEND_ID,
@@ -48,7 +48,6 @@ import {
   CHOROPLETH_MAP_DATA_ID,
   CHOROPLETH_SOURCE_ID,
   type MapMode,
-  POINTS_MAP_DATA_ID,
   POINTS_SOURCE_ID,
   POINTS_STATUS_MAP_DATA_ID,
   POINTS_STATUS_SOURCE_ID,
@@ -67,56 +66,6 @@ export {
   NAO_HABILITADA_COLOR,
 } from './legendsBuilders';
 export type { MapMode } from './mapDataBuilders';
-
-/**
- * The plain-points layer for `pontos` mode. Renders one circle per cozinha
- * location with uniform color, left at the `dotDensity` resolver's defaults
- * (`circleColor`/`circleRadius`/etc.) — no `paint` override needed since every
- * point looks the same. `hoverTooltip` is a ready-made config (render + style),
- * built by callers via `toHoverTooltip` in `mapaTooltips` — this module only
- * plumbs it onto the layer.
- */
-const buildPointsLayer = (
-  hoverTooltip?: HoverTooltipConfig
-): VisualizationLayer => {
-  return {
-    id: 'cozinhas-pts',
-    sourceId: POINTS_SOURCE_ID,
-    geometry: 'point',
-    mapDataId: POINTS_MAP_DATA_ID,
-    activeLegendId: DOT_DENSITY_LEGEND_ID,
-    hoverTooltip,
-  };
-};
-
-/**
- * The status-colored points layer for `pontos-status` mode. `paint` mirrors
- * geovis' `DEFAULT_DOT_DENSITY_PAINT` (radius, stroke) so these points look
- * identical to the `pontos` ones, but deliberately omits `circleColor`: the
- * adapter resolves a point's color from explicit paint FIRST
- * (`resolveCircleColor`), only falling back to the `activeLegendId`'s
- * categorical `match` expression (over the joined `situacao` feature-state)
- * when the paint has none. This only holds because `pontos-status` sets no
- * `mapType` (see {@link MAP_TYPE_BY_MODE}) — the `dotDensity` resolver would
- * merge its own `circleColor` into this paint and flatten every point.
- */
-const buildPointsStatusLayer = (
-  hoverTooltip?: HoverTooltipConfig
-): VisualizationLayer => {
-  return {
-    id: 'cozinhas-status-pts',
-    sourceId: POINTS_STATUS_SOURCE_ID,
-    geometry: 'point',
-    mapDataId: POINTS_STATUS_MAP_DATA_ID,
-    activeLegendId: POINTS_STATUS_LEGEND_ID,
-    paint: {
-      circleRadius: 2.4,
-      circleStrokeColor: '#FAF9F7',
-      circleStrokeWidth: 0.5,
-    },
-    hoverTooltip,
-  };
-};
 
 /**
  * Radius range (px) for the proportional circles. geovis' own default is
@@ -146,29 +95,31 @@ const BUBBLES_RADIUS_RANGE: [number, number] = [4, 38];
  *   proportional-ceiling path (`usesProportionalCeiling` requires it); drop it
  *   and `scaleMaxValue` is ignored and sizing falls back to legend thresholds.
  *
- * The hover tooltip is attached HERE (not on the fill) in `circulos` mode so
- * hovering fires from the circles themselves. The circle features resolve
- * their ids from `codarea` — geovis derives the source's `promoteId` from the
- * bubbles `mapData` entry's `joinKey` (`resolvePromoteIdForSource`) — so the
- * tooltip callback's `info.featureId` → município lookup works unchanged.
- *
  * `sizeBy.transform: 'sqrt'` is also what makes circles render at all: it
  * puts the resolver on the `scaleMaxValue` proportional-ceiling path
  * (`usesProportionalCeiling`); without it every circle silently paints at
  * `zeroRadiusPx`. Dropping `paint.circleColor` altogether would similarly
  * leave circles with an undefined (opaque black) fill — `PROPORTIONAL_CIRCLES_DEFAULTS`
- * only covers opacity/stroke, never a color.
+ * only covers opacity/stroke, never a color. `circleOpacity` matches the
+ * resolver's own default (0.72) but is pinned here via
+ * {@link BUBBLES_CIRCLE_OPACITY} so the legend swatches (repainted in
+ * `MapaPlayground` from the same constant) can never drift from the map.
+ *
+ * No `hoverTooltip` here: geovis only fires hover on POLYGON layers with an
+ * `activeLegendId` (`useMapHover`), so a tooltip on this point layer would
+ * never render — the `circulos` tooltip lives on the município fill instead
+ * (see {@link buildFillLayer}).
  */
-const buildBubblesOverrideLayer = (
-  hoverTooltip?: HoverTooltipConfig
-): VisualizationLayer => {
+const buildBubblesOverrideLayer = (): VisualizationLayer => {
   return {
     id: 'cozinhas-bolhas-overrides',
     sourceId: BUBBLES_SOURCE_ID,
     geometry: 'point',
     sizeBy: { range: BUBBLES_RADIUS_RANGE, transform: 'sqrt' },
-    paint: { circleColor: BUBBLES_COLOR },
-    hoverTooltip,
+    paint: {
+      circleColor: BUBBLES_COLOR,
+      circleOpacity: BUBBLES_CIRCLE_OPACITY,
+    },
   };
 };
 
@@ -208,7 +159,6 @@ const SOURCES: GeoJSONSource[] = [
  */
 const LEGEND_BUILDER_BY_MODE: Partial<Record<MapMode, () => LegendSpec>> = {
   'pontos-status': buildPointsStatusLegend,
-  circulos: buildBubblesLegend,
   'coropletico-taxa': buildRateLegend,
   'coropletico-percentual': buildPercentLegend,
   'coropletico-cadunico': buildCadUnicoLegend,
@@ -228,15 +178,20 @@ const LEGEND_BUILDER_BY_MODE: Partial<Record<MapMode, () => LegendSpec>> = {
 };
 
 /**
- * Builds legends for the given mode via `LEGEND_BUILDER_BY_MODE`. `pontos` is
- * the one exception carrying two: the visible `buildDotDensityLegend` (has
- * `colorBy` + `position`) and the invisible `buildPontosFillLegend` (no
- * `colorBy`, no `position`) — see `PONTOS_FILL_LEGEND_ID` for why the fill
- * needs its own, uncolored legend entry instead of sharing the points' one.
+ * Builds legends for the given mode via `LEGEND_BUILDER_BY_MODE`. `pontos` and
+ * `circulos` carry two: their visible legend (`buildDotDensityLegend` /
+ * `buildBubblesLegend`, both with a `position`) plus the invisible
+ * `buildPontosFillLegend` (no `colorBy`, no `position`) — the fill references
+ * it as `activeLegendId` purely so geovis hover-tracks the fill (enabling the
+ * município tooltip) without the legend ever painting it; see
+ * `PONTOS_FILL_LEGEND_ID` for why the fill needs its own, uncolored entry.
  */
 const buildLegends = (mode: MapMode): LegendSpec[] => {
   if (mode === 'pontos') {
     return [buildDotDensityLegend(), buildPontosFillLegend()];
+  }
+  if (mode === 'circulos') {
+    return [buildBubblesLegend(), buildPontosFillLegend()];
   }
   const build = LEGEND_BUILDER_BY_MODE[mode] ?? buildChoroplethLegend;
   return [build()];
@@ -247,8 +202,11 @@ const buildLegends = (mode: MapMode): LegendSpec[] => {
  * legend so the adapter drives data-driven paint; overlay modes resolve to a
  * legend with no `colorBy` (rendering nothing, existing only so hover
  * tracking has a real legend to reference), while the adapter falls back to
- * the layer's own explicit `fillColor` for paint. `pontos` cannot reuse
- * `DOT_DENSITY_LEGEND_ID` here — see `PONTOS_FILL_LEGEND_ID`.
+ * the layer's own explicit `fillColor` for paint. `pontos` and `circulos`
+ * cannot reuse their visible legends here — see `PONTOS_FILL_LEGEND_ID`.
+ * `pontos-status` is the one overlay whose legend DOES sit on the fill: its
+ * categorical `match` reads the município feature-state, which the mode never
+ * feeds, so every polygon falls through to the legend's grey `defaultColor`.
  */
 const FILL_LEGEND_ID_BY_MODE: { [key in MapMode]: string | undefined } = {
   coropletico: CHOROPLETH_LEGEND_ID,
@@ -262,23 +220,22 @@ const FILL_LEGEND_ID_BY_MODE: { [key in MapMode]: string | undefined } = {
   'coropletico-ivs-renda-trabalho': IVS_RENDA_LEGEND_ID,
   pontos: PONTOS_FILL_LEGEND_ID,
   'pontos-status': POINTS_STATUS_LEGEND_ID,
-  circulos: undefined,
+  circulos: PONTOS_FILL_LEGEND_ID,
 };
 
 /**
- * The município fill layer — always present so the hover tooltip (which tracks
- * layers with an `activeLegendId`) works in choropleth modes.
+ * The município fill layer — always present, and the ONLY layer carrying a
+ * `hoverTooltip`: geovis fires hover exclusively on polygon layers with an
+ * `activeLegendId` (`useMapHover`), so every mode's tooltip — including the
+ * overlay modes — renders from the hovered município here. Point layers never
+ * fire hover, which is why none of them declare a tooltip.
  *
  * In choropleth modes (`coropletico*`) the fill declares the matching legend
  * id so the adapter resolves its data-driven paint. In overlay modes
- * (`pontos`, `pontos-status`, `circulos`) `activeLegendId` is `undefined` —
- * the adapter falls back to `fillColor: WITHOUT_KITCHEN_COLOR`, keeping the
- * map background neutral without rendering a choropleth legend.
- *
- * In `circulos` mode the tooltip moves to the overlay layer (see
- * `buildBubblesOverrideLayer`), so the fill deliberately drops its
- * `hoverTooltip` there — hovering a município without touching a circle shows
- * nothing, which is the intent: the circles are the data in that mode.
+ * (`pontos`, `pontos-status`, `circulos`) the referenced legend paints
+ * nothing (no `colorBy`, or a categorical over never-fed feature-state) — the
+ * adapter falls back to `fillColor: WITHOUT_KITCHEN_COLOR`, keeping the map
+ * background neutral while hover tracking (and the tooltip) still works.
  */
 const buildFillLayer = (
   mode: MapMode,
@@ -295,7 +252,7 @@ const buildFillLayer = (
       lineColor: '#FAF9F7',
       fillColor: WITHOUT_KITCHEN_COLOR,
     },
-    hoverTooltip: mode === 'circulos' ? undefined : hoverTooltip,
+    hoverTooltip,
   };
 };
 
@@ -340,17 +297,19 @@ const MAP_TYPE_BY_MODE: { [key in MapMode]: MapType | undefined } = {
  * `-renda-trabalho` (read from `ivsByCity`), and nothing in the overlay modes
  * (`pontos`, `pontos-status`, `circulos`).
  *
- * Invariants: the município fill layer is always present; the points overlay
- * exists only in `pontos` mode; the status points overlay only in
- * `pontos-status` mode; the circles override only in `circulos` mode, which is
- * also the only mode carrying `scaleMaxValue`.
+ * Invariants: the município fill layer is always present; the `pontos` points
+ * layer is auto-generated by geovis' `dotDensity` resolver (no hand-authored
+ * layer — the resolver's defaults are exactly the look we want); the status
+ * points overlay exists only in `pontos-status` mode; the circles override
+ * only in `circulos` mode, which is also the only mode carrying
+ * `scaleMaxValue`.
  *
  * @returns the spec consumed by `<GeovisWorkspace>`.
  *
- * `fillHoverTooltip`/`pontosHoverTooltip`/`pontosStatusHoverTooltip` are
- * ready-made `HoverTooltipConfig` objects (render + shared card style) built
- * by callers via `toHoverTooltip` in `mapaTooltips` — this module only plumbs
- * them onto the matching layer, it never constructs tooltip style itself.
+ * `fillHoverTooltip` is a ready-made `HoverTooltipConfig` (render + shared
+ * card style) built by callers via `toHoverTooltip` in `mapaTooltips` — this
+ * module only plumbs it onto the fill layer (the single hover-tracked layer,
+ * see {@link buildFillLayer}), it never constructs tooltip style itself.
  *
  * @example
  * const spec = buildSpec({ byCity, mode: 'circulos', fillHoverTooltip: toHoverTooltip(renderTooltip) });
@@ -364,8 +323,6 @@ export const buildSpec = (
     fillHoverTooltip,
     cozinhas,
     cozinhasStatus,
-    pontosHoverTooltip,
-    pontosStatusHoverTooltip,
     ivsByCity,
   }: {
     byCity: kitchenRateByCity[];
@@ -373,14 +330,11 @@ export const buildSpec = (
     fillHoverTooltip?: HoverTooltipConfig;
     cozinhas?: CozinhasFeatureCollection;
     cozinhasStatus?: CozinhasStatusFeatureCollection;
-    pontosHoverTooltip?: HoverTooltipConfig;
-    pontosStatusHoverTooltip?: HoverTooltipConfig;
     ivsByCity?: MunicipioIvs[];
   } = {} as {
     byCity: kitchenRateByCity[];
   }
 ): VisualizationSpec => {
-  const showPoints = mode === 'pontos';
   const showPointsStatus = mode === 'pontos-status';
   const showBubbles = mode === 'circulos';
 
@@ -411,11 +365,31 @@ export const buildSpec = (
     legends: buildLegends(mode),
     layers: [
       buildFillLayer(mode, fillHoverTooltip),
-      ...(showPoints ? [buildPointsLayer(pontosHoverTooltip)] : []),
+      // The status-colored points. `paint` mirrors geovis'
+      // `DEFAULT_DOT_DENSITY_PAINT` (radius, stroke) so these points look
+      // identical to the `pontos` ones, but deliberately omits `circleColor`:
+      // the adapter resolves a point's color from explicit paint FIRST
+      // (`resolveCircleColor`), only falling back to the `activeLegendId`'s
+      // categorical `match` expression (over the joined `situacao`
+      // feature-state) when the paint has none. This only holds because
+      // `pontos-status` sets no `mapType` (see MAP_TYPE_BY_MODE).
       ...(showPointsStatus
-        ? [buildPointsStatusLayer(pontosStatusHoverTooltip)]
+        ? [
+            {
+              id: 'cozinhas-status-pts',
+              sourceId: POINTS_STATUS_SOURCE_ID,
+              geometry: 'point',
+              mapDataId: POINTS_STATUS_MAP_DATA_ID,
+              activeLegendId: POINTS_STATUS_LEGEND_ID,
+              paint: {
+                circleRadius: 2.4,
+                circleStrokeColor: '#FAF9F7',
+                circleStrokeWidth: 0.5,
+              },
+            } satisfies VisualizationLayer,
+          ]
         : []),
-      ...(showBubbles ? [buildBubblesOverrideLayer(fillHoverTooltip)] : []),
+      ...(showBubbles ? [buildBubblesOverrideLayer()] : []),
     ],
     ...(showBubbles ? { scaleMaxValue: maxQuantidade } : {}),
   };

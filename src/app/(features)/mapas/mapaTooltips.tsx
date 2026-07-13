@@ -4,7 +4,7 @@ import { Box, Text } from '@chakra-ui/react';
 import type { HoverTooltipConfig } from '@ttoss/geovis';
 import type * as React from 'react';
 
-import type { CozinhaSituacao, kitchenRateByCity } from '@/data-gateway/schema';
+import type { kitchenRateByCity } from '@/data-gateway/schema';
 
 import {
   colorForCadUnico,
@@ -12,7 +12,6 @@ import {
   colorForPercentual,
   colorForPessoasPorCozinha,
   colorForQuantidade,
-  colorForSituacao,
   colorForTaxa,
   ivsFaixaLabel,
 } from './geovisSpec';
@@ -38,8 +37,9 @@ const TOOLTIP_STYLE: NonNullable<HoverTooltipConfig['style']> = {
 /**
  * Wraps a hover-tooltip render callback into the full spec-driven
  * `HoverTooltip` config (render + shared card style), or `undefined` when no
- * callback is given — the single place layer builders in `geovisSpec` reach
- * for to attach a tooltip, so none of them construct `style` themselves.
+ * callback is given — the single origin of every tooltip config, so
+ * `geovisSpec` only plumbs the ready-made config onto the fill layer (the one
+ * hover-tracked layer) and never constructs `style` itself.
  *
  * @param render tooltip content renderer, or `undefined` to attach nothing.
  * @returns the `HoverTooltipConfig`, or `undefined`.
@@ -163,24 +163,6 @@ export const renderCountTooltip = ({
       primary={
         quantity === 0 ? 'Sem cozinha registrada' : formatCozinhas(quantity)
       }
-    />
-  );
-};
-
-/** Status-mode tooltip: nome da cozinha + swatch da situação + situação. */
-export const renderStatusTooltip = ({
-  code,
-  register,
-}: {
-  code: string;
-  register?: { nome: string; situacao: CozinhaSituacao };
-}) => {
-  const situacao = register?.situacao ?? null;
-  return (
-    <TooltipCard
-      name={register?.nome ?? `Cozinha ${code}`}
-      swatchColor={colorForSituacao(situacao)}
-      primary={situacao ?? 'Situação desconhecida'}
     />
   );
 };

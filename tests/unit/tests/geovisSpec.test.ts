@@ -11,6 +11,7 @@ import {
   ivsFaixaLabel,
 } from 'src/app/(features)/mapas/geovisSpec';
 import {
+  BUBBLES_CIRCLE_OPACITY,
   BUBBLES_COLOR,
   DOT_DENSITY_COLOR,
 } from 'src/app/(features)/mapas/legendsBuilders';
@@ -434,7 +435,7 @@ describe('buildSpec', () => {
     expect(mapDataById(spec, 'cozinhas-por-municipio')?.data).toEqual([]);
   });
 
-  test('pontos configures dotDensity mapType, the points entry leads mapData, and the pontos layer is present', () => {
+  test('pontos configures dotDensity mapType and leaves the point layer to the resolver', () => {
     const spec = buildSpec({
       byCity: BY_CITY,
       mode: 'pontos',
@@ -443,7 +444,9 @@ describe('buildSpec', () => {
 
     expect(spec.mapType).toBe('dotDensity');
     expect(spec.mapData?.[0]?.mapDataId).toBe('cozinhas-pontos');
-    expect(layerIds(spec)).toContain('cozinhas-pts');
+    // No hand-authored point layer: geovis' dotDensity resolver auto-generates
+    // it against mapData[0]'s source, with exactly the default paint we want.
+    expect(layerIds(spec)).toEqual(['municipios-br-fill']);
   });
 
   test('pontos mapData joins on codigo and carries the kitchen features', () => {
@@ -499,6 +502,35 @@ describe('buildSpec', () => {
       { geometryId: '111', value: 5 },
       { geometryId: '222', value: 2 },
     ]);
+  });
+
+  test('every mode ships every mapData join, active mode first, so all sources promote their joinKey at first mount', () => {
+    // Regression: geovis resolves a source's promoteId from the mapData entry
+    // present when the source is FIRST added (initial mode: coropletico).
+    // Missing entries there meant no promoted feature ids — the status points
+    // all painted the legend's grey defaultColor instead of their situação
+    // color, and circles once rendered at zero radius for the same reason.
+    const allEntries = [
+      'cozinhas-por-municipio',
+      'cozinhas-bolhas-data',
+      'cozinhas-pontos',
+      'cozinhas-pontos-status',
+    ];
+    const modes = [
+      { mode: 'coropletico', first: 'cozinhas-por-municipio' },
+      { mode: 'pontos', first: 'cozinhas-pontos' },
+      { mode: 'pontos-status', first: 'cozinhas-pontos-status' },
+      { mode: 'circulos', first: 'cozinhas-bolhas-data' },
+    ] as const;
+
+    for (const { mode, first } of modes) {
+      const spec = buildSpec({ byCity: BY_CITY, mode, cozinhas: COZINHAS });
+      const ids = (spec.mapData ?? []).map((entry) => {
+        return entry.mapDataId;
+      });
+      expect(ids[0]).toBe(first);
+      expect([...ids].sort()).toEqual([...allEntries].sort());
+    }
   });
 
   test('pontos-status sets no mapType, joins situacao rows first, positions the status legend', () => {
@@ -576,6 +608,9 @@ describe('buildSpec', () => {
       return layer.id === 'cozinhas-bolhas-overrides';
     });
     expect(overlay?.paint?.circleColor).toBe(BUBBLES_COLOR);
+    // Circle opacity is pinned on the layer so the legend swatches (faded via
+    // CSS from the same constant) always match the map circles.
+    expect(overlay?.paint?.circleOpacity).toBe(BUBBLES_CIRCLE_OPACITY);
 
     // The legend carries its own categorical colorBy in that same orange so
     // geovis' merge can't inject the auto-generated blue Jenks bands.
@@ -584,6 +619,40 @@ describe('buildSpec', () => {
     });
     expect(legend?.colorBy?.type).toBe('categorical');
     expect(legend?.colorBy?.defaultColor).toBe(BUBBLES_COLOR);
+  });
+
+  test('circulos hover-tracks the fill and carries the only tooltip there', () => {
+    const hoverTooltip = {
+      render: () => {
+        return null;
+      },
+    };
+    const spec = buildSpec({
+      byCity: BY_CITY,
+      mode: 'circulos',
+      fillHoverTooltip: hoverTooltip,
+    });
+
+    // geovis only fires hover on polygon layers with an activeLegendId, so
+    // the fill references the neutral (colorBy-less, position-less) legend —
+    // enabling the município tooltip without painting the fill.
+    const fill = spec.layers.find((layer) => {
+      return layer.id === 'municipios-br-fill';
+    });
+    expect(fill?.activeLegendId).toBe('legenda-cozinhas-pontos-fill');
+    expect(fill?.hoverTooltip).toBe(hoverTooltip);
+
+    const fillLegend = spec.legends?.find((legend) => {
+      return legend.id === 'legenda-cozinhas-pontos-fill';
+    });
+    expect(fillLegend?.colorBy).toBeUndefined();
+    expect(fillLegend?.position).toBeUndefined();
+
+    // Point layers never fire hover — no tooltip is attached to the overlay.
+    const overlay = spec.layers.find((layer) => {
+      return layer.id === 'cozinhas-bolhas-overrides';
+    });
+    expect(overlay?.hoverTooltip).toBeUndefined();
   });
 
   test('defaults to coropletico when no mode is given', () => {

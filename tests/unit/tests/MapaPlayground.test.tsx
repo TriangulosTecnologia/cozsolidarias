@@ -231,20 +231,25 @@ describe('MapaPlayground — visualization toggle', () => {
       'cozinhas-bolhas'
     );
 
-    // Points mode adds the per-cozinha points layer.
+    // Points mode keeps only the fill in the spec (geovis' dotDensity
+    // resolver auto-generates the points layer) and shows the points legend.
     fireEvent.change(screen.getByLabelText('Visualização'), {
       target: { value: 'pontos' },
     });
-    expect(screen.getByTestId('layer-ids')).toHaveTextContent('cozinhas-pts');
+    expect(screen.getByTestId('layer-ids').textContent).toBe(
+      'municipios-br-fill'
+    );
     expect(screen.getByTestId('legend-ids')).toHaveTextContent(
-      'legenda-cozinhas-pontos',
-      { exact: true }
+      'legenda-cozinhas-pontos'
     );
 
-    // Status mode shows the categorical status legend.
+    // Status mode adds the status points layer and its categorical legend.
     fireEvent.change(screen.getByLabelText('Visualização'), {
       target: { value: 'pontos-status' },
     });
+    expect(screen.getByTestId('layer-ids')).toHaveTextContent(
+      'cozinhas-status-pts'
+    );
     expect(screen.getByTestId('legend-ids').textContent).toBe(
       'legenda-cozinhas-status'
     );
@@ -258,8 +263,10 @@ describe('MapaPlayground — visualization toggle', () => {
     expect(screen.getByTestId('layer-ids')).toHaveTextContent(
       'municipios-br-fill'
     );
+    // The bubbles legend renders; the neutral fill legend (no position, no
+    // colorBy) exists only so the fill stays hover-tracked for the tooltip.
     expect(screen.getByTestId('legend-ids').textContent).toBe(
-      'cozinhas-bolhas-data-legend'
+      'cozinhas-bolhas-data-legend,legenda-cozinhas-pontos-fill'
     );
   });
 });

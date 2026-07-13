@@ -3,7 +3,6 @@ import '@testing-library/jest-dom';
 import { screen } from '@testing-library/react';
 import {
   renderFillTooltip,
-  renderStatusTooltip,
   toHoverTooltip,
   TooltipCard,
 } from 'src/app/(features)/mapas/mapaTooltips';
@@ -212,6 +211,45 @@ describe('renderFillTooltip', () => {
     ).toBeNull();
   });
 
+  test.each([
+    'coropletico-taxa',
+    'coropletico-percentual',
+    'coropletico-cadunico',
+    'coropletico-pessoas-cozinha',
+  ] as const)(
+    '%s with no register reads as "Sem cozinha registrada" without a secondary line',
+    (mode) => {
+      renderWithChakra(
+        <>
+          {renderFillTooltip({
+            mode,
+            name: 'Beta',
+            register: undefined,
+            value: null,
+          })}
+        </>
+      );
+
+      expect(screen.getByText('Sem cozinha registrada')).toBeInTheDocument();
+      expect(screen.queryByText(/·/)).not.toBeInTheDocument();
+    }
+  );
+
+  test('a single kitchen is written in the singular', () => {
+    renderWithChakra(
+      <>
+        {renderFillTooltip({
+          mode: 'coropletico',
+          name: 'Gama',
+          register: undefined,
+          value: 1,
+        })}
+      </>
+    );
+
+    expect(screen.getByText('1 cozinha')).toBeInTheDocument();
+  });
+
   test('coropletico keeps the color swatch', () => {
     const { container } = renderWithChakra(
       <>
@@ -228,28 +266,5 @@ describe('renderFillTooltip', () => {
     expect(
       container.querySelector('[data-testid="tooltip-swatch"]')
     ).not.toBeNull();
-  });
-});
-
-describe('renderStatusTooltip', () => {
-  test('renders the cozinha name and its status', () => {
-    renderWithChakra(
-      <>
-        {renderStatusTooltip({
-          code: 'CS1',
-          register: { nome: 'Cozinha A', situacao: 'Habilitada' },
-        })}
-      </>
-    );
-
-    expect(screen.getByText('Cozinha A')).toBeInTheDocument();
-    expect(screen.getByText('Habilitada')).toBeInTheDocument();
-  });
-
-  test('falls back to the code and "Situação desconhecida" when unregistered', () => {
-    renderWithChakra(<>{renderStatusTooltip({ code: 'CS9' })}</>);
-
-    expect(screen.getByText('Cozinha CS9')).toBeInTheDocument();
-    expect(screen.getByText('Situação desconhecida')).toBeInTheDocument();
   });
 });
