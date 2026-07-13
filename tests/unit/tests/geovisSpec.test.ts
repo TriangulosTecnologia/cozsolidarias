@@ -10,6 +10,10 @@ import {
   colorForTaxa,
   ivsFaixaLabel,
 } from 'src/app/(features)/mapas/geovisSpec';
+import {
+  BUBBLES_COLOR,
+  DOT_DENSITY_COLOR,
+} from 'src/app/(features)/mapas/legendsBuilders';
 import type {
   CozinhasFeatureCollection,
   CozinhasStatusFeatureCollection,
@@ -495,7 +499,7 @@ describe('buildSpec', () => {
     ]);
   });
 
-  test('pontos-status configures dotDensity mapType, joins situacao rows first, positions the status legend', () => {
+  test('pontos-status sets no mapType, joins situacao rows first, positions the status legend', () => {
     const status: CozinhasStatusFeatureCollection = {
       type: 'FeatureCollection',
       features: [
@@ -514,7 +518,7 @@ describe('buildSpec', () => {
           properties: {
             codigo: 'CS2',
             nome: 'Cozinha B',
-            situacao: 'Mapeada',
+            situacao: 'Não Habilitada',
           },
         },
       ],
@@ -525,14 +529,17 @@ describe('buildSpec', () => {
       cozinhasStatus: status,
     });
 
-    expect(spec.mapType).toBe('dotDensity');
+    // No mapType: the dotDensity resolver would merge its default paint —
+    // including a flat circleColor — into the status layer, and explicit
+    // paint wins over the legend's categorical expression in the adapter.
+    expect(spec.mapType).toBeUndefined();
 
     // The status entry leads mapData: geovis' mapType resolvers pick their
     // target source from mapData[0] (see buildMapData).
     expect(spec.mapData?.[0]?.mapDataId).toBe('cozinhas-pontos-status');
     expect(spec.mapData?.[0]?.data).toEqual([
       { geometryId: 'CS1', value: 'Habilitada' },
-      { geometryId: 'CS2', value: 'Mapeada' },
+      { geometryId: 'CS2', value: 'Não Habilitada' },
     ]);
 
     const statusLegend = spec.legends?.find((legend) => {
@@ -540,6 +547,15 @@ describe('buildSpec', () => {
     });
     expect(statusLegend?.position).toBe('bottom-right');
     expect(statusLegend?.colorBy?.type).toBe('categorical');
+
+    // The layer keeps the dot look but leaves circleColor for the status
+    // legend's match expression — an explicit color would flatten it.
+    const statusLayer = spec.layers.find((layer) => {
+      return layer.id === 'cozinhas-status-pts';
+    });
+    expect(statusLayer?.paint?.circleColor).toBeUndefined();
+    expect(statusLayer?.paint?.circleRadius).toBe(2.4);
+    expect(statusLayer?.activeLegendId).toBe('legenda-cozinhas-status');
   });
 
   test('circulos renders the proportional-circle overlay', () => {
@@ -547,6 +563,25 @@ describe('buildSpec', () => {
 
     expect(layerIds(spec)).toContain('cozinhas-bolhas-overrides');
     expect(layerIds(spec)).not.toContain('cozinhas-pts');
+  });
+
+  test('circulos paints circles and legend swatch with the same default orange', () => {
+    const spec = buildSpec({ byCity: BY_CITY, mode: 'circulos' });
+
+    // Circles reuse the default orange shared with the point modes.
+    expect(BUBBLES_COLOR).toBe(DOT_DENSITY_COLOR);
+    const overlay = spec.layers.find((layer) => {
+      return layer.id === 'cozinhas-bolhas-overrides';
+    });
+    expect(overlay?.paint?.circleColor).toBe(BUBBLES_COLOR);
+
+    // The legend carries its own categorical colorBy in that same orange so
+    // geovis' merge can't inject the auto-generated blue Jenks bands.
+    const legend = spec.legends?.find((entry) => {
+      return entry.id === 'cozinhas-bolhas-data-legend';
+    });
+    expect(legend?.colorBy?.type).toBe('categorical');
+    expect(legend?.colorBy?.defaultColor).toBe(BUBBLES_COLOR);
   });
 
   test('defaults to coropletico when no mode is given', () => {

@@ -22,6 +22,7 @@ import { ThemeUIProvider } from 'theme-ui';
 import type { CozinhaSituacao } from '@/data-gateway/schema';
 
 import { buildSpec, type MapMode } from './geovisSpec';
+import { BUBBLES_COLOR } from './legendsBuilders';
 import {
   renderFillTooltip,
   renderStatusTooltip,
@@ -155,6 +156,28 @@ const MAP_CONTAINER_CSS: Record<string, unknown> = {
     },
 };
 
+/**
+ * Recolors the circle-size reference rows of the `circulos` legend to the same
+ * orange the map circles paint. geovis' `CirclesLegendItems` hardcodes the
+ * swatch `backgroundColor` (`#6b7280` gray) with no spec-level override, so
+ * the app repaints it from outside; `!important` is required to beat the
+ * inline style. Applied ONLY in `circulos` mode (see `containerCss`): the
+ * count choropleth's legend shares the exact same `aria-label` title, and a
+ * static rule would repaint its blue band swatches too.
+ */
+const BUBBLES_LEGEND_CIRCLES_CSS: Record<string, unknown> = {
+  '& ul[aria-label="Cozinhas por município"] li > span[aria-hidden="true"]': {
+    backgroundColor: `${BUBBLES_COLOR} !important`,
+  },
+};
+
+/** Map-container CSS for the active mode (see BUBBLES_LEGEND_CIRCLES_CSS). */
+const resolveContainerCss = (mode: MapMode): Record<string, unknown> => {
+  return mode === 'circulos'
+    ? { ...MAP_CONTAINER_CSS, ...BUBBLES_LEGEND_CIRCLES_CSS }
+    : MAP_CONTAINER_CSS;
+};
+
 const MapaPlayground = () => {
   const {
     mounted,
@@ -256,6 +279,7 @@ const MapaPlayground = () => {
     estadosGroup,
     municipiosGroup,
   ]);
+  const containerCss = resolveContainerCss(mode);
   const spec = React.useMemo(() => {
     const pts = toggledSpec.layers.filter((l) => {
       return l.geometry === 'point';
@@ -272,7 +296,7 @@ const MapaPlayground = () => {
       h="calc(100vh - 72px)"
       w="100%"
       bg="ivory.200"
-      css={MAP_CONTAINER_CSS}
+      css={containerCss}
     >
       {mounted ? (
         <I18nProvider locale="pt-BR">
