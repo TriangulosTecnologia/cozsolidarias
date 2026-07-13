@@ -118,6 +118,55 @@ const ASSENTAMENTOS_SOURCE: GeoJSONSource = {
 };
 
 /**
+ * A near-white land backdrop for the assentamentos mode: a fill of every state
+ * polygon, laid over the basemap so the busy tiles (roads, protected areas,
+ * rivers) don't compete with the small settlement polygons. Water stays the
+ * basemap's, since it's outside the state polygons. Gated to this mode only.
+ */
+const ESTADOS_SOURCE_ID = 'estados-fill';
+
+const ESTADOS_SOURCE: GeoJSONSource = {
+  id: ESTADOS_SOURCE_ID,
+  type: 'geojson',
+  data: '/geo/estados.json',
+  attribution: '© IBGE',
+};
+
+/** The near-white state backdrop layer (bottom of the assentamentos overlay). */
+const buildEstadosFillLayer = (): VisualizationLayer => {
+  return {
+    id: 'estados-fill',
+    sourceId: ESTADOS_SOURCE_ID,
+    geometry: 'polygon',
+    paint: {
+      // Warm near-white (brand ivory) at near-full opacity: masks the basemap
+      // clutter over land while leaving a whisper of it. The state outline is
+      // drawn by the `estados-boundary` group on top.
+      fillColor: '#FAF9F7',
+      fillOpacity: 0.92,
+    },
+  };
+};
+
+/**
+ * The settlement outline layer — a dedicated `line` over the assentamentos
+ * source, thicker than a fill's 1px edge, so even tiny polygons read as crisp
+ * shapes at the Southeast zoom. Paired with the filled polygon below it.
+ */
+const buildAssentamentosOutlineLayer = (): VisualizationLayer => {
+  return {
+    id: 'assentamentos-outline',
+    sourceId: ASSENTAMENTOS_SOURCE_ID,
+    geometry: 'line',
+    paint: {
+      lineColor: '#241F21',
+      lineWidth: 1.4,
+      lineOpacity: 0.9,
+    },
+  };
+};
+
+/**
  * Maps settlement attributes to categorical `mapData` value rows: `geometryId`
  * is the `cod_imovel` join key, `value` is the human status label the legend's
  * categorical `mapping` (and the tooltip) color by.
@@ -134,10 +183,11 @@ const toAssentamentoStatusRows = (
 };
 
 /**
- * The assentamentos fill layer. Like the município fill, it carries no static
- * `fillColor` — the color comes from the categorical join (`mapDataId` +
- * `activeLegendId`). Filled and translucent so the kitchen points overlaid on
- * top stay legible, with a dark contour outlining each perimeter.
+ * The assentamentos fill layer. Carries no static `fillColor` — the color comes
+ * from the categorical status join (`mapDataId` + `activeLegendId`). Fairly
+ * opaque so each settlement reads as a solid status-colored patch over the
+ * near-white land backdrop; the crisp border comes from the companion
+ * {@link buildAssentamentosOutlineLayer}, and the kitchen points sit on top.
  */
 const buildAssentamentosLayer = (
   hoverTooltipRender?: HoverTooltipConfig['render']
@@ -149,10 +199,7 @@ const buildAssentamentosLayer = (
     mapDataId: ASSENTAMENTOS_MAP_DATA_ID,
     activeLegendId: ASSENTAMENTO_LEGEND_ID,
     paint: {
-      // Lighter fill so the kitchen points overlaid on top stay legible; the
-      // dark contour still outlines each perimeter.
-      fillOpacity: 0.3,
-      lineColor: '#241F21',
+      fillOpacity: 0.7,
     },
     ...(hoverTooltipRender
       ? { hoverTooltip: { render: hoverTooltipRender, style: TOOLTIP_STYLE } }
@@ -427,7 +474,11 @@ const buildOverlayLayers = ({
     layers.push(buildBubblesLayer(maxQuantidade));
   }
   if (mode === 'assentamentos') {
+    // Bottom → top: near-white land backdrop, filled polygons, crisp outline,
+    // then the kitchen points.
+    layers.push(buildEstadosFillLayer());
     layers.push(buildAssentamentosLayer(overlays.assentamentos?.hoverRender));
+    layers.push(buildAssentamentosOutlineLayer());
     layers.push(POINTS_LAYER);
   }
   return layers;
@@ -531,9 +582,12 @@ export const buildSpec = (
     // the mode is active; every other (Brazil-wide) mode keeps the national view.
     view: resolveView(showAssentamentos),
     basemap: { labels: false },
-    // The multi-MB assentamentos geometry is added only in its mode, so other
-    // views never fetch it; the adapter's source sync adds/removes it on switch.
-    sources: showAssentamentos ? [...SOURCES, ASSENTAMENTOS_SOURCE] : SOURCES,
+    // The assentamentos geometry and the state backdrop are added only in this
+    // mode, so other views never fetch them; the adapter's source sync
+    // adds/removes them on switch.
+    sources: showAssentamentos
+      ? [...SOURCES, ASSENTAMENTOS_SOURCE, ESTADOS_SOURCE]
+      : SOURCES,
     mapData: buildMapData({
       byCity,
       choroplethRows,

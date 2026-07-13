@@ -495,10 +495,31 @@ describe('buildSpec', () => {
       })
     ).toBe(false);
 
-    // The geometry source is added only in this mode.
+    // Near-white state backdrop under the polygons + a crisp dedicated outline.
+    expect(layerIds(spec)).toContain('estados-fill');
+    expect(layerIds(spec)).toContain('assentamentos-outline');
+
+    // Layer order (bottom → top): backdrop, fill, outline, points.
+    const ids = layerIds(spec);
+    expect(ids.indexOf('estados-fill')).toBeLessThan(
+      ids.indexOf('assentamentos-poly')
+    );
+    expect(ids.indexOf('assentamentos-poly')).toBeLessThan(
+      ids.indexOf('assentamentos-outline')
+    );
+    expect(ids.indexOf('assentamentos-outline')).toBeLessThan(
+      ids.indexOf('cozinhas-pts')
+    );
+
+    // Both mode-gated sources (geometry + backdrop) are added only in this mode.
     expect(
       spec.sources.some((source) => {
         return source.id === 'assentamentos';
+      })
+    ).toBe(true);
+    expect(
+      spec.sources.some((source) => {
+        return source.id === 'estados-fill';
       })
     ).toBe(true);
 
@@ -537,9 +558,10 @@ describe('buildSpec', () => {
     });
 
     expect(layerIds(spec)).not.toContain('assentamentos-poly');
+    expect(layerIds(spec)).not.toContain('estados-fill');
     expect(
       spec.sources.some((source) => {
-        return source.id === 'assentamentos';
+        return source.id === 'assentamentos' || source.id === 'estados-fill';
       })
     ).toBe(false);
     expect(
