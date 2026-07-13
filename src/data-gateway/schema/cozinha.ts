@@ -1,8 +1,9 @@
 /**
  * Canonical GeoJSON shapes for cozinha locations consumed by the app/map.
  *
- * Only the geometry is exposed for now (no feature properties); the contract
- * can grow a typed `properties` shape later without changing consumers.
+ * Plain point features carry `nome` and `codigo` so the map can display
+ * kitchen names in hover tooltips. Status features additionally carry
+ * `situacao` for color coding.
  */
 
 /** A single cozinha location as a GeoJSON Point feature. */
@@ -13,8 +14,12 @@ export type CozinhaLocationFeature = {
     /** GeoJSON order: `[longitude, latitude]`. */
     coordinates: [number, number];
   };
-  /** No attributes exposed yet. */
-  properties: Record<string, never>;
+  properties: {
+    /** Cozinha display name, for tooltips. */
+    nome: string;
+    /** Source registry code; unique per cozinha. */
+    codigo: string;
+  };
 };
 
 /** Collection of cozinha locations, ready to feed a GeoJSON map source. */
@@ -49,4 +54,66 @@ export type CozinhaBubbleFeature = {
 export type CozinhasBubblesFeatureCollection = {
   type: 'FeatureCollection';
   features: CozinhaBubbleFeature[];
+};
+
+/**
+ * Cozinha status categories shown on the status points map. Values match the
+ * source's `Situação` column verbatim; records with any other status
+ * (empty, workflow states not listed) are **dropped** by the transformer.
+ *
+ * @example
+ * COZINHA_SITUACOES.includes('Habilitada'); // → true
+ */
+export const COZINHA_SITUACOES = [
+  'Habilitada',
+  'Não Habilitada',
+  // 'Mapeada',
+  // 'Retirada',
+  // 'Em análise',
+  // 'Homologada para Habilitação',
+  // 'Pendência emitida pelo MDS (Prazo para adequações 15 dias)',
+  // 'Enviada para análise',
+  // 'Homologada para Retirada',
+] as const;
+
+/**
+ * One canonical cozinha status. See {@link COZINHA_SITUACOES} for the
+ * filtering rule.
+ *
+ * @example
+ * const situacao: CozinhaSituacao = 'Habilitada';
+ */
+export type CozinhaSituacao = (typeof COZINHA_SITUACOES)[number];
+
+/**
+ * A cozinha location as a GeoJSON Point feature carrying its status — the
+ * shape served by `/api/cozinhas/status` for the status-colored points map.
+ * `codigo` is unique per cozinha and is the map's join key (promoted to the
+ * feature id), `nome` feeds the hover tooltip, `situacao` drives the point
+ * color.
+ *
+ * @example
+ * feature.properties; // { codigo: 'CS017783', nome: '…', situacao: 'Habilitada' }
+ */
+export type CozinhaStatusFeature = {
+  type: 'Feature';
+  geometry: {
+    type: 'Point';
+    /** GeoJSON order: `[longitude, latitude]`. */
+    coordinates: [number, number];
+  };
+  properties: {
+    /** Source registry code; unique per cozinha, joins map data to the feature. */
+    codigo: string;
+    /** Cozinha display name, for tooltips. */
+    nome: string;
+    /** Canonical status; see {@link COZINHA_SITUACOES}. */
+    situacao: CozinhaSituacao;
+  };
+};
+
+/** Collection of status-carrying locations for the status points map source. */
+export type CozinhasStatusFeatureCollection = {
+  type: 'FeatureCollection';
+  features: CozinhaStatusFeature[];
 };

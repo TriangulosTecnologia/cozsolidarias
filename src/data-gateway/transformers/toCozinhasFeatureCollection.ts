@@ -7,15 +7,16 @@ import type { CozinhasFeatureCollection } from '../schema';
  *
  * Records without coordinates (`latitude`/`longitude` are `null` in the source)
  * are dropped. Coordinates are emitted in GeoJSON order: `[longitude, latitude]`.
+ * Each feature carries `nome` and `codigo` properties for map tooltips.
  *
  * @param sources - Raw records from data-source-static.
  * @returns Canonical {@link CozinhasFeatureCollection}.
  *
  * @example
  * toCozinhasFeatureCollection([
- *   { latitude: -23.0, longitude: -43.3, ... },
+ *   { codigo: 'CS01', nome: 'Cozinha A', latitude: -23.0, longitude: -43.3, ... },
  * ]);
- * // { type: 'FeatureCollection', features: [{ ..., geometry: { coordinates: [-43.3, -23.0] } }] }
+ * // { type: 'FeatureCollection', features: [{ ..., properties: { nome: 'Cozinha A', codigo: 'CS01' } }] }
  */
 export const toCozinhasFeatureCollection = (
   sources: StaticCozinhaSource[]
@@ -38,7 +39,10 @@ export const toCozinhasFeatureCollection = (
           type: 'Point' as const,
           coordinates: [source.longitude, source.latitude] as [number, number],
         },
-        properties: {},
+        properties: {
+          nome: source.nome,
+          codigo: source.codigo,
+        },
       };
     });
 

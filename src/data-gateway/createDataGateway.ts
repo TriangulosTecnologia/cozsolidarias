@@ -4,6 +4,7 @@ import { readStaticPopulacao } from '../data-source-static/readStaticPopulacao';
 import type {
   CozinhasBubblesFeatureCollection,
   CozinhasFeatureCollection,
+  CozinhasStatusFeatureCollection,
   kitchenRateByCity,
 } from './schema';
 import { toCozinhasBubbles } from './transformers/toCozinhasBubbles';
@@ -13,6 +14,7 @@ import {
   type MunicipioAggregate,
   projectComTaxa,
 } from './transformers/toCozinhasPorMunicipio';
+import { toCozinhasStatusFeatureCollection } from './transformers/toCozinhasStatusFeatureCollection';
 
 /** Gateway interface exposing canonical read functions. */
 export type DataGateway = {
@@ -29,6 +31,12 @@ export type DataGateway = {
    * proportional-circle map).
    */
   getCozinhasBubbles: () => Promise<CozinhasBubblesFeatureCollection>;
+  /**
+   * Returns cozinha locations as a GeoJSON FeatureCollection of Points
+   * carrying `codigo`, `nome` and the canonical `situacao` (for the
+   * status-colored points map).
+   */
+  getCozinhasStatus: () => Promise<CozinhasStatusFeatureCollection>;
 };
 
 const KNOWN_SOURCES = ['static'] as const;
@@ -92,6 +100,10 @@ export const createDataGateway = (): DataGateway => {
       },
       getCozinhasBubbles: async () => {
         return toCozinhasBubbles(await getAggregate());
+      },
+      getCozinhasStatus: async () => {
+        const sources = await readStaticCozinhas();
+        return toCozinhasStatusFeatureCollection(sources);
       },
     };
   }

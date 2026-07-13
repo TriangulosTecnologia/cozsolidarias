@@ -36,7 +36,7 @@ export default function RootLayout({
       className={`${inter.variable} ${interTight.variable}`}
     >
       <head />
-      <body>
+      <body suppressHydrationWarning>
         <Providers>{children}</Providers>
       </body>
     </html>

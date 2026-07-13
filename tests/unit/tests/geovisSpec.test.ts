@@ -3,9 +3,14 @@ import {
   buildSpec,
   colorForPercentual,
   colorForQuantidade,
+  colorForSituacao,
   colorForTaxa,
 } from 'src/app/(features)/mapas/geovisSpec';
-import type { kitchenRateByCity } from 'src/data-gateway/schema';
+import type {
+  CozinhasFeatureCollection,
+  CozinhasStatusFeatureCollection,
+  kitchenRateByCity,
+} from 'src/data-gateway/schema';
 
 const BY_CITY: kitchenRateByCity[] = [
   {
@@ -25,6 +30,22 @@ const BY_CITY: kitchenRateByCity[] = [
     percentualDoBrasil: 28.57,
   },
 ];
+
+const COZINHAS: CozinhasFeatureCollection = {
+  type: 'FeatureCollection',
+  features: [
+    {
+      type: 'Feature',
+      geometry: { type: 'Point', coordinates: [-46.6, -23.5] },
+      properties: { nome: 'Cozinha A', codigo: 'CS1' },
+    },
+    {
+      type: 'Feature',
+      geometry: { type: 'Point', coordinates: [-46.7, -23.6] },
+      properties: { nome: 'Cozinha B', codigo: 'CS2' },
+    },
+  ],
+};
 
 /** Finds a `mapData` entry by id in a built spec. */
 const mapDataById = (
@@ -96,6 +117,40 @@ describe('colorForPercentual', () => {
   });
 });
 
+describe('colorForSituacao', () => {
+  test('each canonical status gets its own color, distinct from "sem dado"', () => {
+    expect(colorForSituacao('Habilitada')).not.toBe(colorForSituacao(null));
+    expect(colorForSituacao('Não Habilitada')).not.toBe(colorForSituacao(null));
+    expect(colorForSituacao('Mapeada')).not.toBe(colorForSituacao(null));
+    expect(colorForSituacao('Retirada')).not.toBe(colorForSituacao(null));
+    expect(colorForSituacao('Em análise')).not.toBe(colorForSituacao(null));
+    expect(colorForSituacao('Homologada para Habilitação')).not.toBe(
+      colorForSituacao(null)
+    );
+    expect(
+      colorForSituacao(
+        'Pendência emitida pelo MDS (Prazo para adequações 15 dias)'
+      )
+    ).not.toBe(colorForSituacao(null));
+    expect(colorForSituacao('Enviada para análise')).not.toBe(
+      colorForSituacao(null)
+    );
+    expect(colorForSituacao('Homologada para Retirada')).not.toBe(
+      colorForSituacao(null)
+    );
+  });
+
+  test('distinct statuses get distinct colors', () => {
+    expect(colorForSituacao('Habilitada')).not.toBe(
+      colorForSituacao('Não Habilitada')
+    );
+    expect(colorForSituacao('Mapeada')).not.toBe(colorForSituacao('Retirada'));
+    expect(colorForSituacao('Em análise')).not.toBe(
+      colorForSituacao('Homologada para Habilitação')
+    );
+  });
+});
+
 describe('buildLegendItems', () => {
   test('leads with the "Sem cozinha" swatch', () => {
     expect(buildLegendItems()[0].label).toBe('Sem cozinha');
@@ -104,7 +159,7 @@ describe('buildLegendItems', () => {
 
 describe('buildSpec', () => {
   test('coropletico feeds raw counts and positions the count legend', () => {
-    const spec = buildSpec(BY_CITY, 'coropletico');
+    const spec = buildSpec({ byCity: BY_CITY, mode: 'coropletico' });
 
     expect(mapDataById(spec, 'cozinhas-por-municipio')?.data).toEqual([
       { geometryId: '111', value: 5 },
@@ -122,7 +177,7 @@ describe('buildSpec', () => {
   });
 
   test('coropletico-taxa feeds rates, drops unknown rates, positions the rate legend', () => {
-    const spec = buildSpec(BY_CITY, 'coropletico-taxa');
+    const spec = buildSpec({ byCity: BY_CITY, mode: 'coropletico-taxa' });
 
     // Beta (porCemMil === null) is dropped so it falls back to "sem dado".
     expect(mapDataById(spec, 'cozinhas-por-municipio')?.data).toEqual([
@@ -142,7 +197,7 @@ describe('buildSpec', () => {
   });
 
   test('coropletico-percentual feeds shares and positions the share legend', () => {
-    const spec = buildSpec(BY_CITY, 'coropletico-percentual');
+    const spec = buildSpec({ byCity: BY_CITY, mode: 'coropletico-percentual' });
 
     // Every município is kept (percentualDoBrasil is never null).
     expect(mapDataById(spec, 'cozinhas-por-municipio')?.data).toEqual([
@@ -168,22 +223,87 @@ describe('buildSpec', () => {
     expect(fill?.activeLegendId).toBe('legenda-percentual');
   });
 
-  test('pontos renders the points overlay and feeds the choropleth nothing', () => {
-    const spec = buildSpec(BY_CITY, 'pontos');
+  test('pontos configures dotDensity mapType, the points entry leads mapData, and the pontos layer is present', () => {
+    const spec = buildSpec({
+      byCity: BY_CITY,
+      mode: 'pontos',
+      cozinhas: COZINHAS,
+    });
 
+    expect(spec.mapType).toBe('dotDensity');
+    expect(spec.mapData?.[0]?.mapDataId).toBe('cozinhas-pontos');
     expect(layerIds(spec)).toContain('cozinhas-pts');
-    expect(mapDataById(spec, 'cozinhas-por-municipio')?.data).toEqual([]);
+  });
+
+  test('pontos mapData joins on codigo and carries the kitchen features', () => {
+    const spec = buildSpec({
+      byCity: BY_CITY,
+      mode: 'pontos',
+      cozinhas: COZINHAS,
+    });
+
+    expect(mapDataById(spec, 'cozinhas-pontos')?.data).toEqual([
+      { geometryId: 'CS1', value: null },
+      { geometryId: 'CS2', value: null },
+    ]);
+  });
+
+  test('pontos-status configures dotDensity mapType, joins situacao rows first, positions the status legend', () => {
+    const status: CozinhasStatusFeatureCollection = {
+      type: 'FeatureCollection',
+      features: [
+        {
+          type: 'Feature',
+          geometry: { type: 'Point', coordinates: [-46.6, -23.5] },
+          properties: {
+            codigo: 'CS1',
+            nome: 'Cozinha A',
+            situacao: 'Habilitada',
+          },
+        },
+        {
+          type: 'Feature',
+          geometry: { type: 'Point', coordinates: [-46.7, -23.6] },
+          properties: {
+            codigo: 'CS2',
+            nome: 'Cozinha B',
+            situacao: 'Mapeada',
+          },
+        },
+      ],
+    };
+    const spec = buildSpec({
+      byCity: BY_CITY,
+      mode: 'pontos-status',
+      cozinhasStatus: status,
+    });
+
+    expect(spec.mapType).toBe('dotDensity');
+
+    // The status entry leads mapData: geovis' mapType resolvers pick their
+    // target source from mapData[0] (see buildMapData).
+    expect(spec.mapData?.[0]?.mapDataId).toBe('cozinhas-pontos-status');
+    expect(spec.mapData?.[0]?.data).toEqual([
+      { geometryId: 'CS1', value: 'Habilitada' },
+      { geometryId: 'CS2', value: 'Mapeada' },
+    ]);
+
+    const statusLegend = spec.legends?.find((legend) => {
+      return legend.id === 'legenda-cozinhas-status';
+    });
+    expect(statusLegend?.position).toBe('bottom-right');
+    expect(statusLegend?.colorBy?.type).toBe('categorical');
   });
 
   test('circulos renders the proportional-circle overlay', () => {
-    const spec = buildSpec(BY_CITY, 'circulos');
+    const spec = buildSpec({ byCity: BY_CITY, mode: 'circulos' });
 
-    expect(layerIds(spec)).toContain('cozinhas-bolhas');
+    expect(layerIds(spec)).toContain('cozinhas-bolhas-overrides');
     expect(layerIds(spec)).not.toContain('cozinhas-pts');
   });
 
   test('defaults to coropletico when no mode is given', () => {
-    const spec = buildSpec(BY_CITY);
+    const spec = buildSpec({ byCity: BY_CITY });
 
     const fill = spec.layers.find((layer) => {
       return layer.id === 'municipios-br-fill';

@@ -68,6 +68,22 @@ describe('createDataGateway', () => {
     }
   });
 
+  test('returns status-carrying kitchen points from the default static source', async () => {
+    const gateway = createDataGateway();
+
+    const status = await gateway.getCozinhasStatus();
+
+    expect(status.type).toBe('FeatureCollection');
+    expect(status.features.length).toBeGreaterThan(0);
+
+    for (const feature of status.features) {
+      expect(feature.geometry.type).toBe('Point');
+      expect(typeof feature.properties.codigo).toBe('string');
+      expect(typeof feature.properties.nome).toBe('string');
+      expect(feature.properties.situacao).toBeTruthy();
+    }
+  });
+
   test('throws on an unknown DATA_SOURCE', () => {
     const previous = process.env['DATA_SOURCE'];
     process.env['DATA_SOURCE'] = 'bogus';

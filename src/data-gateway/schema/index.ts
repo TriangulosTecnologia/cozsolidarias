@@ -3,5 +3,9 @@ export type {
   CozinhaLocationFeature,
   CozinhasBubblesFeatureCollection,
   CozinhasFeatureCollection,
+  CozinhaSituacao,
+  CozinhasStatusFeatureCollection,
+  CozinhaStatusFeature,
 } from './cozinha';
+export { COZINHA_SITUACOES } from './cozinha';
 export type { kitchenByCity, kitchenRateByCity } from './kitchenByCity';

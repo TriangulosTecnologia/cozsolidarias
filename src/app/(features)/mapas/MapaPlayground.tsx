@@ -19,15 +19,17 @@ import { BruttalTheme } from '@ttoss/theme/Bruttal';
 import * as React from 'react';
 import { ThemeUIProvider } from 'theme-ui';
 
-import type { kitchenRateByCity } from '@/data-gateway/schema';
+import type { CozinhaSituacao } from '@/data-gateway/schema';
 
+import { buildSpec, type MapMode } from './geovisSpec';
 import {
-  buildSpec,
-  colorForPercentual,
-  colorForQuantidade,
-  colorForTaxa,
-  type MapMode,
-} from './geovisSpec';
+  renderCountTooltip,
+  renderPercentTooltip,
+  renderRateTooltip,
+  renderStatusTooltip,
+  TooltipCard,
+} from './tooltipRenderers';
+import { useMapaData } from './useMapaData';
 
 const estadosGroup = createBoundaryGroup({
   id: 'estados-boundary',
@@ -41,8 +43,11 @@ const municipiosGroup = createBoundaryGroup({
   paint: { lineColor: '#B2B2B2', lineWidth: 0.6 },
 });
 
-/** `{ codigoIbge: nome }` for every Brazilian município, keyed by `codarea`. */
-type NomesPorCodigo = Record<string, string>;
+/** Per-cozinha display data for the status tooltip, keyed by `codigo`. */
+type StatusPorCodigo = Map<string, { nome: string; situacao: CozinhaSituacao }>;
+
+/** Per-cozinha display data for the plain-points tooltip, keyed by `codigo`. */
+type CozinhasPorCodigo = Map<string, { nome: string; codigo: string }>;
 
 /** Id of the left-sidebar menu group that drives the visualization mode. */
 const MODE_MENU_ID = 'visualizacao';
@@ -66,6 +71,10 @@ const LEFT_SIDEBAR: NonNullable<GeovisWorkspaceConfig['leftSidebar']> = {
           label: '% das cozinhas do Brasil no município',
         },
         { value: 'pontos', label: 'Localização das cozinhas' },
+        {
+          value: 'pontos-status',
+          label: 'Localização das cozinhas com status',
+        },
         { value: 'circulos', label: 'Cozinhas por município' },
       ],
     },
@@ -95,288 +104,157 @@ const scopedSidebarTheme = {
   },
 };
 
-/**
- * Workspace config: only the left sidebar (the mode switcher). The legend and
- * data source now live on the map itself, configured via the geovis spec (see
- * `buildLegends` in `geovisSpec.ts`), so no right sidebar is needed.
- */
 const CONFIG: GeovisWorkspaceConfig = {
   leftSidebar: LEFT_SIDEBAR,
 };
 
-/** `"N cozinhas"` / `"1 cozinha"`, com o número no formato pt-BR. */
-const formatCozinhas = (quantidade: number): string => {
-  return `${quantidade.toLocaleString('pt-BR')} ${
-    quantidade === 1 ? 'cozinha' : 'cozinhas'
-  }`;
-};
-
-/** Card do tooltip: título + swatch da faixa + rótulo, com linha auxiliar opcional. */
-const TooltipCard = ({
-  name,
-  swatchColor,
-  primary,
-  secondary,
-}: {
-  name: string;
-  swatchColor: string;
-  primary: string;
-  secondary?: string;
-}) => {
-  return (
-    <Box display="flex" flexDirection="column" gap="1.5" minW="180px">
-      <Text fontWeight="bold" fontSize="sm" lineHeight="tight">
-        {name}
-      </Text>
-      <Box display="flex" alignItems="center" gap="2">
-        <Box
-          w="12px"
-          h="12px"
-          borderRadius="sm"
-          flexShrink={0}
-          bg={swatchColor}
-        />
-        <Text fontSize="xs" color="text.secondary" lineHeight="tight">
-          {primary}
-        </Text>
-      </Box>
-      {secondary === undefined ? null : (
-        <Text fontSize="xs" color="text.secondary" lineHeight="tight">
-          {secondary}
-        </Text>
-      )}
-    </Box>
-  );
-};
-
-/** Rate-mode tooltip: swatch da taxa + "N por 100 mil hab." + linha auxiliar. */
-const renderRateTooltip = ({
-  name,
-  register,
-}: {
-  name: string;
-  register?: kitchenRateByCity;
-}) => {
-  const taxa = register?.porCemMil ?? null;
-  const populacao = register?.populacao ?? null;
-  const quantidade = register?.quantidade ?? 0;
-
-  const primary =
-    taxa === null
-      ? 'Sem cozinha registrada'
-      : `${taxa.toLocaleString('pt-BR', {
-          maximumFractionDigits: 1,
-        })} por 100 mil hab.`;
-
-  const secondary =
-    taxa !== null && populacao !== null
-      ? `${formatCozinhas(quantidade)} · ${populacao.toLocaleString('pt-BR')} hab.`
-      : undefined;
-
-  return (
-    <TooltipCard
-      name={name}
-      swatchColor={colorForTaxa(taxa)}
-      primary={primary}
-      secondary={secondary}
-    />
-  );
-};
-
-/** Count-mode tooltip (modos `coropletico`, `pontos`, `circulos`): swatch + "N cozinhas". */
-const renderCountTooltip = ({
-  name,
-  quantity,
-}: {
-  name: string;
-  quantity: number;
-}) => {
-  return (
-    <TooltipCard
-      name={name}
-      swatchColor={colorForQuantidade(quantity)}
-      primary={
-        quantity === 0 ? 'Sem cozinha registrada' : formatCozinhas(quantity)
-      }
-    />
-  );
-};
-
-/** Share-mode tooltip: swatch da fatia + "X% das cozinhas do Brasil" + linha auxiliar. */
-const renderPercentTooltip = ({
-  name,
-  register,
-}: {
-  name: string;
-  register?: kitchenRateByCity;
-}) => {
-  const percentual = register?.percentualDoBrasil ?? 0;
-  const quantidade = register?.quantidade ?? 0;
-
-  const primary =
-    percentual <= 0
-      ? 'Sem cozinha registrada'
-      : `${percentual.toLocaleString('pt-BR', {
-          maximumFractionDigits: 2,
-        })}% das cozinhas do Brasil`;
-
-  const secondary = percentual > 0 ? formatCozinhas(quantidade) : undefined;
-
-  return (
-    <TooltipCard
-      name={name}
-      swatchColor={colorForPercentual(percentual)}
-      primary={primary}
-      secondary={secondary}
-    />
-  );
+/** CSS overrides applied to the map container. */
+const MAP_CONTAINER_CSS: Record<string, unknown> = {
+  '& > *': {
+    height: '100%',
+    width: '100%',
+    border: 'none',
+    borderRadius: 0,
+  },
+  // geovis' provider auto-renders the active legend with a fixed 10px
+  // inset from the map corner. Nudge it inward so it doesn't crowd the edges.
+  '& div:has(> ul[aria-label="Cozinhas por município"]), & div:has(> ul[aria-label="Localização das cozinhas"]), & div:has(> ul[aria-label="Localização das cozinhas com status"])':
+    {
+      bottom: '44px !important',
+      right: '44px !important',
+    },
 };
 
 const MapaPlayground = () => {
-  const [mounted, setMounted] = React.useState(false);
-  const [kitchenByCity, setKitchenByCity] = React.useState<kitchenRateByCity[]>(
-    []
-  );
-  const [nomesPorCodigo, setNomesPorCodigo] = React.useState<NomesPorCodigo>(
-    {}
-  );
+  const { mounted, kitchenByCity, nomesPorCodigo, cozinhas, cozinhasStatus } =
+    useMapaData();
   const [selection, setSelection] = React.useState<GeovisWorkspaceSelection>(
     () => {
       return getInitialSelection({ config: { leftSidebar: LEFT_SIDEBAR } });
     }
   );
-
+  const handleVariableChange = React.useCallback(
+    (next: GeovisWorkspaceSelection) => {
+      return setSelection(next);
+    },
+    []
+  );
   const mode = (selection[MODE_MENU_ID] ?? 'coropletico') as MapMode;
-
-  React.useEffect(() => {
-    let cancelled = false;
-
-    const finish = (data: kitchenRateByCity[], nomes: NomesPorCodigo) => {
-      if (cancelled) {
-        return;
-      }
-      setKitchenByCity(data);
-      setNomesPorCodigo(nomes);
-      setMounted(true);
-    };
-
-    Promise.all([
-      fetch('/api/cozinhas/por-municipio').then((response) => {
-        return response.json() as Promise<kitchenRateByCity[]>;
-      }),
-      fetch('/geo/municipios-nomes.json').then((response) => {
-        return response.json() as Promise<NomesPorCodigo>;
-      }),
-    ])
-      .then(([data, nomes]) => {
-        finish(data, nomes);
-      })
-      .catch(() => {
-        // Falha silenciosa: o mapa renderiza todo na cor "sem cozinha" e o
-        // tooltip cai no rótulo de fallback "Município <código>".
-        finish([], {});
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
   const citiesByCode = React.useMemo(() => {
     return new Map(
-      kitchenByCity.map((registro) => {
-        return [registro.codigoIbge, registro];
+      kitchenByCity.map((r) => {
+        return [r.codigoIbge, r];
       })
     );
   }, [kitchenByCity]);
-
-  const hoverTooltip = React.useCallback(
+  const statusByCode = React.useMemo((): StatusPorCodigo => {
+    return new Map(
+      cozinhasStatus.features.map((f) => {
+        return [
+          f.properties.codigo,
+          { nome: f.properties.nome, situacao: f.properties.situacao },
+        ];
+      })
+    );
+  }, [cozinhasStatus]);
+  const cozinhasByCodigo = React.useMemo((): CozinhasPorCodigo => {
+    return new Map(
+      cozinhas.features.map((f) => {
+        return [
+          f.properties.codigo,
+          { nome: f.properties.nome, codigo: f.properties.codigo },
+        ];
+      })
+    );
+  }, [cozinhas]);
+  const fillHoverTooltip = React.useCallback(
     (info: MapHoverInfo) => {
       const code = String(info.featureId);
       const register = citiesByCode.get(code);
-      // Nome vem do catálogo completo (todos os municípios do Brasil). Fallback
-      // só se o catálogo não tiver o código.
       const name =
         nomesPorCodigo[code] ?? register?.municipio ?? `Município ${code}`;
-
-      if (mode === 'coropletico-taxa') {
+      if (mode === 'coropletico-taxa')
         return renderRateTooltip({ name, register });
-      }
-
-      if (mode === 'coropletico-percentual') {
+      if (mode === 'coropletico-percentual')
         return renderPercentTooltip({ name, register });
-      }
-
-      // Contagem bruta: vem do feature-state quando presente, senão dos dados
-      // (ausente => 0).
       const quantity =
         typeof info.value === 'number'
           ? info.value
           : (register?.quantidade ?? 0);
-
       return renderCountTooltip({ name, quantity });
     },
     [citiesByCode, nomesPorCodigo, mode]
   );
-
+  const pontosHoverTooltip = React.useCallback(
+    (info: MapHoverInfo) => {
+      const code = String(info.featureId);
+      const register = cozinhasByCodigo.get(code);
+      return (
+        <TooltipCard
+          name={register?.nome ?? `Cozinha ${code}`}
+          swatchColor="var(--chakra-colors-tertiary-500)"
+          primary={register?.codigo ?? code}
+        />
+      );
+    },
+    [cozinhasByCodigo]
+  );
+  const pontosStatusHoverTooltip = React.useCallback(
+    (info: MapHoverInfo) => {
+      const code = String(info.featureId);
+      return renderStatusTooltip({ code, register: statusByCode.get(code) });
+    },
+    [statusByCode]
+  );
   const baseSpec = React.useMemo(() => {
-    return buildSpec(kitchenByCity, mode, hoverTooltip);
-  }, [kitchenByCity, mode, hoverTooltip]);
-
-  const boundaryGroups = React.useMemo(() => {
-    return [estadosGroup, municipiosGroup];
-  }, []);
-
-  const { spec } = useBoundaryToggle(baseSpec, boundaryGroups);
-
+    return buildSpec({
+      byCity: kitchenByCity,
+      mode,
+      fillHoverRender: fillHoverTooltip,
+      cozinhas,
+      cozinhasStatus,
+      pontosHoverRender: pontosHoverTooltip,
+      pontosStatusHoverRender: pontosStatusHoverTooltip,
+    });
+  }, [
+    kitchenByCity,
+    mode,
+    fillHoverTooltip,
+    cozinhas,
+    cozinhasStatus,
+    pontosHoverTooltip,
+    pontosStatusHoverTooltip,
+  ]);
+  const { spec: toggledSpec } = useBoundaryToggle(baseSpec, [
+    estadosGroup,
+    municipiosGroup,
+  ]);
+  const spec = React.useMemo(() => {
+    const pts = toggledSpec.layers.filter((l) => {
+      return l.geometry === 'point';
+    });
+    if (pts.length === 0) return toggledSpec;
+    const others = toggledSpec.layers.filter((l) => {
+      return l.geometry !== 'point';
+    });
+    return { ...toggledSpec, layers: [...others, ...pts] };
+  }, [toggledSpec]);
   return (
     <Box
       position="relative"
       h="calc(100vh - 72px)"
       w="100%"
       bg="ivory.200"
-      // The `<GeovisWorkspace>` root is a flex container with only `minHeight`
-      // (no `height`), so it collapses instead of filling this box. It's a
-      // closed component, so we stretch its direct child to fill the available
-      // space and drop its card border/radius for a full-bleed map.
-      css={{
-        '& > *': {
-          height: '100%',
-          width: '100%',
-          border: 'none',
-          borderRadius: 0,
-        },
-        // geovis' provider auto-renders the choropleth legend with a fixed 10px
-        // inset from the map corner (`GeoVisLegend`'s corner position isn't
-        // further configurable via the spec). Nudge it inward so it doesn't
-        // crowd the edges. Selected by the legend list's aria-label (its title),
-        // one selector per choropleth legend (count, rate and share).
-        '& div:has(> ul[aria-label="Cozinhas por município"]), & div:has(> ul[aria-label="nº coz. no município / 100.000 hab."]), & div:has(> ul[aria-label="% das cozinhas do Brasil no município"])':
-          {
-            bottom: '44px !important',
-            right: '44px !important',
-          },
-      }}
+      css={MAP_CONTAINER_CSS}
     >
       {mounted ? (
-        // `<GeovisWorkspace>` renders theme-ui and `@ttoss/react-i18n`
-        // components internally, so it needs both a theme-ui provider and the
-        // `<I18nProvider>` ancestor.
         <I18nProvider locale="pt-BR">
-          {/*
-           * Scope the GeovisWorkspace sidebars to theme-ui's provider ONLY, with
-           * global root styles disabled (see scopedSidebarTheme). @ttoss/ui's own
-           * <ThemeProvider> is avoided because it also mounts a second Chakra v3
-           * system whose global `--chakra-*` variables clobber the app's tokens
-           * and break the header. The sidebars only use theme-ui primitives, so
-           * the theme-ui context is all they need.
-           */}
           <ThemeUIProvider theme={scopedSidebarTheme}>
             <GeovisWorkspace
               config={CONFIG}
               visualizationSpec={spec}
               variables={selection}
-              onVariableChange={setSelection}
+              onVariableChange={handleVariableChange}
             />
           </ThemeUIProvider>
         </I18nProvider>
