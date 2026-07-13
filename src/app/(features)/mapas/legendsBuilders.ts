@@ -47,19 +47,6 @@ export const WITHOUT_KITCHEN_COLOR = mapTokens.dataviz.color.status.masked;
 export const BUBBLES_COLOR = mapTokens.dataviz.color.sequential[1][6];
 
 /**
- * Point color for the plain `pontos` mode — the `dotDensity` resolver's own
- * flat default (`DEFAULT_DOT_DENSITY_PAINT.circleColor`), mirrored here so
- * {@link buildDotDensityLegend}'s swatch never drifts from it. Every point's
- * join value is `null` (see `toKitchenRows`), so the legend's categorical
- * `match` never finds the `Cozinha` key and always falls through to
- * `defaultColor` — set to this same value, the layer's paint is unaffected.
- *
- * @example
- * paint.circleColor; // → DOT_DENSITY_COLOR (implicit, from the resolver)
- */
-export const DOT_DENSITY_COLOR = '#E4572E';
-
-/**
  * Resolves the choropleth band color for a kitchen count, mirroring the
  * `threshold` scale that paints the fill (`THRESHOLDS`/`COLORS`). Municípios with
  * no kitchens (`<= 0`) resolve to `WITHOUT_KITCHEN_COLOR` — the same flat fill the
@@ -720,25 +707,21 @@ export const buildPessoasPorCozinhaLegend = (): LegendSpec => {
 
 /**
  * The `dotDensity` legend for `pontos` mode. `resolveDotDensity` never
- * auto-generates a legend (each point carries no size/color-by value), so
- * this is hand-authored. A legend with no color/circle item renders nothing
- * (`GeoVisLegend` returns null on empty items), so `colorBy` carries a single
- * categorical swatch — `'Cozinha'` in {@link DOT_DENSITY_COLOR} — purely to
- * give the legend something to render.
+ * auto-generates a legend (each point carries no size/color-by value), so this
+ * is hand-authored. The `dotDensity` resolver paints every point in its own
+ * flat default color, so a single-color swatch would carry no information —
+ * the legend is therefore **text-only**: no `colorBy`, just the explanatory
+ * `subtitle` (`1 ponto = 1 cozinha`). `GeoVisLegend` renders a text-only
+ * legend (title + subtitle + reference) whenever a `subtitle` is present.
  *
  * This is safe from the leak documented on {@link PONTOS_FILL_LEGEND_ID} only
  * because the município fill uses that OTHER id as its `activeLegendId` in
- * `pontos` mode — the two are never the same legend. This never drives the
- * points layer's paint either: every point's join value is `null` (see
- * `toKitchenRows`), so the `match` expression can't hit the `Cozinha` key and
- * always falls through to `defaultColor`, which is the same
- * {@link DOT_DENSITY_COLOR} the `dotDensity` resolver already paints by
- * default.
+ * `pontos` mode — the two are never the same legend.
  *
  * @returns the dot-density `LegendSpec`.
  *
  * @example
- * buildDotDensityLegend().colorBy?.mapping; // → { Cozinha: DOT_DENSITY_COLOR }
+ * buildDotDensityLegend().colorBy; // → undefined (text-only key)
  */
 export const buildDotDensityLegend = (): LegendSpec => {
   return {
@@ -746,12 +729,6 @@ export const buildDotDensityLegend = (): LegendSpec => {
     title: 'Localização das cozinhas',
     subtitle: '1 ponto = 1 cozinha',
     position: 'bottom-right',
-    colorBy: {
-      type: 'categorical',
-      property: 'value',
-      mapping: { Cozinha: DOT_DENSITY_COLOR },
-      defaultColor: DOT_DENSITY_COLOR,
-    },
     reference: DATA_REFERENCE,
   };
 };

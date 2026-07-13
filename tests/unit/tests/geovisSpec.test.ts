@@ -466,7 +466,9 @@ describe('buildSpec', () => {
       return legend.id === 'legenda-cozinhas-pontos';
     });
     expect(pointsLegend?.position).toBe('bottom-right');
-    expect(pointsLegend?.colorBy?.type).toBe('categorical');
+    // dotDensity paints every point in its flat default color, so the legend
+    // carries no colorBy — it is a text-only key (title + subtitle).
+    expect(pointsLegend?.colorBy).toBeUndefined();
 
     // The fill's own legend exists (for hover tracking) but never renders
     // (no position) and carries no colorBy (so it never drives fill-color).
