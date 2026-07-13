@@ -1,0 +1,539 @@
+{
+  "schema_version": "1.0.0",
+  "catalog": {
+    "id": "coz_solidarias_data_catalog",
+    "title": "Catálogo de Dados — Cozinhas Solidárias",
+    "description": "Catálogo único com os metadados de todos os datasets usados no projeto Cozinhas Solidárias. Estrutura: coleções (por fonte institucional) e datasets indexados por id.",
+    "language": "pt-BR",
+    "status": "draft",
+    "created_at": "2026-07-07",
+    "updated_at": "2026-07-07",
+    "typing_reference": "src/data-source-static/dataCatalogue.ts",
+    "quality_notes": [
+      {
+        "id": "ibge_download_url_pending",
+        "severity": "low",
+        "message": "As URLs de origem de `geojs-100-mun`, `estados` e `municipios-nomes` apontam para o serviço do IBGE identificado pela propriedade `codarea`, mas o endpoint/parâmetros exatos do download original precisam ser confirmados por quem baixou os arquivos."
+      }
+    ]
+  },
+  "collections": {
+    "ibge": {
+      "id": "ibge",
+      "slug": "ibge",
+      "title": "IBGE",
+      "description": "Datasets geográficos e demográficos do Instituto Brasileiro de Geografia e Estatística.",
+      "organization": "Instituto Brasileiro de Geografia e Estatística (IBGE)",
+      "source_url": "https://www.ibge.gov.br",
+      "public_reference_url": "https://servicodados.ibge.gov.br",
+      "tags": [
+        "ibge",
+        "geografia",
+        "demografia",
+        "municipios",
+        "brasil",
+        "dados-publicos"
+      ]
+    },
+    "mds_sagi": {
+      "id": "mds_sagi",
+      "slug": "mds-sagi",
+      "title": "MDS — SAGI",
+      "description": "Datasets sociais do Ministério do Desenvolvimento e Assistência Social, Família e Combate à Fome, via Secretaria de Avaliação e Gestão da Informação (SAGI).",
+      "organization": "Ministério do Desenvolvimento e Assistência Social, Família e Combate à Fome (MDS) — SAGI",
+      "source_url": "https://aplicacoes.mds.gov.br/sagi/",
+      "public_reference_url": "https://aplicacoes.mds.gov.br/sagi-paineis/analise_dados_abertos/",
+      "tags": [
+        "mds",
+        "sagi",
+        "cadastro-unico",
+        "cadunico",
+        "assistencia-social",
+        "brasil",
+        "dados-publicos"
+      ]
+    },
+    "dados_primarios": {
+      "id": "dados_primarios",
+      "slug": "dados-primarios",
+      "title": "Dados Primários",
+      "description": "Datasets coletados diretamente pela equipe do projeto Cozinhas Solidárias.",
+      "organization": "Equipe do projeto Cozinhas Solidárias",
+      "source_url": null,
+      "tags": [
+        "dados-primarios",
+        "cozinhas-solidarias",
+        "coleta-direta",
+        "restrito",
+        "brasil"
+      ]
+    },
+    "ipea": {
+      "id": "ipea",
+      "slug": "ipea",
+      "title": "IPEA",
+      "description": "Datasets socioeconômicos do Instituto de Pesquisa Econômica Aplicada, incluindo o Atlas da Vulnerabilidade Social.",
+      "organization": "Instituto de Pesquisa Econômica Aplicada (IPEA)",
+      "source_url": "https://www.ipea.gov.br",
+      "public_reference_url": "http://ivs.ipea.gov.br",
+      "tags": [
+        "ipea",
+        "vulnerabilidade-social",
+        "ivs",
+        "atlas",
+        "municipios",
+        "brasil",
+        "dados-publicos"
+      ]
+    }
+  },
+  "datasets": {
+    "cozinhas_geolocalizadas": {
+      "id": "cozinhas_geolocalizadas",
+      "collection_id": "dados_primarios",
+      "slug": "cozinhas-geolocalizadas",
+      "title": "Cozinhas Solidárias geolocalizadas",
+      "description": "Cadastro das cozinhas solidárias com endereço, situação de funcionamento, público atendido e coordenadas geográficas. Dado-núcleo do mapa.",
+      "file": "src/data-source-static/data/cozinhas_com_geolocalizacao_all.csv",
+      "format": "CSV",
+      "source": {
+        "url": "https://drive.google.com/file/d/1IHzGfhLsvBIoeD-o8CS1TYKxBvg_v99l/view",
+        "notes": "Dado primário coletado pela equipe do projeto;"
+      },
+      "temporal": {
+        "reference_period": null,
+        "retrieved_at": null
+      },
+      "spatial": {
+        "coverage": "Brasil",
+        "unit": "cozinha (ponto)",
+        "key": "Código da Cozinha"
+      },
+      "access": {
+        "level": "restricted",
+        "contains_personal_data": true,
+        "notes": "Contém endereços completos, CEP, CNPJ, e-mail, telefone e coordenadas — publicar apenas de forma agregada."
+      },
+      "stats": {
+        "rows": 5979,
+        "size_bytes": 2878579,
+        "checkSum": "sha256:66438a33c81dc3063a317cfed720ae30c7a0c746cad2888914998414ed30309b"
+      },
+      "schema": {
+        "fields": [
+          {
+            "name": "Código da Cozinha",
+            "description": "Identificador da cozinha",
+            "role": "identifier"
+          },
+          { "name": "Nome da Cozinha", "description": "Nome da cozinha" },
+          {
+            "name": "Endereço da Cozinha",
+            "description": "Logradouro",
+            "sensitive": true
+          },
+          { "name": "Bairro da Cozinha", "description": "Bairro" },
+          { "name": "CEP", "description": "CEP", "sensitive": true },
+          { "name": "Município da Cozinha", "description": "Município" },
+          { "name": "UF", "description": "Unidade federativa" },
+          {
+            "name": "Email",
+            "description": "E-mail de contato",
+            "sensitive": true
+          },
+          {
+            "name": "Telefone",
+            "description": "Telefone de contato",
+            "sensitive": true
+          },
+          {
+            "name": "CNPJ",
+            "description": "CNPJ da organização",
+            "sensitive": true
+          },
+          {
+            "name": "A cozinha está em funcionamento atualmente?",
+            "description": "Situação operacional"
+          },
+          {
+            "name": "Em quantos dias da semana a Cozinha Solidária funciona?",
+            "description": "Dias de funcionamento"
+          },
+          {
+            "name": "Situação",
+            "description": "Situação no fluxo de cadastro"
+          },
+          {
+            "name": "Data Envio para Análise",
+            "description": "Data de envio para análise"
+          },
+          { "name": "É Reanálise?", "description": "Indicador de reanálise" },
+          { "name": "Avaliador", "description": "Responsável pela avaliação" },
+          { "name": "Data Avaliação", "description": "Data da avaliação" },
+          {
+            "name": "Homologador",
+            "description": "Responsável pela homologação"
+          },
+          { "name": "Data Homologação", "description": "Data da homologação" },
+          {
+            "name": "Público Atendido",
+            "description": "Tipo de público atendido"
+          },
+          {
+            "name": "Público Total Atendido",
+            "description": "Total de pessoas atendidas"
+          },
+          {
+            "name": "Dados da Cozinha atualizados?",
+            "description": "Indicador de atualização"
+          },
+          {
+            "name": "Data da última atualização",
+            "description": "Data da última atualização"
+          },
+          {
+            "name": "Fez atualização GEO e Fotos?",
+            "description": "Indicador de atualização geo/fotos"
+          },
+          {
+            "name": "Link geolocalização",
+            "description": "Link de geolocalização"
+          },
+          {
+            "name": "Latitude",
+            "description": "Latitude",
+            "role": "geometry",
+            "sensitive": true
+          },
+          {
+            "name": "Longitude",
+            "description": "Longitude",
+            "role": "geometry",
+            "sensitive": true
+          },
+          { "name": "Status Foto/Geo", "description": "Status de foto/geo" },
+          {
+            "name": "Endereço Completo",
+            "description": "Endereço completo",
+            "sensitive": true
+          }
+        ]
+      }
+    },
+    "municipios_contorno": {
+      "id": "municipios_contorno",
+      "collection_id": "ibge",
+      "slug": "municipios-contorno",
+      "title": "Contornos dos municípios do Brasil",
+      "description": "Malha municipal (polígonos) de todos os municípios do Brasil, usada como base do mapa coroplético. Join pela propriedade `codarea` (código IBGE de 7 dígitos).",
+      "file": "public/geo/geojs-100-mun.json",
+      "format": "GeoJSON",
+      "source": {
+        "url": "https://servicodados.ibge.gov.br/api/v3/malhas/",
+        "notes": "Origem na malha municipal do IBGE (propriedade `codarea`); endpoint/parâmetros exatos a confirmar."
+      },
+      "temporal": {
+        "reference_period": null,
+        "retrieved_at": null
+      },
+      "spatial": {
+        "coverage": "Brasil",
+        "unit": "município (polígono)",
+        "key": "codarea"
+      },
+      "access": {
+        "level": "public",
+        "contains_personal_data": false
+      },
+      "stats": {
+        "features": 5564,
+        "checkSum": "sha256:b2422d4f885e1167dbcafce6b8a204aec16d38ac2625b3f177c372ddd928c315"
+      },
+      "schema": {
+        "fields": [
+          {
+            "name": "codarea",
+            "description": "Código IBGE do município (7 dígitos)",
+            "role": "identifier"
+          },
+          { "name": "id", "description": "Código IBGE (igual a codarea)" },
+          { "name": "name", "description": "Nome do município" },
+          { "name": "description", "description": "Descrição (igual ao nome)" },
+          {
+            "name": "geometry",
+            "description": "Polígono/MultiPolígono do município",
+            "role": "geometry"
+          }
+        ]
+      }
+    },
+    "estados_contorno": {
+      "id": "estados_contorno",
+      "collection_id": "ibge",
+      "slug": "estados-contorno",
+      "title": "Contornos dos estados do Brasil",
+      "description": "Malha das 27 unidades federativas (polígonos), usada como camada de fronteiras estaduais no mapa.",
+      "file": "public/geo/estados.json",
+      "format": "GeoJSON",
+      "source": {
+        "url": "https://servicodados.ibge.gov.br/api/v3/malhas/",
+        "notes": "Origem na malha de UFs do IBGE (propriedade `codarea`); endpoint/parâmetros exatos a confirmar."
+      },
+      "temporal": {
+        "reference_period": null,
+        "retrieved_at": null
+      },
+      "spatial": {
+        "coverage": "Brasil",
+        "unit": "unidade federativa (polígono)",
+        "key": "codarea"
+      },
+      "access": {
+        "level": "public",
+        "contains_personal_data": false
+      },
+      "stats": {
+        "features": 27,
+        "checkSum": "sha256:94ad59ade24ac458e267e9d2d176ebe63f69f63a89f5d67427db1f4e54b938ae"
+      },
+      "schema": {
+        "fields": [
+          {
+            "name": "codarea",
+            "description": "Código IBGE da UF (2 dígitos)",
+            "role": "identifier"
+          },
+          {
+            "name": "geometry",
+            "description": "Polígono/MultiPolígono da UF",
+            "role": "geometry"
+          }
+        ]
+      }
+    },
+    "municipios_nomes": {
+      "id": "municipios_nomes",
+      "collection_id": "ibge",
+      "slug": "municipios-nomes",
+      "title": "Nomes dos municípios por código IBGE",
+      "description": "Mapa plano `{ códigoIbge: nome }` de todos os municípios, usado para rótulos e tooltips do mapa.",
+      "file": "public/geo/municipios-nomes.json",
+      "format": "JSON",
+      "source": {
+        "url": "https://servicodados.ibge.gov.br/api/v1/localidades/municipios",
+        "notes": "Nomes correspondem à propriedade `name` da malha municipal; provavelmente extraído de geojs-100-mun ou da API de localidades do IBGE. A confirmar."
+      },
+      "temporal": {
+        "reference_period": null,
+        "retrieved_at": null
+      },
+      "spatial": {
+        "coverage": "Brasil",
+        "unit": "município",
+        "key": "codigoIbge"
+      },
+      "access": {
+        "level": "public",
+        "contains_personal_data": false
+      },
+      "stats": {
+        "entries": 5564,
+        "checkSum": "sha256:590adbc706a069ee90d4472629b2981aa95d7b01bac2dcfcb0babdb350feebbf"
+      },
+      "schema": {
+        "fields": [
+          {
+            "name": "codigoIbge",
+            "description": "Código IBGE do município (7 dígitos), chave do mapa",
+            "role": "identifier"
+          },
+          { "name": "nome", "description": "Nome do município (valor do mapa)" }
+        ]
+      }
+    },
+    "municipios_populacao": {
+      "id": "municipios_populacao",
+      "collection_id": "ibge",
+      "slug": "municipios-populacao",
+      "title": "População residente por município (Censo 2022)",
+      "description": "Mapa plano `{ códigoIbge: habitantes }` da população residente por município, usado como denominador da taxa de cozinhas por 100 mil habitantes.",
+      "file": "public/geo/municipios-populacao.json",
+      "format": "JSON",
+      "source": {
+        "url": "https://servicodados.ibge.gov.br/api/v3/agregados/4709/periodos/2022/variaveis/93?localidades=N6[all]",
+        "notes": "Censo 2022, agregado 4709 (variável 93, população residente)."
+      },
+      "generated_by": "scripts/generate-municipios-populacao.mjs",
+      "temporal": {
+        "reference_period": "2022",
+        "retrieved_at": "2026-07-06"
+      },
+      "spatial": {
+        "coverage": "Brasil",
+        "unit": "município",
+        "key": "codigoIbge"
+      },
+      "access": {
+        "level": "public",
+        "contains_personal_data": false
+      },
+      "stats": {
+        "entries": 5570,
+        "checkSum": "sha256:566f10d2f52664ba36892557022e4e1210b66058a8e66ed06c14f9576d7d7365"
+      },
+      "schema": {
+        "fields": [
+          {
+            "name": "codigoIbge",
+            "description": "Código IBGE do município (7 dígitos), chave do mapa",
+            "role": "identifier"
+          },
+          {
+            "name": "habitantes",
+            "description": "População residente (valor do mapa)",
+            "unit": "pessoas"
+          }
+        ]
+      }
+    },
+    "municipios_cadunico": {
+      "id": "municipios_cadunico",
+      "collection_id": "mds_sagi",
+      "slug": "municipios-cadunico",
+      "title": "Pessoas cadastradas no Cadastro Único por município",
+      "description": "Mapa plano `{ códigoIbge: pessoasCadastradas }` do total de pessoas registradas no Cadastro Único por município, usado como denominador das variantes de cobertura do mapa.",
+      "file": "public/geo/municipios-cadunico.json",
+      "format": "JSON",
+      "source": {
+        "url": "https://aplicacoes.mds.gov.br/sagi/servicos/misocial",
+        "notes": "Campo `cadun_qtd_pessoas_cadastradas_i`, `anomes:202606`, `tipo` municipal (código IBGE de 6 dígitos remapeado para 7)."
+      },
+      "generated_by": "scripts/generate-municipios-cadunico.mjs",
+      "temporal": {
+        "reference_period": "2026-06",
+        "retrieved_at": "2026-07-07"
+      },
+      "spatial": {
+        "coverage": "Brasil",
+        "unit": "município",
+        "key": "codigoIbge"
+      },
+      "access": {
+        "level": "public",
+        "contains_personal_data": false
+      },
+      "stats": {
+        "entries": 5564,
+        "checkSum": "sha256:32165c5584f34f3cfd9569cee2baf49641b31ff3e77253d0620eb9c126659c78"
+      },
+      "schema": {
+        "fields": [
+          {
+            "name": "codigoIbge",
+            "description": "Código IBGE do município (7 dígitos), chave do mapa",
+            "role": "identifier"
+          },
+          {
+            "name": "pessoasCadastradas",
+            "description": "Pessoas registradas no Cadastro Único (valor do mapa)",
+            "unit": "pessoas"
+          }
+        ]
+      }
+    },
+    "municipios_ivs": {
+      "id": "municipios_ivs",
+      "collection_id": "ipea",
+      "slug": "municipios-ivs",
+      "title": "Índice de Vulnerabilidade Social por município (Atlas IVS, 2010)",
+      "description": "Todos os 5.565 municípios do Brasil com o Índice de Vulnerabilidade Social (IVS), seus subíndices e os índices IDHM, extraídos dos dados brutos do Atlas da Vulnerabilidade Social do IPEA. Recorte: ano 2010, nível município, totais de cor/sexo/situação de domicílio. Alimenta as variantes coropléticas do mapa — IVS geral e os três subíndices (infraestrutura urbana, capital humano, renda e trabalho) — via join pela coluna `municipio` (código IBGE de 7 dígitos ↔ `codarea`).",
+      "file": "src/data-source-static/data/atlasivs_municipios_2010.csv",
+      "format": "CSV",
+      "source": {
+        "url": "http://ivs.ipea.gov.br/index.php/pt/planilha",
+        "notes": "Extraído de `atlasivs_dadosbrutos_pt_v2.xlsx` (aba `Dados brutos IVS`, 103 colunas), filtrando ano 2010, nível município e totais de cor/sexo/situação de domicílio. Mantidas 12 das 103 colunas. Dados municipais existem apenas para 2000 e 2010. Observação: `ivs` e `idhm` usam ponto decimal; os demais subíndices preservam a vírgula decimal da fonte."
+      },
+      "temporal": {
+        "reference_period": "2010",
+        "retrieved_at": "2026-07-10"
+      },
+      "spatial": {
+        "coverage": "Brasil (5.565 municípios)",
+        "unit": "município",
+        "key": "municipio"
+      },
+      "access": {
+        "level": "public",
+        "contains_personal_data": false
+      },
+      "stats": {
+        "rows": 5565,
+        "size_bytes": 693907,
+        "checkSum": "sha256:3d45207d2f3181388adaff25d92a4dee06a482a221ef0ca35a786b4bfd0cbba8"
+      },
+      "schema": {
+        "fields": [
+          {
+            "name": "municipio",
+            "description": "Código IBGE do município (7 dígitos), chave de join com o mapa",
+            "role": "identifier"
+          },
+          {
+            "name": "nome_municipio_uf",
+            "description": "Nome do município com a UF entre parênteses, ex.: Brasília (DF)"
+          },
+          {
+            "name": "ivs",
+            "description": "Índice de Vulnerabilidade Social geral (0–1); maior = mais vulnerável",
+            "unit": "índice"
+          },
+          {
+            "name": "ivs_infraestrutura_urbana",
+            "description": "Subíndice IVS de Infraestrutura Urbana (0–1)",
+            "unit": "índice"
+          },
+          {
+            "name": "ivs_capital_humano",
+            "description": "Subíndice IVS de Capital Humano (0–1)",
+            "unit": "índice"
+          },
+          {
+            "name": "ivs_renda_e_trabalho",
+            "description": "Subíndice IVS de Renda e Trabalho (0–1)",
+            "unit": "índice"
+          },
+          {
+            "name": "idhm",
+            "description": "Índice de Desenvolvimento Humano Municipal geral (0–1)",
+            "unit": "índice"
+          },
+          {
+            "name": "idhm_long",
+            "description": "Subíndice IDHM de Longevidade (0–1)",
+            "unit": "índice"
+          },
+          {
+            "name": "idhm_educ",
+            "description": "Subíndice IDHM de Educação (0–1)",
+            "unit": "índice"
+          },
+          {
+            "name": "idhm_renda",
+            "description": "Subíndice IDHM de Renda (0–1)",
+            "unit": "índice"
+          },
+          {
+            "name": "idhm_educ_sub_esc",
+            "description": "Subcomponente de escolaridade do IDHM Educação (0–1)",
+            "unit": "índice"
+          },
+          {
+            "name": "idhm_educ_sub_freq",
+            "description": "Subcomponente de frequência escolar do IDHM Educação (0–1)",
+            "unit": "índice"
+          }
+        ]
+      }
+    }
+  }
+}

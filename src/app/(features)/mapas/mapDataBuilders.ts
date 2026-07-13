@@ -5,6 +5,7 @@ import type {
   CozinhasStatusFeatureCollection,
   kitchenByCity,
   kitchenRateByCity,
+  MunicipioIvs,
 } from '@/data-gateway/schema';
 
 /**
@@ -14,6 +15,14 @@ import type {
  *   inhabitants rate (darker = higher density);
  * - `coropletico-percentual`: data-driven choropleth of each município's share
  *   (%) of all Brazilian cozinhas (darker = larger share);
+ * - `coropletico-cadunico`: data-driven choropleth of the cozinhas-per-10k-
+ *   CadÚnico-people rate (darker = better coverage of the vulnerable population);
+ * - `coropletico-pessoas-cozinha`: data-driven choropleth of the CadÚnico-people-
+ *   per-cozinha ratio (darker = more people per cozinha = thinner coverage);
+ * - `coropletico-ivs`: data-driven choropleth of each município's overall Social
+ *   Vulnerability Index (IPEA), colored by the official faixas (green = low,
+ *   red = high vulnerability), and its three sub-indices (`-infraestrutura`,
+ *   `-capital-humano`, `-renda-trabalho`);
  * - `pontos`: flat background so the individual kitchen points stand out;
  * - `pontos-status`: flat background with one point per cozinha, colored by
  *   its status (situação);
@@ -31,6 +40,12 @@ export type MapMode =
   | 'coropletico'
   | 'coropletico-taxa'
   | 'coropletico-percentual'
+  | 'coropletico-cadunico'
+  | 'coropletico-pessoas-cozinha'
+  | 'coropletico-ivs'
+  | 'coropletico-ivs-infraestrutura'
+  | 'coropletico-ivs-capital-humano'
+  | 'coropletico-ivs-renda-trabalho'
   | 'pontos'
   | 'pontos-status'
   | 'circulos';
@@ -139,6 +154,80 @@ const toPercentRows = (byCity: kitchenRateByCity[]): MapDataRow[] => {
 };
 
 /**
+ * Maps per-município CadÚnico rates to geovis `mapData` value rows, dropping
+ * municípios with an unknown rate (`porDezMilCadUnico === null`) so they fall
+ * back to the legend's `defaultColor` ("sem dado") instead of a low rate.
+ */
+const toCadUnicoRows = (byCity: kitchenRateByCity[]): MapDataRow[] => {
+  return byCity.flatMap((register) => {
+    return register.porDezMilCadUnico === null
+      ? []
+      : [
+          {
+            geometryId: register.codigoIbge,
+            value: register.porDezMilCadUnico,
+          },
+        ];
+  });
+};
+
+/**
+ * Maps per-município people-per-cozinha values to geovis `mapData` value rows,
+ * dropping municípios with an unknown value (`pessoasPorCozinha === null`) so
+ * they fall back to the legend's `defaultColor` ("sem dado").
+ */
+const toPessoasPorCozinhaRows = (byCity: kitchenRateByCity[]): MapDataRow[] => {
+  return byCity.flatMap((register) => {
+    return register.pessoasPorCozinha === null
+      ? []
+      : [
+          {
+            geometryId: register.codigoIbge,
+            value: register.pessoasPorCozinha,
+          },
+        ];
+  });
+};
+
+/**
+ * Maps an IVS-family score (overall IVS or a sub-index, selected by `pick`) to
+ * geovis `mapData` value rows. Every row is kept — the gateway already dropped
+ * municípios with an invalid/absent score, so the only municípios that fall back
+ * to the legend's `defaultColor` ("sem dado") are those missing from the IVS
+ * snapshot entirely.
+ */
+const toIvsRows = (
+  ivsByCity: MunicipioIvs[],
+  pick: (register: MunicipioIvs) => number
+): MapDataRow[] => {
+  return ivsByCity.map((register) => {
+    return { geometryId: register.codigoIbge, value: pick(register) };
+  });
+};
+
+/**
+ * The IVS-family modes and the score each one paints. Keyed by {@link MapMode}
+ * so `toChoroplethRows` resolves the whole family in one lookup instead of a
+ * branch per sub-index. Every value lives on the same `[0, 1]` IPEA scale.
+ */
+const IVS_PICKERS: Partial<
+  Record<MapMode, (register: MunicipioIvs) => number>
+> = {
+  'coropletico-ivs': (register) => {
+    return register.ivs;
+  },
+  'coropletico-ivs-infraestrutura': (register) => {
+    return register.ivsInfraestruturaUrbana;
+  },
+  'coropletico-ivs-capital-humano': (register) => {
+    return register.ivsCapitalHumano;
+  },
+  'coropletico-ivs-renda-trabalho': (register) => {
+    return register.ivsRendaETrabalho;
+  },
+};
+
+/**
  * Maps plain cozinha features to geovis `mapData` value rows for the
  * `pontos` mode. Each row joins on the cozinha's unique `codigo` so
  * geovis promotes it to the feature id, enabling hover tooltip lookup.
@@ -167,27 +256,44 @@ const toStatusRows = (
 };
 
 /**
+ * The cozinha-based choropleth modes and the value rows each one paints. Keyed
+ * by {@link MapMode} so `toChoroplethRows` resolves them in one lookup; the IVS
+ * family is handled separately via {@link IVS_PICKERS}.
+ */
+const CHOROPLETH_ROW_BUILDERS: Partial<
+  Record<MapMode, (byCity: kitchenRateByCity[]) => MapDataRow[]>
+> = {
+  coropletico: toValueRows,
+  'coropletico-taxa': toRateRows,
+  'coropletico-percentual': toPercentRows,
+  'coropletico-cadunico': toCadUnicoRows,
+  'coropletico-pessoas-cozinha': toPessoasPorCozinhaRows,
+};
+
+/**
  * Choropleth value rows for the given mode: raw counts in `coropletico`, the
  * per-100k rate in `coropletico-taxa`, the share (%) of Brazil in
- * `coropletico-percentual`. Returns `[]` for non-choropleth modes.
+ * `coropletico-percentual`, the per-10k-CadÚnico rate in
+ * `coropletico-cadunico`, the people-per-cozinha value in
+ * `coropletico-pessoas-cozinha`, the overall IVS or a sub-index in the IVS-family
+ * modes (from `ivsByCity`, defaulting to `[]`). Returns `[]` for the overlay
+ * modes (`pontos`, `pontos-status`, `circulos`).
  */
 const toChoroplethRows = ({
   byCity,
   mode,
+  ivsByCity = [],
 }: {
   byCity: kitchenRateByCity[];
   mode: MapMode;
+  ivsByCity?: MunicipioIvs[];
 }): MapDataRow[] => {
-  if (mode === 'coropletico') {
-    return toValueRows(byCity);
+  const ivsPick = IVS_PICKERS[mode];
+  if (ivsPick) {
+    return toIvsRows(ivsByCity, ivsPick);
   }
-  if (mode === 'coropletico-taxa') {
-    return toRateRows(byCity);
-  }
-  if (mode === 'coropletico-percentual') {
-    return toPercentRows(byCity);
-  }
-  return [];
+  const buildRows = CHOROPLETH_ROW_BUILDERS[mode];
+  return buildRows ? buildRows(byCity) : [];
 };
 
 /**
@@ -210,6 +316,8 @@ const toChoroplethRows = ({
  * @param cozinhas plain cozinha features; feeds the `pontos` join.
  * @param cozinhasStatus status-carrying cozinha features; feeds the
  *   `pontos-status` join. @default undefined (empty status rows)
+ * @param ivsByCity per-município IVS rows; feeds the IVS-family modes'
+ *   choropleth join. @default [] (empty choropleth rows)
  * @returns every `MapData` entry the spec needs for that mode, primary first.
  *
  * @example
@@ -221,18 +329,20 @@ export const buildMapData = ({
   mode,
   cozinhas,
   cozinhasStatus,
+  ivsByCity,
 }: {
   byCity: kitchenRateByCity[];
   mode: MapMode;
   cozinhas?: CozinhasFeatureCollection;
   cozinhasStatus?: CozinhasStatusFeatureCollection;
+  ivsByCity?: MunicipioIvs[];
 }): MapData[] => {
   const choroplethEntry: MapData = {
     mapDataId: CHOROPLETH_MAP_DATA_ID,
     mapId: CHOROPLETH_SOURCE_ID,
     joinKey: 'codarea',
     title: 'Cozinhas por município',
-    data: toChoroplethRows({ byCity, mode }),
+    data: toChoroplethRows({ byCity, mode, ivsByCity }),
   };
 
   const pointsEntry: MapData = {

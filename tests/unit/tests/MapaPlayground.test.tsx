@@ -121,6 +121,9 @@ const BY_CITY: kitchenRateByCity[] = [
     populacao: 11_451_999,
     porCemMil: 0.04,
     percentualDoBrasil: 100,
+    pessoasCadUnico: 3_884_884,
+    porDezMilCadUnico: 0.01,
+    pessoasPorCozinha: 776_977,
   },
 ];
 
@@ -198,6 +201,28 @@ describe('MapaPlayground — visualization toggle', () => {
     // Share (%) mode also keeps the single choropleth fill, no overlay.
     fireEvent.change(screen.getByLabelText('Visualização'), {
       target: { value: 'coropletico-percentual' },
+    });
+    expect(screen.getByTestId('layer-ids')).not.toHaveTextContent(
+      'cozinhas-pts'
+    );
+    expect(screen.getByTestId('layer-ids')).not.toHaveTextContent(
+      'cozinhas-bolhas'
+    );
+
+    // CadÚnico mode keeps the single choropleth fill, no overlay.
+    fireEvent.change(screen.getByLabelText('Visualização'), {
+      target: { value: 'coropletico-cadunico' },
+    });
+    expect(screen.getByTestId('layer-ids')).not.toHaveTextContent(
+      'cozinhas-pts'
+    );
+    expect(screen.getByTestId('layer-ids')).not.toHaveTextContent(
+      'cozinhas-bolhas'
+    );
+
+    // Coverage (people-per-cozinha) mode also keeps the single fill, no overlay.
+    fireEvent.change(screen.getByLabelText('Visualização'), {
+      target: { value: 'coropletico-pessoas-cozinha' },
     });
     expect(screen.getByTestId('layer-ids')).not.toHaveTextContent(
       'cozinhas-pts'

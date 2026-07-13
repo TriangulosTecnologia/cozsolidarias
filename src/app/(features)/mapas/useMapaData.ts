@@ -6,6 +6,7 @@ import type {
   CozinhasFeatureCollection,
   CozinhasStatusFeatureCollection,
   kitchenRateByCity,
+  MunicipioIvs,
 } from '@/data-gateway/schema';
 
 /** `{ codigoIbge: nome }` for every Brazilian município, keyed by `codarea`. */
@@ -24,17 +25,18 @@ const EMPTY_COZINHAS_COLLECTION: CozinhasFeatureCollection = {
 };
 
 /**
- * Loads the map's four datasets on mount: per-município counts/rates, the
- * município name catalog, the plain cozinha points and the status-carrying
- * cozinha points. `mounted` flips only after all four settle; on any failure
- * the map falls back to empty data (every município renders "sem cozinha" and
- * tooltips use the fallback labels).
+ * Loads the map's five datasets on mount: per-município counts/rates, the
+ * IVS-family snapshot, the município name catalog, the plain cozinha points and
+ * the status-carrying cozinha points. `mounted` flips only after all five
+ * settle; on any failure the map falls back to empty data (every município
+ * renders "sem cozinha" and tooltips use the fallback labels).
  */
 export const useMapaData = () => {
   const [mounted, setMounted] = React.useState(false);
   const [kitchenByCity, setKitchenByCity] = React.useState<kitchenRateByCity[]>(
     []
   );
+  const [ivsByCity, setIvsByCity] = React.useState<MunicipioIvs[]>([]);
   const [nomesPorCodigo, setNomesPorCodigo] = React.useState<NomesPorCodigo>(
     {}
   );
@@ -49,6 +51,7 @@ export const useMapaData = () => {
 
     const finish = (
       data: kitchenRateByCity[],
+      ivs: MunicipioIvs[],
       nomes: NomesPorCodigo,
       cozinhasData: CozinhasFeatureCollection,
       status: CozinhasStatusFeatureCollection
@@ -57,6 +60,7 @@ export const useMapaData = () => {
         return;
       }
       setKitchenByCity(data);
+      setIvsByCity(ivs);
       setNomesPorCodigo(nomes);
       setCozinhas(cozinhasData);
       setCozinhasStatus(status);
@@ -66,6 +70,9 @@ export const useMapaData = () => {
     Promise.all([
       fetch('/api/cozinhas/por-municipio').then((response) => {
         return response.json() as Promise<kitchenRateByCity[]>;
+      }),
+      fetch('/api/municipios/ivs').then((response) => {
+        return response.json() as Promise<MunicipioIvs[]>;
       }),
       fetch('/geo/municipios-nomes.json').then((response) => {
         return response.json() as Promise<NomesPorCodigo>;
@@ -77,9 +84,10 @@ export const useMapaData = () => {
         return response.json() as Promise<CozinhasStatusFeatureCollection>;
       }),
     ])
-      .then(([data, nomes, cozinhasData, status]) => {
+      .then(([data, ivs, nomes, cozinhasData, status]) => {
         finish(
           data,
+          Array.isArray(ivs) ? ivs : [],
           nomes,
           Array.isArray(cozinhasData?.features)
             ? cozinhasData
@@ -90,7 +98,7 @@ export const useMapaData = () => {
       .catch(() => {
         // Falha silenciosa: o mapa renderiza todo na cor "sem cozinha" e o
         // tooltip cai no rótulo de fallback "Município <código>".
-        finish([], {}, EMPTY_COZINHAS_COLLECTION, EMPTY_STATUS_COLLECTION);
+        finish([], [], {}, EMPTY_COZINHAS_COLLECTION, EMPTY_STATUS_COLLECTION);
       });
 
     return () => {
@@ -98,5 +106,12 @@ export const useMapaData = () => {
     };
   }, []);
 
-  return { mounted, kitchenByCity, nomesPorCodigo, cozinhas, cozinhasStatus };
+  return {
+    mounted,
+    kitchenByCity,
+    ivsByCity,
+    nomesPorCodigo,
+    cozinhas,
+    cozinhasStatus,
+  };
 };

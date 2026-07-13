@@ -5,11 +5,7 @@ import { EXPO_OUT } from '../../config/site';
 
 /** Visual variant of the call-to-action link. */
 export type CtaVariant =
-  | 'solid'
-  | 'outline'
-  | 'outline-dark'
-  | 'solid-laranja'
-  | 'ghost';
+  'solid' | 'outline' | 'outline-dark' | 'solid-laranja' | 'ghost';
 
 type Props = {
   /** Destination passed directly to `next/link`. */

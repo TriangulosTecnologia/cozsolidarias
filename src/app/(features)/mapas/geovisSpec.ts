@@ -11,18 +11,28 @@ import type {
   CozinhasFeatureCollection,
   CozinhasStatusFeatureCollection,
   kitchenRateByCity,
+  MunicipioIvs,
 } from '@/data-gateway/schema';
 
 import {
   buildBubblesLegend,
+  buildCadUnicoLegend,
   buildChoroplethLegend,
   buildDotDensityLegend,
+  buildIvsLegend,
   buildPercentLegend,
+  buildPessoasPorCozinhaLegend,
   buildPointsStatusLegend,
   buildRateLegend,
+  CADUNICO_LEGEND_ID,
   CHOROPLETH_LEGEND_ID,
   DOT_DENSITY_LEGEND_ID,
+  IVS_CAPITAL_LEGEND_ID,
+  IVS_INFRA_LEGEND_ID,
+  IVS_LEGEND_ID,
+  IVS_RENDA_LEGEND_ID,
   PERCENT_LEGEND_ID,
+  PESSOAS_COZINHA_LEGEND_ID,
   POINTS_STATUS_LEGEND_ID,
   RATE_LEGEND_ID,
   WITHOUT_KITCHEN_COLOR,
@@ -41,11 +51,15 @@ import {
 
 export {
   buildLegendItems,
+  colorForCadUnico,
+  colorForIvs,
   colorForPercentual,
+  colorForPessoasPorCozinha,
   colorForQuantidade,
   colorForSituacao,
   colorForTaxa,
   HABILITADA_COLOR,
+  ivsFaixaLabel,
   NAO_HABILITADA_COLOR,
 } from './legendsBuilders';
 export type { MapMode } from './mapDataBuilders';
@@ -198,26 +212,38 @@ const SOURCES: GeoJSONSource[] = [
 ];
 
 /**
- * Builds legends for the given mode. Each mode returns only its own legend;
- * modes that share no legend with any other mode each get their own builder.
+ * Legend builders keyed by the mode they serve. Each mode returns only its own
+ * legend; modes that share no legend with any other mode each get their own
+ * builder. The four IVS-family modes share `buildIvsLegend`, varying only the
+ * id. `coropletico` has no entry — it falls back to `buildChoroplethLegend` in
+ * `buildLegends`.
  */
+const LEGEND_BUILDER_BY_MODE: Partial<Record<MapMode, () => LegendSpec>> = {
+  pontos: buildDotDensityLegend,
+  'pontos-status': buildPointsStatusLegend,
+  circulos: buildBubblesLegend,
+  'coropletico-taxa': buildRateLegend,
+  'coropletico-percentual': buildPercentLegend,
+  'coropletico-cadunico': buildCadUnicoLegend,
+  'coropletico-pessoas-cozinha': buildPessoasPorCozinhaLegend,
+  'coropletico-ivs': () => {
+    return buildIvsLegend(IVS_LEGEND_ID);
+  },
+  'coropletico-ivs-infraestrutura': () => {
+    return buildIvsLegend(IVS_INFRA_LEGEND_ID);
+  },
+  'coropletico-ivs-capital-humano': () => {
+    return buildIvsLegend(IVS_CAPITAL_LEGEND_ID);
+  },
+  'coropletico-ivs-renda-trabalho': () => {
+    return buildIvsLegend(IVS_RENDA_LEGEND_ID);
+  },
+};
+
+/** Builds legends for the given mode via `LEGEND_BUILDER_BY_MODE`. */
 const buildLegends = (mode: MapMode): LegendSpec[] => {
-  if (mode === 'pontos') {
-    return [buildDotDensityLegend()];
-  }
-  if (mode === 'pontos-status') {
-    return [buildPointsStatusLegend()];
-  }
-  if (mode === 'circulos') {
-    return [buildBubblesLegend()];
-  }
-  if (mode === 'coropletico-taxa') {
-    return [buildRateLegend()];
-  }
-  if (mode === 'coropletico-percentual') {
-    return [buildPercentLegend()];
-  }
-  return [buildChoroplethLegend()];
+  const build = LEGEND_BUILDER_BY_MODE[mode] ?? buildChoroplethLegend;
+  return [build()];
 };
 
 /**
@@ -230,6 +256,12 @@ const FILL_LEGEND_ID_BY_MODE: { [key in MapMode]: string | undefined } = {
   coropletico: CHOROPLETH_LEGEND_ID,
   'coropletico-taxa': RATE_LEGEND_ID,
   'coropletico-percentual': PERCENT_LEGEND_ID,
+  'coropletico-cadunico': CADUNICO_LEGEND_ID,
+  'coropletico-pessoas-cozinha': PESSOAS_COZINHA_LEGEND_ID,
+  'coropletico-ivs': IVS_LEGEND_ID,
+  'coropletico-ivs-infraestrutura': IVS_INFRA_LEGEND_ID,
+  'coropletico-ivs-capital-humano': IVS_CAPITAL_LEGEND_ID,
+  'coropletico-ivs-renda-trabalho': IVS_RENDA_LEGEND_ID,
   pontos: DOT_DENSITY_LEGEND_ID,
   'pontos-status': POINTS_STATUS_LEGEND_ID,
   circulos: undefined,
@@ -283,6 +315,12 @@ const MAP_TYPE_BY_MODE: { [key in MapMode]: MapType } = {
   coropletico: 'choropleth',
   'coropletico-taxa': 'choropleth',
   'coropletico-percentual': 'choropleth',
+  'coropletico-cadunico': 'choropleth',
+  'coropletico-pessoas-cozinha': 'choropleth',
+  'coropletico-ivs': 'choropleth',
+  'coropletico-ivs-infraestrutura': 'choropleth',
+  'coropletico-ivs-capital-humano': 'choropleth',
+  'coropletico-ivs-renda-trabalho': 'choropleth',
   pontos: 'dotDensity',
   'pontos-status': 'dotDensity',
   circulos: 'proportionalCircles',
@@ -293,14 +331,26 @@ const MAP_TYPE_BY_MODE: { [key in MapMode]: MapType } = {
  * per-mode `mapData` (via `buildMapData`), per-mode legends (via
  * `buildLegends`) and layers, pre-configured from the mode's `mapType`.
  *
+ * The choropleth value rows depend on the mode: raw counts in `coropletico`,
+ * the per-100k-inhabitants rate in `coropletico-taxa`, the share (%) of Brazil
+ * in `coropletico-percentual`, the per-10k-CadÚnico rate in
+ * `coropletico-cadunico`, the people-per-cozinha value in
+ * `coropletico-pessoas-cozinha`, the overall IVS in `coropletico-ivs` and each
+ * IVS sub-index in `coropletico-ivs-infraestrutura` / `-capital-humano` /
+ * `-renda-trabalho` (read from `ivsByCity`), and nothing in the overlay modes
+ * (`pontos`, `pontos-status`, `circulos`).
+ *
  * Invariants: the município fill layer is always present; the points overlay
- * exists only in `pontos` mode; the circles override only in `circulos` mode,
- * which is also the only mode carrying `scaleMaxValue`.
+ * exists only in `pontos` mode; the status points overlay only in
+ * `pontos-status` mode; the circles override only in `circulos` mode, which is
+ * also the only mode carrying `scaleMaxValue`.
  *
  * @returns the spec consumed by `<GeovisWorkspace>`.
  *
  * @example
  * const spec = buildSpec({ byCity, mode: 'circulos', fillHoverRender: renderTooltip });
+ * @example
+ * const spec = buildSpec({ byCity, mode: 'coropletico-ivs', ivsByCity });
  */
 export const buildSpec = (
   {
@@ -311,6 +361,7 @@ export const buildSpec = (
     cozinhasStatus,
     pontosHoverRender,
     pontosStatusHoverRender,
+    ivsByCity,
   }: {
     byCity: kitchenRateByCity[];
     mode?: MapMode;
@@ -319,6 +370,7 @@ export const buildSpec = (
     cozinhasStatus?: CozinhasStatusFeatureCollection;
     pontosHoverRender?: HoverTooltipConfig['render'];
     pontosStatusHoverRender?: HoverTooltipConfig['render'];
+    ivsByCity?: MunicipioIvs[];
   } = {} as {
     byCity: kitchenRateByCity[];
   }
@@ -327,6 +379,8 @@ export const buildSpec = (
   const showPointsStatus = mode === 'pontos-status';
   const showBubbles = mode === 'circulos';
 
+  // Bounds for the circle-size scale: the largest per-município count. Falls
+  // back to 1 when there's no data so the circles layer can still clamp it.
   const maxQuantidade = byCity.reduce((max, register) => {
     return Math.max(max, register.quantidade);
   }, 1);
@@ -340,7 +394,13 @@ export const buildSpec = (
     },
     basemap: { labels: false },
     sources: SOURCES,
-    mapData: buildMapData({ byCity, mode, cozinhas, cozinhasStatus }),
+    mapData: buildMapData({
+      byCity,
+      mode,
+      cozinhas,
+      cozinhasStatus,
+      ivsByCity,
+    }),
     legends: buildLegends(mode),
     layers: [
       buildFillLayer(mode, fillHoverRender),

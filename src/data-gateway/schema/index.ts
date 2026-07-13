@@ -9,3 +9,4 @@ export type {
 } from './cozinha';
 export { COZINHA_SITUACOES } from './cozinha';
 export type { kitchenByCity, kitchenRateByCity } from './kitchenByCity';
+export type { MunicipioIvs } from './municipioIvs';

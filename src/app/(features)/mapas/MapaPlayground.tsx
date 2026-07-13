@@ -23,9 +23,7 @@ import type { CozinhaSituacao } from '@/data-gateway/schema';
 
 import { buildSpec, type MapMode } from './geovisSpec';
 import {
-  renderCountTooltip,
-  renderPercentTooltip,
-  renderRateTooltip,
+  renderFillTooltip,
   renderStatusTooltip,
   TooltipCard,
 } from './tooltipRenderers';
@@ -70,6 +68,30 @@ const LEFT_SIDEBAR: NonNullable<GeovisWorkspaceConfig['leftSidebar']> = {
           value: 'coropletico-percentual',
           label: '% das cozinhas do Brasil no município',
         },
+        {
+          value: 'coropletico-cadunico',
+          label: 'nº coz. / 10 mil pessoas no CadÚnico',
+        },
+        {
+          value: 'coropletico-pessoas-cozinha',
+          label: 'pessoas no CadÚnico por cozinha',
+        },
+        {
+          value: 'coropletico-ivs',
+          label: 'Índice de vulnerabilidade social',
+        },
+        {
+          value: 'coropletico-ivs-infraestrutura',
+          label: 'IVS Infraestrutura Urbana',
+        },
+        {
+          value: 'coropletico-ivs-capital-humano',
+          label: 'IVS Capital Humano',
+        },
+        {
+          value: 'coropletico-ivs-renda-trabalho',
+          label: 'IVS Renda e Trabalho',
+        },
         { value: 'pontos', label: 'Localização das cozinhas' },
         {
           value: 'pontos-status',
@@ -108,7 +130,16 @@ const CONFIG: GeovisWorkspaceConfig = {
   leftSidebar: LEFT_SIDEBAR,
 };
 
-/** CSS overrides applied to the map container. */
+/**
+ * CSS overrides applied to the map container. `<GeovisWorkspace>`'s root is a
+ * flex container with only `minHeight` (no `height`), so it collapses instead
+ * of filling this box — it's a closed component, so we stretch its direct
+ * child to fill the available space and drop its card border/radius for a
+ * full-bleed map. geovis' provider also auto-renders the active legend with a
+ * fixed 10px inset from the map corner; the selector list below (one per
+ * choropleth/overlay legend, matched by its aria-label title) nudges it inward
+ * so it doesn't crowd the edges.
+ */
 const MAP_CONTAINER_CSS: Record<string, unknown> = {
   '& > *': {
     height: '100%',
@@ -116,9 +147,7 @@ const MAP_CONTAINER_CSS: Record<string, unknown> = {
     border: 'none',
     borderRadius: 0,
   },
-  // geovis' provider auto-renders the active legend with a fixed 10px
-  // inset from the map corner. Nudge it inward so it doesn't crowd the edges.
-  '& div:has(> ul[aria-label="Cozinhas por município"]), & div:has(> ul[aria-label="Localização das cozinhas"]), & div:has(> ul[aria-label="Localização das cozinhas com status"])':
+  '& div:has(> ul[aria-label="Cozinhas por município"]), & div:has(> ul[aria-label="nº coz. no município / 100.000 hab."]), & div:has(> ul[aria-label="% das cozinhas do Brasil no município"]), & div:has(> ul[aria-label="nº coz. / 10 mil pessoas no CadÚnico"]), & div:has(> ul[aria-label="pessoas no CadÚnico por cozinha"]), & div:has(> ul[aria-label="Índice de vulnerabilidade social"]), & div:has(> ul[aria-label="IVS Infraestrutura Urbana"]), & div:has(> ul[aria-label="IVS Capital Humano"]), & div:has(> ul[aria-label="IVS Renda e Trabalho"]), & div:has(> ul[aria-label="Localização das cozinhas"]), & div:has(> ul[aria-label="Localização das cozinhas com status"])':
     {
       bottom: '44px !important',
       right: '44px !important',
@@ -126,8 +155,14 @@ const MAP_CONTAINER_CSS: Record<string, unknown> = {
 };
 
 const MapaPlayground = () => {
-  const { mounted, kitchenByCity, nomesPorCodigo, cozinhas, cozinhasStatus } =
-    useMapaData();
+  const {
+    mounted,
+    kitchenByCity,
+    ivsByCity,
+    nomesPorCodigo,
+    cozinhas,
+    cozinhasStatus,
+  } = useMapaData();
   const [selection, setSelection] = React.useState<GeovisWorkspaceSelection>(
     () => {
       return getInitialSelection({ config: { leftSidebar: LEFT_SIDEBAR } });
@@ -173,15 +208,7 @@ const MapaPlayground = () => {
       const register = citiesByCode.get(code);
       const name =
         nomesPorCodigo[code] ?? register?.municipio ?? `Município ${code}`;
-      if (mode === 'coropletico-taxa')
-        return renderRateTooltip({ name, register });
-      if (mode === 'coropletico-percentual')
-        return renderPercentTooltip({ name, register });
-      const quantity =
-        typeof info.value === 'number'
-          ? info.value
-          : (register?.quantidade ?? 0);
-      return renderCountTooltip({ name, quantity });
+      return renderFillTooltip({ mode, name, register, value: info.value });
     },
     [citiesByCode, nomesPorCodigo, mode]
   );
@@ -215,6 +242,7 @@ const MapaPlayground = () => {
       cozinhasStatus,
       pontosHoverRender: pontosHoverTooltip,
       pontosStatusHoverRender: pontosStatusHoverTooltip,
+      ivsByCity,
     });
   }, [
     kitchenByCity,
@@ -224,6 +252,7 @@ const MapaPlayground = () => {
     cozinhasStatus,
     pontosHoverTooltip,
     pontosStatusHoverTooltip,
+    ivsByCity,
   ]);
   const { spec: toggledSpec } = useBoundaryToggle(baseSpec, [
     estadosGroup,

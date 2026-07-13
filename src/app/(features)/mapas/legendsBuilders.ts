@@ -101,6 +101,30 @@ const RATE_LEGEND_LABELS = [
 ];
 
 /**
+ * Shared "floored step scale" resolver for the share / CadÚnico / coverage
+ * choropleths, mirroring geovis' `step` fill exactly: a `null` value and any
+ * value below the first break (a município with no cozinha / no data) resolve to
+ * `WITHOUT_KITCHEN_COLOR`; every band `[break[i-1], break[i])` resolves to
+ * `colors[i]`. Any value at or above the first break gets a visible band.
+ */
+const colorForFlooredScale = (
+  value: number | null,
+  thresholds: readonly number[],
+  colors: readonly string[]
+): string => {
+  if (value === null) {
+    return WITHOUT_KITCHEN_COLOR;
+  }
+  const index = thresholds.findIndex((threshold) => {
+    return value < threshold;
+  });
+  if (index === 0) {
+    return WITHOUT_KITCHEN_COLOR;
+  }
+  return index === -1 ? colors[colors.length - 1] : colors[index];
+};
+
+/**
  * Break points (in %) for the "share of Brazil's cozinhas" choropleth. The
  * meaningful cutpoints are `0.05 / 0.1 / 0.3 / 1 / 3`, chosen from the real
  * distribution of the 870 municípios with ≥1 cozinha (shares are tiny and
@@ -145,15 +169,7 @@ const PERCENT_COLORS = sampleRamp(
  * colorForPercentual(0); // → WITHOUT_KITCHEN_COLOR ("sem cozinha")
  */
 export const colorForPercentual = (percentual: number): string => {
-  const index = PERCENT_THRESHOLDS.findIndex((threshold) => {
-    return percentual < threshold;
-  });
-  if (index === 0) {
-    return WITHOUT_KITCHEN_COLOR;
-  }
-  return index === -1
-    ? PERCENT_COLORS[PERCENT_COLORS.length - 1]
-    : PERCENT_COLORS[index];
+  return colorForFlooredScale(percentual, PERCENT_THRESHOLDS, PERCENT_COLORS);
 };
 
 /**
@@ -173,6 +189,247 @@ const PERCENT_LEGEND_LABELS = [
       : `${lower.toLocaleString('pt-BR')} – ${upper.toLocaleString('pt-BR')}%`;
   }),
 ];
+
+/**
+ * Break points for the "cozinhas per 10k CadÚnico people" choropleth — the rate
+ * `(cozinhas / pessoas) * 10_000`. The meaningful cutpoints are
+ * `0.2 / 0.5 / 1 / 2 / 4`, chosen from the real distribution of the 870
+ * municípios with ≥1 cozinha (median ≈ 0.75, p90 ≈ 2.8).
+ *
+ * The leading `0.01` is a **floor, not a real cutpoint** (see
+ * `PERCENT_THRESHOLDS`): geovis paints values below the first break with
+ * the grey `defaultColor`, so the floor keeps the ~66 municípios whose rate sits
+ * between the real minimum (≈ 0.04) and `0.2` painted blue instead of grey. Only
+ * municípios with no cozinha (or, defensively, unknown CadÚnico) stay grey.
+ */
+const CADUNICO_THRESHOLDS = [0.01, 0.2, 0.5, 1, 2, 4];
+
+/**
+ * Color ramp for the CadÚnico choropleth — `CADUNICO_THRESHOLDS.length + 1`
+ * steps. As with `PERCENT_COLORS`, only `CADUNICO_COLORS[1..]` are painted
+ * (the below-first-break bin uses `defaultColor`), so index `0` is vestigial and
+ * index `1` is the lightest visible band.
+ */
+const CADUNICO_COLORS = sampleRamp(
+  mapTokens.dataviz.color.sequential[1],
+  CADUNICO_THRESHOLDS.length + 1
+);
+
+/**
+ * Resolves the CadÚnico-choropleth band color for a cozinhas-per-10k-CadÚnico
+ * rate (see {@link colorForPercentual}, which shares the same floored-scale
+ * logic). A `null` rate (município missing from the CadÚnico snapshot) or a
+ * município with no cozinha is grey.
+ *
+ * @param taxa cozinhas-per-10k-CadÚnico rate, or `null` when unknown.
+ * @returns the CSS color of the band that rate falls in.
+ *
+ * @example
+ * colorForCadUnico(null); // → WITHOUT_KITCHEN_COLOR
+ */
+export const colorForCadUnico = (taxa: number | null): string => {
+  return colorForFlooredScale(taxa, CADUNICO_THRESHOLDS, CADUNICO_COLORS);
+};
+
+/**
+ * Labels for the CadÚnico legend, one per rendered swatch
+ * (`CADUNICO_THRESHOLDS.length + 1`). The first swatch is the grey `defaultColor`
+ * bin, labelled "Sem cozinha"; the rest derive from the meaningful cutpoints
+ * (`CADUNICO_THRESHOLDS` without the `0.01` floor) so they can't drift.
+ */
+const CADUNICO_LEGEND_LABELS = [
+  'Sem cozinha',
+  `< ${CADUNICO_THRESHOLDS[1].toLocaleString('pt-BR')}`,
+  ...CADUNICO_THRESHOLDS.slice(1).map((lower, index) => {
+    const upper = CADUNICO_THRESHOLDS[index + 2];
+    return upper === undefined
+      ? `${lower.toLocaleString('pt-BR')}+`
+      : `${lower.toLocaleString('pt-BR')} – ${upper.toLocaleString('pt-BR')}`;
+  }),
+];
+
+/**
+ * Break points for the "CadÚnico people per cozinha" (coverage) choropleth — the
+ * inverse ratio `pessoas / cozinhas`. The meaningful cutpoints are
+ * `5.000 / 10.000 / 20.000 / 40.000 / 80.000`, chosen from the real distribution
+ * of the 870 municípios with ≥1 cozinha (median ≈ 13k, p90 ≈ 45k). Darker = more
+ * people per cozinha = thinner coverage.
+ *
+ * The leading `1` is a **floor, not a real cutpoint**: it keeps every município
+ * with a cozinha (minimum ≈ 7 people/cozinha) out of the grey below-first-break
+ * bin, so only municípios with no cozinha (or, defensively, unknown CadÚnico)
+ * stay grey.
+ */
+const PESSOAS_COZINHA_THRESHOLDS = [1, 5000, 10000, 20000, 40000, 80000];
+
+/**
+ * Color ramp for the coverage choropleth — `PESSOAS_COZINHA_THRESHOLDS.length +
+ * 1` steps. As with `CADUNICO_COLORS`, only index `1..` are painted (the
+ * below-first-break bin uses `defaultColor`), so index `0` is vestigial.
+ */
+const PESSOAS_COZINHA_COLORS = sampleRamp(
+  mapTokens.dataviz.color.sequential[1],
+  PESSOAS_COZINHA_THRESHOLDS.length + 1
+);
+
+/**
+ * Resolves the coverage-choropleth band color for a people-per-cozinha value
+ * (see {@link colorForPercentual}). A `null` value (município missing from the
+ * CadÚnico snapshot) or a município with no cozinha is grey.
+ *
+ * @param valor CadÚnico people per cozinha, or `null` when unknown.
+ * @returns the CSS color of the band that value falls in.
+ *
+ * @example
+ * colorForPessoasPorCozinha(null); // → WITHOUT_KITCHEN_COLOR
+ */
+export const colorForPessoasPorCozinha = (valor: number | null): string => {
+  return colorForFlooredScale(
+    valor,
+    PESSOAS_COZINHA_THRESHOLDS,
+    PESSOAS_COZINHA_COLORS
+  );
+};
+
+/**
+ * Labels for the coverage legend, one per rendered swatch
+ * (`PESSOAS_COZINHA_THRESHOLDS.length + 1`). The first swatch is the grey
+ * `defaultColor` bin, labelled "Sem cozinha"; the rest derive from the
+ * meaningful cutpoints (`PESSOAS_COZINHA_THRESHOLDS` without the `1` floor).
+ */
+const PESSOAS_COZINHA_LEGEND_LABELS = [
+  'Sem cozinha',
+  `< ${PESSOAS_COZINHA_THRESHOLDS[1].toLocaleString('pt-BR')}`,
+  ...PESSOAS_COZINHA_THRESHOLDS.slice(1).map((lower, index) => {
+    const upper = PESSOAS_COZINHA_THRESHOLDS[index + 2];
+    return upper === undefined
+      ? `${lower.toLocaleString('pt-BR')}+`
+      : `${lower.toLocaleString('pt-BR')} – ${upper.toLocaleString('pt-BR')}`;
+  }),
+];
+
+/**
+ * IVS faixas oficiais do Atlas da Vulnerabilidade Social (IPEA): five fixed
+ * classes on the `[0, 1]` index. Break points are the class upper bounds, so
+ * `value < 0.2` → "muito baixa", `[0.2, 0.3)` → "baixa", …, `>= 0.5` → "muito
+ * alta". Every band is a real painted class; a município only goes grey when
+ * it's absent from the IVS snapshot (see `IVS_FLOOR`). These four cutpoints
+ * drive the tooltip (`colorForIvs` / `ivsFaixaLabel`); the fill legend prepends
+ * `IVS_FLOOR` so "muito baixa" isn't swallowed by geovis' grey base bin.
+ */
+const IVS_THRESHOLDS = [0.2, 0.3, 0.4, 0.5];
+
+/**
+ * Leading **floor**, not a real cutpoint: geovis' `step` fill paints every
+ * value *below the first break* with the grey `defaultColor`, and missing
+ * municípios coalesce to `0`. Without a floor the whole "muito baixa" class
+ * (`< 0.2`) would fall in that bin and render as "sem dado". Set just above `0`
+ * so every positive score is painted; the shared IVS family scale reuses it,
+ * and `ivs_infraestrutura_urbana` has real `0.0` values (44 municípios) that are
+ * indistinguishable from the coalesced-`0` missing sentinel, so those
+ * unavoidably stay grey.
+ */
+const IVS_FLOOR = 0.001;
+
+/** Faixa names, one per band (`IVS_THRESHOLDS.length + 1`), low → high. */
+const IVS_FAIXA_LABELS = [
+  'Muito baixa',
+  'Baixa',
+  'Média',
+  'Alta',
+  'Muito alta',
+];
+
+/**
+ * Legend swatch labels, one per rendered bin (`IVS_THRESHOLDS.length + 2`): the
+ * first is the grey `defaultColor` base bin (município absent from the snapshot),
+ * labelled "Sem dado"; the rest are the faixa name + its official IPEA class
+ * range (`0,201` etc.), so they read as the canonical classification.
+ */
+const IVS_LEGEND_LABELS = [
+  'Sem dado',
+  'Muito baixa (≤ 0,200)',
+  'Baixa (0,201–0,300)',
+  'Média (0,301–0,400)',
+  'Alta (0,401–0,500)',
+  'Muito alta (≥ 0,501)',
+];
+
+/**
+ * Single-hue red ramp for the IVS faixas (`IVS_THRESHOLDS.length + 1` steps):
+ * light red = low vulnerability, dark red = high. Sampled at evenly spaced
+ * indices of the brand `red` sequential ramp so the scale reads as a
+ * monochromatic light→dark gradient — the more reddish the município, the higher
+ * its social vulnerability.
+ */
+const IVS_COLORS = [
+  mapTokens.dataviz.color.sequential[5][0], // muito baixa — light red
+  mapTokens.dataviz.color.sequential[5][3], // baixa
+  mapTokens.dataviz.color.sequential[5][6], // média
+  mapTokens.dataviz.color.sequential[5][9], // alta
+  mapTokens.dataviz.color.sequential[5][13], // muito alta — dark red
+];
+
+/**
+ * Resolves the IVS-choropleth band color for an overall IVS score, mirroring the
+ * `threshold` scale that paints the fill (`IVS_THRESHOLDS`/`IVS_COLORS`). A
+ * `null` score (município missing from the IVS snapshot) resolves to
+ * `WITHOUT_KITCHEN_COLOR` so the hover-tooltip swatch matches the "sem dado"
+ * fill.
+ *
+ * @param ivs overall IVS score in `[0, 1]`, or `null` when unknown.
+ * @returns the CSS color of the score's faixa.
+ *
+ * @example
+ * colorForIvs(null); // → WITHOUT_KITCHEN_COLOR (grey "sem dado")
+ * colorForIvs(0.15); // → the "muito baixa" light-red band
+ */
+export const colorForIvs = (ivs: number | null): string => {
+  if (ivs === null) {
+    return WITHOUT_KITCHEN_COLOR;
+  }
+  const index = IVS_THRESHOLDS.findIndex((threshold) => {
+    return ivs < threshold;
+  });
+  return index === -1 ? IVS_COLORS[IVS_COLORS.length - 1] : IVS_COLORS[index];
+};
+
+/**
+ * Resolves the IVS faixa name for a score (see `IVS_FAIXA_LABELS`), or `null`
+ * when the score is unknown. Shared by the tooltip so the faixa it shows can't
+ * drift from the band {@link colorForIvs} paints (both read `IVS_THRESHOLDS`).
+ *
+ * @param ivs overall IVS score in `[0, 1]`, or `null` when unknown.
+ * @returns the faixa name (e.g. `'Média'`), or `null`.
+ *
+ * @example
+ * ivsFaixaLabel(0.35); // → 'Média'
+ * ivsFaixaLabel(null); // → null
+ */
+export const ivsFaixaLabel = (ivs: number | null): string | null => {
+  if (ivs === null) {
+    return null;
+  }
+  const index = IVS_THRESHOLDS.findIndex((threshold) => {
+    return ivs < threshold;
+  });
+  return index === -1
+    ? IVS_FAIXA_LABELS[IVS_FAIXA_LABELS.length - 1]
+    : IVS_FAIXA_LABELS[index];
+};
+
+/**
+ * Shared fill scale for the whole IVS family (overall IVS + the three
+ * sub-indices): every one lives on the same `[0, 1]` IPEA scale, faixas and
+ * colors, so they reuse a single floor-prefixed threshold/color pair and only
+ * differ in copy. See `IVS_FLOOR` for why the floor leads the breaks.
+ */
+const IVS_FAMILY_THRESHOLDS = [IVS_FLOOR, ...IVS_THRESHOLDS];
+const IVS_FAMILY_COLORS = [WITHOUT_KITCHEN_COLOR, ...IVS_COLORS];
+
+/** Source note shared by the IVS-family legends: data vintage + IPEA classification. */
+const IVS_FAMILY_REFERENCE =
+  'Fonte dos dados: Atlas da Vulnerabilidade Social — IPEA (2010). Faixas de classificação conforme IPEA, Atlas da Vulnerabilidade Social nos Municípios Brasileiros (2015), seção "Como ler o IVS".';
 
 /**
  * Id of the count-choropleth legend; also the fill's `activeLegendId` in
@@ -199,11 +456,60 @@ export const RATE_LEGEND_ID = 'legenda-taxa';
  */
 export const PERCENT_LEGEND_ID = 'legenda-percentual';
 
+/**
+ * Id of the CadÚnico legend; also the fill's `activeLegendId` in that mode.
+ *
+ * @example
+ * spec.legends?.find((legend) => legend.id === CADUNICO_LEGEND_ID);
+ */
+export const CADUNICO_LEGEND_ID = 'legenda-cadunico';
+
+/**
+ * Id of the coverage (people-per-cozinha) legend; also the fill's
+ * `activeLegendId` in that mode.
+ *
+ * @example
+ * spec.legends?.find((legend) => legend.id === PESSOAS_COZINHA_LEGEND_ID);
+ */
+export const PESSOAS_COZINHA_LEGEND_ID = 'legenda-pessoas-cozinha';
+
+/**
+ * Id of the overall-IVS legend; also the fill's `activeLegendId` in
+ * `coropletico-ivs` mode.
+ *
+ * @example
+ * spec.legends?.find((legend) => legend.id === IVS_LEGEND_ID);
+ */
+export const IVS_LEGEND_ID = 'legenda-ivs';
+
+/** Id of the IVS Infraestrutura Urbana sub-index legend. */
+export const IVS_INFRA_LEGEND_ID = 'legenda-ivs-infraestrutura';
+
+/** Id of the IVS Capital Humano sub-index legend. */
+export const IVS_CAPITAL_LEGEND_ID = 'legenda-ivs-capital-humano';
+
+/** Id of the IVS Renda e Trabalho sub-index legend. */
+export const IVS_RENDA_LEGEND_ID = 'legenda-ivs-renda-trabalho';
+
 /** Title of the rate legend; also the fill's `activeLegendId` in rate mode. */
 const RATE_LEGEND_TITLE = 'nº coz. no município / 100.000 hab.';
 
 /** Title of the share legend; also the fill's `activeLegendId` in share mode. */
 const PERCENT_LEGEND_TITLE = '% das cozinhas do Brasil no município';
+
+/** Title of the CadÚnico legend; also the fill's `activeLegendId` in that mode. */
+const CADUNICO_LEGEND_TITLE = 'nº coz. / 10 mil pessoas no CadÚnico';
+
+/** Title of the coverage legend; also the fill's `activeLegendId` in that mode. */
+const PESSOAS_COZINHA_LEGEND_TITLE = 'pessoas no CadÚnico por cozinha';
+
+/** Title of the IVS legend; also the menu label for the IVS choropleth. */
+const IVS_LEGEND_TITLE = 'Índice de vulnerabilidade social';
+
+/** Titles of the three IVS sub-index legends; also their menu labels. */
+const IVS_INFRA_LEGEND_TITLE = 'IVS Infraestrutura Urbana';
+const IVS_CAPITAL_LEGEND_TITLE = 'IVS Capital Humano';
+const IVS_RENDA_LEGEND_TITLE = 'IVS Renda e Trabalho';
 
 export const DOT_DENSITY_LEGEND_ID = 'legenda-cozinhas-pontos';
 
@@ -456,6 +762,138 @@ export const buildPercentLegend = (): LegendSpec => {
     },
     labelFormat: { type: 'labels', labels: PERCENT_LEGEND_LABELS },
     reference: DATA_REFERENCE,
+  };
+};
+
+/**
+ * The CadÚnico-choropleth legend for `coropletico-cadunico` mode. Uses
+ * `CADUNICO_THRESHOLDS` and `CADUNICO_COLORS` so the legend matches the fill.
+ *
+ * @returns the CadÚnico-choropleth `LegendSpec`.
+ *
+ * @example
+ * buildCadUnicoLegend().id; // → CADUNICO_LEGEND_ID
+ */
+export const buildCadUnicoLegend = (): LegendSpec => {
+  return {
+    id: CADUNICO_LEGEND_ID,
+    title: CADUNICO_LEGEND_TITLE,
+    subtitle:
+      'Quanto mais escuro o município, mais cozinhas por 10 mil pessoas no CadÚnico.',
+    position: 'bottom-right',
+    colorBy: {
+      type: 'quantitative',
+      property: 'value',
+      scale: 'threshold',
+      thresholds: CADUNICO_THRESHOLDS,
+      colors: CADUNICO_COLORS,
+      defaultColor: WITHOUT_KITCHEN_COLOR,
+    },
+    labelFormat: { type: 'labels', labels: CADUNICO_LEGEND_LABELS },
+    reference: 'Fontes: © Cozinhas Solidárias · MDS/SAGI (CadÚnico, jun/2026)',
+  };
+};
+
+/**
+ * The coverage-choropleth legend for `coropletico-pessoas-cozinha` mode. Uses
+ * `PESSOAS_COZINHA_THRESHOLDS` and `PESSOAS_COZINHA_COLORS` so the legend
+ * matches the fill.
+ *
+ * @returns the coverage-choropleth `LegendSpec`.
+ *
+ * @example
+ * buildPessoasPorCozinhaLegend().id; // → PESSOAS_COZINHA_LEGEND_ID
+ */
+export const buildPessoasPorCozinhaLegend = (): LegendSpec => {
+  return {
+    id: PESSOAS_COZINHA_LEGEND_ID,
+    title: PESSOAS_COZINHA_LEGEND_TITLE,
+    subtitle:
+      'Quanto mais escuro o município, mais pessoas do CadÚnico para cada cozinha.',
+    position: 'bottom-right',
+    colorBy: {
+      type: 'quantitative',
+      property: 'value',
+      scale: 'threshold',
+      thresholds: PESSOAS_COZINHA_THRESHOLDS,
+      colors: PESSOAS_COZINHA_COLORS,
+      defaultColor: WITHOUT_KITCHEN_COLOR,
+    },
+    labelFormat: { type: 'labels', labels: PESSOAS_COZINHA_LEGEND_LABELS },
+    reference: 'Fontes: © Cozinhas Solidárias · MDS/SAGI (CadÚnico, jun/2026)',
+  };
+};
+
+/**
+ * The IVS-family legend ids, titles and subtitles the four IVS choropleth
+ * variants (overall + three sub-indices) share everything except copy — each
+ * one only varies the legend id, title, and subtitle text.
+ */
+const IVS_LEGEND_VARIANTS: {
+  id: string;
+  title: string;
+  subtitleTopic: string;
+}[] = [
+  {
+    id: IVS_LEGEND_ID,
+    title: IVS_LEGEND_TITLE,
+    subtitleTopic: 'a vulnerabilidade social (IVS)',
+  },
+  {
+    id: IVS_INFRA_LEGEND_ID,
+    title: IVS_INFRA_LEGEND_TITLE,
+    subtitleTopic: 'a vulnerabilidade de infraestrutura urbana',
+  },
+  {
+    id: IVS_CAPITAL_LEGEND_ID,
+    title: IVS_CAPITAL_LEGEND_TITLE,
+    subtitleTopic: 'a vulnerabilidade de capital humano',
+  },
+  {
+    id: IVS_RENDA_LEGEND_ID,
+    title: IVS_RENDA_LEGEND_TITLE,
+    subtitleTopic: 'a vulnerabilidade de renda e trabalho',
+  },
+];
+
+/**
+ * Builds one of the four IVS-family legends (overall IVS or a sub-index),
+ * selected by `legendId`. Every variant shares the same floor-prefixed
+ * `IVS_FAMILY_THRESHOLDS`/`IVS_FAMILY_COLORS` scale and labels — only the
+ * title/subtitle copy differs — since all four scores live on the same
+ * `[0, 1]` IPEA scale.
+ *
+ * @param legendId one of `IVS_LEGEND_ID`, `IVS_INFRA_LEGEND_ID`,
+ * `IVS_CAPITAL_LEGEND_ID`, `IVS_RENDA_LEGEND_ID`.
+ * @returns the matching IVS-family `LegendSpec`.
+ *
+ * @example
+ * buildIvsLegend(IVS_LEGEND_ID).id; // → IVS_LEGEND_ID
+ */
+export const buildIvsLegend = (legendId: string): LegendSpec => {
+  const variant =
+    IVS_LEGEND_VARIANTS.find((candidate) => {
+      return candidate.id === legendId;
+    }) ?? IVS_LEGEND_VARIANTS[0];
+
+  return {
+    id: variant.id,
+    title: variant.title,
+    subtitle: `Quanto mais avermelhado o município, maior ${variant.subtitleTopic}.`,
+    position: 'bottom-right',
+    // Floor-prefixed so geovis paints all five faixas: the base bin
+    // (`< IVS_FLOOR`) is the grey "sem dado" swatch, and `[IVS_FLOOR, 0.2)` →
+    // the muito-baixa color.
+    colorBy: {
+      type: 'quantitative',
+      property: 'value',
+      scale: 'threshold',
+      thresholds: IVS_FAMILY_THRESHOLDS,
+      colors: IVS_FAMILY_COLORS,
+      defaultColor: WITHOUT_KITCHEN_COLOR,
+    },
+    labelFormat: { type: 'labels', labels: IVS_LEGEND_LABELS },
+    reference: IVS_FAMILY_REFERENCE,
   };
 };
 
