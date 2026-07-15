@@ -63,6 +63,29 @@ describe('renderMunicipioTooltip', () => {
     expect(screen.getByText('Sem cozinha registrada')).toBeInTheDocument();
   });
 
+  test('choropleth count mode keeps the faixa colour swatch', () => {
+    renderTooltip({ mode: 'coropletico', register: REGISTER, value: 5 });
+
+    // The count row carries the swatch Box alongside the label.
+    expect(screen.getByText('5 cozinhas').parentElement?.children).toHaveLength(
+      2
+    );
+  });
+
+  test.each(['pontos', 'circulos'] as const)(
+    '%s mode shows only the name and count, without the colour swatch',
+    (mode) => {
+      renderTooltip({ mode, register: REGISTER, value: 5 });
+
+      expect(screen.getByText('São Paulo')).toBeInTheDocument();
+      expect(screen.getByText('5 cozinhas')).toBeInTheDocument();
+      // No swatch: the count row holds only the label.
+      expect(
+        screen.getByText('5 cozinhas').parentElement?.children
+      ).toHaveLength(1);
+    }
+  );
+
   test('rate mode shows the per-100k rate and the auxiliary population line', () => {
     renderTooltip({ mode: 'coropletico-taxa', register: REGISTER });
 

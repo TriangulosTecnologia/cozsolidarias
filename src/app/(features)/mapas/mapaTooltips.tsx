@@ -32,8 +32,10 @@ const formatCozinhas = (quantidade: number): string => {
 };
 
 /**
- * Card do tooltip: título + swatch da faixa + rótulo, com linha auxiliar
- * opcional e linhas de detalhe extras opcionais.
+ * Card do tooltip: título + swatch da faixa (opcional) + rótulo, com linha
+ * auxiliar opcional e linhas de detalhe extras opcionais. Omita `swatchColor`
+ * em modos sem paint data-driven (ex.: `pontos`), onde o quadrado colorido não
+ * representaria nenhuma faixa.
  */
 const TooltipCard = ({
   name,
@@ -43,7 +45,7 @@ const TooltipCard = ({
   details,
 }: {
   name: string;
-  swatchColor: string;
+  swatchColor?: string;
   primary: string;
   secondary?: string;
   details?: string[];
@@ -54,13 +56,15 @@ const TooltipCard = ({
         {name}
       </Text>
       <Box display="flex" alignItems="center" gap="2">
-        <Box
-          w="12px"
-          h="12px"
-          borderRadius="sm"
-          flexShrink={0}
-          bg={swatchColor}
-        />
+        {swatchColor === undefined ? null : (
+          <Box
+            w="12px"
+            h="12px"
+            borderRadius="sm"
+            flexShrink={0}
+            bg={swatchColor}
+          />
+        )}
         <Text fontSize="xs" color="text.secondary" lineHeight="tight">
           {primary}
         </Text>
@@ -120,18 +124,25 @@ const renderRateTooltip = ({
   );
 };
 
-/** Count-mode tooltip (modos `coropletico`, `pontos`, `circulos`): swatch + "N cozinhas". */
+/**
+ * Count-mode tooltip (modos `coropletico`, `pontos`, `circulos`): "N cozinhas".
+ * O swatch da faixa só aparece no coroplético de contagem — em `pontos` e
+ * `circulos` os municípios não são pintados por quantidade, então o quadrado
+ * colorido seria enganoso e é omitido.
+ */
 const renderCountTooltip = ({
   name,
   quantity,
+  showSwatch,
 }: {
   name: string;
   quantity: number;
+  showSwatch: boolean;
 }) => {
   return (
     <TooltipCard
       name={name}
-      swatchColor={colorForQuantidade(quantity)}
+      swatchColor={showSwatch ? colorForQuantidade(quantity) : undefined}
       primary={
         quantity === 0 ? 'Sem cozinha registrada' : formatCozinhas(quantity)
       }
@@ -452,9 +463,14 @@ export const renderMunicipioTooltip = ({
   }
 
   // Contagem bruta: vem do feature-state quando presente, senão dos dados
-  // (ausente => 0).
+  // (ausente => 0). O swatch da faixa só faz sentido no coroplético de
+  // contagem; em `pontos` e `circulos` os municípios usam a cor padrão.
   const quantity =
     typeof value === 'number' ? value : (register?.quantidade ?? 0);
 
-  return renderCountTooltip({ name, quantity });
+  return renderCountTooltip({
+    name,
+    quantity,
+    showSwatch: mode === 'coropletico',
+  });
 };

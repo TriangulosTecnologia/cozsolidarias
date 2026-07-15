@@ -1,8 +1,12 @@
 /**
  * Canonical GeoJSON shapes for cozinha locations consumed by the app/map.
  *
- * Only the geometry is exposed for now (no feature properties); the contract
- * can grow a typed `properties` shape later without changing consumers.
+ * Each feature carries its registration code as `properties.codigo`. The map
+ * source promotes that property to the MapLibre `feature.id` (`promoteId:
+ * 'codigo'`, wired via a `mapData` join in `geovisSpec`), so a click reports it
+ * as `MapClickInfo.featureId` and feeds straight into `GET /api/cozinhas/[codigo]`.
+ * The code lives in `properties` (not the top-level GeoJSON `id`) because
+ * MapLibre feature ids must be numeric unless promoted from a property.
  */
 
 /** A single cozinha location as a GeoJSON Point feature. */
@@ -13,8 +17,13 @@ export type CozinhaLocationFeature = {
     /** GeoJSON order: `[longitude, latitude]`. */
     coordinates: [number, number];
   };
-  /** No attributes exposed yet. */
-  properties: Record<string, never>;
+  properties: {
+    /**
+     * Registration code (`Código da Cozinha`), e.g. `CS016282`. Promoted to the
+     * map's clickable `feature.id` and used as the detail-endpoint lookup key.
+     */
+    codigo: string;
+  };
 };
 
 /** Collection of cozinha locations, ready to feed a GeoJSON map source. */

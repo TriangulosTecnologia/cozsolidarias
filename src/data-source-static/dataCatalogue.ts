@@ -117,8 +117,11 @@ export type CatalogueDataset = {
   temporal: CatalogueTemporal;
   spatial: CatalogueSpatial;
   access: CatalogueAccess;
-  /** Lightweight volume stats (rows/entries/features/size). */
-  stats?: Record<string, number>;
+  /**
+   * Lightweight volume stats (rows/entries/features/size) plus optional string
+   * metadata like a `checksum`.
+   */
+  stats?: Record<string, number | string>;
   schema: { fields: CatalogueField[] };
 };
 

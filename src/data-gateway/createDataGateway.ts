@@ -4,11 +4,13 @@ import { readStaticIvs } from '../data-source-static/readStaticIvs';
 import { readStaticMunicipios } from '../data-source-static/readStaticMunicipios';
 import { readStaticPopulacao } from '../data-source-static/readStaticPopulacao';
 import type {
+  CozinhaDetalhe,
   CozinhasBubblesFeatureCollection,
   CozinhasFeatureCollection,
   kitchenRateByCity,
   MunicipioIvs,
 } from './schema';
+import { toCozinhaDetalhe } from './transformers/toCozinhaDetalhe';
 import { toCozinhasBubbles } from './transformers/toCozinhasBubbles';
 import { toCozinhasFeatureCollection } from './transformers/toCozinhasFeatureCollection';
 import {
@@ -22,6 +24,13 @@ import { toMunicipioIvs } from './transformers/toMunicipioIvs';
 export type DataGateway = {
   /** Returns cozinha locations as a GeoJSON FeatureCollection of Points. */
   getCozinhas: () => Promise<CozinhasFeatureCollection>;
+  /**
+   * Returns the full detail of a single cozinha by its registration code
+   * (`Código da Cozinha`, unique across the snapshot), or `null` when no cozinha
+   * carries that code. Backs the click-to-inspect endpoint
+   * (`GET /api/cozinhas/[codigo]`).
+   */
+  getCozinhaByCodigo: (codigo: string) => Promise<CozinhaDetalhe | null>;
   /**
    * Returns one row per município with its cozinha count, Census population,
    * Cadastro Único registrations and the derived metrics (per-100k-inhabitants
@@ -93,6 +102,13 @@ export const createDataGateway = (): DataGateway => {
       getCozinhas: async () => {
         const sources = await readStaticCozinhas();
         return toCozinhasFeatureCollection(sources);
+      },
+      getCozinhaByCodigo: async (codigo) => {
+        const sources = await readStaticCozinhas();
+        const match = sources.find((source) => {
+          return source.codigo === codigo;
+        });
+        return match ? toCozinhaDetalhe(match) : null;
       },
       getCozinhasPorMunicipio: async () => {
         const [aggregate, populacao, cadunico] = await Promise.all([

@@ -83,10 +83,37 @@ const TOOLTIP_STYLE: NonNullable<HoverTooltipConfig['style']> = {
  * The kitchen points layer. Larger, more opaque dots with a thick light halo so
  * each kitchen reads over the pale basemap and the settlement polygons. Static
  * (no data-driven paint), rendered in `pontos` and `assentamentos` modes.
+ *
+ * Each point feature carries its registration code as the GeoJSON `id`, so
+ * declaring a `click` config opts the layer into click tracking and reports
+ * that code as `MapClickInfo.featureId` — the key for `/api/cozinhas/[codigo]`.
+ *
+ * @param onSelect - Spec-driven click handler; invoked with the clicked point's
+ * {@link MapClickInfo} (or `null` when the selection is cleared). Omit to render
+ * the points without click tracking.
+ */
+/** GeoJSON source of kitchen points and the join that promotes `codigo`. */
+const COZINHAS_SOURCE_ID = 'cozinhas';
+const COZINHAS_POINTS_MAP_DATA_ID = 'cozinhas-pts-promote';
+
+/**
+ * Layer id of the kitchen points layer. Exported so `MapaPlayground` can filter
+ * `onFeatureSelect` to only react to kitchen-point clicks.
+ */
+export const COZINHAS_POINTS_LAYER_ID = 'cozinhas-pts';
+
+/**
+ * The kitchen points layer. Larger, more opaque dots with a thick light halo so
+ * each kitchen reads over the pale basemap and the settlement polygons. Static
+ * (no data-driven paint), rendered in `pontos` and `assentamentos` modes.
+ *
+ * Declares `click: {}` to opt into click tracking so the workspace's
+ * `rightSidebar.onFeatureSelect` fires when a point is clicked. The clicked
+ * feature's `featureId` is the `codigo` (promoted via `promoteId: 'codigo'`).
  */
 const POINTS_LAYER: VisualizationLayer = {
-  id: 'cozinhas-pts',
-  sourceId: 'cozinhas',
+  id: COZINHAS_POINTS_LAYER_ID,
+  sourceId: COZINHAS_SOURCE_ID,
   geometry: 'point',
   paint: {
     circleColor: '#E4572E',
@@ -95,6 +122,7 @@ const POINTS_LAYER: VisualizationLayer = {
     circleStrokeColor: '#FAF9F7',
     circleStrokeWidth: 1.2,
   },
+  click: {},
 };
 
 /** GeoJSON source + categorical status join for the assentamentos overlay. */
@@ -245,7 +273,7 @@ const buildBubblesLayer = (maxQuantidade: number): VisualizationLayer => {
  */
 const SOURCES: GeoJSONSource[] = [
   {
-    id: 'cozinhas',
+    id: COZINHAS_SOURCE_ID,
     type: 'geojson',
     data: '/api/cozinhas',
     attribution: '© Cozinhas Solidárias',
@@ -528,6 +556,17 @@ const buildMapData = ({
       title: 'Cozinhas por município',
       data: toValueRows(byCity),
     },
+    // Carries no feature-state values (empty `data`); its only job is the
+    // `joinKey`, which makes geovis promote each point's `codigo` property to the
+    // MapLibre `feature.id` (`promoteId: 'codigo'`). Without it, MapLibre drops
+    // the non-numeric string id and point clicks report `0`. Always present so
+    // the promotion is set when the always-on `cozinhas` source is first added.
+    {
+      mapDataId: COZINHAS_POINTS_MAP_DATA_ID,
+      mapId: COZINHAS_SOURCE_ID,
+      joinKey: 'codigo',
+      data: [],
+    },
   ];
 
   if (!showAssentamentos) {
@@ -594,7 +633,6 @@ export const buildSpec = (
   }, 1);
 
   return {
-    id: 'mapa-cozinhas-sp',
     engine: 'maplibre',
     // The assentamentos data covers only some states, so frame that region when
     // the mode is active; every other (Brazil-wide) mode keeps the national view.
