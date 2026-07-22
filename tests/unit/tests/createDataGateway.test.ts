@@ -1,4 +1,5 @@
 import { createDataGateway } from 'src/data-gateway/createDataGateway';
+import { readStaticCozinhas } from 'src/data-source-static/readStaticCozinhas';
 
 describe('createDataGateway', () => {
   test('returns kitchens as a GeoJSON FeatureCollection from the default static source', async () => {
@@ -8,6 +9,25 @@ describe('createDataGateway', () => {
 
     expect(kitchens.type).toBe('FeatureCollection');
     expect(Array.isArray(kitchens.features)).toBe(true);
+  });
+
+  test('returns the detail of an existing cozinha by its registration code', async () => {
+    const gateway = createDataGateway();
+    // Read a real code from the source so the test survives snapshot churn.
+    const [first] = await readStaticCozinhas();
+
+    const detail = await gateway.getCozinhaByCodigo(first.codigo);
+
+    expect(detail).not.toBeNull();
+    expect(detail?.codigo).toBe(first.codigo);
+    expect(detail?.nome).toBe(first.nome);
+    expect(detail?.municipio).toBe(first.municipio);
+  });
+
+  test('returns null when no cozinha carries the given code', async () => {
+    const gateway = createDataGateway();
+
+    expect(await gateway.getCozinhaByCodigo('__no_such_code__')).toBeNull();
   });
 
   test('aggregates kitchens per municipality from the default static source', async () => {

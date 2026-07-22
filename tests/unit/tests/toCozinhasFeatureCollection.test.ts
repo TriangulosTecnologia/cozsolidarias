@@ -42,7 +42,7 @@ const source = (
 describe('toCozinhasFeatureCollection', () => {
   test('maps a record with coordinates to a Point feature in [lng, lat] order', () => {
     const result = toCozinhasFeatureCollection([
-      source({ latitude: -23.5, longitude: -46.6 }),
+      source({ codigo: 'CS016282', latitude: -23.5, longitude: -46.6 }),
     ]);
 
     expect(result.type).toBe('FeatureCollection');
@@ -50,7 +50,7 @@ describe('toCozinhasFeatureCollection', () => {
     expect(result.features[0]).toEqual({
       type: 'Feature',
       geometry: { type: 'Point', coordinates: [-46.6, -23.5] },
-      properties: {},
+      properties: { codigo: 'CS016282' },
     });
   });
 

@@ -19,11 +19,16 @@ import { BruttalTheme } from '@ttoss/theme/Bruttal';
 import * as React from 'react';
 import { ThemeUIProvider } from 'theme-ui';
 
-import type { kitchenRateByCity, MunicipioIvs } from '@/data-gateway/schema';
+import type {
+  CozinhaDetalhe,
+  kitchenRateByCity,
+  MunicipioIvs,
+} from '@/data-gateway/schema';
 
 import {
   type AssentamentoAtributo,
   buildSpec,
+  COZINHAS_POINTS_LAYER_ID,
   type MapMode,
 } from './geovisSpec';
 import {
@@ -146,13 +151,111 @@ const scopedSidebarTheme = {
   },
 };
 
+// Persists the last successfully loaded kitchen so non-point clicks (e.g.
+// municipalities) keep showing the same detail instead of clearing the sidebar.
+// Synchronous return skips the workspace's loading state for those clicks.
+let lastCozinhaDetail: CozinhaDetalhe | null = null;
+
+const field = (label: string, value: string) => {
+  return (
+    <>
+      <span style={{ fontSize: '11px', color: '#6b7280' }}>{label}</span>
+      <span style={{ fontSize: '13px', color: '#111827' }}>{value}</span>
+    </>
+  );
+};
+
+const CozinhaDetailPanel = ({ cozinha }: { cozinha: CozinhaDetalhe }) => {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        <span
+          style={{ fontSize: '15px', fontWeight: 'bold', color: '#111827' }}
+        >
+          {cozinha.nome}
+        </span>
+        <span
+          style={{
+            alignSelf: 'flex-start',
+            padding: '2px 8px',
+            borderRadius: '9999px',
+            fontSize: '11px',
+            fontWeight: '600',
+            color: '#166534',
+            backgroundColor: '#dcfce7',
+          }}
+        >
+          {cozinha.situacao}
+        </span>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        {field('Em funcionamento', cozinha.emFuncionamento || '—')}
+        {cozinha.diasFuncionamento &&
+          field('Dias de funcionamento', cozinha.diasFuncionamento)}
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        {field('Endereço', cozinha.enderecoCompleto || cozinha.endereco)}
+        <span style={{ fontSize: '11px', color: '#374151' }}>
+          {cozinha.bairro ? `${cozinha.bairro} · ` : ''}
+          {cozinha.municipio}/{cozinha.uf}
+          {cozinha.cep ? ` · CEP ${cozinha.cep}` : ''}
+        </span>
+      </div>
+      {cozinha.publicoAtendido && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          {field('Público atendido', cozinha.publicoAtendido)}
+          {cozinha.publicoTotalAtendido && (
+            <span style={{ fontSize: '11px', color: '#374151' }}>
+              {cozinha.publicoTotalAtendido} pessoas
+            </span>
+          )}
+        </div>
+      )}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+        <span style={{ fontSize: '11px', color: '#9ca3af' }}>
+          {cozinha.codigo}
+        </span>
+        {cozinha.dataUltimaAtualizacao && (
+          <span style={{ fontSize: '11px', color: '#9ca3af' }}>
+            Atualizado em {cozinha.dataUltimaAtualizacao}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+};
+
 /**
- * Workspace config: only the left sidebar (the mode switcher). The legend and
- * data source now live on the map itself, configured via the geovis spec (see
- * `buildLegends` in `geovisSpec.ts`), so no right sidebar is needed.
+ * Workspace config: left sidebar (mode switcher) + right sidebar (cozinha
+ * detail panel). The legend lives on the map itself (via the geovis spec).
  */
 const CONFIG: GeovisWorkspaceConfig = {
   leftSidebar: LEFT_SIDEBAR,
+  rightSidebar: {
+    title: 'Cozinha Solidária',
+    onFeatureSelect: (info) => {
+      if (info.layerId !== COZINHAS_POINTS_LAYER_ID) {
+        return lastCozinhaDetail;
+      }
+      return fetch(`/api/cozinhas/${info.featureId}`).then(async (response) => {
+        if (!response.ok) return lastCozinhaDetail;
+        const detail = (await response.json()) as CozinhaDetalhe;
+        lastCozinhaDetail = detail;
+        return detail;
+      });
+    },
+    renderDetails: ({ loading, error, data }) => {
+      if (loading) {
+        return (
+          <span style={{ fontSize: '14px', color: '#6b7280' }}>
+            Carregando…
+          </span>
+        );
+      }
+      if (error || !data) return null;
+      return <CozinhaDetailPanel cozinha={data as CozinhaDetalhe} />;
+    },
+  },
 };
 
 /** Everything the map loads once at mount. */
@@ -301,10 +404,13 @@ const MapaPlayground = () => {
 
   // Assentamentos mode hides the município layers entirely — drop the município
   // boundary outline too, keeping only the state outlines for context.
+  // The state group comes last so its darker, wider outline is drawn on top of
+  // the lighter município outline where the two coincide along state borders —
+  // otherwise the município line overdraws it and the state border disappears.
   const boundaryGroups = React.useMemo(() => {
     return mode === 'assentamentos'
       ? [estadosGroup]
-      : [estadosGroup, municipiosGroup];
+      : [municipiosGroup, estadosGroup];
   }, [mode]);
 
   const { spec } = useBoundaryToggle(baseSpec, boundaryGroups);
