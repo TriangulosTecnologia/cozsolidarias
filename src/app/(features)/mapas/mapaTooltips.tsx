@@ -90,6 +90,32 @@ const TooltipCard = ({
   );
 };
 
+/**
+ * Tooltip shown when hovering a kitchen point on the map. Displays only the
+ * kitchen name — no metric swatch since the points layer has no data-driven
+ * paint.
+ *
+ * @param params.nome - Kitchen display name from `properties.nome`.
+ * @returns The tooltip element for the hovered kitchen point.
+ *
+ * @example
+ * renderCozinhaTooltip({ nome: 'Cozinha Esperança' });
+ * // <Box> with a bold <Text> showing the name
+ */
+export const renderCozinhaTooltip = ({
+  nome,
+}: {
+  nome: string;
+}): React.ReactNode => {
+  return (
+    <Box minW="140px">
+      <Text fontWeight="bold" fontSize="sm" lineHeight="tight">
+        {nome}
+      </Text>
+    </Box>
+  );
+};
+
 /** Rate-mode tooltip: swatch da taxa + "N por 100 mil hab." + linha auxiliar. */
 const renderRateTooltip = ({
   name,

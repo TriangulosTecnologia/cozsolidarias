@@ -23,6 +23,8 @@ export type CozinhaLocationFeature = {
      * map's clickable `feature.id` and used as the detail-endpoint lookup key.
      */
     codigo: string;
+    /** Display name of the cozinha, shown in the hover tooltip. */
+    nome: string;
   };
 };
 

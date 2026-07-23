@@ -1,4 +1,5 @@
 import { createDataGateway } from 'src/data-gateway/createDataGateway';
+import { readStaticCafProducao } from 'src/data-source-static/readStaticCafProducao';
 import { readStaticCozinhas } from 'src/data-source-static/readStaticCozinhas';
 
 describe('createDataGateway', () => {
@@ -136,6 +137,34 @@ describe('createDataGateway', () => {
       expect(entry.ivs).toBeGreaterThanOrEqual(0);
       expect(entry.ivs).toBeLessThanOrEqual(1);
     }
+  });
+
+  test('returns CAF areas as a GeoJSON FeatureCollection from the default static source', async () => {
+    const gateway = createDataGateway();
+
+    const cafs = await gateway.getCafs();
+
+    expect(cafs.type).toBe('FeatureCollection');
+    expect(cafs.features.length).toBeGreaterThan(0);
+    expect(cafs.features[0].geometry.type).toBe('Point');
+  });
+
+  test('returns the production detail of an existing CAF by its number', async () => {
+    const gateway = createDataGateway();
+    // Read a real nrCaf from the source so the test survives snapshot churn.
+    const [first] = await readStaticCafProducao();
+
+    const detail = await gateway.getCafByNrCaf(first.nrCaf);
+
+    expect(detail).not.toBeNull();
+    expect(detail?.nrCaf).toBe(first.nrCaf);
+    expect(detail?.producao.length).toBeGreaterThan(0);
+  });
+
+  test('returns null when no CAF carries the given number', async () => {
+    const gateway = createDataGateway();
+
+    expect(await gateway.getCafByNrCaf('__no_such_caf__')).toBeNull();
   });
 
   test('throws on an unknown DATA_SOURCE', () => {

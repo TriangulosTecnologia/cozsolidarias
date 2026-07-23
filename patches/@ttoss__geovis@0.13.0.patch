@@ -1,0 +1,354 @@
+diff --git a/dist/MapLibreAdapter-Dzg5IsZL.cjs b/dist/MapLibreAdapter-Dzg5IsZL.cjs
+index a9ea0d44e24d779f2a95fc84590106157c3e5419..bfb227d5230ec79aa9ab189ba8396c22a8232de2 100644
+--- a/dist/MapLibreAdapter-Dzg5IsZL.cjs
++++ b/dist/MapLibreAdapter-Dzg5IsZL.cjs
+@@ -1006,6 +1006,7 @@ var syncMapView = (map, prev, next) => {
+   if (!next) return;
+   const p = prev ?? {};
+   syncCenter(map, prev, next);
++  if (p.maxZoomIn !== next.maxZoomIn) map.setMaxZoom(next.maxZoomIn ?? null);
+   syncZoom(map, prev, next);
+   const pp = p.pitch ?? 0;
+   const np = next.pitch ?? 0;
+@@ -1024,6 +1025,7 @@ var createMap = (spec, container) => {
+     style,
+     center: view?.center ?? [0, 0],
+     zoom: view?.zoom ?? 1,
++    maxZoom: view?.maxZoomIn,
+     pitch: view?.pitch ?? 0,
+     bearing: view?.bearing ?? 0
+   });
+diff --git a/dist/MapLibreAdapter-sjD9MukB.mjs b/dist/MapLibreAdapter-sjD9MukB.mjs
+index 84cd237c8a9f916488f2421bdd98064941693a64..413d21ef18bdd2bf39ef3f65aaeae60d0378b8c3 100644
+--- a/dist/MapLibreAdapter-sjD9MukB.mjs
++++ b/dist/MapLibreAdapter-sjD9MukB.mjs
+@@ -1005,6 +1005,7 @@ var syncMapView = (map, prev, next) => {
+   if (!next) return;
+   const p = prev ?? {};
+   syncCenter(map, prev, next);
++  if (p.maxZoomIn !== next.maxZoomIn) map.setMaxZoom(next.maxZoomIn ?? null);
+   syncZoom(map, prev, next);
+   const pp = p.pitch ?? 0;
+   const np = next.pitch ?? 0;
+@@ -1023,6 +1024,7 @@ var createMap = (spec, container) => {
+     style,
+     center: view?.center ?? [0, 0],
+     zoom: view?.zoom ?? 1,
++    maxZoom: view?.maxZoomIn,
+     pitch: view?.pitch ?? 0,
+     bearing: view?.bearing ?? 0
+   });
+diff --git a/dist/index.cjs b/dist/index.cjs
+index eadadd401923661d75c4fc2f586fca64b0e22d93..e3034d55f396b40460d5a2508665df4af95dce69 100644
+--- a/dist/index.cjs
++++ b/dist/index.cjs
+@@ -481,6 +481,9 @@ var schema_default = {
+         "zoom": {
+           "type": "number"
+         },
++        "maxZoomIn": {
++          "type": "number"
++        },
+         "pitch": {
+           "type": "number"
+         },
+diff --git a/dist/index.d.cts b/dist/index.d.cts
+index 4988d9a82710ce35a894d05ca7490f90523c3f20..3cee4a0b31563485c0883de2832043567bf071cc 100644
+--- a/dist/index.d.cts
++++ b/dist/index.d.cts
+@@ -319,6 +319,13 @@ type MapType = 'choropleth' | 'dotDensity' | 'proportionalCircles';
+ interface ViewState {
+   center?: LngLat;
+   zoom?: number;
++  /**
++   * Highest zoom level the user can reach by zooming in. Acts as a camera
++   * ceiling: interactive zoom, `setView`, and programmatic `zoom` are all
++   * clamped to this value. Higher numbers mean closer to the ground. When
++   * omitted, MapLibre's default maximum (`22`) applies.
++   */
++  maxZoomIn?: number;
+   pitch?: number;
+   bearing?: number;
+   projection?: 'mercator' | 'vertical-perspective';
+@@ -502,6 +509,14 @@ interface VisualizationLayer {
+      */
+     color?: string; /** Pixel offset `[x, y]` applied to the DOM marker. */
+     offset?: [number, number];
++    /**
++     * Feature property key holding the latitude. Paired with `lngKey`, geovis
++     * reads the pin position from `feature.properties` instead of the tile
++     * geometry to avoid drift at high zoom.
++     */
++    latKey?: string;
++    /** Feature property key holding the longitude. Must be paired with `latKey`. */
++    lngKey?: string;
+   };
+   /**
+    * Spec-driven hover tooltip. When present, `<GeoVisProvider>` automatically
+@@ -954,6 +969,12 @@ interface MapClickInfo {
+   value: number | string | null;
+   /** Geographic coordinates `[lng, lat]` of the click. */
+   lngLat: [number, number];
++  /**
++   * Geographic coordinates `[lng, lat]` of the feature's geometry centroid or
++   * property-based position. `undefined` for lines/polygons. Prefer
++   * `featureLngLat ?? lngLat` when anchoring a marker to the feature.
++   */
++  featureLngLat?: [number, number];
+   /** Canvas-relative pixel coordinates of the click. */
+   point: {
+     x: number;
+diff --git a/dist/index.d.mts b/dist/index.d.mts
+index 4988d9a82710ce35a894d05ca7490f90523c3f20..3cee4a0b31563485c0883de2832043567bf071cc 100644
+--- a/dist/index.d.mts
++++ b/dist/index.d.mts
+@@ -319,6 +319,13 @@ type MapType = 'choropleth' | 'dotDensity' | 'proportionalCircles';
+ interface ViewState {
+   center?: LngLat;
+   zoom?: number;
++  /**
++   * Highest zoom level the user can reach by zooming in. Acts as a camera
++   * ceiling: interactive zoom, `setView`, and programmatic `zoom` are all
++   * clamped to this value. Higher numbers mean closer to the ground. When
++   * omitted, MapLibre's default maximum (`22`) applies.
++   */
++  maxZoomIn?: number;
+   pitch?: number;
+   bearing?: number;
+   projection?: 'mercator' | 'vertical-perspective';
+@@ -502,6 +509,14 @@ interface VisualizationLayer {
+      */
+     color?: string; /** Pixel offset `[x, y]` applied to the DOM marker. */
+     offset?: [number, number];
++    /**
++     * Feature property key holding the latitude. Paired with `lngKey`, geovis
++     * reads the pin position from `feature.properties` instead of the tile
++     * geometry to avoid drift at high zoom.
++     */
++    latKey?: string;
++    /** Feature property key holding the longitude. Must be paired with `latKey`. */
++    lngKey?: string;
+   };
+   /**
+    * Spec-driven hover tooltip. When present, `<GeoVisProvider>` automatically
+@@ -954,6 +969,12 @@ interface MapClickInfo {
+   value: number | string | null;
+   /** Geographic coordinates `[lng, lat]` of the click. */
+   lngLat: [number, number];
++  /**
++   * Geographic coordinates `[lng, lat]` of the feature's geometry centroid or
++   * property-based position. `undefined` for lines/polygons. Prefer
++   * `featureLngLat ?? lngLat` when anchoring a marker to the feature.
++   */
++  featureLngLat?: [number, number];
+   /** Canvas-relative pixel coordinates of the click. */
+   point: {
+     x: number;
+diff --git a/dist/index.mjs b/dist/index.mjs
+index dd2c9afda49fa5b5a9748a1ba99ba37ff52a7112..230c3238666b670587d27d9845613b76b308b3e8 100644
+--- a/dist/index.mjs
++++ b/dist/index.mjs
+@@ -475,6 +475,9 @@ var schema_default = {
+         "zoom": {
+           "type": "number"
+         },
++        "maxZoomIn": {
++          "type": "number"
++        },
+         "pitch": {
+           "type": "number"
+         },
+@@ -2923,11 +2926,13 @@ var decodeHoverTrackedKey = key => {
+ */
+ var decodeClickTrackedKey = key => {
+   return key.split("").map(entry => {
+-    const [layerId, sourceId, hasSelectedPaint] = entry.split("");
++    const [layerId, sourceId, hasSelectedPaint, latKey, lngKey] = entry.split("");
+     return {
+       layerId,
+       sourceId,
+-      hasSelectedPaint: hasSelectedPaint === "1"
++      hasSelectedPaint: hasSelectedPaint === "1",
++      latKey: latKey || void 0,
++      lngKey: lngKey || void 0
+     };
+   });
+ };
+@@ -2972,7 +2977,9 @@ var buildHandleClick = ({
+   sourceByLayerId,
+   setClick,
+   prevSelectedState,
+-  needsSelectedState
++  needsSelectedState,
++  latKey,
++  lngKey
+ }) => {
+   return event => {
+     const feature = event.features?.[0];
+@@ -3005,12 +3012,29 @@ var buildHandleClick = ({
+       source: sourceId,
+       id: feature.id
+     });
++    let featureLngLat;
++    if (latKey && lngKey) {
++      const props = feature.properties;
++      const rawLat = props?.[latKey];
++      const rawLng = props?.[lngKey];
++      const lat = typeof rawLat === "number" ? rawLat : parseFloat(String(rawLat ?? ""));
++      const lng = typeof rawLng === "number" ? rawLng : parseFloat(String(rawLng ?? ""));
++      if (Number.isFinite(lat) && Number.isFinite(lng)) {
++        featureLngLat = [lng, lat];
++      }
++    } else {
++      const geom = feature.geometry;
++      featureLngLat = geom?.type === "Point" && geom.coordinates.length >= 2
++        ? [geom.coordinates[0], geom.coordinates[1]]
++        : void 0;
++    }
+     setClick({
+       layerId: resolvedLayerId,
+       sourceId,
+       featureId: feature.id,
+       value: coerceFeatureStateValue(state.value),
+       lngLat: [event.lngLat.lng, event.lngLat.lat],
++      featureLngLat,
+       point: {
+         x: event.point.x,
+         y: event.point.y
+@@ -3025,9 +3049,11 @@ var buildHandleMove = ({
+   setHover,
+   lastPointRef,
+   prevHoveredState,
+-  hoverPaintLayerIds
++  hoverPaintLayerIds,
++  pointHovering
+ }) => {
+   return event => {
++    if (pointHovering && pointHovering.current) return;
+     const feature = event.features?.[0] ?? map.queryRenderedFeatures(event.point, {
+       layers: [layerId]
+     })[0];
+@@ -3204,13 +3230,35 @@ var buildPointerLayerIds = layers => {
+ */
+ var buildHandleGlobalCursor = ({
+   map,
+-  pointerLayerIds
++  pointerLayerIds,
++  trackedLayerIds,
++  setHover,
++  pointHovering
+ }) => {
+   return event => {
+     const hits = pointerLayerIds.size > 0 ? map.queryRenderedFeatures([event.point.x, event.point.y], {
+       layers: [...pointerLayerIds]
+     }) : [];
+-    map.getCanvas().style.cursor = hits.length > 0 ? "pointer" : "default";
++    if (hits.length > 0) {
++      map.getCanvas().style.cursor = "pointer";
++      const feature = hits[0];
++      const rect = map.getCanvas().getBoundingClientRect();
++      setHover({
++        layerId: feature.layer.id,
++        sourceId: feature.source,
++        featureId: feature.id ?? "",
++        value: null,
++        point: { x: rect.left + event.point.x, y: rect.top + event.point.y }
++      });
++      pointHovering.current = true;
++    } else {
++      map.getCanvas().style.cursor = "default";
++      if (pointHovering.current) {
++        pointHovering.current = false;
++        const polygonHits = trackedLayerIds.length > 0 ? map.queryRenderedFeatures([event.point.x, event.point.y], { layers: trackedLayerIds }) : [];
++        if (polygonHits.length === 0) setHover(null);
++      }
++    }
+   };
+ };
+ var buildClickTracking = trackedKey => {
+@@ -3248,7 +3296,7 @@ var useMapHover = ({
+   }, [spec.layers]);
+   React.useEffect(() => {
+     if (!runtime) return;
+-    if (!trackedKey) return;
++    if (!trackedKey && pointerLayerIds.size === 0) return;
+     const map = runtime.getAdapter().getNativeInstance();
+     if (!map) return;
+     const {
+@@ -3256,10 +3304,11 @@ var useMapHover = ({
+       sourceByLayerId,
+       hoverPaintLayerIds,
+       trackedLayerIds
+-    } = buildHoverTracking(trackedKey);
++    } = trackedKey ? buildHoverTracking(trackedKey) : { tracked: [], sourceByLayerId: new Map(), hoverPaintLayerIds: new Set(), trackedLayerIds: [] };
+     const prevHoveredState = {
+       current: null
+     };
++    const pointHovering = { current: false };
+     const handlers = tracked.map(({
+       layerId
+     }) => {
+@@ -3272,7 +3321,8 @@ var useMapHover = ({
+           setHover,
+           lastPointRef,
+           prevHoveredState,
+-          hoverPaintLayerIds
++          hoverPaintLayerIds,
++          pointHovering
+         })
+       };
+     });
+@@ -3281,7 +3331,10 @@ var useMapHover = ({
+     };
+     const handleGlobalCursor = buildHandleGlobalCursor({
+       map,
+-      pointerLayerIds
++      pointerLayerIds,
++      trackedLayerIds,
++      setHover,
++      pointHovering
+     });
+     map.on("mousemove", handleGlobalCursor);
+     const handleWindowFocus = buildHandleWindowFocus({
+@@ -3341,7 +3394,9 @@ var useMapClick = ({
+       return layer.activeLegendId != null || layer.selectedPaint != null || layer.clickAnchor != null || layer.click != null;
+     }).map(layer => {
+       const needsSelectedState = layer.selectedPaint != null || layer.clickAnchor?.iconImage != null;
+-      return `${layer.id}${""}${layer.sourceId}${""}${needsSelectedState ? "1" : "0"}`;
++      const latKey = layer.clickAnchor?.latKey ?? "";
++      const lngKey = layer.clickAnchor?.lngKey ?? "";
++      return `${layer.id}${""}${layer.sourceId}${""}${needsSelectedState ? "1" : "0"}${""}${latKey}${""}${lngKey}`;
+     }).join("");
+   }, [spec.layers]);
+   React.useEffect(() => {
+@@ -3358,7 +3413,9 @@ var useMapClick = ({
+     };
+     const handlers = tracked.map(({
+       layerId,
+-      hasSelectedPaint
++      hasSelectedPaint,
++      latKey,
++      lngKey
+     }) => {
+       return {
+         layerId,
+@@ -3368,7 +3425,9 @@ var useMapClick = ({
+           sourceByLayerId,
+           setClick,
+           prevSelectedState,
+-          needsSelectedState: hasSelectedPaint
++          needsSelectedState: hasSelectedPaint,
++          latKey,
++          lngKey
+         })
+       };
+     });
+@@ -3445,7 +3504,7 @@ var useClickAnchor = ({
+         default: maplibregl
+       } = await import("maplibre-gl");
+       if (cancelled) return;
+-      marker = new maplibregl.Marker(buildMarkerOptions(anchor)).setLngLat(click.lngLat).addTo(map);
++      marker = new maplibregl.Marker(buildMarkerOptions(anchor)).setLngLat(click.featureLngLat ?? click.lngLat).addTo(map);
+       const STYLE_ID = "geovis-pin-drop-keyframes";
+       if (!document.getElementById(STYLE_ID)) {
+         const style = document.createElement("style");

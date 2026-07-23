@@ -583,6 +583,14 @@ describe('buildSpec', () => {
     expect(layerIds(spec)).not.toContain('cozinhas-pts');
   });
 
+  test('cafs renders the CAF points overlay and feeds the choropleth nothing', () => {
+    const spec = buildSpec(BY_CITY, 'cafs');
+
+    expect(layerIds(spec)).toContain('cafs-pts');
+    expect(layerIds(spec)).not.toContain('cozinhas-pts');
+    expect(mapDataById(spec, 'cozinhas-por-municipio')?.data).toEqual([]);
+  });
+
   test('assentamentos overlays the settlement polygons and points, and hides municípios', () => {
     const spec = buildSpec(BY_CITY, 'assentamentos', undefined, [], {
       assentamentos: { atributos: ASSENTAMENTOS },

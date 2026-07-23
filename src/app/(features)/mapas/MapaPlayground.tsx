@@ -4,11 +4,6 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 
 import { Box, Text } from '@chakra-ui/react';
 import {
-  createBoundaryGroup,
-  type MapHoverInfo,
-  useBoundaryToggle,
-} from '@ttoss/geovis';
-import {
   GeovisWorkspace,
   type GeovisWorkspaceConfig,
   type GeovisWorkspaceSelection,
@@ -20,36 +15,20 @@ import * as React from 'react';
 import { ThemeUIProvider } from 'theme-ui';
 
 import type {
-  CozinhaDetalhe,
+  CafAreaFeature,
+  CafsFeatureCollection,
+  CozinhasFeatureCollection,
   kitchenRateByCity,
   MunicipioIvs,
 } from '@/data-gateway/schema';
 
+import { type AssentamentoAtributo, type MapMode } from './geovisSpec';
 import {
-  type AssentamentoAtributo,
-  buildSpec,
-  COZINHAS_POINTS_LAYER_ID,
-  type MapMode,
-} from './geovisSpec';
-import {
-  renderAssentamentoTooltip,
-  renderMunicipioTooltip,
-} from './mapaTooltips';
-
-const estadosGroup = createBoundaryGroup({
-  id: 'estados-boundary',
-  data: '/geo/estados.json',
-  paint: { lineColor: '#241F21', lineWidth: 0.8 },
-});
-
-const municipiosGroup = createBoundaryGroup({
-  id: 'municipios-boundary',
-  data: '/geo/geojs-100-mun.json',
-  paint: { lineColor: '#B2B2B2', lineWidth: 0.6 },
-});
-
-/** `{ codigoIbge: nome }` for every Brazilian município, keyed by `codarea`. */
-type NomesPorCodigo = Record<string, string>;
+  CAF_RIGHT_SIDEBAR,
+  COZINHA_RIGHT_SIDEBAR,
+  MODES_WITH_RIGHT_SIDEBAR,
+} from './mapaDetailSidebars';
+import { type NomesPorCodigo, useMapaSpec } from './useMapaSpec';
 
 /** Id of the left-sidebar menu group that drives the visualization mode. */
 const MODE_MENU_ID = 'visualizacao';
@@ -123,6 +102,7 @@ const LEFT_SIDEBAR: NonNullable<GeovisWorkspaceConfig['leftSidebar']> = {
         { value: 'pontos', label: 'Localização das cozinhas' },
         { value: 'circulos', label: 'Cozinhas por município' },
         { value: 'assentamentos', label: 'Assentamentos e cozinhas' },
+        { value: 'cafs', label: 'CAFs' },
       ],
     },
   ],
@@ -151,119 +131,16 @@ const scopedSidebarTheme = {
   },
 };
 
-// Persists the last successfully loaded kitchen so non-point clicks (e.g.
-// municipalities) keep showing the same detail instead of clearing the sidebar.
-// Synchronous return skips the workspace's loading state for those clicks.
-let lastCozinhaDetail: CozinhaDetalhe | null = null;
-
-const field = (label: string, value: string) => {
-  return (
-    <>
-      <span style={{ fontSize: '11px', color: '#6b7280' }}>{label}</span>
-      <span style={{ fontSize: '13px', color: '#111827' }}>{value}</span>
-    </>
-  );
-};
-
-const CozinhaDetailPanel = ({ cozinha }: { cozinha: CozinhaDetalhe }) => {
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-        <span
-          style={{ fontSize: '15px', fontWeight: 'bold', color: '#111827' }}
-        >
-          {cozinha.nome}
-        </span>
-        <span
-          style={{
-            alignSelf: 'flex-start',
-            padding: '2px 8px',
-            borderRadius: '9999px',
-            fontSize: '11px',
-            fontWeight: '600',
-            color: '#166534',
-            backgroundColor: '#dcfce7',
-          }}
-        >
-          {cozinha.situacao}
-        </span>
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-        {field('Em funcionamento', cozinha.emFuncionamento || '—')}
-        {cozinha.diasFuncionamento &&
-          field('Dias de funcionamento', cozinha.diasFuncionamento)}
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-        {field('Endereço', cozinha.enderecoCompleto || cozinha.endereco)}
-        <span style={{ fontSize: '11px', color: '#374151' }}>
-          {cozinha.bairro ? `${cozinha.bairro} · ` : ''}
-          {cozinha.municipio}/{cozinha.uf}
-          {cozinha.cep ? ` · CEP ${cozinha.cep}` : ''}
-        </span>
-      </div>
-      {cozinha.publicoAtendido && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          {field('Público atendido', cozinha.publicoAtendido)}
-          {cozinha.publicoTotalAtendido && (
-            <span style={{ fontSize: '11px', color: '#374151' }}>
-              {cozinha.publicoTotalAtendido} pessoas
-            </span>
-          )}
-        </div>
-      )}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-        <span style={{ fontSize: '11px', color: '#9ca3af' }}>
-          {cozinha.codigo}
-        </span>
-        {cozinha.dataUltimaAtualizacao && (
-          <span style={{ fontSize: '11px', color: '#9ca3af' }}>
-            Atualizado em {cozinha.dataUltimaAtualizacao}
-          </span>
-        )}
-      </div>
-    </div>
-  );
-};
-
-/**
- * Workspace config: left sidebar (mode switcher) + right sidebar (cozinha
- * detail panel). The legend lives on the map itself (via the geovis spec).
- */
-const CONFIG: GeovisWorkspaceConfig = {
-  leftSidebar: LEFT_SIDEBAR,
-  rightSidebar: {
-    title: 'Cozinha Solidária',
-    onFeatureSelect: (info) => {
-      if (info.layerId !== COZINHAS_POINTS_LAYER_ID) {
-        return lastCozinhaDetail;
-      }
-      return fetch(`/api/cozinhas/${info.featureId}`).then(async (response) => {
-        if (!response.ok) return lastCozinhaDetail;
-        const detail = (await response.json()) as CozinhaDetalhe;
-        lastCozinhaDetail = detail;
-        return detail;
-      });
-    },
-    renderDetails: ({ loading, error, data }) => {
-      if (loading) {
-        return (
-          <span style={{ fontSize: '14px', color: '#6b7280' }}>
-            Carregando…
-          </span>
-        );
-      }
-      if (error || !data) return null;
-      return <CozinhaDetailPanel cozinha={data as CozinhaDetalhe} />;
-    },
-  },
-};
-
 /** Everything the map loads once at mount. */
 type MapBootstrap = {
   data: kitchenRateByCity[];
   ivs: MunicipioIvs[];
   nomes: NomesPorCodigo;
   settlements: AssentamentoAtributo[];
+  /** `codigo → nome` lookup for kitchen point hover tooltips. */
+  cozinhaNames: Record<string, string>;
+  /** `nrCaf → CafAreaFeature properties` lookup for CAF hover tooltips. */
+  cafProps: Record<string, CafAreaFeature['properties']>;
 };
 
 const EMPTY_BOOTSTRAP: MapBootstrap = {
@@ -271,6 +148,8 @@ const EMPTY_BOOTSTRAP: MapBootstrap = {
   ivs: [],
   nomes: {},
   settlements: [],
+  cozinhaNames: {},
+  cafProps: {},
 };
 
 /**
@@ -282,21 +161,38 @@ const EMPTY_BOOTSTRAP: MapBootstrap = {
  */
 const fetchMapData = async (): Promise<MapBootstrap> => {
   try {
-    const [data, ivs, nomes, settlements] = await Promise.all([
-      fetch('/api/cozinhas/por-municipio').then((response) => {
-        return response.json() as Promise<kitchenRateByCity[]>;
-      }),
-      fetch('/api/municipios/ivs').then((response) => {
-        return response.json() as Promise<MunicipioIvs[]>;
-      }),
-      fetch('/geo/municipios-nomes.json').then((response) => {
-        return response.json() as Promise<NomesPorCodigo>;
-      }),
-      fetch('/geo/assentamentos-atributos.json').then((response) => {
-        return response.json() as Promise<AssentamentoAtributo[]>;
-      }),
-    ]);
-    return { data, ivs, nomes, settlements };
+    const [data, ivs, nomes, settlements, cozinhasGeoJSON, cafsGeoJSON] =
+      await Promise.all([
+        fetch('/api/cozinhas/por-municipio').then((response) => {
+          return response.json() as Promise<kitchenRateByCity[]>;
+        }),
+        fetch('/api/municipios/ivs').then((response) => {
+          return response.json() as Promise<MunicipioIvs[]>;
+        }),
+        fetch('/geo/municipios-nomes.json').then((response) => {
+          return response.json() as Promise<NomesPorCodigo>;
+        }),
+        fetch('/geo/assentamentos-atributos.json').then((response) => {
+          return response.json() as Promise<AssentamentoAtributo[]>;
+        }),
+        fetch('/api/cozinhas').then((response) => {
+          return response.json() as Promise<CozinhasFeatureCollection>;
+        }),
+        fetch('/api/cafs').then((response) => {
+          return response.json() as Promise<CafsFeatureCollection>;
+        }),
+      ]);
+    const cozinhaNames = Object.fromEntries(
+      cozinhasGeoJSON.features.map((f) => {
+        return [f.properties.codigo, f.properties.nome];
+      })
+    );
+    const cafProps = Object.fromEntries(
+      cafsGeoJSON.features.map((f) => {
+        return [f.properties.nrCaf, f.properties];
+      })
+    );
+    return { data, ivs, nomes, settlements, cozinhaNames, cafProps };
   } catch {
     return EMPTY_BOOTSTRAP;
   }
@@ -314,6 +210,12 @@ const MapaPlayground = () => {
   const [assentamentos, setAssentamentos] = React.useState<
     AssentamentoAtributo[]
   >([]);
+  const [cozinhaNames, setCozinhaNames] = React.useState<
+    Record<string, string>
+  >({});
+  const [cafProps, setCafProps] = React.useState<
+    Record<string, CafAreaFeature['properties']>
+  >({});
   const [selection, setSelection] = React.useState<GeovisWorkspaceSelection>(
     () => {
       return getInitialSelection({ config: { leftSidebar: LEFT_SIDEBAR } });
@@ -321,6 +223,18 @@ const MapaPlayground = () => {
   );
 
   const mode = (selection[MODE_MENU_ID] ?? 'coropletico') as MapMode;
+
+  const config = React.useMemo((): GeovisWorkspaceConfig => {
+    return {
+      leftSidebar: LEFT_SIDEBAR,
+      rightSidebar:
+        mode === 'cafs'
+          ? CAF_RIGHT_SIDEBAR
+          : MODES_WITH_RIGHT_SIDEBAR.has(mode)
+            ? COZINHA_RIGHT_SIDEBAR
+            : undefined,
+    };
+  }, [mode]);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -333,6 +247,8 @@ const MapaPlayground = () => {
       setIvsByCity(bootstrap.ivs);
       setNomesPorCodigo(bootstrap.nomes);
       setAssentamentos(bootstrap.settlements);
+      setCozinhaNames(bootstrap.cozinhaNames);
+      setCafProps(bootstrap.cafProps);
       setMounted(true);
     });
 
@@ -341,79 +257,15 @@ const MapaPlayground = () => {
     };
   }, []);
 
-  const citiesByCode = React.useMemo(() => {
-    return new Map(
-      kitchenByCity.map((registro) => {
-        return [registro.codigoIbge, registro];
-      })
-    );
-  }, [kitchenByCity]);
-
-  const hoverTooltip = React.useCallback(
-    (info: MapHoverInfo) => {
-      const code = String(info.featureId);
-      const register = citiesByCode.get(code);
-      // Nome vem do catálogo completo (todos os municípios do Brasil). Fallback
-      // só se o catálogo não tiver o código.
-      const name =
-        nomesPorCodigo[code] ?? register?.municipio ?? `Município ${code}`;
-
-      return renderMunicipioTooltip({
-        mode,
-        name,
-        register,
-        value: info.value,
-      });
-    },
-    [citiesByCode, nomesPorCodigo, mode]
-  );
-
-  const assentamentosByCode = React.useMemo(() => {
-    return new Map(
-      assentamentos.map((atributo) => {
-        return [atributo.codImovel, atributo];
-      })
-    );
-  }, [assentamentos]);
-
-  const assentamentoTooltip = React.useCallback(
-    (info: MapHoverInfo) => {
-      return renderAssentamentoTooltip({
-        atributo: assentamentosByCode.get(String(info.featureId)),
-        value: info.value,
-      });
-    },
-    [assentamentosByCode]
-  );
-
-  const baseSpec = React.useMemo(() => {
-    return buildSpec(kitchenByCity, mode, hoverTooltip, ivsByCity, {
-      assentamentos: {
-        atributos: assentamentos,
-        hoverRender: assentamentoTooltip,
-      },
-    });
-  }, [
+  const spec = useMapaSpec({
     kitchenByCity,
-    mode,
-    hoverTooltip,
     ivsByCity,
+    nomesPorCodigo,
     assentamentos,
-    assentamentoTooltip,
-  ]);
-
-  // Assentamentos mode hides the município layers entirely — drop the município
-  // boundary outline too, keeping only the state outlines for context.
-  // The state group comes last so its darker, wider outline is drawn on top of
-  // the lighter município outline where the two coincide along state borders —
-  // otherwise the município line overdraws it and the state border disappears.
-  const boundaryGroups = React.useMemo(() => {
-    return mode === 'assentamentos'
-      ? [estadosGroup]
-      : [municipiosGroup, estadosGroup];
-  }, [mode]);
-
-  const { spec } = useBoundaryToggle(baseSpec, boundaryGroups);
+    cozinhaNames,
+    cafProps,
+    mode,
+  });
 
   return (
     <Box
@@ -460,7 +312,7 @@ const MapaPlayground = () => {
            */}
           <ThemeUIProvider theme={scopedSidebarTheme}>
             <GeovisWorkspace
-              config={CONFIG}
+              config={config}
               visualizationSpec={spec}
               variables={selection}
               onVariableChange={setSelection}

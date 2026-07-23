@@ -7,6 +7,7 @@ import type {
 } from 'src/app/(features)/mapas/geovisSpec';
 import {
   renderAssentamentoTooltip,
+  renderCozinhaTooltip,
   renderMunicipioTooltip,
 } from 'src/app/(features)/mapas/mapaTooltips';
 import type { kitchenRateByCity } from 'src/data-gateway/schema';
@@ -211,6 +212,16 @@ describe('renderMunicipioTooltip', () => {
     renderTooltip({ mode: 'coropletico-idhm-renda', value: null });
 
     expect(screen.getByText('Sem dado de IDHM Renda')).toBeInTheDocument();
+  });
+});
+
+describe('renderCozinhaTooltip', () => {
+  test('shows only the kitchen name', () => {
+    renderWithChakra(
+      <>{renderCozinhaTooltip({ nome: 'Cozinha Esperança' })}</>
+    );
+
+    expect(screen.getByText('Cozinha Esperança')).toBeInTheDocument();
   });
 });
 

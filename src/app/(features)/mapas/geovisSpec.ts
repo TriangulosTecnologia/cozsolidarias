@@ -7,16 +7,13 @@ import type {
   VisualizationSpec,
 } from '@ttoss/geovis';
 
-import type {
-  kitchenByCity,
-  kitchenRateByCity,
-  MunicipioIvs,
-} from '@/data-gateway/schema';
+import type { kitchenRateByCity, MunicipioIvs } from '@/data-gateway/schema';
 
 import {
   ASSENTAMENTO_LEGEND_ID,
   assentamentoStatusLabel,
 } from './geovisAssentamentosScales';
+import { resolveChoroplethRows, toValueRows } from './geovisChoroplethRows';
 import { buildLegends, legendIdForMode, type MapMode } from './geovisScales';
 
 /** Re-exported so consumers keep importing the map's mode type from here. */
@@ -59,6 +56,10 @@ type MapOverlays = {
     atributos?: AssentamentoAtributo[];
     hoverRender?: HoverTooltipConfig['render'];
   };
+  /** Hover tooltip renderer for individual kitchen points (`pontos` and `assentamentos` modes). */
+  cozinhaTooltipRender?: HoverTooltipConfig['render'];
+  /** Hover tooltip renderer for individual CAF area points (`cafs` mode). */
+  cafTooltipRender?: HoverTooltipConfig['render'];
 };
 
 /**
@@ -123,6 +124,9 @@ const POINTS_LAYER: VisualizationLayer = {
     circleStrokeWidth: 1.2,
   },
   click: {},
+  clickAnchor: {
+    color: '#EA4335',
+  },
 };
 
 /** GeoJSON source + categorical status join for the assentamentos overlay. */
@@ -233,6 +237,41 @@ const buildAssentamentosLayer = (
   };
 };
 
+/** GeoJSON source of CAF area points and the join that promotes `nrCaf`. */
+const CAFS_SOURCE_ID = 'cafs';
+const CAFS_POINTS_MAP_DATA_ID = 'cafs-pts-promote';
+
+/**
+ * Layer id of the CAF area points layer. Exported so consumers can filter
+ * interactions to CAF-point clicks.
+ */
+export const CAFS_POINTS_LAYER_ID = 'cafs-pts';
+
+/**
+ * The CAF area points layer. Green dots with a light halo rendered in `cafs`
+ * mode. Static (no data-driven paint); each point carries all tooltip fields
+ * directly in `properties`.
+ *
+ * Declares `click: {}` to opt into geovis interactive-layer registration,
+ * which also enables hover-tooltip tracking on point layers.
+ */
+const CAFS_LAYER: VisualizationLayer = {
+  id: CAFS_POINTS_LAYER_ID,
+  sourceId: CAFS_SOURCE_ID,
+  geometry: 'point',
+  paint: {
+    circleColor: '#2D9B52',
+    circleRadius: 4,
+    circleOpacity: 0.9,
+    circleStrokeColor: '#FAF9F7',
+    circleStrokeWidth: 1.2,
+  },
+  click: {},
+  clickAnchor: {
+    color: '#2D9B52',
+  },
+};
+
 /** GeoJSON source + join key for the proportional-circle (bubble) overlay. */
 const BUBBLES_SOURCE_ID = 'cozinhas-bubbles';
 const BUBBLES_MAP_DATA_ID = 'cozinhas-bolhas-data';
@@ -284,184 +323,42 @@ const SOURCES: GeoJSONSource[] = [
     data: '/api/cozinhas/bolhas',
     attribution: '© Cozinhas Solidárias',
   },
+  {
+    id: CAFS_SOURCE_ID,
+    type: 'geojson',
+    data: '/api/cafs',
+    attribution: '© CAF / Cadastro Ambiental Rural',
+  },
 ];
 
+/**
+ * Zoom-in ceiling shared by every camera. Caps how close the user can get so
+ * the view stays at município scale and avoids the high-zoom range where point
+ * pins drift from their rendered circles.
+ */
+const MAX_ZOOM_IN = 9;
+
 /** Default camera: the whole of Brazil (all cozinha-based modes). */
-const BRAZIL_VIEW = { center: [-53.0, -14.5] as [number, number], zoom: 4 };
+const BRAZIL_VIEW = {
+  center: [-53.0, -14.5] as [number, number],
+  zoom: 4,
+  maxZoomIn: MAX_ZOOM_IN,
+};
 
 /**
  * Camera for the assentamentos mode: framed on the Southeast, which covers the
  * currently included states (SP, MG, RJ, ES). Widen/re-center as coverage grows
  * (and revert to {@link BRAZIL_VIEW} once it's national).
  */
-const SUDESTE_VIEW = { center: [-45.5, -20.0] as [number, number], zoom: 5 };
+const SUDESTE_VIEW = {
+  center: [-45.5, -20.0] as [number, number],
+  zoom: 5,
+  maxZoomIn: MAX_ZOOM_IN,
+};
 
 /** Picks the camera for the active mode (Southeast for assentamentos, else Brazil). */
 const resolveView = (showAssentamentos: boolean) => {
   return showAssentamentos ? SUDESTE_VIEW : BRAZIL_VIEW;
-};
-
-/** Maps per-município counts to geovis `mapData` value rows. */
-const toValueRows = (byCity: kitchenByCity[]): MapDataRow[] => {
-  return byCity.map((register) => {
-    return { geometryId: register.codigoIbge, value: register.quantidade };
-  });
-};
-
-/**
- * Maps per-município rates to geovis `mapData` value rows, dropping municípios
- * with an unknown rate (`porCemMil === null`) so they fall back to the legend's
- * `defaultColor` ("sem dado") instead of being colored as a low rate.
- */
-const toRateRows = (byCity: kitchenRateByCity[]): MapDataRow[] => {
-  return byCity.flatMap((register) => {
-    return register.porCemMil === null
-      ? []
-      : [{ geometryId: register.codigoIbge, value: register.porCemMil }];
-  });
-};
-
-/**
- * Maps per-município shares (%) to geovis `mapData` value rows. Every row is
- * kept — `percentualDoBrasil` is never `null` — so municípios absent from the
- * data (no cozinha) are the only ones that fall back to the legend's
- * `defaultColor` ("sem cozinha").
- */
-const toPercentRows = (byCity: kitchenRateByCity[]): MapDataRow[] => {
-  return byCity.map((register) => {
-    return {
-      geometryId: register.codigoIbge,
-      value: register.percentualDoBrasil,
-    };
-  });
-};
-
-/**
- * Maps per-município CadÚnico rates to geovis `mapData` value rows, dropping
- * municípios with an unknown rate (`porDezMilCadUnico === null`) so they fall
- * back to the legend's `defaultColor` ("sem dado") instead of a low rate.
- */
-const toCadUnicoRows = (byCity: kitchenRateByCity[]): MapDataRow[] => {
-  return byCity.flatMap((register) => {
-    return register.porDezMilCadUnico === null
-      ? []
-      : [
-          {
-            geometryId: register.codigoIbge,
-            value: register.porDezMilCadUnico,
-          },
-        ];
-  });
-};
-
-/**
- * Maps per-município people-per-cozinha values to geovis `mapData` value rows,
- * dropping municípios with an unknown value (`pessoasPorCozinha === null`) so
- * they fall back to the legend's `defaultColor` ("sem dado").
- */
-const toPessoasPorCozinhaRows = (byCity: kitchenRateByCity[]): MapDataRow[] => {
-  return byCity.flatMap((register) => {
-    return register.pessoasPorCozinha === null
-      ? []
-      : [
-          {
-            geometryId: register.codigoIbge,
-            value: register.pessoasPorCozinha,
-          },
-        ];
-  });
-};
-
-/**
- * Maps a per-município score (any IVS- or IDHM-family value, selected by `pick`)
- * to geovis `mapData` value rows. Every row is kept — the gateway already dropped
- * municípios with an invalid/absent score, so the only municípios that fall back
- * to the legend's `defaultColor` ("sem dado") are those missing from the IVS
- * snapshot entirely.
- */
-const toScoreRows = (
-  ivsByCity: MunicipioIvs[],
-  pick: (register: MunicipioIvs) => number
-): MapDataRow[] => {
-  return ivsByCity.map((register) => {
-    return { geometryId: register.codigoIbge, value: pick(register) };
-  });
-};
-
-/**
- * The IVS- and IDHM-family modes and the score each one paints, all read from
- * the per-município {@link MunicipioIvs} snapshot. Keyed by {@link MapMode} so
- * `buildSpec` resolves every family member in one lookup instead of a branch per
- * dimension.
- */
-const SCORE_PICKERS: Partial<
-  Record<MapMode, (register: MunicipioIvs) => number>
-> = {
-  'coropletico-ivs': (register) => {
-    return register.ivs;
-  },
-  'coropletico-ivs-infraestrutura': (register) => {
-    return register.ivsInfraestruturaUrbana;
-  },
-  'coropletico-ivs-capital-humano': (register) => {
-    return register.ivsCapitalHumano;
-  },
-  'coropletico-ivs-renda-trabalho': (register) => {
-    return register.ivsRendaETrabalho;
-  },
-  'coropletico-idhm': (register) => {
-    return register.idhm;
-  },
-  'coropletico-idhm-longevidade': (register) => {
-    return register.idhmLongevidade;
-  },
-  'coropletico-idhm-educacao': (register) => {
-    return register.idhmEducacao;
-  },
-  'coropletico-idhm-renda': (register) => {
-    return register.idhmRenda;
-  },
-  'coropletico-idhm-educacao-escolaridade': (register) => {
-    return register.idhmEducacaoEscolaridade;
-  },
-  'coropletico-idhm-educacao-frequencia': (register) => {
-    return register.idhmEducacaoFrequencia;
-  },
-};
-
-/**
- * The cozinha-based choropleth modes and the value rows each one paints. Keyed
- * by {@link MapMode} so `buildSpec` resolves them in one lookup; the score
- * families are handled separately via {@link SCORE_PICKERS}.
- */
-const CHOROPLETH_ROW_BUILDERS: Partial<
-  Record<MapMode, (byCity: kitchenRateByCity[]) => MapDataRow[]>
-> = {
-  coropletico: toValueRows,
-  'coropletico-taxa': toRateRows,
-  'coropletico-percentual': toPercentRows,
-  'coropletico-cadunico': toCadUnicoRows,
-  'coropletico-pessoas-cozinha': toPessoasPorCozinhaRows,
-};
-
-/**
- * Resolves the município choropleth value rows for the active mode: the IVS- and
- * IDHM-families read the score snapshot (via {@link SCORE_PICKERS}), the
- * cozinha-based choropleths use their row builder (via
- * {@link CHOROPLETH_ROW_BUILDERS}), and every other mode (overlays) feeds nothing
- * so the fill stays neutral.
- */
-const resolveChoroplethRows = (
-  mode: MapMode,
-  byCity: kitchenRateByCity[],
-  ivsByCity: MunicipioIvs[]
-): MapDataRow[] => {
-  const scorePick = SCORE_PICKERS[mode];
-  if (scorePick) {
-    return toScoreRows(ivsByCity, scorePick);
-  }
-  const buildRows = CHOROPLETH_ROW_BUILDERS[mode];
-  return buildRows ? buildRows(byCity) : [];
 };
 
 /**
@@ -510,14 +407,37 @@ const buildOverlayLayers = ({
   overlays: MapOverlays;
 }): VisualizationLayer[] => {
   const layers: VisualizationLayer[] = [];
+  const pointsLayer: VisualizationLayer = overlays.cozinhaTooltipRender
+    ? {
+        ...POINTS_LAYER,
+        hoverTooltip: {
+          render: overlays.cozinhaTooltipRender,
+          style: TOOLTIP_STYLE,
+        },
+      }
+    : POINTS_LAYER;
+
+  const cafsLayer: VisualizationLayer = overlays.cafTooltipRender
+    ? {
+        ...CAFS_LAYER,
+        hoverTooltip: {
+          render: overlays.cafTooltipRender,
+          style: TOOLTIP_STYLE,
+        },
+      }
+    : CAFS_LAYER;
+
   if (mode !== 'assentamentos') {
     layers.push(buildFillLayer(mode, hoverTooltipRender));
   }
   if (mode === 'pontos') {
-    layers.push(POINTS_LAYER);
+    layers.push(pointsLayer);
   }
   if (mode === 'circulos') {
     layers.push(buildBubblesLayer(maxQuantidade));
+  }
+  if (mode === 'cafs') {
+    layers.push(cafsLayer);
   }
   if (mode === 'assentamentos') {
     // Bottom → top: near-white land backdrop, filled polygons, crisp outline,
@@ -525,7 +445,7 @@ const buildOverlayLayers = ({
     layers.push(buildEstadosFillLayer());
     layers.push(buildAssentamentosLayer(overlays.assentamentos?.hoverRender));
     layers.push(buildAssentamentosOutlineLayer());
-    layers.push(POINTS_LAYER);
+    layers.push(pointsLayer);
   }
   return layers;
 };
@@ -565,6 +485,14 @@ const buildMapData = ({
       mapDataId: COZINHAS_POINTS_MAP_DATA_ID,
       mapId: COZINHAS_SOURCE_ID,
       joinKey: 'codigo',
+      data: [],
+    },
+    // Same promotion pattern for CAF points: promotes `nrCaf` to `feature.id`
+    // so hovers report it as `MapHoverInfo.featureId` for tooltip lookup.
+    {
+      mapDataId: CAFS_POINTS_MAP_DATA_ID,
+      mapId: CAFS_SOURCE_ID,
+      joinKey: 'nrCaf',
       data: [],
     },
   ];
@@ -637,7 +565,7 @@ export const buildSpec = (
     // The assentamentos data covers only some states, so frame that region when
     // the mode is active; every other (Brazil-wide) mode keeps the national view.
     view: resolveView(showAssentamentos),
-    basemap: { labels: false },
+    basemap: {},
     // The assentamentos geometry and the state backdrop are added only in this
     // mode, so other views never fetch them; the adapter's source sync
     // adds/removes them on switch.
