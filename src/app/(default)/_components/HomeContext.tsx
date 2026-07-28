@@ -36,7 +36,7 @@ const HomeContext = () => {
               <Box as="span" color="verde.600">
                 infraestruturas comunitárias
               </Box>{' '}
-              de cuidado.
+              de cuidado
             </Text>
           </GridItem>
 

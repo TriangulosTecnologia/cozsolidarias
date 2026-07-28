@@ -9,7 +9,7 @@ import HomeHero from './_components/HomeHero';
 
 export const metadata: Metadata = {
   title:
-    'Cozinhas Solidárias — Territórios que alimentam. Dados que fortalecem.',
+    'Cozinhas Solidárias — Territórios que alimentam, dados que fortalecem',
   description:
     'Plataforma de inteligência territorial para mapear, documentar e apoiar Cozinhas Solidárias no Brasil.',
 };

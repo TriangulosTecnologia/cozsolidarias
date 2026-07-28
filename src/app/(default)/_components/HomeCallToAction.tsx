@@ -36,7 +36,7 @@ const HomeCallToAction = () => {
               color="ivory.100"
               maxW="20ch"
             >
-              Informação pública que volta ao território.
+              Informação pública que volta ao território
             </Text>
             <Text textStyle="body-lg" color="verde.300" maxW="52ch">
               Se você atua em uma cozinha, pesquisa o tema, representa uma

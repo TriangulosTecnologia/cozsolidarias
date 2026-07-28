@@ -160,7 +160,7 @@ const HomeHero = () => {
                     animationFillMode="both"
                     animationDelay="0.1s"
                   >
-                    Territórios que alimentam.
+                    Territórios que alimentam,
                   </Box>
                   <Box
                     as="span"
@@ -171,7 +171,7 @@ const HomeHero = () => {
                     animationFillMode="both"
                     animationDelay="0.2s"
                   >
-                    Dados que fortalecem.
+                    dados que fortalecem
                   </Box>
                 </Text>
               </Box>

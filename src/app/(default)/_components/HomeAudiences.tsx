@@ -184,7 +184,7 @@ const HomeAudiences = () => {
                 textStyle="title-2"
                 color="charcoal.900"
               >
-                O território é a primeira camada de leitura.
+                O território é a primeira camada de leitura
               </Text>
               <Text textStyle="body-lg" color="charcoal.700">
                 Explore registros por UF, município, fonte e status de
