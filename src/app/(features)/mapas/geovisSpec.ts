@@ -129,6 +129,72 @@ const POINTS_LAYER: VisualizationLayer = {
   },
 };
 
+/**
+ * Whether the "Localização das cozinhas" toggle starts on for the given mode.
+ * The kitchens are the *primary* visualization in `pontos` (points),
+ * `circulos` (bubbles) and `assentamentos` (points over the settlements), so
+ * the toggle defaults on there. On every choropleth and on `cafs` they are an
+ * *opt-in overlay* — the layer is present but hidden until the user reveals it.
+ *
+ * The geovis control keys its remembered state by `item.id`, so `defaultActive`
+ * only decides the initial state *before the first toggle*; after the user
+ * flips it once, that explicit choice wins across all modes.
+ */
+const cozinhasDefaultActive = (mode: MapMode): boolean => {
+  return mode === 'pontos' || mode === 'circulos' || mode === 'assentamentos';
+};
+
+/**
+ * Builds the spec-driven layer-toggle control for the active mode.
+ * `<GeoVisProvider>` auto-mounts a floating "Camadas" button (bottom-left)
+ * whenever `spec.control` is present — no component is placed manually. The
+ * on/off choice is remembered by `item.id`, so each toggle persists across mode
+ * switches (which rebuild the spec).
+ *
+ * - **Cozinhas** shows/hides the kitchens by referencing both representations
+ *   (`cozinhas-pts` in `pontos`/`assentamentos`/choropleths/`cafs`,
+ *   `cozinhas-bolhas` in `circulos`); only the one present in the active mode is
+ *   toggled. The points layer is now rendered in every mode except `circulos`,
+ *   so the item is enabled everywhere; its initial state comes from
+ *   {@link cozinhasDefaultActive}.
+ * - **Linhas dos estados** toggles the state boundary outline drawn from
+ *   `/geo/estados.json`. That line is a normal layer added by the
+ *   `estados-boundary` group in `useMapaSpec` (`createBoundaryGroup` names it
+ *   `${id}-line`), so referencing `estados-boundary-line` by id lets the
+ *   control hide/show it. The group is present in every mode, so this item is
+ *   always enabled.
+ *
+ * @param mode - Active {@link MapMode}; sets the kitchens item's `defaultActive`.
+ * @returns The control spec for the "Camadas" button.
+ *
+ * @example
+ * buildControl('pontos').items[0].defaultActive; // true
+ * buildControl('coropletico').items[0].defaultActive; // false
+ */
+const buildControl = (
+  mode: MapMode
+): NonNullable<VisualizationSpec['control']> => {
+  return {
+    id: 'camadas',
+    label: 'Camadas',
+    position: 'bottom-left',
+    trigger: 'hover',
+    items: [
+      {
+        id: 'cozinhas',
+        label: 'Localização das cozinhas',
+        layers: [COZINHAS_POINTS_LAYER_ID, 'cozinhas-bolhas'],
+        defaultActive: cozinhasDefaultActive(mode),
+      },
+      {
+        id: 'estados',
+        label: 'Linhas dos estados',
+        layers: ['estados-boundary-line'],
+      },
+    ],
+  };
+};
+
 /** GeoJSON source + categorical status join for the assentamentos overlay. */
 const ASSENTAMENTOS_SOURCE_ID = 'assentamentos';
 const ASSENTAMENTOS_MAP_DATA_ID = 'assentamentos-status';
@@ -390,10 +456,26 @@ const buildFillLayer = (
 };
 
 /**
+ * Attaches a spec-driven hover tooltip to a layer when a render is provided,
+ * returning the layer unchanged otherwise.
+ */
+const withHoverTooltip = (
+  layer: VisualizationLayer,
+  render?: HoverTooltipConfig['render']
+): VisualizationLayer => {
+  return render
+    ? { ...layer, hoverTooltip: { render, style: TOOLTIP_STYLE } }
+    : layer;
+};
+
+/**
  * Assembles the layers for the active mode. The município fill is present in
  * every mode **except** `assentamentos` (where municípios are hidden). The
  * kitchen points sit on top in `pontos` and `assentamentos`; `circulos` shows
- * the proportional-circle overlay instead.
+ * the proportional-circle overlay instead. On every choropleth and on `cafs`
+ * the points are also added on top but start hidden (`visible: false`), so the
+ * "Camadas" control can reveal them as an opt-in overlay (see
+ * {@link cozinhasDefaultActive}).
  */
 const buildOverlayLayers = ({
   mode,
@@ -407,25 +489,11 @@ const buildOverlayLayers = ({
   overlays: MapOverlays;
 }): VisualizationLayer[] => {
   const layers: VisualizationLayer[] = [];
-  const pointsLayer: VisualizationLayer = overlays.cozinhaTooltipRender
-    ? {
-        ...POINTS_LAYER,
-        hoverTooltip: {
-          render: overlays.cozinhaTooltipRender,
-          style: TOOLTIP_STYLE,
-        },
-      }
-    : POINTS_LAYER;
-
-  const cafsLayer: VisualizationLayer = overlays.cafTooltipRender
-    ? {
-        ...CAFS_LAYER,
-        hoverTooltip: {
-          render: overlays.cafTooltipRender,
-          style: TOOLTIP_STYLE,
-        },
-      }
-    : CAFS_LAYER;
+  const pointsLayer = withHoverTooltip(
+    POINTS_LAYER,
+    overlays.cozinhaTooltipRender
+  );
+  const cafsLayer = withHoverTooltip(CAFS_LAYER, overlays.cafTooltipRender);
 
   if (mode !== 'assentamentos') {
     layers.push(buildFillLayer(mode, hoverTooltipRender));
@@ -446,6 +514,13 @@ const buildOverlayLayers = ({
     layers.push(buildAssentamentosLayer(overlays.assentamentos?.hoverRender));
     layers.push(buildAssentamentosOutlineLayer());
     layers.push(pointsLayer);
+  }
+  // Opt-in kitchen overlay on every choropleth and on `cafs`: the same points
+  // layer, added last (on top) but hidden until the "Camadas" control reveals
+  // it. `cozinhasDefaultActive` returns `false` for these modes, so the control
+  // keeps it hidden on first render.
+  if (mode.startsWith('coropletico') || mode === 'cafs') {
+    layers.push({ ...pointsLayer, visible: false });
   }
   return layers;
 };
@@ -585,5 +660,6 @@ export const buildSpec = (
       hoverTooltipRender,
       overlays,
     }),
+    control: buildControl(mode),
   };
 };

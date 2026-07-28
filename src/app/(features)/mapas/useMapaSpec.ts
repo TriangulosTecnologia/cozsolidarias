@@ -1,4 +1,8 @@
-import { createBoundaryGroup, useBoundaryToggle } from '@ttoss/geovis';
+import {
+  createBoundaryGroup,
+  useBoundaryToggle,
+  type VisualizationSpec,
+} from '@ttoss/geovis';
 import * as React from 'react';
 
 import type {
@@ -28,6 +32,49 @@ const municipiosGroup = createBoundaryGroup({
   paint: { lineColor: '#B2B2B2', lineWidth: 0.6 },
 });
 
+/**
+ * Point/circle overlays that must always paint above the boundary outlines: the
+ * kitchen points, the proportional circles, and the CAF points. `useBoundaryToggle`
+ * appends the município/estado boundary groups *after* every `buildSpec` layer, so
+ * without lifting these back to the top the thin boundary lines would render over
+ * them (e.g. município borders drawn over the kitchen points).
+ */
+const TOP_OVERLAY_LAYER_IDS = new Set([
+  'cozinhas-pts',
+  'cozinhas-bolhas',
+  'cafs-pts',
+]);
+
+/**
+ * Re-orders a spec's layers so the {@link TOP_OVERLAY_LAYER_IDS} overlays sit
+ * last (topmost), keeping every other layer's relative order and each layer's
+ * config untouched. Returns the spec unchanged when it carries none of them.
+ *
+ * This runs *after* {@link useBoundaryToggle} has appended the boundary lines,
+ * which is what makes the kitchen points win over the município/estado outlines.
+ *
+ * @param spec - The spec whose layers to re-order (boundary lines already appended).
+ * @returns A spec with the overlay layers moved to the end (or the same spec).
+ *
+ * @example
+ * liftOverlaysAboveBoundaries({ ...spec, layers: [fill, points, boundaryLine] });
+ * // → layers: [fill, boundaryLine, points]
+ */
+export const liftOverlaysAboveBoundaries = (
+  spec: VisualizationSpec
+): VisualizationSpec => {
+  const above = spec.layers.filter((layer) => {
+    return TOP_OVERLAY_LAYER_IDS.has(layer.id);
+  });
+  if (above.length === 0) {
+    return spec;
+  }
+  const below = spec.layers.filter((layer) => {
+    return !TOP_OVERLAY_LAYER_IDS.has(layer.id);
+  });
+  return { ...spec, layers: [...below, ...above] };
+};
+
 /** The map data the spec is derived from, plus the active visualization mode. */
 type UseMapaSpecParams = {
   kitchenByCity: kitchenRateByCity[];
@@ -42,8 +89,10 @@ type UseMapaSpecParams = {
 /**
  * Builds the geovis visualization spec for the maps playground, wiring every
  * layer's hover tooltip (via {@link useMapaTooltips}) and the boundary-group
- * toggle to the active mode. Memoizes the spec so the map only rebuilds when its
- * inputs change.
+ * toggle to the active mode. The point/circle overlays are lifted above the
+ * appended boundary lines (via {@link liftOverlaysAboveBoundaries}) so the
+ * kitchen points always render on top. Memoizes the spec so the map only
+ * rebuilds when its inputs change.
  *
  * @param params - The loaded map data and the active {@link MapMode}.
  * @returns The geovis {@link VisualizationSpec} for the current mode.
@@ -103,5 +152,11 @@ export const useMapaSpec = ({
   }, [mode]);
 
   const { spec } = useBoundaryToggle(baseSpec, boundaryGroups);
-  return spec;
+
+  // The boundary toggle appends the município/estado outlines after every base
+  // layer; lift the point/circle overlays back on top so they never hide behind
+  // the boundary lines.
+  return React.useMemo(() => {
+    return liftOverlaysAboveBoundaries(spec);
+  }, [spec]);
 };

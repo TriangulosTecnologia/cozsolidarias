@@ -177,9 +177,55 @@ const CozinhaDetailPanel = ({ cozinha }: { cozinha: CozinhaDetalhe }) => {
 };
 
 /**
- * Right sidebar config for the CAF points mode. Fetches the clicked CAF's
- * detail from `/api/cafs/[nrCaf]`, falling back to an empty production list on
- * 404 and to the last loaded detail on other errors.
+ * Fetches a CAF's detail from `/api/cafs/[nrCaf]`, falling back to an empty
+ * production list on 404 and to the last loaded detail on other errors.
+ */
+const fetchCafDetalhe = (
+  nrCaf: string | number
+): Promise<CafDetalhe | null> => {
+  return fetch(`/api/cafs/${nrCaf}`).then(async (response) => {
+    if (response.status === 404) {
+      return { nrCaf: String(nrCaf), producao: [] };
+    }
+    if (!response.ok) {
+      return lastCafDetalhe;
+    }
+    const detalhe = (await response.json()) as CafDetalhe;
+    lastCafDetalhe = detalhe;
+    return detalhe;
+  });
+};
+
+/**
+ * Fetches a kitchen's detail from `/api/cozinhas/[codigo]`, keeping the last
+ * loaded detail visible on error.
+ */
+const fetchCozinhaDetail = (
+  codigo: string | number
+): Promise<CozinhaDetalhe | null> => {
+  return fetch(`/api/cozinhas/${codigo}`).then(async (response) => {
+    if (!response.ok) return lastCozinhaDetail;
+    const detail = (await response.json()) as CozinhaDetalhe;
+    lastCozinhaDetail = detail;
+    return detail;
+  });
+};
+
+/**
+ * Discriminated detail returned by the `cafs`-mode sidebar's `onFeatureSelect`:
+ * `kind` says which point layer was clicked so `renderDetails` picks the right
+ * panel.
+ */
+type CafOrCozinhaDetail =
+  | { kind: 'caf'; detalhe: CafDetalhe }
+  | { kind: 'cozinha'; detalhe: CozinhaDetalhe };
+
+/**
+ * Right sidebar config for the `cafs` mode, which renders **two** clickable
+ * point layers: CAF areas (green) and the opt-in kitchen overlay (orange).
+ * `onFeatureSelect` branches on `info.layerId` to fetch the matching detail and
+ * tags it so `renderDetails` shows the CAF or the kitchen panel. A CAF 404 falls
+ * back to an empty production list; other errors keep the last loaded detail.
  *
  * @example
  * <GeovisWorkspace config={{ rightSidebar: CAF_RIGHT_SIDEBAR }} ... />
@@ -187,21 +233,21 @@ const CozinhaDetailPanel = ({ cozinha }: { cozinha: CozinhaDetalhe }) => {
 export const CAF_RIGHT_SIDEBAR: NonNullable<
   GeovisWorkspaceConfig['rightSidebar']
 > = {
-  title: 'CAF',
+  title: 'Detalhe',
   shouldOpen: (info) => {
-    return info.layerId === CAFS_POINTS_LAYER_ID;
+    return (
+      info.layerId === CAFS_POINTS_LAYER_ID ||
+      info.layerId === COZINHAS_POINTS_LAYER_ID
+    );
   },
   onFeatureSelect: (info) => {
-    return fetch(`/api/cafs/${info.featureId}`).then(async (response) => {
-      if (response.status === 404) {
-        return { nrCaf: String(info.featureId), producao: [] };
-      }
-      if (!response.ok) {
-        return lastCafDetalhe;
-      }
-      const detalhe = (await response.json()) as CafDetalhe;
-      lastCafDetalhe = detalhe;
-      return detalhe;
+    if (info.layerId === COZINHAS_POINTS_LAYER_ID) {
+      return fetchCozinhaDetail(info.featureId).then((detalhe) => {
+        return detalhe ? { kind: 'cozinha', detalhe } : null;
+      });
+    }
+    return fetchCafDetalhe(info.featureId).then((detalhe) => {
+      return detalhe ? { kind: 'caf', detalhe } : null;
     });
   },
   renderDetails: ({ loading, error, data }) => {
@@ -211,7 +257,12 @@ export const CAF_RIGHT_SIDEBAR: NonNullable<
       );
     }
     if (error || !data) return null;
-    return <CafDetailPanel detalhe={data as CafDetalhe} />;
+    const detail = data as CafOrCozinhaDetail;
+    return detail.kind === 'cozinha' ? (
+      <CozinhaDetailPanel cozinha={detail.detalhe} />
+    ) : (
+      <CafDetailPanel detalhe={detail.detalhe} />
+    );
   },
 };
 
@@ -231,12 +282,7 @@ export const COZINHA_RIGHT_SIDEBAR: NonNullable<
     return info.layerId === COZINHAS_POINTS_LAYER_ID;
   },
   onFeatureSelect: (info) => {
-    return fetch(`/api/cozinhas/${info.featureId}`).then(async (response) => {
-      if (!response.ok) return lastCozinhaDetail;
-      const detail = (await response.json()) as CozinhaDetalhe;
-      lastCozinhaDetail = detail;
-      return detail;
-    });
+    return fetchCozinhaDetail(info.featureId);
   },
   renderDetails: ({ loading, error, data }) => {
     if (loading) {
@@ -249,8 +295,25 @@ export const COZINHA_RIGHT_SIDEBAR: NonNullable<
   },
 };
 
-/** Modes that render the kitchen points layer and expose the detail sidebar. */
-export const MODES_WITH_RIGHT_SIDEBAR = new Set<MapMode>([
-  'pontos',
-  'assentamentos',
-]);
+/**
+ * Whether the given mode exposes the kitchen detail sidebar
+ * ({@link COZINHA_RIGHT_SIDEBAR}). True for `pontos` and `assentamentos` (points
+ * always shown) and for every choropleth (`coropletico*`), where the points are
+ * an opt-in overlay whose clicks should still open the kitchen detail. The
+ * `cafs` mode is excluded here — it uses the combined {@link CAF_RIGHT_SIDEBAR}
+ * instead; `circulos` is excluded too (bubbles carry no click detail).
+ *
+ * @param mode - Active {@link MapMode}.
+ * @returns `true` when the kitchen detail sidebar applies.
+ *
+ * @example
+ * modeShowsCozinhaDetail('coropletico'); // true
+ * modeShowsCozinhaDetail('cafs'); // false
+ */
+export const modeShowsCozinhaDetail = (mode: MapMode): boolean => {
+  return (
+    mode === 'pontos' ||
+    mode === 'assentamentos' ||
+    mode.startsWith('coropletico')
+  );
+};

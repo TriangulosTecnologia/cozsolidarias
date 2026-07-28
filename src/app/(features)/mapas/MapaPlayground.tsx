@@ -26,7 +26,7 @@ import { type AssentamentoAtributo, type MapMode } from './geovisSpec';
 import {
   CAF_RIGHT_SIDEBAR,
   COZINHA_RIGHT_SIDEBAR,
-  MODES_WITH_RIGHT_SIDEBAR,
+  modeShowsCozinhaDetail,
 } from './mapaDetailSidebars';
 import { type NomesPorCodigo, useMapaSpec } from './useMapaSpec';
 
@@ -230,7 +230,7 @@ const MapaPlayground = () => {
       rightSidebar:
         mode === 'cafs'
           ? CAF_RIGHT_SIDEBAR
-          : MODES_WITH_RIGHT_SIDEBAR.has(mode)
+          : modeShowsCozinhaDetail(mode)
             ? COZINHA_RIGHT_SIDEBAR
             : undefined,
     };
