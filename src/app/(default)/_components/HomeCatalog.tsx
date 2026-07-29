@@ -59,7 +59,7 @@ const HomeCatalog = () => {
                 textStyle="title-1"
                 color="charcoal.900"
               >
-                Nenhum dado sem contexto.
+                Nenhum dado sem contexto
               </Text>
               <Text textStyle="body-lg" color="charcoal.700">
                 Cada dataset deve indicar origem, período, cobertura, campos,

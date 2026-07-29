@@ -172,50 +172,44 @@ describe('MapaPlayground — visualization toggle', () => {
     // Waits out the mount fetch, then the workspace (and its spec) render.
     const layerIds = await screen.findByTestId('layer-ids');
 
-    // Default (choropleth): the fill layer only, no points/bubbles overlay.
-    expect(layerIds).not.toHaveTextContent('cozinhas-pts');
+    // Default (choropleth): the fill layer plus the kitchen points as a hidden
+    // opt-in overlay (revealed via the "Camadas" control); no bubble overlay.
+    expect(layerIds).toHaveTextContent('cozinhas-pts');
     expect(layerIds).not.toHaveTextContent('cozinhas-bolhas');
 
-    // Rate mode keeps the single choropleth fill, no points/bubbles overlay.
+    // Rate mode keeps the choropleth fill plus the hidden kitchen overlay; no
+    // bubble overlay.
     fireEvent.change(screen.getByLabelText('Visualização'), {
       target: { value: 'coropletico-taxa' },
     });
-    expect(screen.getByTestId('layer-ids')).not.toHaveTextContent(
-      'cozinhas-pts'
-    );
+    expect(screen.getByTestId('layer-ids')).toHaveTextContent('cozinhas-pts');
     expect(screen.getByTestId('layer-ids')).not.toHaveTextContent(
       'cozinhas-bolhas'
     );
 
-    // Share (%) mode also keeps the single choropleth fill, no overlay.
+    // Share (%) mode also keeps the fill plus the hidden kitchen overlay.
     fireEvent.change(screen.getByLabelText('Visualização'), {
       target: { value: 'coropletico-percentual' },
     });
-    expect(screen.getByTestId('layer-ids')).not.toHaveTextContent(
-      'cozinhas-pts'
-    );
+    expect(screen.getByTestId('layer-ids')).toHaveTextContent('cozinhas-pts');
     expect(screen.getByTestId('layer-ids')).not.toHaveTextContent(
       'cozinhas-bolhas'
     );
 
-    // CadÚnico mode keeps the single choropleth fill, no overlay.
+    // CadÚnico mode keeps the fill plus the hidden kitchen overlay.
     fireEvent.change(screen.getByLabelText('Visualização'), {
       target: { value: 'coropletico-cadunico' },
     });
-    expect(screen.getByTestId('layer-ids')).not.toHaveTextContent(
-      'cozinhas-pts'
-    );
+    expect(screen.getByTestId('layer-ids')).toHaveTextContent('cozinhas-pts');
     expect(screen.getByTestId('layer-ids')).not.toHaveTextContent(
       'cozinhas-bolhas'
     );
 
-    // Coverage (people-per-cozinha) mode also keeps the single fill, no overlay.
+    // Coverage (people-per-cozinha) mode also keeps the fill plus the overlay.
     fireEvent.change(screen.getByLabelText('Visualização'), {
       target: { value: 'coropletico-pessoas-cozinha' },
     });
-    expect(screen.getByTestId('layer-ids')).not.toHaveTextContent(
-      'cozinhas-pts'
-    );
+    expect(screen.getByTestId('layer-ids')).toHaveTextContent('cozinhas-pts');
     expect(screen.getByTestId('layer-ids')).not.toHaveTextContent(
       'cozinhas-bolhas'
     );

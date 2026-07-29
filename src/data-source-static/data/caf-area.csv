@@ -1,0 +1,1000 @@
+"nr_caf";"ds_tipo_area";"ds_tipo_unidade_medida";"nr_area";"cd_municipio";"sg_uf";"nm_municipio";"ds_tipo_localizacao_area";"ds_condicao_dominio";"st_imovel_principal";"nr_latitude";"nr_longitude"
+6;Terra;ha;2.20;"5300108";DF;Brasília;Rural;Proprietário;true;-15.771184;-48.180337
+8;Terra;ha;5.00;"5300108";DF;Brasília;Rural;Comodatário;true;-15.769219876173404;-48.18303644657135
+9;Terra;ha;5.00;"5300108";DF;Brasília;Rural;Comodatário;true;-15.769197785910054;-48.181733233180125
+10;Terra;ha;0.54;"5300108";DF;Brasília;Rural;Posseiro;true;-15.833844362375778;-48.17548334598541
+14;Terra;ha;50.00;"2409803";RN;Pedro Velho;Rural;Posseiro;true;-6.450598307183013;-35.26163935661316
+15;Terra;ha;15.36;"2402600";RN;Ceará-Mirim;Rural;Assentado da reforma agrária;true;-5.5180122851810145;-3538362022051478
+17;Terra;ha;14.00;"2402600";RN;Ceará-Mirim;Rural;Assentado da reforma agrária;true;-5.518299606664946;-35.37891626358032
+18;Terra;ha;70.00;"2411106";RN;Ruy Barbosa;Rural;Comodatário;true;-5.8439592499188375;-35.97474747940661
+20;Terra;ha;4.58;"2409803";RN;Pedro Velho;Rural;Proprietário;true;-6.468888;-35.263055
+23;Terra;ha;2.00;"2409803";RN;Pedro Velho;Rural;Comodatário;true;-6.48495455884436;-35.24905023581773
+24;Terra;ha;22.00;"2401701";RN;Bom Jesus;Rural;Proprietário;true;-6.005231466169274;-35.56338518857956
+24;Terra;ha;195.57;"2401701";RN;Bom Jesus;Rural;Proprietário;false;-6.005871663388891;-35.563623905181885
+27;Terra;ha;8.57;"3136504";MG;Jordânia;Rural;Posseiro;true;-15.808211;-40.421461
+29;Terra;ha;22.30;"3146305";MG;Padre Paraíso;Rural;Posseiro;true;-17.103674109798604;-41.415421845403664
+30;Terra;ha;9.70;"5219001";GO;Sanclerlândia;Rural;Proprietário;true;-16.1115;-50.1624
+32;Terra;ha;15.00;"2414704";RN;Várzea;Rural;Posseiro;true;-6.365021297587688;-35.38165748119354
+34;Terra;ha;104.60;"5106216";MT;Nova Canaã do Norte;Rural;Assentado da reforma agrária;true;-10.543516584649868;-55.94281733036041
+39;Terra;ha;2.00;"5300108";DF;Brasília;Rural;Parceiro/meeiro;true;-15.79766371380254;-47.64085633376784
+42;Terra;ha;45.00;"5107156";MT;Reserva do Cabaçal;Rural;Posseiro;true;-15.138378864927926;-58.32349736752859
+43;Terra;ha;3.00;"3146305";MG;Padre Paraíso;Rural;Posseiro;true;-17.126419;-41.60513
+45;Terra;ha;2.00;"3146305";MG;Padre Paraíso;Rural;Comodatário;true;-17.168922;-41.638922
+47;Terra;ha;2.00;"5300108";DF;Brasília;Rural;Parceiro/meeiro;true;-15.931670828207448;-47.59595453739166
+49;Terra;ha;2.15;"3146305";MG;Padre Paraíso;Rural;Posseiro;true;-17.101888;-41.619885
+50;Terra;ha;0.60;"2202703";PI;Cocal;Rural;Comodatário;true;-3.4239908563151555;-41.512691165873164
+52;Terra;ha;15.00;"3146305";MG;Padre Paraíso;Rural;Posseiro;true;-17.067890675632317;-41.46807971163941
+53;Terra;ha;14.28;"5300108";DF;Brasília;Rural;Permissionário de áreas públicas;true;-15.921931590779105;-47.627111077308655
+54;Terra;ha;2.00;"3146305";MG;Padre Paraíso;Rural;Comodatário;true;-17.09430956749545;-41.57675512822438
+56;Terra;ha;5.63;"4104006";PR;Campina Grande do Sul;Rural;Proprietário;true;-25.283777;-49.024513
+1062;Terra;ha;6.30;"3160306";MG;Santo Antônio do Jacinto;Rural;Proprietário;true;-16.46382836992297;-40.117588
+1063;Terra;ha;4.36;"3160306";MG;Santo Antônio do Jacinto;Rural;Posseiro;true;-16.513454;-40.211678
+1070;Terra;ha;2.00;"5300108";DF;Brasília;Rural;Posseiro;true;-15.739264803957258;-48.119739840253466
+1076;Terra;ha;7.00;"5108402";MT;Várzea Grande;Rural;Proprietário;true;-15.731757150340153;-56.122761368751526
+1079;Terra;ha;2.00;"2202703";PI;Cocal;Rural;Proprietário;true;3304467;-47.879539132118225
+1082;Terra;ha;1.00;"5300108";DF;Brasília;Rural;Parceiro/meeiro;true;-15.761239276415775;-47.645052712313195
+1085;Terra;ha;6.05;"3146305";MG;Padre Paraíso;Rural;Proprietário;true;-16.99574657598858;-41.45122888095092
+1086;Terra;ha;14.03;"4203600";SC;Campos Novos;Rural;Assentado da reforma agrária;true;-27.36047661425305;-51.33892357349396
+2084;Terra;ha;26.00;"4203600";SC;Campos Novos;Rural;Arrendatário;true;-27.342275436664682;-51.10514223575592
+2084;Terra;ha;25.00;"4203600";SC;Campos Novos;Rural;Arrendatário;false;-27.330952986361712;-51.099058985710144
+2084;Terra;ha;15.00;"4203600";SC;Campos Novos;Rural;Arrendatário;false;-27.273827519075;-51.0737282037735
+2085;Terra;ha;14.20;"3160306";MG;Santo Antônio do Jacinto;Rural;Proprietário;true;-16.448683339374437;-40.19543945789337
+2087;Terra;ha;10.00;"3146305";MG;Padre Paraíso;Rural;Posseiro;true;-17.09444952912289;-41.57286887999454
+2090;Terra;ha;20.00;"5300108";DF;Brasília;Rural;Parceiro/meeiro;true;-15.784696531066686;-47.4467995762825
+2095;Terra;ha;1.00;"3146305";MG;Padre Paraíso;Rural;Comodatário;true;-17.05184;-41.424881
+2096;Terra;ha;1.00;"2202703";PI;Cocal;Rural;Comodatário;true;-3.447802902355156;-41.40455146298419
+2098;Terra;ha;6.30;"2902807";BA;Barra da Estiva;Rural;Proprietário;true;-13.65605903;-41.32698445
+2098;Terra;ha;9.26;"2902807";BA;Barra da Estiva;Rural;Proprietário;false;-13.65677907;-41.32535609
+2099;Terra;ha;17.42;"2108603";MA;Pinheiro;Rural;Assentado da reforma agrária;true;-2.658577;-45.250968
+2101;Terra;ha;4.00;"2516300";PB;Sumé;Rural;Proprietário;true;-7.689233;-36.860611
+2102;Terra;ha;0.60;"2602001";PE;Bodocó;Rural;Comodatário;true;-7.611388;-39.975556
+2103;Terra;ha;1.80;"2902807";BA;Barra da Estiva;Rural;Possuidor;true;-13.611729;-41.299582
+2111;Terra;ha;2.25;"2902807";BA;Barra da Estiva;Rural;Posseiro;true;-13.58096663;-41.33808337
+2112;Terra;ha;25.82;"4309753";RS;Ibarama;Rural;Proprietário;true;-29.233145;-53.094014
+2113;Terra;ha;2.00;"3200201";ES;Alegre;Rural;Parceiro/meeiro;true;-20.302019034446378;-40.057273507118225
+2114;Terra;ha;13.00;"2504207";PB;Catingueira;Rural;Posseiro;true;-7.135283361437052;-37.61669933795929
+2115;Terra;ha;1.00;"3146305";MG;Padre Paraíso;Rural;Comodatário;true;-17.058813081689504;-41.421925127506256
+2116;Terra;ha;16.94;"3160306";MG;Santo Antônio do Jacinto;Rural;Posseiro;true;-16.57052036852622;-40.31395255241406
+2117;Terra;ha;2.39;"2413300";RN;Serra de São Bento;Rural;Proprietário;true;-6.43722222;-35.75
+2122;Terra;ha;9.34;"3200102";ES;Afonso Cláudio;Rural;Beneficiário/a do PNCF;true;-20.09901859870981;-41.032154436425216
+2124;Terra;ha;15.18;"5208608";GO;Goianésia;Rural;Proprietário;true;-15.179600040632634;-49.208906292915344
+2125;Terra;ha;5.05;"4104451";PR;Cantagalo;Rural;Proprietário;true;-25.32896;-52.05063
+2126;Terra;ha;5.28;"4125704";PR;São Miguel do Iguaçu;Rural;Proprietário;false;-25.323195429111625;-54.21493007359402
+2126;Terra;ha;5.26;"4125704";PR;São Miguel do Iguaçu;Rural;Proprietário;false;-25.32048796329687;-54.20985979974663
+2126;Terra;ha;6.20;"4125704";PR;São Miguel do Iguaçu;Rural;Proprietário;true;-25.32118930060165;-54.21182656075184
+2128;Terra;ha;299.00;"2201150";PI;Baixa Grande do Ribeiro;Rural;Posseiro;true;-8.61112;-45.354921
+2129;Terra;ha;1.38;"2902807";BA;Barra da Estiva;Rural;Posseiro;false;-13.58777497;-41.29037781
+2129;Terra;ha;3.65;"2902807";BA;Barra da Estiva;Rural;Posseiro;true;-13.62066948;-41.29856666
+2132;Terra;ha;3.00;"3146305";MG;Padre Paraíso;Rural;Posseiro;true;-17.037388;-41.483794
+2134;Terra;ha;4.64;"3102050";MG;Alto Caparaó;Rural;Proprietário;true;-20.480170300025193;-41.89910352230072
+2135;Terra;ha;5.87;"2614600";PE;Tabira;Rural;Posseiro;true;-7.513889;37.565
+2136;Terra;ha;2.86;"3146305";MG;Padre Paraíso;Rural;Posseiro;true;-17.03592;-41.483009
+2137;Terra;ha;7.50;"4312385";RS;Monte Belo do Sul;Rural;Proprietário;true;-29.123744;-51.6496
+2138;Terra;ha;4.84;"4104451";PR;Cantagalo;Rural;Comodatário;true;-25.38233;-52.06133
+2139;Terra;ha;1.33;"4104451";PR;Cantagalo;Rural;Posseiro;false;-25.38611;-52.05815
+2139;Terra;ha;10.19;"4104451";PR;Cantagalo;Rural;Proprietário;true;-25.378756;-52.0488
+2142;Terra;ha;26.63;"5208608";GO;Goianésia;Rural;Assentado da reforma agrária;true;-15.295247232779085;-49.273772835731506
+2143;Terra;ha;48.01;"2515500";PB;Serra Branca;Rural;Beneficiário/a do PNCF;true;-7.67111111;-36.74611111
+2145;Terra;ha;11.50;"2612307";PE;Saloá;Rural;Posseiro;true;-9.03545081295728;-36.70187294483185
+2147;Terra;ha;2.00;"2902807";BA;Barra da Estiva;Rural;Posseiro;true;-13.5851005;-41.23538752
+2149;Terra;ha;2.50;"2515807";PB;Serra Redonda;Rural;Proprietário;true;-7.1475;-35.67777778
+2151;Terra;ha;32.00;"2107902";MA;Passagem Franca;Rural;Posseiro;true;-6.301059499954969;-43.840540051460266
+2153;Terra;ha;0.30;"2612307";PE;Saloá;Rural;Comodatário;true;-8.971738512601224;-36.66001952399859
+2154;Terra;ha;3.00;"4212403";SC;Pedras Grandes;Rural;Comodatário;true;-28.47732767215344;-49.13084328174591
+2154;Terra;ha;7.40;"4218707";SC;Tubarão;Rural;Parceiro/meeiro;false;-28.476781021081816;-49.130247831344604
+2156;Terra;ha;0.43;"2900306";BA;Acajutiba;Rural;Comodatário;true;-11.665159;-38.019398
+2159;Terra;ha;4.40;"2614600";PE;Tabira;Rural;Posseiro;true;-7.565278;-37.521111
+2162;Terra;ha;3.00;"2615706";PE;Triunfo;Rural;Posseiro;true;-7.8058833;-38.0486111
+2163;Terra;ha;13.79;"5300108";DF;Brasília;Rural;Assentado da reforma agrária;true;-15.556606;-47.481845
+2167;Terra;ha;18.50;"3200136";ES;Águia Branca;Rural;Comodatário;true;-19.047606;-40.704677
+2168;Terra;ha;10.00;"2612208";PE;Salgueiro;Rural;Uso Coletivo;true;-8.2701;-38.9229
+2170;Terra;ha;5.15;"3200102";ES;Afonso Cláudio;Rural;Proprietário;true;41.057570693025276;20.19486129336028
+2170;Terra;ha;4.18;"3200102";ES;Afonso Cláudio;Rural;Proprietário;false;-20.194861293;-41.05757
+2171;Terra;ha;42.16;"4104600";PR;Capitão Leônidas Marques;Rural;Proprietário;true;-25.404922;-53.623447
+2172;Terra;ha;32.00;"2605608";PE;Flores;Rural;Proprietário;true;-7.87414796546089;-37.99115717411041
+2173;Terra;ha;5.25;"3102050";MG;Alto Caparaó;Rural;Proprietário;true;-20.499536085548314;-41.93327486515045
+2175;Terra;ha;0.20;"2900306";BA;Acajutiba;Rural;Proprietário;true;-11.66204012470862;-38.01862299442291
+2177;Terra;ha;1.00;"2614709";PE;Tacaimbó;Rural;Posseiro;true;-8.371727778;-36.28869444
+2178;Terra;ha;36.30;"4316733";RS;Santa Cecília do Sul;Rural;Proprietário;true;28.119212;51.957345
+2178;Terra;ha;10.40;"4316733";RS;Santa Cecília do Sul;Rural;Proprietário;false;28.123376;51.952453
+2179;Terra;ha;0.60;"2612471";PE;Santa Cruz da Baixa Verde;Rural;Comodatário;true;-7.878120041037541;-38.19014202886162
+2182;Terra;ha;1.00;"2612307";PE;Saloá;Rural;Posseiro;true;-8.940168953437759;-36.678752303123474
+2183;Terra;ha;8.00;"4304952";RS;Caseiros;Rural;Arrendatário;true;-28.242006;-51.689119
+2184;Terra;ha;3.00;"2611002";PE;Petrolândia;Rural;Posseiro;true;-8.831442066958768;-38.390870690345764
+2184;Tanque;M³;84.00;"2611002";PE;Petrolândia;Rural;Permissionário de áreas públicas;false;-8.869444840199622;-38.459277749061584
+2186;Terra;ha;2.04;"3553500";SP;Tapiraí;Rural;Arrendatário;true;-23.942884;-47.506342
+2188;Terra;ha;8.25;"3102050";MG;Alto Caparaó;Rural;Arrendatário;true;-20.490819;-41.873026
+2190;Terra;ha;27.60;"4316808";RS;Santa Cruz do Sul;Rural;Proprietário;true;-29.631862482613723;-52.3056560754776
+2191;Terra;ha;1.07;"2612307";PE;Saloá;Rural;Proprietário;true;-8.975459457071302;-36.656736731529236
+2193;Terra;ha;1.73;"4114807";PR;Marialva;Rural;Proprietário;true;-23.518480791947415;-51.805399008598336
+2195;Terra;ha;2.00;"2500700";PB;São João do Rio do Peixe;Rural;Parceiro/meeiro;true;-6.87555555;-38.36805556
+2196;Terra;ha;17.34;"2612307";PE;Saloá;Rural;Posseiro;true;-9.020579433143329;-36.72683894634247
+2197;Terra;ha;1.00;"4316808";RS;Santa Cruz do Sul;Rural;Proprietário;false;-29.52;52.33
+2197;Terra;ha;7.75;"4316808";RS;Santa Cruz do Sul;Rural;Proprietário;true;-29.518699352004788;-52.3409242201663
+2198;Terra;ha;1.00;"3160306";MG;Santo Antônio do Jacinto;Rural;Comodatário;true;-16.534981851070686;-40.22251904010773
+2199;Terra;ha;71.00;"4309902";RS;Ibiraiaras;Rural;Proprietário;true;-28.27363;-51.626465
+2201;Terra;ha;10.10;"4204806";SC;Curitibanos;Rural;Proprietário;false;-27.105582;-50.699016
+2201;Terra;ha;9.10;"4311700";RS;Machadinho;Rural;Proprietário;false;-27.506044;-51.683639
+2201;Terra;ha;6.00;"4302303";RS;Bom Jesus;Rural;Proprietário;false;-28.466608;-50.342066
+2201;Terra;ha;3.40;"4311700";RS;Machadinho;Rural;Proprietário;true;-27.505203;-51.683791
+2203;Terra;ha;1.00;"2509800";PB;Mulungu;Rural;Comodatário;true;-6.95;-35.38583333
+2204;Terra;ha;0.50;"2610509";PE;Passira;Rural;Comodatário;true;-7.98305555555555;-35.5713888888888
+3195;Terra;ha;6.00;"2513307";PB;Santa Helena;Rural;Parceiro/meeiro;true;-6.423279;-38.392336
+3196;Terra;ha;18.00;"3541307";SP;Presidente Epitácio;Rural;Proprietário;true;-21.664318480111806;-51.90450968927857
+3197;Terra;ha;38.90;"4301958";RS;Barra Funda;Rural;Arrendatário;true;-27.94570604706653;-53.01302969455719
+3198;Terra;ha;1.00;"2611002";PE;Petrolândia;Rural;Posseiro;true;-8.83004264809127;-38.39222252368927
+3200;Terra;ha;4.00;"4312385";RS;Monte Belo do Sul;Rural;Comodatário;true;-29.113343;-51.669437
+3202;Terra;ha;6.50;"4322533";RS;Vale do Sol;Rural;Proprietário;true;-29.715447;-52.608083
+3203;Terra;ha;39.50;"4316808";RS;Santa Cruz do Sul;Rural;Comodatário;true;-29.65810163981875;-52.34041375566949
+3209;Terra;ha;17.00;"3509106";SP;Caiuá;Rural;Assentado da reforma agrária;true;-21.644375142775605;-51.89677215633496
+3211;Terra;ha;3.00;"4322533";RS;Vale do Sol;Rural;Comodatário;true;-29.588717;-52.720776
+3213;Terra;ha;17.10;"5002704";MS;Campo Grande;Rural;Assentado da reforma agrária;true;-20.310522;-54.759432
+3216;Terra;ha;4.00;"4317608";RS;Santo Antônio da Patrulha;Rural;Proprietário;true;-29.823028677041254;-50.43011976211419
+4196;Terra;ha;8.61;"3200136";ES;Águia Branca;Rural;Proprietário;true;-19.081059468446785;-40.70907651846399
+4197;Terra;ha;14.92;"3541307";SP;Presidente Epitácio;Rural;Proprietário;true;-21.68957991310215;-52.00003445148468
+4198;Terra;ha;44.29;"5208608";GO;Goianésia;Rural;Assentado da reforma agrária;true;-15.32799690915423;-49.283815026283264
+4199;Terra;ha;13.40;"4314605";RS;Piratini;Rural;Proprietário;true;-31.66803;-52.988465
+4200;Terra;ha;8.00;"4312708";RS;Nonoai;Rural;Proprietário;false;-27.378426;-52.882525
+4200;Terra;ha;5.00;"4309126";RS;Gramado dos Loureiros;Rural;Proprietário;false;-27.39269774773533;-52.89192259311676
+4200;Terra;ha;5.08;"4309126";RS;Gramado dos Loureiros;Rural;Proprietário;false;-27.39577455605837;-52.89336025714874
+4200;Terra;ha;5.27;"4309126";RS;Gramado dos Loureiros;Rural;Proprietário;true;-27.393511580848816;-52.89436876773834
+4201;Terra;ha;2.00;"2615706";PE;Triunfo;Rural;Uso Coletivo;true;-7.810579;-38.067442
+4202;Terra;ha;12.10;"4102752";PR;Bela Vista da Caroba;Rural;Comodatário;false;-25.898955;-53.687922
+4202;Terra;ha;4.20;"4102752";PR;Bela Vista da Caroba;Rural;Comodatário;false;-25.906888;-53.676237
+4202;Terra;ha;7.00;"4102752";PR;Bela Vista da Caroba;Rural;Comodatário;true;-25.898892;-53.691041
+4205;Terra;ha;19.50;"4121406";PR;Realeza;Rural;Comodatário;true;-25.759755;-53.523517
+4209;Terra;ha;17.00;"4320677";RS;Sinimbu;Rural;Proprietário;true;-29.52542;-52.455602
+4210;Terra;ha;9.98;"4312955";RS;Nova Boa Vista;Rural;Proprietário;true;-27.987378;-52.982727
+4212;Terra;ha;1.00;"2601201";PE;Arcoverde;Rural;Proprietário;true;-8.408057;-37.1216547
+4213;Terra;ha;0.60;"2612307";PE;Saloá;Rural;Proprietário;true;-8.981534511224037;-36.66789185321952
+4214;Terra;ha;1.00;"3201159";ES;Brejetuba;Rural;Parceiro/meeiro;true;-20.22482211781571;-41.263829
+4216;Terra;ha;1.00;"2614709";PE;Tacaimbó;Rural;Comodatário;true;-8.37510278;-36.32333056
+4222;Terra;ha;10.00;"5300108";DF;Brasília;Rural;Posseiro;true;-15.545973445986135;-48.03317606449127
+4225;Terra;ha;11.37;"4104600";PR;Capitão Leônidas Marques;Rural;Arrendatário;true;-25.490689;-53.475794
+4226;Terra;ha;5.00;"5300108";DF;Brasília;Rural;Parceiro/meeiro;true;-15.510757024589509;-15.510757024589509
+4227;Terra;ha;7.02;"4316808";RS;Santa Cruz do Sul;Rural;Proprietário;true;-29.70817093452251;-52.33939826488495
+4228;Terra;ha;9.68;"4104451";PR;Cantagalo;Rural;Comodatário;false;-25.156614;-52.143862
+4228;Terra;ha;7.42;"4104451";PR;Cantagalo;Rural;Proprietário;true;-25.1574;-52.13981
+4230;Terra;ha;17.67;"5208608";GO;Goianésia;Rural;Proprietário;true;-15.185708764787526;-49.262539744377136
+4231;Terra;ha;8.50;"2610509";PE;Passira;Rural;Posseiro;true;-7.98222222;-35.54305556
+4232;Terra;ha;2.50;"4304952";RS;Caseiros;Rural;Proprietário;true;-28.279090608889394;-51.72093451023102
+4234;Terra;ha;2.53;"4104451";PR;Cantagalo;Rural;Proprietário;true;-25.40696;-52.16933
+4234;Terra;ha;2.59;"4104451";PR;Cantagalo;Rural;Proprietário;false;-25.407369;-52.167845
+4234;Terra;ha;5.01;"4104451";PR;Cantagalo;Rural;Proprietário;false;-25.408781927548088;-52.169448017196665
+4235;Terra;ha;4.00;"3139508";MG;Manhumirim;Rural;Arrendatário;true;-20.353622;-41.995283
+4235;Terra;ha;3.50;"3139508";MG;Manhumirim;Rural;Arrendatário;false;-20.357610;-41.935093
+4235;Terra;ha;5.00;"3139508";MG;Manhumirim;Rural;Arrendatário;false;-20.357099;-42.004834
+4236;Terra;ha;37.60;"4311700";RS;Machadinho;Rural;Proprietário;true;-27.538618;-51.675997
+4238;Terra;ha;1.23;"2603108";PE;Cachoeirinha;Rural;Posseiro;true;-8.43285022388958;-36.30107171386841
+4239;Terra;ha;15.00;"4309126";RS;Gramado dos Loureiros;Rural;Parceiro/meeiro;true;-27.44353506402137;-52.933786511421204
+4239;Terra;ha;3.70;"4309126";RS;Gramado dos Loureiros;Rural;Parceiro/meeiro;false;-27.443163;-52.923123
+4240;Terra;ha;4.00;"2607505";PE;Itaíba;Rural;Posseiro;true;-8.95147821376089;-37.4437290430069
+4241;Terra;ha;14.18;"2607703";PE;Itapetim;Rural;Parceiro/meeiro;true;-7.331158;-37.195706
+4242;Terra;ha;32.96;"1301308";AM;Codajás;Rural;Proprietário;true;-3.819017;-62.010297
+5195;Terra;ha;9.68;"5208608";GO;Goianésia;Rural;Proprietário;true;-15.403748299023063;-49.16355550289154
+5198;Terra;ha;5.40;"2510006";PB;Nazarezinho;Rural;Proprietário;true;-6.564965;-38.232371
+5202;Terra;ha;0.70;"2603108";PE;Cachoeirinha;Rural;Comodatário;true;-8.48046914713773;-36.28648450221058
+5203;Terra;ha;23.77;"2607406";PE;Itacuruba;Rural;Posseiro;true;-8.666468821513686;-38.62939417362213
+5204;Terra;ha;3.16;"3160306";MG;Santo Antônio do Jacinto;Rural;Uso Coletivo;true;-16.466276015034317;-40.12398540973663
+5205;Terra;ha;17.30;"4313201";RS;Nova Petrópolis;Rural;Proprietário;true;-29.411046;-51.13304
+5205;Terra;ha;2.22;"4313201";RS;Nova Petrópolis;Rural;Proprietário;false;-29.40953;-51.133104
+5205;Terra;ha;2.00;"4313201";RS;Nova Petrópolis;Rural;Proprietário;false;-29.409699;-51.137306
+5206;Terra;ha;5.14;"4104600";PR;Capitão Leônidas Marques;Rural;Proprietário;false;-25.446975;-53.569383
+5206;Terra;ha;7.00;"4104600";PR;Capitão Leônidas Marques;Rural;Comodatário;false;-25.459514;-53.527283
+5206;Terra;ha;20.73;"4104600";PR;Capitão Leônidas Marques;Rural;Proprietário;true;-25.434825;-53.571136
+5207;Terra;ha;3.46;"2510006";PB;Nazarezinho;Rural;Posseiro;true;-7.012187959337853;-38.321433663368225
+5210;Terra;ha;1.22;"2604502";PE;Chã Grande;Rural;Posseiro;true;-8.21910126278036;-35.44040350108978
+5211;Terra;ha;10.00;"2607406";PE;Itacuruba;Rural;Posseiro;true;-8.801841107092471;-38.7020069360733
+5212;Terra;ha;31.10;"2510006";PB;Nazarezinho;Rural;Posseiro;true;-6.9576640135788566;-38.354392647743225
+5214;Terra;ha;10.14;"2607406";PE;Itacuruba;Rural;Posseiro;true;-8.733130625653262;-38.683982491493225
+5216;Terra;ha;6.00;"4316808";RS;Santa Cruz do Sul;Rural;Proprietário;true;-29.593194657377598;-52.33919441699982
+5218;Terra;ha;10.00;"4312955";RS;Nova Boa Vista;Rural;Arrendatário;true;-27.960221;-52.987638
+5219;Terra;ha;11.25;"4218707";SC;Tubarão;Rural;Proprietário;true;-28.478810953549505;-48.981932401657104
+5220;Terra;ha;1.01;"2614402";PE;Solidão;Rural;Posseiro;true;-7.564422;-37.692411
+5221;Terra;ha;27.46;"4104600";PR;Capitão Leônidas Marques;Rural;Parceiro/meeiro;false;-25.446581;-53.604281
+5221;Terra;ha;19.02;"4104600";PR;Capitão Leônidas Marques;Rural;Parceiro/meeiro;true;-25.446581;-53.604278
+5222;Terra;ha;2.00;"2614105";PE;Sertânia;Rural;Posseiro;true;-8.326337805784748;-37.59376645088196
+5223;Terra;ha;2.00;"2603900";PE;Carnaíba;Rural;Comodatário;true;-7.925497715647738;-37.75598108768463
+5224;Terra;ha;43.92;"3119302";MG;Coromandel;Rural;Arrendatário;true;-18.520256;-46.851388
+5225;Terra;ha;27.00;"2614105";PE;Sertânia;Rural;Proprietário;true;-8.117911;-37.410734
+5226;Terra;ha;35.40;"2513307";PB;Santa Helena;Rural;Proprietário;true;-6.6744444444444;-38.623888888889
+5228;Terra;ha;1.00;"2602001";PE;Bodocó;Rural;Comodatário;true;-7.60972222;-40.09527777
+5230;Terra;ha;6.27;"2613602";PE;São José do Egito;Rural;Posseiro;true;-7.528072;-37.404319
+5231;Terra;ha;2.53;"2612307";PE;Saloá;Rural;Posseiro;true;-9.007749588362636;-36.69762700796127
+5232;Terra;ha;1.50;"3200201";ES;Alegre;Rural;Parceiro/meeiro;true;-20.86179958471741;-41.54256820678711
+5233;Terra;ha;12.40;"4104451";PR;Cantagalo;Rural;Arrendatário;false;-25.27528;-52.20949
+5233;Terra;ha;4.34;"4104451";PR;Cantagalo;Rural;Proprietário;true;-25.395589803827246;-52.1159202327881
+5233;Terra;ha;6.32;"4104451";PR;Cantagalo;Rural;Proprietário;false;-25.435563;-52.118066
+5233;Terra;ha;1.07;"4104451";PR;Cantagalo;Rural;Proprietário;false;-25.435563822705575;-52.11806671936034
+5233;Terra;ha;4.84;"4104451";PR;Cantagalo;Rural;Arrendatário;false;-25.4113771338015;-52.105271064038114
+5233;Terra;ha;7.26;"4104451";PR;Cantagalo;Rural;Arrendatário;false;-25.391935777889508;-52.11364571954347
+5235;Terra;ha;2.00;"2601201";PE;Arcoverde;Rural;Arrendatário;true;-8.413214;-36.993697
+5236;Terra;ha;2.71;"2612307";PE;Saloá;Rural;Proprietário;true;-8.936983434443816;-36.68557047843933
+5237;Terra;ha;10.90;"2600807";PE;Altinho;Rural;Posseiro;true;-8.47486388888889;-36.1281222222222
+5239;Terra;ha;2.80;"2513307";PB;Santa Helena;Rural;Proprietário;true;-6.699985823778249;-38.635820746421814
+5240;Terra;ha;14.19;"4305108";RS;Caxias do Sul;Rural;Proprietário;false;-29.24906223729264;-51.10631383481612
+5240;Terra;ha;10.00;"4305108";RS;Caxias do Sul;Rural;Proprietário;false;-29.251500736290918;-51.101829181615926
+5240;Terra;ha;7.43;"4305108";RS;Caxias do Sul;Rural;Proprietário;true;-29.240866395249036;-51.11724651891345
+5241;Terra;ha;3.08;"2607406";PE;Itacuruba;Rural;Posseiro;true;-8.667409082042068;-38.62699091434479
+5242;Terra;ha;6.62;"4313201";RS;Nova Petrópolis;Rural;Arrendatário;false;-29.383582;-51.18916
+5242;Terra;ha;0.72;"4313201";RS;Nova Petrópolis;Rural;Arrendatário;true;-29.36966;-51.044655
+5242;Terra;ha;2.85;"4313201";RS;Nova Petrópolis;Rural;Arrendatário;false;-29.370961;-50.96248
+5243;Terra;ha;5.00;"2607406";PE;Itacuruba;Rural;Uso Coletivo;true;-8.798787578081692;-38.749900460243225
+5244;Terra;ha;2.00;"5300108";DF;Brasília;Rural;Parceiro/meeiro;true;-15.682343568599281;-48.1167675188415
+5245;Terra;ha;1.38;"2614600";PE;Tabira;Rural;Proprietário;true;-7.531389;-37.471944
+5246;Terra;ha;1.50;"2614600";PE;Tabira;Rural;Comodatário;true;-7.514683;-37.4744
+6226;Terra;ha;2.59;"4309126";RS;Gramado dos Loureiros;Rural;Proprietário;true;-27.4611;-52.851486
+6227;Terra;ha;6.51;"4104600";PR;Capitão Leônidas Marques;Rural;Parceiro/meeiro;false;-53.499094;-53.499094
+6227;Terra;ha;7.86;"4104600";PR;Capitão Leônidas Marques;Rural;Parceiro/meeiro;false;-25.495097;-53.499097
+6227;Terra;ha;24.00;"4104600";PR;Capitão Leônidas Marques;Rural;Parceiro/meeiro;true;-25.495097;-53.499094
+6227;Terra;ha;6.88;"4104600";PR;Capitão Leônidas Marques;Rural;Parceiro/meeiro;false;-25.495092;-53.499094
+6229;Terra;ha;3.00;"2612471";PE;Santa Cruz da Baixa Verde;Rural;Proprietário;true;-7.8846054684850015;-38.14848482608795
+7226;Terra;ha;2.00;"2612307";PE;Saloá;Rural;Posseiro;true;-8.953498031028657;-36.65085732936859
+7228;Terra;ha;7.00;"4305447";RS;Chuvisca;Rural;Comodatário;false;-30.761643;-52.013663
+7228;Terra;ha;17.00;"4305447";RS;Chuvisca;Rural;Arrendatário;false;-30.765953;-52.020857
+7228;Terra;ha;6.10;"4305447";RS;Chuvisca;Rural;Proprietário;true;-30.767983;-52.026828
+7228;Terra;ha;6.50;"4305447";RS;Chuvisca;Rural;Posseiro;false;-30.771739;-52.020086
+7228;Terra;ha;9.00;"4305447";RS;Chuvisca;Rural;Comodatário;false;-30.767822;-52.022133
+7228;Terra;ha;5.17;"4305447";RS;Chuvisca;Rural;Parceiro/meeiro;false;-30.762841;-52.018808
+7228;Terra;ha;7.00;"4305447";RS;Chuvisca;Rural;Arrendatário;false;-30.763678;-52.025715
+7232;Terra;ha;47.20;"4219507";SC;Xanxerê;Rural;Proprietário;true;-26.819574;-52.3601349
+7234;Terra;ha;1.02;"2600807";PE;Altinho;Rural;Posseiro;true;-8.451483;-36.016619
+7235;Terra;ha;1.00;"2405108";RN;Jandaíra;Rural;Comodatário;true;-5.264;-36.149484
+7236;Terra;ha;10.00;"2607406";PE;Itacuruba;Rural;Posseiro;true;-8.739167;38.714722
+7237;Terra;ha;3.40;"2510006";PB;Nazarezinho;Rural;Posseiro;true;-6.89222692385628;-38.354392647743225
+7240;Terra;ha;15.35;"2607703";PE;Itapetim;Rural;Parceiro/meeiro;true;-7.446936;-37.119325
+8226;Terra;ha;14.79;"4303509";RS;Camaquã;Rural;Proprietário;true;-30.6788;-51.9396
+8227;Terra;ha;3.00;"4316972";RS;Santa Margarida do Sul;Rural;Proprietário;true;-30.337824575853553;-54.10396993160248
+8229;Terra;ha;2.00;"2510006";PB;Nazarezinho;Rural;Comodatário;true;-6.990379144065141;-38.277488350868225
+8230;Terra;ha;1.32;"2603108";PE;Cachoeirinha;Rural;Posseiro;true;-8.445302456315295;-36.34567859888076
+8231;Terra;ha;1.00;"2605608";PE;Flores;Rural;Comodatário;true;7.862982;37.871751
+8233;Terra;ha;11.00;"2607109";PE;Ingazeira;Rural;Posseiro;true;-7.684978353379429;-37.43466808997631
+8234;Terra;ha;13.50;"2409803";RN;Pedro Velho;Rural;Posseiro;true;-6.455943781542378;-35.26206314563751
+8235;Terra;ha;15.27;"2607703";PE;Itapetim;Rural;Posseiro;true;-7.438783;-37.054244
+8236;Terra;ha;2.00;"3200201";ES;Alegre;Rural;Parceiro/meeiro;true;-20.71100618992328;-41.42926096916199
+8237;Terra;ha;1.31;"3146305";MG;Padre Paraíso;Rural;Proprietário;true;-17.047891822152508;-41.465240120887756
+8238;Terra;ha;69.54;"2400505";RN;Alexandria;Rural;Proprietário;true;-6.2863305556;-37.9436444444
+8243;Terra;ha;5.30;"4316808";RS;Santa Cruz do Sul;Rural;Proprietário;true;-29.439212;-52.365894
+8244;Terra;ha;3.60;"4316808";RS;Santa Cruz do Sul;Rural;Proprietário;true;-29.817508095377416;-52.35430061817169
+8245;Terra;ha;6.80;"3201159";ES;Brejetuba;Rural;Parceiro/meeiro;true;-20.225077740505967;-41.27498
+8247;Terra;ha;24.20;"4215406";SC;Salto Veloso;Rural;Proprietário;true;-26.869860702444228;-51.46212011575699
+8249;Terra;ha;10.09;"1301308";AM;Codajás;Rural;Proprietário;true;-3.7908313633096693;-62.052811452362064
+8250;Terra;ha;1.00;"2613602";PE;São José do Egito;Rural;Proprietário;true;-7.57138;-37.316558
+8251;Terra;ha;14.70;"5006606";MS;Ponta Porã;Rural;Assentado da reforma agrária;true;-22.197635;-55.666363
+8252;Terra;ha;4.64;"5000906";MS;Antônio João;Rural;Proprietário;true;-22.138212;-55.921284
+8254;Terra;ha;4.00;"5003157";MS;Coronel Sapucaia;Rural;Arrendatário;true;-23.282032;-55.544194
+8254;Terra;ha;2.50;"5003157";MS;Coronel Sapucaia;Rural;Arrendatário;false;-23.482033024855717;-55.262351632118225
+8255;Terra;ha;7.50;"5004007";MS;Glória de Dourados;Rural;Proprietário;true;-22.37346219792;-54.28452551364899
+8255;Terra;ha;19.92;"5003801";MS;Fátima do Sul;Rural;Proprietário;false;-22.35972532466629;-54.31373835782786
+8255;Terra;ha;7.50;"5004007";MS;Glória de Dourados;Rural;Proprietário;false;-22.392419290638276;-54.29617702960968
+8257;Terra;ha;10.33;"5004601";MS;Itaquiraí;Rural;Assentado da reforma agrária;true;-23.48518189230373;-54.146981835365295
+8258;Terra;ha;17.16;"5004304";MS;Iguatemi;Rural;Assentado da reforma agrária;true;-23.350422268739962;-54.46545660495758
+8260;Terra;ha;10.45;"5004502";MS;Itaporã;Rural;Proprietário;true;-22.017219;-54.767336
+8260;Terra;ha;39.14;"5004502";MS;Itaporã;Rural;Comodatário;false;-22.017217;-54.767334
+8260;Terra;ha;5.22;"5004502";MS;Itaporã;Rural;Proprietário;false;-22.017218;-54.767335
+8262;Terra;ha;33.82;"5005806";MS;Nioaque;Rural;Assentado da reforma agrária;true;20522973;55472155
+8263;Terra;ha;45.82;"4215406";SC;Salto Veloso;Rural;Proprietário;true;-26.881376081719868;-51.388185024261475
+8265;Terra;ha;2.42;"5008404";MS;Vicentina;Rural;Proprietário;false;-22.42018696367638;-54.38720762042341
+8265;Terra;ha;15.19;"5008404";MS;Vicentina;Rural;Proprietário;true;-22.440651259862115;-54.35967692887135
+8265;Terra;ha;4.20;"5008404";MS;Vicentina;Rural;Proprietário;false;-22.419701499263798;-54.38677047040979
+8267;Terra;ha;5.62;"5008305";MS;Três Lagoas;Rural;Proprietário;true;-20.78938820764694;-51.790671944618225
+8268;Terra;ha;7.14;"5002100";MS;Bela Vista;Rural;Proprietário;true;-21.972957048104476;-56.457635164260864
+8270;Terra;ha;15.00;"5005152";MS;Juti;Rural;Assentado da reforma agrária;true;-22.763376;-54.70288
+8271;Terra;ha;20.00;"5001102";MS;Aquidauana;Rural;Proprietário;true;-20.46914;-55.69335
+8272;Terra;ha;12.09;"5002308";MS;Brasilândia;Rural;Proprietário;true;-21.36754098517226;-51.99696600437164
+8272;Terra;ha;23.45;"5002308";MS;Brasilândia;Rural;Proprietário;false;-21.33485240512361;-51.99806034564972
+8274;Terra;ha;35.00;"5004502";MS;Itaporã;Rural;Arrendatário;false;-21.968127236956647;-54.729772210121155
+8274;Terra;ha;5.92;"5004502";MS;Itaporã;Rural;Arrendatário;true;-22.029047137037278;-54.748461842536926
+8274;Terra;ha;50.00;"5004502";MS;Itaporã;Rural;Arrendatário;false;-21.957715;-54.732539
+8275;Terra;ha;4.84;"4104600";PR;Capitão Leônidas Marques;Rural;Proprietário;false;-25.476122;-53.490531
+8275;Terra;ha;8.99;"4104600";PR;Capitão Leônidas Marques;Rural;Proprietário;true;-25.475372;-53.493892
+8275;Terra;ha;4.83;"4104600";PR;Capitão Leônidas Marques;Rural;Proprietário;false;-25.477211;-53.469181
+8275;Terra;ha;6.50;"4104600";PR;Capitão Leônidas Marques;Rural;Proprietário;false;-25.49035;-53.518164
+8275;Terra;ha;14.53;"4104600";PR;Capitão Leônidas Marques;Rural;Proprietário;false;-25.496936;-53.494728
+8275;Terra;ha;9.68;"4104600";PR;Capitão Leônidas Marques;Rural;Proprietário;false;-25.504336;-53.487336
+8278;Terra;ha;1.00;"2610509";PE;Passira;Rural;Comodatário;true;-7.98142335778398;-35.594503
+8279;Terra;ha;1.54;"2902807";BA;Barra da Estiva;Rural;Posseiro;true;-13.57390046;-41.31801604
+8280;Terra;ha;1.50;"2610509";PE;Passira;Rural;Comodatário;true;-8.04527778;-35.56166667
+8281;Terra;ha;1.60;"2505238";PB;Cuité de Mamanguape;Rural;Posseiro;true;-6.907525563699132;-35.29975943797096
+8285;Terra;ha;24.91;"5003702";MS;Dourados;Rural;Assentado da reforma agrária;true;-22.082696;-55.343321
+8286;Terra;ha;45.60;"2607109";PE;Ingazeira;Rural;Comodatário;true;-7.72888889;-37.40583333
+8288;Terra;ha;3.00;"4123808";PR;Santa Izabel do Oeste;Rural;Comodatário;true;-25.747035;-53.454884
+8290;Terra;ha;32.46;"1100346";RO;Alvorada D'Oeste;Rural;Proprietário;true;-11.150412;-62.172655
+8290;Terra;ha;22.93;"1100346";RO;Alvorada D'Oeste;Rural;Proprietário;false;-11.110038;-62.185375
+8291;Terra;ha;10.00;"4312955";RS;Nova Boa Vista;Rural;Arrendatário;false;-28.00805;-52.929903
+8291;Terra;ha;12.00;"4312955";RS;Nova Boa Vista;Rural;Parceiro/meeiro;false;-27.999714;-52.966258
+8291;Terra;ha;10.50;"4312955";RS;Nova Boa Vista;Rural;Arrendatário;false;-28.004939;-52.928017
+8291;Terra;ha;17.00;"4312955";RS;Nova Boa Vista;Rural;Parceiro/meeiro;true;-28.01257;-52.935681
+8292;Terra;ha;2.40;"2510006";PB;Nazarezinho;Rural;Uso Coletivo;true;-6.94675846295264;-38.277488350868225
+8293;Terra;ha;5.00;"5300108";DF;Brasília;Rural;Parceiro/meeiro;true;-15.622203;-47.549484
+8295;Terra;ha;1.50;"3204104";ES;Pinheiros;Rural;Comodatário;true;-18.35556;-40.10035
+8296;Terra;ha;1.00;"2611002";PE;Petrolândia;Rural;Uso Coletivo;true;-9.087978;-38.231764
+8297;Terra;ha;30.00;"5005103";MS;Jateí;Rural;Proprietário;true;-22.564147;-54.22284
+8298;Terra;ha;1.80;"3201159";ES;Brejetuba;Rural;Parceiro/meeiro;true;-20.231912044917923;-41.31958
+8299;Terra;ha;8.00;"4316808";RS;Santa Cruz do Sul;Rural;Comodatário;true;-29.587723511599098;-52.52491056919098
+8300;Terra;ha;31.11;"4314506";RS;Pinheiro Machado;Rural;Assentado da reforma agrária;true;-31.679297695431533;-53.44333112239838
+8303;Terra;ha;20.40;"4312385";RS;Monte Belo do Sul;Rural;Proprietário;true;-29.150349967366;-51.648875260629
+8304;Terra;ha;14.00;"5300108";DF;Brasília;Rural;Arrendatário;true;-15.829116944775446;-47.635865807533264
+8306;Terra;ha;13.80;"4312385";RS;Monte Belo do Sul;Rural;Proprietário;true;-29.149197222222;-51.651113888889
+8307;Terra;ha;6.00;"4301958";RS;Barra Funda;Rural;Arrendatário;false;-27.907767;-53.048553
+8307;Terra;ha;16.10;"4301958";RS;Barra Funda;Rural;Proprietário;true;-27.887365;-53.040508
+8307;Terra;ha;9.60;"4301958";RS;Barra Funda;Rural;Proprietário;false;-27.888794;-53.0417715
+8307;Terra;ha;2.40;"4301958";RS;Barra Funda;Rural;Proprietário;false;-27.887722;-53.039133
+9309;Terra;ha;15.00;"2500700";PB;São João do Rio do Peixe;Rural;Proprietário;true;-6.785222;-38.373077
+9310;Terra;ha;47.00;"2107902";MA;Passagem Franca;Rural;Comodatário;true;-6.134207896825667;-43.665295243263245
+9311;Terra;ha;2.76;"3204351";ES;Rio Bananal;Rural;Proprietário;true;-19.309998959620803;-40.31423717737198
+9313;Terra;ha;0.05;"2411205";RN;Santa Cruz;Periurbano;Posseiro;true;-6.229739608822228;-36.031864523887634
+9314;Terra;ha;110.00;"5003900";MS;Figueirão;Rural;Proprietário;true;-18.523689431850727;-53.85617136955261
+9314;Terra;ha;75.72;"5003900";MS;Figueirão;Rural;Proprietário;false;-18.536918907270355;-53.86477053165436
+9315;Terra;ha;10.93;"2614709";PE;Tacaimbó;Rural;Proprietário;false;-8.42823413785277;-36.272294306909494
+9315;Terra;ha;3.33;"2603108";PE;Cachoeirinha;Rural;Proprietário;true;-8.435475964246605;-36.283428719787
+9317;Terra;ha;2.00;"2603900";PE;Carnaíba;Rural;Comodatário;true;-7.81146835833811;-37.796836495399475
+9318;Terra;ha;0.77;"2613602";PE;São José do Egito;Rural;Posseiro;true;-7.549444;-37.418333
+9319;Terra;ha;4.27;"4311700";RS;Machadinho;Rural;Beneficiário/a do PNCF;true;-27.612913;-51.729208
+9320;Terra;ha;4.00;"2615706";PE;Triunfo;Rural;Comodatário;true;-7.827608;-38.058947
+9321;Terra;ha;8.70;"4303202";RS;Cacique Doble;Rural;Proprietário;false;-27.894808184402144;-51.700807213783264
+9321;Terra;ha;13.30;"4303202";RS;Cacique Doble;Rural;Proprietário;true;-27.897287759519376;-51.693543791770935
+9322;Terra;ha;5.97;"3200136";ES;Águia Branca;Rural;Proprietário;true;-18.969973477414577;-40.77979356050491
+9323;Terra;ha;12.60;"3139508";MG;Manhumirim;Rural;Parceiro/meeiro;true;-20.31893912490791;-41.88706576824188
+9324;Terra;ha;6.79;"4312385";RS;Monte Belo do Sul;Rural;Parceiro/meeiro;true;-29.0929919;-51.6563138435
+9325;Terra;ha;4.48;"5300108";DF;Brasília;Rural;Assentado da reforma agrária;true;155349.92;474327
+9326;Terra;ha;2.00;"5300108";DF;Brasília;Rural;Parceiro/meeiro;true;-15.960385414631581;-47.687031626701355
+9327;Terra;ha;9.60;"2607406";PE;Itacuruba;Rural;Posseiro;true;-8.668819718658144;-38.627334237098694
+9328;Terra;ha;2.20;"4315909";RS;Rodeio Bonito;Rural;Proprietário;true;-27.48373;-53.183505
+9328;Terra;ha;1.16;"4315909";RS;Rodeio Bonito;Rural;Proprietário;false;-27.483605;-53.182001
+9330;Terra;ha;1.00;"2612307";PE;Saloá;Rural;Comodatário;true;-9.013368685976229;-36.70561999082565
+9331;Terra;ha;1.00;"2412906";RN;São Tomé;Rural;Comodatário;true;-5.887969404584366;-36.18194282054901
+9333;Terra;ha;0.90;"4309126";RS;Gramado dos Loureiros;Rural;Proprietário;false;-27.42958;-52.916202
+9333;Terra;ha;4.10;"4309126";RS;Gramado dos Loureiros;Rural;Proprietário;false;-27.430827;-52.918681
+9333;Terra;ha;12.05;"4309126";RS;Gramado dos Loureiros;Rural;Proprietário;true;-27.43126;-52.916594
+9333;Terra;ha;12.15;"4309126";RS;Gramado dos Loureiros;Rural;Proprietário;false;-27.42858;-52.912801
+9334;Terra;ha;7.30;"2500700";PB;São João do Rio do Peixe;Rural;Proprietário;true;-6.911791;-38.39357
+9335;Terra;ha;1.20;"2615706";PE;Triunfo;Rural;Posseiro;true;-7.886823;-38.086839
+9337;Terra;ha;6.30;"4315909";RS;Rodeio Bonito;Rural;Proprietário;false;-27.44643;-53.145394
+9337;Terra;ha;11.65;"4315909";RS;Rodeio Bonito;Rural;Proprietário;true;-27.448241;-53.147449
+9338;Terra;ha;8.38;"5300108";DF;Brasília;Rural;Assentado da reforma agrária;true;152939.84;475021.49
+9340;Terra;ha;12.57;"2409803";RN;Pedro Velho;Rural;Posseiro;true;-6.447288082951431;-35.17824947834015
+9341;Terra;ha;6.00;"4301073";RS;Arroio do Padre;Rural;Posseiro;true;-31.451176823437244;-52.36579120159149
+9343;Terra;ha;1.00;"2606507";PE;Iati;Rural;Comodatário;true;-9.084842729389054;-36.82464838027954
+9344;Terra;ha;0.50;"3200102";ES;Afonso Cláudio;Rural;Parceiro/meeiro;true;-15.79081872417382;-47.879539132118225
+9347;Terra;ha;3.40;"4315909";RS;Rodeio Bonito;Periurbano;Proprietário;true;-27.483753;-53.165612
+9348;Terra;ha;9.10;"4311700";RS;Machadinho;Rural;Proprietário;true;-27.508863;-51.683813
+9349;Terra;ha;7.65;"4303509";RS;Camaquã;Rural;Proprietário;true;-30.68778010996029;-51.776466965675354
+9350;Terra;ha;5.70;"4308201";RS;Flores da Cunha;Rural;Proprietário;true;-29.104322;-51.324719
+9350;Terra;ha;12.00;"4307906";RS;Farroupilha;Rural;Proprietário;false;-29.132962;-51.287724
+9352;Terra;ha;11.61;"4303202";RS;Cacique Doble;Rural;Proprietário;false;-27.844910673178124;-51.756704449653625
+9352;Terra;ha;7.38;"4303202";RS;Cacique Doble;Rural;Proprietário;true;-27.844275069170305;-51.70492104322822
+9352;Terra;ha;2.61;"4303202";RS;Cacique Doble;Rural;Proprietário;false;-27.843018080129163;-51.706252098083496
+9357;Terra;ha;17.00;"4313706";RS;Palmeira das Missões;Rural;Arrendatário;false;-27.847437;-53.205827
+9357;Terra;ha;8.00;"4313706";RS;Palmeira das Missões;Rural;Arrendatário;false;-27.879033;-53.192908
+9357;Terra;ha;4.97;"4301958";RS;Barra Funda;Rural;Arrendatário;false;-27.910458362140258;-53.02123017658234
+9357;Terra;ha;6.00;"4313706";RS;Palmeira das Missões;Rural;Arrendatário;false;-27.881466;-53.166283
+9357;Terra;ha;8.00;"4313706";RS;Palmeira das Missões;Rural;Arrendatário;false;-27.84347658492023;-53.205303915344246
+9357;Terra;ha;0.55;"4301958";RS;Barra Funda;Rural;Proprietário;true;-27.914079545132893;-53.02173721097565
+9359;Terra;ha;82.57;"1301308";AM;Codajás;Rural;Posseiro;true;-3.801233;-62.486308
+9360;Terra;ha;4.00;"4312955";RS;Nova Boa Vista;Rural;Proprietário;true;-28.024912;-53.007139
+9360;Terra;ha;4.73;"4312955";RS;Nova Boa Vista;Rural;Arrendatário;false;-28.024911;-53.007139
+9360;Terra;ha;1.00;"4312955";RS;Nova Boa Vista;Rural;Proprietário;false;-28.027297;-53.004067
+9361;Terra;ha;2.00;"2615706";PE;Triunfo;Rural;Comodatário;true;-7.827584;-38.058745
+9362;Terra;ha;12.10;"4312385";RS;Monte Belo do Sul;Rural;Proprietário;true;-29.178422;-51.6478
+9363;Terra;ha;13.26;"4104600";PR;Capitão Leônidas Marques;Rural;Proprietário;true;-25.500317;-53.615206
+9364;Terra;ha;92.56;"5007901";MS;Sidrolândia;Rural;Proprietário;true;-20.74855938086979;-55.1651269197464
+9365;Terra;ha;12.14;"4316105";RS;Ronda Alta;Rural;Proprietário;true;-27.763977;-52.845827
+9366;Terra;ha;28.01;"5007554";MS;Santa Rita do Pardo;Rural;Assentado da reforma agrária;true;-21.39887;-52.89363
+9367;Terra;ha;1.37;"2614402";PE;Solidão;Rural;Posseiro;true;-7.605244;-37.699831
+9368;Terra;ha;2.51;"2614402";PE;Solidão;Rural;Posseiro;true;-7.601428;-37.679069
+9369;Terra;ha;0.93;"2614402";PE;Solidão;Rural;Posseiro;true;-7.630556;-37.751944
+9370;Terra;ha;4.48;"2614402";PE;Solidão;Rural;Posseiro;true;-7.596911;-37.702019
+9371;Terra;ha;1.00;"2600609";PE;Alagoinha;Rural;Uso Coletivo;true;-8.4653;-36.709571
+9372;Terra;ha;0.58;"2614402";PE;Solidão;Rural;Posseiro;true;-7.571311;-37.702233
+9373;Terra;ha;1.00;"2614402";PE;Solidão;Rural;Comodatário;true;-7.6008436352030255;-37.677314374343865
+9374;Terra;ha;1.00;"2614402";PE;Solidão;Rural;Comodatário;true;-7.610556;-37.686111
+9375;Terra;ha;14.30;"2500700";PB;São João do Rio do Peixe;Rural;Proprietário;true;-6.894895;-38.409508
+9376;Terra;ha;7.00;"2510006";PB;Nazarezinho;Rural;Posseiro;true;-6.990379144065141;-38.321433663368225
+9379;Terra;ha;1.10;"2607703";PE;Itapetim;Rural;Posseiro;true;-7.443258;-37.159572
+9380;Terra;ha;6.00;"4316808";RS;Santa Cruz do Sul;Rural;Comodatário;true;-29.726343600023828;-52.323294281959534
+9381;Terra;ha;5.20;"4320206";RS;Seberi;Rural;Proprietário;true;-27.452776;-53.357049
+9383;Terra;ha;2.00;"5300108";DF;Brasília;Rural;Arrendatário;true;-15.933569;-47.575602
+9384;Terra;ha;2.00;"2615706";PE;Triunfo;Rural;Comodatário;true;-7.892484;-38.08567
+9385;Terra;ha;0.22;"2603108";PE;Cachoeirinha;Rural;Posseiro;true;-8.425131850559957;-36.28297241152055
+9387;Terra;ha;5.80;"2513307";PB;Santa Helena;Rural;Parceiro/meeiro;true;-6.747208677350876;-38.49749137529174
+9388;Terra;ha;2.50;"4312385";RS;Monte Belo do Sul;Rural;Proprietário;true;-29.1264;-51.647355
+9389;Terra;ha;1.50;"2902807";BA;Barra da Estiva;Rural;Comodatário;true;-13.6664378;-41.23762621
+9390;Terra;ha;16.94;"4123808";PR;Santa Izabel do Oeste;Rural;Arrendatário;true;-25.766125;-53.410235
+9391;Terra;ha;32.09;"4303202";RS;Cacique Doble;Rural;Proprietário;true;-27.684156656264893;-51.63834
+9392;Terra;ha;42.42;"2107902";MA;Passagem Franca;Rural;Comodatário;true;-6.020625333128394;-43.9035639166832
+9393;Terra;ha;4.82;"2605103";PE;Custódia;Rural;Proprietário;true;-8.070833;-37.522222
+9394;Terra;ha;2.00;"2603900";PE;Carnaíba;Rural;Comodatário;true;7.801667;37.722222
+9395;Terra;ha;4.10;"2500700";PB;São João do Rio do Peixe;Rural;Proprietário;true;-6.72834;-38.421267
+9397;Terra;ha;16.00;"2510006";PB;Nazarezinho;Rural;Proprietário;true;-7.012187959337853;-38.299461007118225
+9398;Terra;ha;20.00;"2607703";PE;Itapetim;Rural;Parceiro/meeiro;true;-7.409511;-37.083231
+9405;Terra;ha;19.00;"4303202";RS;Cacique Doble;Rural;Parceiro/meeiro;true;-27.828080140799784;-51.733497977256775
+9406;Terra;ha;18.90;"2500700";PB;São João do Rio do Peixe;Rural;Proprietário;true;-6.803871;-38.443869
+9407;Terra;ha;5.00;"3204559";ES;Santa Maria de Jetibá;Rural;Proprietário;true;-20.030298;-40.625599
+9408;Terra;ha;3.70;"4313805";RS;Palmitinho;Rural;Arrendatário;true;-27.301990737980987;-53.618887066841125
+9410;Terra;ha;2.00;"2615706";PE;Triunfo;Rural;Comodatário;true;-7.891741;-38.087144
+9411;Terra;ha;71.00;"2404853";RN;Itajá;Rural;Proprietário;true;-5.651225492388924;-36.79678827524185
+9412;Terra;ha;12.10;"4126108";PR;São Tomé;Rural;Proprietário;false;-23.576968;-52.548484
+9412;Terra;ha;18.15;"4105508";PR;Cianorte;Rural;Proprietário;true;-23.724454118979452;-52.61054
+9412;Terra;ha;43.56;"4105508";PR;Cianorte;Rural;Parceiro/meeiro;false;-23.726124948917846;-52.61513
+9414;Terra;ha;1.00;"2607703";PE;Itapetim;Rural;Comodatário;true;-7.343614;-37.205539
+9415;Terra;ha;3.60;"2500700";PB;São João do Rio do Peixe;Rural;Proprietário;true;-6.629213;-38.380801
+9416;Terra;ha;5.00;"2510006";PB;Nazarezinho;Rural;Comodatário;true;-6.924946603339218;-38.299461007118225
+9417;Terra;ha;10.00;"4305447";RS;Chuvisca;Rural;Posseiro;true;-30.782786;-52.072989
+9419;Terra;ha;2.09;"2607703";PE;Itapetim;Rural;Proprietário;true;-7.397614;-37.160033
+9420;Terra;ha;0.60;"2600609";PE;Alagoinha;Rural;Posseiro;true;-8.497503598659096;-36.734644174575806
+9421;Terra;ha;2.00;"2615805";PE;Tupanatinga;Rural;Comodatário;true;-8.442711474766515;-37.255759835243225
+9423;Terra;ha;18.40;"3204559";ES;Santa Maria de Jetibá;Rural;Proprietário;false;-41.01;-20.11
+9423;Terra;ha;7.10;"3200102";ES;Afonso Cláudio;Rural;Proprietário;true;-20.198456322657186;-41.01782809279464
+9424;Terra;ha;5.00;"4315909";RS;Rodeio Bonito;Rural;Proprietário;true;-27.422246;-53.167075
+9425;Terra;ha;4.30;"5008305";MS;Três Lagoas;Rural;Proprietário;true;-20.418416422513225;-52.09524214267731
+9426;Terra;ha;2.00;"3200201";ES;Alegre;Rural;Parceiro/meeiro;true;-20.81323335381116;-41.49939805269241
+9428;Terra;ha;23.10;"4311700";RS;Machadinho;Rural;Proprietário;false;-27.509076;-51.632808
+9428;Terra;ha;21.32;"4311700";RS;Machadinho;Rural;Proprietário;true;-27.514925;-51.632751
+9429;Terra;ha;11.50;"3203163";ES;Laranja da Terra;Rural;Proprietário;true;-19.868468314019175;-40.97368
+9430;Terra;ha;12.00;"4312385";RS;Monte Belo do Sul;Rural;Parceiro/meeiro;true;-29.177175;-51.6225
+9431;Terra;ha;15.00;"3204104";ES;Pinheiros;Rural;Arrendatário;true;-18.32309;-39.99433
+9433;Terra;ha;8.50;"4104600";PR;Capitão Leônidas Marques;Rural;Parceiro/meeiro;true;-25.436156;-53.586133
+9434;Terra;ha;3.90;"4320206";RS;Seberi;Rural;Proprietário;true;-27.586986;-53.320216
+9438;Terra;ha;9.94;"4316808";RS;Santa Cruz do Sul;Rural;Proprietário;true;-29.666465879991648;-52.38617581738088
+9439;Terra;ha;0.80;"4320206";RS;Seberi;Rural;Proprietário;true;-27.550803;-53.334589
+9439;Terra;ha;10.35;"4320206";RS;Seberi;Rural;Proprietário;false;-27.551694;-53.335001
+9441;Terra;ha;6.00;"2615805";PE;Tupanatinga;Rural;Comodatário;true;-8.76417915753688;-37.395835518836975
+9445;Terra;ha;10.00;"4316808";RS;Santa Cruz do Sul;Rural;Proprietário;true;-29.494111556292406;-52.405155301094055
+9446;Terra;ha;7.25;"4320206";RS;Seberi;Rural;Arrendatário;true;-27.491674;-53.31235
+9449;Terra;ha;10.68;"4104600";PR;Capitão Leônidas Marques;Rural;Proprietário;true;-25.438878;-53.568664
+9450;Terra;ha;13.00;"5006606";MS;Ponta Porã;Rural;Assentado da reforma agrária;true;-22.248955168440627;-55.51864206790924
+9452;Terra;ha;15.05;"4305447";RS;Chuvisca;Rural;Proprietário;true;-30.729989;-51.942433
+9453;Terra;ha;7.00;"4305447";RS;Chuvisca;Rural;Proprietário;true;-30.797909;-52.021449
+9454;Terra;ha;13.45;"4305447";RS;Chuvisca;Rural;Posseiro;true;-30.828233;-51.991837
+9455;Terra;ha;4.00;"3153509";MG;Alto Jequitibá;Rural;Comodatário;true;-20.390711553217532;-41.857969164848306
+9455;Terra;ha;2.50;"3153509";MG;Alto Jequitibá;Rural;Parceiro/meeiro;false;-20.4710163;-41.93032896
+9460;Terra;ha;5.00;"3203056";ES;Jaguaré;Rural;Proprietário;true;-18.914920953061;-40.045695010912
+9460;Terra;ha;4.00;"3203056";ES;Jaguaré;Rural;Arrendatário;false;-18.5502;-40.0015
+9461;Terra;ha;17.00;"2611804";PE;Ribeirão;Rural;Posseiro;true;-8.516737639218697;-35.478206276893616
+9465;Terra;ha;3.80;"4315909";RS;Rodeio Bonito;Rural;Proprietário;true;-27.442011;-53.160982
+9466;Terra;ha;23.00;"2411700";RN;São Bento do Trairí;Rural;Posseiro;true;-6.402664786549553;-36.05918767440795
+9467;Terra;ha;2.50;"2510006";PB;Nazarezinho;Rural;Posseiro;true;-6.9576640135788566;-38.387351632118225
+9469;Terra;ha;58.54;"5003702";MS;Dourados;Rural;Assentado da reforma agrária;true;-22.016416;-55.628603
+9470;Terra;ha;6.00;"2615805";PE;Tupanatinga;Rural;Comodatário;true;-8.731670319468567;-37.384849190711975
+9471;Terra;ha;21.00;"2513307";PB;Santa Helena;Rural;Parceiro/meeiro;true;-6.6914683944452875;-38.653308749198914
+9472;Terra;ha;3.60;"4312385";RS;Monte Belo do Sul;Rural;Proprietário;true;-29.116425;-51.666625
+9473;Terra;ha;1.18;"2615805";PE;Tupanatinga;Rural;Proprietário;true;-8.742462423719518;-37.316184639930725
+9474;Terra;ha;6.00;"2500700";PB;São João do Rio do Peixe;Rural;Comodatário;true;-6.798906;-38.426404
+9475;Terra;ha;1.00;"2603108";PE;Cachoeirinha;Rural;Comodatário;true;-8.45127382179587;-36.31050341829118
+9477;Terra;ha;2.00;"2600807";PE;Altinho;Rural;Comodatário;true;-8.47459444;-36.0739
+9478;Terra;ha;9.97;"2602001";PE;Bodocó;Rural;Uso Coletivo;true;-7.510279587633685;-40.11256193489197
+9479;Terra;ha;65.00;"2107902";MA;Passagem Franca;Rural;Comodatário;true;-6.096315926186948;-43.794406056404114
+9480;Terra;ha;7.50;"4315909";RS;Rodeio Bonito;Rural;Proprietário;true;-27.481775;-53.150828
+9482;Terra;ha;21.78;"4320206";RS;Seberi;Rural;Proprietário;true;-27.524083;-53.399616
+9483;Terra;ha;2.40;"2513307";PB;Santa Helena;Rural;Proprietário;true;-6.710632960552852;-38.64759296178818
+9484;Terra;ha;1.00;"2612307";PE;Saloá;Rural;Comodatário;true;-9.008547312557782;-36.718685030937195
+9486;Terra;ha;5.90;"4310504";RS;Iraí;Rural;Proprietário;true;-27.18170905709203;-53.23226273059845
+9487;Terra;ha;2.83;"2600609";PE;Alagoinha;Rural;Posseiro;true;-8.47668081260911;-36.71283364360487
+9488;Terra;ha;10.00;"2614600";PE;Tabira;Rural;Proprietário;true;-7.506325;-37.596906
+9490;Lâmina dágua;ha;0.01;"2513307";PB;Santa Helena;Rural;Permissionário de áreas públicas;true;-6.687991;-38.523992
+9492;Terra;ha;4.67;"2603108";PE;Cachoeirinha;Rural;Posseiro;true;-8.43361111;-36.29333333
+9493;Terra;ha;16.95;"2613602";PE;São José do Egito;Rural;Posseiro;true;-7.419014;-37.24253
+9494;Terra;ha;0.60;"2612307";PE;Saloá;Rural;Comodatário;true;-8.9620760469663;-36.698734760284424
+9495;Terra;ha;1.54;"4320206";RS;Seberi;Rural;Proprietário;true;-27.586907;-53.321315
+9496;Terra;ha;2.70;"2615805";PE;Tupanatinga;Rural;Proprietário;true;-8.776394262871944;-37.3367840051651
+9497;Terra;ha;10.44;"2614600";PE;Tabira;Rural;Posseiro;true;-7.522227;-37.576378
+9498;Terra;ha;17.80;"4123808";PR;Santa Izabel do Oeste;Rural;Proprietário;true;-25.821223;-53.426488
+9501;Terra;ha;3.18;"4316808";RS;Santa Cruz do Sul;Rural;Proprietário;true;-29.70643761838991;-52.32382535934448
+9503;Terra;ha;3.00;"2513307";PB;Santa Helena;Rural;Proprietário;true;-6.791114411652399;-38.52491945028305
+9504;Terra;ha;1.00;"2612307";PE;Saloá;Rural;Comodatário;true;-9.030010334795719;-36.72311872243881
+9505;Terra;ha;2.00;"2510006";PB;Nazarezinho;Rural;Comodatário;true;-6.94675846295264;-38.321433663368225
+9509;Terra;ha;2.00;"2500601";PB;Alhandra;Rural;Arrendatário;true;-7.396650597761445;-34.89679992198944
+9510;Terra;ha;3.22;"2600807";PE;Altinho;Rural;Proprietário;true;-8.44016111;-36.11929722
+9511;Terra;ha;15.69;"5003108";MS;Corguinho;Rural;Assentado da reforma agrária;true;-19.806983;-54.982603
+9512;Terra;ha;19.80;"5007901";MS;Sidrolândia;Rural;Assentado da reforma agrária;true;-21.208209068728806;-54.88774359226227
+9513;Terra;ha;52.60;"2513307";PB;Santa Helena;Rural;Parceiro/meeiro;true;-6.71596059769904;-38.61730545759201
+9514;Terra;ha;1.00;"2413300";RN;Serra de São Bento;Rural;Comodatário;true;-6.425112755168722;-35.669952034950256
+9515;Terra;ha;0.53;"2612307";PE;Saloá;Rural;Proprietário;true;-8.927331970153537;-36.681324541568756
+9517;Terra;ha;4.50;"3203163";ES;Laranja da Terra;Rural;Parceiro/meeiro;true;-19.903859862430267;-41.02337
+9518;Terra;ha;2.00;"2614600";PE;Tabira;Rural;Comodatário;true;-7.581297;-37.443156
+9520;Terra;ha;5.00;"4320206";RS;Seberi;Rural;Proprietário;true;-27.440664;-53.346856
+9521;Terra;ha;10.00;"4304952";RS;Caseiros;Rural;Arrendatário;true;-28.25321787774912;-51.710302233695984
+9521;Terra;ha;10.00;"4309902";RS;Ibiraiaras;Rural;Arrendatário;false;-28.33942957634989;-51.67053043842316
+9522;Terra;ha;8.00;"2602803";PE;Buíque;Rural;Proprietário;true;-8.650106;-37.178342
+9525;Terra;ha;10.38;"4320701";RS;Sobradinho;Rural;Proprietário;true;-29.434045;-53.083256
+9527;Terra;ha;14.75;"4316808";RS;Santa Cruz do Sul;Rural;Proprietário;true;-29.617053226352372;-52.45047390460968
+9528;Terra;ha;18.15;"4216255";SC;São João do Oeste;Rural;Proprietário;true;-27.115158;-53.537996
+9529;Terra;ha;13.58;"4312385";RS;Monte Belo do Sul;Rural;Parceiro/meeiro;true;-29.092466;-51.655666
+9532;Terra;ha;3.00;"2511608";PB;Pilões;Rural;Proprietário;true;-6.879682;-35.599789
+9538;Terra;ha;6.09;"4104600";PR;Capitão Leônidas Marques;Rural;Parceiro/meeiro;true;-25.49753484460417;-53.55821992034346
+9539;Terra;ha;6.66;"4315909";RS;Rodeio Bonito;Rural;Proprietário;true;-27.44691;-53.171341
+9542;Terra;ha;2.50;"2511608";PB;Pilões;Rural;Parceiro/meeiro;true;-6.867223118844064;-35.651667
+9543;Terra;ha;45.44;"5007406";MS;Rio Verde de Mato Grosso;Rural;Proprietário;false;-18.825721872417603;-54.70085799694061
+9543;Terra;ha;113.28;"5007406";MS;Rio Verde de Mato Grosso;Rural;Proprietário;true;-18.808635399192102;-54.705103550270586
+9543;Terra;ha;11.54;"5007406";MS;Rio Verde de Mato Grosso;Rural;Proprietário;false;-18.818294275594273;-54.70135655938362
+9546;Terra;ha;5.46;"2613602";PE;São José do Egito;Rural;Posseiro;true;-7.475522;-37.302849
+9550;Terra;ha;90.41;"5206909";GO;Davinópolis;Rural;Comodatário;true;-18.101481012025214;-47.66365349292755
+9552;Terra;ha;8.90;"4315909";RS;Rodeio Bonito;Rural;Beneficiário/a do PNCF;true;-27.407807;-53.160986
+9564;Terra;ha;0.29;"2508307";PB;Lagoa Seca;Rural;Proprietário;true;-7.152033012356873;-35.9185391664505
+9564;Terra;ha;0.55;"2508307";PB;Lagoa Seca;Rural;Proprietário;false;-7.151674065825782;-35.9190970659256
+9565;Terra;ha;1.00;"2511608";PB;Pilões;Rural;Comodatário;true;-6.8791888888889;-35.658127777778
+9567;Terra;ha;16.64;"2607703";PE;Itapetim;Rural;Posseiro;true;-7.346219;-37.198814
+9569;Terra;ha;70.48;"2107902";MA;Passagem Franca;Rural;Proprietário;true;-6.16182;-43.84993
+9571;Terra;ha;18.50;"2510006";PB;Nazarezinho;Rural;Posseiro;true;-6.531462;-38.190227
+9572;Terra;ha;10.00;"3139508";MG;Manhumirim;Rural;Comodatário;false;-20.312997150504064;-41.85579350189261
+9572;Terra;ha;2.90;"3139508";MG;Manhumirim;Rural;Arrendatário;false;-20.315296366465287;-41.84518039226532
+9572;Terra;ha;2.20;"3139508";MG;Manhumirim;Rural;Arrendatário;false;-20.326805588741152;-41.85058236122131
+9572;Terra;ha;1.00;"3139508";MG;Manhumirim;Rural;Parceiro/meeiro;true;-20.314284281967623;-41.844826340675354
+9573;Terra;ha;0.50;"2602704";PE;Buenos Aires;Rural;Posseiro;true;-7.70206633085096;-35.337422490119934
+9574;Terra;ha;2.50;"2512804";PB;Riacho dos Cavalos;Rural;Proprietário;true;-6.366079;-37.665773
+9574;Terra;ha;3.33;"2512804";PB;Riacho dos Cavalos;Rural;Proprietário;false;6.533333;37.665277
+9576;Terra;ha;8.00;"4303509";RS;Camaquã;Rural;Arrendatário;true;-30.763189167885614;-51.81730091571808
+9577;Terra;ha;0.85;"2513307";PB;Santa Helena;Rural;Posseiro;true;-6.735629728432574;-38.64131659269333
+9579;Terra;ha;13.61;"5004007";MS;Glória de Dourados;Rural;Proprietário;true;-22.37737109402228;-54.148247838020325
+9580;Terra;ha;70.00;"3135209";MG;Januária;Rural;Posseiro;false;-15.390119;-44.627052
+9580;Terra;ha;13.00;"3108255";MG;Bonito de Minas;Rural;Posseiro;true;-15.38393;-44.639626
+9580;Terra;ha;69.00;"3135209";MG;Januária;Rural;Proprietário;false;-15.3854442;-44.642842
+9581;Terra;ha;0.29;"2107902";MA;Passagem Franca;Rural;Proprietário;true;-6.1870942659086525;-43.82793366909027
+9582;Terra;ha;14.00;"4301057";RS;Arroio do Sal;Rural;Proprietário;true;-29.51584912643792;-49.90157604217529
+9585;Terra;ha;3.30;"2607703";PE;Itapetim;Rural;Proprietário;true;-7.472633;-37.097782
+9587;Terra;ha;0.04;"2603108";PE;Cachoeirinha;Rural;Posseiro;true;-8.46972222;-36.24277778
+9588;Terra;ha;2.26;"2413557";RN;Serrinha dos Pintos;Rural;Proprietário;true;-6.13277778;-37.99194444
+9589;Terra;ha;5.00;"2510006";PB;Nazarezinho;Rural;Comodatário;true;-6.924946603339218;-38.343406319618225
+9591;Terra;ha;15.01;"2607703";PE;Itapetim;Rural;Posseiro;true;-7.407619;-37.156572
+9592;Terra;ha;3.00;"3102050";MG;Alto Caparaó;Rural;Proprietário;true;-20.4624599409054;-41.883514523506165
+9593;Terra;ha;2.01;"2614501";PE;Surubim;Rural;Posseiro;true;-7.9034388888889;-35.712716666667
+9594;Terra;ha;8.30;"5007950";MS;Tacuru;Rural;Assentado da reforma agrária;true;-23.65070613699477;-55.012412667274475
+9595;Terra;ha;2.00;"2604106";PE;Caruaru;Rural;Posseiro;true;-8.22390844961259;-35.882746
+9596;Terra;ha;1.10;"2510006";PB;Nazarezinho;Rural;Posseiro;true;-6.560706;-38.181531
+9597;Terra;ha;3.50;"2900801";BA;Alcobaça;Rural;Proprietário;false;-17.3112;-39.1613
+9597;Terra;ha;29.00;"2900801";BA;Alcobaça;Rural;Proprietário;true;-17.3113;-39.1614
+9598;Terra;ha;1.00;"2600609";PE;Alagoinha;Rural;Arrendatário;true;-8.458701632271561;-36.731916187683545
+9601;Terra;ha;27.50;"5107008";MT;Poxoréu;Rural;Proprietário;true;-16.077543382819215;-54.15580754265995
+9602;Terra;ha;5.00;"2510006";PB;Nazarezinho;Rural;Comodatário;true;-6.9031337351731406;-38.321433663368225
+9603;Terra;ha;14.08;"5004601";MS;Itaquiraí;Rural;Assentado da reforma agrária;true;-23.459792008404754;-54.083574414253235
+9604;Terra;ha;11.11;"4309126";RS;Gramado dos Loureiros;Rural;Proprietário;true;-27.45108168497584;-52.93281018733978
+9606;Terra;ha;7.50;"4104451";PR;Cantagalo;Rural;Proprietário;true;-25.191256;-52.079161
+9608;Terra;ha;19.40;"4303509";RS;Camaquã;Rural;Proprietário;true;-30.752693241571063;-51.840577125549316
+9609;Terra;ha;18.53;"2614402";PE;Solidão;Rural;Posseiro;true;-7.533343226815776;-37.652991388252254
+9610;Terra;ha;27.30;"5006606";MS;Ponta Porã;Rural;Assentado da reforma agrária;true;-22.217997291682828;-55.58840914189788
+9611;Terra;ha;0.41;"5008404";MS;Vicentina;Rural;Comodatário;true;-22.461048448372946;-54.48601305484772
+9612;Terra;ha;10.00;"5002704";MS;Campo Grande;Rural;Posseiro;true;-20.387002203923853;-54.638877511024475
+9614;Terra;ha;8.42;"2614402";PE;Solidão;Rural;Posseiro;true;-7.531662698802731;-37.65188631813812
+9615;Terra;ha;6.65;"4306551";RS;Dom Pedro de Alcântara;Rural;Proprietário;false;-29.332866;-49.831386
+9615;Terra;ha;30.00;"4306551";RS;Dom Pedro de Alcântara;Rural;Arrendatário;false;-29.323768890381473;-49.86745954049594
+9615;Terra;ha;3.30;"4321501";RS;Torres;Rural;Proprietário;false;-29.3267;-49.831443
+9615;Terra;ha;7.26;"4306551";RS;Dom Pedro de Alcântara;Rural;Proprietário;true;-29.326246;-49.836246
+9617;Terra;ha;1.00;"2614402";PE;Solidão;Rural;Comodatário;true;-7.605329385813573;-37.59224666004943
+9618;Terra;ha;13.32;"5004304";MS;Iguatemi;Rural;Proprietário;true;-23.169142;-54.502128
+9621;Terra;ha;8.00;"3200102";ES;Afonso Cláudio;Rural;Proprietário;true;-20.172845;-41.093028
+9622;Terra;ha;10.97;"4309126";RS;Gramado dos Loureiros;Rural;Proprietário;true;-27.432051687797156;-52.92737066745758
+9623;Terra;ha;2.70;"2500700";PB;São João do Rio do Peixe;Rural;Proprietário;true;-6.601298;-38.404624
+9624;Terra;ha;1.20;"2603108";PE;Cachoeirinha;Rural;Posseiro;true;-8.515649149623687;-36.29690387413088
+9625;Terra;ha;5.60;"4311700";RS;Machadinho;Rural;Proprietário;true;-27.554665;-51.689115
+9626;Terra;ha;1.50;"4320206";RS;Seberi;Rural;Proprietário;true;-27.492467;-53.375161
+9626;Terra;ha;9.50;"4320206";RS;Seberi;Rural;Proprietário;false;-27.502076;-53.37085
+9627;Terra;ha;0.60;"2615805";PE;Tupanatinga;Rural;Proprietário;true;-8.689522587821578;-37.294211983680725
+9629;Terra;ha;14.00;"2612307";PE;Saloá;Rural;Posseiro;true;-8.961692175724831;-36.78628474473953
+9630;Terra;ha;15.00;"4318622";RS;São José dos Ausentes;Rural;Arrendatário;true;-28.514791645939688;-49.94978265801764
+9631;Terra;ha;8.10;"3201159";ES;Brejetuba;Rural;Proprietário;true;-20.21519107144725;-41.285072
+9632;Terra;ha;12.45;"4301958";RS;Barra Funda;Rural;Proprietário;true;-27.93681579425325;-52.97690033912659
+9633;Terra;ha;13.64;"4320206";RS;Seberi;Rural;Proprietário;true;272647.39;531911.32
+9633;Terra;ha;6.25;"4320206";RS;Seberi;Rural;Proprietário;false;272645.87;531916.02
+9633;Terra;ha;20.74;"4320206";RS;Seberi;Rural;Proprietário;false;272656.46;531917.3
+9635;Terra;ha;8.07;"2603108";PE;Cachoeirinha;Rural;Proprietário;true;-8.53613690189767;-36.265568628311165
+9636;Terra;ha;2.50;"2615805";PE;Tupanatinga;Rural;Comodatário;true;-8.777327344674413;-37.355108857154846
+9637;Terra;ha;14.50;"2411205";RN;Santa Cruz;Rural;Posseiro;true;-6.205930692408697;-35.9629887342453
+9639;Terra;ha;1.25;"4218707";SC;Tubarão;Rural;Proprietário;true;-28.499474128429096;-48.98685157299042
+9640;Terra;ha;3.50;"3201001";ES;Boa Esperança;Rural;Comodatário;false;-18.49476;-40.3872
+9640;Terra;ha;3.00;"3204104";ES;Pinheiros;Rural;Comodatário;true;-18.43593;-40.23288
+9640;Terra;ha;7.00;"3204104";ES;Pinheiros;Rural;Parceiro/meeiro;false;-18.4434;-40.28536
+9640;Terra;ha;2.00;"3201001";ES;Boa Esperança;Rural;Arrendatário;false;-18.49549;-40.38635
+9641;Terra;ha;3.60;"2513307";PB;Santa Helena;Rural;Parceiro/meeiro;true;-6.701618465776777;-38.63699018955231
+9642;Terra;ha;7.00;"2611002";PE;Petrolândia;Rural;Posseiro;true;-8.9630555555556;-38.355
+9644;Terra;ha;3.02;"4104600";PR;Capitão Leônidas Marques;Rural;Proprietário;false;-25.431933378341324;-53.56453013624573
+9644;Terra;ha;30.62;"4104600";PR;Capitão Leônidas Marques;Rural;Proprietário;true;-25.4331348294166;-53.56632185186768
+9644;Terra;ha;5.91;"4104600";PR;Capitão Leônidas Marques;Rural;Proprietário;false;-25.431914;-53.564219
+9645;Terra;ha;0.67;"2603108";PE;Cachoeirinha;Rural;Posseiro;true;-8.528857059434277;-36.29460537254089
+9647;Terra;ha;10.80;"4320206";RS;Seberi;Rural;Proprietário;true;-27.504796;-53.291818
+9648;Terra;ha;1.00;"2600609";PE;Alagoinha;Rural;Comodatário;true;-8.434061;-36.743528
+9652;Terra;ha;3.30;"4315909";RS;Rodeio Bonito;Rural;Proprietário;false;-27.427228;-53.134505
+9652;Terra;ha;2.26;"4315909";RS;Rodeio Bonito;Rural;Proprietário;true;-27.425275;-53.132724
+9652;Terra;ha;8.62;"4315909";RS;Rodeio Bonito;Rural;Proprietário;false;-27.425776;-53.132769
+9653;Terra;ha;4.96;"2902807";BA;Barra da Estiva;Rural;Posseiro;true;-13.629944;-41.367522
+9655;Terra;ha;9.00;"4320206";RS;Seberi;Rural;Usufrutuário;false;-27.420106520255175;-53.36758273277458
+9655;Terra;ha;5.50;"4320206";RS;Seberi;Rural;Proprietário;true;-27.419968;-53.365789
+9656;Terra;ha;1.00;"2411205";RN;Santa Cruz;Rural;Comodatário;true;-6.18565;-35.916261
+9657;Terra;ha;2.00;"2615805";PE;Tupanatinga;Rural;Arrendatário;true;-8.711826;-37.359499
+9658;Terra;ha;5.70;"4104451";PR;Cantagalo;Rural;Proprietário;false;-25.425208;-52.112026
+9658;Terra;ha;12.37;"4104451";PR;Cantagalo;Rural;Proprietário;false;-25.427541;-52.110924
+9658;Terra;ha;15.18;"4104451";PR;Cantagalo;Rural;Proprietário;true;-25.423618;-52.108702
+9659;Terra;ha;4.90;"4309126";RS;Gramado dos Loureiros;Rural;Proprietário;true;-27.42376671904421;-52.88443386554718
+9661;Terra;ha;17.18;"5003108";MS;Corguinho;Rural;Assentado da reforma agrária;true;-19.821695;-54.972573
+9662;Terra;ha;6.40;"3112109";MG;Caparaó;Rural;Comodatário;true;-20.503478368164686;41.86500654087764
+9663;Lâmina dágua;ha;0.00;"2605707";PE;Floresta;Rural;Uso Coletivo;true;-8.786483085358569;-38.48691523075104
+9664;Terra;ha;7.26;"4104451";PR;Cantagalo;Rural;Arrendatário;false;-25.44189;-52.13761
+9664;Terra;ha;6.41;"4104451";PR;Cantagalo;Rural;Proprietário;true;-25.441964;-52.135439
+9665;Terra;ha;6.69;"4123808";PR;Santa Izabel do Oeste;Rural;Proprietário;true;-15.790448;-53.367089
+9666;Terra;ha;10.44;"5007901";MS;Sidrolândia;Rural;Assentado da reforma agrária;true;-21.076849;-54.550292
+9667;Terra;ha;7.87;"4320206";RS;Seberi;Rural;Proprietário;true;-27.415772;-53.348656
+9667;Terra;ha;11.00;"4320206";RS;Seberi;Rural;Proprietário;false;-27.424972;-53.349186
+9668;Terra;ha;6.00;"4312385";RS;Monte Belo do Sul;Rural;Proprietário;true;-29.14723;-51.68044
+9669;Terra;ha;4.80;"3203205";ES;Linhares;Rural;Comodatário;true;-19.347959655654734;-40.299713015556335
+9670;Terra;ha;10.30;"4309753";RS;Ibarama;Rural;Proprietário;false;-29.415579;-53.133442
+9670;Terra;ha;0.20;"4309753";RS;Ibarama;Urbano;Proprietário;false;-29.419016;-53.13472
+9670;Terra;ha;15.00;"4309753";RS;Ibarama;Rural;Proprietário;true;-29.404667;-53.170119
+9670;Terra;ha;3.50;"4309753";RS;Ibarama;Rural;Proprietário;false;-29.406262;-53.176097
+9670;Terra;ha;8.00;"4309753";RS;Ibarama;Rural;Proprietário;false;-29.408475;-53.175107
+9672;Terra;ha;10.45;"4305447";RS;Chuvisca;Rural;Arrendatário;true;-30.751832;-52.033117
+9676;Terra;ha;5.00;"3153400";MG;Presidente Olegário;Rural;Comodatário;true;-18.543911248787655;-46.295380890369394
+9678;Terra;ha;9.00;"5007802";MS;Selvíria;Rural;Assentado da reforma agrária;true;-20.2041018396394;-51.73420608043671
+9680;Terra;ha;34.90;"5007695";MS;São Gabriel do Oeste;Rural;Assentado da reforma agrária;true;-19.282476588163597;-54.60225731134415
+9682;Terra;ha;7.50;"4315909";RS;Rodeio Bonito;Rural;Proprietário;true;-27.432359;-53.148229
+9685;Terra;ha;16.64;"4104600";PR;Capitão Leônidas Marques;Rural;Comodatário;true;-25.412975;-53.630561
+9686;Terra;ha;33.09;"5005681";MS;Mundo Novo;Rural;Proprietário;true;-23.886710951446645;-54.3251234292984
+9687;Terra;ha;9.68;"4301958";RS;Barra Funda;Rural;Proprietário;true;-27.896813657770885;-53.00053060054779
+9689;Terra;ha;20.14;"5007901";MS;Sidrolândia;Rural;Assentado da reforma agrária;true;-21.06258554635911;-54.9248868227005
+9690;Terra;ha;1.50;"4218707";SC;Tubarão;Rural;Parceiro/meeiro;true;-28.494808716071695;-49.13002252578735
+9691;Terra;ha;5.47;"2613602";PE;São José do Egito;Rural;Posseiro;true;-7.525335;-37.341962
+9692;Terra;ha;76.00;"2803104";SE;Itabi;Rural;Proprietário;true;-10.092596;-37.16302
+9693;Terra;ha;28.60;"2504207";PB;Catingueira;Rural;Assentado da reforma agrária;true;-7.142007970911044;-37.611286640167236
+9696;Terra;ha;2.00;"2512804";PB;Riacho dos Cavalos;Rural;Proprietário;true;-6.496666;-37.62138
+9697;Terra;ha;25.54;"4303202";RS;Cacique Doble;Rural;Proprietário;true;-27.821699225638422;-51.7065954208374
+9698;Terra;ha;3.40;"2602001";PE;Bodocó;Rural;Proprietário;true;-7.77638889;-40.01472222
+9700;Terra;ha;28.60;"2504207";PB;Catingueira;Rural;Assentado da reforma agrária;true;-7.142564824945213;-37.611088156700134
+9701;Terra;ha;11.00;"4123808";PR;Santa Izabel do Oeste;Rural;Proprietário;true;-25.756808;-53.455998
+9702;Terra;ha;1.00;"2513307";PB;Santa Helena;Rural;Parceiro/meeiro;true;-6.771927369716554;-38.52524936199188
+9703;Terra;ha;0.30;"2612307";PE;Saloá;Rural;Posseiro;true;-8.965300842040904;-36.66710041720292
+9704;Terra;ha;3.90;"3200201";ES;Alegre;Rural;Proprietário;true;-20.714250752630374;-41.59190744161606
+9705;Terra;ha;1.00;"2615805";PE;Tupanatinga;Rural;Arrendatário;true;-8.690508308009056;-37.2928386926651
+9706;Terra;ha;2.40;"4312385";RS;Monte Belo do Sul;Rural;Proprietário;true;-29.115425;-51.658158
+9706;Terra;ha;3.55;"4312385";RS;Monte Belo do Sul;Rural;Proprietário;false;-29.113352;-51.657115
+9708;Terra;ha;30.85;"4104600";PR;Capitão Leônidas Marques;Rural;Proprietário;true;-25.510069;-53.493869
+9710;Terra;ha;4.50;"2612307";PE;Saloá;Rural;Proprietário;true;-8.955296006068158;-36.63634121417999
+9711;Terra;ha;0.86;"2900306";BA;Acajutiba;Rural;Posseiro;true;-11.658845868852556;-38.013816475868225
+9713;Terra;ha;30.00;"4303509";RS;Camaquã;Rural;Comodatário;true;-30.94482913387169;-51.72509729862213
+9714;Terra;ha;1.00;"2510006";PB;Nazarezinho;Rural;Posseiro;true;-6.94675846295264;-38.310447335243225
+9717;Terra;ha;6.81;"4104600";PR;Capitão Leônidas Marques;Rural;Proprietário;true;-25.441258;-53.543214
+9718;Terra;ha;29.70;"5003801";MS;Fátima do Sul;Rural;Comodatário;true;-22.369940128991413;-54.350627012811714
+9719;Terra;ha;6.00;"4303202";RS;Cacique Doble;Rural;Comodatário;true;-27.717558272728052;-51.67348086833954
+9719;Terra;ha;7.00;"4303202";RS;Cacique Doble;Rural;Proprietário;false;-27.7139736689093;-51.668094992637634
+9720;Terra;ha;1.00;"2511608";PB;Pilões;Rural;Parceiro/meeiro;true;-6.8570361111111;-35.590033333333
+9721;Terra;ha;3.53;"4312385";RS;Monte Belo do Sul;Rural;Arrendatário;true;-29.141958;-51.6910972
+9723;Terra;ha;4.00;"2500700";PB;São João do Rio do Peixe;Rural;Proprietário;true;-6.83305556;-38.40305556
+9724;Terra;ha;1.70;"2515203";PB;São Sebastião do Umbuzeiro;Rural;Posseiro;true;-8.04854305688848;-37.02142596244812
+9725;Terra;ha;4.00;"2500700";PB;São João do Rio do Peixe;Rural;Proprietário;true;-6.80694444;-38.455
+9726;Terra;ha;2.00;"2602001";PE;Bodocó;Rural;Comodatário;true;-7.533055;-40.031666
+9727;Terra;ha;0.71;"2515104";PB;São Sebastião de Lagoa de Roça;Rural;Proprietário;true;-7.07719999999999;-35.829961111111004
+9728;Terra;ha;13.30;"4305447";RS;Chuvisca;Rural;Posseiro;true;-30.785365;-52.02099
+9729;Terra;ha;3.00;"4104451";PR;Cantagalo;Rural;Comodatário;false;-25.377958;-52.155124
+9729;Terra;ha;1.82;"4104451";PR;Cantagalo;Rural;Proprietário;true;-25.37885972257119;-52.1553236246109
+9729;Terra;ha;3.00;"4104451";PR;Cantagalo;Rural;Comodatário;false;-25.378885;-52.150696
+9731;Terra;ha;4.20;"2803104";SE;Itabi;Rural;Proprietário;true;-10.139166;-37.211111
+9732;Terra;ha;1.00;"2600807";PE;Altinho;Rural;Comodatário;true;8.489864;-36.016342
+9733;Terra;ha;5.00;"5003488";MS;Dois Irmãos do Buriti;Rural;Proprietário;true;-20.681348395937988;-55.27716815471649
+9733;Terra;ha;36.00;"5003488";MS;Dois Irmãos do Buriti;Rural;Arrendatário;false;-20.678397354111937;-55.28333723545066
+9733;Terra;ha;5.00;"5003488";MS;Dois Irmãos do Buriti;Rural;Proprietário;false;-20.681528696986344;-55.27684360742569
+9734;Terra;ha;1.00;"2608107";PE;João Alfredo;Rural;Posseiro;true;-7.846538996286078;-35.5448055267334
+9735;Terra;ha;3.00;"4315909";RS;Rodeio Bonito;Rural;Arrendatário;false;-27.435266;-53.176458
+9735;Terra;ha;0.60;"4315909";RS;Rodeio Bonito;Rural;Proprietário;false;-27.436523;-53.17374
+9735;Terra;ha;2.30;"4315909";RS;Rodeio Bonito;Rural;Proprietário;true;-27.436662;-53.172957
+9736;Terra;ha;43.29;"4320677";RS;Sinimbu;Rural;Proprietário;true;-29.491629;-52.563807
+9737;Terra;ha;2.00;"2607653";PE;Itambé;Rural;Posseiro;true;-7.4127466101934125;-35.16121931920111
+9738;Terra;ha;10.00;"2101806";MA;Benedito Leite;Rural;Arrendatário;true;-7.142533340811285;-44.584319302307925
+9740;Terra;ha;8.80;"2515203";PB;São Sebastião do Umbuzeiro;Rural;Posseiro;true;-8.091410292753974;-37.009066343307495
+9741;Terra;ha;29.80;"2612307";PE;Saloá;Rural;Proprietário;true;-8.988719998853616;-36.77190466891203
+9742;Terra;ha;3.00;"2514909";PB;São Mamede;Rural;Proprietário;true;-6.583048888;-37.0917711111
+9743;Terra;ha;25.06;"5006606";MS;Ponta Porã;Rural;Assentado da reforma agrária;true;-22.033777954663098;-55.60485899448395
+9744;Terra;ha;9.10;"2803104";SE;Itabi;Rural;Proprietário;true;-10.114924;-37.141621
+9744;Terra;ha;9.00;"2803104";SE;Itabi;Rural;Posseiro;false;-10.10867;-37.16308
+9744;Terra;ha;5.00;"2803104";SE;Itabi;Rural;Posseiro;false;-10.11305556;-37.14111111
+9745;Terra;ha;2.00;"2606507";PE;Iati;Rural;Comodatário;true;-9.232556087052586;-36.942681670188904
+9748;Terra;ha;80.00;"2515203";PB;São Sebastião do Umbuzeiro;Rural;Posseiro;true;-8.149079952817454;-37.12541788816452
+9749;Terra;ha;2.00;"2607653";PE;Itambé;Rural;Posseiro;true;-7.495802762902167;-35.07634699344635
+9750;Terra;ha;40.00;"2606507";PE;Iati;Rural;Posseiro;true;-9.107971194116057;-36.87658667564392
+9751;Terra;ha;24.00;"2510006";PB;Nazarezinho;Rural;Proprietário;true;-6.94675846295264;-38.299461007118225
+9752;Terra;ha;2.00;"3200201";ES;Alegre;Rural;Parceiro/meeiro;true;-20.70491702981443;-41.44586652517319
+9753;Terra;ha;3.41;"3201001";ES;Boa Esperança;Rural;Proprietário;false;-18.417888;-40.396208
+9753;Terra;ha;2.88;"3204104";ES;Pinheiros;Rural;Proprietário;true;-18.442206;-40.295311
+9755;Terra;ha;6.00;"3553500";SP;Tapiraí;Rural;Arrendatário;true;-23.948965;-47.51277
+9756;Terra;ha;4.80;"3200102";ES;Afonso Cláudio;Rural;Proprietário;true;-20.168252141574886;-41.238828217212024
+9758;Terra;ha;21.00;"2107902";MA;Passagem Franca;Rural;Comodatário;true;-6.18793690636837;-43.74598681926727
+9759;Terra;ha;1.00;"2606507";PE;Iati;Rural;Comodatário;true;-9.099674634991358;-36.874092221260106
+9760;Terra;ha;6.00;"3204351";ES;Rio Bananal;Rural;Parceiro/meeiro;true;-19.31065751890351;-40.30177295207977
+9760;Terra;ha;4.80;"3204351";ES;Rio Bananal;Rural;Parceiro/meeiro;false;-19.310601830151505;-40.298999547958374
+9761;Terra;ha;13.10;"4312955";RS;Nova Boa Vista;Rural;Proprietário;true;-27.974472;-53.019601
+9761;Terra;ha;9.10;"4312955";RS;Nova Boa Vista;Rural;Proprietário;false;-27.960939;-53.021769
+9761;Terra;ha;7.20;"4301958";RS;Barra Funda;Rural;Proprietário;false;-27.955817;-53.020097
+9761;Terra;ha;6.70;"4312955";RS;Nova Boa Vista;Rural;Proprietário;false;-27.966411;-52.966864
+9762;Terra;ha;7.94;"4309126";RS;Gramado dos Loureiros;Rural;Proprietário;true;-27.477749923744973;-52.95178949832916
+9763;Terra;ha;19.25;"5208608";GO;Goianésia;Rural;Proprietário;true;-15.257813466570765;-49.155423045158386
+9765;Terra;ha;39.57;"5006606";MS;Ponta Porã;Rural;Assentado da reforma agrária;true;-22.1466858029005;-55.4894103500104
+9767;Terra;ha;18.00;"4309571";RS;Herveiras;Rural;Proprietário;true;-29.43050522308528;-52.75737762451172
+9769;Terra;ha;27.10;"5005152";MS;Juti;Rural;Proprietário;true;-22.85822190738256;-54.64053511619568
+9770;Terra;ha;12.95;"2613602";PE;São José do Egito;Rural;Posseiro;true;-7.482861;-37.164604
+9771;Terra;ha;2.40;"2101806";MA;Benedito Leite;Rural;Proprietário;true;-7.186621464066154;-44.627586007118225
+9772;Terra;ha;5.57;"4320701";RS;Sobradinho;Rural;Proprietário;true;-29.225152;-53.42958
+9773;Terra;ha;124.00;"2107902";MA;Passagem Franca;Rural;Comodatário;true;-6.116670392839598;-43.746448159217834
+9774;Terra;ha;3.00;"3139508";MG;Manhumirim;Rural;Parceiro/meeiro;true;-20.32808329415385;-41.89465641975403
+9776;Terra;ha;1.50;"4315909";RS;Rodeio Bonito;Rural;Arrendatário;true;-27.422545;-53.156846
+9777;Terra;ha;10.07;"2614402";PE;Solidão;Rural;Posseiro;true;-7.55841637262606;-37.670679582664484
+9777;Terra;ha;0.91;"2614402";PE;Solidão;Rural;Posseiro;false;-7.553889;-37.673889
+9778;Terra;ha;215.00;"2107902";MA;Passagem Franca;Rural;Comodatário;true;-6.158486359787683;-43.744946122169495
+9779;Terra;ha;1.03;"5003801";MS;Fátima do Sul;Rural;Proprietário;true;-22.394752;-54486705
+9780;Terra;ha;9.17;"2614402";PE;Solidão;Rural;Comodatário;true;-7.544703050601274;-37.65323344445801
+9782;Terra;ha;10.00;"4312955";RS;Nova Boa Vista;Rural;Proprietário;true;-27.9853;-52.950194
+9783;Terra;ha;3.51;"2614402";PE;Solidão;Rural;Posseiro;true;-7.62;-37.645556
+9784;Terra;ha;6.00;"4315909";RS;Rodeio Bonito;Rural;Arrendatário;true;-27.442985;-53.16065
+9785;Terra;ha;3.24;"2614402";PE;Solidão;Rural;Posseiro;true;-7.59719185647452;-37.721305238098154
+9787;Terra;ha;3.04;"2614402";PE;Solidão;Rural;Posseiro;true;-7.591042;-37.655406
+9788;Terra;ha;2.93;"2614402";PE;Solidão;Rural;Posseiro;true;-7.628991851891586;-37.637363467597964
+9790;Terra;ha;94627.50;"2101806";MA;Benedito Leite;Rural;Proprietário;true;-7.158086543925054;-44.50330317020416
+9792;Terra;ha;4.77;"2614402";PE;Solidão;Rural;Posseiro;true;-7.6294570902180485;-37.64058633995055
+9794;Terra;ha;1.29;"2614402";PE;Solidão;Rural;Posseiro;true;-7.565689;-37.675189
+9795;Terra;ha;16.56;"2614402";PE;Solidão;Rural;Posseiro;true;-7.574153372813726;-37.61327183068848
+9797;Terra;ha;36.30;"2614402";PE;Solidão;Rural;Posseiro;true;-7.599850666350165;-37.60686730422974
+9798;Terra;ha;1.00;"2614402";PE;Solidão;Rural;Comodatário;true;-7.624865341868927;-37.60751653372956
+9799;Terra;ha;2.00;"2614402";PE;Solidão;Rural;Comodatário;true;-7.608436;-37.630081
+9800;Terra;ha;1.00;"2614402";PE;Solidão;Rural;Comodatário;true;-7.550844;-37.705244
+9802;Terra;ha;7.50;"2500700";PB;São João do Rio do Peixe;Rural;Comodatário;true;-6.80361111;-38.44972222
+9803;Terra;ha;0.50;"2613107";PE;São Caitano;Rural;Comodatário;true;-8.38627778;-36.19272222
+9804;Terra;ha;3.00;"2608800";PE;Lajedo;Rural;Proprietário;true;-8.691259224111002;-36.28180365073399
+9806;Terra;ha;2.30;"2413102";RN;Senador Elói de Souza;Rural;Proprietário;true;-6.066047;-35.613283
+9807;Terra;ha;2.00;"4309050";RS;Glorinha;Rural;Arrendatário;true;-29.830535;-50.808313
+9808;Terra;ha;1.31;"2510006";PB;Nazarezinho;Rural;Posseiro;true;-6.97947435452426;-38.310447335243225
+9809;Terra;ha;23.60;"3202900";ES;Itarana;Rural;Proprietário;true;-20.0148633167358;-40.9593501175451
+9810;Terra;ha;1.00;"2101806";MA;Benedito Leite;Rural;Proprietário;true;-7.211827057772658;-44.583640694618225
+9811;Terra;ha;3.00;"4315909";RS;Rodeio Bonito;Rural;Arrendatário;true;-27.43726;-53.180877
+9812;Terra;ha;2.33;"5008404";MS;Vicentina;Periurbano;Comodatário;true;-22.41573990702565;-54.445269772898364
+9813;Terra;ha;1.00;"2900306";BA;Acajutiba;Rural;Posseiro;true;-11.660863297879482;-38.0124431848526
+9814;Terra;ha;2.00;"3200201";ES;Alegre;Rural;Parceiro/meeiro;true;-20.859934834574947;-41.57432019710541
+9815;Terra;ha;8.90;"2500700";PB;São João do Rio do Peixe;Rural;Proprietário;true;-6.77583333;-38.3975
+9816;Terra;ha;19.30;"4316808";RS;Santa Cruz do Sul;Rural;Proprietário;true;-29.57237481731682;-52.49434411525726
+9819;Terra;ha;1.94;"2500403";PB;Alagoa Nova;Rural;Proprietário;true;-7.095905917494019;-35.75036631709337
+9821;Terra;ha;7.80;"3204351";ES;Rio Bananal;Rural;Proprietário;true;-19.193542754699852;-40.33434569835663
+9822;Terra;ha;15.00;"2107902";MA;Passagem Franca;Rural;Comodatário;true;-6.155766028211138;-43.777505805465815
+9824;Terra;ha;13.90;"2513307";PB;Santa Helena;Rural;Proprietário;true;-6.7025694444444;-38.569319444444
+9825;Terra;ha;0.33;"4320701";RS;Sobradinho;Periurbano;Proprietário;true;-29.423224;-54.031304
+9825;Terra;ha;16.10;"4320701";RS;Sobradinho;Rural;Proprietário;false;-29.420784;-53.012315
+9826;Terra;ha;75.49;"2515203";PB;São Sebastião do Umbuzeiro;Rural;Assentado da reforma agrária;true;-8.242878554038507;-36.9993872804121
+9827;Terra;ha;1.00;"2602001";PE;Bodocó;Rural;Comodatário;true;-7.809569167534686;-39.80950142219483
+9829;Terra;ha;2.37;"2607703";PE;Itapetim;Rural;Proprietário;true;-7.404997;-37.236328
+9830;Terra;ha;2.00;"2610905";PE;Pesqueira;Rural;Comodatário;true;-8.3642;-36.4248
+9831;Terra;ha;5.60;"2500700";PB;São João do Rio do Peixe;Rural;Comodatário;true;-6.92527778;-38.39194444
+9832;Terra;ha;36.98;"2605103";PE;Custódia;Rural;Proprietário;true;-7.982778;-37.627222
+9833;Terra;ha;2.22;"2614709";PE;Tacaimbó;Rural;Proprietário;true;-8.396652778;-36.23600278
+9834;Terra;ha;7.10;"4301958";RS;Barra Funda;Rural;Proprietário;true;-27.93205368031836;-52.9902657866478
+9835;Terra;ha;4.13;"2807105";SE;Simão Dias;Rural;Arrendatário;true;-10.7902777777;-37.736111111111114
+9837;Terra;ha;2.00;"2202703";PI;Cocal;Urbano;Arrendatário;true;-3.40694;-41.42583
+9839;Terra;ha;45.88;"2512804";PB;Riacho dos Cavalos;Rural;Proprietário;true;-6.370833;-37.644444
+9841;Terra;ha;0.25;"2603108";PE;Cachoeirinha;Rural;Posseiro;true;-8.52277512741055;-36.280574335463115
+9842;Terra;ha;2.00;"2515203";PB;São Sebastião do Umbuzeiro;Rural;Comodatário;true;-8.136791640814899;-37.096924781799316
+9843;Terra;ha;3.00;"2500700";PB;São João do Rio do Peixe;Rural;Comodatário;true;-6.710017;-38.408872
+9844;Terra;ha;0.43;"2900306";BA;Acajutiba;Rural;Proprietário;true;-11.661367652845689;-38.01948130130768
+9845;Lâmina dágua;ha;0.00;"2404853";RN;Itajá;Rural;Uso Coletivo;true;-5.670939666901684;-36.88153803348541
+9846;Terra;ha;27.63;"3121209";MG;Delfinópolis;Rural;Proprietário;true;-20.498571;46.600537
+9847;Terra;ha;2.40;"2512408";PB;Puxinanã;Rural;Comodatário;true;-7.1259135545573145;-35.954394936561584
+9849;Terra;ha;3.50;"2614709";PE;Tacaimbó;Rural;Posseiro;true;-8.363694444;-36.31584167
+9852;Terra;ha;1.00;"2510006";PB;Nazarezinho;Rural;Posseiro;true;-6.968569310899133;-38.332419991493225
+9854;Terra;ha;10.43;"3102704";MG;Cachoeira de Pajeú;Rural;Proprietário;true;-16.03710514276136;-41.661172807216644
+9855;Terra;ha;20.65;"5003488";MS;Dois Irmãos do Buriti;Rural;Assentado da reforma agrária;true;-20.723831906104845;-55.462457835674286
+9856;Terra;ha;2.00;"2615805";PE;Tupanatinga;Rural;Proprietário;true;-8.787251796784922;-37.277732491493225
+9857;Terra;ha;1.00;"2603108";PE;Cachoeirinha;Rural;Comodatário;true;-8.47907582100209;-36.28231693431915
+9860;Terra;ha;2.00;"2614709";PE;Tacaimbó;Rural;Posseiro;true;-8.374238889;-36.31082222
+9861;Terra;ha;9.23;"5006002";MS;Nova Alvorada do Sul;Rural;Assentado da reforma agrária;true;-21.699954572288902;-53.907825350761414
+9862;Terra;ha;6.90;"4320206";RS;Seberi;Rural;Proprietário;true;-27.540475;-53.32114
+9864;Terra;ha;27.00;"4305447";RS;Chuvisca;Rural;Posseiro;true;-30.835192;-51.994035
+9866;Terra;ha;1.00;"2615805";PE;Tupanatinga;Rural;Comodatário;true;-8.804894610905384;-37.365623116493225
+9869;Terra;ha;11.81;"5004502";MS;Itaporã;Rural;Proprietário;true;-22.109070443782485;-54.785433411598206
+9869;Terra;ha;49.41;"5004502";MS;Itaporã;Rural;Proprietário;false;-22.114918308236017;-54.78558361530304
+9870;Terra;ha;12.74;"5008305";MS;Três Lagoas;Rural;Assentado da reforma agrária;true;-20.76555868175602;-52.033154368400574
+9871;Terra;ha;15.00;"5003306";MS;Coxim;Rural;Arrendatário;false;-18.514986;-54.682371
+9871;Terra;ha;150.00;"5000252";MS;Alcinópolis;Rural;Arrendatário;true;-18.20363;-54.12529
+9871;Terra;ha;60.00;"5000252";MS;Alcinópolis;Rural;Arrendatário;false;-18.1991638889;-54.1284027778
+9872;Terra;ha;15.12;"4104451";PR;Cantagalo;Rural;Arrendatário;false;-25.182644;-52.079533
+9872;Terra;ha;25.26;"4104451";PR;Cantagalo;Rural;Assentado da reforma agrária;true;-25.190194;-52.082486
+9872;Terra;ha;16.94;"4108650";PR;Goioxim;Rural;Arrendatário;false;-25.167633;-52.060289
+9874;Terra;ha;10.00;"5007976";MS;Taquarussu;Rural;Proprietário;true;-22.486567379730914;-53.395147919654846
+9875;Terra;ha;2.00;"4303509";RS;Camaquã;Rural;Parceiro/meeiro;true;-30.60729782653721;-51.92543685436249
+9876;Terra;ha;2.00;"2616001";PE;Venturosa;Rural;Arrendatário;true;-8.55309444444444;-36.829725
+9878;Terra;ha;3.00;"4315909";RS;Rodeio Bonito;Rural;Proprietário;true;-27.441927;-53.16221
+9881;Terra;ha;14.52;"5004007";MS;Glória de Dourados;Rural;Proprietário;false;-22.39433482747428;-54.23029304947704
+9881;Terra;ha;18.00;"5004007";MS;Glória de Dourados;Rural;Proprietário;true;-22.389176484150784;-54.30139124393463
+9885;Terra;ha;7.06;"5005681";MS;Mundo Novo;Rural;Proprietário;true;-23.940538864342326;-54.31643307209015
+9887;Terra;ha;4.00;"3202900";ES;Itarana;Rural;Comodatário;true;-19.978540650442586;-40.8584064245224
+9889;Terra;ha;36.00;"2504207";PB;Catingueira;Rural;Assentado da reforma agrária;true;-7.169174712489581;-37.680460810661316
+9890;Terra;ha;0.60;"2612307";PE;Saloá;Rural;Comodatário;true;-9.002876706143976;-36.711437702178955
+9892;Terra;ha;0.70;"4320206";RS;Seberi;Rural;Proprietário;true;-27.473272;-53.341318
+9893;Terra;ha;5.55;"2513307";PB;Santa Helena;Rural;Proprietário;true;0.6462791;38.305459
+9897;Terra;ha;1.35;"2801009";SE;Campo do Brito;Rural;Proprietário;false;-10.811111111111;-37.47
+9897;Terra;ha;2.10;"2801009";SE;Campo do Brito;Rural;Proprietário;false;-10.80555555555;-37.475555555556
+9897;Terra;ha;2.85;"2801009";SE;Campo do Brito;Rural;Proprietário;true;-10.7905555555;-37.484166666667
+9899;Terra;ha;5.00;"2614709";PE;Tacaimbó;Rural;Posseiro;true;-8.370230556;-36.29615
+9900;Terra;ha;2.00;"2501104";PB;Areia;Rural;Posseiro;true;-6.957678216248665;-35.682987570762634
+9901;Terra;ha;0.50;"2608800";PE;Lajedo;Rural;Proprietário;true;-7.999999999996956;-36.00000000008247
+9903;Terra;ha;1.00;"2613107";PE;São Caitano;Rural;Comodatário;true;-8.36022222;-36.09438889
+9905;Terra;ha;33.70;"2601201";PE;Arcoverde;Rural;Proprietário;true;-8.34895;-37.08173
+9906;Terra;ha;15.00;"4320107";RS;Sarandi;Rural;Parceiro/meeiro;true;-27.843012;-53.039728
+9909;Terra;ha;1.90;"2513307";PB;Santa Helena;Rural;Proprietário;true;-6.701482607753986;-38.615862429142
+9913;Terra;ha;20.73;"5007976";MS;Taquarussu;Rural;Assentado da reforma agrária;true;-22.71566234690349;-53.414626121520996
+9914;Terra;ha;7.50;"4303509";RS;Camaquã;Rural;Proprietário;true;-30.79025309487115;-51.90794885158539
+9915;Terra;ha;2.02;"4312385";RS;Monte Belo do Sul;Rural;Arrendatário;true;-29.112025;-51.695325
+9917;Terra;ha;2.00;"2101806";MA;Benedito Leite;Rural;Proprietário;true;-7.138931384604527;-44.50261652469635
+9918;Terra;ha;19.73;"2512804";PB;Riacho dos Cavalos;Rural;Proprietário;false;-6.508611;-37.608888
+9918;Terra;ha;3.17;"2512804";PB;Riacho dos Cavalos;Rural;Proprietário;true;-6.494444;-37.606388
+9919;Terra;ha;9.44;"5007901";MS;Sidrolândia;Rural;Assentado da reforma agrária;true;-20.910175092972274;-54.74969565868378
+9920;Terra;ha;0.60;"2409100";RN;Passa e Fica;Rural;Comodatário;true;-6.430741968501901;-35.63425987958908
+9921;Terra;ha;21.92;"5006259";MS;Novo Horizonte do Sul;Rural;Proprietário;true;-22.631013;-53.898871
+9923;Terra;ha;52.49;"1101104";RO;Itapuã do Oeste;Rural;Proprietário;true;-9.126853630484156;-63.38292181491852
+9924;Terra;ha;1.33;"2605400";PE;Feira Nova;Rural;Comodatário;true;-7.9077222222222;-35.372927777778
+9925;Terra;ha;6.13;"2614600";PE;Tabira;Rural;Posseiro;true;-7.547222;-37.489444
+9926;Terra;ha;2.10;"4312658";RS;Não-Me-Toque;Rural;Arrendatário;true;-28.446274;-52.775839
+9926;Terra;ha;5.78;"4312658";RS;Não-Me-Toque;Rural;Proprietário;false;-28.456815;-52.76859
+9928;Terra;ha;21.00;"2615805";PE;Tupanatinga;Rural;Proprietário;true;-8.791323290028117;-37.2763592004776
+9930;Terra;ha;4.00;"2409100";RN;Passa e Fica;Rural;Comodatário;true;-6.446344585130083;-35.63092589378357
+9933;Terra;ha;1.77;"2614600";PE;Tabira;Rural;Proprietário;false;-7.489167;-37.512222
+9933;Terra;ha;4.73;"2614600";PE;Tabira;Rural;Proprietário;true;-7.487222;-37.511667
+9935;Terra;ha;39.40;"4320206";RS;Seberi;Rural;Proprietário;true;-27.440835;-53.352227
+9936;Terra;ha;2.00;"4309902";RS;Ibiraiaras;Rural;Comodatário;true;-28.41857012492104;-51.62431061267853
+9937;Terra;ha;3.30;"4312385";RS;Monte Belo do Sul;Rural;Parceiro/meeiro;true;-29.161216;-51.627894
+9939;Terra;ha;43.61;"3153400";MG;Presidente Olegário;Rural;Proprietário;true;-18.10304129288978;-46.190133690834045
+9940;Terra;ha;25.00;"4311304";RS;Lagoa Vermelha;Rural;Arrendatário;true;-28.24060996921972;-51.60622179508209
+9941;Terra;ha;0.07;"2606507";PE;Iati;Rural;Uso Coletivo;true;-9.314228470412491;-36.94730739263107
+9942;Terra;ha;4.00;"2608800";PE;Lajedo;Rural;Proprietário;true;8425006;36180496
+9943;Terra;ha;4.00;"4302105";RS;Bento Gonçalves;Rural;Proprietário;true;-29.1612;-51.6278
+9943;Terra;ha;6.08;"4302105";RS;Bento Gonçalves;Rural;Proprietário;false;-29.16122;-51.62789
+9944;Terra;ha;6.80;"3104908";MG;Baependi;Rural;Proprietário;true;-21.99432;-44.82629
+9945;Terra;ha;36.00;"4303509";RS;Camaquã;Rural;Proprietário;true;-30.703497512153;-51.866342425346375
+9947;Terra;ha;26.51;"5006606";MS;Ponta Porã;Rural;Assentado da reforma agrária;true;-22.232033347422156;-55.4291957616806
+9948;Terra;ha;11.00;"4104600";PR;Capitão Leônidas Marques;Rural;Arrendatário;false;-25.452689;-53.621644
+9948;Terra;ha;7.85;"4104600";PR;Capitão Leônidas Marques;Rural;Arrendatário;false;-25.464072;-53.610683
+9948;Terra;ha;3.16;"4104600";PR;Capitão Leônidas Marques;Rural;Proprietário;false;-25.444689;-53.625986
+9948;Terra;ha;2.54;"4104600";PR;Capitão Leônidas Marques;Rural;Proprietário;true;-25.444689;-53.625989
+9948;Terra;ha;6.00;"4104600";PR;Capitão Leônidas Marques;Rural;Arrendatário;false;-25.481894;-53.637781
+9948;Terra;ha;12.10;"4104600";PR;Capitão Leônidas Marques;Rural;Arrendatário;false;-25.415264;-53.637225
+9948;Terra;ha;14.04;"4104600";PR;Capitão Leônidas Marques;Rural;Arrendatário;false;-53.637225;-53.610681
+9950;Terra;ha;1.72;"2613602";PE;São José do Egito;Rural;Proprietário;true;-7.34445;-37.23493
+9951;Terra;ha;17.30;"5006606";MS;Ponta Porã;Rural;Assentado da reforma agrária;true;-22.13650696335637;-55.474305152893066
+9952;Terra;ha;9.68;"5005681";MS;Mundo Novo;Rural;Proprietário;true;-23.9661241632038;-54.24731791019442
+9953;Terra;ha;9.50;"4304952";RS;Caseiros;Rural;Proprietário;true;-28.204583215116184;-51.72415316104889
+9954;Terra;ha;5.00;"2605608";PE;Flores;Rural;Comodatário;true;-7.875508306000827;-37.972617745399475
+9955;Terra;ha;9.68;"5008404";MS;Vicentina;Rural;Comodatário;true;-22.453314802511528;-54.505539536476135
+9956;Terra;ha;1.00;"2606507";PE;Iati;Rural;Comodatário;true;-9.019486089986444;-36.843552589416504
+9957;Terra;ha;1.00;"2601201";PE;Arcoverde;Rural;Comodatário;true;-8.449192;-37.081964
+9958;Terra;ha;4.50;"4304952";RS;Caseiros;Rural;Arrendatário;true;-28.20535851858601;-51.72244727611542
+9959;Terra;ha;2.01;"2605608";PE;Flores;Rural;Proprietário;true;40.76;-73.984
+9960;Terra;ha;30.00;"2611903";PE;Rio Formoso;Rural;Posseiro;true;-8.68177222;-35.20978611
+9961;Terra;ha;17.88;"2514651";PB;São José do Brejo do Cruz;Rural;Proprietário;true;-6.18694444;-37.38527778
+9962;Terra;ha;30.88;"2107902";MA;Passagem Franca;Rural;Comodatário;true;-6.167647081220355;-43.67056517572882
+9964;Terra;ha;2.00;"2615805";PE;Tupanatinga;Rural;Comodatário;true;-8.724816645251458;-37.31687128543854
+9965;Terra;ha;12.50;"4303202";RS;Cacique Doble;Rural;Proprietário;true;-27.769912184163083;-51.71415388584137
+9966;Terra;ha;3.50;"4302105";RS;Bento Gonçalves;Rural;Arrendatário;true;-29.160789592218375;-51.54600909922318
+9967;Terra;ha;2.20;"2902807";BA;Barra da Estiva;Rural;Posseiro;true;-13.620197;-41.344679
+9968;Terra;ha;3.68;"2613107";PE;São Caitano;Rural;Proprietário;true;-8.39433333;-36.15233333
+9969;Terra;ha;3.60;"2512408";PB;Puxinanã;Rural;Proprietário;true;-7.15925;-35.933645
+9970;Terra;ha;2.50;"2600807";PE;Altinho;Rural;Proprietário;true;-8.43234722;-36.10484722
+9972;Terra;ha;0.85;"2608107";PE;João Alfredo;Rural;Posseiro;true;-7.85810783226011;-35.654239654541016
+9973;Terra;ha;4.14;"2605103";PE;Custódia;Rural;Proprietário;true;-8.27000833;-37.823889
+9974;Terra;ha;1.00;"2614709";PE;Tacaimbó;Rural;Posseiro;true;-8.381536111;-36.25737222
+9976;Terra;ha;0.80;"2600807";PE;Altinho;Rural;Comodatário;true;-8.43136667;-36.10325556
+9978;Terra;ha;0.60;"2608107";PE;João Alfredo;Rural;Comodatário;true;-7.85428291796956;-35.65241038799286
+9980;Terra;ha;5.00;"3200136";ES;Águia Branca;Rural;Beneficiário/a do PNCF;true;-18.906570870429736;-40.80509545245561
+9981;Terra;ha;7.80;"4316808";RS;Santa Cruz do Sul;Rural;Comodatário;true;-29.604610633746386;-52.39406168460846
+9983;Terra;ha;14.40;"4218707";SC;Tubarão;Rural;Proprietário;true;-28.408405266620726;-49.11712646484375
+9984;Terra;ha;12.34;"4316808";RS;Santa Cruz do Sul;Rural;Proprietário;true;-29.652232457732886;-52.399677729080786
+9985;Terra;ha;2.00;"4320701";RS;Sobradinho;Rural;Arrendatário;true;-29.445191;-53.001567
+9986;Terra;ha;14.08;"5004601";MS;Itaquiraí;Rural;Assentado da reforma agrária;true;-23.46961029660975;-54.060829281806946
+9987;Terra;ha;3.00;"2511301";PB;Piancó;Rural;Proprietário;true;-7.258317475155703;-37.98128664493561
+9988;Terra;ha;27.00;"2513307";PB;Santa Helena;Rural;Parceiro/meeiro;true;-6.77498611111;-38.5050833333
+9989;Terra;ha;4.06;"2613602";PE;São José do Egito;Rural;Posseiro;true;-7.73899;-37.261745
+9990;Terra;ha;9.60;"4311981";RS;Mariana Pimentel;Rural;Proprietário;true;-30.376988;-51.517873
+9992;Terra;ha;22.47;"4300851";RS;Arambaré;Rural;Assentado da reforma agrária;true;-30.789857191604614;-51.66741907596588
+9993;Terra;ha;19.00;"4309571";RS;Herveiras;Rural;Arrendatário;true;-30.010000;-51.220000
+9994;Terra;ha;9.60;"3204104";ES;Pinheiros;Rural;Comodatário;true;-18.4682;-40.13487
+9995;Terra;ha;0.30;"2608800";PE;Lajedo;Rural;Proprietário;true;-8.7462361111111;-36.303902777778
+9997;Terra;ha;18.18;"2602001";PE;Bodocó;Rural;Posseiro;true;-7.46638889;-40.06083333
+9998;Terra;ha;4.00;"4315909";RS;Rodeio Bonito;Rural;Proprietário;true;-27.48895;-53.132036
+9999;Terra;ha;1.55;"2603108";PE;Cachoeirinha;Rural;Posseiro;true;-8.40527778;-36.34361111
+10000;Terra;ha;57.00;"2107902";MA;Passagem Franca;Rural;Comodatário;true;-6.152282672840633;-43.77249513418504
+10001;Terra;ha;2.00;"2615805";PE;Tupanatinga;Rural;Arrendatário;true;-8.776394262871944;-37.31206476688385
+10003;Terra;ha;1.00;"2603108";PE;Cachoeirinha;Rural;Comodatário;true;-8.4009235465915;-36.327464294279174
+10005;Terra;ha;2.00;"2515203";PB;São Sebastião do Umbuzeiro;Rural;Comodatário;true;-8.134772619022304;-37.0045280456543
+10006;Terra;ha;4.52;"4123824";PR;Santa Lúcia;Rural;Proprietário;true;-25.375858;-53.559703
+10007;Terra;ha;3.00;"4303509";RS;Camaquã;Rural;Parceiro/meeiro;true;-30.81768733131449;-51.91691815853119
+10009;Terra;ha;0.42;"2608453";PE;Lagoa do Carro;Rural;Proprietário;true;-7.839344286505788;-35.308433175086975
+10010;Terra;ha;1.00;"2508307";PB;Lagoa Seca;Rural;Proprietário;true;-7.139141;-35.90784
+10011;Terra;ha;7.24;"4104451";PR;Cantagalo;Rural;Proprietário;false;-25.360091777465467;-52.019861340522766
+10011;Terra;ha;53.98;"4104451";PR;Cantagalo;Rural;Proprietário;true;-25.344113031384392;-52.06837713718414
+10012;Terra;ha;1.00;"2606507";PE;Iati;Rural;Uso Coletivo;true;-9.313654873591531;-36.94677945232352
+10013;Terra;ha;9.30;"4318606";RS;São José do Ouro;Rural;Proprietário;true;-27.80780085603019;-51.54038965702057
+10014;Terra;ha;1.53;"2305654";CE;Ipaporanga;Rural;Arrendatário;true;-4.876025087613782;-40.84055892846679
+10015;Terra;ha;2.00;"2501104";PB;Areia;Rural;Posseiro;true;-6.958110290088349;-35.682451128959656
+10018;Terra;ha;15.00;"2500700";PB;São João do Rio do Peixe;Rural;Comodatário;true;-6.57361111;-38.37055556
+10019;Terra;ha;4.13;"2607950";PE;Jaqueira;Rural;Posseiro;true;-8.707792;-35.778312
+10020;Terra;ha;5.75;"4315909";RS;Rodeio Bonito;Rural;Proprietário;true;-27.416498;-53.142813
+10021;Terra;ha;94.66;"2101806";MA;Benedito Leite;Rural;Proprietário;true;-7.1326135217660935;-44.503989815711975
+10022;Terra;ha;6.60;"2500700";PB;São João do Rio do Peixe;Rural;Proprietário;true;-6.91361111;-38.41222222
+10023;Terra;ha;150.00;"5007950";MS;Tacuru;Rural;Arrendatário;true;-23.3426;545011
+10026;Terra;ha;22.64;"5005103";MS;Jateí;Rural;Proprietário;true;-22.619376;-53.974352
+10028;Terra;ha;1.00;"2602001";PE;Bodocó;Rural;Comodatário;true;-7.438318343253602;-39.9279510179126
+10030;Terra;ha;3.00;"2600609";PE;Alagoinha;Rural;Arrendatário;true;-8.462628494296725;-36.71937704086304
+10032;Terra;ha;25.00;"2513307";PB;Santa Helena;Rural;Posseiro;true;-6.702609429033292;-38.62705260515213
+10033;Terra;ha;41.10;"2600807";PE;Altinho;Rural;Posseiro;true;-8.510714;-36.109097
+10034;Terra;ha;9.90;"2500700";PB;São João do Rio do Peixe;Rural;Parceiro/meeiro;true;-6.64805556;-38.38472222
+10035;Terra;ha;28.09;"5004304";MS;Iguatemi;Rural;Assentado da reforma agrária;true;-23.153123343626635;-54.55735981464386
+10036;Terra;ha;2.00;"2500700";PB;São João do Rio do Peixe;Rural;Parceiro/meeiro;true;6.91361712;38.41222223
+10037;Terra;ha;7.12;"4315800";RS;Roca Sales;Rural;Proprietário;false;-27.437833;-53.193347
+10037;Terra;ha;5.62;"4315909";RS;Rodeio Bonito;Rural;Proprietário;true;-27.438144;-53.191632
+10038;Terra;ha;10.00;"2611002";PE;Petrolândia;Rural;Posseiro;true;-9.0941166670255;-38.287525
+10039;Terra;ha;6.58;"2600104";PE;Afogados da Ingazeira;Rural;Posseiro;true;-7.72297624855563;-37.546885442868636
+10040;Terra;ha;40.00;"2606507";PE;Iati;Rural;Comodatário;true;-8.972999621579824;-36.85396492481232
+10041;Terra;ha;1.20;"4315909";RS;Rodeio Bonito;Rural;Proprietário;true;-27.434137;-53.164014
+10042;Terra;ha;3.02;"4104451";PR;Cantagalo;Rural;Proprietário;true;-25.38391958890457;-52.054579854011536
+10043;Terra;ha;14.40;"5004601";MS;Itaquiraí;Rural;Assentado da reforma agrária;true;-23.4867562978313;-54.1403728723526
+10044;Terra;ha;10.06;"2600104";PE;Afogados da Ingazeira;Rural;Posseiro;true;-7.725159454655071;-37.54803436112976
+10045;Terra;ha;2.00;"2612307";PE;Saloá;Rural;Comodatário;true;-8.912914620982654;-36.835291385650635
+10046;Terra;ha;23.32;"5007950";MS;Tacuru;Rural;Beneficiário/a do PNCF;true;-23.63606204408262;-55.028355717659
+10047;Terra;ha;5.00;"3201159";ES;Brejetuba;Rural;Comodatário;true;-19.981222608560504;-41.285072
+10048;Terra;ha;2.00;"2606507";PE;Iati;Rural;Comodatário;true;-8.991803693352988;-36.86608980049883
+10050;Terra;ha;3.80;"3200102";ES;Afonso Cláudio;Rural;Proprietário;true;-20.06459031877652;-41.01140703742905
+10051;Terra;ha;11.50;"4316808";RS;Santa Cruz do Sul;Rural;Proprietário;true;-29.602802582876137;-52.44056046009064
+10052;Terra;ha;13.40;"4304952";RS;Caseiros;Rural;Proprietário;true;-28.224553603884083;-51.72997687815924
+10053;Terra;ha;2.00;"2615201";PE;Terra Nova;Rural;Comodatário;true;-8.203305;-39.396435
+10055;Terra;ha;7.00;"2606507";PE;Iati;Rural;Proprietário;true;-9.127525620377053;-36.89308762550354
+10056;Terra;ha;21.00;"4303202";RS;Cacique Doble;Rural;Proprietário;true;-27.814977099845635;-51.74312174320221
+10058;Terra;ha;5.23;"4104600";PR;Capitão Leônidas Marques;Rural;Proprietário;true;-25.431467;-53.652283
+10058;Terra;ha;8.62;"4104600";PR;Capitão Leônidas Marques;Rural;Proprietário;false;-25.445597;-53.650572
+10059;Terra;ha;5.00;"4315909";RS;Rodeio Bonito;Rural;Proprietário;true;-27.450641;-53.164247
+10060;Terra;ha;17.76;"4322202";RS;Tupanciretã;Rural;Assentado da reforma agrária;true;-28.848291900673214;-53.78005564212799
+10061;Terra;ha;15.00;"4312385";RS;Monte Belo do Sul;Rural;Proprietário;false;-29.087363;-51.663344
+10061;Terra;ha;2.40;"4312385";RS;Monte Belo do Sul;Rural;Proprietário;true;-29.0873638;-51.663344
+10061;Terra;ha;6.12;"4312385";RS;Monte Belo do Sul;Rural;Proprietário;false;-29.0873638;-51.6633444
+10062;Terra;ha;26.65;"5208608";GO;Goianésia;Rural;Assentado da reforma agrária;true;-15.332413074689283;-49.27710321166993
+10063;Terra;ha;5.00;"4316808";RS;Santa Cruz do Sul;Rural;Comodatário;true;-29.464971273052335;-52.367629820352434
+10064;Terra;ha;8.00;"4315909";RS;Rodeio Bonito;Rural;Proprietário;true;-27.443636;-53.182517
+10064;Terra;ha;3.60;"4315909";RS;Rodeio Bonito;Rural;Proprietário;false;-27.43972;-53.181746
+10065;Terra;ha;19.30;"3200102";ES;Afonso Cláudio;Rural;Proprietário;true;-20.114116153286567;-41.20175302488733
+10066;Terra;ha;16.71;"4104600";PR;Capitão Leônidas Marques;Rural;Proprietário;false;-25.458400511252005;-53.698338343933095
+10066;Terra;ha;14.99;"4104600";PR;Capitão Leônidas Marques;Rural;Proprietário;true;-25.459431;-53.693903
+10067;Terra;ha;2.00;"2606507";PE;Iati;Rural;Comodatário;true;-9.018306652531114;-36.842758655548096
+10068;Terra;ha;2.87;"4318507";RS;São José do Norte;Rural;Proprietário;true;-31.914903;-51.936509
+10069;Terra;ha;17.00;"4303202";RS;Cacique Doble;Rural;Proprietário;true;-27.85889539026607;-51.697030663490295
+10070;Terra;ha;10.00;"2614105";PE;Sertânia;Rural;Posseiro;true;-8.159019;-37.206875
+10071;Terra;ha;3.00;"4315909";RS;Rodeio Bonito;Rural;Arrendatário;true;-27.427554;-53.171183
+10073;Terra;ha;25.00;"3204351";ES;Rio Bananal;Rural;Proprietário;true;-19.246421716040967;-40.313719893634094
+10073;Terra;ha;2.70;"3204351";ES;Rio Bananal;Rural;Proprietário;false;-19.26213565386;-40.306954979896545
+10073;Terra;ha;7.00;"3204351";ES;Rio Bananal;Rural;Proprietário;false;-19.196762311368822;-40.27468532323837
+10075;Terra;ha;1.66;"4320206";RS;Seberi;Rural;Arrendatário;true;-27.468307;-53.389998
+10076;Terra;ha;6.00;"4315909";RS;Rodeio Bonito;Rural;Proprietário;true;-27.455284;-53.14595
+10077;Terra;ha;5.00;"5004007";MS;Glória de Dourados;Rural;Arrendatário;true;-22.3703991771524;-54.1692978143692
+10078;Terra;ha;6.60;"4315909";RS;Rodeio Bonito;Rural;Proprietário;true;-27.499591;-53.170386
+10079;Terra;ha;5.80;"4303509";RS;Camaquã;Rural;Parceiro/meeiro;true;-30.668960771036907;-51.92883789539337
+10080;Terra;ha;26.50;"4303202";RS;Cacique Doble;Rural;Proprietário;true;-27.778693472690854;-51.689305901527405
+10081;Terra;ha;29.13;"5004304";MS;Iguatemi;Rural;Assentado da reforma agrária;true;-23.181611939581224;-54.625526476604996
+10082;Terra;ha;3.00;"5004007";MS;Glória de Dourados;Rural;Arrendatário;true;-22.438501387538864;-54.235902428627014
+10083;Terra;ha;20.19;"5006606";MS;Ponta Porã;Rural;Assentado da reforma agrária;true;-22.179472;-55.49753
+10085;Terra;ha;3.00;"2603900";PE;Carnaíba;Rural;Proprietário;true;-7.840138002192135;-37.783103585243225
+10087;Terra;ha;22.00;"4303202";RS;Cacique Doble;Rural;Proprietário;true;-27.747468062262723;-51.68460130691528
+10088;Terra;ha;31.00;"4122701";PR;Sabáudia;Rural;Proprietário;true;-23.298690581103852;-51.53883814538198
+10088;Terra;ha;9.68;"4122701";PR;Sabáudia;Rural;Proprietário;false;-23.299533063609275;-51.55104835064293
+10088;Terra;ha;7.67;"4119657";PR;Pitangueiras;Rural;Proprietário;false;-23.250658376970268;-51.575761293554415
+10089;Terra;ha;19.00;"2107902";MA;Passagem Franca;Rural;Comodatário;true;-5.985199876805564;-43.727685279328256
+10090;Terra;ha;5.00;"2504157";PB;Casserengue;Rural;Parceiro/meeiro;true;-6.7359532;-35.8265897
+10091;Terra;ha;3.06;"2607703";PE;Itapetim;Rural;Posseiro;true;-7.308656;-37.245144
+10093;Terra;ha;12.00;"4308201";RS;Flores da Cunha;Rural;Proprietário;true;-28.954113;-51.212881
+10093;Terra;ha;31.80;"4308201";RS;Flores da Cunha;Rural;Proprietário;false;-28.949881;-51.224388
+10095;Terra;ha;28.00;"4305306";RS;Chapada;Rural;Proprietário;false;-27.997803;-53.0392
+10095;Terra;ha;16.00;"4312955";RS;Nova Boa Vista;Rural;Proprietário;true;-27.982628;-53.036814
+10095;Terra;ha;9.90;"4312955";RS;Nova Boa Vista;Rural;Proprietário;false;-28.021283;-52.933822
+10096;Terra;ha;8.51;"2610509";PE;Passira;Rural;Proprietário;true;-7.959733;-35.462344
+10097;Terra;ha;12.00;"2607505";PE;Itaíba;Rural;Posseiro;true;-8.975145616278908;-37.36357390880585
+10098;Terra;ha;2.04;"2616001";PE;Venturosa;Rural;Posseiro;true;-8.609225;-36.7689916666667
+10099;Terra;ha;12.00;"4303202";RS;Cacique Doble;Rural;Comodatário;false;-27.830129544747493;-51.68960630893707
+10099;Terra;ha;3.35;"4303202";RS;Cacique Doble;Rural;Proprietário;false;-27.831059354147513;-51.68696701526642
+10099;Terra;ha;12.50;"4303202";RS;Cacique Doble;Rural;Proprietário;true;-27.82504865984337;-51.67265474796295
+10101;Terra;ha;2.10;"5300108";DF;Brasília;Rural;Posseiro;true;-15.613271317313208;-48.047516494989395
+10102;Terra;ha;10.50;"4315909";RS;Rodeio Bonito;Rural;Arrendatário;true;-27.425411;-53.139665
+10103;Terra;ha;4.73;"2607703";PE;Itapetim;Rural;Proprietário;true;-7.366111;-37.139722
+10104;Terra;ha;26.62;"4104451";PR;Cantagalo;Rural;Arrendatário;true;-25.413664;-52.116517
+10106;Terra;ha;5.02;"2605103";PE;Custódia;Rural;Proprietário;true;-8.136389;-37.7425
+10107;Terra;ha;12.05;"5003108";MS;Corguinho;Rural;Assentado da reforma agrária;true;-19.495212;-55.110887
+10108;Terra;ha;10.24;"4320206";RS;Seberi;Rural;Proprietário;false;-27.56379;-53.340227
+10108;Terra;ha;6.72;"4320206";RS;Seberi;Rural;Proprietário;true;-27.56469;-53.340573
+10109;Terra;ha;1.00;"3160306";MG;Santo Antônio do Jacinto;Rural;Comodatário;true;-16.49226286918582;-40.305260016182764
+10110;Terra;ha;9.16;"5006002";MS;Nova Alvorada do Sul;Rural;Assentado da reforma agrária;true;-21.69198572723673;-53.90748739242554

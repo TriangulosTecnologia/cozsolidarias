@@ -1,15 +1,21 @@
 import { readStaticCadUnico } from '../data-source-static/readStaticCadUnico';
+import { readStaticCafProducao } from '../data-source-static/readStaticCafProducao';
+import { readStaticCafs } from '../data-source-static/readStaticCafs';
 import { readStaticCozinhas } from '../data-source-static/readStaticCozinhas';
 import { readStaticIvs } from '../data-source-static/readStaticIvs';
 import { readStaticMunicipios } from '../data-source-static/readStaticMunicipios';
 import { readStaticPopulacao } from '../data-source-static/readStaticPopulacao';
 import type {
+  CafDetalhe,
+  CafsFeatureCollection,
   CozinhaDetalhe,
   CozinhasBubblesFeatureCollection,
   CozinhasFeatureCollection,
   kitchenRateByCity,
   MunicipioIvs,
 } from './schema';
+import { toCafDetalhe } from './transformers/toCafDetalhe';
+import { toCafsFeatureCollection } from './transformers/toCafsFeatureCollection';
 import { toCozinhaDetalhe } from './transformers/toCozinhaDetalhe';
 import { toCozinhasBubbles } from './transformers/toCozinhasBubbles';
 import { toCozinhasFeatureCollection } from './transformers/toCozinhasFeatureCollection';
@@ -22,6 +28,15 @@ import { toMunicipioIvs } from './transformers/toMunicipioIvs';
 
 /** Gateway interface exposing canonical read functions. */
 export type DataGateway = {
+  /** Returns CAF area locations as a GeoJSON FeatureCollection of Points. */
+  getCafs: () => Promise<CafsFeatureCollection>;
+  /**
+   * Returns the production and income detail of a single CAF by its
+   * registration number (`nrCaf`), or `null` when no production records exist
+   * for that CAF. Backs the click-to-inspect endpoint
+   * (`GET /api/cafs/[nrCaf]`).
+   */
+  getCafByNrCaf: (nrCaf: string) => Promise<CafDetalhe | null>;
   /** Returns cozinha locations as a GeoJSON FeatureCollection of Points. */
   getCozinhas: () => Promise<CozinhasFeatureCollection>;
   /**
@@ -99,6 +114,18 @@ export const createDataGateway = (): DataGateway => {
     };
 
     return {
+      getCafs: async () => {
+        const sources = await readStaticCafs();
+        return toCafsFeatureCollection(sources);
+      },
+      getCafByNrCaf: async (nrCaf) => {
+        const sources = await readStaticCafProducao();
+        const matched = sources.filter((s) => {
+          return s.nrCaf === nrCaf;
+        });
+        if (matched.length === 0) return null;
+        return toCafDetalhe({ nrCaf, sources: matched });
+      },
       getCozinhas: async () => {
         const sources = await readStaticCozinhas();
         return toCozinhasFeatureCollection(sources);

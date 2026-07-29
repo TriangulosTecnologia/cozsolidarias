@@ -583,6 +583,70 @@ describe('buildSpec', () => {
     expect(layerIds(spec)).not.toContain('cozinhas-pts');
   });
 
+  test('cafs renders the CAF points overlay plus a hidden kitchen overlay', () => {
+    const spec = buildSpec(BY_CITY, 'cafs');
+
+    expect(layerIds(spec)).toContain('cafs-pts');
+    expect(mapDataById(spec, 'cozinhas-por-municipio')?.data).toEqual([]);
+
+    // Kitchens are an opt-in overlay here: present but hidden until toggled.
+    const points = spec.layers.find((layer) => {
+      return layer.id === 'cozinhas-pts';
+    });
+    expect(points?.visible).toBe(false);
+  });
+
+  test('choropleths render the kitchen points as a hidden opt-in overlay', () => {
+    const modes = [
+      'coropletico',
+      'coropletico-taxa',
+      'coropletico-ivs',
+      'coropletico-idhm',
+    ] as const;
+
+    for (const mode of modes) {
+      const spec = buildSpec(BY_CITY, mode, undefined, IVS_BY_CITY);
+      const points = spec.layers.find((layer) => {
+        return layer.id === 'cozinhas-pts';
+      });
+      expect(points).toBeDefined();
+      expect(points?.visible).toBe(false);
+    }
+  });
+
+  test('primary modes render the kitchen points visible (not hidden)', () => {
+    for (const mode of ['pontos', 'assentamentos'] as const) {
+      const spec = buildSpec(BY_CITY, mode);
+      const points = spec.layers.find((layer) => {
+        return layer.id === 'cozinhas-pts';
+      });
+      expect(points?.visible).not.toBe(false);
+    }
+  });
+
+  test('the "Camadas" kitchens toggle defaults on only where kitchens are the primary layer', () => {
+    const cozinhasItem = (mode: Parameters<typeof buildSpec>[1]) => {
+      return buildSpec(
+        BY_CITY,
+        mode,
+        undefined,
+        IVS_BY_CITY
+      ).control?.items.find((item) => {
+        return item.id === 'cozinhas';
+      });
+    };
+
+    // Kitchens are the primary visualization: toggle starts on.
+    for (const mode of ['pontos', 'circulos', 'assentamentos'] as const) {
+      expect(cozinhasItem(mode)?.defaultActive).toBe(true);
+    }
+
+    // Opt-in overlay: toggle starts off (layer present but hidden).
+    for (const mode of ['coropletico', 'coropletico-ivs', 'cafs'] as const) {
+      expect(cozinhasItem(mode)?.defaultActive).toBe(false);
+    }
+  });
+
   test('assentamentos overlays the settlement polygons and points, and hides municípios', () => {
     const spec = buildSpec(BY_CITY, 'assentamentos', undefined, [], {
       assentamentos: { atributos: ASSENTAMENTOS },

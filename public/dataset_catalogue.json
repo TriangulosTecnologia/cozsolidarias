@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "2.0.0",
   "catalog": {
     "id": "coz_solidarias_data_catalog",
     "title": "Catálogo de Dados — Cozinhas Solidárias",
@@ -7,7 +7,7 @@
     "language": "pt-BR",
     "status": "draft",
     "created_at": "2026-07-07",
-    "updated_at": "2026-07-13",
+    "updated_at": "2026-07-27",
     "typing_reference": "src/data-source-static/dataCatalogue.ts",
     "quality_notes": [
       {
@@ -103,6 +103,22 @@
         "sao-paulo",
         "dados-publicos"
       ]
+    },
+    "mda": {
+      "id": "mda",
+      "slug": "mda",
+      "title": "MDA",
+      "description": "Datasets do Ministério do Desenvolvimento Agrário relativos ao Cadastro Ambiental Rural de agricultores familiares.",
+      "organization": "Ministério do Desenvolvimento Agrário (MDA)",
+      "source_url": "https://www.gov.br/mda",
+      "tags": [
+        "mda",
+        "caf",
+        "agricultura-familiar",
+        "imoveis-rurais",
+        "brasil",
+        "dados-publicos"
+      ]
     }
   },
   "datasets": {
@@ -119,13 +135,25 @@
         "notes": "Dado primário coletado pela equipe do projeto;"
       },
       "temporal": {
-        "reference_period": null,
-        "retrieved_at": null
+        "status": "unknown"
       },
       "spatial": {
-        "coverage": "Brasil",
-        "unit": "cozinha (ponto)",
-        "key": "Código da Cozinha"
+        "status": "described",
+        "extent": [
+          {
+            "scheme": "iso3166-1",
+            "code": "BR"
+          }
+        ],
+        "coverage": "exhaustive",
+        "grain": {
+          "scheme": "custom",
+          "code": "kitchen",
+          "label": "cozinha"
+        },
+        "geometry": "point",
+        "precision": "unknown",
+        "field": "Código da Cozinha"
       },
       "access": {
         "level": "restricted",
@@ -144,16 +172,32 @@
             "description": "Identificador da cozinha",
             "role": "identifier"
           },
-          { "name": "Nome da Cozinha", "description": "Nome da cozinha" },
+          {
+            "name": "Nome da Cozinha",
+            "description": "Nome da cozinha"
+          },
           {
             "name": "Endereço da Cozinha",
             "description": "Logradouro",
             "sensitive": true
           },
-          { "name": "Bairro da Cozinha", "description": "Bairro" },
-          { "name": "CEP", "description": "CEP", "sensitive": true },
-          { "name": "Município da Cozinha", "description": "Município" },
-          { "name": "UF", "description": "Unidade federativa" },
+          {
+            "name": "Bairro da Cozinha",
+            "description": "Bairro"
+          },
+          {
+            "name": "CEP",
+            "description": "CEP",
+            "sensitive": true
+          },
+          {
+            "name": "Município da Cozinha",
+            "description": "Município"
+          },
+          {
+            "name": "UF",
+            "description": "Unidade federativa"
+          },
           {
             "name": "Email",
             "description": "E-mail de contato",
@@ -185,14 +229,26 @@
             "name": "Data Envio para Análise",
             "description": "Data de envio para análise"
           },
-          { "name": "É Reanálise?", "description": "Indicador de reanálise" },
-          { "name": "Avaliador", "description": "Responsável pela avaliação" },
-          { "name": "Data Avaliação", "description": "Data da avaliação" },
+          {
+            "name": "É Reanálise?",
+            "description": "Indicador de reanálise"
+          },
+          {
+            "name": "Avaliador",
+            "description": "Responsável pela avaliação"
+          },
+          {
+            "name": "Data Avaliação",
+            "description": "Data da avaliação"
+          },
           {
             "name": "Homologador",
             "description": "Responsável pela homologação"
           },
-          { "name": "Data Homologação", "description": "Data da homologação" },
+          {
+            "name": "Data Homologação",
+            "description": "Data da homologação"
+          },
           {
             "name": "Público Atendido",
             "description": "Tipo de público atendido"
@@ -229,7 +285,10 @@
             "role": "geometry",
             "sensitive": true
           },
-          { "name": "Status Foto/Geo", "description": "Status de foto/geo" },
+          {
+            "name": "Status Foto/Geo",
+            "description": "Status de foto/geo"
+          },
           {
             "name": "Endereço Completo",
             "description": "Endereço completo",
@@ -251,13 +310,26 @@
         "notes": "Origem na malha municipal do IBGE (propriedade `codarea`); endpoint/parâmetros exatos a confirmar."
       },
       "temporal": {
-        "reference_period": null,
-        "retrieved_at": null
+        "status": "not_applicable"
       },
       "spatial": {
-        "coverage": "Brasil",
-        "unit": "município (polígono)",
-        "key": "codarea"
+        "status": "described",
+        "extent": [
+          {
+            "scheme": "iso3166-1",
+            "code": "BR"
+          }
+        ],
+        "coverage": "exhaustive",
+        "grain": {
+          "scheme": "admin",
+          "code": "municipality",
+          "label": "município"
+        },
+        "geometry": "multipolygon",
+        "precision": "not_applicable",
+        "srid": 4326,
+        "field": "codarea"
       },
       "access": {
         "level": "public",
@@ -274,9 +346,18 @@
             "description": "Código IBGE do município (7 dígitos)",
             "role": "identifier"
           },
-          { "name": "id", "description": "Código IBGE (igual a codarea)" },
-          { "name": "name", "description": "Nome do município" },
-          { "name": "description", "description": "Descrição (igual ao nome)" },
+          {
+            "name": "id",
+            "description": "Código IBGE (igual a codarea)"
+          },
+          {
+            "name": "name",
+            "description": "Nome do município"
+          },
+          {
+            "name": "description",
+            "description": "Descrição (igual ao nome)"
+          },
           {
             "name": "geometry",
             "description": "Polígono/MultiPolígono do município",
@@ -298,13 +379,26 @@
         "notes": "Origem na malha de UFs do IBGE (propriedade `codarea`); endpoint/parâmetros exatos a confirmar."
       },
       "temporal": {
-        "reference_period": null,
-        "retrieved_at": null
+        "status": "not_applicable"
       },
       "spatial": {
-        "coverage": "Brasil",
-        "unit": "unidade federativa (polígono)",
-        "key": "codarea"
+        "status": "described",
+        "extent": [
+          {
+            "scheme": "iso3166-1",
+            "code": "BR"
+          }
+        ],
+        "coverage": "exhaustive",
+        "grain": {
+          "scheme": "admin",
+          "code": "state",
+          "label": "unidade federativa"
+        },
+        "geometry": "multipolygon",
+        "precision": "not_applicable",
+        "srid": 4326,
+        "field": "codarea"
       },
       "access": {
         "level": "public",
@@ -342,13 +436,25 @@
         "notes": "Nomes correspondem à propriedade `name` da malha municipal; provavelmente extraído de geojs-100-mun ou da API de localidades do IBGE. A confirmar."
       },
       "temporal": {
-        "reference_period": null,
-        "retrieved_at": null
+        "status": "not_applicable"
       },
       "spatial": {
-        "coverage": "Brasil",
-        "unit": "município",
-        "key": "codigoIbge"
+        "status": "described",
+        "extent": [
+          {
+            "scheme": "iso3166-1",
+            "code": "BR"
+          }
+        ],
+        "coverage": "exhaustive",
+        "grain": {
+          "scheme": "admin",
+          "code": "municipality",
+          "label": "município"
+        },
+        "geometry": "none",
+        "precision": "not_applicable",
+        "field": "codigoIbge"
       },
       "access": {
         "level": "public",
@@ -365,7 +471,10 @@
             "description": "Código IBGE do município (7 dígitos), chave do mapa",
             "role": "identifier"
           },
-          { "name": "nome", "description": "Nome do município (valor do mapa)" }
+          {
+            "name": "nome",
+            "description": "Nome do município (valor do mapa)"
+          }
         ]
       }
     },
@@ -383,13 +492,30 @@
       },
       "generated_by": "scripts/generate-municipios-populacao.mjs",
       "temporal": {
-        "reference_period": "2022",
-        "retrieved_at": "2026-07-06"
+        "status": "described",
+        "extent": [["2022-01-01", "2022-12-31"]],
+        "grain": "P1Y",
+        "frequency": "annual",
+        "history": "snapshot",
+        "timezone": "America/Sao_Paulo"
       },
       "spatial": {
-        "coverage": "Brasil",
-        "unit": "município",
-        "key": "codigoIbge"
+        "status": "described",
+        "extent": [
+          {
+            "scheme": "iso3166-1",
+            "code": "BR"
+          }
+        ],
+        "coverage": "exhaustive",
+        "grain": {
+          "scheme": "admin",
+          "code": "municipality",
+          "label": "município"
+        },
+        "geometry": "none",
+        "precision": "not_applicable",
+        "field": "codigoIbge"
       },
       "access": {
         "level": "public",
@@ -428,13 +554,30 @@
       },
       "generated_by": "scripts/generate-municipios-cadunico.mjs",
       "temporal": {
-        "reference_period": "2026-06",
-        "retrieved_at": "2026-07-07"
+        "status": "described",
+        "extent": [["2026-06-01", "2026-06-30"]],
+        "grain": "P1M",
+        "frequency": "monthly",
+        "history": "overwrite",
+        "timezone": "America/Sao_Paulo"
       },
       "spatial": {
-        "coverage": "Brasil",
-        "unit": "município",
-        "key": "codigoIbge"
+        "status": "described",
+        "extent": [
+          {
+            "scheme": "iso3166-1",
+            "code": "BR"
+          }
+        ],
+        "coverage": "exhaustive",
+        "grain": {
+          "scheme": "admin",
+          "code": "municipality",
+          "label": "município"
+        },
+        "geometry": "none",
+        "precision": "not_applicable",
+        "field": "codigoIbge"
       },
       "access": {
         "level": "public",
@@ -472,13 +615,30 @@
         "notes": "Extraído de `atlasivs_dadosbrutos_pt_v2.xlsx` (aba `Dados brutos IVS`, 103 colunas), filtrando ano 2010, nível município e totais de cor/sexo/situação de domicílio. Mantidas 12 das 103 colunas. Dados municipais existem apenas para 2000 e 2010. Observação: `ivs` e `idhm` usam ponto decimal; os demais subíndices preservam a vírgula decimal da fonte."
       },
       "temporal": {
-        "reference_period": "2010",
-        "retrieved_at": "2026-07-10"
+        "status": "described",
+        "extent": [["2010-01-01", "2010-12-31"]],
+        "grain": "P1Y",
+        "frequency": "one_time",
+        "history": "snapshot",
+        "timezone": "America/Sao_Paulo"
       },
       "spatial": {
-        "coverage": "Brasil (5.565 municípios)",
-        "unit": "município",
-        "key": "municipio"
+        "status": "described",
+        "extent": [
+          {
+            "scheme": "iso3166-1",
+            "code": "BR"
+          }
+        ],
+        "coverage": "exhaustive",
+        "grain": {
+          "scheme": "admin",
+          "code": "municipality",
+          "label": "município"
+        },
+        "geometry": "none",
+        "precision": "not_applicable",
+        "field": "municipio"
       },
       "access": {
         "level": "public",
@@ -553,6 +713,80 @@
         ]
       }
     },
+    "caf_producao": {
+      "id": "caf_producao",
+      "collection_id": "mda",
+      "slug": "caf-producao",
+      "title": "Produção e renda CAF — Cadastro Ambiental Rural",
+      "description": "Itens de produção e renda de cada imóvel CAF (Cadastro Ambiental Rural): categorias (estabelecimento agropecuário ou fora dele), tipo de renda, produto, renda auferida e renda estimada. Vincula-se a `caf_areas` pela chave `nr_caf`. Cada imóvel pode ter múltiplas linhas (uma por produto).",
+      "file": "src/data-source-static/data/producao-caf.csv",
+      "format": "CSV",
+      "source": {
+        "url": null,
+        "notes": "Delimitador: ponto e vírgula. Complementa caf-area.csv; join por nr_caf."
+      },
+      "temporal": {
+        "status": "unknown"
+      },
+      "spatial": {
+        "status": "described",
+        "extent": [
+          {
+            "scheme": "iso3166-1",
+            "code": "BR"
+          }
+        ],
+        "coverage": "exhaustive",
+        "grain": {
+          "scheme": "custom",
+          "code": "rural_property",
+          "label": "imóvel rural (CAF)"
+        },
+        "geometry": "none",
+        "precision": "not_applicable",
+        "field": "nr_caf"
+      },
+      "access": {
+        "level": "public",
+        "contains_personal_data": false
+      },
+      "stats": {
+        "rows": 999,
+        "size_bytes": 102909,
+        "checkSum": "sha256:e6a71cfa9bfd5fdbbbcc48b3654fd242f72fd591bd495308fbd2b149d2dcc8f5"
+      },
+      "schema": {
+        "fields": [
+          {
+            "name": "nr_caf",
+            "description": "Número de registro no CAF; chave de join com caf_areas",
+            "role": "join"
+          },
+          {
+            "name": "categoria_renda",
+            "description": "Categoria da renda: \"RENDA DO ESTABELECIMENTO AGROPECUÁRIO\" ou \"RENDA FORA DO ESTABALECIMENTO AGROPECUÁRIO\""
+          },
+          {
+            "name": "ds_tipo_renda",
+            "description": "Tipo de renda dentro da categoria (ex.: Lavouras Permanentes, Lavouras Temporárias)"
+          },
+          {
+            "name": "ds_produto",
+            "description": "Produto ou atividade geradora da renda (ex.: Outras Frutas Lavoura Permanente)"
+          },
+          {
+            "name": "vl_renda_auferida",
+            "description": "Renda efetivamente obtida com o produto",
+            "unit": "BRL"
+          },
+          {
+            "name": "vl_renda_estimada",
+            "description": "Renda estimada com o produto",
+            "unit": "BRL"
+          }
+        ]
+      }
+    },
     "assentamentos": {
       "id": "assentamentos",
       "collection_id": "sicar",
@@ -568,13 +802,43 @@
       },
       "generated_by": "scripts/generate-assentamentos.mjs",
       "temporal": {
-        "reference_period": "2026-06",
-        "retrieved_at": "2026-07-13"
+        "status": "described",
+        "extent": [["2026-06-01", "2026-06-30"]],
+        "grain": "P1M",
+        "frequency": "irregular",
+        "history": "snapshot",
+        "timezone": "America/Sao_Paulo"
       },
       "spatial": {
-        "coverage": "SP, MG, RJ, ES",
-        "unit": "assentamento (polígono)",
-        "key": "cod_imovel"
+        "status": "described",
+        "extent": [
+          {
+            "scheme": "iso3166-2",
+            "code": "BR-SP"
+          },
+          {
+            "scheme": "iso3166-2",
+            "code": "BR-MG"
+          },
+          {
+            "scheme": "iso3166-2",
+            "code": "BR-RJ"
+          },
+          {
+            "scheme": "iso3166-2",
+            "code": "BR-ES"
+          }
+        ],
+        "coverage": "exhaustive",
+        "grain": {
+          "scheme": "custom",
+          "code": "settlement",
+          "label": "assentamento"
+        },
+        "geometry": "multipolygon",
+        "precision": "not_applicable",
+        "srid": 4326,
+        "field": "cod_imovel"
       },
       "access": {
         "level": "public",
@@ -634,6 +898,105 @@
         ]
       }
     },
+    "caf_areas": {
+      "id": "caf_areas",
+      "collection_id": "mda",
+      "slug": "caf-areas",
+      "title": "Áreas CAF — Cadastro Ambiental Rural",
+      "description": "Áreas rurais cadastradas no CAF (Cadastro Ambiental Rural), com dimensão em hectares, condição de domínio (proprietário, comodatário, posseiro) e ponto de geolocalização. Alimenta a camada de pontos CAF no mapa.",
+      "file": "src/data-source-static/data/caf-area.csv",
+      "format": "CSV",
+      "source": {
+        "url": null,
+        "notes": "Delimitador: ponto e vírgula. Colunas originais preservadas nos nomes dos campos."
+      },
+      "temporal": {
+        "status": "unknown"
+      },
+      "spatial": {
+        "status": "described",
+        "extent": [
+          {
+            "scheme": "iso3166-1",
+            "code": "BR"
+          }
+        ],
+        "coverage": "exhaustive",
+        "grain": {
+          "scheme": "custom",
+          "code": "rural_property",
+          "label": "área rural"
+        },
+        "geometry": "point",
+        "precision": "unknown",
+        "field": "nr_caf"
+      },
+      "access": {
+        "level": "public",
+        "contains_personal_data": false
+      },
+      "stats": {
+        "rows": 999,
+        "checkSum": "sha256:bcb37512c19a2138600a3641963335dc0795bb74b98d5720f4a614bb7ae646e7"
+      },
+      "schema": {
+        "fields": [
+          {
+            "name": "nr_caf",
+            "description": "Número de registro no CAF; chave do ponto no mapa",
+            "role": "identifier"
+          },
+          {
+            "name": "ds_tipo_area",
+            "description": "Tipo de área (ex.: Terra)"
+          },
+          {
+            "name": "ds_tipo_unidade_medida",
+            "description": "Unidade de medida da área (ex.: ha)"
+          },
+          {
+            "name": "nr_area",
+            "description": "Tamanho da área",
+            "unit": "ha"
+          },
+          {
+            "name": "cd_municipio",
+            "description": "Código IBGE do município (7 dígitos)",
+            "role": "join"
+          },
+          {
+            "name": "sg_uf",
+            "description": "Sigla da unidade federativa"
+          },
+          {
+            "name": "nm_municipio",
+            "description": "Nome do município"
+          },
+          {
+            "name": "ds_tipo_localizacao_area",
+            "description": "Tipo de localização (ex.: Rural)"
+          },
+          {
+            "name": "ds_condicao_dominio",
+            "description": "Condição de domínio do imóvel (ex.: Proprietário, Comodatário, Posseiro)"
+          },
+          {
+            "name": "st_imovel_principal",
+            "description": "Indica se é o imóvel principal do agricultor (true/false)"
+          },
+          {
+            "name": "nr_latitude",
+            "description": "Latitude do ponto representativo da área",
+            "role": "geometry"
+          },
+          {
+            "name": "nr_longitude",
+            "description": "Longitude do ponto representativo da área",
+            "role": "geometry"
+          }
+        ]
+      }
+    },
     "assentamentos_atributos": {
       "id": "assentamentos_atributos",
       "collection_id": "sicar",
@@ -649,13 +1012,42 @@
       },
       "generated_by": "scripts/generate-assentamentos.mjs",
       "temporal": {
-        "reference_period": "2026-06",
-        "retrieved_at": "2026-07-13"
+        "status": "described",
+        "extent": [["2026-06-01", "2026-06-30"]],
+        "grain": "P1M",
+        "frequency": "irregular",
+        "history": "snapshot",
+        "timezone": "America/Sao_Paulo"
       },
       "spatial": {
-        "coverage": "SP, MG, RJ, ES",
-        "unit": "assentamento",
-        "key": "codImovel"
+        "status": "described",
+        "extent": [
+          {
+            "scheme": "iso3166-2",
+            "code": "BR-SP"
+          },
+          {
+            "scheme": "iso3166-2",
+            "code": "BR-MG"
+          },
+          {
+            "scheme": "iso3166-2",
+            "code": "BR-RJ"
+          },
+          {
+            "scheme": "iso3166-2",
+            "code": "BR-ES"
+          }
+        ],
+        "coverage": "exhaustive",
+        "grain": {
+          "scheme": "custom",
+          "code": "settlement",
+          "label": "assentamento"
+        },
+        "geometry": "none",
+        "precision": "not_applicable",
+        "field": "codImovel"
       },
       "access": {
         "level": "public",

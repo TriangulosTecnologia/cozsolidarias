@@ -1,4 +1,11 @@
 export type {
+  CafAreaFeature,
+  CafAreaProperties,
+  CafDetalhe,
+  CafProducaoItem,
+  CafsFeatureCollection,
+} from './caf';
+export type {
   CozinhaBubbleFeature,
   CozinhaLocationFeature,
   CozinhasBubblesFeatureCollection,

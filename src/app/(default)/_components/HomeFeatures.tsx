@@ -13,22 +13,22 @@ type Principle = {
 
 const PRINCIPLES: Principle[] = [
   {
-    verb: 'Mapeamos.',
+    verb: 'Mapeamos',
     description: 'Registros territoriais de cozinhas, entidades e fontes.',
     meta: 'Fonte · Cobertura · Status · Limite',
   },
   {
-    verb: 'Validamos.',
+    verb: 'Validamos',
     description: 'Origem, cobertura, consistência e status dos dados.',
     meta: 'Fonte · Cobertura · Status · Limite',
   },
   {
-    verb: 'Visualizamos.',
+    verb: 'Visualizamos',
     description: 'Mapas, filtros e recortes para leitura pública.',
     meta: 'Fonte · Cobertura · Status · Limite',
   },
   {
-    verb: 'Devolvemos.',
+    verb: 'Devolvemos',
     description: 'Informação útil para territórios, redes e políticas.',
     meta: 'Fonte · Cobertura · Status · Limite',
   },
@@ -109,7 +109,7 @@ const HomeFeatures = () => {
             color="charcoal.900"
             maxW="32ch"
           >
-            Método como linguagem.
+            Método como linguagem
           </Text>
         </Box>
 

@@ -8,15 +8,22 @@ export default jestUnitConfig({
     // Honor the `@/*` path alias (tsconfig) — @ttoss/config only maps CSS.
     '^@/(.*)$': '<rootDir>/../../src/$1',
   },
-  // MapaPlayground is covered by behavior (the mode toggle), not line coverage:
-  // its error/tooltip branches aren't exercised, so keep it out of the gate.
-  coveragePathIgnorePatterns: ['/node_modules/', 'MapaPlayground\\.tsx$'],
+  // MapaPlayground and the client-only modules it composes (the detail-sidebar
+  // panels and the tooltip-wiring hook) are covered by behavior (the mode
+  // toggle), not line coverage: their hover/click render branches aren't
+  // exercised under jsdom, so keep them out of the gate.
+  coveragePathIgnorePatterns: [
+    '/node_modules/',
+    'MapaPlayground\\.tsx$',
+    'mapaDetailSidebars\\.tsx$',
+    'useMapaTooltips\\.ts$',
+  ],
   coverageThreshold: {
     global: {
-      branches: 97.95,
+      branches: 98.0,
       functions: 99.99,
-      lines: 99.35,
-      statements: 99.35,
+      lines: 99.5,
+      statements: 99.5,
     },
   },
 });
