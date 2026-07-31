@@ -17,8 +17,10 @@
  *
  * Usage:  GOOGLE_MAPS_API_KEY=... node scripts/geocode-cozinhas.mjs
  */
-import { copyFile, readFile, writeFile } from 'node:fs/promises';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { copyFile, readFile, writeFile } from 'node:fs/promises';
+import { setTimeout } from 'node:timers';
+import { URLSearchParams } from 'node:url';
 
 const CSV =
   process.env.GEOCODE_CSV ??
@@ -33,7 +35,11 @@ if (!KEY) {
   process.exit(1);
 }
 
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const sleep = (ms) => {
+  return new Promise((r) => {
+    return setTimeout(r, ms);
+  });
+};
 const isBlank = (v) => {
   const t = (v ?? '').trim();
   return t === '' || t === '---';
@@ -41,48 +47,62 @@ const isBlank = (v) => {
 
 /** RFC 4180 parser — mirrors readStaticCozinhas.ts so read/write round-trips. */
 const parseCsv = (text) => {
-  const rows = [];
-  let row = [];
-  let field = '';
-  let inQuotes = false;
-  for (let i = 0; i < text.length; i += 1) {
-    const c = text[i];
-    const n = text[i + 1];
-    if (inQuotes) {
-      if (c !== '"') field += c;
-      else if (n === '"') {
-        field += '"';
-        i += 1;
-      } else inQuotes = false;
-      continue;
+  const st = { rows: [], row: [], field: '', inQuotes: false };
+  // One char inside a quoted field. Returns extra chars consumed: 1 when an
+  // escaped "" pair collapses to a single ", otherwise 0.
+  const inQuoted = (c, n) => {
+    if (c !== '"') {
+      st.field += c;
+      return 0;
     }
-    if (c === '"') inQuotes = true;
+    if (n === '"') {
+      st.field += '"';
+      return 1;
+    }
+    st.inQuotes = false;
+    return 0;
+  };
+  // One char outside quotes: quote-open, delimiter, row break, or literal.
+  const unquoted = (c) => {
+    if (c === '"') st.inQuotes = true;
     else if (c === ',') {
-      row.push(field);
-      field = '';
+      st.row.push(st.field);
+      st.field = '';
     } else if (c === '\n') {
-      row.push(field);
-      rows.push(row);
-      row = [];
-      field = '';
-    } else if (c !== '\r') field += c;
+      st.row.push(st.field);
+      st.rows.push(st.row);
+      st.row = [];
+      st.field = '';
+    } else if (c !== '\r') st.field += c;
+  };
+  for (let i = 0; i < text.length; i += 1) {
+    if (st.inQuotes) i += inQuoted(text[i], text[i + 1]);
+    else unquoted(text[i]);
   }
-  if (field !== '' || row.length > 0) {
-    row.push(field);
-    rows.push(row);
+  if (st.field !== '' || st.row.length > 0) {
+    st.row.push(st.field);
+    st.rows.push(st.row);
   }
-  return rows;
+  return st.rows;
 };
 
 /** Minimal RFC 4180 field escaper accepted by the project's parser. */
-const escapeField = (v) =>
-  /[",\n\r]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
-const toCsv = (rows) =>
-  `${rows.map((r) => r.map(escapeField).join(',')).join('\n')}\n`;
+const escapeField = (v) => {
+  return /[",\n\r]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
+};
+const toCsv = (rows) => {
+  return `${rows
+    .map((r) => {
+      return r.map(escapeField).join(',');
+    })
+    .join('\n')}\n`;
+};
 
 const haversineKm = (lat1, lon1, lat2, lon2) => {
   const R = 6371;
-  const toRad = (x) => (x * Math.PI) / 180;
+  const toRad = (x) => {
+    return (x * Math.PI) / 180;
+  };
   const dLat = toRad(lat2 - lat1);
   const dLon = toRad(lon2 - lon1);
   const a =
@@ -102,7 +122,9 @@ const geocode = async (query) => {
     });
   for (let attempt = 0; attempt < 4; attempt += 1) {
     try {
-      const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
+      const res = await fetch(url, {
+        signal: globalThis.AbortSignal.timeout(15000),
+      });
       const d = await res.json();
       if (d.status === 'OK') {
         const g = d.results[0].geometry;
@@ -146,20 +168,35 @@ const iNome = col('Nome da Cozinha');
 const iLat = col('Latitude');
 const iLng = col('Longitude');
 
-const data = rows.slice(1).filter((r) => r.some((c) => c.trim() !== ''));
+const data = rows.slice(1).filter((r) => {
+  return r.some((c) => {
+    return c.trim() !== '';
+  });
+});
 
-const buildQuery = (r) =>
-  [r[iAddr], r[iBairro], r[iMun], r[iUf], r[iCep]]
-    .map((x) => (x ?? '').trim())
-    .filter((x) => x && x !== '---')
-    .join(', ') + ', Brasil';
+const buildQuery = (r) => {
+  return (
+    [r[iAddr], r[iBairro], r[iMun], r[iUf], r[iCep]]
+      .map((x) => {
+        return (x ?? '').trim();
+      })
+      .filter((x) => {
+        return x && x !== '---';
+      })
+      .join(', ') + ', Brasil'
+  );
+};
 
 const cache = existsSync(CACHE) ? JSON.parse(readFileSync(CACHE, 'utf8')) : {};
 let cacheDirty = 0;
-const saveCache = () => writeFileSync(CACHE, JSON.stringify(cache));
+const saveCache = () => {
+  return writeFileSync(CACHE, JSON.stringify(cache));
+};
 
 const queries = [...new Set(data.map(buildQuery))];
-const todo = queries.filter((q) => !(q in cache));
+const todo = queries.filter((q) => {
+  return !(q in cache);
+});
 console.log(
   `records=${data.length} uniqueQueries=${queries.length} cached=${queries.length - todo.length} toFetch=${todo.length}`
 );
@@ -252,7 +289,13 @@ for (const r of data) {
 // Round-trip self-check: re-parse our output and assert every non-coordinate
 // cell is identical to the input. Abort (leaving the CSV untouched) on any drift.
 const rebuilt = toCsv(outRows);
-const check = parseCsv(rebuilt).slice(1).filter((r) => r.some((c) => c.trim() !== ''));
+const check = parseCsv(rebuilt)
+  .slice(1)
+  .filter((r) => {
+    return r.some((c) => {
+      return c.trim() !== '';
+    });
+  });
 if (check.length !== data.length) {
   throw new Error(
     `self-check failed: row count ${check.length} !== ${data.length}`

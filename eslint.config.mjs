@@ -27,6 +27,7 @@ export default [
       'build/**',
       'out/**',
       'public/**',
+      '**/*.example.ts',
     ],
   },
   {
