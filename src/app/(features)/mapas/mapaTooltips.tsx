@@ -90,17 +90,21 @@ const TooltipCard = ({
   );
 };
 
+/** Terracotta accent matching the kitchen points on the map (`#E4572E`). */
+const COZINHA_ACCENT = '#E4572E';
+
 /**
- * Tooltip shown when hovering a kitchen point on the map. Displays only the
- * kitchen name — no metric swatch since the points layer has no data-driven
- * paint.
+ * Tooltip shown when hovering a kitchen point on the map. Renders a terracotta
+ * left-border accent (matching the point marker), a "Nome da cozinha" caption
+ * and the kitchen name in bold. No metric swatch — the points layer has no
+ * data-driven paint.
  *
  * @param params.nome - Kitchen display name from `properties.nome`.
  * @returns The tooltip element for the hovered kitchen point.
  *
  * @example
  * renderCozinhaTooltip({ nome: 'Cozinha Esperança' });
- * // <Box> with a bold <Text> showing the name
+ * // <Box> with a "Nome da cozinha" caption over the bold name
  */
 export const renderCozinhaTooltip = ({
   nome,
@@ -108,8 +112,17 @@ export const renderCozinhaTooltip = ({
   nome: string;
 }): React.ReactNode => {
   return (
-    <Box minW="140px">
-      <Text fontWeight="bold" fontSize="sm" lineHeight="tight">
+    <Box
+      minW="180px"
+      maxW="260px"
+      borderLeft="3px solid"
+      borderLeftColor={COZINHA_ACCENT}
+      pl="2.5"
+    >
+      <Text fontSize="xs" color="text.secondary" lineHeight="tight" mb="0.5">
+        Nome da cozinha
+      </Text>
+      <Text fontSize="sm" fontWeight="bold" lineHeight="tight" lineClamp="2">
         {nome}
       </Text>
     </Box>

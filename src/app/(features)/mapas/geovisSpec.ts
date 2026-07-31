@@ -640,7 +640,7 @@ export const buildSpec = (
     // The assentamentos data covers only some states, so frame that region when
     // the mode is active; every other (Brazil-wide) mode keeps the national view.
     view: resolveView(showAssentamentos),
-    basemap: {},
+    basemap: { labels: false },
     // The assentamentos geometry and the state backdrop are added only in this
     // mode, so other views never fetch them; the adapter's source sync
     // adds/removes them on switch.

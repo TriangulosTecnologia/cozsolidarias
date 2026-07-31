@@ -12,29 +12,18 @@ const source = (
     bairro: '',
     cep: '',
     municipio: '',
+    codigoIbge: '',
     uf: '',
     email: '',
-    telefone: '',
     cnpj: '',
     emFuncionamento: '',
     diasFuncionamento: '',
     situacao: '',
-    dataEnvioAnalise: '',
-    reanalise: '',
-    avaliador: '',
-    dataAvaliacao: '',
-    homologador: '',
-    dataHomologacao: '',
     publicoAtendido: '',
     publicoTotalAtendido: '',
-    dadosAtualizados: '',
-    dataUltimaAtualizacao: '',
-    atualizacaoGeoFotos: '',
-    linkGeolocalizacao: '',
+    refeicoesPorDia: '',
     latitude: null,
     longitude: null,
-    statusFotoGeo: '',
-    enderecoCompleto: '',
     ...overrides,
   };
 };
@@ -67,23 +56,19 @@ describe('toCozinhaDetalhe', () => {
   });
 
   test('excludes the source contact/PII columns from the contract', () => {
-    const result = toCozinhaDetalhe(
-      source({ email: 'a@b.c', telefone: '(11) 90000-0000', cnpj: '00.000' })
-    );
+    const result = toCozinhaDetalhe(source({ email: 'a@b.c', cnpj: '00.000' }));
 
     expect(result).not.toHaveProperty('email');
-    expect(result).not.toHaveProperty('telefone');
     expect(result).not.toHaveProperty('cnpj');
   });
 
-  test('excludes the internal review-workflow columns from the contract', () => {
+  test('excludes the source administrative columns from the contract', () => {
     const result = toCozinhaDetalhe(
-      source({ avaliador: 'John Doe', homologador: 'Jane Doe' })
+      source({ codigoIbge: '3550308', refeicoesPorDia: '120' })
     );
 
-    expect(result).not.toHaveProperty('avaliador');
-    expect(result).not.toHaveProperty('homologador');
-    expect(result).not.toHaveProperty('dataHomologacao');
+    expect(result).not.toHaveProperty('codigoIbge');
+    expect(result).not.toHaveProperty('refeicoesPorDia');
   });
 
   test('preserves null coordinates', () => {

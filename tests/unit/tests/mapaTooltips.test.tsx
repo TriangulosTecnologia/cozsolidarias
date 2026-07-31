@@ -216,11 +216,12 @@ describe('renderMunicipioTooltip', () => {
 });
 
 describe('renderCozinhaTooltip', () => {
-  test('shows only the kitchen name', () => {
+  test('shows the "Nome da cozinha" caption and the kitchen name', () => {
     renderWithChakra(
       <>{renderCozinhaTooltip({ nome: 'Cozinha Esperança' })}</>
     );
 
+    expect(screen.getByText('Nome da cozinha')).toBeInTheDocument();
     expect(screen.getByText('Cozinha Esperança')).toBeInTheDocument();
   });
 });

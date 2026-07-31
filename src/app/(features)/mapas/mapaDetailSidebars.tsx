@@ -145,7 +145,7 @@ const CozinhaDetailPanel = ({ cozinha }: { cozinha: CozinhaDetalhe }) => {
           field('Dias de funcionamento', cozinha.diasFuncionamento)}
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-        {field('Endereço', cozinha.enderecoCompleto || cozinha.endereco)}
+        {field('Endereço', cozinha.endereco)}
         <span style={{ fontSize: '11px', color: '#374151' }}>
           {cozinha.bairro ? `${cozinha.bairro} · ` : ''}
           {cozinha.municipio}/{cozinha.uf}
@@ -166,11 +166,6 @@ const CozinhaDetailPanel = ({ cozinha }: { cozinha: CozinhaDetalhe }) => {
         <span style={{ fontSize: '11px', color: '#9ca3af' }}>
           {cozinha.codigo}
         </span>
-        {cozinha.dataUltimaAtualizacao && (
-          <span style={{ fontSize: '11px', color: '#9ca3af' }}>
-            Atualizado em {cozinha.dataUltimaAtualizacao}
-          </span>
-        )}
       </div>
     </div>
   );

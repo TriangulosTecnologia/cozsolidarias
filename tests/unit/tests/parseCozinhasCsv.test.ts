@@ -1,7 +1,7 @@
 import { parseCozinhasCsv } from 'src/data-source-static/readStaticCozinhas';
 
 /**
- * The 29 CSV headers, in order, exactly as `readStaticCozinhas` expects them.
+ * The 18 CSV headers, in order, exactly as `readStaticCozinhas` expects them.
  * Kept here (not imported) so the test fails loudly if the source columns drift.
  */
 const HEADERS = [
@@ -11,29 +11,18 @@ const HEADERS = [
   'Bairro da Cozinha',
   'CEP',
   'Município da Cozinha',
+  'Código IBGE',
   'UF',
   'Email',
-  'Telefone',
   'CNPJ',
   'A cozinha está em funcionamento atualmente?',
   'Em quantos dias da semana a Cozinha Solidária funciona?',
   'Situação',
-  'Data Envio para Análise',
-  'É Reanálise?',
-  'Avaliador',
-  'Data Avaliação',
-  'Homologador',
-  'Data Homologação',
   'Público Atendido',
   'Público Total Atendido',
-  'Dados da Cozinha atualizados?',
-  'Data da última atualização',
-  'Fez atualização GEO e Fotos?',
-  'Link geolocalização',
+  'Quantidade refeições produzidas por dia de trabalho',
   'Latitude',
   'Longitude',
-  'Status Foto/Geo',
-  'Endereço Completo',
 ];
 
 /** Column indices we assert against. */
@@ -42,13 +31,13 @@ const COL = {
   nome: 1,
   endereco: 2,
   municipio: 5,
-  latitude: 25,
-  longitude: 26,
+  latitude: 16,
+  longitude: 17,
 } as const;
 
 const HEADER_LINE = HEADERS.join(',');
 
-/** Builds a 29-cell row, with the given (already CSV-valid) cells overridden. */
+/** Builds an 18-cell row, with the given (already CSV-valid) cells overridden. */
 const rawRow = (overrides: Record<number, string> = {}): string[] => {
   const cells = Array.from({ length: HEADERS.length }, () => {
     return '';
