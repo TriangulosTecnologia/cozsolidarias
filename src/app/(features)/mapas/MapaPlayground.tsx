@@ -2,7 +2,7 @@
 
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-import { Box, Text } from '@chakra-ui/react';
+import { Box } from '@chakra-ui/react';
 import {
   GeovisWorkspace,
   type GeovisWorkspaceConfig,
@@ -28,6 +28,7 @@ import {
   COZINHA_RIGHT_SIDEBAR,
   modeShowsCozinhaDetail,
 } from './mapaDetailSidebars';
+import MapLoadingIndicator from './MapLoadingIndicator';
 import { type NomesPorCodigo, useMapaSpec } from './useMapaSpec';
 
 /** Id of the left-sidebar menu group that drives the visualization mode. */
@@ -320,17 +321,7 @@ const MapaPlayground = () => {
           </ThemeUIProvider>
         </I18nProvider>
       ) : (
-        <Box
-          position="absolute"
-          inset={0}
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-        >
-          <Text textStyle="body-sm" color="text.secondary">
-            Carregando mapa…
-          </Text>
-        </Box>
+        <MapLoadingIndicator />
       )}
     </Box>
   );

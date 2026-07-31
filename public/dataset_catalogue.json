@@ -7,7 +7,7 @@
     "language": "pt-BR",
     "status": "draft",
     "created_at": "2026-07-07",
-    "updated_at": "2026-07-27",
+    "updated_at": "2026-07-29",
     "typing_reference": "src/data-source-static/dataCatalogue.ts",
     "quality_notes": [
       {
@@ -131,7 +131,7 @@
       "file": "src/data-source-static/data/cozinhas_com_geolocalizacao_all.csv",
       "format": "CSV",
       "source": {
-        "url": "https://drive.google.com/file/d/1IHzGfhLsvBIoeD-o8CS1TYKxBvg_v99l/view",
+        "url": "https://docs.google.com/spreadsheets/d/1fEt1zRYwajWPqRGDXsHnUoHtEktxKeDC/edit?rtpof=true&sd=true&gid=297639936#gid=297639936",
         "notes": "Dado primário coletado pela equipe do projeto;"
       },
       "temporal": {
@@ -145,7 +145,7 @@
             "code": "BR"
           }
         ],
-        "coverage": "exhaustive",
+        "coverage": "partial",
         "grain": {
           "scheme": "custom",
           "code": "kitchen",
@@ -158,12 +158,12 @@
       "access": {
         "level": "restricted",
         "contains_personal_data": true,
-        "notes": "Contém endereços completos, CEP, CNPJ, e-mail, telefone e coordenadas — publicar apenas de forma agregada."
+        "notes": "Contém endereço, CEP, CNPJ, e-mail e coordenadas — publicar apenas de forma agregada. Recorte apenas das cozinhas habilitadas; parte dos registros não tem coordenadas."
       },
       "stats": {
-        "rows": 5979,
-        "size_bytes": 2878579,
-        "checkSum": "sha256:66438a33c81dc3063a317cfed720ae30c7a0c746cad2888914998414ed30309b"
+        "rows": 1396,
+        "size_bytes": 770399,
+        "checkSum": "sha256:59e8b3c27235a38f91873ba44f6a27f876aad38418c728e800f58a0952e6969d"
       },
       "schema": {
         "fields": [
@@ -195,17 +195,17 @@
             "description": "Município"
           },
           {
+            "name": "Código IBGE",
+            "description": "Código IBGE do município",
+            "role": "identifier"
+          },
+          {
             "name": "UF",
             "description": "Unidade federativa"
           },
           {
             "name": "Email",
             "description": "E-mail de contato",
-            "sensitive": true
-          },
-          {
-            "name": "Telefone",
-            "description": "Telefone de contato",
             "sensitive": true
           },
           {
@@ -226,30 +226,6 @@
             "description": "Situação no fluxo de cadastro"
           },
           {
-            "name": "Data Envio para Análise",
-            "description": "Data de envio para análise"
-          },
-          {
-            "name": "É Reanálise?",
-            "description": "Indicador de reanálise"
-          },
-          {
-            "name": "Avaliador",
-            "description": "Responsável pela avaliação"
-          },
-          {
-            "name": "Data Avaliação",
-            "description": "Data da avaliação"
-          },
-          {
-            "name": "Homologador",
-            "description": "Responsável pela homologação"
-          },
-          {
-            "name": "Data Homologação",
-            "description": "Data da homologação"
-          },
-          {
             "name": "Público Atendido",
             "description": "Tipo de público atendido"
           },
@@ -258,20 +234,9 @@
             "description": "Total de pessoas atendidas"
           },
           {
-            "name": "Dados da Cozinha atualizados?",
-            "description": "Indicador de atualização"
-          },
-          {
-            "name": "Data da última atualização",
-            "description": "Data da última atualização"
-          },
-          {
-            "name": "Fez atualização GEO e Fotos?",
-            "description": "Indicador de atualização geo/fotos"
-          },
-          {
-            "name": "Link geolocalização",
-            "description": "Link de geolocalização"
+            "name": "Quantidade refeições produzidas por dia de trabalho",
+            "description": "Refeições produzidas por dia de trabalho",
+            "unit": "refeições"
           },
           {
             "name": "Latitude",
@@ -283,15 +248,6 @@
             "name": "Longitude",
             "description": "Longitude",
             "role": "geometry",
-            "sensitive": true
-          },
-          {
-            "name": "Status Foto/Geo",
-            "description": "Status de foto/geo"
-          },
-          {
-            "name": "Endereço Completo",
-            "description": "Endereço completo",
             "sensitive": true
           }
         ]

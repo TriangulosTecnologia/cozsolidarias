@@ -5,8 +5,8 @@ import type { CozinhaDetalhe } from '../schema';
  * Projects a source-native cozinha record into the canonical
  * {@link CozinhaDetalhe} contract, keeping only the descriptive fields
  * (identity, location, operation, público atendido) and dropping the source's
- * contact/PII columns (email, telefone, CNPJ) and its internal review-workflow
- * columns (avaliador, homologador, analysis/homologation dates, …).
+ * contact/PII columns (email, CNPJ) and its administrative columns
+ * (`Código IBGE`, `Quantidade refeições produzidas por dia de trabalho`).
  *
  * @param source - Raw record from data-source-static.
  * @returns The canonical detail for one cozinha.
@@ -31,9 +31,7 @@ export const toCozinhaDetalhe = (
     situacao: source.situacao,
     publicoAtendido: source.publicoAtendido,
     publicoTotalAtendido: source.publicoTotalAtendido,
-    dataUltimaAtualizacao: source.dataUltimaAtualizacao,
     latitude: source.latitude,
     longitude: source.longitude,
-    enderecoCompleto: source.enderecoCompleto,
   };
 };

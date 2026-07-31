@@ -3,11 +3,10 @@
  * code. Feeds the per-cozinha detail endpoint (`GET /api/cozinhas/[codigo]`)
  * and, later, the click-to-inspect panel on the map.
  *
- * Descriptive fields only. The source's contact/PII columns (email, telefone,
- * CNPJ) and its internal review-workflow columns (avaliador, homologador,
- * analysis/homologation dates, …) are intentionally left out of the contract.
- * An empty string means "não informado" — the source already normalizes blank
- * cells to `''`.
+ * Descriptive fields only. The source's contact/PII columns (email, CNPJ) and
+ * its administrative columns (`Código IBGE`, refeições/dia) are intentionally
+ * left out of the contract. An empty string means "não informado" — the source
+ * already normalizes blank cells to `''`.
  */
 export type CozinhaDetalhe = {
   /** Registration code (`Código da Cozinha`), e.g. `CS016282`. The lookup key. */
@@ -34,12 +33,8 @@ export type CozinhaDetalhe = {
   publicoAtendido: string;
   /** People served, as reported. Kept as text; may be blank. */
   publicoTotalAtendido: string;
-  /** Date of the last data update, as reported. */
-  dataUltimaAtualizacao: string;
   /** Latitude in decimal degrees, or `null` when the source has no coordinate. */
   latitude: number | null;
   /** Longitude in decimal degrees, or `null` when the source has no coordinate. */
   longitude: number | null;
-  /** Full formatted address (`Endereço Completo`). */
-  enderecoCompleto: string;
 };
