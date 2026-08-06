@@ -2,7 +2,7 @@ import { Box, Text } from '@chakra-ui/react';
 import type { MapHoverInfo } from '@ttoss/geovis';
 import type * as React from 'react';
 
-import type { kitchenRateByCity } from '@/data-gateway/schema';
+import type { cafByCity, kitchenRateByCity } from '@/data-gateway/schema';
 
 import {
   assentamentoStatusLabel,
@@ -14,6 +14,7 @@ import {
 } from './geovisCozinhaStatusScales';
 import {
   colorForCadUnico,
+  colorForCafPercentual,
   colorForPercentual,
   colorForPessoasPorCozinha,
   colorForQuantidade,
@@ -27,71 +28,13 @@ import {
   ivsFaixaLabel,
 } from './geovisScoreScales';
 import type { AssentamentoAtributo } from './geovisSpec';
+import { TooltipCard } from './mapaTooltipCard';
 
 /** `"N cozinhas"` / `"1 cozinha"`, com o número no formato pt-BR. */
 const formatCozinhas = (quantidade: number): string => {
   return `${quantidade.toLocaleString('pt-BR')} ${
     quantidade === 1 ? 'cozinha' : 'cozinhas'
   }`;
-};
-
-/**
- * Card do tooltip: título + swatch da faixa (opcional) + rótulo, com linha
- * auxiliar opcional e linhas de detalhe extras opcionais. Omita `swatchColor`
- * em modos sem paint data-driven (ex.: `pontos`), onde o quadrado colorido não
- * representaria nenhuma faixa.
- */
-const TooltipCard = ({
-  name,
-  swatchColor,
-  primary,
-  secondary,
-  details,
-}: {
-  name: string;
-  swatchColor?: string;
-  primary: string;
-  secondary?: string;
-  details?: string[];
-}) => {
-  return (
-    <Box display="flex" flexDirection="column" gap="1.5" minW="180px">
-      <Text fontWeight="bold" fontSize="sm" lineHeight="tight">
-        {name}
-      </Text>
-      <Box display="flex" alignItems="center" gap="2">
-        {swatchColor === undefined ? null : (
-          <Box
-            w="12px"
-            h="12px"
-            borderRadius="sm"
-            flexShrink={0}
-            bg={swatchColor}
-          />
-        )}
-        <Text fontSize="xs" color="text.secondary" lineHeight="tight">
-          {primary}
-        </Text>
-      </Box>
-      {secondary === undefined ? null : (
-        <Text fontSize="xs" color="text.secondary" lineHeight="tight">
-          {secondary}
-        </Text>
-      )}
-      {details?.map((line) => {
-        return (
-          <Text
-            key={line}
-            fontSize="xs"
-            color="text.secondary"
-            lineHeight="tight"
-          >
-            {line}
-          </Text>
-        );
-      })}
-    </Box>
-  );
 };
 
 /**
@@ -220,6 +163,46 @@ const renderPercentTooltip = ({
     <TooltipCard
       name={name}
       swatchColor={colorForPercentual(percentual)}
+      primary={primary}
+      secondary={secondary}
+    />
+  );
+};
+
+/**
+ * CAF-share-mode tooltip: swatch + "X% dos CAFs do Brasil" + a "N CAFs" line with
+ * the count in the município, both read from the joined CAF `register`. Municípios
+ * absent from the CAF snapshot read "Sem CAF registrado". 4 decimals because the
+ * shares are tiny (median ≈ 0,0084%).
+ */
+const renderCafPercentTooltip = ({
+  name,
+  register,
+}: {
+  name: string;
+  register?: cafByCity;
+}) => {
+  const percentual = register?.percentualDoBrasil ?? 0;
+  const quantidade = register?.quantidade ?? 0;
+
+  const primary =
+    percentual <= 0
+      ? 'Sem CAF registrado'
+      : `${percentual.toLocaleString('pt-BR', {
+          maximumFractionDigits: 4,
+        })}% dos CAFs do Brasil`;
+
+  const secondary =
+    quantidade > 0
+      ? `${quantidade.toLocaleString('pt-BR')} ${
+          quantidade === 1 ? 'CAF' : 'CAFs'
+        }`
+      : undefined;
+
+  return (
+    <TooltipCard
+      name={name}
+      swatchColor={colorForCafPercentual(percentual)}
       primary={primary}
       secondary={secondary}
     />
@@ -466,8 +449,10 @@ const SCORE_TOOLTIPS: Partial<Record<MapMode, ScoreTooltip>> = {
  * @param params.mode - Active {@link MapMode} driving which metric is shown.
  * @param params.name - Resolved município display name (already falls back to
  * `Município <code>` upstream).
- * @param params.register - Canonical row for the município, or `undefined` when
- * it has no cozinhas (tooltips then read as "Sem cozinha registrada").
+ * @param params.register - Canonical cozinha row for the município, or `undefined`
+ * when it has no cozinhas (tooltips then read as "Sem cozinha registrada").
+ * @param params.cafRegister - Canonical CAF row for the município, or `undefined`
+ * when it has no CAF; read only in the `coropletico-cafs-percentual` mode.
  * @param params.value - The hovered feature's `value` from geovis feature-state
  * (the painted count), used only by the count fallback.
  * @returns The tooltip card element for the hovered município.
@@ -480,11 +465,13 @@ export const renderMunicipioTooltip = ({
   mode,
   name,
   register,
+  cafRegister,
   value,
 }: {
   mode: MapMode;
   name: string;
   register?: kitchenRateByCity;
+  cafRegister?: cafByCity;
   value: MapHoverInfo['value'];
 }): React.ReactNode => {
   if (mode === 'coropletico-taxa') {
@@ -493,6 +480,10 @@ export const renderMunicipioTooltip = ({
 
   if (mode === 'coropletico-percentual') {
     return renderPercentTooltip({ name, register });
+  }
+
+  if (mode === 'coropletico-cafs-percentual') {
+    return renderCafPercentTooltip({ name, register: cafRegister });
   }
 
   if (mode === 'coropletico-cadunico') {

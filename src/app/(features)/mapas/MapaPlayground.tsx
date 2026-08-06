@@ -16,6 +16,7 @@ import { ThemeUIProvider } from 'theme-ui';
 
 import type {
   CafAreaFeature,
+  cafByCity,
   CafsFeatureCollection,
   CozinhasFeatureCollection,
   kitchenRateByCity,
@@ -51,6 +52,10 @@ const LEFT_SIDEBAR: NonNullable<GeovisWorkspaceConfig['leftSidebar']> = {
         {
           value: 'coropletico-percentual',
           label: '% das cozinhas do Brasil no município',
+        },
+        {
+          value: 'coropletico-cafs-percentual',
+          label: '% dos CAFs do Brasil no município',
         },
         {
           value: 'coropletico-cadunico',
@@ -144,6 +149,8 @@ type MapBootstrap = {
   cozinhaStatus: Record<string, string>;
   /** `nrCaf → CafAreaFeature properties` lookup for CAF hover tooltips. */
   cafProps: Record<string, CafAreaFeature['properties']>;
+  /** Per-município CAF shares for the "% dos CAFs do Brasil" choropleth. */
+  cafsByCity: cafByCity[];
 };
 
 const EMPTY_BOOTSTRAP: MapBootstrap = {
@@ -154,6 +161,7 @@ const EMPTY_BOOTSTRAP: MapBootstrap = {
   cozinhaNames: {},
   cozinhaStatus: {},
   cafProps: {},
+  cafsByCity: [],
 };
 
 /**
@@ -165,27 +173,37 @@ const EMPTY_BOOTSTRAP: MapBootstrap = {
  */
 const fetchMapData = async (): Promise<MapBootstrap> => {
   try {
-    const [data, ivs, nomes, settlements, cozinhasGeoJSON, cafsGeoJSON] =
-      await Promise.all([
-        fetch('/api/cozinhas/por-municipio').then((response) => {
-          return response.json() as Promise<kitchenRateByCity[]>;
-        }),
-        fetch('/api/municipios/ivs').then((response) => {
-          return response.json() as Promise<MunicipioIvs[]>;
-        }),
-        fetch('/geo/municipios-nomes.json').then((response) => {
-          return response.json() as Promise<NomesPorCodigo>;
-        }),
-        fetch('/geo/assentamentos-atributos.json').then((response) => {
-          return response.json() as Promise<AssentamentoAtributo[]>;
-        }),
-        fetch('/api/cozinhas').then((response) => {
-          return response.json() as Promise<CozinhasFeatureCollection>;
-        }),
-        fetch('/api/cafs').then((response) => {
-          return response.json() as Promise<CafsFeatureCollection>;
-        }),
-      ]);
+    const [
+      data,
+      ivs,
+      nomes,
+      settlements,
+      cozinhasGeoJSON,
+      cafsGeoJSON,
+      cafsByCity,
+    ] = await Promise.all([
+      fetch('/api/cozinhas/por-municipio').then((response) => {
+        return response.json() as Promise<kitchenRateByCity[]>;
+      }),
+      fetch('/api/municipios/ivs').then((response) => {
+        return response.json() as Promise<MunicipioIvs[]>;
+      }),
+      fetch('/geo/municipios-nomes.json').then((response) => {
+        return response.json() as Promise<NomesPorCodigo>;
+      }),
+      fetch('/geo/assentamentos-atributos.json').then((response) => {
+        return response.json() as Promise<AssentamentoAtributo[]>;
+      }),
+      fetch('/api/cozinhas').then((response) => {
+        return response.json() as Promise<CozinhasFeatureCollection>;
+      }),
+      fetch('/api/cafs').then((response) => {
+        return response.json() as Promise<CafsFeatureCollection>;
+      }),
+      fetch('/api/cafs/por-municipio').then((response) => {
+        return response.json() as Promise<cafByCity[]>;
+      }),
+    ]);
     const cozinhaNames = Object.fromEntries(
       cozinhasGeoJSON.features.map((f) => {
         return [f.properties.codigo, f.properties.nome];
@@ -209,6 +227,7 @@ const fetchMapData = async (): Promise<MapBootstrap> => {
       cozinhaNames,
       cozinhaStatus,
       cafProps,
+      cafsByCity,
     };
   } catch {
     return EMPTY_BOOTSTRAP;
@@ -236,6 +255,7 @@ const MapaPlayground = () => {
   const [cafProps, setCafProps] = React.useState<
     Record<string, CafAreaFeature['properties']>
   >({});
+  const [cafsByCity, setCafsByCity] = React.useState<cafByCity[]>([]);
   const [selection, setSelection] = React.useState<GeovisWorkspaceSelection>(
     () => {
       return getInitialSelection({ config: { leftSidebar: LEFT_SIDEBAR } });
@@ -270,6 +290,7 @@ const MapaPlayground = () => {
       setCozinhaNames(bootstrap.cozinhaNames);
       setCozinhaStatus(bootstrap.cozinhaStatus);
       setCafProps(bootstrap.cafProps);
+      setCafsByCity(bootstrap.cafsByCity);
       setMounted(true);
     });
 
@@ -286,6 +307,7 @@ const MapaPlayground = () => {
     cozinhaNames,
     cafProps,
     cozinhaStatus,
+    cafByCity: cafsByCity,
     mode,
   });
 
@@ -312,7 +334,7 @@ const MapaPlayground = () => {
         // crowd the edges. Selected by the legend list's aria-label (its title),
         // one selector per choropleth legend (count, rate, share, CadÚnico,
         // coverage, IVS) plus the categorical settlement legend.
-        '& div:has(> ul[aria-label="Cozinhas por município"]), & div:has(> ul[aria-label="nº coz. no município / 100.000 hab."]), & div:has(> ul[aria-label="% das cozinhas do Brasil no município"]), & div:has(> ul[aria-label="nº coz. / 10 mil pessoas no CadÚnico"]), & div:has(> ul[aria-label="pessoas no CadÚnico por cozinha"]), & div:has(> ul[aria-label="Índice de vulnerabilidade social"]), & div:has(> ul[aria-label="Assentamentos rurais"])':
+        '& div:has(> ul[aria-label="Cozinhas por município"]), & div:has(> ul[aria-label="nº coz. no município / 100.000 hab."]), & div:has(> ul[aria-label="% das cozinhas do Brasil no município"]), & div:has(> ul[aria-label="% dos CAFs do Brasil no município"]), & div:has(> ul[aria-label="nº coz. / 10 mil pessoas no CadÚnico"]), & div:has(> ul[aria-label="pessoas no CadÚnico por cozinha"]), & div:has(> ul[aria-label="Índice de vulnerabilidade social"]), & div:has(> ul[aria-label="Assentamentos rurais"])':
           {
             bottom: '44px !important',
             right: '44px !important',

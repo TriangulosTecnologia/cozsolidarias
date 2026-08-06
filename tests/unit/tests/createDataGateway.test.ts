@@ -167,6 +167,41 @@ describe('createDataGateway', () => {
     expect(await gateway.getCafByNrCaf('__no_such_caf__')).toBeNull();
   });
 
+  test('aggregates CAFs per município with their share of Brazil from the default static source', async () => {
+    const gateway = createDataGateway();
+
+    const byCity = await gateway.getCafsPorMunicipio();
+
+    expect(Array.isArray(byCity)).toBe(true);
+    expect(byCity.length).toBeGreaterThan(0);
+
+    for (const entry of byCity) {
+      expect(typeof entry.codigoIbge).toBe('string');
+      expect(entry.codigoIbge).not.toBe('');
+      expect(typeof entry.municipio).toBe('string');
+      expect(entry.quantidade).toBeGreaterThanOrEqual(0);
+      // Every município carries its share (%) of Brazil's CAFs, derived from
+      // the national total (sum of the snapshot counts).
+      expect(typeof entry.percentualDoBrasil).toBe('number');
+      expect(entry.percentualDoBrasil).toBeGreaterThanOrEqual(0);
+    }
+
+    // At least one município has CAFs and a positive share.
+    expect(
+      byCity.some((entry) => {
+        return entry.quantidade > 0 && entry.percentualDoBrasil > 0;
+      })
+    ).toBe(true);
+
+    // The shares add up to ~100% of what the choropleth paints. Six-decimal
+    // rounding over ~5.5k municípios keeps the sum tight around 100.
+    const totalShare = byCity.reduce((sum, entry) => {
+      return sum + entry.percentualDoBrasil;
+    }, 0);
+    expect(totalShare).toBeGreaterThan(99);
+    expect(totalShare).toBeLessThan(101);
+  });
+
   test('throws on an unknown DATA_SOURCE', () => {
     const previous = process.env['DATA_SOURCE'];
     process.env['DATA_SOURCE'] = 'bogus';

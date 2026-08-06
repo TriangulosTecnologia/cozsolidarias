@@ -10,7 +10,7 @@ import {
   renderCozinhaTooltip,
   renderMunicipioTooltip,
 } from 'src/app/(features)/mapas/mapaTooltips';
-import type { kitchenRateByCity } from 'src/data-gateway/schema';
+import type { cafByCity, kitchenRateByCity } from 'src/data-gateway/schema';
 
 import { renderWithChakra } from './renderWithChakra';
 
@@ -30,6 +30,7 @@ const REGISTER: kitchenRateByCity = {
 const renderTooltip = (args: {
   mode: MapMode;
   register?: kitchenRateByCity;
+  cafRegister?: cafByCity;
   value?: number | null;
 }) => {
   return renderWithChakra(
@@ -38,6 +39,7 @@ const renderTooltip = (args: {
         mode: args.mode,
         name: 'São Paulo',
         register: args.register,
+        cafRegister: args.cafRegister,
         value: args.value ?? null,
       })}
     </>
@@ -112,6 +114,30 @@ describe('renderMunicipioTooltip', () => {
     renderTooltip({ mode: 'coropletico-percentual', register: undefined });
 
     expect(screen.getByText('Sem cozinha registrada')).toBeInTheDocument();
+  });
+
+  test('CAF share mode shows the % of Brazil (4 decimals) and the CAF count', () => {
+    renderTooltip({
+      mode: 'coropletico-cafs-percentual',
+      cafRegister: {
+        codigoIbge: '3550308',
+        municipio: 'São Paulo',
+        quantidade: 1234,
+        percentualDoBrasil: 0.0084,
+      },
+    });
+
+    expect(screen.getByText('0,0084% dos CAFs do Brasil')).toBeInTheDocument();
+    expect(screen.getByText('1.234 CAFs')).toBeInTheDocument();
+  });
+
+  test('CAF share mode reads "sem CAF" without a CAF register', () => {
+    renderTooltip({
+      mode: 'coropletico-cafs-percentual',
+      cafRegister: undefined,
+    });
+
+    expect(screen.getByText('Sem CAF registrado')).toBeInTheDocument();
   });
 
   test('CadÚnico mode shows the per-10k-CadÚnico rate', () => {

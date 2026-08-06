@@ -5,6 +5,7 @@ export type {
   CafProducaoItem,
   CafsFeatureCollection,
 } from './caf';
+export type { cafByCity } from './cafByCity';
 export type {
   CozinhaBubbleFeature,
   CozinhaLocationFeature,

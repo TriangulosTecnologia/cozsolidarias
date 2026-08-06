@@ -142,8 +142,20 @@ const ASSENTAMENTOS = [
   },
 ];
 
+const CAF_BY_CITY = [
+  {
+    codigoIbge: '3550308',
+    municipio: 'São Paulo',
+    quantidade: 42,
+    percentualDoBrasil: 0.01,
+  },
+];
+
 /** Resolves each mount-time fetch to the right shape for the URL. */
 const bodyForUrl = (url: string) => {
+  if (url.includes('cafs/por-municipio')) {
+    return CAF_BY_CITY;
+  }
   if (url.includes('por-municipio')) {
     return BY_CITY;
   }
@@ -190,6 +202,15 @@ describe('MapaPlayground — visualization toggle', () => {
     // Share (%) mode also keeps the fill plus the hidden kitchen overlay.
     fireEvent.change(screen.getByLabelText('Visualização'), {
       target: { value: 'coropletico-percentual' },
+    });
+    expect(screen.getByTestId('layer-ids')).toHaveTextContent('cozinhas-pts');
+    expect(screen.getByTestId('layer-ids')).not.toHaveTextContent(
+      'cozinhas-bolhas'
+    );
+
+    // CAF share mode keeps the choropleth fill plus the hidden kitchen overlay.
+    fireEvent.change(screen.getByLabelText('Visualização'), {
+      target: { value: 'coropletico-cafs-percentual' },
     });
     expect(screen.getByTestId('layer-ids')).toHaveTextContent('cozinhas-pts');
     expect(screen.getByTestId('layer-ids')).not.toHaveTextContent(

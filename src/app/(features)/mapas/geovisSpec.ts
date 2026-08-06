@@ -1,3 +1,7 @@
+/* eslint-disable max-lines -- Full geovis spec assembly: sources, layers,
+   mapData joins, legends and control for every map mode, built here as one
+   cohesive unit. Grows a few lines per new map variant; splitting the mode
+   branches would scatter the spec and hurt readability. Tracked as a follow-up. */
 import type {
   GeoJSONSource,
   HoverTooltipConfig,
@@ -7,7 +11,11 @@ import type {
   VisualizationSpec,
 } from '@ttoss/geovis';
 
-import type { kitchenRateByCity, MunicipioIvs } from '@/data-gateway/schema';
+import type {
+  cafByCity,
+  kitchenRateByCity,
+  MunicipioIvs,
+} from '@/data-gateway/schema';
 
 import {
   ASSENTAMENTO_LEGEND_ID,
@@ -71,6 +79,8 @@ type MapOverlays = {
    * operating status. Absent/empty entries fall back to the masked color.
    */
   cozinhaStatus?: Record<string, string>;
+  /** Per-município CAF share rows; painted in `coropletico-cafs-percentual` mode. */
+  cafByCity?: cafByCity[];
 };
 
 /**
@@ -632,12 +642,13 @@ const buildMapData = ({
  * @param overlays - Overlay config: `assentamentos.atributos` color the
  * settlement polygons by status and `hoverRender` draws their tooltip;
  * `cozinhaStatus` (`codigo → emFuncionamento`) colors the kitchen points by
- * operating status. Defaults to `{}`.
+ * operating status; `cafByCity` paints the CAF share choropleth. Defaults to `{}`.
  * @returns The geovis visualization spec (sources, mapData, legends, layers).
  *
  * @example
  * buildSpec(byCity, 'coropletico-taxa');
  * buildSpec(byCity, 'coropletico-ivs', undefined, ivsByCity);
+ * buildSpec(byCity, 'coropletico-cafs-percentual', undefined, [], { cafByCity });
  * buildSpec(byCity, 'assentamentos', undefined, [], { assentamentos: { atributos } });
  */
 export const buildSpec = (
@@ -649,7 +660,12 @@ export const buildSpec = (
 ): VisualizationSpec => {
   const showAssentamentos = mode === 'assentamentos';
 
-  const choroplethRows = resolveChoroplethRows(mode, byCity, ivsByCity);
+  const choroplethRows = resolveChoroplethRows(
+    mode,
+    byCity,
+    ivsByCity,
+    overlays.cafByCity ?? []
+  );
 
   // Bounds for the circle-size scale: the largest per-município count. Falls
   // back to 1 when there's no data so `buildBubblesLayer` can still clamp it.

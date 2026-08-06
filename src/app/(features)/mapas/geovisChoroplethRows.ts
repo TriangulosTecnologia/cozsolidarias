@@ -1,6 +1,7 @@
 import type { MapDataRow } from '@ttoss/geovis';
 
 import type {
+  cafByCity,
   kitchenByCity,
   kitchenRateByCity,
   MunicipioIvs,
@@ -44,6 +45,21 @@ const toRateRows = (byCity: kitchenRateByCity[]): MapDataRow[] => {
  * `defaultColor` ("sem cozinha").
  */
 const toPercentRows = (byCity: kitchenRateByCity[]): MapDataRow[] => {
+  return byCity.map((register) => {
+    return {
+      geometryId: register.codigoIbge,
+      value: register.percentualDoBrasil,
+    };
+  });
+};
+
+/**
+ * Maps per-município CAF shares (%) to geovis `mapData` value rows. Every row is
+ * kept — `percentualDoBrasil` is never `null` — so municípios absent from the
+ * CAF snapshot (no CAF) are the only ones that fall back to the legend's
+ * `defaultColor` ("sem CAF").
+ */
+const toCafPercentRows = (byCity: cafByCity[]): MapDataRow[] => {
   return byCity.map((register) => {
     return {
       geometryId: register.codigoIbge,
@@ -170,16 +186,21 @@ const CHOROPLETH_ROW_BUILDERS: Partial<
  * @param mode - Active {@link MapMode} driving which metric is painted.
  * @param byCity - Per-município canonical cozinha rate rows.
  * @param ivsByCity - Per-município IVS/IDHM score rows.
+ * @param cafByCity - Per-município CAF share rows.
  * @returns The value rows for the mode, or `[]` for non-choropleth modes.
  *
  * @example
- * resolveChoroplethRows('coropletico-taxa', byCity, ivsByCity);
+ * resolveChoroplethRows('coropletico-taxa', byCity, ivsByCity, cafByCity);
  */
 export const resolveChoroplethRows = (
   mode: MapMode,
   byCity: kitchenRateByCity[],
-  ivsByCity: MunicipioIvs[]
+  ivsByCity: MunicipioIvs[],
+  cafByCity: cafByCity[]
 ): MapDataRow[] => {
+  if (mode === 'coropletico-cafs-percentual') {
+    return toCafPercentRows(cafByCity);
+  }
   const scorePick = SCORE_PICKERS[mode];
   if (scorePick) {
     return toScoreRows(ivsByCity, scorePick);
