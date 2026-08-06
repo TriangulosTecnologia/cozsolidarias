@@ -330,23 +330,24 @@ const MapaPlayground = () => {
       w="100%"
       bg="ivory.200"
       // `<GeovisWorkspace>` (0.6.x) wraps its map in an outer `position:relative`
-      // Box; inside it the map's Flex layout only sets `minHeight` (no `height`),
-      // so it doesn't fill. We turn the outer Box into a full-height flex column
-      // and let its in-flow child (the map layout) grow with `flex: 1`. The
-      // hover tooltip and legends are `position: absolute` siblings, which ignore
-      // flex-item props — so this stretches only the map, not those overlays.
+      // Box; inside it the map's Flex layout only sets `minHeight` (no `height`)
+      // and carries the card's border/radius. We turn the outer Box into a
+      // full-height flex column and let its in-flow child (the map layout) grow
+      // with `flex: 1`, dropping that card border/radius for a full-bleed map.
+      // The hover tooltip and legends are `position: absolute` siblings, which
+      // ignore flex-item props — so this stretches only the map, not the overlays.
       css={{
         '& > *': {
           height: '100%',
           width: '100%',
-          border: 'none',
-          borderRadius: 0,
           display: 'flex',
           flexDirection: 'column',
         },
         '& > * > *': {
           flex: '1',
           minHeight: 0,
+          border: 'none',
+          borderRadius: 0,
         },
         // geovis' provider auto-renders the choropleth legend with a fixed 10px
         // inset from the map corner (`GeoVisLegend`'s corner position isn't
