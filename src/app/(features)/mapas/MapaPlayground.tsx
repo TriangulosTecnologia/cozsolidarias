@@ -273,6 +273,18 @@ const MapaPlayground = () => {
           : modeShowsCozinhaDetail(mode)
             ? COZINHA_RIGHT_SIDEBAR
             : undefined,
+      // geovis-workspace 0.6.x adds `legend`, `warnings` and `metadata` slots to
+      // the right sidebar, and it stays open while *any* of them has content —
+      // `metadata` always does (`spec.sources.length > 0`), so it never
+      // auto-closed. Hide all three so the right sidebar hosts only the
+      // `inspector` (the clicked feature's detail): it then shows on a point
+      // click and closes on a click outside a point (empty inspector → no
+      // content → sidebar hides), like the previous version.
+      slots: {
+        legend: { hidden: true },
+        warnings: { hidden: true },
+        metadata: { hidden: true },
+      },
     };
   }, [mode]);
 
@@ -317,16 +329,24 @@ const MapaPlayground = () => {
       h="calc(100vh - 72px)"
       w="100%"
       bg="ivory.200"
-      // The `<GeovisWorkspace>` root is a flex container with only `minHeight`
-      // (no `height`), so it collapses instead of filling this box. It's a
-      // closed component, so we stretch its direct child to fill the available
-      // space and drop its card border/radius for a full-bleed map.
+      // `<GeovisWorkspace>` (0.6.x) wraps its map in an outer `position:relative`
+      // Box; inside it the map's Flex layout only sets `minHeight` (no `height`),
+      // so it doesn't fill. We turn the outer Box into a full-height flex column
+      // and let its in-flow child (the map layout) grow with `flex: 1`. The
+      // hover tooltip and legends are `position: absolute` siblings, which ignore
+      // flex-item props — so this stretches only the map, not those overlays.
       css={{
         '& > *': {
           height: '100%',
           width: '100%',
           border: 'none',
           borderRadius: 0,
+          display: 'flex',
+          flexDirection: 'column',
+        },
+        '& > * > *': {
+          flex: '1',
+          minHeight: 0,
         },
         // geovis' provider auto-renders the choropleth legend with a fixed 10px
         // inset from the map corner (`GeoVisLegend`'s corner position isn't
