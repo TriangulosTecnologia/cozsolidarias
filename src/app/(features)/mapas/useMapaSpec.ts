@@ -83,6 +83,8 @@ type UseMapaSpecParams = {
   assentamentos: AssentamentoAtributo[];
   cozinhaNames: Record<string, string>;
   cafProps: Record<string, CafAreaFeature['properties']>;
+  /** `codigo → emFuncionamento` for every kitchen point; colors the points by status. */
+  cozinhaStatus: Record<string, string>;
   mode: MapMode;
 };
 
@@ -98,7 +100,7 @@ type UseMapaSpecParams = {
  * @returns The geovis {@link VisualizationSpec} for the current mode.
  *
  * @example
- * const spec = useMapaSpec({ kitchenByCity, ivsByCity, nomesPorCodigo, assentamentos, cozinhaNames, cafProps, mode });
+ * const spec = useMapaSpec({ kitchenByCity, ivsByCity, nomesPorCodigo, assentamentos, cozinhaNames, cafProps, cozinhaStatus, mode });
  * // <GeovisWorkspace visualizationSpec={spec} ... />
  */
 export const useMapaSpec = ({
@@ -108,6 +110,7 @@ export const useMapaSpec = ({
   assentamentos,
   cozinhaNames,
   cafProps,
+  cozinhaStatus,
   mode,
 }: UseMapaSpecParams) => {
   const { hoverTooltip, assentamentoTooltip, cozinhaTooltip, cafTooltip } =
@@ -116,6 +119,7 @@ export const useMapaSpec = ({
       nomesPorCodigo,
       assentamentos,
       cozinhaNames,
+      cozinhaStatus,
       cafProps,
       mode,
     });
@@ -128,6 +132,7 @@ export const useMapaSpec = ({
       },
       cozinhaTooltipRender: cozinhaTooltip,
       cafTooltipRender: cafTooltip,
+      cozinhaStatus,
     });
   }, [
     kitchenByCity,
@@ -138,6 +143,7 @@ export const useMapaSpec = ({
     assentamentoTooltip,
     cozinhaTooltip,
     cafTooltip,
+    cozinhaStatus,
   ]);
 
   // Assentamentos mode hides the município layers entirely — drop the município

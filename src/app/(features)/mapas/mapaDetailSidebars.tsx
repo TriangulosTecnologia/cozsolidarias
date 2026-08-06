@@ -7,6 +7,11 @@ import type {
 } from '@/data-gateway/schema';
 
 import {
+  colorForCozinhaStatus,
+  cozinhaStatusLabel,
+  cozinhaStatusShortLabel,
+} from './geovisCozinhaStatusScales';
+import {
   CAFS_POINTS_LAYER_ID,
   COZINHAS_POINTS_LAYER_ID,
   type MapMode,
@@ -117,6 +122,13 @@ const CafDetailPanel = ({ detalhe }: { detalhe: CafDetalhe }) => {
 };
 
 const CozinhaDetailPanel = ({ cozinha }: { cozinha: CozinhaDetalhe }) => {
+  // Same derivation as the point color: the source-native `emFuncionamento` text
+  // → descriptive label → terse label + point color, so the sidebar badge reads
+  // Ativo/Reduzido/Inativo and matches the color painting the point on the map.
+  const statusLabel = cozinhaStatusLabel(cozinha.emFuncionamento);
+  const statusColor = colorForCozinhaStatus(statusLabel);
+  const statusShort = cozinhaStatusShortLabel(statusLabel);
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
@@ -128,15 +140,26 @@ const CozinhaDetailPanel = ({ cozinha }: { cozinha: CozinhaDetalhe }) => {
         <span
           style={{
             alignSelf: 'flex-start',
-            padding: '2px 8px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '2px 10px',
             borderRadius: '9999px',
             fontSize: '11px',
             fontWeight: '600',
-            color: '#166534',
-            backgroundColor: '#dcfce7',
+            color: '#374151',
+            backgroundColor: `${statusColor}22`,
           }}
         >
-          {cozinha.situacao}
+          <span
+            style={{
+              width: '8px',
+              height: '8px',
+              borderRadius: '9999px',
+              backgroundColor: statusColor,
+            }}
+          />
+          {statusShort}
         </span>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>

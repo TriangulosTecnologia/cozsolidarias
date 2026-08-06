@@ -3,6 +3,7 @@ import * as React from 'react';
 
 import type { CafAreaFeature, kitchenRateByCity } from '@/data-gateway/schema';
 
+import { cozinhaStatusLabel } from './geovisCozinhaStatusScales';
 import { type AssentamentoAtributo, type MapMode } from './geovisSpec';
 import { renderCafTooltip } from './mapaCafTooltip';
 import {
@@ -20,6 +21,8 @@ type UseMapaTooltipsParams = {
   nomesPorCodigo: NomesPorCodigo;
   assentamentos: AssentamentoAtributo[];
   cozinhaNames: Record<string, string>;
+  /** `codigo → emFuncionamento`, so the kitchen hover shows the operating status. */
+  cozinhaStatus: Record<string, string>;
   cafProps: Record<string, CafAreaFeature['properties']>;
   mode: MapMode;
 };
@@ -33,13 +36,14 @@ type UseMapaTooltipsParams = {
  * @returns `{ hoverTooltip, assentamentoTooltip, cozinhaTooltip, cafTooltip }`.
  *
  * @example
- * const { hoverTooltip } = useMapaTooltips({ kitchenByCity, nomesPorCodigo, assentamentos, cozinhaNames, cafProps, mode });
+ * const { hoverTooltip } = useMapaTooltips({ kitchenByCity, nomesPorCodigo, assentamentos, cozinhaNames, cozinhaStatus, cafProps, mode });
  */
 export const useMapaTooltips = ({
   kitchenByCity,
   nomesPorCodigo,
   assentamentos,
   cozinhaNames,
+  cozinhaStatus,
   cafProps,
   mode,
 }: UseMapaTooltipsParams) => {
@@ -92,12 +96,19 @@ export const useMapaTooltips = ({
     return new Map(Object.entries(cozinhaNames));
   }, [cozinhaNames]);
 
+  const statusByCodigo = React.useMemo(() => {
+    return new Map(Object.entries(cozinhaStatus));
+  }, [cozinhaStatus]);
+
   const cozinhaTooltip = React.useCallback(
     (info: MapHoverInfo) => {
-      const nome = cozinhasByCodigo.get(String(info.featureId)) ?? '';
-      return renderCozinhaTooltip({ nome });
+      const codigo = String(info.featureId);
+      const nome = cozinhasByCodigo.get(codigo) ?? '';
+      const raw = statusByCodigo.get(codigo);
+      const statusLabel = raw === undefined ? null : cozinhaStatusLabel(raw);
+      return renderCozinhaTooltip({ nome, statusLabel });
     },
-    [cozinhasByCodigo]
+    [cozinhasByCodigo, statusByCodigo]
   );
 
   const cafPropsByNrCaf = React.useMemo(() => {

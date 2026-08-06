@@ -34,6 +34,7 @@ describe('toCozinhasFeatureCollection', () => {
       source({
         codigo: 'CS016282',
         nome: 'Cozinha Esperança',
+        emFuncionamento: 'Sim, está funcionando normalmente',
         latitude: -23.5,
         longitude: -46.6,
       }),
@@ -41,10 +42,15 @@ describe('toCozinhasFeatureCollection', () => {
 
     expect(result.type).toBe('FeatureCollection');
     expect(result.features).toHaveLength(1);
+    // `emFuncionamento` rides along on the point so the map can color it by status.
     expect(result.features[0]).toEqual({
       type: 'Feature',
       geometry: { type: 'Point', coordinates: [-46.6, -23.5] },
-      properties: { codigo: 'CS016282', nome: 'Cozinha Esperança' },
+      properties: {
+        codigo: 'CS016282',
+        nome: 'Cozinha Esperança',
+        emFuncionamento: 'Sim, está funcionando normalmente',
+      },
     });
   });
 

@@ -576,6 +576,42 @@ describe('buildSpec', () => {
     expect(mapDataById(spec, 'cozinhas-por-municipio')?.data).toEqual([]);
   });
 
+  test('pontos colors the kitchen points by status and positions the status legend', () => {
+    const spec = buildSpec(BY_CITY, 'pontos', undefined, [], {
+      cozinhaStatus: {
+        CS1: 'Sim, está funcionando normalmente',
+        CS2: '',
+      },
+    });
+
+    // The points layer paints from the categorical status legend.
+    const points = spec.layers.find((layer) => {
+      return layer.id === 'cozinhas-pts';
+    });
+    expect(points?.activeLegendId).toBe('legenda-cozinhas-status');
+
+    // The status join carries one row per point: codigo → descriptive label,
+    // with unknown/blank status folding to "Outros" (the masked swatch).
+    expect(mapDataById(spec, 'cozinhas-pts-promote')?.data).toEqual([
+      { geometryId: 'CS1', value: 'Em funcionamento' },
+      { geometryId: 'CS2', value: 'Outros' },
+    ]);
+
+    // The status legend is the positioned (visible) one in pontos mode.
+    const legend = spec.legends?.find((entry) => {
+      return entry.id === 'legenda-cozinhas-status';
+    });
+    expect(legend?.position).toBe('bottom-right');
+  });
+
+  test('the status legend is present but not positioned outside pontos mode', () => {
+    const legend = buildSpec(BY_CITY, 'coropletico').legends?.find((entry) => {
+      return entry.id === 'legenda-cozinhas-status';
+    });
+    expect(legend).toBeDefined();
+    expect(legend?.position).toBeUndefined();
+  });
+
   test('circulos renders the proportional-circle overlay', () => {
     const spec = buildSpec(BY_CITY, 'circulos');
 

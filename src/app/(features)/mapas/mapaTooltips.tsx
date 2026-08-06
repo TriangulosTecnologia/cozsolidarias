@@ -9,6 +9,10 @@ import {
   colorForAssentamentoStatus,
 } from './geovisAssentamentosScales';
 import {
+  colorForCozinhaStatus,
+  cozinhaStatusShortLabel,
+} from './geovisCozinhaStatusScales';
+import {
   colorForCadUnico,
   colorForPercentual,
   colorForPessoasPorCozinha,
@@ -90,33 +94,33 @@ const TooltipCard = ({
   );
 };
 
-/** Terracotta accent matching the kitchen points on the map (`#E4572E`). */
-const COZINHA_ACCENT = '#E4572E';
-
 /**
- * Tooltip shown when hovering a kitchen point on the map. Renders a terracotta
- * left-border accent (matching the point marker), a "Nome da cozinha" caption
- * and the kitchen name in bold. No metric swatch — the points layer has no
- * data-driven paint.
+ * Tooltip for a hovered kitchen point: "Nome da cozinha" caption, the name, and
+ * the terse operating-status label (Ativo / Reduzido / Inativo / Não informado).
+ * The left-border accent is the point's own status color, so the hover reads the
+ * name plus the situation that colors the point.
  *
  * @param params.nome - Kitchen display name from `properties.nome`.
+ * @param params.statusLabel - Descriptive status label (from
+ * `cozinhaStatusLabel(emFuncionamento)`), or `null` when unknown.
  * @returns The tooltip element for the hovered kitchen point.
  *
  * @example
- * renderCozinhaTooltip({ nome: 'Cozinha Esperança' });
- * // <Box> with a "Nome da cozinha" caption over the bold name
+ * renderCozinhaTooltip({ nome: 'Cozinha Esperança', statusLabel: 'Em funcionamento' });
  */
 export const renderCozinhaTooltip = ({
   nome,
+  statusLabel,
 }: {
   nome: string;
+  statusLabel: string | null;
 }): React.ReactNode => {
   return (
     <Box
       minW="180px"
       maxW="260px"
       borderLeft="3px solid"
-      borderLeftColor={COZINHA_ACCENT}
+      borderLeftColor={colorForCozinhaStatus(statusLabel)}
       pl="2.5"
     >
       <Text fontSize="xs" color="text.secondary" lineHeight="tight" mb="0.5">
@@ -124,6 +128,9 @@ export const renderCozinhaTooltip = ({
       </Text>
       <Text fontSize="sm" fontWeight="bold" lineHeight="tight" lineClamp="2">
         {nome}
+      </Text>
+      <Text fontSize="xs" color="text.secondary" lineHeight="tight" mt="1">
+        {cozinhaStatusShortLabel(statusLabel)}
       </Text>
     </Box>
   );

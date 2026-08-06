@@ -216,13 +216,27 @@ describe('renderMunicipioTooltip', () => {
 });
 
 describe('renderCozinhaTooltip', () => {
-  test('shows the "Nome da cozinha" caption and the kitchen name', () => {
+  test('shows the caption, the kitchen name and the terse status label', () => {
     renderWithChakra(
-      <>{renderCozinhaTooltip({ nome: 'Cozinha Esperança' })}</>
+      <>
+        {renderCozinhaTooltip({
+          nome: 'Cozinha Esperança',
+          statusLabel: 'Em funcionamento',
+        })}
+      </>
     );
 
     expect(screen.getByText('Nome da cozinha')).toBeInTheDocument();
     expect(screen.getByText('Cozinha Esperança')).toBeInTheDocument();
+    expect(screen.getByText('Ativo')).toBeInTheDocument();
+  });
+
+  test('reads "Não informado" when the status is unknown', () => {
+    renderWithChakra(
+      <>{renderCozinhaTooltip({ nome: 'Sem status', statusLabel: null })}</>
+    );
+
+    expect(screen.getByText('Não informado')).toBeInTheDocument();
   });
 });
 

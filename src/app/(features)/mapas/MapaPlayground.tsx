@@ -140,6 +140,8 @@ type MapBootstrap = {
   settlements: AssentamentoAtributo[];
   /** `codigo → nome` lookup for kitchen point hover tooltips. */
   cozinhaNames: Record<string, string>;
+  /** `codigo → emFuncionamento` lookup that colors the kitchen points by status. */
+  cozinhaStatus: Record<string, string>;
   /** `nrCaf → CafAreaFeature properties` lookup for CAF hover tooltips. */
   cafProps: Record<string, CafAreaFeature['properties']>;
 };
@@ -150,6 +152,7 @@ const EMPTY_BOOTSTRAP: MapBootstrap = {
   nomes: {},
   settlements: [],
   cozinhaNames: {},
+  cozinhaStatus: {},
   cafProps: {},
 };
 
@@ -188,12 +191,25 @@ const fetchMapData = async (): Promise<MapBootstrap> => {
         return [f.properties.codigo, f.properties.nome];
       })
     );
+    const cozinhaStatus = Object.fromEntries(
+      cozinhasGeoJSON.features.map((f) => {
+        return [f.properties.codigo, f.properties.emFuncionamento];
+      })
+    );
     const cafProps = Object.fromEntries(
       cafsGeoJSON.features.map((f) => {
         return [f.properties.nrCaf, f.properties];
       })
     );
-    return { data, ivs, nomes, settlements, cozinhaNames, cafProps };
+    return {
+      data,
+      ivs,
+      nomes,
+      settlements,
+      cozinhaNames,
+      cozinhaStatus,
+      cafProps,
+    };
   } catch {
     return EMPTY_BOOTSTRAP;
   }
@@ -212,6 +228,9 @@ const MapaPlayground = () => {
     AssentamentoAtributo[]
   >([]);
   const [cozinhaNames, setCozinhaNames] = React.useState<
+    Record<string, string>
+  >({});
+  const [cozinhaStatus, setCozinhaStatus] = React.useState<
     Record<string, string>
   >({});
   const [cafProps, setCafProps] = React.useState<
@@ -249,6 +268,7 @@ const MapaPlayground = () => {
       setNomesPorCodigo(bootstrap.nomes);
       setAssentamentos(bootstrap.settlements);
       setCozinhaNames(bootstrap.cozinhaNames);
+      setCozinhaStatus(bootstrap.cozinhaStatus);
       setCafProps(bootstrap.cafProps);
       setMounted(true);
     });
@@ -265,6 +285,7 @@ const MapaPlayground = () => {
     assentamentos,
     cozinhaNames,
     cafProps,
+    cozinhaStatus,
     mode,
   });
 
