@@ -1,3 +1,8 @@
+/* eslint-disable max-lines -- Cohesive choropleth-scale registry: one
+   threshold/color/label/legend set per map variant. Splitting would need a
+   shared-primitives module (sampleRamp, colorForFlooredScale, flooredBinLabels)
+   to avoid a circular import with the extracted scale files. Tracked as a
+   follow-up. */
 import type { LegendSpec } from '@ttoss/geovis';
 
 import { mapTokens } from '@/config/theme';
@@ -155,6 +160,29 @@ const colorForFlooredScale = (
 };
 
 /**
+ * Builds a floored-scale legend's swatch labels: the grey below-floor bin
+ * `firstLabel`, then `< thresholds[1]` and one `a – b` range per meaningful
+ * cutpoint (the `thresholds` without their floor). `suffix` (e.g. `%`) is
+ * appended to the upper bound of each bin, matching the source formatting.
+ */
+const flooredBinLabels = (
+  firstLabel: string,
+  thresholds: readonly number[],
+  suffix = ''
+): string[] => {
+  return [
+    firstLabel,
+    `< ${thresholds[1].toLocaleString('pt-BR')}${suffix}`,
+    ...thresholds.slice(1).map((lower, index) => {
+      const upper = thresholds[index + 2];
+      return upper === undefined
+        ? `${lower.toLocaleString('pt-BR')}${suffix}+`
+        : `${lower.toLocaleString('pt-BR')} – ${upper.toLocaleString('pt-BR')}${suffix}`;
+    }),
+  ];
+};
+
+/**
  * Resolves the share-choropleth band color for a município's % of Brazil's
  * cozinhas (see {@link colorForFlooredScale}). Any positive share, however
  * small, gets a visible blue band; only a município with no cozinha (share
@@ -178,16 +206,62 @@ export const colorForPercentual = (percentual: number): string => {
  * cozinha"; the rest are derived from the meaningful cutpoints
  * (`PERCENT_THRESHOLDS` without the `0.01` floor) so they can't drift.
  */
-const PERCENT_LEGEND_LABELS = [
+const PERCENT_LEGEND_LABELS = flooredBinLabels(
   'Sem cozinha',
-  `< ${PERCENT_THRESHOLDS[1].toLocaleString('pt-BR')}%`,
-  ...PERCENT_THRESHOLDS.slice(1).map((lower, index) => {
-    const upper = PERCENT_THRESHOLDS[index + 2];
-    return upper === undefined
-      ? `${lower.toLocaleString('pt-BR')}%+`
-      : `${lower.toLocaleString('pt-BR')} – ${upper.toLocaleString('pt-BR')}%`;
-  }),
-];
+  PERCENT_THRESHOLDS,
+  '%'
+);
+
+/**
+ * Break points (in %) for the "share of Brazil's CAFs" choropleth. CAF shares
+ * are far tinier and more skewed than the cozinha shares: one CAF is ≈ 0.000025%,
+ * the median município sits at ≈ 0.0085%, and the largest (Cametá, ~14.4k CAFs)
+ * reaches ≈ 0.37%. Reusing {@link PERCENT_THRESHOLDS} (floor `0.01`) would push
+ * every município below 0.01% — more than half of them — into the grey "sem CAF"
+ * bin, so this scale uses its own, much smaller cutpoints spanning below-median
+ * (`0.005`) to the top município (`0.3`).
+ *
+ * The leading `0.00001` is a **floor, not a real cutpoint** (see
+ * {@link PERCENT_THRESHOLDS}): it sits below the smallest real share (one CAF ≈
+ * 0.000025%), so geovis paints only municípios with no CAF (coalesced `0`) in the
+ * grey `defaultColor` bin; every município with ≥1 CAF gets a visible band.
+ */
+const CAF_PERCENT_THRESHOLDS = [0.00001, 0.005, 0.02, 0.05, 0.15, 0.3];
+
+/**
+ * Resolves the CAF-share-choropleth band color for a município's % of Brazil's
+ * CAFs (see {@link colorForFlooredScale}), reusing the shared {@link PERCENT_COLORS}
+ * ramp over the CAF-specific {@link CAF_PERCENT_THRESHOLDS}. Any positive share,
+ * however small, gets a visible band; only a município with no CAF (share below
+ * the floor) is grey.
+ *
+ * @param percentual - Município's share (%) of Brazil's CAFs.
+ * @returns The hex color for the share's band.
+ *
+ * @example
+ * colorForCafPercentual(0); // WITHOUT_KITCHEN_COLOR ("sem CAF")
+ * colorForCafPercentual(0.01); // a visible blue band
+ */
+export const colorForCafPercentual = (percentual: number): string => {
+  return colorForFlooredScale(
+    percentual,
+    CAF_PERCENT_THRESHOLDS,
+    PERCENT_COLORS
+  );
+};
+
+/**
+ * Labels for the CAF-share legend, one per rendered swatch
+ * (`CAF_PERCENT_THRESHOLDS.length + 1`). The first swatch is the grey
+ * `defaultColor` bin geovis paints below the floor, labelled "Sem CAF"; the rest
+ * derive from the meaningful cutpoints (`CAF_PERCENT_THRESHOLDS` without the
+ * `0.00001` floor) so they can't drift.
+ */
+const CAF_PERCENT_LEGEND_LABELS = flooredBinLabels(
+  'Sem CAF',
+  CAF_PERCENT_THRESHOLDS,
+  '%'
+);
 
 /**
  * Break points for the "cozinhas per 10k CadÚnico people" choropleth — the rate
@@ -236,16 +310,10 @@ export const colorForCadUnico = (taxa: number | null): string => {
  * bin, labelled "Sem cozinha"; the rest derive from the meaningful cutpoints
  * (`CADUNICO_THRESHOLDS` without the `0.01` floor) so they can't drift.
  */
-const CADUNICO_LEGEND_LABELS = [
+const CADUNICO_LEGEND_LABELS = flooredBinLabels(
   'Sem cozinha',
-  `< ${CADUNICO_THRESHOLDS[1].toLocaleString('pt-BR')}`,
-  ...CADUNICO_THRESHOLDS.slice(1).map((lower, index) => {
-    const upper = CADUNICO_THRESHOLDS[index + 2];
-    return upper === undefined
-      ? `${lower.toLocaleString('pt-BR')}+`
-      : `${lower.toLocaleString('pt-BR')} – ${upper.toLocaleString('pt-BR')}`;
-  }),
-];
+  CADUNICO_THRESHOLDS
+);
 
 /**
  * Break points for the "CadÚnico people per cozinha" (coverage) choropleth — the
@@ -297,16 +365,10 @@ export const colorForPessoasPorCozinha = (valor: number | null): string => {
  * `defaultColor` bin, labelled "Sem cozinha"; the rest derive from the
  * meaningful cutpoints (`PESSOAS_COZINHA_THRESHOLDS` without the `1` floor).
  */
-const PESSOAS_COZINHA_LEGEND_LABELS = [
+const PESSOAS_COZINHA_LEGEND_LABELS = flooredBinLabels(
   'Sem cozinha',
-  `< ${PESSOAS_COZINHA_THRESHOLDS[1].toLocaleString('pt-BR')}`,
-  ...PESSOAS_COZINHA_THRESHOLDS.slice(1).map((lower, index) => {
-    const upper = PESSOAS_COZINHA_THRESHOLDS[index + 2];
-    return upper === undefined
-      ? `${lower.toLocaleString('pt-BR')}+`
-      : `${lower.toLocaleString('pt-BR')} – ${upper.toLocaleString('pt-BR')}`;
-  }),
-];
+  PESSOAS_COZINHA_THRESHOLDS
+);
 
 /** A single swatch for the workspace's right-sidebar legend. */
 export type LegendItem = { color: string; label: string };
@@ -349,6 +411,8 @@ export const buildLegendItems = (): LegendItem[] => {
  *   inhabitants rate (darker = higher density);
  * - `coropletico-percentual`: data-driven choropleth of each município's share
  *   (%) of all Brazilian cozinhas (darker = larger share);
+ * - `coropletico-cafs-percentual`: data-driven choropleth of each município's
+ *   share (%) of all Brazilian CAFs (darker = larger share);
  * - `coropletico-cadunico`: data-driven choropleth of the cozinhas-per-10k-
  *   CadÚnico-people rate (darker = better coverage of the vulnerable population);
  * - `coropletico-pessoas-cozinha`: data-driven choropleth of the CadÚnico-people-
@@ -370,6 +434,7 @@ export type MapMode =
   | 'coropletico'
   | 'coropletico-taxa'
   | 'coropletico-percentual'
+  | 'coropletico-cafs-percentual'
   | 'coropletico-cadunico'
   | 'coropletico-pessoas-cozinha'
   | 'coropletico-ivs'
@@ -390,6 +455,7 @@ export type MapMode =
 const CHOROPLETH_LEGEND_ID = 'legenda-cozinhas';
 const RATE_LEGEND_ID = 'legenda-taxa';
 const PERCENT_LEGEND_ID = 'legenda-percentual';
+const CAF_PERCENT_LEGEND_ID = 'legenda-cafs-percentual';
 const CADUNICO_LEGEND_ID = 'legenda-cadunico';
 const PESSOAS_COZINHA_LEGEND_ID = 'legenda-pessoas-cozinha';
 const IVS_LEGEND_ID = 'legenda-ivs';
@@ -408,6 +474,9 @@ const RATE_LEGEND_TITLE = 'nº coz. no município / 100.000 hab.';
 
 /** Title of the share legend; also the fill's `activeLegendId` in share mode. */
 const PERCENT_LEGEND_TITLE = '% das cozinhas do Brasil no município';
+
+/** Title of the CAF-share legend; also the fill's `activeLegendId` in that mode. */
+const CAF_PERCENT_LEGEND_TITLE = '% dos CAFs do Brasil no município';
 
 /** Title of the CadÚnico legend; also the fill's `activeLegendId` in that mode. */
 const CADUNICO_LEGEND_TITLE = 'nº coz. / 10 mil pessoas no CadÚnico';
@@ -483,6 +552,18 @@ const LEGEND_CONFIGS: LegendConfig[] = [
     colors: PERCENT_COLORS,
     labels: PERCENT_LEGEND_LABELS,
     reference: 'Fonte dos dados: © Cozinhas Solidárias',
+  },
+  {
+    id: CAF_PERCENT_LEGEND_ID,
+    mode: 'coropletico-cafs-percentual',
+    title: CAF_PERCENT_LEGEND_TITLE,
+    subtitle:
+      'Quanto mais escuro o município, maior a fatia dos CAFs do Brasil ali.',
+    thresholds: CAF_PERCENT_THRESHOLDS,
+    colors: PERCENT_COLORS,
+    labels: CAF_PERCENT_LEGEND_LABELS,
+    reference:
+      'Fonte dos dados: Cadastro Nacional da Agricultura Familiar (CAF)',
   },
   {
     id: CADUNICO_LEGEND_ID,

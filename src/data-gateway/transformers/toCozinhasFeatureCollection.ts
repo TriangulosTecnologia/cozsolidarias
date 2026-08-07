@@ -41,7 +41,11 @@ export const toCozinhasFeatureCollection = (
           type: 'Point' as const,
           coordinates: [source.longitude, source.latitude] as [number, number],
         },
-        properties: { codigo: source.codigo, nome: source.nome },
+        properties: {
+          codigo: source.codigo,
+          nome: source.nome,
+          emFuncionamento: source.emFuncionamento,
+        },
       };
     });
 

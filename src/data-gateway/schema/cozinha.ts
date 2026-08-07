@@ -25,6 +25,12 @@ export type CozinhaLocationFeature = {
     codigo: string;
     /** Display name of the cozinha, shown in the hover tooltip. */
     nome: string;
+    /**
+     * Current operating status (`A cozinha está em funcionamento atualmente?`),
+     * source-native text. Drives the categorical point color on the map via the
+     * `cozinhas-status` join. Empty string when the source cell is blank.
+     */
+    emFuncionamento: string;
   };
 };
 

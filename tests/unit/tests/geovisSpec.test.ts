@@ -5,6 +5,7 @@ import {
 import {
   buildLegendItems,
   colorForCadUnico,
+  colorForCafPercentual,
   colorForPercentual,
   colorForPessoasPorCozinha,
   colorForQuantidade,
@@ -20,7 +21,11 @@ import {
   type AssentamentoAtributo,
   buildSpec,
 } from 'src/app/(features)/mapas/geovisSpec';
-import type { kitchenRateByCity, MunicipioIvs } from 'src/data-gateway/schema';
+import type {
+  cafByCity,
+  kitchenRateByCity,
+  MunicipioIvs,
+} from 'src/data-gateway/schema';
 
 const BY_CITY: kitchenRateByCity[] = [
   {
@@ -44,6 +49,21 @@ const BY_CITY: kitchenRateByCity[] = [
     pessoasCadUnico: null,
     porDezMilCadUnico: null,
     pessoasPorCozinha: null,
+  },
+];
+
+const CAF_BY_CITY: cafByCity[] = [
+  {
+    codigoIbge: '111',
+    municipio: 'Alpha',
+    quantidade: 14_390,
+    percentualDoBrasil: 0.3,
+  },
+  {
+    codigoIbge: '222',
+    municipio: 'Beta',
+    quantidade: 200,
+    percentualDoBrasil: 0.004,
   },
 ];
 
@@ -181,6 +201,32 @@ describe('colorForPercentual', () => {
 
   test('higher shares map to a different (darker) band than lower shares', () => {
     expect(colorForPercentual(0.02)).not.toBe(colorForPercentual(2));
+  });
+});
+
+describe('colorForCafPercentual', () => {
+  test('a município with no CAF (share 0) resolves to the "sem CAF" fill', () => {
+    expect(colorForCafPercentual(0)).toBe(colorForQuantidade(0));
+  });
+
+  test('a share below the smaller CAF floor stays grey', () => {
+    // Below the 0.00001 floor (a fraction of a single CAF) → the grey bin.
+    expect(colorForCafPercentual(0.000005)).toBe(colorForQuantidade(0));
+  });
+
+  test('tiny real CAF shares — below the cozinha floor — are still painted', () => {
+    // The whole reason for a CAF-specific scale: a município at 0.001% (well
+    // below the cozinha scale's 0.01 floor) has a real CAF and must be blue.
+    expect(colorForCafPercentual(0.001)).not.toBe(colorForCafPercentual(0));
+    expect(colorForCafPercentual(0.0084)).not.toBe(colorForCafPercentual(0));
+  });
+
+  test('shares above the top threshold share the darkest band', () => {
+    expect(colorForCafPercentual(0.5)).toBe(colorForCafPercentual(0.4));
+  });
+
+  test('higher shares map to a different (darker) band than lower shares', () => {
+    expect(colorForCafPercentual(0.001)).not.toBe(colorForCafPercentual(0.2));
   });
 });
 
@@ -404,6 +450,47 @@ describe('buildSpec', () => {
     expect(fill?.activeLegendId).toBe('legenda-percentual');
   });
 
+  test('coropletico-cafs-percentual feeds CAF shares from the CAF data and positions its legend', () => {
+    const spec = buildSpec(
+      BY_CITY,
+      'coropletico-cafs-percentual',
+      undefined,
+      [],
+      {
+        cafByCity: CAF_BY_CITY,
+      }
+    );
+
+    // The choropleth reads the separate CAF dataset, not the kitchen rows; every
+    // município is kept (percentualDoBrasil is never null).
+    expect(mapDataById(spec, 'cozinhas-por-municipio')?.data).toEqual([
+      { geometryId: '111', value: 0.3 },
+      { geometryId: '222', value: 0.004 },
+    ]);
+
+    const cafLegend = spec.legends?.find((legend) => {
+      return legend.id === 'legenda-cafs-percentual';
+    });
+    expect(cafLegend?.position).toBe('bottom-right');
+    // A much smaller floor than the cozinha share scale keeps tiny CAF shares
+    // (median ≈ 0.0084%) out of the grey "sem CAF" bin.
+    expect(cafLegend?.colorBy.thresholds?.[0]).toBe(0.00001);
+    if (cafLegend?.labelFormat?.type === 'labels') {
+      expect(cafLegend.labelFormat.labels[0]).toBe('Sem CAF');
+    }
+
+    const fill = spec.layers.find((layer) => {
+      return layer.id === 'municipios-br-fill';
+    });
+    expect(fill?.activeLegendId).toBe('legenda-cafs-percentual');
+  });
+
+  test('coropletico-cafs-percentual feeds nothing when no CAF data is provided', () => {
+    const spec = buildSpec(BY_CITY, 'coropletico-cafs-percentual');
+
+    expect(mapDataById(spec, 'cozinhas-por-municipio')?.data).toEqual([]);
+  });
+
   test('coropletico-cadunico feeds CadÚnico rates, drops unknown rates, positions its legend', () => {
     const spec = buildSpec(BY_CITY, 'coropletico-cadunico');
 
@@ -574,6 +661,42 @@ describe('buildSpec', () => {
 
     expect(layerIds(spec)).toContain('cozinhas-pts');
     expect(mapDataById(spec, 'cozinhas-por-municipio')?.data).toEqual([]);
+  });
+
+  test('pontos colors the kitchen points by status and positions the status legend', () => {
+    const spec = buildSpec(BY_CITY, 'pontos', undefined, [], {
+      cozinhaStatus: {
+        CS1: 'Sim, está funcionando normalmente',
+        CS2: '',
+      },
+    });
+
+    // The points layer paints from the categorical status legend.
+    const points = spec.layers.find((layer) => {
+      return layer.id === 'cozinhas-pts';
+    });
+    expect(points?.activeLegendId).toBe('legenda-cozinhas-status');
+
+    // The status join carries one row per point: codigo → descriptive label,
+    // with unknown/blank status folding to "Outros" (the masked swatch).
+    expect(mapDataById(spec, 'cozinhas-pts-promote')?.data).toEqual([
+      { geometryId: 'CS1', value: 'Em funcionamento' },
+      { geometryId: 'CS2', value: 'Outros' },
+    ]);
+
+    // The status legend is the positioned (visible) one in pontos mode.
+    const legend = spec.legends?.find((entry) => {
+      return entry.id === 'legenda-cozinhas-status';
+    });
+    expect(legend?.position).toBe('bottom-right');
+  });
+
+  test('the status legend is present but not positioned outside pontos mode', () => {
+    const legend = buildSpec(BY_CITY, 'coropletico').legends?.find((entry) => {
+      return entry.id === 'legenda-cozinhas-status';
+    });
+    expect(legend).toBeDefined();
+    expect(legend?.position).toBeUndefined();
   });
 
   test('circulos renders the proportional-circle overlay', () => {

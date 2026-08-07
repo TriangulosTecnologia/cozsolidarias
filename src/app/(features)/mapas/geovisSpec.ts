@@ -1,3 +1,7 @@
+/* eslint-disable max-lines -- Full geovis spec assembly: sources, layers,
+   mapData joins, legends and control for every map mode, built here as one
+   cohesive unit. Grows a few lines per new map variant; splitting the mode
+   branches would scatter the spec and hurt readability. Tracked as a follow-up. */
 import type {
   GeoJSONSource,
   HoverTooltipConfig,
@@ -7,13 +11,22 @@ import type {
   VisualizationSpec,
 } from '@ttoss/geovis';
 
-import type { kitchenRateByCity, MunicipioIvs } from '@/data-gateway/schema';
+import type {
+  cafByCity,
+  kitchenRateByCity,
+  MunicipioIvs,
+} from '@/data-gateway/schema';
 
 import {
   ASSENTAMENTO_LEGEND_ID,
   assentamentoStatusLabel,
 } from './geovisAssentamentosScales';
 import { resolveChoroplethRows, toValueRows } from './geovisChoroplethRows';
+import {
+  buildCozinhaStatusLegend,
+  COZINHA_STATUS_LEGEND_ID,
+  cozinhaStatusLabel,
+} from './geovisCozinhaStatusScales';
 import { buildLegends, legendIdForMode, type MapMode } from './geovisScales';
 
 /** Re-exported so consumers keep importing the map's mode type from here. */
@@ -60,6 +73,14 @@ type MapOverlays = {
   cozinhaTooltipRender?: HoverTooltipConfig['render'];
   /** Hover tooltip renderer for individual CAF area points (`cafs` mode). */
   cafTooltipRender?: HoverTooltipConfig['render'];
+  /**
+   * `codigo → emFuncionamento` (source-native status text) for every kitchen
+   * point, used to build the `cozinhas-status` join that colors the points by
+   * operating status. Absent/empty entries fall back to the masked color.
+   */
+  cozinhaStatus?: Record<string, string>;
+  /** Per-município CAF share rows; painted in `coropletico-cafs-percentual` mode. */
+  cafByCity?: cafByCity[];
 };
 
 /**
@@ -105,8 +126,13 @@ export const COZINHAS_POINTS_LAYER_ID = 'cozinhas-pts';
 
 /**
  * The kitchen points layer. Larger, more opaque dots with a thick light halo so
- * each kitchen reads over the pale basemap and the settlement polygons. Static
- * (no data-driven paint), rendered in `pontos` and `assentamentos` modes.
+ * each kitchen reads over the pale basemap and the settlement polygons.
+ *
+ * Data-driven color by operating status: `mapDataId` binds the `cozinhas-status`
+ * join (`codigo` → descriptive status label) and `activeLegendId` points at the
+ * categorical {@link COZINHA_STATUS_LEGEND_ID} legend, whose `colorBy.mapping`
+ * paints each point green / amber / red (masked fallback for unknown). Carries no
+ * static `circleColor` — the join drives it, mirroring the assentamentos fill.
  *
  * Declares `click: {}` to opt into click tracking so the workspace's
  * `rightSidebar.onFeatureSelect` fires when a point is clicked. The clicked
@@ -116,8 +142,9 @@ const POINTS_LAYER: VisualizationLayer = {
   id: COZINHAS_POINTS_LAYER_ID,
   sourceId: COZINHAS_SOURCE_ID,
   geometry: 'point',
+  mapDataId: COZINHAS_POINTS_MAP_DATA_ID,
+  activeLegendId: COZINHA_STATUS_LEGEND_ID,
   paint: {
-    circleColor: '#E4572E',
     circleRadius: 4,
     circleOpacity: 0.9,
     circleStrokeColor: '#FAF9F7',
@@ -551,16 +578,20 @@ const buildMapData = ({
       title: 'Cozinhas por município',
       data: toValueRows(byCity),
     },
-    // Carries no feature-state values (empty `data`); its only job is the
-    // `joinKey`, which makes geovis promote each point's `codigo` property to the
-    // MapLibre `feature.id` (`promoteId: 'codigo'`). Without it, MapLibre drops
-    // the non-numeric string id and point clicks report `0`. Always present so
-    // the promotion is set when the always-on `cozinhas` source is first added.
+    // Doubles as (a) the `promoteId: 'codigo'` promotion — the `joinKey` makes
+    // geovis promote each point's `codigo` to the MapLibre `feature.id` (without
+    // it clicks report `0`) — and (b) the status color join: each row's `value`
+    // is the descriptive status label the categorical points legend colors by.
+    // Always present so the promotion is set when the `cozinhas` source is added.
     {
       mapDataId: COZINHAS_POINTS_MAP_DATA_ID,
       mapId: COZINHAS_SOURCE_ID,
       joinKey: 'codigo',
-      data: [],
+      data: Object.entries(overlays.cozinhaStatus ?? {}).map(
+        ([codigo, raw]) => {
+          return { geometryId: codigo, value: cozinhaStatusLabel(raw) };
+        }
+      ),
     },
     // Same promotion pattern for CAF points: promotes `nrCaf` to `feature.id`
     // so hovers report it as `MapHoverInfo.featureId` for tooltip lookup.
@@ -608,14 +639,16 @@ const buildMapData = ({
  * @param hoverTooltipRender - Optional spec-driven hover-tooltip renderer.
  * @param ivsByCity - Per-município IVS/IDHM rows (from the gateway); read in the
  * `coropletico-ivs*` and `coropletico-idhm*` modes. Defaults to `[]`.
- * @param overlays - Overlay config for the assentamentos mode:
- * `assentamentos.atributos` color the polygons by status and `hoverRender` draws
- * their tooltip. Defaults to `{}`.
+ * @param overlays - Overlay config: `assentamentos.atributos` color the
+ * settlement polygons by status and `hoverRender` draws their tooltip;
+ * `cozinhaStatus` (`codigo → emFuncionamento`) colors the kitchen points by
+ * operating status; `cafByCity` paints the CAF share choropleth. Defaults to `{}`.
  * @returns The geovis visualization spec (sources, mapData, legends, layers).
  *
  * @example
  * buildSpec(byCity, 'coropletico-taxa');
  * buildSpec(byCity, 'coropletico-ivs', undefined, ivsByCity);
+ * buildSpec(byCity, 'coropletico-cafs-percentual', undefined, [], { cafByCity });
  * buildSpec(byCity, 'assentamentos', undefined, [], { assentamentos: { atributos } });
  */
 export const buildSpec = (
@@ -627,7 +660,12 @@ export const buildSpec = (
 ): VisualizationSpec => {
   const showAssentamentos = mode === 'assentamentos';
 
-  const choroplethRows = resolveChoroplethRows(mode, byCity, ivsByCity);
+  const choroplethRows = resolveChoroplethRows(
+    mode,
+    byCity,
+    ivsByCity,
+    overlays.cafByCity ?? []
+  );
 
   // Bounds for the circle-size scale: the largest per-município count. Falls
   // back to 1 when there's no data so `buildBubblesLayer` can still clamp it.
@@ -653,7 +691,10 @@ export const buildSpec = (
       showAssentamentos,
       overlays,
     }),
-    legends: buildLegends(mode),
+    legends: [
+      ...buildLegends(mode),
+      buildCozinhaStatusLegend(mode === 'pontos'),
+    ],
     layers: buildOverlayLayers({
       mode,
       maxQuantidade,

@@ -1,8 +1,13 @@
 import { type MapHoverInfo } from '@ttoss/geovis';
 import * as React from 'react';
 
-import type { CafAreaFeature, kitchenRateByCity } from '@/data-gateway/schema';
+import type {
+  CafAreaFeature,
+  cafByCity,
+  kitchenRateByCity,
+} from '@/data-gateway/schema';
 
+import { cozinhaStatusLabel } from './geovisCozinhaStatusScales';
 import { type AssentamentoAtributo, type MapMode } from './geovisSpec';
 import { renderCafTooltip } from './mapaCafTooltip';
 import {
@@ -14,13 +19,28 @@ import {
 /** `{ codigoIbge: nome }` for every Brazilian município, keyed by `codarea`. */
 export type NomesPorCodigo = Record<string, string>;
 
+/** Indexes canonical per-município rows by their `codigoIbge` for O(1) hover lookup. */
+const indexByCodigoIbge = <T extends { codigoIbge: string }>(
+  rows: T[]
+): Map<string, T> => {
+  return new Map(
+    rows.map((row) => {
+      return [row.codigoIbge, row];
+    })
+  );
+};
+
 /** The lookups and active mode each hover tooltip is derived from. */
 type UseMapaTooltipsParams = {
   kitchenByCity: kitchenRateByCity[];
   nomesPorCodigo: NomesPorCodigo;
   assentamentos: AssentamentoAtributo[];
   cozinhaNames: Record<string, string>;
+  /** `codigo → emFuncionamento`, so the kitchen hover shows the operating status. */
+  cozinhaStatus: Record<string, string>;
   cafProps: Record<string, CafAreaFeature['properties']>;
+  /** Per-município CAF rows, so the CAF choropleth hover shows the share + count. */
+  cafByCity: cafByCity[];
   mode: MapMode;
 };
 
@@ -33,23 +53,25 @@ type UseMapaTooltipsParams = {
  * @returns `{ hoverTooltip, assentamentoTooltip, cozinhaTooltip, cafTooltip }`.
  *
  * @example
- * const { hoverTooltip } = useMapaTooltips({ kitchenByCity, nomesPorCodigo, assentamentos, cozinhaNames, cafProps, mode });
+ * const { hoverTooltip } = useMapaTooltips({ kitchenByCity, nomesPorCodigo, assentamentos, cozinhaNames, cozinhaStatus, cafProps, cafByCity, mode });
  */
 export const useMapaTooltips = ({
   kitchenByCity,
   nomesPorCodigo,
   assentamentos,
   cozinhaNames,
+  cozinhaStatus,
   cafProps,
+  cafByCity,
   mode,
 }: UseMapaTooltipsParams) => {
   const citiesByCode = React.useMemo(() => {
-    return new Map(
-      kitchenByCity.map((registro) => {
-        return [registro.codigoIbge, registro];
-      })
-    );
+    return indexByCodigoIbge(kitchenByCity);
   }, [kitchenByCity]);
+
+  const cafsByCode = React.useMemo(() => {
+    return indexByCodigoIbge(cafByCity);
+  }, [cafByCity]);
 
   const hoverTooltip = React.useCallback(
     (info: MapHoverInfo) => {
@@ -64,10 +86,11 @@ export const useMapaTooltips = ({
         mode,
         name,
         register,
+        cafRegister: cafsByCode.get(code),
         value: info.value,
       });
     },
-    [citiesByCode, nomesPorCodigo, mode]
+    [citiesByCode, cafsByCode, nomesPorCodigo, mode]
   );
 
   const assentamentosByCode = React.useMemo(() => {
@@ -92,12 +115,19 @@ export const useMapaTooltips = ({
     return new Map(Object.entries(cozinhaNames));
   }, [cozinhaNames]);
 
+  const statusByCodigo = React.useMemo(() => {
+    return new Map(Object.entries(cozinhaStatus));
+  }, [cozinhaStatus]);
+
   const cozinhaTooltip = React.useCallback(
     (info: MapHoverInfo) => {
-      const nome = cozinhasByCodigo.get(String(info.featureId)) ?? '';
-      return renderCozinhaTooltip({ nome });
+      const codigo = String(info.featureId);
+      const nome = cozinhasByCodigo.get(codigo) ?? '';
+      const raw = statusByCodigo.get(codigo);
+      const statusLabel = raw === undefined ? null : cozinhaStatusLabel(raw);
+      return renderCozinhaTooltip({ nome, statusLabel });
     },
-    [cozinhasByCodigo]
+    [cozinhasByCodigo, statusByCodigo]
   );
 
   const cafPropsByNrCaf = React.useMemo(() => {

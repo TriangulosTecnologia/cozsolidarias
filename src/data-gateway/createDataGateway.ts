@@ -1,11 +1,13 @@
 import { readStaticCadUnico } from '../data-source-static/readStaticCadUnico';
 import { readStaticCafProducao } from '../data-source-static/readStaticCafProducao';
 import { readStaticCafs } from '../data-source-static/readStaticCafs';
+import { readStaticCafsPorMunicipio } from '../data-source-static/readStaticCafsPorMunicipio';
 import { readStaticCozinhas } from '../data-source-static/readStaticCozinhas';
 import { readStaticIvs } from '../data-source-static/readStaticIvs';
 import { readStaticMunicipios } from '../data-source-static/readStaticMunicipios';
 import { readStaticPopulacao } from '../data-source-static/readStaticPopulacao';
 import type {
+  cafByCity,
   CafDetalhe,
   CafsFeatureCollection,
   CozinhaDetalhe,
@@ -16,6 +18,7 @@ import type {
 } from './schema';
 import { toCafDetalhe } from './transformers/toCafDetalhe';
 import { toCafsFeatureCollection } from './transformers/toCafsFeatureCollection';
+import { toCafsPorMunicipio } from './transformers/toCafsPorMunicipio';
 import { toCozinhaDetalhe } from './transformers/toCozinhaDetalhe';
 import { toCozinhasBubbles } from './transformers/toCozinhasBubbles';
 import { toCozinhasFeatureCollection } from './transformers/toCozinhasFeatureCollection';
@@ -37,6 +40,13 @@ export type DataGateway = {
    * (`GET /api/cafs/[nrCaf]`).
    */
   getCafByNrCaf: (nrCaf: string) => Promise<CafDetalhe | null>;
+  /**
+   * Returns one row per município with its distinct-CAF count and the derived
+   * share (%) of Brazil's CAFs, for the CAF share choropleth. Reads the
+   * pre-aggregated `caf-por-municipio.json` snapshot (the raw `caf-area.csv` is
+   * too large to aggregate at request time).
+   */
+  getCafsPorMunicipio: () => Promise<cafByCity[]>;
   /** Returns cozinha locations as a GeoJSON FeatureCollection of Points. */
   getCozinhas: () => Promise<CozinhasFeatureCollection>;
   /**
@@ -125,6 +135,9 @@ export const createDataGateway = (): DataGateway => {
         });
         if (matched.length === 0) return null;
         return toCafDetalhe({ nrCaf, sources: matched });
+      },
+      getCafsPorMunicipio: async () => {
+        return toCafsPorMunicipio(await readStaticCafsPorMunicipio());
       },
       getCozinhas: async () => {
         const sources = await readStaticCozinhas();

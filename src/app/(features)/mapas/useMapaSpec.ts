@@ -7,6 +7,7 @@ import * as React from 'react';
 
 import type {
   CafAreaFeature,
+  cafByCity,
   kitchenRateByCity,
   MunicipioIvs,
 } from '@/data-gateway/schema';
@@ -83,6 +84,10 @@ type UseMapaSpecParams = {
   assentamentos: AssentamentoAtributo[];
   cozinhaNames: Record<string, string>;
   cafProps: Record<string, CafAreaFeature['properties']>;
+  /** `codigo → emFuncionamento` for every kitchen point; colors the points by status. */
+  cozinhaStatus: Record<string, string>;
+  /** Per-município CAF shares for the "% dos CAFs do Brasil" choropleth. */
+  cafByCity: cafByCity[];
   mode: MapMode;
 };
 
@@ -98,7 +103,7 @@ type UseMapaSpecParams = {
  * @returns The geovis {@link VisualizationSpec} for the current mode.
  *
  * @example
- * const spec = useMapaSpec({ kitchenByCity, ivsByCity, nomesPorCodigo, assentamentos, cozinhaNames, cafProps, mode });
+ * const spec = useMapaSpec({ kitchenByCity, ivsByCity, nomesPorCodigo, assentamentos, cozinhaNames, cafProps, cozinhaStatus, cafByCity, mode });
  * // <GeovisWorkspace visualizationSpec={spec} ... />
  */
 export const useMapaSpec = ({
@@ -108,6 +113,8 @@ export const useMapaSpec = ({
   assentamentos,
   cozinhaNames,
   cafProps,
+  cozinhaStatus,
+  cafByCity,
   mode,
 }: UseMapaSpecParams) => {
   const { hoverTooltip, assentamentoTooltip, cozinhaTooltip, cafTooltip } =
@@ -116,7 +123,9 @@ export const useMapaSpec = ({
       nomesPorCodigo,
       assentamentos,
       cozinhaNames,
+      cozinhaStatus,
       cafProps,
+      cafByCity,
       mode,
     });
 
@@ -128,6 +137,8 @@ export const useMapaSpec = ({
       },
       cozinhaTooltipRender: cozinhaTooltip,
       cafTooltipRender: cafTooltip,
+      cozinhaStatus,
+      cafByCity,
     });
   }, [
     kitchenByCity,
@@ -138,6 +149,8 @@ export const useMapaSpec = ({
     assentamentoTooltip,
     cozinhaTooltip,
     cafTooltip,
+    cozinhaStatus,
+    cafByCity,
   ]);
 
   // Assentamentos mode hides the município layers entirely — drop the município
