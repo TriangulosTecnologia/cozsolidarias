@@ -54,6 +54,12 @@ describe('renderMunicipioTooltip', () => {
     expect(screen.getByText('7 cozinhas')).toBeInTheDocument();
   });
 
+  test('count mode uses the singular "cozinha" for a count of one', () => {
+    renderTooltip({ mode: 'coropletico', register: REGISTER, value: 1 });
+
+    expect(screen.getByText('1 cozinha')).toBeInTheDocument();
+  });
+
   test('count mode falls back to the joined count when there is no feature-state value', () => {
     renderTooltip({ mode: 'coropletico', register: REGISTER, value: null });
 
@@ -129,6 +135,20 @@ describe('renderMunicipioTooltip', () => {
 
     expect(screen.getByText('0,0084% dos CAFs do Brasil')).toBeInTheDocument();
     expect(screen.getByText('1.234 CAFs')).toBeInTheDocument();
+  });
+
+  test('CAF share mode uses the singular "CAF" for a count of one', () => {
+    renderTooltip({
+      mode: 'coropletico-cafs-percentual',
+      cafRegister: {
+        codigoIbge: '3550308',
+        municipio: 'São Paulo',
+        quantidade: 1,
+        percentualDoBrasil: 0.0001,
+      },
+    });
+
+    expect(screen.getByText('1 CAF')).toBeInTheDocument();
   });
 
   test('CAF share mode reads "sem CAF" without a CAF register', () => {
