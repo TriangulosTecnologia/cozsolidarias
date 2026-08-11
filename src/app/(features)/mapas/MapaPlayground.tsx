@@ -15,6 +15,7 @@ import * as React from 'react';
 import { ThemeUIProvider } from 'theme-ui';
 
 import type {
+  cadinsanByCity,
   CafAreaFeature,
   cafByCity,
   CafsFeatureCollection,
@@ -56,6 +57,14 @@ const LEFT_SIDEBAR: NonNullable<GeovisWorkspaceConfig['leftSidebar']> = {
         {
           value: 'coropletico-cafs-percentual',
           label: '% dos CAFs do Brasil no município',
+        },
+        {
+          value: 'coropletico-cadinsan-com-pbf',
+          label: 'Insegurança alimentar — cenário com o Bolsa Família',
+        },
+        {
+          value: 'coropletico-cadinsan-sem-pbf',
+          label: 'Insegurança alimentar — cenário sem o Bolsa Família',
         },
         {
           value: 'coropletico-cadunico',
@@ -151,6 +160,8 @@ type MapBootstrap = {
   cafProps: Record<string, CafAreaFeature['properties']>;
   /** Per-município CAF shares for the "% dos CAFs do Brasil" choropleth. */
   cafsByCity: cafByCity[];
+  /** Per-município CADINSAN food-insecurity shares for the food-insecurity choropleths. */
+  cadinsanByCity: cadinsanByCity[];
 };
 
 const EMPTY_BOOTSTRAP: MapBootstrap = {
@@ -162,6 +173,7 @@ const EMPTY_BOOTSTRAP: MapBootstrap = {
   cozinhaStatus: {},
   cafProps: {},
   cafsByCity: [],
+  cadinsanByCity: [],
 };
 
 /**
@@ -181,6 +193,7 @@ const fetchMapData = async (): Promise<MapBootstrap> => {
       cozinhasGeoJSON,
       cafsGeoJSON,
       cafsByCity,
+      cadinsanByCity,
     ] = await Promise.all([
       fetch('/api/cozinhas/por-municipio').then((response) => {
         return response.json() as Promise<kitchenRateByCity[]>;
@@ -202,6 +215,9 @@ const fetchMapData = async (): Promise<MapBootstrap> => {
       }),
       fetch('/api/cafs/por-municipio').then((response) => {
         return response.json() as Promise<cafByCity[]>;
+      }),
+      fetch('/api/cadinsan/por-municipio').then((response) => {
+        return response.json() as Promise<cadinsanByCity[]>;
       }),
     ]);
     const cozinhaNames = Object.fromEntries(
@@ -228,6 +244,7 @@ const fetchMapData = async (): Promise<MapBootstrap> => {
       cozinhaStatus,
       cafProps,
       cafsByCity,
+      cadinsanByCity,
     };
   } catch {
     return EMPTY_BOOTSTRAP;
@@ -256,6 +273,9 @@ const MapaPlayground = () => {
     Record<string, CafAreaFeature['properties']>
   >({});
   const [cafsByCity, setCafsByCity] = React.useState<cafByCity[]>([]);
+  const [cadinsanByCity, setCadinsanByCity] = React.useState<cadinsanByCity[]>(
+    []
+  );
   const [selection, setSelection] = React.useState<GeovisWorkspaceSelection>(
     () => {
       return getInitialSelection({ config: { leftSidebar: LEFT_SIDEBAR } });
@@ -303,6 +323,7 @@ const MapaPlayground = () => {
       setCozinhaStatus(bootstrap.cozinhaStatus);
       setCafProps(bootstrap.cafProps);
       setCafsByCity(bootstrap.cafsByCity);
+      setCadinsanByCity(bootstrap.cadinsanByCity);
       setMounted(true);
     });
 
@@ -320,6 +341,7 @@ const MapaPlayground = () => {
     cafProps,
     cozinhaStatus,
     cafByCity: cafsByCity,
+    cadinsanByCity,
     mode,
   });
 
@@ -358,7 +380,7 @@ const MapaPlayground = () => {
     // Selected by the legend list's aria-label (its title), one selector per
     // choropleth legend (count, rate, share, CadÚnico, coverage, IVS) plus the
     // categorical settlement legend.
-    '& div:has(> ul[aria-label="Cozinhas por município"]), & div:has(> ul[aria-label="nº coz. no município / 100.000 hab."]), & div:has(> ul[aria-label="% das cozinhas do Brasil no município"]), & div:has(> ul[aria-label="% dos CAFs do Brasil no município"]), & div:has(> ul[aria-label="nº coz. / 10 mil pessoas no CadÚnico"]), & div:has(> ul[aria-label="pessoas no CadÚnico por cozinha"]), & div:has(> ul[aria-label="Índice de vulnerabilidade social"]), & div:has(> ul[aria-label="Assentamentos rurais"])':
+    '& div:has(> ul[aria-label="Cozinhas por município"]), & div:has(> ul[aria-label="nº coz. no município / 100.000 hab."]), & div:has(> ul[aria-label="% das cozinhas do Brasil no município"]), & div:has(> ul[aria-label="% dos CAFs do Brasil no município"]), & div:has(> ul[aria-label="Insegurança alimentar no CadÚnico — cenário com o Bolsa Família"]), & div:has(> ul[aria-label="Insegurança alimentar no CadÚnico — cenário sem o Bolsa Família"]), & div:has(> ul[aria-label="nº coz. / 10 mil pessoas no CadÚnico"]), & div:has(> ul[aria-label="pessoas no CadÚnico por cozinha"]), & div:has(> ul[aria-label="Índice de vulnerabilidade social"]), & div:has(> ul[aria-label="Assentamentos rurais"])':
       {
         bottom: '44px !important',
         right: '44px !important',

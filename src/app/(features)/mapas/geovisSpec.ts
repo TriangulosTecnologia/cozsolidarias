@@ -13,6 +13,7 @@ import type {
 
 import { mapTokens } from '@/config/theme';
 import type {
+  cadinsanByCity,
   cafByCity,
   kitchenRateByCity,
   MunicipioIvs,
@@ -82,6 +83,11 @@ type MapOverlays = {
   cozinhaStatus?: Record<string, string>;
   /** Per-município CAF share rows; painted in `coropletico-cafs-percentual` mode. */
   cafByCity?: cafByCity[];
+  /**
+   * Per-município CADINSAN food-insecurity share rows; painted in the
+   * `coropletico-cadinsan-com-pbf` and `coropletico-cadinsan-sem-pbf` modes.
+   */
+  cadinsanByCity?: cadinsanByCity[];
 };
 
 /**
@@ -679,7 +685,8 @@ const buildMapData = ({
  * @param overlays - Overlay config: `assentamentos.atributos` color the
  * settlement polygons by status and `hoverRender` draws their tooltip;
  * `cozinhaStatus` (`codigo → emFuncionamento`) colors the kitchen points by
- * operating status; `cafByCity` paints the CAF share choropleth. Defaults to `{}`.
+ * operating status; `cafByCity` paints the CAF share choropleth; `cadinsanByCity`
+ * paints the CADINSAN food-insecurity choropleths. Defaults to `{}`.
  * @returns The geovis visualization spec (sources, mapData, legends, layers).
  *
  * @example
@@ -701,7 +708,8 @@ export const buildSpec = (
     mode,
     byCity,
     ivsByCity,
-    overlays.cafByCity ?? []
+    overlays.cafByCity ?? [],
+    overlays.cadinsanByCity ?? []
   );
 
   // Bounds for the circle-size scale: the largest per-município count. Falls

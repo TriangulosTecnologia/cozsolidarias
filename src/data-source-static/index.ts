@@ -11,6 +11,10 @@ export type {
   CatalogueTemporal,
   DataCatalogue,
 } from './dataCatalogue';
+export {
+  parseCadinsanMunicipal,
+  readStaticCadinsanMunicipal,
+} from './readStaticCadinsanMunicipal';
 export type { StaticCadUnico } from './readStaticCadUnico';
 export { readStaticCadUnico } from './readStaticCadUnico';
 export { readStaticCozinhas } from './readStaticCozinhas';

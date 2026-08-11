@@ -1,3 +1,4 @@
+export type { cadinsanByCity } from './cadinsanByCity';
 export type {
   CafAreaFeature,
   CafAreaProperties,

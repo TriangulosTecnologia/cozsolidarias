@@ -271,6 +271,63 @@ const CAF_PERCENT_LEGEND_LABELS = flooredBinLabels(
 );
 
 /**
+ * Break points (in %) for the CADINSAN food-insecurity choropleths — the share
+ * of a município's CadÚnico families in food insecurity. Fixed, interpretable
+ * cutpoints (`10 / 20 / 30 / 40`) shared by the "com PBF" and "sem PBF" modes so
+ * the two are read on the same ruler ("acima de 30%" means the same in both).
+ *
+ * Unlike the other floored scales, the leading break is **`0`, a real cutpoint**,
+ * not a positive floor: `0%` is a meaningful value (a município with CadÚnico
+ * families but none in food insecurity) that must paint the lightest band, so
+ * geovis' `step` (which paints `value >= thresholds[0]`) keeps `0` visible.
+ * Only a município with no CadÚnico denominator resolves to `null` upstream and
+ * lands in the grey "sem dado" bin.
+ */
+const CADINSAN_THRESHOLDS = [0, 10, 20, 30, 40];
+
+/**
+ * Color ramp for the CADINSAN choropleths — `CADINSAN_THRESHOLDS.length + 1`
+ * steps from the shared sequential ramp. As with the other floored scales,
+ * `CADINSAN_COLORS[0]` is vestigial (geovis maps the below-first-break bin to
+ * `defaultColor`); `CADINSAN_COLORS[1]` is the lightest painted band (`< 10%`).
+ */
+const CADINSAN_COLORS = sampleRamp(
+  mapTokens.dataviz.color.sequential[1],
+  CADINSAN_THRESHOLDS.length + 1
+);
+
+/**
+ * Resolves the CADINSAN-choropleth band color for a food-insecurity share (%),
+ * mirroring the floored `step` fill (see {@link colorForFlooredScale}). A `null`
+ * share (município with no CadÚnico denominator) resolves to
+ * `WITHOUT_KITCHEN_COLOR` ("sem dado"); every real share `>= 0` gets a visible
+ * band, so the hover-tooltip swatch always matches the map.
+ *
+ * @param proporcao - Food-insecurity share (%), or `null` when unknown.
+ * @returns The hex color for the share's band.
+ *
+ * @example
+ * colorForCadinsan(null); // WITHOUT_KITCHEN_COLOR ("sem dado")
+ * colorForCadinsan(0); // the lightest painted band
+ * colorForCadinsan(35); // the "30 – 40%" band
+ */
+export const colorForCadinsan = (proporcao: number | null): string => {
+  return colorForFlooredScale(proporcao, CADINSAN_THRESHOLDS, CADINSAN_COLORS);
+};
+
+/**
+ * Labels for the CADINSAN legends, one per rendered swatch
+ * (`CADINSAN_THRESHOLDS.length + 1`). The first swatch is the grey `defaultColor`
+ * bin (municípios with no CadÚnico denominator), labelled "Sem dado"; the rest
+ * derive from the cutpoints so they can't drift.
+ */
+const CADINSAN_LEGEND_LABELS = flooredBinLabels(
+  'Sem dado',
+  CADINSAN_THRESHOLDS,
+  '%'
+);
+
+/**
  * Break points for the "cozinhas per 10k CadÚnico people" choropleth — the rate
  * `(cozinhas / pessoas) * 10_000`. The meaningful cutpoints are
  * `0.2 / 0.5 / 1 / 2 / 4`, chosen from the real distribution of the 870
@@ -442,6 +499,8 @@ export type MapMode =
   | 'coropletico-taxa'
   | 'coropletico-percentual'
   | 'coropletico-cafs-percentual'
+  | 'coropletico-cadinsan-com-pbf'
+  | 'coropletico-cadinsan-sem-pbf'
   | 'coropletico-cadunico'
   | 'coropletico-pessoas-cozinha'
   | 'coropletico-ivs'
@@ -463,6 +522,8 @@ const CHOROPLETH_LEGEND_ID = 'legenda-cozinhas';
 const RATE_LEGEND_ID = 'legenda-taxa';
 const PERCENT_LEGEND_ID = 'legenda-percentual';
 const CAF_PERCENT_LEGEND_ID = 'legenda-cafs-percentual';
+const CADINSAN_COM_PBF_LEGEND_ID = 'legenda-cadinsan-com-pbf';
+const CADINSAN_SEM_PBF_LEGEND_ID = 'legenda-cadinsan-sem-pbf';
 const CADUNICO_LEGEND_ID = 'legenda-cadunico';
 const PESSOAS_COZINHA_LEGEND_ID = 'legenda-pessoas-cozinha';
 const IVS_LEGEND_ID = 'legenda-ivs';
@@ -484,6 +545,12 @@ const PERCENT_LEGEND_TITLE = '% das cozinhas do Brasil no município';
 
 /** Title of the CAF-share legend; also the fill's `activeLegendId` in that mode. */
 const CAF_PERCENT_LEGEND_TITLE = '% dos CAFs do Brasil no município';
+
+/** Titles of the CADINSAN legends (scenario framing, not "who receives PBF"). */
+const CADINSAN_COM_PBF_LEGEND_TITLE =
+  'Insegurança alimentar no CadÚnico — cenário com o Bolsa Família';
+const CADINSAN_SEM_PBF_LEGEND_TITLE =
+  'Insegurança alimentar no CadÚnico — cenário sem o Bolsa Família';
 
 /** Title of the CadÚnico legend; also the fill's `activeLegendId` in that mode. */
 const CADUNICO_LEGEND_TITLE = 'nº coz. / 10 mil pessoas no CadÚnico';
@@ -570,6 +637,28 @@ const LEGEND_CONFIGS: LegendConfig[] = [
     labels: CAF_PERCENT_LEGEND_LABELS,
     reference:
       'Fonte dos dados: Cadastro Nacional da Agricultura Familiar (CAF)',
+  },
+  {
+    id: CADINSAN_COM_PBF_LEGEND_ID,
+    mode: 'coropletico-cadinsan-com-pbf',
+    title: CADINSAN_COM_PBF_LEGEND_TITLE,
+    subtitle:
+      'Parcela das famílias do CadÚnico em insegurança alimentar já considerando o alívio do Bolsa Família. Compare com o cenário sem para ver o efeito do programa.',
+    thresholds: CADINSAN_THRESHOLDS,
+    colors: CADINSAN_COLORS,
+    labels: CADINSAN_LEGEND_LABELS,
+    reference: 'Fonte dos dados: MDS — CADINSAN 2025 (base do CadÚnico)',
+  },
+  {
+    id: CADINSAN_SEM_PBF_LEGEND_ID,
+    mode: 'coropletico-cadinsan-sem-pbf',
+    title: CADINSAN_SEM_PBF_LEGEND_TITLE,
+    subtitle:
+      'Parcela das famílias do CadÚnico que estariam em insegurança alimentar se não houvesse o Bolsa Família. Quanto mais escuro, maior a parcela.',
+    thresholds: CADINSAN_THRESHOLDS,
+    colors: CADINSAN_COLORS,
+    labels: CADINSAN_LEGEND_LABELS,
+    reference: 'Fonte dos dados: MDS — CADINSAN 2025 (base do CadÚnico)',
   },
   {
     id: CADUNICO_LEGEND_ID,
