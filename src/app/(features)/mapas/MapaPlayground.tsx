@@ -323,44 +323,60 @@ const MapaPlayground = () => {
     mode,
   });
 
+  // `<GeovisWorkspace>` (0.6.x) wraps its map in an outer `position:relative`
+  // Box; inside it the map's Flex layout only sets `minHeight` (no `height`) and
+  // carries the card's border/radius. We turn the outer Box into a full-height
+  // flex column and let its in-flow child (the map layout) grow with `flex: 1`,
+  // dropping that card border/radius for a full-bleed map. The hover tooltip and
+  // legends are `position: absolute` siblings, which ignore flex-item props — so
+  // this stretches only the map, not the overlays. Applied only when the map is
+  // mounted (see the `css` prop below).
+  const mapLayoutCss = {
+    '& > *': {
+      height: '100%',
+      width: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      // geovis-workspace 0.6.1 draws the map's card border/shadow on the wrapper
+      // element(s), which varies by nesting level across versions. Strip it on
+      // both the direct child and its child so the map is full-bleed regardless
+      // of where the version places it. The legends/tooltips are `position:
+      // absolute` siblings, so their own borders are unaffected.
+      border: 'none',
+      boxShadow: 'none',
+    },
+    '& > * > *': {
+      flex: '1',
+      minHeight: 0,
+      border: 'none',
+      borderRadius: 0,
+      boxShadow: 'none',
+    },
+    // geovis' provider auto-renders the choropleth legend with a fixed 10px
+    // inset from the map corner (`GeoVisLegend`'s corner position isn't further
+    // configurable via the spec). Nudge it inward so it doesn't crowd the edges.
+    // Selected by the legend list's aria-label (its title), one selector per
+    // choropleth legend (count, rate, share, CadÚnico, coverage, IVS) plus the
+    // categorical settlement legend.
+    '& div:has(> ul[aria-label="Cozinhas por município"]), & div:has(> ul[aria-label="nº coz. no município / 100.000 hab."]), & div:has(> ul[aria-label="% das cozinhas do Brasil no município"]), & div:has(> ul[aria-label="% dos CAFs do Brasil no município"]), & div:has(> ul[aria-label="nº coz. / 10 mil pessoas no CadÚnico"]), & div:has(> ul[aria-label="pessoas no CadÚnico por cozinha"]), & div:has(> ul[aria-label="Índice de vulnerabilidade social"]), & div:has(> ul[aria-label="Assentamentos rurais"])':
+      {
+        bottom: '44px !important',
+        right: '44px !important',
+      },
+  };
+
   return (
     <Box
       position="relative"
       h="calc(100vh - 72px)"
       w="100%"
       bg="ivory.200"
-      // `<GeovisWorkspace>` (0.6.x) wraps its map in an outer `position:relative`
-      // Box; inside it the map's Flex layout only sets `minHeight` (no `height`)
-      // and carries the card's border/radius. We turn the outer Box into a
-      // full-height flex column and let its in-flow child (the map layout) grow
-      // with `flex: 1`, dropping that card border/radius for a full-bleed map.
-      // The hover tooltip and legends are `position: absolute` siblings, which
-      // ignore flex-item props — so this stretches only the map, not the overlays.
-      css={{
-        '& > *': {
-          height: '100%',
-          width: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-        },
-        '& > * > *': {
-          flex: '1',
-          minHeight: 0,
-          border: 'none',
-          borderRadius: 0,
-        },
-        // geovis' provider auto-renders the choropleth legend with a fixed 10px
-        // inset from the map corner (`GeoVisLegend`'s corner position isn't
-        // further configurable via the spec). Nudge it inward so it doesn't
-        // crowd the edges. Selected by the legend list's aria-label (its title),
-        // one selector per choropleth legend (count, rate, share, CadÚnico,
-        // coverage, IVS) plus the categorical settlement legend.
-        '& div:has(> ul[aria-label="Cozinhas por município"]), & div:has(> ul[aria-label="nº coz. no município / 100.000 hab."]), & div:has(> ul[aria-label="% das cozinhas do Brasil no município"]), & div:has(> ul[aria-label="% dos CAFs do Brasil no município"]), & div:has(> ul[aria-label="nº coz. / 10 mil pessoas no CadÚnico"]), & div:has(> ul[aria-label="pessoas no CadÚnico por cozinha"]), & div:has(> ul[aria-label="Índice de vulnerabilidade social"]), & div:has(> ul[aria-label="Assentamentos rurais"])':
-          {
-            bottom: '44px !important',
-            right: '44px !important',
-          },
-      }}
+      // Gated on `mounted`: these rules restyle `<GeovisWorkspace>`'s DOM, and
+      // their `& > *` / `& > * > *` selectors would otherwise also match the
+      // loading indicator's own children while loading — flexing the mark and
+      // caption apart and pushing the mark off-centre. Only apply once the map
+      // (not the loading indicator) is the child.
+      css={mounted ? mapLayoutCss : undefined}
     >
       {mounted ? (
         // `<GeovisWorkspace>` renders theme-ui and `@ttoss/react-i18n`

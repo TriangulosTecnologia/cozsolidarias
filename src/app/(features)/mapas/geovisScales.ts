@@ -59,53 +59,6 @@ export const colorForQuantidade = (quantidade: number): string => {
 };
 
 /**
- * Break points for the "cozinhas per 100k inhabitants" rate choropleth, chosen
- * from the real distribution of the 870 municípios with ≥1 cozinha (median
- * ≈ 4.6, p90 ≈ 19). The lowest bin (`< 1`) is a real, painted band here — unlike
- * the count scale, where no município ever falls below 1 — so its color is the
- * lightest ramp step (`COLORS[0]`), distinct from the grey "sem dado" fill.
- */
-const RATE_THRESHOLDS = [1, 3, 6, 12, 24];
-
-/**
- * Resolves the rate-choropleth band color for a cozinhas-per-100k rate,
- * mirroring the `threshold` scale that paints the fill (`RATE_THRESHOLDS` over
- * the shared `COLORS` ramp). A `null` rate (município missing from the
- * population snapshot) resolves to `WITHOUT_KITCHEN_COLOR` so the hover-tooltip
- * swatch matches the "sem dado" fill.
- *
- * @param taxa - Cozinhas-per-100k rate, or `null` when unknown.
- * @returns The hex color for the rate's band.
- *
- * @example
- * colorForTaxa(null); // WITHOUT_KITCHEN_COLOR
- * colorForTaxa(0.5); // the lightest painted band
- */
-export const colorForTaxa = (taxa: number | null): string => {
-  if (taxa === null) {
-    return WITHOUT_KITCHEN_COLOR;
-  }
-  const index = RATE_THRESHOLDS.findIndex((threshold) => {
-    return taxa < threshold;
-  });
-  return index === -1 ? COLORS[COLORS.length - 1] : COLORS[index];
-};
-
-/**
- * Explicit labels for the rate legend's threshold bins, one per bin
- * (`RATE_THRESHOLDS.length + 1`), derived from `RATE_THRESHOLDS` so they can't
- * drift. The "sem dado" swatch is rendered separately via the legend's
- * `noDataLabel`, not folded into a bin.
- */
-const RATE_LEGEND_LABELS = [
-  `< ${RATE_THRESHOLDS[0]}`,
-  ...RATE_THRESHOLDS.map((lower, index) => {
-    const upper = RATE_THRESHOLDS[index + 1];
-    return upper === undefined ? `${lower}+` : `${lower} – ${upper}`;
-  }),
-];
-
-/**
  * Break points (in %) for the "share of Brazil's cozinhas" choropleth. The
  * meaningful cutpoints are `0.05 / 0.1 / 0.3 / 1 / 3`, chosen from the real
  * distribution of the 870 municípios with ≥1 cozinha (shares are tiny and
@@ -181,6 +134,60 @@ const flooredBinLabels = (
     }),
   ];
 };
+
+/**
+ * Break points for the "cozinhas per 100k inhabitants" rate choropleth, chosen
+ * from the real distribution of the 870 municípios with ≥1 cozinha (median
+ * ≈ 4.6, p90 ≈ 19).
+ *
+ * The leading `0.001` is a **floor, not a real cutpoint** (see
+ * {@link PERCENT_THRESHOLDS}): geovis' `step` paints every value *below the
+ * first break* with the grey `defaultColor`, so the floor must sit below the
+ * smallest real rate — even a município as large as São Paulo (~11.5M hab.)
+ * with a single cozinha rates ≈ 0.009 per 100k. With the floor, only municípios
+ * with no cozinha / no population data land in the grey bin; every município
+ * with ≥1 cozinha gets a visible blue band — including the `< 1` band, where a
+ * município like Araraquara (~1 cozinha for ~230k hab., ≈ 0.43) sits.
+ */
+const RATE_THRESHOLDS = [0.001, 1, 3, 6, 12, 24];
+
+/**
+ * Color ramp for the rate choropleth — `RATE_THRESHOLDS.length + 1` steps from
+ * the shared sequential ramp. Only `RATE_COLORS[1..]` are painted: geovis maps
+ * the below-floor bin to `defaultColor`, so `RATE_COLORS[0]` is vestigial (the
+ * count scale wastes its first step the same way).
+ */
+const RATE_COLORS = sampleRamp(
+  mapTokens.dataviz.color.sequential[1],
+  RATE_THRESHOLDS.length + 1
+);
+
+/**
+ * Resolves the rate-choropleth band color for a cozinhas-per-100k rate,
+ * mirroring the floored `step` fill (see {@link colorForFlooredScale}). A `null`
+ * rate (município missing from the population snapshot) and any value below the
+ * floor resolve to `WITHOUT_KITCHEN_COLOR`; every positive rate gets a visible
+ * band, so the hover-tooltip swatch always matches the map.
+ *
+ * @param taxa - Cozinhas-per-100k rate, or `null` when unknown.
+ * @returns The hex color for the rate's band.
+ *
+ * @example
+ * colorForTaxa(null); // WITHOUT_KITCHEN_COLOR
+ * colorForTaxa(0.5); // the lightest painted band (Araraquara sits here)
+ */
+export const colorForTaxa = (taxa: number | null): string => {
+  return colorForFlooredScale(taxa, RATE_THRESHOLDS, RATE_COLORS);
+};
+
+/**
+ * Labels for the rate legend, one per rendered swatch
+ * (`RATE_THRESHOLDS.length + 1`). The first swatch is the grey `defaultColor`
+ * bin geovis paints below the floor, labelled "Sem dado"; the rest derive from
+ * the meaningful cutpoints (`RATE_THRESHOLDS` without the floor) so they can't
+ * drift.
+ */
+const RATE_LEGEND_LABELS = flooredBinLabels('Sem dado', RATE_THRESHOLDS);
 
 /**
  * Resolves the share-choropleth band color for a município's % of Brazil's
@@ -537,10 +544,9 @@ const LEGEND_CONFIGS: LegendConfig[] = [
     subtitle:
       'Quanto mais escuro o município, mais cozinhas por 100 mil habitantes.',
     thresholds: RATE_THRESHOLDS,
-    colors: COLORS,
+    colors: RATE_COLORS,
     labels: RATE_LEGEND_LABELS,
     reference: 'Fontes: © Cozinhas Solidárias · IBGE (Censo 2022)',
-    noDataLabel: 'Sem dado',
   },
   {
     id: PERCENT_LEGEND_ID,

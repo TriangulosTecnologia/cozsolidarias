@@ -11,6 +11,7 @@ import type {
   VisualizationSpec,
 } from '@ttoss/geovis';
 
+import { mapTokens } from '@/config/theme';
 import type {
   cafByCity,
   kitchenRateByCity,
@@ -158,17 +159,19 @@ const POINTS_LAYER: VisualizationLayer = {
 
 /**
  * Whether the "Localização das cozinhas" toggle starts on for the given mode.
- * The kitchens are the *primary* visualization in `pontos` (points),
- * `circulos` (bubbles) and `assentamentos` (points over the settlements), so
- * the toggle defaults on there. On every choropleth and on `cafs` they are an
- * *opt-in overlay* — the layer is present but hidden until the user reveals it.
+ * The kitchen *points* are the primary visualization in `pontos` (points) and
+ * `assentamentos` (points over the settlements), so the toggle defaults on
+ * there. In `circulos` the primary layer is the proportional-circle overlay
+ * (always visible, never toggled); the points are an *opt-in overlay* there,
+ * so the toggle starts off — as it does on every choropleth and on `cafs`,
+ * where the points layer is present but hidden until the user reveals it.
  *
  * The geovis control keys its remembered state by `item.id`, so `defaultActive`
  * only decides the initial state *before the first toggle*; after the user
  * flips it once, that explicit choice wins across all modes.
  */
 const cozinhasDefaultActive = (mode: MapMode): boolean => {
-  return mode === 'pontos' || mode === 'circulos' || mode === 'assentamentos';
+  return mode === 'pontos' || mode === 'assentamentos';
 };
 
 /**
@@ -178,12 +181,12 @@ const cozinhasDefaultActive = (mode: MapMode): boolean => {
  * on/off choice is remembered by `item.id`, so each toggle persists across mode
  * switches (which rebuild the spec).
  *
- * - **Cozinhas** shows/hides the kitchens by referencing both representations
- *   (`cozinhas-pts` in `pontos`/`assentamentos`/choropleths/`cafs`,
- *   `cozinhas-bolhas` in `circulos`); only the one present in the active mode is
- *   toggled. The points layer is now rendered in every mode except `circulos`,
- *   so the item is enabled everywhere; its initial state comes from
- *   {@link cozinhasDefaultActive}.
+ * - **Cozinhas** shows/hides the kitchen *points* layer (`cozinhas-pts`),
+ *   which is now rendered in every mode. The proportional-circle overlay
+ *   (`cozinhas-bolhas`, `circulos` mode) is the always-on primary layer there
+ *   and is deliberately not referenced, so the toggle only reveals the points
+ *   on top of the circles. The item is enabled everywhere; its initial state
+ *   comes from {@link cozinhasDefaultActive}.
  * - **Linhas dos estados** toggles the state boundary outline drawn from
  *   `/geo/estados.json`. That line is a normal layer added by the
  *   `estados-boundary` group in `useMapaSpec` (`createBoundaryGroup` names it
@@ -210,7 +213,7 @@ const buildControl = (
       {
         id: 'cozinhas',
         label: 'Localização das cozinhas',
-        layers: [COZINHAS_POINTS_LAYER_ID, 'cozinhas-bolhas'],
+        layers: [COZINHAS_POINTS_LAYER_ID],
         defaultActive: cozinhasDefaultActive(mode),
       },
       {
@@ -341,9 +344,18 @@ const CAFS_POINTS_MAP_DATA_ID = 'cafs-pts-promote';
 export const CAFS_POINTS_LAYER_ID = 'cafs-pts';
 
 /**
- * The CAF area points layer. Green dots with a light halo rendered in `cafs`
+ * CAF point color: the steel-blue (position 9) from the dataviz `categorical`
+ * palette. A cool hue chosen to stay distinct from the kitchen points' warm
+ * green/amber/red status colors when both overlays are shown together in `cafs`
+ * mode.
+ */
+const CAF_POINT_COLOR = mapTokens.dataviz.color.categorical[1][8];
+
+/**
+ * The CAF area points layer. Steel-blue dots with a light halo rendered in `cafs`
  * mode. Static (no data-driven paint); each point carries all tooltip fields
- * directly in `properties`.
+ * directly in `properties`. The steel-blue (see {@link CAF_POINT_COLOR}) sets
+ * them apart from the status-colored kitchen points.
  *
  * Declares `click: {}` to opt into geovis interactive-layer registration,
  * which also enables hover-tooltip tracking on point layers.
@@ -353,7 +365,7 @@ const CAFS_LAYER: VisualizationLayer = {
   sourceId: CAFS_SOURCE_ID,
   geometry: 'point',
   paint: {
-    circleColor: '#2D9B52',
+    circleColor: CAF_POINT_COLOR,
     circleRadius: 4,
     circleOpacity: 0.9,
     circleStrokeColor: '#FAF9F7',
@@ -361,7 +373,7 @@ const CAFS_LAYER: VisualizationLayer = {
   },
   click: {},
   clickAnchor: {
-    color: '#2D9B52',
+    color: CAF_POINT_COLOR,
   },
 };
 
@@ -431,11 +443,19 @@ const SOURCES: GeoJSONSource[] = [
  */
 const MAX_ZOOM_IN = 9;
 
+/**
+ * Zoom-out floor shared by every camera. Caps how far the user can zoom out at
+ * the level where Brazil's whole territory fills the view — the same zoom as the
+ * default {@link BRAZIL_VIEW} — so the map never recedes to a global/ocean scale.
+ */
+const MAX_ZOOM_OUT = 4;
+
 /** Default camera: the whole of Brazil (all cozinha-based modes). */
 const BRAZIL_VIEW = {
   center: [-53.0, -14.5] as [number, number],
   zoom: 4,
   maxZoomIn: MAX_ZOOM_IN,
+  maxZoomOut: MAX_ZOOM_OUT,
 };
 
 /**
@@ -447,6 +467,7 @@ const SUDESTE_VIEW = {
   center: [-45.5, -20.0] as [number, number],
   zoom: 5,
   maxZoomIn: MAX_ZOOM_IN,
+  maxZoomOut: MAX_ZOOM_OUT,
 };
 
 /** Picks the camera for the active mode (Southeast for assentamentos, else Brazil). */
@@ -496,13 +517,26 @@ const withHoverTooltip = (
 };
 
 /**
- * Assembles the layers for the active mode. The município fill is present in
- * every mode **except** `assentamentos` (where municípios are hidden). The
- * kitchen points sit on top in `pontos` and `assentamentos`; `circulos` shows
- * the proportional-circle overlay instead. On every choropleth and on `cafs`
- * the points are also added on top but start hidden (`visible: false`), so the
- * "Camadas" control can reveal them as an opt-in overlay (see
- * {@link cozinhasDefaultActive}).
+ * Assembles the layers for the active mode.
+ *
+ * Both kitchen representations — the proportional-circle overlay
+ * (`cozinhas-bolhas`) and the points (`cozinhas-pts`) — are present in **every**
+ * mode, always in the order `[bubbles, points]`, with only their visibility
+ * varying by mode. This fixes their stacking at first mount: the geovis adapter
+ * appends newly-added layers on top and never reorders existing ones, so if the
+ * bubbles were added only on entering `circulos` they would land *above* the
+ * points that the mount-time (`coropletico`) spec already placed. Keeping both
+ * present from the first render — and never removing them — guarantees the
+ * points always draw on top of the circles regardless of the navigation path.
+ *
+ * Visibility per mode:
+ * - **bubbles** — visible only in `circulos` (its primary layer); hidden else.
+ * - **points** — visible in `pontos` and `assentamentos` (their primary layer);
+ *   hidden everywhere else, where the "Camadas" control reveals them as an
+ *   opt-in overlay (see {@link cozinhasDefaultActive}).
+ *
+ * The município fill is present in every mode **except** `assentamentos` (where
+ * municípios are hidden and the settlement backdrop/polygons/outline replace it).
  */
 const buildOverlayLayers = ({
   mode,
@@ -522,33 +556,36 @@ const buildOverlayLayers = ({
   );
   const cafsLayer = withHoverTooltip(CAFS_LAYER, overlays.cafTooltipRender);
 
-  if (mode !== 'assentamentos') {
-    layers.push(buildFillLayer(mode, hoverTooltipRender));
-  }
-  if (mode === 'pontos') {
-    layers.push(pointsLayer);
-  }
-  if (mode === 'circulos') {
-    layers.push(buildBubblesLayer(maxQuantidade));
-  }
-  if (mode === 'cafs') {
-    layers.push(cafsLayer);
-  }
   if (mode === 'assentamentos') {
-    // Bottom → top: near-white land backdrop, filled polygons, crisp outline,
-    // then the kitchen points.
+    // Bottom → top: near-white land backdrop, filled polygons, crisp outline.
     layers.push(buildEstadosFillLayer());
     layers.push(buildAssentamentosLayer(overlays.assentamentos?.hoverRender));
     layers.push(buildAssentamentosOutlineLayer());
-    layers.push(pointsLayer);
+  } else {
+    layers.push(buildFillLayer(mode, hoverTooltipRender));
   }
-  // Opt-in kitchen overlay on every choropleth and on `cafs`: the same points
-  // layer, added last (on top) but hidden until the "Camadas" control reveals
-  // it. `cozinhasDefaultActive` returns `false` for these modes, so the control
-  // keeps it hidden on first render.
-  if (mode.startsWith('coropletico') || mode === 'cafs') {
-    layers.push({ ...pointsLayer, visible: false });
+
+  // Proportional circles: always present so their stacking position *below* the
+  // points is fixed at mount and never reordered by a later mode switch. Only
+  // visible in `circulos`, where they are the primary layer.
+  layers.push({
+    ...buildBubblesLayer(maxQuantidade),
+    visible: mode === 'circulos',
+  });
+
+  if (mode === 'cafs') {
+    layers.push(cafsLayer);
   }
+
+  // Kitchen points: always present and always added AFTER the bubbles, so they
+  // render on top of the proportional circles. Visible where they are the
+  // primary layer (`pontos`, `assentamentos`); hidden elsewhere, where the
+  // "Camadas" control reveals them as an opt-in overlay.
+  layers.push({
+    ...pointsLayer,
+    visible: mode === 'pontos' || mode === 'assentamentos',
+  });
+
   return layers;
 };
 
@@ -678,7 +715,10 @@ export const buildSpec = (
     // The assentamentos data covers only some states, so frame that region when
     // the mode is active; every other (Brazil-wide) mode keeps the national view.
     view: resolveView(showAssentamentos),
-    basemap: {},
+    // Hide the basemap's text/icon labels (place, road and POI names) so the
+    // choropleths, points and bubbles read against a clean geography. Only the
+    // basemap's own `symbol` layers are affected — we declare none of our own.
+    basemap: { labels: false },
     // The assentamentos geometry and the state backdrop are added only in this
     // mode, so other views never fetch them; the adapter's source sync
     // adds/removes them on switch.

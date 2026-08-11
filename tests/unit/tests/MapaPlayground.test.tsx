@@ -56,12 +56,24 @@ jest.mock('@ttoss/geovis-workspace', () => {
           }[];
         };
       };
-      visualizationSpec: { layers?: { id: string }[] };
+      visualizationSpec: { layers?: { id: string; visible?: boolean }[] };
       variables: Record<string, string>;
       onVariableChange: (next: Record<string, string>) => void;
     }) => {
       const menu = config.leftSidebar.menus[0];
-      const layerIds = (visualizationSpec.layers ?? [])
+      const specLayers = visualizationSpec.layers ?? [];
+      const layerIds = specLayers
+        .map((layer) => {
+          return layer.id;
+        })
+        .join(',');
+      // Both kitchen representations are present in every mode; what differs is
+      // visibility. Expose the visible ids separately so the test can assert
+      // which layer each mode actually shows.
+      const visibleLayerIds = specLayers
+        .filter((layer) => {
+          return layer.visible !== false;
+        })
         .map((layer) => {
           return layer.id;
         })
@@ -69,6 +81,7 @@ jest.mock('@ttoss/geovis-workspace', () => {
       return (
         <div data-testid="geovis-workspace">
           <div data-testid="layer-ids">{layerIds}</div>
+          <div data-testid="visible-layer-ids">{visibleLayerIds}</div>
           <select
             aria-label={menu.title}
             value={variables[menu.id]}
@@ -184,87 +197,61 @@ describe('MapaPlayground — visualization toggle', () => {
     // Waits out the mount fetch, then the workspace (and its spec) render.
     const layerIds = await screen.findByTestId('layer-ids');
 
-    // Default (choropleth): the fill layer plus the kitchen points as a hidden
-    // opt-in overlay (revealed via the "Camadas" control); no bubble overlay.
+    // Both kitchen representations are present in every mode (their stacking is
+    // fixed at mount); each mode decides which one is *visible*.
+    const visible = () => {
+      return screen.getByTestId('visible-layer-ids');
+    };
+
+    // Default (choropleth): the fill is visible; the kitchen points and bubbles
+    // are present but hidden (points are the opt-in "Camadas" overlay).
     expect(layerIds).toHaveTextContent('cozinhas-pts');
-    expect(layerIds).not.toHaveTextContent('cozinhas-bolhas');
+    expect(layerIds).toHaveTextContent('cozinhas-bolhas');
+    expect(visible()).toHaveTextContent('municipios-br-fill');
+    expect(visible()).not.toHaveTextContent('cozinhas-pts');
+    expect(visible()).not.toHaveTextContent('cozinhas-bolhas');
 
-    // Rate mode keeps the choropleth fill plus the hidden kitchen overlay; no
-    // bubble overlay.
-    fireEvent.change(screen.getByLabelText('Visualização'), {
-      target: { value: 'coropletico-taxa' },
-    });
-    expect(screen.getByTestId('layer-ids')).toHaveTextContent('cozinhas-pts');
-    expect(screen.getByTestId('layer-ids')).not.toHaveTextContent(
-      'cozinhas-bolhas'
-    );
+    // Every other choropleth behaves the same: fill visible, both kitchen
+    // layers hidden.
+    for (const value of [
+      'coropletico-taxa',
+      'coropletico-percentual',
+      'coropletico-cafs-percentual',
+      'coropletico-cadunico',
+      'coropletico-pessoas-cozinha',
+    ]) {
+      fireEvent.change(screen.getByLabelText('Visualização'), {
+        target: { value },
+      });
+      expect(visible()).toHaveTextContent('municipios-br-fill');
+      expect(visible()).not.toHaveTextContent('cozinhas-pts');
+      expect(visible()).not.toHaveTextContent('cozinhas-bolhas');
+    }
 
-    // Share (%) mode also keeps the fill plus the hidden kitchen overlay.
-    fireEvent.change(screen.getByLabelText('Visualização'), {
-      target: { value: 'coropletico-percentual' },
-    });
-    expect(screen.getByTestId('layer-ids')).toHaveTextContent('cozinhas-pts');
-    expect(screen.getByTestId('layer-ids')).not.toHaveTextContent(
-      'cozinhas-bolhas'
-    );
-
-    // CAF share mode keeps the choropleth fill plus the hidden kitchen overlay.
-    fireEvent.change(screen.getByLabelText('Visualização'), {
-      target: { value: 'coropletico-cafs-percentual' },
-    });
-    expect(screen.getByTestId('layer-ids')).toHaveTextContent('cozinhas-pts');
-    expect(screen.getByTestId('layer-ids')).not.toHaveTextContent(
-      'cozinhas-bolhas'
-    );
-
-    // CadÚnico mode keeps the fill plus the hidden kitchen overlay.
-    fireEvent.change(screen.getByLabelText('Visualização'), {
-      target: { value: 'coropletico-cadunico' },
-    });
-    expect(screen.getByTestId('layer-ids')).toHaveTextContent('cozinhas-pts');
-    expect(screen.getByTestId('layer-ids')).not.toHaveTextContent(
-      'cozinhas-bolhas'
-    );
-
-    // Coverage (people-per-cozinha) mode also keeps the fill plus the overlay.
-    fireEvent.change(screen.getByLabelText('Visualização'), {
-      target: { value: 'coropletico-pessoas-cozinha' },
-    });
-    expect(screen.getByTestId('layer-ids')).toHaveTextContent('cozinhas-pts');
-    expect(screen.getByTestId('layer-ids')).not.toHaveTextContent(
-      'cozinhas-bolhas'
-    );
-
-    // Points mode adds the per-cozinha points layer.
+    // Points mode shows the per-cozinha points; the bubbles stay hidden.
     fireEvent.change(screen.getByLabelText('Visualização'), {
       target: { value: 'pontos' },
     });
-    expect(screen.getByTestId('layer-ids')).toHaveTextContent('cozinhas-pts');
+    expect(visible()).toHaveTextContent('cozinhas-pts');
+    expect(visible()).not.toHaveTextContent('cozinhas-bolhas');
 
-    // Bubbles mode swaps it for the proportional-circle layer.
+    // Bubbles mode shows the proportional circles; the points stay hidden
+    // (revealed on top only via the "Camadas" control).
     fireEvent.change(screen.getByLabelText('Visualização'), {
       target: { value: 'circulos' },
     });
-    expect(screen.getByTestId('layer-ids')).toHaveTextContent(
-      'cozinhas-bolhas'
-    );
-    expect(screen.getByTestId('layer-ids')).not.toHaveTextContent(
-      'cozinhas-pts'
-    );
+    expect(visible()).toHaveTextContent('cozinhas-bolhas');
+    expect(visible()).not.toHaveTextContent('cozinhas-pts');
 
-    // Assentamentos mode adds the settlement polygons with the kitchen points
-    // on top, and drops the bubble overlay.
+    // Assentamentos mode shows the settlement polygons with the kitchen points
+    // on top; the bubbles and the município fill stay hidden/absent.
     fireEvent.change(screen.getByLabelText('Visualização'), {
       target: { value: 'assentamentos' },
     });
-    expect(screen.getByTestId('layer-ids')).toHaveTextContent(
-      'assentamentos-poly'
-    );
-    expect(screen.getByTestId('layer-ids')).toHaveTextContent('cozinhas-pts');
-    expect(screen.getByTestId('layer-ids')).not.toHaveTextContent(
-      'cozinhas-bolhas'
-    );
-    // Municípios are hidden in this mode — no município fill layer.
+    expect(visible()).toHaveTextContent('assentamentos-poly');
+    expect(visible()).toHaveTextContent('cozinhas-pts');
+    expect(visible()).not.toHaveTextContent('cozinhas-bolhas');
+    // Municípios are hidden in this mode — no município fill layer at all.
     expect(screen.getByTestId('layer-ids')).not.toHaveTextContent(
       'municipios-br-fill'
     );

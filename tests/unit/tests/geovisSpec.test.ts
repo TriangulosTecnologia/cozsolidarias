@@ -415,7 +415,10 @@ describe('buildSpec', () => {
       return legend.id === 'legenda-taxa';
     });
     expect(rateLegend?.position).toBe('bottom-right');
-    expect(rateLegend?.noDataLabel).toBe('Sem dado');
+    // The grey "below first break" swatch is labelled "Sem dado".
+    if (rateLegend?.labelFormat?.type === 'labels') {
+      expect(rateLegend.labelFormat.labels[0]).toBe('Sem dado');
+    }
 
     const fill = spec.layers.find((layer) => {
       return layer.id === 'municipios-br-fill';
@@ -650,6 +653,16 @@ describe('buildSpec', () => {
     }
   );
 
+  test('hides basemap labels and floors the zoom-out at the Brazil-wide level', () => {
+    const spec = buildSpec(BY_CITY, 'coropletico');
+    expect(spec.basemap?.labels).toBe(false);
+    expect(spec.view?.maxZoomOut).toBe(4);
+
+    // The assentamentos camera shares the same zoom-out floor.
+    const assentamentos = buildSpec(BY_CITY, 'assentamentos');
+    expect(assentamentos.view?.maxZoomOut).toBe(4);
+  });
+
   test('coropletico-ivs feeds nothing when no IVS data is provided', () => {
     const spec = buildSpec(BY_CITY, 'coropletico-ivs');
 
@@ -699,11 +712,29 @@ describe('buildSpec', () => {
     expect(legend?.position).toBeUndefined();
   });
 
-  test('circulos renders the proportional-circle overlay', () => {
+  test('circulos renders the proportional-circle overlay plus a hidden kitchen overlay', () => {
     const spec = buildSpec(BY_CITY, 'circulos');
 
+    // Bubbles are the always-on primary layer here.
     expect(layerIds(spec)).toContain('cozinhas-bolhas');
-    expect(layerIds(spec)).not.toContain('cozinhas-pts');
+    const bubbles = spec.layers.find((layer) => {
+      return layer.id === 'cozinhas-bolhas';
+    });
+    expect(bubbles?.visible).not.toBe(false);
+
+    // Kitchen points are an opt-in overlay here: present but hidden until toggled.
+    expect(layerIds(spec)).toContain('cozinhas-pts');
+    const points = spec.layers.find((layer) => {
+      return layer.id === 'cozinhas-pts';
+    });
+    expect(points?.visible).toBe(false);
+
+    // Points sit on top of the bubbles, so revealing them draws each kitchen
+    // over its proportional circle.
+    const ids = layerIds(spec);
+    expect(ids.indexOf('cozinhas-bolhas')).toBeLessThan(
+      ids.indexOf('cozinhas-pts')
+    );
   });
 
   test('cafs renders the CAF points overlay plus a hidden kitchen overlay', () => {
@@ -711,6 +742,12 @@ describe('buildSpec', () => {
 
     expect(layerIds(spec)).toContain('cafs-pts');
     expect(mapDataById(spec, 'cozinhas-por-municipio')?.data).toEqual([]);
+
+    // CAF points are steel-blue, set apart from the status-colored kitchen points.
+    const cafs = spec.layers.find((layer) => {
+      return layer.id === 'cafs-pts';
+    });
+    expect(cafs?.paint?.circleColor).toBe('#5B87A8');
 
     // Kitchens are an opt-in overlay here: present but hidden until toggled.
     const points = spec.layers.find((layer) => {
@@ -759,14 +796,30 @@ describe('buildSpec', () => {
       });
     };
 
-    // Kitchens are the primary visualization: toggle starts on.
-    for (const mode of ['pontos', 'circulos', 'assentamentos'] as const) {
+    // Kitchen points are the primary visualization: toggle starts on.
+    for (const mode of ['pontos', 'assentamentos'] as const) {
       expect(cozinhasItem(mode)?.defaultActive).toBe(true);
     }
 
-    // Opt-in overlay: toggle starts off (layer present but hidden).
-    for (const mode of ['coropletico', 'coropletico-ivs', 'cafs'] as const) {
+    // Opt-in overlay: toggle starts off (layer present but hidden). In
+    // `circulos` the proportional circles are the always-on primary layer, so
+    // the points start hidden there too.
+    for (const mode of [
+      'circulos',
+      'coropletico',
+      'coropletico-ivs',
+      'cafs',
+    ] as const) {
       expect(cozinhasItem(mode)?.defaultActive).toBe(false);
+    }
+  });
+
+  test('the "Camadas" kitchens toggle controls only the points layer, never the bubbles', () => {
+    for (const mode of ['pontos', 'circulos', 'coropletico', 'cafs'] as const) {
+      const item = buildSpec(BY_CITY, mode).control?.items.find((entry) => {
+        return entry.id === 'cozinhas';
+      });
+      expect(item?.layers).toEqual(['cozinhas-pts']);
     }
   });
 
@@ -775,10 +828,20 @@ describe('buildSpec', () => {
       assentamentos: { atributos: ASSENTAMENTOS },
     });
 
-    // Filled polygons + points on top; no bubble overlay.
+    // Filled polygons + visible points on top.
     expect(layerIds(spec)).toContain('assentamentos-poly');
     expect(layerIds(spec)).toContain('cozinhas-pts');
-    expect(layerIds(spec)).not.toContain('cozinhas-bolhas');
+    const points = spec.layers.find((layer) => {
+      return layer.id === 'cozinhas-pts';
+    });
+    expect(points?.visible).not.toBe(false);
+
+    // The bubble layer is always present (to keep its stacking order fixed) but
+    // hidden here — there is no proportional-circle overlay in this mode.
+    const bubbles = spec.layers.find((layer) => {
+      return layer.id === 'cozinhas-bolhas';
+    });
+    expect(bubbles?.visible).toBe(false);
 
     // Municípios are hidden entirely: no fill layer, no choropleth join.
     expect(layerIds(spec)).not.toContain('municipios-br-fill');
