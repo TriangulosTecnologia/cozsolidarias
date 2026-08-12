@@ -1,3 +1,4 @@
+import { readStaticCadinsanMunicipal } from '../data-source-static/readStaticCadinsanMunicipal';
 import { readStaticCadUnico } from '../data-source-static/readStaticCadUnico';
 import { readStaticCafProducao } from '../data-source-static/readStaticCafProducao';
 import { readStaticCafs } from '../data-source-static/readStaticCafs';
@@ -7,6 +8,7 @@ import { readStaticIvs } from '../data-source-static/readStaticIvs';
 import { readStaticMunicipios } from '../data-source-static/readStaticMunicipios';
 import { readStaticPopulacao } from '../data-source-static/readStaticPopulacao';
 import type {
+  cadinsanByCity,
   cafByCity,
   CafDetalhe,
   CafsFeatureCollection,
@@ -16,6 +18,7 @@ import type {
   kitchenRateByCity,
   MunicipioIvs,
 } from './schema';
+import { toCadinsanPorMunicipio } from './transformers/toCadinsanPorMunicipio';
 import { toCafDetalhe } from './transformers/toCafDetalhe';
 import { toCafsFeatureCollection } from './transformers/toCafsFeatureCollection';
 import { toCafsPorMunicipio } from './transformers/toCafsPorMunicipio';
@@ -47,6 +50,13 @@ export type DataGateway = {
    * too large to aggregate at request time).
    */
   getCafsPorMunicipio: () => Promise<cafByCity[]>;
+  /**
+   * Returns one row per município (all 5,570) with its CADINSAN 2025
+   * food-insecurity headcounts (com/sem PBF), its CadÚnico total, and the
+   * derived shares (%), for the food-insecurity choropleths. The source is
+   * already per-município, so this is a cheap projection (no aggregation).
+   */
+  getCadinsanPorMunicipio: () => Promise<cadinsanByCity[]>;
   /** Returns cozinha locations as a GeoJSON FeatureCollection of Points. */
   getCozinhas: () => Promise<CozinhasFeatureCollection>;
   /**
@@ -138,6 +148,9 @@ export const createDataGateway = (): DataGateway => {
       },
       getCafsPorMunicipio: async () => {
         return toCafsPorMunicipio(await readStaticCafsPorMunicipio());
+      },
+      getCadinsanPorMunicipio: async () => {
+        return toCadinsanPorMunicipio(await readStaticCadinsanMunicipal());
       },
       getCozinhas: async () => {
         const sources = await readStaticCozinhas();

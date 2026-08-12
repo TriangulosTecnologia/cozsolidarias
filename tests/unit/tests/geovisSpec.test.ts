@@ -4,6 +4,7 @@ import {
 } from 'src/app/(features)/mapas/geovisAssentamentosScales';
 import {
   buildLegendItems,
+  colorForCadinsan,
   colorForCadUnico,
   colorForCafPercentual,
   colorForPercentual,
@@ -22,6 +23,7 @@ import {
   buildSpec,
 } from 'src/app/(features)/mapas/geovisSpec';
 import type {
+  cadinsanByCity,
   cafByCity,
   kitchenRateByCity,
   MunicipioIvs,
@@ -64,6 +66,32 @@ const CAF_BY_CITY: cafByCity[] = [
     municipio: 'Beta',
     quantidade: 200,
     percentualDoBrasil: 0.004,
+  },
+];
+
+const CADINSAN_BY_CITY: cadinsanByCity[] = [
+  {
+    codigoIbge: '111',
+    municipio: 'Alpha',
+    uf: 'X',
+    regiao: 'R',
+    absolutoComPbf: 10,
+    absolutoSemPbf: 25,
+    cadastrosCadunico: 100,
+    proporcaoComPbf: 10,
+    proporcaoSemPbf: 25,
+  },
+  {
+    // No CadÚnico denominator → both shares null → dropped from the choropleth.
+    codigoIbge: '333',
+    municipio: 'Gamma',
+    uf: 'Y',
+    regiao: 'S',
+    absolutoComPbf: 0,
+    absolutoSemPbf: 0,
+    cadastrosCadunico: 0,
+    proporcaoComPbf: null,
+    proporcaoSemPbf: null,
   },
 ];
 
@@ -227,6 +255,26 @@ describe('colorForCafPercentual', () => {
 
   test('higher shares map to a different (darker) band than lower shares', () => {
     expect(colorForCafPercentual(0.001)).not.toBe(colorForCafPercentual(0.2));
+  });
+});
+
+describe('colorForCadinsan', () => {
+  test('a real 0% is painted (lightest band), not the grey "sem dado"', () => {
+    // Unlike the other scales, 0 is a real value here — only null is grey.
+    expect(colorForCadinsan(0)).not.toBe(colorForCadinsan(null));
+  });
+
+  test('a null share (no CadÚnico denominator) is the grey "sem dado" fill', () => {
+    expect(colorForCadinsan(null)).toBe(colorForQuantidade(0));
+  });
+
+  test('darkens across the fixed 10-point bands', () => {
+    expect(colorForCadinsan(5)).not.toBe(colorForCadinsan(15));
+    expect(colorForCadinsan(15)).not.toBe(colorForCadinsan(35));
+  });
+
+  test('shares of 40% or more share the darkest band', () => {
+    expect(colorForCadinsan(45)).toBe(colorForCadinsan(90));
   });
 });
 
@@ -490,6 +538,58 @@ describe('buildSpec', () => {
 
   test('coropletico-cafs-percentual feeds nothing when no CAF data is provided', () => {
     const spec = buildSpec(BY_CITY, 'coropletico-cafs-percentual');
+
+    expect(mapDataById(spec, 'cozinhas-por-municipio')?.data).toEqual([]);
+  });
+
+  test('coropletico-cadinsan-sem-pbf feeds the sem-PBF shares, drops null denominators, positions its legend', () => {
+    const spec = buildSpec(
+      BY_CITY,
+      'coropletico-cadinsan-sem-pbf',
+      undefined,
+      [],
+      { cadinsanByCity: CADINSAN_BY_CITY }
+    );
+
+    // Reads the CADINSAN dataset; Gamma (null share) is dropped, Alpha kept.
+    expect(mapDataById(spec, 'cozinhas-por-municipio')?.data).toEqual([
+      { geometryId: '111', value: 25 },
+    ]);
+
+    const legend = spec.legends?.find((entry) => {
+      return entry.id === 'legenda-cadinsan-sem-pbf';
+    });
+    expect(legend?.position).toBe('bottom-right');
+    // 0 is a real cutpoint (not a positive floor), so 0% paints a band.
+    expect(legend?.colorBy.thresholds?.[0]).toBe(0);
+
+    const fill = spec.layers.find((layer) => {
+      return layer.id === 'municipios-br-fill';
+    });
+    expect(fill?.activeLegendId).toBe('legenda-cadinsan-sem-pbf');
+  });
+
+  test('coropletico-cadinsan-com-pbf feeds the com-PBF shares and positions its legend', () => {
+    const spec = buildSpec(
+      BY_CITY,
+      'coropletico-cadinsan-com-pbf',
+      undefined,
+      [],
+      { cadinsanByCity: CADINSAN_BY_CITY }
+    );
+
+    expect(mapDataById(spec, 'cozinhas-por-municipio')?.data).toEqual([
+      { geometryId: '111', value: 10 },
+    ]);
+
+    const legend = spec.legends?.find((entry) => {
+      return entry.id === 'legenda-cadinsan-com-pbf';
+    });
+    expect(legend?.position).toBe('bottom-right');
+  });
+
+  test('coropletico-cadinsan-* feeds nothing when no CADINSAN data is provided', () => {
+    const spec = buildSpec(BY_CITY, 'coropletico-cadinsan-sem-pbf');
 
     expect(mapDataById(spec, 'cozinhas-por-municipio')?.data).toEqual([]);
   });

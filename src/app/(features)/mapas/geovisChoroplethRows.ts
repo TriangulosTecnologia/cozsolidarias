@@ -1,6 +1,7 @@
 import type { MapDataRow } from '@ttoss/geovis';
 
 import type {
+  cadinsanByCity,
   cafByCity,
   kitchenByCity,
   kitchenRateByCity,
@@ -65,6 +66,23 @@ const toCafPercentRows = (byCity: cafByCity[]): MapDataRow[] => {
       geometryId: register.codigoIbge,
       value: register.percentualDoBrasil,
     };
+  });
+};
+
+/**
+ * Maps per-município CADINSAN food-insecurity shares (%) to geovis `mapData`
+ * value rows, selecting the com/sem-PBF proportion via `pick`. Municípios whose
+ * share is `null` (no CadÚnico denominator) are dropped so they fall back to the
+ * legend's `defaultColor` ("sem dado"); a real `0%` is kept and paints the
+ * lightest band.
+ */
+const toCadinsanRows = (
+  cadinsanByCity: cadinsanByCity[],
+  pick: (register: cadinsanByCity) => number | null
+): MapDataRow[] => {
+  return cadinsanByCity.flatMap((register) => {
+    const value = pick(register);
+    return value === null ? [] : [{ geometryId: register.codigoIbge, value }];
   });
 };
 
@@ -187,19 +205,31 @@ const CHOROPLETH_ROW_BUILDERS: Partial<
  * @param byCity - Per-município canonical cozinha rate rows.
  * @param ivsByCity - Per-município IVS/IDHM score rows.
  * @param cafByCity - Per-município CAF share rows.
+ * @param cadinsanByCity - Per-município CADINSAN food-insecurity share rows.
  * @returns The value rows for the mode, or `[]` for non-choropleth modes.
  *
  * @example
- * resolveChoroplethRows('coropletico-taxa', byCity, ivsByCity, cafByCity);
+ * resolveChoroplethRows('coropletico-taxa', byCity, ivsByCity, cafByCity, cadinsanByCity);
  */
 export const resolveChoroplethRows = (
   mode: MapMode,
   byCity: kitchenRateByCity[],
   ivsByCity: MunicipioIvs[],
-  cafByCity: cafByCity[]
+  cafByCity: cafByCity[],
+  cadinsanByCity: cadinsanByCity[]
 ): MapDataRow[] => {
   if (mode === 'coropletico-cafs-percentual') {
     return toCafPercentRows(cafByCity);
+  }
+  if (mode === 'coropletico-cadinsan-com-pbf') {
+    return toCadinsanRows(cadinsanByCity, (register) => {
+      return register.proporcaoComPbf;
+    });
+  }
+  if (mode === 'coropletico-cadinsan-sem-pbf') {
+    return toCadinsanRows(cadinsanByCity, (register) => {
+      return register.proporcaoSemPbf;
+    });
   }
   const scorePick = SCORE_PICKERS[mode];
   if (scorePick) {

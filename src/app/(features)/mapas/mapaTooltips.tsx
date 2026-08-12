@@ -1,8 +1,16 @@
+/* eslint-disable max-lines -- Cohesive hover-tooltip renderer registry: one
+   renderer per map mode (choropleth variants, points, settlements) plus the
+   mode→content dispatcher, kept together so the whole hover surface reads as one
+   unit. Splitting would scatter closely-related copy. Tracked as a follow-up. */
 import { Box, Text } from '@chakra-ui/react';
 import type { MapHoverInfo } from '@ttoss/geovis';
 import type * as React from 'react';
 
-import type { cafByCity, kitchenRateByCity } from '@/data-gateway/schema';
+import type {
+  cadinsanByCity,
+  cafByCity,
+  kitchenRateByCity,
+} from '@/data-gateway/schema';
 
 import {
   assentamentoStatusLabel,
@@ -13,6 +21,7 @@ import {
   cozinhaStatusShortLabel,
 } from './geovisCozinhaStatusScales';
 import {
+  colorForCadinsan,
   colorForCadUnico,
   colorForCafPercentual,
   colorForPercentual,
@@ -205,6 +214,100 @@ const renderCafPercentTooltip = ({
       swatchColor={colorForCafPercentual(percentual)}
       primary={primary}
       secondary={secondary}
+    />
+  );
+};
+
+/** `"X,y%"` no formato pt-BR, com uma casa decimal. */
+const formatPercent = (value: number): string => {
+  return `${value.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%`;
+};
+
+/** Inteiro no formato pt-BR (separador de milhar). */
+const formatFamilias = (value: number): string => {
+  return value.toLocaleString('pt-BR');
+};
+
+/**
+ * Frase do efeito do Bolsa Família na variação CADINSAN, comparando com o
+ * cenário oposto: no modo `sem` mostra o alívio ("cai para"); no `com` mostra o
+ * contrafactual ("seria"). Retorna `undefined` quando o cenário oposto não tem
+ * proporção (sem denominador do CadÚnico).
+ */
+const cadinsanEffectLine = ({
+  variant,
+  proporcao,
+  absoluto,
+}: {
+  variant: 'com' | 'sem';
+  proporcao: number | null;
+  absoluto: number;
+}): string | undefined => {
+  if (proporcao === null) {
+    return undefined;
+  }
+  const detalhe = `${formatPercent(proporcao)} (${formatFamilias(absoluto)} famílias)`;
+  return variant === 'sem'
+    ? `Com o Bolsa Família, cai para ${detalhe}`
+    : `Sem o Bolsa Família, seria ${detalhe}`;
+};
+
+/**
+ * CADINSAN-mode tooltip. Destaca a proporção do cenário ativo (com/sem o efeito
+ * do Bolsa Família) com a cor da faixa do mapa, a linha "N de M famílias do
+ * CadÚnico neste cenário", e — como cada município carrega os dois cenários — uma
+ * linha de efeito com a proporção do cenário oposto. Assim o leitor lê os dois
+ * números como o mesmo indicador sob dois cenários, nunca como "quem recebe
+ * Bolsa Família". Municípios sem denominador do CadÚnico (`proporcao === null`)
+ * leem apenas "Sem dado do CadÚnico". `variant` escolhe a métrica ativa; as duas
+ * dividem a mesma escala de cor.
+ */
+const renderCadinsanTooltip = ({
+  name,
+  register,
+  variant,
+}: {
+  name: string;
+  register?: cadinsanByCity;
+  variant: 'com' | 'sem';
+}) => {
+  const semDado = (
+    <TooltipCard
+      name={name}
+      swatchColor={colorForCadinsan(null)}
+      primary="Sem dado do CadÚnico"
+    />
+  );
+  if (register === undefined) {
+    return semDado;
+  }
+
+  const isCom = variant === 'com';
+  const activeProporcao = isCom
+    ? register.proporcaoComPbf
+    : register.proporcaoSemPbf;
+  if (activeProporcao === null) {
+    return semDado;
+  }
+
+  const activeAbsoluto = isCom
+    ? register.absolutoComPbf
+    : register.absolutoSemPbf;
+  const qualifier = isCom ? 'com o Bolsa Família' : 'sem o Bolsa Família';
+
+  const effect = cadinsanEffectLine({
+    variant,
+    proporcao: isCom ? register.proporcaoSemPbf : register.proporcaoComPbf,
+    absoluto: isCom ? register.absolutoSemPbf : register.absolutoComPbf,
+  });
+
+  return (
+    <TooltipCard
+      name={name}
+      swatchColor={colorForCadinsan(activeProporcao)}
+      primary={`${formatPercent(activeProporcao)} em insegurança alimentar (${qualifier})`}
+      secondary={`${formatFamilias(activeAbsoluto)} de ${formatFamilias(register.cadastrosCadunico)} famílias do CadÚnico neste cenário`}
+      details={effect === undefined ? undefined : [effect]}
     />
   );
 };
@@ -439,6 +542,29 @@ const SCORE_TOOLTIPS: Partial<Record<MapMode, ScoreTooltip>> = {
 };
 
 /**
+ * Choropleth modes whose tooltip reads only `{ name, register }` from the
+ * canonical cozinha rate rows. Keyed by {@link MapMode} so the dispatcher
+ * resolves them in one lookup instead of a branch each.
+ */
+const RATE_TOOLTIPS: Partial<
+  Record<
+    MapMode,
+    (args: { name: string; register?: kitchenRateByCity }) => React.ReactNode
+  >
+> = {
+  'coropletico-taxa': renderRateTooltip,
+  'coropletico-percentual': renderPercentTooltip,
+  'coropletico-cadunico': renderCadUnicoTooltip,
+  'coropletico-pessoas-cozinha': renderPessoasPorCozinhaTooltip,
+};
+
+/** The two CADINSAN modes and the com/sem-PBF scenario each one shows. */
+const CADINSAN_VARIANTS: Partial<Record<MapMode, 'com' | 'sem'>> = {
+  'coropletico-cadinsan-com-pbf': 'com',
+  'coropletico-cadinsan-sem-pbf': 'sem',
+};
+
+/**
  * Resolves the hover-tooltip content for a município, dispatching on the active
  * map mode. Each choropleth mode renders the metric it colors by (rate, share,
  * CadÚnico rate, coverage, any IVS- or IDHM-family score); every other mode
@@ -453,6 +579,8 @@ const SCORE_TOOLTIPS: Partial<Record<MapMode, ScoreTooltip>> = {
  * when it has no cozinhas (tooltips then read as "Sem cozinha registrada").
  * @param params.cafRegister - Canonical CAF row for the município, or `undefined`
  * when it has no CAF; read only in the `coropletico-cafs-percentual` mode.
+ * @param params.cadinsanRegister - Canonical CADINSAN row for the município, or
+ * `undefined` when absent; read only in the `coropletico-cadinsan-*` modes.
  * @param params.value - The hovered feature's `value` from geovis feature-state
  * (the painted count), used only by the count fallback.
  * @returns The tooltip card element for the hovered município.
@@ -466,32 +594,32 @@ export const renderMunicipioTooltip = ({
   name,
   register,
   cafRegister,
+  cadinsanRegister,
   value,
 }: {
   mode: MapMode;
   name: string;
   register?: kitchenRateByCity;
   cafRegister?: cafByCity;
+  cadinsanRegister?: cadinsanByCity;
   value: MapHoverInfo['value'];
 }): React.ReactNode => {
-  if (mode === 'coropletico-taxa') {
-    return renderRateTooltip({ name, register });
-  }
-
-  if (mode === 'coropletico-percentual') {
-    return renderPercentTooltip({ name, register });
+  const rateTooltip = RATE_TOOLTIPS[mode];
+  if (rateTooltip) {
+    return rateTooltip({ name, register });
   }
 
   if (mode === 'coropletico-cafs-percentual') {
     return renderCafPercentTooltip({ name, register: cafRegister });
   }
 
-  if (mode === 'coropletico-cadunico') {
-    return renderCadUnicoTooltip({ name, register });
-  }
-
-  if (mode === 'coropletico-pessoas-cozinha') {
-    return renderPessoasPorCozinhaTooltip({ name, register });
+  const cadinsanVariant = CADINSAN_VARIANTS[mode];
+  if (cadinsanVariant) {
+    return renderCadinsanTooltip({
+      name,
+      register: cadinsanRegister,
+      variant: cadinsanVariant,
+    });
   }
 
   const score = SCORE_TOOLTIPS[mode];
