@@ -7,6 +7,7 @@ import type { LegendSpec } from '@ttoss/geovis';
 
 import { mapTokens } from '@/config/theme';
 
+import { classifyValues } from './classifyValues';
 import { buildAssentamentoLegend } from './geovisAssentamentosScales';
 import {
   IDHM_FAMILY_COLORS,
@@ -451,21 +452,41 @@ export type LegendItem = { color: string; label: string };
  * @example
  * buildLegendItems()[0]; // { color: WITHOUT_KITCHEN_COLOR, label: 'Sem cozinha' }
  */
-export const buildLegendItems = (): LegendItem[] => {
-  const ranges = THRESHOLDS.map((lower, index): LegendItem => {
-    const upper = THRESHOLDS[index + 1];
-    const color = COLORS[index + 1];
-
+/**
+ * Builds the integer-count legend labels from a threshold array: the grey "Sem
+ * cozinha" bin first, then one label per count range — a single value when the
+ * range spans one integer (`upper - lower === 1`), a closed `a–b` range
+ * otherwise, and an open `n+` for the top band. Shared by {@link buildLegendItems}
+ * and the count choropleth so the count labels can be rebuilt from data-driven
+ * (Jenks) breaks without duplicating the range formatting.
+ *
+ * @param thresholds - The count scale's thresholds (floor first).
+ * @returns The ordered labels: "Sem cozinha", then one per count range.
+ *
+ * @example
+ * buildCountLabels([1, 3, 6]); // ['Sem cozinha', '1–2', '3–5', '6+']
+ */
+const buildCountLabels = (thresholds: readonly number[]): string[] => {
+  const ranges = thresholds.map((lower, index) => {
+    const upper = thresholds[index + 1];
     if (upper === undefined) {
-      return { color, label: `${lower}+` };
+      return `${lower}+`;
     }
     if (upper - lower === 1) {
-      return { color, label: `${lower}` };
+      return `${lower}`;
     }
-    return { color, label: `${lower}–${upper - 1}` };
+    return `${lower}–${upper - 1}`;
   });
+  return ['Sem cozinha', ...ranges];
+};
 
-  return [{ color: WITHOUT_KITCHEN_COLOR, label: 'Sem cozinha' }, ...ranges];
+export const buildLegendItems = (): LegendItem[] => {
+  return buildCountLabels(THRESHOLDS).map((label, index): LegendItem => {
+    return {
+      color: index === 0 ? WITHOUT_KITCHEN_COLOR : COLORS[index],
+      label,
+    };
+  });
 };
 
 /**
@@ -589,6 +610,13 @@ type LegendConfig = {
   labels: string[];
   reference: string;
   noDataLabel?: string;
+  /**
+   * Rebuilds this scale's labels from a threshold array. Present only on the
+   * ad-hoc (hand-picked) choropleths, which opt into data-driven Jenks breaks;
+   * absent on the IVS/IDHM families, whose official faixa breaks never change.
+   * Its presence is what marks a mode as Jenks-eligible (see {@link jenksBreaksForMode}).
+   */
+  labelsFrom?: (thresholds: readonly number[]) => string[];
 };
 
 const LEGEND_CONFIGS: LegendConfig[] = [
@@ -599,9 +627,8 @@ const LEGEND_CONFIGS: LegendConfig[] = [
     subtitle: 'Quanto mais escuro o município, mais cozinhas cadastradas ali.',
     thresholds: THRESHOLDS,
     colors: COLORS,
-    labels: buildLegendItems().map((item) => {
-      return item.label;
-    }),
+    labels: buildCountLabels(THRESHOLDS),
+    labelsFrom: buildCountLabels,
     reference: 'Fonte dos dados: © Cozinhas Solidárias',
   },
   {
@@ -613,6 +640,9 @@ const LEGEND_CONFIGS: LegendConfig[] = [
     thresholds: RATE_THRESHOLDS,
     colors: RATE_COLORS,
     labels: RATE_LEGEND_LABELS,
+    labelsFrom: (thresholds) => {
+      return flooredBinLabels('Sem dado', thresholds);
+    },
     reference: 'Fontes: © Cozinhas Solidárias · IBGE (Censo 2022)',
   },
   {
@@ -624,6 +654,9 @@ const LEGEND_CONFIGS: LegendConfig[] = [
     thresholds: PERCENT_THRESHOLDS,
     colors: PERCENT_COLORS,
     labels: PERCENT_LEGEND_LABELS,
+    labelsFrom: (thresholds) => {
+      return flooredBinLabels('Sem cozinha', thresholds, '%');
+    },
     reference: 'Fonte dos dados: © Cozinhas Solidárias',
   },
   {
@@ -635,6 +668,9 @@ const LEGEND_CONFIGS: LegendConfig[] = [
     thresholds: CAF_PERCENT_THRESHOLDS,
     colors: PERCENT_COLORS,
     labels: CAF_PERCENT_LEGEND_LABELS,
+    labelsFrom: (thresholds) => {
+      return flooredBinLabels('Sem CAF', thresholds, '%');
+    },
     reference:
       'Fonte dos dados: Cadastro Nacional da Agricultura Familiar (CAF)',
   },
@@ -647,6 +683,9 @@ const LEGEND_CONFIGS: LegendConfig[] = [
     thresholds: CADINSAN_THRESHOLDS,
     colors: CADINSAN_COLORS,
     labels: CADINSAN_LEGEND_LABELS,
+    labelsFrom: (thresholds) => {
+      return flooredBinLabels('Sem dado', thresholds, '%');
+    },
     reference: 'Fonte dos dados: MDS — CADINSAN 2025 (base do CadÚnico)',
   },
   {
@@ -658,6 +697,9 @@ const LEGEND_CONFIGS: LegendConfig[] = [
     thresholds: CADINSAN_THRESHOLDS,
     colors: CADINSAN_COLORS,
     labels: CADINSAN_LEGEND_LABELS,
+    labelsFrom: (thresholds) => {
+      return flooredBinLabels('Sem dado', thresholds, '%');
+    },
     reference: 'Fonte dos dados: MDS — CADINSAN 2025 (base do CadÚnico)',
   },
   {
@@ -669,6 +711,9 @@ const LEGEND_CONFIGS: LegendConfig[] = [
     thresholds: CADUNICO_THRESHOLDS,
     colors: CADUNICO_COLORS,
     labels: CADUNICO_LEGEND_LABELS,
+    labelsFrom: (thresholds) => {
+      return flooredBinLabels('Sem cozinha', thresholds);
+    },
     reference: 'Fontes: © Cozinhas Solidárias · MDS/SAGI (CadÚnico, jun/2026)',
   },
   {
@@ -680,6 +725,9 @@ const LEGEND_CONFIGS: LegendConfig[] = [
     thresholds: PESSOAS_COZINHA_THRESHOLDS,
     colors: PESSOAS_COZINHA_COLORS,
     labels: PESSOAS_COZINHA_LEGEND_LABELS,
+    labelsFrom: (thresholds) => {
+      return flooredBinLabels('Sem cozinha', thresholds);
+    },
     reference: 'Fontes: © Cozinhas Solidárias · MDS/SAGI (CadÚnico, jun/2026)',
   },
   {
@@ -816,8 +864,22 @@ const LEGEND_CONFIGS: LegendConfig[] = [
  * buildLegends('coropletico-taxa').find((l) => l.position); // the rate legend
  * buildLegends('assentamentos').find((l) => l.position); // the settlement legend
  */
-export const buildLegends = (mode: MapMode): LegendSpec[] => {
+export const buildLegends = (
+  mode: MapMode,
+  jenksBreaks?: number[] | null
+): LegendSpec[] => {
   const choropleths = LEGEND_CONFIGS.map((config): LegendSpec => {
+    // Only the active ad-hoc choropleth swaps its hand-picked thresholds for the
+    // data-driven Jenks breaks (rebuilding its labels to match). The fill and
+    // the legend share this `colorBy`, so the single swap moves both together;
+    // the IVS/IDHM families (no `labelsFrom`) keep their fixed official faixas.
+    const jenks =
+      config.labelsFrom && jenksBreaks && config.mode === mode
+        ? jenksBreaks
+        : null;
+    const thresholds = jenks ?? config.thresholds;
+    const labels =
+      jenks && config.labelsFrom ? config.labelsFrom(jenks) : config.labels;
     return {
       id: config.id,
       title: config.title,
@@ -827,17 +889,50 @@ export const buildLegends = (mode: MapMode): LegendSpec[] => {
         type: 'quantitative',
         property: 'value',
         scale: 'threshold',
-        thresholds: config.thresholds,
+        thresholds,
         colors: config.colors,
         defaultColor: WITHOUT_KITCHEN_COLOR,
       },
-      labelFormat: { type: 'labels', labels: config.labels },
+      labelFormat: { type: 'labels', labels },
       ...(config.noDataLabel ? { noDataLabel: config.noDataLabel } : {}),
       reference: config.reference,
     };
   });
 
   return [...choropleths, buildAssentamentoLegend(mode === 'assentamentos')];
+};
+
+/**
+ * Computes the Jenks natural-breaks thresholds for a mode's painted values,
+ * preserving the mode's fixed floor and band count so the result is a drop-in
+ * replacement for its hand-picked threshold array. Returns `null` for modes that
+ * are not Jenks-eligible — the IVS/IDHM families (official faixas) and the
+ * non-choropleth overlays — or when the data has too few distinct values to
+ * split; the caller then keeps the fixed scale.
+ *
+ * @param mode - Active {@link MapMode}.
+ * @param values - The values the mode paints (the choropleth `mapData` rows' values).
+ * @returns The `[floor, ...breaks]` threshold array, or `null` to keep the fixed scale.
+ *
+ * @example
+ * jenksBreaksForMode('coropletico', [1, 1, 2, 8, 40]); // data-driven breaks
+ * jenksBreaksForMode('coropletico-ivs', values); // null (official faixas)
+ */
+export const jenksBreaksForMode = (
+  mode: MapMode,
+  values: readonly (number | string | null | undefined)[]
+): number[] | null => {
+  const config = LEGEND_CONFIGS.find((entry) => {
+    return entry.mode === mode;
+  });
+  if (!config?.labelsFrom) {
+    return null;
+  }
+  return classifyValues({
+    values,
+    classes: config.thresholds.length,
+    floor: config.thresholds[0],
+  }).breaks;
 };
 
 /**
