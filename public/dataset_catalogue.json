@@ -7,7 +7,7 @@
     "language": "pt-BR",
     "status": "draft",
     "created_at": "2026-07-07",
-    "updated_at": "2026-07-29",
+    "updated_at": "2026-08-14",
     "typing_reference": "src/data-source-static/dataCatalogue.ts",
     "quality_notes": [
       {
@@ -554,6 +554,100 @@
             "name": "pessoasCadastradas",
             "description": "Pessoas registradas no Cadastro Único (valor do mapa)",
             "unit": "pessoas"
+          }
+        ]
+      }
+    },
+    "municipios_cadinsan": {
+      "id": "municipios_cadinsan",
+      "collection_id": "mds_sagi",
+      "slug": "municipios-cadinsan",
+      "title": "Insegurança alimentar de famílias do CadÚnico por município (CADINSAN 2025)",
+      "description": "Contagem de famílias do Cadastro Único em situação de insegurança alimentar (CADINSAN) por município — com e sem o efeito do Programa Bolsa Família (PBF) — mais o total de cadastros do CadÚnico que serve de denominador, para todos os 5.570 municípios do Brasil. Alimenta as duas variantes coropléticas de insegurança alimentar (\"com PBF\" e \"sem PBF\"); a proporção (%) que os mapas pintam é recalculada pela aplicação a partir dos absolutos e do total do CadÚnico (null quando não há denominador), via join pela coluna `Cod_IBGE` (código IBGE de 7 dígitos ↔ `codarea`). As colunas de proporção da própria fonte são ignoradas.",
+      "file": "src/data-source-static/data/CADINSAN_2025_dados_municipais.csv",
+      "format": "CSV",
+      "source": {
+        "url": "https://www.gov.br/mds/pt-br/Sisan/vigilancia-do-sisan/CADINSAN2025.pdf",
+        "notes": "CSV delimitado por vírgula; as colunas de proporção carregam vírgula decimal entre aspas (ex.: \"18,7%\") e são ignoradas — o gateway recalcula a proporção a partir dos absolutos e do total do CadÚnico."
+      },
+      "temporal": {
+        "status": "described",
+        "extent": [["2025-01-01", "2025-12-31"]],
+        "grain": "P1Y",
+        "frequency": "one_time",
+        "history": "snapshot",
+        "timezone": "America/Sao_Paulo"
+      },
+      "spatial": {
+        "status": "described",
+        "extent": [
+          {
+            "scheme": "iso3166-1",
+            "code": "BR"
+          }
+        ],
+        "coverage": "exhaustive",
+        "grain": {
+          "scheme": "admin",
+          "code": "municipality",
+          "label": "município"
+        },
+        "geometry": "none",
+        "precision": "not_applicable",
+        "field": "Cod_IBGE"
+      },
+      "access": {
+        "level": "public",
+        "contains_personal_data": false
+      },
+      "stats": {
+        "rows": 5570,
+        "size_bytes": 375142,
+        "checkSum": "sha256:c1d83fa305b61d8f4bfb8d1bb1eb121a80568f3c58204f364c4d4ccd51c06167"
+      },
+      "schema": {
+        "fields": [
+          {
+            "name": "Cod_IBGE",
+            "description": "Código IBGE do município (7 dígitos), chave de join com o mapa (↔ codarea)",
+            "role": "identifier"
+          },
+          {
+            "name": "Região",
+            "description": "Macro-região do país (ex.: Sudeste, Nordeste)"
+          },
+          {
+            "name": "UF",
+            "description": "Unidade federativa, nome completo (ex.: São Paulo)"
+          },
+          {
+            "name": "Município",
+            "description": "Nome do município"
+          },
+          {
+            "name": "Cadinsan_absoluto_com_PBF",
+            "description": "Famílias do CadÚnico em insegurança alimentar, incluindo as beneficiárias do Programa Bolsa Família",
+            "unit": "famílias"
+          },
+          {
+            "name": "Cadinsan_absoluto_sem_PBF",
+            "description": "Famílias do CadÚnico em insegurança alimentar, excluindo o efeito do Programa Bolsa Família",
+            "unit": "famílias"
+          },
+          {
+            "name": "Cadastros_Cadunico",
+            "description": "Total de cadastros (famílias) do CadÚnico no município; denominador das proporções",
+            "unit": "famílias"
+          },
+          {
+            "name": "Cadinsan_proporcional_com_PBF",
+            "description": "Proporção (%) de famílias em insegurança alimentar com PBF, como texto com vírgula decimal (ex.: \"18,7%\"). Ignorada pela aplicação — recalculada a partir dos absolutos.",
+            "unit": "%"
+          },
+          {
+            "name": "Cadinsan_proporcional_sem_PBF",
+            "description": "Proporção (%) de famílias em insegurança alimentar sem o efeito do PBF, como texto com vírgula decimal (ex.: \"27,7%\"). Ignorada pela aplicação — recalculada a partir dos absolutos.",
+            "unit": "%"
           }
         ]
       }

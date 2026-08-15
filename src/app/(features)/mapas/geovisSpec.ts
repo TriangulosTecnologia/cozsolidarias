@@ -29,7 +29,12 @@ import {
   COZINHA_STATUS_LEGEND_ID,
   cozinhaStatusLabel,
 } from './geovisCozinhaStatusScales';
-import { buildLegends, legendIdForMode, type MapMode } from './geovisScales';
+import {
+  buildLegends,
+  jenksBreaksForMode,
+  legendIdForMode,
+  type MapMode,
+} from './geovisScales';
 
 /** Re-exported so consumers keep importing the map's mode type from here. */
 export type { MapMode };
@@ -712,6 +717,17 @@ export const buildSpec = (
     overlays.cadinsanByCity ?? []
   );
 
+  // Data-driven Jenks breaks for the active ad-hoc choropleth, computed from the
+  // exact values it paints (so the legend can never disagree with the fill).
+  // `null` for the IVS/IDHM families (fixed official faixas) and overlays, which
+  // keeps their hand-picked/official scale.
+  const jenksBreaks = jenksBreaksForMode(
+    mode,
+    choroplethRows.map((row) => {
+      return row.value;
+    })
+  );
+
   // Bounds for the circle-size scale: the largest per-município count. Falls
   // back to 1 when there's no data so `buildBubblesLayer` can still clamp it.
   const maxQuantidade = byCity.reduce((max, register) => {
@@ -740,7 +756,7 @@ export const buildSpec = (
       overlays,
     }),
     legends: [
-      ...buildLegends(mode),
+      ...buildLegends(mode, jenksBreaks),
       buildCozinhaStatusLegend(mode === 'pontos'),
     ],
     layers: buildOverlayLayers({
