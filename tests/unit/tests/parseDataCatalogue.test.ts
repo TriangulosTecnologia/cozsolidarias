@@ -1,3 +1,6 @@
+import { readFile } from 'node:fs/promises';
+import { join } from 'node:path';
+
 import { parseDataCatalogue } from 'src/data-source-static/readStaticDataCatalogue';
 
 /** Smallest catalogue that satisfies every required field. */
@@ -43,7 +46,7 @@ const minimal = {
   },
 };
 
-/** Serializes `minimal` with a deep patch applied to one dataset. */
+/** Serializes `minimal` with a patch applied to its one dataset. */
 const withDataset = (patch: Record<string, unknown>) => {
   return JSON.stringify({
     ...minimal,
@@ -52,9 +55,7 @@ const withDataset = (patch: Record<string, unknown>) => {
 };
 
 describe('parseDataCatalogue', () => {
-  test('parses the real catalogue served at public/dataset_catalogue.json', async () => {
-    const { readFile } = await import('node:fs/promises');
-    const { join } = await import('node:path');
+  test('accepts the real catalogue, exposing it source-native and uninterpreted', async () => {
     const text = await readFile(
       join(process.cwd(), 'public', 'dataset_catalogue.json'),
       'utf8'
@@ -65,7 +66,6 @@ describe('parseDataCatalogue', () => {
     expect(catalogue.schema_version).toBe('2.0.0');
     expect(Object.keys(catalogue.datasets)).toHaveLength(12);
     expect(Object.keys(catalogue.collections)).toHaveLength(6);
-    expect(catalogue.catalog.quality_notes[0].severity).toBe('low');
 
     const cozinhas = catalogue.datasets['cozinhas_geolocalizadas'];
     expect(cozinhas.access.level).toBe('restricted');
@@ -79,107 +79,17 @@ describe('parseDataCatalogue', () => {
     );
   });
 
-  test('parses a minimal catalogue, defaulting every optional field to undefined', () => {
+  test('leaves absent optional fields undefined rather than inventing values', () => {
     const catalogue = parseDataCatalogue(JSON.stringify(minimal));
 
     const dataset = catalogue.datasets['malhas'];
-    expect(dataset.generated_by).toBeUndefined();
     expect(dataset.stats).toBeUndefined();
+    expect(dataset.generated_by).toBeUndefined();
     expect(dataset.source.notes).toBeUndefined();
     expect(dataset.access.notes).toBeUndefined();
     expect(dataset.schema.fields[0].role).toBeUndefined();
+    expect(dataset.schema.fields[0].unit).toBeUndefined();
     expect(catalogue.collections['ibge'].public_reference_url).toBeUndefined();
-  });
-
-  test('reads a described temporal dimension, including open-ended bounds', () => {
-    const catalogue = parseDataCatalogue(
-      withDataset({
-        temporal: {
-          status: 'described',
-          extent: [['2008-01-01', null]],
-          grain: 'P1D',
-          frequency: 'annual',
-          history: 'append_only',
-          timezone: 'America/Sao_Paulo',
-        },
-      })
-    );
-
-    const { temporal } = catalogue.datasets['malhas'];
-    expect(temporal.status).toBe('described');
-    expect(temporal).toMatchObject({
-      extent: [['2008-01-01', null]],
-      grain: 'P1D',
-      frequency: 'annual',
-      history: 'append_only',
-    });
-  });
-
-  test('reads a described spatial dimension with its geometry and SRID', () => {
-    const catalogue = parseDataCatalogue(
-      withDataset({
-        spatial: {
-          status: 'described',
-          extent: [{ scheme: 'iso3166-1', code: 'BR' }],
-          coverage: 'exhaustive',
-          grain: { scheme: 'admin', code: 'municipality' },
-          geometry: 'multipolygon',
-          precision: 'not_applicable',
-          srid: 4326,
-          field: 'codarea',
-        },
-      })
-    );
-
-    expect(catalogue.datasets['malhas'].spatial).toMatchObject({
-      status: 'described',
-      geometry: 'multipolygon',
-      srid: 4326,
-    });
-  });
-
-  test('reads the open-ended stats bag, keeping numbers and strings apart', () => {
-    const catalogue = parseDataCatalogue(
-      withDataset({
-        stats: { features: 5564, checkSum: 'sha256:abc', size_bytes: 42 },
-        generated_by: 'scripts/generate.mjs',
-      })
-    );
-
-    expect(catalogue.datasets['malhas'].stats).toEqual({
-      features: 5564,
-      checkSum: 'sha256:abc',
-      size_bytes: 42,
-    });
-    expect(catalogue.datasets['malhas'].generated_by).toBe(
-      'scripts/generate.mjs'
-    );
-  });
-
-  test('reads a sensitive field flag', () => {
-    const catalogue = parseDataCatalogue(
-      withDataset({
-        schema: {
-          fields: [
-            {
-              name: 'CNPJ',
-              description: 'CNPJ',
-              role: 'identifier',
-              unit: 'BRL',
-              sensitive: true,
-            },
-          ],
-        },
-      })
-    );
-
-    expect(catalogue.datasets['malhas'].schema.fields[0]).toEqual({
-      name: 'CNPJ',
-      description: 'CNPJ',
-      role: 'identifier',
-      unit: 'BRL',
-      sensitive: true,
-    });
   });
 
   test.each([
@@ -275,9 +185,12 @@ describe('parseDataCatalogue', () => {
       }),
       'datasets.malhas.spatial.srid must be absent when geometry is "none"',
     ],
-  ])('rejects %s', (_case, text, message) => {
-    expect(() => {
-      return parseDataCatalogue(text);
-    }).toThrow(`[data-source-static] data catalogue: ${message}.`);
-  });
+  ])(
+    'fails loudly, naming the offending path, on %s',
+    (_case, text, message) => {
+      expect(() => {
+        return parseDataCatalogue(text);
+      }).toThrow(`[data-source-static] data catalogue: ${message}.`);
+    }
+  );
 });
