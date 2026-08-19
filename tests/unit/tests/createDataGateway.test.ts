@@ -233,6 +233,39 @@ describe('createDataGateway', () => {
     expect(altamira?.proporcaoSemPbf).toBe(39.43);
   });
 
+  test('returns the data catalogue, redacted, from the default static source', async () => {
+    const gateway = createDataGateway();
+
+    const catalogue = await gateway.getCatalogue();
+
+    expect(catalogue.meta.title).toBe(
+      'Catálogo de Dados — Cozinhas Solidárias'
+    );
+    expect(catalogue.collections.length).toBe(
+      catalogue.summary.collectionCount
+    );
+    expect(
+      catalogue.collections.flatMap((collection) => {
+        return collection.datasets;
+      })
+    ).toHaveLength(catalogue.summary.datasetCount);
+    // The contract carries no origin URL, repository path or checksum, so the
+    // app cannot leak them regardless of how a component renders it.
+    expect(JSON.stringify(catalogue)).not.toMatch(
+      /https?:\/\/|sha256:|src\/data-source-static/
+    );
+  });
+
+  test('re-reads the catalogue per call so a hand edit needs no restart', async () => {
+    const gateway = createDataGateway();
+
+    const first = await gateway.getCatalogue();
+    const second = await gateway.getCatalogue();
+
+    expect(second).not.toBe(first);
+    expect(second).toEqual(first);
+  });
+
   test('throws on an unknown DATA_SOURCE', () => {
     const previous = process.env['DATA_SOURCE'];
     process.env['DATA_SOURCE'] = 'bogus';

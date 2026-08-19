@@ -18,6 +18,10 @@ export {
 export type { StaticCadUnico } from './readStaticCadUnico';
 export { readStaticCadUnico } from './readStaticCadUnico';
 export { readStaticCozinhas } from './readStaticCozinhas';
+export {
+  parseDataCatalogue,
+  readStaticDataCatalogue,
+} from './readStaticDataCatalogue';
 export type { StaticIvsSource } from './readStaticIvs';
 export { parseIvsCsv, readStaticIvs } from './readStaticIvs';
 export type { StaticPopulacao } from './readStaticPopulacao';

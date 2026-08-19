@@ -4,6 +4,7 @@ import { readStaticCafProducao } from '../data-source-static/readStaticCafProduc
 import { readStaticCafs } from '../data-source-static/readStaticCafs';
 import { readStaticCafsPorMunicipio } from '../data-source-static/readStaticCafsPorMunicipio';
 import { readStaticCozinhas } from '../data-source-static/readStaticCozinhas';
+import { readStaticDataCatalogue } from '../data-source-static/readStaticDataCatalogue';
 import { readStaticIvs } from '../data-source-static/readStaticIvs';
 import { readStaticMunicipios } from '../data-source-static/readStaticMunicipios';
 import { readStaticPopulacao } from '../data-source-static/readStaticPopulacao';
@@ -12,12 +13,14 @@ import type {
   cafByCity,
   CafDetalhe,
   CafsFeatureCollection,
+  CatalogueContract,
   CozinhaDetalhe,
   CozinhasBubblesFeatureCollection,
   CozinhasFeatureCollection,
   kitchenRateByCity,
   MunicipioIvs,
 } from './schema';
+import { toAppCatalogue } from './transformers/toAppCatalogue';
 import { toCadinsanPorMunicipio } from './transformers/toCadinsanPorMunicipio';
 import { toCafDetalhe } from './transformers/toCafDetalhe';
 import { toCafsFeatureCollection } from './transformers/toCafsFeatureCollection';
@@ -57,6 +60,16 @@ export type DataGateway = {
    * already per-município, so this is a cheap projection (no aggregation).
    */
   getCadinsanPorMunicipio: () => Promise<cadinsanByCity[]>;
+  /**
+   * Returns the data catalogue — every dataset's origin, coverage, access,
+   * volume and field-level dictionary — as rendered by `/dados`.
+   *
+   * Origin URLs, repository paths and file checksums are redacted: they have no
+   * field in the contract, so they never reach the app. Unlike the other reads
+   * this one is not memoized — the catalogue is hand-edited documentation, and
+   * every edit must reach the page without a restart.
+   */
+  getCatalogue: () => Promise<CatalogueContract>;
   /** Returns cozinha locations as a GeoJSON FeatureCollection of Points. */
   getCozinhas: () => Promise<CozinhasFeatureCollection>;
   /**
@@ -151,6 +164,9 @@ export const createDataGateway = (): DataGateway => {
       },
       getCadinsanPorMunicipio: async () => {
         return toCadinsanPorMunicipio(await readStaticCadinsanMunicipal());
+      },
+      getCatalogue: async () => {
+        return toAppCatalogue(await readStaticDataCatalogue());
       },
       getCozinhas: async () => {
         const sources = await readStaticCozinhas();

@@ -8,6 +8,27 @@ export type {
 } from './caf';
 export type { cafByCity } from './cafByCity';
 export type {
+  CatalogueAccessLevelContract,
+  CatalogueCollectionContract,
+  CatalogueContract,
+  CatalogueCoverageContract,
+  CatalogueDatasetContract,
+  CatalogueFieldContract,
+  CatalogueFrequencyContract,
+  CatalogueGapContract,
+  CatalogueGapKind,
+  CatalogueGeometryContract,
+  CatalogueHistoryContract,
+  CatalogueMetaContract,
+  CatalogueNoteContract,
+  CatalogueNoteSeverity,
+  CataloguePrecisionContract,
+  CatalogueSpatialContract,
+  CatalogueSummaryContract,
+  CatalogueTemporalContract,
+  CatalogueVolumeContract,
+} from './catalogue';
+export type {
   CozinhaBubbleFeature,
   CozinhaLocationFeature,
   CozinhasBubblesFeatureCollection,
