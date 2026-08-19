@@ -5,7 +5,6 @@ import type {
   CatalogueGapKind,
   CatalogueGeometryContract,
   CatalogueHistoryContract,
-  CatalogueNoteSeverity,
   CataloguePrecisionContract,
   CatalogueVolumeContract,
 } from '../../../../data-gateway/schema';
@@ -72,13 +71,6 @@ export const VOLUME_LABELS: Record<CatalogueVolumeContract['kind'], string> = {
   rows: 'linhas',
   entries: 'entradas',
   features: 'feições',
-};
-
-/** Severity of an authored caveat. */
-export const SEVERITY_LABELS: Record<CatalogueNoteSeverity, string> = {
-  low: 'baixa',
-  medium: 'média',
-  high: 'alta',
 };
 
 /** What each derived gap means, phrased for a reader of the page. */

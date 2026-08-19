@@ -16,7 +16,6 @@ import {
   labelOf,
   PRECISION_LABELS,
   ROLE_LABELS,
-  SEVERITY_LABELS,
   VOLUME_LABELS,
 } from 'src/app/(features)/dados/_components/catalogueLabels';
 
@@ -31,7 +30,6 @@ describe('catalogueLabels', () => {
     expect(PRECISION_LABELS.notApplicable).toBe('não se aplica');
     expect(ACCESS_LABELS.restricted).toBe('Restrito');
     expect(VOLUME_LABELS.features).toBe('feições');
-    expect(SEVERITY_LABELS.low).toBe('baixa');
     expect(GAP_LABELS.originUndocumented).toBe(
       'Origem sem endereço registrado'
     );
@@ -46,7 +44,6 @@ describe('catalogueLabels', () => {
       PRECISION_LABELS,
       ACCESS_LABELS,
       VOLUME_LABELS,
-      SEVERITY_LABELS,
       GAP_LABELS,
     ]) {
       for (const value of Object.values(labels)) {

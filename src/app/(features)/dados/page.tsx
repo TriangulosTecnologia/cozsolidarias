@@ -1,10 +1,9 @@
 import type { Metadata } from 'next';
 
 import { gateway } from '../../../gateway';
-import CatalogueCollections from './_components/CatalogueCollections';
-import CatalogueGaps from './_components/CatalogueGaps';
 import CatalogueHero from './_components/CatalogueHero';
 import CatalogueLegend from './_components/CatalogueLegend';
+import DatasetGrid from './_components/DatasetGrid';
 
 export const metadata: Metadata = {
   title: 'Dados — Cozinha Solidária em Rede',
@@ -28,8 +27,9 @@ export const dynamic = 'force-dynamic';
 
 /**
  * `/dados` page — the project's data catalogue. Everything on it is derived from
- * `public/dataset_catalogue.json`: the sections, counts, gaps and dictionaries
- * all follow the JSON, so adding a dataset there makes it appear here.
+ * `public/dataset_catalogue.json`, so adding a dataset there makes it appear
+ * here. The grid shows only what identifies each dataset; the full metadata and
+ * data dictionary open in a drawer.
  *
  * Origin URLs, repository paths and file checksums never reach this page — the
  * gateway contract has no field for them.
@@ -43,12 +43,8 @@ export default async function DadosPage() {
 
   return (
     <>
-      <CatalogueHero meta={catalogue.meta} summary={catalogue.summary} />
-      <CatalogueGaps
-        notes={catalogue.meta.qualityNotes}
-        gaps={catalogue.gaps}
-      />
-      <CatalogueCollections collections={catalogue.collections} />
+      <CatalogueHero meta={catalogue.meta} />
+      <DatasetGrid datasets={catalogue.datasets} />
       <CatalogueLegend />
     </>
   );

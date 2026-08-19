@@ -13,6 +13,11 @@ export const describedDataset: CatalogueDatasetContract = {
   title: 'Assentamentos rurais',
   description: 'Perímetros dos assentamentos rurais cadastrados.',
   format: 'GeoJSON',
+  source: {
+    title: 'SICAR',
+    description: 'Base geográfica do Cadastro Ambiental Rural.',
+    tags: ['sicar', 'assentamentos'],
+  },
   organization: 'Serviço Florestal Brasileiro',
   originNotes: 'Extraído das bases estaduais AREA_IMOVEL.',
   hasDocumentedOrigin: true,
@@ -59,8 +64,8 @@ export const describedDataset: CatalogueDatasetContract = {
 
 /**
  * A restricted dataset carrying personal data, an undocumented time dimension
- * and unknown coordinate precision — the shape that drives the page's access
- * notice, sensitive-field marking and gap rows.
+ * and unknown coordinate precision — the shape that drives the access notice,
+ * sensitive-field marking and gap row.
  */
 export const restrictedDataset: CatalogueDatasetContract = {
   id: 'cozinhas_geolocalizadas',
@@ -68,6 +73,11 @@ export const restrictedDataset: CatalogueDatasetContract = {
   title: 'Cozinhas Solidárias geolocalizadas',
   description: 'Cadastro das cozinhas solidárias com coordenadas.',
   format: 'CSV',
+  source: {
+    title: 'Dados Primários',
+    description: 'Datasets coletados pela equipe do projeto.',
+    tags: ['dados-primarios', 'restrito'],
+  },
   organization: 'Equipe do projeto',
   originNotes: null,
   hasDocumentedOrigin: true,
@@ -110,6 +120,11 @@ export const referenceDataset: CatalogueDatasetContract = {
   title: 'Nomes dos municípios',
   description: 'Mapa de código IBGE para nome do município.',
   format: 'JSON',
+  source: {
+    title: 'IBGE',
+    description: 'Datasets geográficos e demográficos do IBGE.',
+    tags: ['ibge'],
+  },
   organization: 'IBGE',
   originNotes: null,
   hasDocumentedOrigin: false,
@@ -123,15 +138,14 @@ export const referenceDataset: CatalogueDatasetContract = {
 };
 
 /**
- * Builds a catalogue contract covering every rendering branch of `/dados`:
- * a described dataset, a restricted one, an atemporal reference lookup, an
- * authored quality note and derived gaps.
+ * Builds a catalogue contract covering every rendering branch of `/dados`: a
+ * described dataset, a restricted one and an atemporal reference lookup.
  *
  * @param overrides - Fields to replace on the built catalogue.
  * @returns A complete {@link CatalogueContract}.
  *
  * @example
- * const catalogue = buildCatalogue({ gaps: [] });
+ * const catalogue = buildCatalogue({ datasets: [] });
  */
 export const buildCatalogue = (
   overrides: Partial<CatalogueContract> = {}
@@ -143,62 +157,8 @@ export const buildCatalogue = (
       status: 'draft',
       updatedAt: '2026-08-14',
       schemaVersion: '2.0.0',
-      qualityNotes: [
-        {
-          id: 'ibge_download_url_pending',
-          severity: 'low',
-          message: 'As URLs de origem precisam ser confirmadas.',
-        },
-      ],
     },
-    summary: {
-      datasetCount: 3,
-      collectionCount: 2,
-      fieldCount: 3,
-      sensitiveFieldCount: 1,
-      restrictedDatasetCount: 1,
-      formats: ['CSV', 'GeoJSON', 'JSON'],
-    },
-    collections: [
-      {
-        id: 'dados_primarios',
-        slug: 'dados-primarios',
-        title: 'Dados Primários',
-        description: 'Datasets coletados pela equipe do projeto.',
-        organization: 'Equipe do projeto',
-        tags: ['dados-primarios', 'restrito'],
-        datasets: [restrictedDataset],
-      },
-      {
-        id: 'sicar',
-        slug: 'sicar',
-        title: 'SICAR',
-        description: 'Base geográfica do Cadastro Ambiental Rural.',
-        organization: 'Serviço Florestal Brasileiro',
-        tags: ['sicar'],
-        datasets: [describedDataset, referenceDataset],
-      },
-    ],
-    gaps: [
-      {
-        datasetId: 'cozinhas_geolocalizadas',
-        datasetTitle: 'Cozinhas Solidárias geolocalizadas',
-        collectionSlug: 'dados-primarios',
-        kind: 'temporalUnknown',
-      },
-      {
-        datasetId: 'cozinhas_geolocalizadas',
-        datasetTitle: 'Cozinhas Solidárias geolocalizadas',
-        collectionSlug: 'dados-primarios',
-        kind: 'precisionUnknown',
-      },
-      {
-        datasetId: 'municipios_nomes',
-        datasetTitle: 'Nomes dos municípios',
-        collectionSlug: 'sicar',
-        kind: 'originUndocumented',
-      },
-    ],
+    datasets: [describedDataset, restrictedDataset, referenceDataset],
     ...overrides,
   };
 };

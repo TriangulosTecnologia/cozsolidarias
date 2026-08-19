@@ -32,7 +32,7 @@ const buildSource = ({
         organization: 'Instituto Brasileiro de Geografia e Estatística',
         source_url: 'https://www.ibge.gov.br',
         public_reference_url: 'https://servicodados.ibge.gov.br',
-        tags: ['ibge'],
+        tags: ['ibge', 'geografia'],
       },
     },
     datasets: {
@@ -77,59 +77,62 @@ describe('toAppCatalogue', () => {
     }
   });
 
-  test('derives the summary counts from the datasets themselves', async () => {
+  test('flattens the real catalogue into one list of datasets, each with its source', async () => {
     const catalogue = toAppCatalogue(await readStaticDataCatalogue());
 
-    const datasets = catalogue.collections.flatMap((collection) => {
-      return collection.datasets;
+    expect(catalogue.datasets).toHaveLength(12);
+    expect(catalogue.meta).toEqual({
+      title: 'Catálogo de Dados — Cozinhas Solidárias',
+      description: expect.stringContaining('Catálogo único'),
+      status: 'draft',
+      updatedAt: '2026-08-14',
+      schemaVersion: '2.0.0',
     });
-    expect(catalogue.summary.datasetCount).toBe(datasets.length);
-    expect(catalogue.summary.collectionCount).toBe(
-      catalogue.collections.length
-    );
-    expect(catalogue.summary.fieldCount).toBe(
-      datasets.reduce((total, dataset) => {
-        return total + dataset.fields.length;
-      }, 0)
-    );
-    expect(catalogue.summary.formats).toEqual(['CSV', 'GeoJSON', 'JSON']);
-    expect(catalogue.summary.restrictedDatasetCount).toBe(1);
-    expect(catalogue.summary.sensitiveFieldCount).toBe(6);
+
+    const cozinhas = catalogue.datasets.find((dataset) => {
+      return dataset.id === 'cozinhas_geolocalizadas';
+    });
+    expect(cozinhas?.source.title).toBe('Dados Primários');
+    expect(cozinhas?.source.tags).toContain('dados-primarios');
+    expect(cozinhas?.access.level).toBe('restricted');
+    expect(cozinhas?.fields).toHaveLength(18);
+    expect(
+      cozinhas?.fields.filter((field) => {
+        return field.sensitive;
+      })
+    ).toHaveLength(6);
   });
 
-  test('sorts collections and their datasets by title with pt-BR collation', async () => {
+  test('sorts datasets by title with pt-BR collation', async () => {
     const catalogue = toAppCatalogue(await readStaticDataCatalogue());
 
-    const titles = catalogue.collections.map((collection) => {
-      return collection.title;
+    const titles = catalogue.datasets.map((dataset) => {
+      return dataset.title;
     });
     expect(titles).toEqual(
       [...titles].sort((a, b) => {
         return a.localeCompare(b, 'pt-BR');
       })
     );
-
-    const mda = catalogue.collections.find((collection) => {
-      return collection.id === 'mda';
-    });
-    // "Áreas" before "Produção" only under accent-aware collation.
-    expect(
-      mda?.datasets.map((dataset) => {
-        return dataset.id;
-      })
-    ).toEqual(['caf_areas', 'caf_producao']);
+    // Accent-aware: an accented initial sorts under its base letter, not after
+    // Z where a byte-wise comparison would push it.
+    const positionOf = (prefix: string) => {
+      return titles.findIndex((title) => {
+        return title.startsWith(prefix);
+      });
+    };
+    expect(positionOf('Áreas')).toBeLessThan(positionOf('Assentamentos'));
+    expect(positionOf('Índice')).toBeLessThan(positionOf('Nomes'));
+    expect(positionOf('Índice')).toBeGreaterThan(positionOf('Contornos'));
   });
 
   test('inherits the collection publisher unless the dataset overrides it', async () => {
     const catalogue = toAppCatalogue(await readStaticDataCatalogue());
 
-    const datasets = catalogue.collections.flatMap((collection) => {
-      return collection.datasets;
-    });
-    const inherited = datasets.find((dataset) => {
+    const inherited = catalogue.datasets.find((dataset) => {
       return dataset.id === 'municipios_populacao';
     });
-    const overridden = datasets.find((dataset) => {
+    const overridden = catalogue.datasets.find((dataset) => {
       return dataset.id === 'assentamentos';
     });
 
@@ -141,34 +144,40 @@ describe('toAppCatalogue', () => {
     );
   });
 
-  test('flattens every derived gap, attributed to its dataset and collection', async () => {
+  test('derives each dataset gap from its own metadata', async () => {
     const catalogue = toAppCatalogue(await readStaticDataCatalogue());
 
-    expect(catalogue.gaps).toContainEqual({
-      datasetId: 'cozinhas_geolocalizadas',
-      datasetTitle: 'Cozinhas Solidárias geolocalizadas',
-      collectionSlug: 'dados-primarios',
-      kind: 'temporalUnknown',
-    });
-    expect(catalogue.gaps).toContainEqual({
-      datasetId: 'caf_producao',
-      datasetTitle: 'Produção e renda CAF — Cadastro Ambiental Rural',
-      collectionSlug: 'mda',
-      kind: 'originUndocumented',
-    });
-    // Every gap must name a dataset that the page actually renders.
-    const ids = catalogue.collections.flatMap((collection) => {
-      return collection.datasets.map((dataset) => {
-        return dataset.id;
+    const byId = (id: string) => {
+      return catalogue.datasets.find((dataset) => {
+        return dataset.id === id;
       });
+    };
+
+    expect(byId('cozinhas_geolocalizadas')?.gaps).toEqual([
+      'temporalUnknown',
+      'precisionUnknown',
+    ]);
+    expect(byId('caf_producao')?.gaps).toEqual([
+      'temporalUnknown',
+      'originUndocumented',
+    ]);
+    expect(byId('municipios_populacao')?.gaps).toEqual([]);
+  });
+
+  test('denormalizes the collection onto the dataset as its source', () => {
+    const dataset = toAppCatalogue(buildSource()).datasets[0];
+
+    expect(dataset.source).toEqual({
+      title: 'IBGE',
+      description: 'Datasets do IBGE',
+      tags: ['ibge', 'geografia'],
     });
-    for (const gap of catalogue.gaps) {
-      expect(ids).toContain(gap.datasetId);
-    }
+    // The collection's URLs are not part of the source it exposes.
+    expect(JSON.stringify(dataset.source)).not.toContain('http');
   });
 
   test('normalizes the source vocabularies to camelCase', () => {
-    const catalogue = toAppCatalogue(
+    const dataset = toAppCatalogue(
       buildSource({
         dataset: {
           temporal: {
@@ -189,9 +198,8 @@ describe('toAppCatalogue', () => {
           },
         },
       })
-    );
+    ).datasets[0];
 
-    const dataset = catalogue.collections[0].datasets[0];
     expect(dataset.temporal).toEqual({
       status: 'described',
       extent: [{ start: '2008-01-01', end: null }],
@@ -219,7 +227,7 @@ describe('toAppCatalogue', () => {
           spatial: { status: 'unknown' },
         },
       })
-    ).collections[0].datasets[0];
+    ).datasets[0];
     const notApplicable = toAppCatalogue(
       buildSource({
         dataset: {
@@ -227,7 +235,7 @@ describe('toAppCatalogue', () => {
           spatial: { status: 'not_applicable' },
         },
       })
-    ).collections[0].datasets[0];
+    ).datasets[0];
 
     expect(unknown.temporal).toEqual({ status: 'unknown' });
     expect(unknown.spatial).toEqual({ status: 'unknown' });
@@ -242,17 +250,16 @@ describe('toAppCatalogue', () => {
     ['entries', { entries: 5564 }, { kind: 'entries', count: 5564 }],
     ['rows', { rows: 999 }, { kind: 'rows', count: 999 }],
   ])('reads the %s volume from the stats bag', (_kind, stats, expected) => {
-    const catalogue = toAppCatalogue(buildSource({ dataset: { stats } }));
-
-    expect(catalogue.collections[0].datasets[0].volume).toEqual(expected);
+    expect(
+      toAppCatalogue(buildSource({ dataset: { stats } })).datasets[0].volume
+    ).toEqual(expected);
   });
 
   test('leaves volume and size null when the stats bag records neither', () => {
     const withoutCounts = toAppCatalogue(
       buildSource({ dataset: { stats: { checkSum: 'sha256:abc' } } })
-    ).collections[0].datasets[0];
-    const withoutStats =
-      toAppCatalogue(buildSource()).collections[0].datasets[0];
+    ).datasets[0];
+    const withoutStats = toAppCatalogue(buildSource()).datasets[0];
 
     expect(withoutCounts.volume).toBeNull();
     expect(withoutCounts.sizeBytes).toBeNull();
@@ -284,7 +291,7 @@ describe('toAppCatalogue', () => {
           },
         },
       })
-    ).collections[0].datasets[0];
+    ).datasets[0];
 
     expect(dataset.sizeBytes).toBe(2048);
     expect(dataset.originNotes).toBe('Delimitador: ponto e vírgula.');
@@ -319,7 +326,7 @@ describe('toAppCatalogue', () => {
           },
         },
       })
-    ).collections[0].datasets[0];
+    ).datasets[0];
 
     expect(dataset.gaps).toEqual(['precisionUnknown']);
   });

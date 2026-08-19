@@ -9,22 +9,18 @@ export type {
 export type { cafByCity } from './cafByCity';
 export type {
   CatalogueAccessLevelContract,
-  CatalogueCollectionContract,
   CatalogueContract,
   CatalogueCoverageContract,
   CatalogueDatasetContract,
   CatalogueFieldContract,
   CatalogueFrequencyContract,
-  CatalogueGapContract,
   CatalogueGapKind,
   CatalogueGeometryContract,
   CatalogueHistoryContract,
   CatalogueMetaContract,
-  CatalogueNoteContract,
-  CatalogueNoteSeverity,
   CataloguePrecisionContract,
+  CatalogueSourceContract,
   CatalogueSpatialContract,
-  CatalogueSummaryContract,
   CatalogueTemporalContract,
   CatalogueVolumeContract,
 } from './catalogue';

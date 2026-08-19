@@ -22,9 +22,6 @@
  * pt-BR wording belongs to the app layer.
  */
 
-/** Severity of an authored caveat about the catalogue. */
-export type CatalogueNoteSeverity = 'low' | 'medium' | 'high';
-
 /** Whether a dataset may be published openly. */
 export type CatalogueAccessLevelContract = 'public' | 'restricted';
 
@@ -69,8 +66,8 @@ export type CataloguePrecisionContract =
   | 'unknown';
 
 /**
- * A documented gap in the catalogue, derived from the metadata itself rather
- * than authored by hand — so the page's "lacunas" section ages with the JSON.
+ * A gap a dataset carries, derived from its own metadata rather than authored by
+ * hand — so an undocumented dimension surfaces without anyone writing a note.
  *
  * - `temporalUnknown` — the dataset has a time dimension that is not documented.
  * - `spatialUnknown` — the dataset has a spatial dimension that is not documented.
@@ -83,22 +80,6 @@ export type CatalogueGapKind =
   | 'precisionUnknown'
   | 'originUndocumented';
 
-/** One derived gap, attributed to the dataset that carries it. */
-export type CatalogueGapContract = {
-  datasetId: string;
-  datasetTitle: string;
-  /** Slug of the owning collection, for anchoring a link to the dataset. */
-  collectionSlug: string;
-  kind: CatalogueGapKind;
-};
-
-/** An authored caveat about the catalogue or its data. */
-export type CatalogueNoteContract = {
-  id: string;
-  severity: CatalogueNoteSeverity;
-  message: string;
-};
-
 /** Metadata about the catalogue itself. */
 export type CatalogueMetaContract = {
   title: string;
@@ -109,24 +90,18 @@ export type CatalogueMetaContract = {
   updatedAt: string;
   /** Version of the catalogue's own schema (e.g. `2.0.0`). */
   schemaVersion: string;
-  qualityNotes: CatalogueNoteContract[];
 };
 
 /**
- * Headline counts derived from the catalogue, for the page's summary strip.
- * Every value is computed — none is authored — so the strip cannot drift from
- * the datasets it describes.
+ * The institutional source a dataset belongs to, denormalized onto the dataset.
+ * The catalogue holds a dozen datasets across six sources, so repeating the
+ * source beats making every consumer join on an id.
  */
-export type CatalogueSummaryContract = {
-  datasetCount: number;
-  collectionCount: number;
-  /** Total documented fields across every dataset's data dictionary. */
-  fieldCount: number;
-  /** Fields flagged as carrying personal or otherwise sensitive data. */
-  sensitiveFieldCount: number;
-  restrictedDatasetCount: number;
-  /** Distinct file formats present, sorted (e.g. `['CSV', 'GeoJSON', 'JSON']`). */
-  formats: string[];
+export type CatalogueSourceContract = {
+  /** Short name of the source (e.g. `IBGE`, `SICAR`, `Dados Primários`). */
+  title: string;
+  description: string;
+  tags: string[];
 };
 
 /** One field (column/property/map value) of a dataset's data dictionary. */
@@ -186,6 +161,8 @@ export type CatalogueDatasetContract = {
   description: string;
   /** File format as authored (e.g. `CSV`, `JSON`, `GeoJSON`). */
   format: string;
+  /** The institutional source this dataset belongs to. */
+  source: CatalogueSourceContract;
   /**
    * Publisher of the data. Resolved from the dataset's own `source.organization`
    * when present, falling back to the owning collection's — most datasets omit
@@ -197,8 +174,7 @@ export type CatalogueDatasetContract = {
   /**
    * Whether an origin URL was recorded for the dataset. The URL itself is never
    * carried (see the module note) — and a recorded origin is not necessarily a
-   * *public* one, so this asserts only that provenance was documented, which is
-   * what the "lacunas" section reports on.
+   * *public* one, so this asserts only that provenance was documented.
    */
   hasDocumentedOrigin: boolean;
   temporal: CatalogueTemporalContract;
@@ -217,29 +193,13 @@ export type CatalogueDatasetContract = {
   gaps: CatalogueGapKind[];
 };
 
-/** An institutional source with the datasets it publishes. */
-export type CatalogueCollectionContract = {
-  id: string;
-  /** URL-safe slug, used as the section anchor on `/dados`. */
-  slug: string;
-  title: string;
-  description: string;
-  organization: string;
-  tags: string[];
-  /** Datasets of this collection, sorted by title (pt-BR collation). */
-  datasets: CatalogueDatasetContract[];
-};
-
 /**
- * The whole app-facing catalogue: metadata about the catalogue, derived summary
- * counts, the collections with their nested datasets, and every derived gap
- * flattened for the "lacunas" section.
+ * The whole app-facing catalogue: metadata about the catalogue itself plus one
+ * flat list of datasets, each carrying its source. Flat because `/dados` renders
+ * a single grid — there is no grouping level left for a nested shape to serve.
  */
 export type CatalogueContract = {
   meta: CatalogueMetaContract;
-  summary: CatalogueSummaryContract;
-  /** Collections sorted by title (pt-BR collation). */
-  collections: CatalogueCollectionContract[];
-  /** Every dataset gap, in collection then dataset order. */
-  gaps: CatalogueGapContract[];
+  /** Every dataset, sorted by title (pt-BR collation). */
+  datasets: CatalogueDatasetContract[];
 };

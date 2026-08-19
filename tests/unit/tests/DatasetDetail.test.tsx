@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom';
 
 import { screen } from '@testing-library/react';
-import DatasetCard from 'src/app/(features)/dados/_components/DatasetCard';
+import DatasetDetail from 'src/app/(features)/dados/_components/DatasetDetail';
 
 import {
   describedDataset,
@@ -10,16 +10,23 @@ import {
 } from './catalogueFixture';
 import { renderWithChakra } from './renderWithChakra';
 
-describe('DatasetCard', () => {
+describe('DatasetDetail', () => {
   test('renders a fully described dataset with both coverage dimensions', () => {
-    renderWithChakra(<DatasetCard dataset={describedDataset} />);
+    renderWithChakra(<DatasetDetail dataset={describedDataset} />);
 
     expect(
-      screen.getByRole('heading', { level: 4, name: 'Assentamentos rurais' })
+      screen.getByText('Perímetros dos assentamentos rurais cadastrados.')
     ).toBeInTheDocument();
-    expect(screen.getByText('GeoJSON')).toBeInTheDocument();
+
+    expect(
+      screen.getByText('Serviço Florestal Brasileiro')
+    ).toBeInTheDocument();
     expect(screen.getByText('Público')).toBeInTheDocument();
     expect(screen.getByText('1.825 feições')).toBeInTheDocument();
+    expect(screen.getByText('12,0 MB')).toBeInTheDocument();
+    expect(
+      screen.getByText('Extraído das bases estaduais AREA_IMOVEL.')
+    ).toBeInTheDocument();
 
     expect(screen.getByText('01/06/2026 a 30/06/2026')).toBeInTheDocument();
     expect(screen.getByText('por mês (P1M)')).toBeInTheDocument();
@@ -34,19 +41,19 @@ describe('DatasetCard', () => {
     expect(screen.getByText('não se aplica · EPSG:4326')).toBeInTheDocument();
 
     expect(
-      screen.getByText('Serviço Florestal Brasileiro')
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText('Extraído das bases estaduais AREA_IMOVEL.')
-    ).toBeInTheDocument();
-    expect(screen.getByText('12,0 MB')).toBeInTheDocument();
-    expect(
       screen.getByText('Dicionário de dados · 2 campos')
     ).toBeInTheDocument();
+    expect(screen.getByText('cod_imovel')).toBeInTheDocument();
+
+    expect(screen.getByText('Fonte · SICAR')).toBeInTheDocument();
+    expect(
+      screen.getByText('Base geográfica do Cadastro Ambiental Rural.')
+    ).toBeInTheDocument();
+    expect(screen.getByText('assentamentos')).toBeInTheDocument();
   });
 
   test('shows the personal-data notice and the gaps of a restricted dataset', () => {
-    renderWithChakra(<DatasetCard dataset={restrictedDataset} />);
+    renderWithChakra(<DatasetDetail dataset={restrictedDataset} />);
 
     expect(screen.getByText('Restrito')).toBeInTheDocument();
     expect(screen.getByText('Contém dados pessoais')).toBeInTheDocument();
@@ -59,12 +66,11 @@ describe('DatasetCard', () => {
         'Cobertura temporal não documentada · Precisão das coordenadas não documentada'
       )
     ).toBeInTheDocument();
-    // Point geometry with unknown precision still renders the precision row.
-    expect(screen.getByText('não documentada')).toBeInTheDocument();
+    expect(screen.getByText('dado sensível')).toBeInTheDocument();
   });
 
   test('renders both non-applicable dimensions and omits absent optional rows', () => {
-    renderWithChakra(<DatasetCard dataset={referenceDataset} />);
+    renderWithChakra(<DatasetDetail dataset={referenceDataset} />);
 
     expect(
       screen.getByText('não se aplica — dado de referência atemporal')
@@ -72,8 +78,8 @@ describe('DatasetCard', () => {
     expect(screen.getByText('não se aplica')).toBeInTheDocument();
     expect(screen.getByText('5.564 entradas')).toBeInTheDocument();
     // No origin notes and no recorded size: those rows must not appear.
-    expect(screen.queryByText('Origem')).not.toBeInTheDocument();
-    expect(screen.queryByText('Tamanho')).not.toBeInTheDocument();
+    expect(screen.queryByText('Origem')).toBeNull();
+    expect(screen.queryByText('Tamanho')).toBeNull();
     expect(
       screen.getByText(
         'Este dataset ainda não tem o dicionário de campos documentado.'
@@ -81,17 +87,9 @@ describe('DatasetCard', () => {
     ).toBeInTheDocument();
   });
 
-  test('anchors the card on the dataset slug so the index can link to it', () => {
-    const { container } = renderWithChakra(
-      <DatasetCard dataset={describedDataset} />
-    );
-
-    expect(container.querySelector('#assentamentos')).toBeInTheDocument();
-  });
-
-  test('warns about restricted access even without a note, and hides volume when unrecorded', () => {
+  test('warns about restricted access without a note, and hides an unrecorded volume', () => {
     renderWithChakra(
-      <DatasetCard
+      <DatasetDetail
         dataset={{
           ...describedDataset,
           access: {
@@ -108,12 +106,12 @@ describe('DatasetCard', () => {
     expect(
       screen.getByText('Este dataset não é publicado de forma individualizada.')
     ).toBeInTheDocument();
-    expect(screen.queryByText(/feições/)).not.toBeInTheDocument();
+    expect(screen.queryByText('Volume')).toBeNull();
   });
 
   test('renders multiple temporal intervals and an unmapped spatial grain code', () => {
     renderWithChakra(
-      <DatasetCard
+      <DatasetDetail
         dataset={{
           ...describedDataset,
           temporal: {
@@ -148,12 +146,12 @@ describe('DatasetCard', () => {
     ).toBeInTheDocument();
     expect(screen.getByText('sem geometria')).toBeInTheDocument();
     // Geometry-less data gets no precision row.
-    expect(screen.queryByText('Precisão')).not.toBeInTheDocument();
+    expect(screen.queryByText('Precisão')).toBeNull();
   });
 
   test('renders an undocumented spatial dimension', () => {
     renderWithChakra(
-      <DatasetCard
+      <DatasetDetail
         dataset={{ ...describedDataset, spatial: { status: 'unknown' } }}
       />
     );

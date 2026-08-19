@@ -7,10 +7,8 @@ import { buildCatalogue } from './catalogueFixture';
 import { renderWithChakra } from './renderWithChakra';
 
 describe('CatalogueHero', () => {
-  test('renders the catalogue title, edition state and derived counters', () => {
-    const { meta, summary } = buildCatalogue();
-
-    renderWithChakra(<CatalogueHero meta={meta} summary={summary} />);
+  test('renders the catalogue title, purpose and edition state', () => {
+    renderWithChakra(<CatalogueHero meta={buildCatalogue().meta} />);
 
     expect(
       screen.getByRole('heading', {
@@ -25,29 +23,15 @@ describe('CatalogueHero', () => {
     expect(
       screen.getByText('Atualizado em 14/08/2026 · esquema 2.0.0')
     ).toBeInTheDocument();
-
-    expect(screen.getByText('datasets')).toBeInTheDocument();
-    expect(screen.getByText('fontes')).toBeInTheDocument();
-    expect(screen.getByText('campos documentados')).toBeInTheDocument();
-    expect(screen.getByText('campos sensíveis')).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        'Formatos: CSV · GeoJSON · JSON · Acesso restrito em 1 de 3 datasets.'
-      )
-    ).toBeInTheDocument();
   });
 
-  test('formats large counts with pt-BR thousands separators', () => {
-    const { meta, summary } = buildCatalogue();
+  test('falls back to the raw status code when it is not a known stage', () => {
+    const { meta } = buildCatalogue();
 
     renderWithChakra(
-      <CatalogueHero
-        meta={meta}
-        summary={{ ...summary, fieldCount: 1089, datasetCount: 1200 }}
-      />
+      <CatalogueHero meta={{ ...meta, status: 'sunsetting' }} />
     );
 
-    expect(screen.getByText('1.089')).toBeInTheDocument();
-    expect(screen.getByText('1.200')).toBeInTheDocument();
+    expect(screen.getByText('sunsetting')).toBeInTheDocument();
   });
 });

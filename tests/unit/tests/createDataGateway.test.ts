@@ -241,14 +241,11 @@ describe('createDataGateway', () => {
     expect(catalogue.meta.title).toBe(
       'Catálogo de Dados — Cozinhas Solidárias'
     );
-    expect(catalogue.collections.length).toBe(
-      catalogue.summary.collectionCount
-    );
-    expect(
-      catalogue.collections.flatMap((collection) => {
-        return collection.datasets;
-      })
-    ).toHaveLength(catalogue.summary.datasetCount);
+    expect(catalogue.datasets).toHaveLength(12);
+    for (const dataset of catalogue.datasets) {
+      expect(dataset.source.title).not.toBe('');
+      expect(Array.isArray(dataset.fields)).toBe(true);
+    }
     // The contract carries no origin URL, repository path or checksum, so the
     // app cannot leak them regardless of how a component renders it.
     expect(JSON.stringify(catalogue)).not.toMatch(

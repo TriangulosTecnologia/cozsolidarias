@@ -11,12 +11,10 @@ import type {
   CatalogueDatasetContract,
   CatalogueFieldContract,
   CatalogueFrequencyContract,
-  CatalogueGapContract,
   CatalogueGapKind,
   CatalogueHistoryContract,
   CataloguePrecisionContract,
   CatalogueSpatialContract,
-  CatalogueSummaryContract,
   CatalogueTemporalContract,
   CatalogueVolumeContract,
 } from '../schema/catalogue';
@@ -188,6 +186,11 @@ const toDataset = ({
     title: dataset.title,
     description: dataset.description,
     format: dataset.format,
+    source: {
+      title: collection.title,
+      description: collection.description,
+      tags: collection.tags,
+    },
     // Most datasets omit their own publisher and inherit the collection's.
     organization: dataset.source.organization ?? collection.organization,
     originNotes: dataset.source.notes ?? null,
@@ -206,48 +209,18 @@ const toDataset = ({
   };
 };
 
-const toSummary = (
-  datasets: CatalogueDatasetContract[],
-  collectionCount: number
-): CatalogueSummaryContract => {
-  const fields = datasets.flatMap((dataset) => {
-    return dataset.fields;
-  });
-
-  return {
-    datasetCount: datasets.length,
-    collectionCount,
-    fieldCount: fields.length,
-    sensitiveFieldCount: fields.filter((field) => {
-      return field.sensitive;
-    }).length,
-    restrictedDatasetCount: datasets.filter((dataset) => {
-      return dataset.access.level === 'restricted';
-    }).length,
-    formats: [
-      ...new Set(
-        datasets.map((dataset) => {
-          return dataset.format;
-        })
-      ),
-    ].sort((a, b) => {
-      return a.localeCompare(b, 'pt-BR');
-    }),
-  };
-};
-
 /**
  * Transforms the source catalogue into the canonical app contract: redacts the
  * fields the app must never receive, normalizes vocabularies to camelCase,
- * resolves each dataset's publisher, nests datasets under their collection and
- * derives the summary counts and gap list.
+ * resolves each dataset's publisher, denormalizes its source onto it and derives
+ * the gaps it carries.
  *
  * The redaction is structural — origin URLs, repository paths and file
  * checksums have no field in {@link CatalogueContract}, so they cannot reach a
  * component. See the note on that type for the full list.
  *
- * Deterministic: collections and their datasets are sorted by title with pt-BR
- * collation, so the rendered page is stable across reads.
+ * Deterministic: datasets are sorted by title with pt-BR collation, so the
+ * rendered page is stable across reads.
  *
  * @param catalogue - The validated source catalogue.
  * @returns The canonical catalogue consumed by `/dados`.
@@ -255,62 +228,21 @@ const toSummary = (
  *
  * @example
  * const app = toAppCatalogue(await readStaticDataCatalogue());
- * app.summary.datasetCount; // 12
- * app.collections[0].datasets[0].fields[0].name; // 'Código da Cozinha'
+ * app.datasets.length; // 12
+ * app.datasets[0].source.title; // 'Dados Primários'
  */
 export const toAppCatalogue = (catalogue: DataCatalogue): CatalogueContract => {
-  const collections = Object.values(catalogue.collections)
-    .map((collection) => {
-      const datasets = Object.values(catalogue.datasets)
-        .filter((dataset) => {
-          return dataset.collection_id === collection.id;
-        })
-        .map((dataset) => {
-          return toDataset({ dataset, collection });
-        })
-        .sort(byTitle);
-
-      return {
-        id: collection.id,
-        slug: collection.slug,
-        title: collection.title,
-        description: collection.description,
-        organization: collection.organization,
-        tags: collection.tags,
-        datasets,
-      };
+  const datasets = Object.values(catalogue.datasets)
+    .map((dataset) => {
+      const collection = catalogue.collections[dataset.collection_id];
+      if (collection === undefined) {
+        throw new Error(
+          `[data-gateway] dataset "${dataset.id}" references unknown collection "${dataset.collection_id}".`
+        );
+      }
+      return toDataset({ dataset, collection });
     })
     .sort(byTitle);
-
-  const known = new Set(
-    collections.map((collection) => {
-      return collection.id;
-    })
-  );
-  for (const dataset of Object.values(catalogue.datasets)) {
-    if (!known.has(dataset.collection_id)) {
-      throw new Error(
-        `[data-gateway] dataset "${dataset.id}" references unknown collection "${dataset.collection_id}".`
-      );
-    }
-  }
-
-  const gaps: CatalogueGapContract[] = collections.flatMap((collection) => {
-    return collection.datasets.flatMap((dataset) => {
-      return dataset.gaps.map((kind) => {
-        return {
-          datasetId: dataset.id,
-          datasetTitle: dataset.title,
-          collectionSlug: collection.slug,
-          kind,
-        };
-      });
-    });
-  });
-
-  const datasets = collections.flatMap((collection) => {
-    return collection.datasets;
-  });
 
   return {
     meta: {
@@ -319,12 +251,7 @@ export const toAppCatalogue = (catalogue: DataCatalogue): CatalogueContract => {
       status: catalogue.catalog.status,
       updatedAt: catalogue.catalog.updated_at,
       schemaVersion: catalogue.schema_version,
-      qualityNotes: catalogue.catalog.quality_notes.map((note) => {
-        return { id: note.id, severity: note.severity, message: note.message };
-      }),
     },
-    summary: toSummary(datasets, collections.length),
-    collections,
-    gaps,
+    datasets,
   };
 };
