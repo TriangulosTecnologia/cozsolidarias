@@ -42,8 +42,13 @@ export type CatalogueField = {
  * `notes`.
  */
 export type CatalogueSource = {
-  /** Publisher/organization the data came from. */
-  organization: string;
+  /**
+   * Publisher/organization the data came from. Optional **override** of the
+   * owning {@link CatalogueCollection}'s `organization`: most datasets inherit
+   * the collection's publisher and omit this field, so consumers must fall back
+   * to `collection.organization` when it is absent.
+   */
+  organization?: string;
   /**
    * Public download URL of the source, or `null` for primary data with no
    * public URL. NEVER a local machine path — see the type-level note above.
