@@ -2,6 +2,7 @@ import { type MapHoverInfo } from '@ttoss/geovis';
 import * as React from 'react';
 
 import type {
+  cadinsanByCity,
   CafAreaFeature,
   cafByCity,
   kitchenRateByCity,
@@ -41,6 +42,8 @@ type UseMapaTooltipsParams = {
   cafProps: Record<string, CafAreaFeature['properties']>;
   /** Per-município CAF rows, so the CAF choropleth hover shows the share + count. */
   cafByCity: cafByCity[];
+  /** Per-município CADINSAN rows, so the food-insecurity hover shows the share + counts. */
+  cadinsanByCity: cadinsanByCity[];
   mode: MapMode;
 };
 
@@ -63,20 +66,23 @@ export const useMapaTooltips = ({
   cozinhaStatus,
   cafProps,
   cafByCity,
+  cadinsanByCity,
   mode,
 }: UseMapaTooltipsParams) => {
-  const citiesByCode = React.useMemo(() => {
-    return indexByCodigoIbge(kitchenByCity);
-  }, [kitchenByCity]);
-
-  const cafsByCode = React.useMemo(() => {
-    return indexByCodigoIbge(cafByCity);
-  }, [cafByCity]);
+  // The three choropleth datasets are joined by `codigoIbge` for O(1) hover
+  // lookup; indexed together since they all arrive from the same mount fetch.
+  const byCode = React.useMemo(() => {
+    return {
+      cities: indexByCodigoIbge(kitchenByCity),
+      cafs: indexByCodigoIbge(cafByCity),
+      cadinsan: indexByCodigoIbge(cadinsanByCity),
+    };
+  }, [kitchenByCity, cafByCity, cadinsanByCity]);
 
   const hoverTooltip = React.useCallback(
     (info: MapHoverInfo) => {
       const code = String(info.featureId);
-      const register = citiesByCode.get(code);
+      const register = byCode.cities.get(code);
       // Nome vem do catálogo completo (todos os municípios do Brasil). Fallback
       // só se o catálogo não tiver o código.
       const name =
@@ -86,11 +92,12 @@ export const useMapaTooltips = ({
         mode,
         name,
         register,
-        cafRegister: cafsByCode.get(code),
+        cafRegister: byCode.cafs.get(code),
+        cadinsanRegister: byCode.cadinsan.get(code),
         value: info.value,
       });
     },
-    [citiesByCode, cafsByCode, nomesPorCodigo, mode]
+    [byCode, nomesPorCodigo, mode]
   );
 
   const assentamentosByCode = React.useMemo(() => {

@@ -10,7 +10,11 @@ import {
   renderCozinhaTooltip,
   renderMunicipioTooltip,
 } from 'src/app/(features)/mapas/mapaTooltips';
-import type { cafByCity, kitchenRateByCity } from 'src/data-gateway/schema';
+import type {
+  cadinsanByCity,
+  cafByCity,
+  kitchenRateByCity,
+} from 'src/data-gateway/schema';
 
 import { renderWithChakra } from './renderWithChakra';
 
@@ -26,11 +30,25 @@ const REGISTER: kitchenRateByCity = {
   pessoasPorCozinha: 776_977,
 };
 
+/** Altamira/PA — a município where the Bolsa Família effect is large. */
+const CADINSAN_REGISTER: cadinsanByCity = {
+  codigoIbge: '1500602',
+  municipio: 'Altamira',
+  uf: 'Pará',
+  regiao: 'Norte',
+  absolutoComPbf: 2616,
+  absolutoSemPbf: 5779,
+  cadastrosCadunico: 14656,
+  proporcaoComPbf: 17.85,
+  proporcaoSemPbf: 39.43,
+};
+
 /** Renders a tooltip for the given mode/register into the DOM under Chakra. */
 const renderTooltip = (args: {
   mode: MapMode;
   register?: kitchenRateByCity;
   cafRegister?: cafByCity;
+  cadinsanRegister?: cadinsanByCity;
   value?: number | null;
 }) => {
   return renderWithChakra(
@@ -40,6 +58,7 @@ const renderTooltip = (args: {
         name: 'São Paulo',
         register: args.register,
         cafRegister: args.cafRegister,
+        cadinsanRegister: args.cadinsanRegister,
         value: args.value ?? null,
       })}
     </>
@@ -158,6 +177,85 @@ describe('renderMunicipioTooltip', () => {
     });
 
     expect(screen.getByText('Sem CAF registrado')).toBeInTheDocument();
+  });
+
+  test('CADINSAN "sem PBF" mode shows the share, the N de M line and the relief effect', () => {
+    renderTooltip({
+      mode: 'coropletico-cadinsan-sem-pbf',
+      cadinsanRegister: CADINSAN_REGISTER,
+    });
+
+    expect(
+      screen.getByText('39,4% em insegurança alimentar (sem o Bolsa Família)')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('5.779 de 14.656 famílias do CadÚnico neste cenário')
+    ).toBeInTheDocument();
+    // Effect line points to the com-PBF scenario ("cai para").
+    expect(
+      screen.getByText('Com o Bolsa Família, cai para 17,9% (2.616 famílias)')
+    ).toBeInTheDocument();
+  });
+
+  test('CADINSAN "com PBF" mode shows the counterfactual effect ("seria")', () => {
+    renderTooltip({
+      mode: 'coropletico-cadinsan-com-pbf',
+      cadinsanRegister: CADINSAN_REGISTER,
+    });
+
+    expect(
+      screen.getByText('17,9% em insegurança alimentar (com o Bolsa Família)')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Sem o Bolsa Família, seria 39,4% (5.779 famílias)')
+    ).toBeInTheDocument();
+  });
+
+  test('CADINSAN mode reads "sem dado" without a CADINSAN register', () => {
+    renderTooltip({
+      mode: 'coropletico-cadinsan-sem-pbf',
+      cadinsanRegister: undefined,
+    });
+
+    expect(screen.getByText('Sem dado do CadÚnico')).toBeInTheDocument();
+  });
+
+  test('CADINSAN mode reads "sem dado" when the município has no CadÚnico denominator', () => {
+    renderTooltip({
+      mode: 'coropletico-cadinsan-com-pbf',
+      cadinsanRegister: {
+        codigoIbge: '9999999',
+        municipio: 'Sem CadÚnico',
+        uf: 'X',
+        regiao: 'Sul',
+        absolutoComPbf: 0,
+        absolutoSemPbf: 0,
+        cadastrosCadunico: 0,
+        proporcaoComPbf: null,
+        proporcaoSemPbf: null,
+      },
+    });
+
+    expect(screen.getByText('Sem dado do CadÚnico')).toBeInTheDocument();
+  });
+
+  test('CADINSAN mode omits the effect line when the counterpart scenario has no share', () => {
+    renderTooltip({
+      mode: 'coropletico-cadinsan-com-pbf',
+      cadinsanRegister: {
+        ...CADINSAN_REGISTER,
+        proporcaoSemPbf: null,
+        absolutoSemPbf: 0,
+      },
+    });
+
+    // The active (com-PBF) scenario still shows; the "seria" effect is dropped.
+    expect(
+      screen.getByText(/17,9% em insegurança alimentar/)
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(/Sem o Bolsa Família, seria/)
+    ).not.toBeInTheDocument();
   });
 
   test('CadÚnico mode shows the per-10k-CadÚnico rate', () => {

@@ -6,6 +6,7 @@ import {
 import * as React from 'react';
 
 import type {
+  cadinsanByCity,
   CafAreaFeature,
   cafByCity,
   CozinhasFeatureCollection,
@@ -90,6 +91,8 @@ type UseMapaSpecParams = {
   cozinhaStatus: Record<string, string>;
   /** Per-município CAF shares for the "% dos CAFs do Brasil" choropleth. */
   cafByCity: cafByCity[];
+  /** Per-município CADINSAN food-insecurity shares for the food-insecurity choropleths. */
+  cadinsanByCity: cadinsanByCity[];
   mode: MapMode;
   /**
    * Kitchen points for the selected time-lapse year, held in memory. When set,
@@ -112,7 +115,7 @@ type UseMapaSpecParams = {
  * @returns The geovis {@link VisualizationSpec} for the current mode.
  *
  * @example
- * const spec = useMapaSpec({ kitchenByCity, ivsByCity, nomesPorCodigo, assentamentos, cozinhaNames, cafProps, cozinhaStatus, cafByCity, mode });
+ * const spec = useMapaSpec({ kitchenByCity, ivsByCity, nomesPorCodigo, assentamentos, cozinhaNames, cafProps, cozinhaStatus, cafByCity, cadinsanByCity, mode });
  * // <GeovisWorkspace visualizationSpec={spec} ... />
  */
 export const useMapaSpec = ({
@@ -124,6 +127,7 @@ export const useMapaSpec = ({
   cafProps,
   cozinhaStatus,
   cafByCity,
+  cadinsanByCity,
   mode,
   cozinhasPoints,
 }: UseMapaSpecParams) => {
@@ -136,6 +140,7 @@ export const useMapaSpec = ({
       cozinhaStatus,
       cafProps,
       cafByCity,
+      cadinsanByCity,
       mode,
     });
 
@@ -149,6 +154,7 @@ export const useMapaSpec = ({
       cafTooltipRender: cafTooltip,
       cozinhaStatus,
       cafByCity,
+      cadinsanByCity,
     });
 
     // Time-lapse: serve the kitchen points from the selected year's in-memory
@@ -177,6 +183,7 @@ export const useMapaSpec = ({
     cafTooltip,
     cozinhaStatus,
     cafByCity,
+    cadinsanByCity,
     cozinhasPoints,
   ]);
 

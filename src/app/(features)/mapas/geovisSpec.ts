@@ -13,6 +13,7 @@ import type {
 
 import { mapTokens } from '@/config/theme';
 import type {
+  cadinsanByCity,
   cafByCity,
   kitchenRateByCity,
   MunicipioIvs,
@@ -28,7 +29,12 @@ import {
   COZINHA_STATUS_LEGEND_ID,
   cozinhaStatusLabel,
 } from './geovisCozinhaStatusScales';
-import { buildLegends, legendIdForMode, type MapMode } from './geovisScales';
+import {
+  buildLegends,
+  jenksBreaksForMode,
+  legendIdForMode,
+  type MapMode,
+} from './geovisScales';
 
 /** Re-exported so consumers keep importing the map's mode type from here. */
 export type { MapMode };
@@ -82,6 +88,11 @@ type MapOverlays = {
   cozinhaStatus?: Record<string, string>;
   /** Per-município CAF share rows; painted in `coropletico-cafs-percentual` mode. */
   cafByCity?: cafByCity[];
+  /**
+   * Per-município CADINSAN food-insecurity share rows; painted in the
+   * `coropletico-cadinsan-com-pbf` and `coropletico-cadinsan-sem-pbf` modes.
+   */
+  cadinsanByCity?: cadinsanByCity[];
 };
 
 /**
@@ -693,7 +704,8 @@ const buildMapData = ({
  * @param overlays - Overlay config: `assentamentos.atributos` color the
  * settlement polygons by status and `hoverRender` draws their tooltip;
  * `cozinhaStatus` (`codigo → emFuncionamento`) colors the kitchen points by
- * operating status; `cafByCity` paints the CAF share choropleth. Defaults to `{}`.
+ * operating status; `cafByCity` paints the CAF share choropleth; `cadinsanByCity`
+ * paints the CADINSAN food-insecurity choropleths. Defaults to `{}`.
  * @returns The geovis visualization spec (sources, mapData, legends, layers).
  *
  * @example
@@ -715,7 +727,19 @@ export const buildSpec = (
     mode,
     byCity,
     ivsByCity,
-    overlays.cafByCity ?? []
+    overlays.cafByCity ?? [],
+    overlays.cadinsanByCity ?? []
+  );
+
+  // Data-driven Jenks breaks for the active ad-hoc choropleth, computed from the
+  // exact values it paints (so the legend can never disagree with the fill).
+  // `null` for the IVS/IDHM families (fixed official faixas) and overlays, which
+  // keeps their hand-picked/official scale.
+  const jenksBreaks = jenksBreaksForMode(
+    mode,
+    choroplethRows.map((row) => {
+      return row.value;
+    })
   );
 
   // Bounds for the circle-size scale: the largest per-município count. Falls
@@ -746,7 +770,7 @@ export const buildSpec = (
       overlays,
     }),
     legends: [
-      ...buildLegends(mode),
+      ...buildLegends(mode, jenksBreaks),
       buildCozinhaStatusLegend(mode === 'pontos'),
     ],
     layers: buildOverlayLayers({

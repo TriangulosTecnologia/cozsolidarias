@@ -36,6 +36,31 @@ export type StaticCafPorMunicipioSource = {
 };
 
 /**
+ * Shape of one município's CADINSAN 2025 row after the comma-delimited CSV is
+ * parsed. Food-insecurity headcounts among CadÚnico families, with and without
+ * Programa Bolsa Família (PBF) beneficiaries, plus the CadÚnico total that is
+ * their denominator. The source's own proportion columns (`"18,7%"`) are
+ * ignored — the gateway recomputes the share from these counts. Count fields
+ * are coerced to `number`; identity fields stay strings.
+ */
+export type StaticCadinsanMunicipioSource = {
+  /** 7-digit IBGE code (`Cod_IBGE`); joins to `codarea` on the map. */
+  codigoIbge: string;
+  /** Macro-region (`Região`), e.g. `Sudeste`. */
+  regiao: string;
+  /** State (`UF`), the full name, e.g. `São Paulo`. */
+  uf: string;
+  /** Município name (`Município`). */
+  municipio: string;
+  /** Food-insecure CadÚnico families including PBF beneficiaries (`Cadinsan_absoluto_com_PBF`). */
+  absolutoComPbf: number;
+  /** Food-insecure CadÚnico families excluding PBF beneficiaries (`Cadinsan_absoluto_sem_PBF`). */
+  absolutoSemPbf: number;
+  /** Total CadÚnico registrations in the município (`Cadastros_Cadunico`); the share denominator. */
+  cadastrosCadunico: number;
+};
+
+/**
  * Shape of a single CAF (Cadastro Ambiental Rural) production/income record
  * after the semicolon-delimited CSV snapshot is parsed. Numeric fields
  * (`vlRendaAuferida`, `vlRendaEstimada`) are coerced to `number | null`; all

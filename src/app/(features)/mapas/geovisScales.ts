@@ -7,6 +7,7 @@ import type { LegendSpec } from '@ttoss/geovis';
 
 import { mapTokens } from '@/config/theme';
 
+import { classifyValues } from './classifyValues';
 import { buildAssentamentoLegend } from './geovisAssentamentosScales';
 import {
   IDHM_FAMILY_COLORS,
@@ -271,6 +272,63 @@ const CAF_PERCENT_LEGEND_LABELS = flooredBinLabels(
 );
 
 /**
+ * Break points (in %) for the CADINSAN food-insecurity choropleths — the share
+ * of a município's CadÚnico families in food insecurity. Fixed, interpretable
+ * cutpoints (`10 / 20 / 30 / 40`) shared by the "com PBF" and "sem PBF" modes so
+ * the two are read on the same ruler ("acima de 30%" means the same in both).
+ *
+ * Unlike the other floored scales, the leading break is **`0`, a real cutpoint**,
+ * not a positive floor: `0%` is a meaningful value (a município with CadÚnico
+ * families but none in food insecurity) that must paint the lightest band, so
+ * geovis' `step` (which paints `value >= thresholds[0]`) keeps `0` visible.
+ * Only a município with no CadÚnico denominator resolves to `null` upstream and
+ * lands in the grey "sem dado" bin.
+ */
+const CADINSAN_THRESHOLDS = [0, 10, 20, 30, 40];
+
+/**
+ * Color ramp for the CADINSAN choropleths — `CADINSAN_THRESHOLDS.length + 1`
+ * steps from the shared sequential ramp. As with the other floored scales,
+ * `CADINSAN_COLORS[0]` is vestigial (geovis maps the below-first-break bin to
+ * `defaultColor`); `CADINSAN_COLORS[1]` is the lightest painted band (`< 10%`).
+ */
+const CADINSAN_COLORS = sampleRamp(
+  mapTokens.dataviz.color.sequential[1],
+  CADINSAN_THRESHOLDS.length + 1
+);
+
+/**
+ * Resolves the CADINSAN-choropleth band color for a food-insecurity share (%),
+ * mirroring the floored `step` fill (see {@link colorForFlooredScale}). A `null`
+ * share (município with no CadÚnico denominator) resolves to
+ * `WITHOUT_KITCHEN_COLOR` ("sem dado"); every real share `>= 0` gets a visible
+ * band, so the hover-tooltip swatch always matches the map.
+ *
+ * @param proporcao - Food-insecurity share (%), or `null` when unknown.
+ * @returns The hex color for the share's band.
+ *
+ * @example
+ * colorForCadinsan(null); // WITHOUT_KITCHEN_COLOR ("sem dado")
+ * colorForCadinsan(0); // the lightest painted band
+ * colorForCadinsan(35); // the "30 – 40%" band
+ */
+export const colorForCadinsan = (proporcao: number | null): string => {
+  return colorForFlooredScale(proporcao, CADINSAN_THRESHOLDS, CADINSAN_COLORS);
+};
+
+/**
+ * Labels for the CADINSAN legends, one per rendered swatch
+ * (`CADINSAN_THRESHOLDS.length + 1`). The first swatch is the grey `defaultColor`
+ * bin (municípios with no CadÚnico denominator), labelled "Sem dado"; the rest
+ * derive from the cutpoints so they can't drift.
+ */
+const CADINSAN_LEGEND_LABELS = flooredBinLabels(
+  'Sem dado',
+  CADINSAN_THRESHOLDS,
+  '%'
+);
+
+/**
  * Break points for the "cozinhas per 10k CadÚnico people" choropleth — the rate
  * `(cozinhas / pessoas) * 10_000`. The meaningful cutpoints are
  * `0.2 / 0.5 / 1 / 2 / 4`, chosen from the real distribution of the 870
@@ -394,21 +452,41 @@ export type LegendItem = { color: string; label: string };
  * @example
  * buildLegendItems()[0]; // { color: WITHOUT_KITCHEN_COLOR, label: 'Sem cozinha' }
  */
-export const buildLegendItems = (): LegendItem[] => {
-  const ranges = THRESHOLDS.map((lower, index): LegendItem => {
-    const upper = THRESHOLDS[index + 1];
-    const color = COLORS[index + 1];
-
+/**
+ * Builds the integer-count legend labels from a threshold array: the grey "Sem
+ * cozinha" bin first, then one label per count range — a single value when the
+ * range spans one integer (`upper - lower === 1`), a closed `a–b` range
+ * otherwise, and an open `n+` for the top band. Shared by {@link buildLegendItems}
+ * and the count choropleth so the count labels can be rebuilt from data-driven
+ * (Jenks) breaks without duplicating the range formatting.
+ *
+ * @param thresholds - The count scale's thresholds (floor first).
+ * @returns The ordered labels: "Sem cozinha", then one per count range.
+ *
+ * @example
+ * buildCountLabels([1, 3, 6]); // ['Sem cozinha', '1–2', '3–5', '6+']
+ */
+const buildCountLabels = (thresholds: readonly number[]): string[] => {
+  const ranges = thresholds.map((lower, index) => {
+    const upper = thresholds[index + 1];
     if (upper === undefined) {
-      return { color, label: `${lower}+` };
+      return `${lower}+`;
     }
     if (upper - lower === 1) {
-      return { color, label: `${lower}` };
+      return `${lower}`;
     }
-    return { color, label: `${lower}–${upper - 1}` };
+    return `${lower}–${upper - 1}`;
   });
+  return ['Sem cozinha', ...ranges];
+};
 
-  return [{ color: WITHOUT_KITCHEN_COLOR, label: 'Sem cozinha' }, ...ranges];
+export const buildLegendItems = (): LegendItem[] => {
+  return buildCountLabels(THRESHOLDS).map((label, index): LegendItem => {
+    return {
+      color: index === 0 ? WITHOUT_KITCHEN_COLOR : COLORS[index],
+      label,
+    };
+  });
 };
 
 /**
@@ -442,6 +520,8 @@ export type MapMode =
   | 'coropletico-taxa'
   | 'coropletico-percentual'
   | 'coropletico-cafs-percentual'
+  | 'coropletico-cadinsan-com-pbf'
+  | 'coropletico-cadinsan-sem-pbf'
   | 'coropletico-cadunico'
   | 'coropletico-pessoas-cozinha'
   | 'coropletico-ivs'
@@ -463,6 +543,8 @@ const CHOROPLETH_LEGEND_ID = 'legenda-cozinhas';
 const RATE_LEGEND_ID = 'legenda-taxa';
 const PERCENT_LEGEND_ID = 'legenda-percentual';
 const CAF_PERCENT_LEGEND_ID = 'legenda-cafs-percentual';
+const CADINSAN_COM_PBF_LEGEND_ID = 'legenda-cadinsan-com-pbf';
+const CADINSAN_SEM_PBF_LEGEND_ID = 'legenda-cadinsan-sem-pbf';
 const CADUNICO_LEGEND_ID = 'legenda-cadunico';
 const PESSOAS_COZINHA_LEGEND_ID = 'legenda-pessoas-cozinha';
 const IVS_LEGEND_ID = 'legenda-ivs';
@@ -484,6 +566,12 @@ const PERCENT_LEGEND_TITLE = '% das cozinhas do Brasil no município';
 
 /** Title of the CAF-share legend; also the fill's `activeLegendId` in that mode. */
 const CAF_PERCENT_LEGEND_TITLE = '% dos CAFs do Brasil no município';
+
+/** Titles of the CADINSAN legends (scenario framing, not "who receives PBF"). */
+const CADINSAN_COM_PBF_LEGEND_TITLE =
+  'Insegurança alimentar no CadÚnico — cenário com o Bolsa Família';
+const CADINSAN_SEM_PBF_LEGEND_TITLE =
+  'Insegurança alimentar no CadÚnico — cenário sem o Bolsa Família';
 
 /** Title of the CadÚnico legend; also the fill's `activeLegendId` in that mode. */
 const CADUNICO_LEGEND_TITLE = 'nº coz. / 10 mil pessoas no CadÚnico';
@@ -522,6 +610,13 @@ type LegendConfig = {
   labels: string[];
   reference: string;
   noDataLabel?: string;
+  /**
+   * Rebuilds this scale's labels from a threshold array. Present only on the
+   * ad-hoc (hand-picked) choropleths, which opt into data-driven Jenks breaks;
+   * absent on the IVS/IDHM families, whose official faixa breaks never change.
+   * Its presence is what marks a mode as Jenks-eligible (see {@link jenksBreaksForMode}).
+   */
+  labelsFrom?: (thresholds: readonly number[]) => string[];
 };
 
 const LEGEND_CONFIGS: LegendConfig[] = [
@@ -532,9 +627,8 @@ const LEGEND_CONFIGS: LegendConfig[] = [
     subtitle: 'Quanto mais escuro o município, mais cozinhas cadastradas ali.',
     thresholds: THRESHOLDS,
     colors: COLORS,
-    labels: buildLegendItems().map((item) => {
-      return item.label;
-    }),
+    labels: buildCountLabels(THRESHOLDS),
+    labelsFrom: buildCountLabels,
     reference: 'Fonte dos dados: © Cozinhas Solidárias',
   },
   {
@@ -546,6 +640,9 @@ const LEGEND_CONFIGS: LegendConfig[] = [
     thresholds: RATE_THRESHOLDS,
     colors: RATE_COLORS,
     labels: RATE_LEGEND_LABELS,
+    labelsFrom: (thresholds) => {
+      return flooredBinLabels('Sem dado', thresholds);
+    },
     reference: 'Fontes: © Cozinhas Solidárias · IBGE (Censo 2022)',
   },
   {
@@ -557,6 +654,9 @@ const LEGEND_CONFIGS: LegendConfig[] = [
     thresholds: PERCENT_THRESHOLDS,
     colors: PERCENT_COLORS,
     labels: PERCENT_LEGEND_LABELS,
+    labelsFrom: (thresholds) => {
+      return flooredBinLabels('Sem cozinha', thresholds, '%');
+    },
     reference: 'Fonte dos dados: © Cozinhas Solidárias',
   },
   {
@@ -568,8 +668,39 @@ const LEGEND_CONFIGS: LegendConfig[] = [
     thresholds: CAF_PERCENT_THRESHOLDS,
     colors: PERCENT_COLORS,
     labels: CAF_PERCENT_LEGEND_LABELS,
+    labelsFrom: (thresholds) => {
+      return flooredBinLabels('Sem CAF', thresholds, '%');
+    },
     reference:
       'Fonte dos dados: Cadastro Nacional da Agricultura Familiar (CAF)',
+  },
+  {
+    id: CADINSAN_COM_PBF_LEGEND_ID,
+    mode: 'coropletico-cadinsan-com-pbf',
+    title: CADINSAN_COM_PBF_LEGEND_TITLE,
+    subtitle:
+      'Parcela das famílias do CadÚnico em insegurança alimentar já considerando o alívio do Bolsa Família. Compare com o cenário sem para ver o efeito do programa.',
+    thresholds: CADINSAN_THRESHOLDS,
+    colors: CADINSAN_COLORS,
+    labels: CADINSAN_LEGEND_LABELS,
+    labelsFrom: (thresholds) => {
+      return flooredBinLabels('Sem dado', thresholds, '%');
+    },
+    reference: 'Fonte dos dados: MDS — CADINSAN 2025 (base do CadÚnico)',
+  },
+  {
+    id: CADINSAN_SEM_PBF_LEGEND_ID,
+    mode: 'coropletico-cadinsan-sem-pbf',
+    title: CADINSAN_SEM_PBF_LEGEND_TITLE,
+    subtitle:
+      'Parcela das famílias do CadÚnico que estariam em insegurança alimentar se não houvesse o Bolsa Família. Quanto mais escuro, maior a parcela.',
+    thresholds: CADINSAN_THRESHOLDS,
+    colors: CADINSAN_COLORS,
+    labels: CADINSAN_LEGEND_LABELS,
+    labelsFrom: (thresholds) => {
+      return flooredBinLabels('Sem dado', thresholds, '%');
+    },
+    reference: 'Fonte dos dados: MDS — CADINSAN 2025 (base do CadÚnico)',
   },
   {
     id: CADUNICO_LEGEND_ID,
@@ -580,6 +711,9 @@ const LEGEND_CONFIGS: LegendConfig[] = [
     thresholds: CADUNICO_THRESHOLDS,
     colors: CADUNICO_COLORS,
     labels: CADUNICO_LEGEND_LABELS,
+    labelsFrom: (thresholds) => {
+      return flooredBinLabels('Sem cozinha', thresholds);
+    },
     reference: 'Fontes: © Cozinhas Solidárias · MDS/SAGI (CadÚnico, jun/2026)',
   },
   {
@@ -591,6 +725,9 @@ const LEGEND_CONFIGS: LegendConfig[] = [
     thresholds: PESSOAS_COZINHA_THRESHOLDS,
     colors: PESSOAS_COZINHA_COLORS,
     labels: PESSOAS_COZINHA_LEGEND_LABELS,
+    labelsFrom: (thresholds) => {
+      return flooredBinLabels('Sem cozinha', thresholds);
+    },
     reference: 'Fontes: © Cozinhas Solidárias · MDS/SAGI (CadÚnico, jun/2026)',
   },
   {
@@ -727,8 +864,22 @@ const LEGEND_CONFIGS: LegendConfig[] = [
  * buildLegends('coropletico-taxa').find((l) => l.position); // the rate legend
  * buildLegends('assentamentos').find((l) => l.position); // the settlement legend
  */
-export const buildLegends = (mode: MapMode): LegendSpec[] => {
+export const buildLegends = (
+  mode: MapMode,
+  jenksBreaks?: number[] | null
+): LegendSpec[] => {
   const choropleths = LEGEND_CONFIGS.map((config): LegendSpec => {
+    // Only the active ad-hoc choropleth swaps its hand-picked thresholds for the
+    // data-driven Jenks breaks (rebuilding its labels to match). The fill and
+    // the legend share this `colorBy`, so the single swap moves both together;
+    // the IVS/IDHM families (no `labelsFrom`) keep their fixed official faixas.
+    const jenks =
+      config.labelsFrom && jenksBreaks && config.mode === mode
+        ? jenksBreaks
+        : null;
+    const thresholds = jenks ?? config.thresholds;
+    const labels =
+      jenks && config.labelsFrom ? config.labelsFrom(jenks) : config.labels;
     return {
       id: config.id,
       title: config.title,
@@ -740,17 +891,50 @@ export const buildLegends = (mode: MapMode): LegendSpec[] => {
         type: 'quantitative',
         property: 'value',
         scale: 'threshold',
-        thresholds: config.thresholds,
+        thresholds,
         colors: config.colors,
         defaultColor: WITHOUT_KITCHEN_COLOR,
       },
-      labelFormat: { type: 'labels', labels: config.labels },
+      labelFormat: { type: 'labels', labels },
       ...(config.noDataLabel ? { noDataLabel: config.noDataLabel } : {}),
       reference: config.reference,
     };
   });
 
   return [...choropleths, buildAssentamentoLegend(mode === 'assentamentos')];
+};
+
+/**
+ * Computes the Jenks natural-breaks thresholds for a mode's painted values,
+ * preserving the mode's fixed floor and band count so the result is a drop-in
+ * replacement for its hand-picked threshold array. Returns `null` for modes that
+ * are not Jenks-eligible — the IVS/IDHM families (official faixas) and the
+ * non-choropleth overlays — or when the data has too few distinct values to
+ * split; the caller then keeps the fixed scale.
+ *
+ * @param mode - Active {@link MapMode}.
+ * @param values - The values the mode paints (the choropleth `mapData` rows' values).
+ * @returns The `[floor, ...breaks]` threshold array, or `null` to keep the fixed scale.
+ *
+ * @example
+ * jenksBreaksForMode('coropletico', [1, 1, 2, 8, 40]); // data-driven breaks
+ * jenksBreaksForMode('coropletico-ivs', values); // null (official faixas)
+ */
+export const jenksBreaksForMode = (
+  mode: MapMode,
+  values: readonly (number | string | null | undefined)[]
+): number[] | null => {
+  const config = LEGEND_CONFIGS.find((entry) => {
+    return entry.mode === mode;
+  });
+  if (!config?.labelsFrom) {
+    return null;
+  }
+  return classifyValues({
+    values,
+    classes: config.thresholds.length,
+    floor: config.thresholds[0],
+  }).breaks;
 };
 
 /**

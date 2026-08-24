@@ -20,6 +20,7 @@ import * as React from 'react';
 import { ThemeUIProvider } from 'theme-ui';
 
 import type {
+  cadinsanByCity,
   CafAreaFeature,
   cafByCity,
   CafsFeatureCollection,
@@ -91,6 +92,16 @@ const LEFT_SIDEBAR: NonNullable<GeovisWorkspaceConfig['leftSidebar']> = {
                 value: 'coropletico-cafs-percentual',
                 label: '% dos CAFs do Brasil no município',
                 icon: 'lucide:wheat',
+              },
+              {
+                value: 'coropletico-cadinsan-com-pbf',
+                label: 'Insegurança alimentar — cenário com o Bolsa Família',
+                icon: 'lucide:utensils-crossed',
+              },
+              {
+                value: 'coropletico-cadinsan-sem-pbf',
+                label: 'Insegurança alimentar — cenário sem o Bolsa Família',
+                icon: 'lucide:utensils',
               },
               {
                 value: 'coropletico-cadunico',
@@ -262,6 +273,8 @@ type MapBootstrap = {
   cafProps: Record<string, CafAreaFeature['properties']>;
   /** Per-município CAF shares for the "% dos CAFs do Brasil" choropleth. */
   cafsByCity: cafByCity[];
+  /** Per-município CADINSAN food-insecurity shares for the food-insecurity choropleths. */
+  cadinsanByCity: cadinsanByCity[];
 };
 
 const EMPTY_BOOTSTRAP: MapBootstrap = {
@@ -273,6 +286,7 @@ const EMPTY_BOOTSTRAP: MapBootstrap = {
   cozinhaStatus: {},
   cafProps: {},
   cafsByCity: [],
+  cadinsanByCity: [],
 };
 
 /**
@@ -292,6 +306,7 @@ const fetchMapData = async (): Promise<MapBootstrap> => {
       cozinhasGeoJSON,
       cafsGeoJSON,
       cafsByCity,
+      cadinsanByCity,
     ] = await Promise.all([
       fetch('/api/cozinhas/por-municipio').then((response) => {
         return response.json() as Promise<kitchenRateByCity[]>;
@@ -313,6 +328,9 @@ const fetchMapData = async (): Promise<MapBootstrap> => {
       }),
       fetch('/api/cafs/por-municipio').then((response) => {
         return response.json() as Promise<cafByCity[]>;
+      }),
+      fetch('/api/cadinsan/por-municipio').then((response) => {
+        return response.json() as Promise<cadinsanByCity[]>;
       }),
     ]);
     const cozinhaNames = Object.fromEntries(
@@ -339,6 +357,7 @@ const fetchMapData = async (): Promise<MapBootstrap> => {
       cozinhaStatus,
       cafProps,
       cafsByCity,
+      cadinsanByCity,
     };
   } catch {
     return EMPTY_BOOTSTRAP;
@@ -367,6 +386,9 @@ const MapaPlayground = () => {
     Record<string, CafAreaFeature['properties']>
   >({});
   const [cafsByCity, setCafsByCity] = React.useState<cafByCity[]>([]);
+  const [cadinsanByCity, setCadinsanByCity] = React.useState<cadinsanByCity[]>(
+    []
+  );
   const [selection, setSelection] = React.useState<GeovisWorkspaceSelection>(
     () => {
       return getInitialSelection({ config: { leftSidebar: LEFT_SIDEBAR } });
@@ -427,6 +449,7 @@ const MapaPlayground = () => {
       setCozinhaStatus(bootstrap.cozinhaStatus);
       setCafProps(bootstrap.cafProps);
       setCafsByCity(bootstrap.cafsByCity);
+      setCadinsanByCity(bootstrap.cadinsanByCity);
       setMounted(true);
     });
 
@@ -444,6 +467,7 @@ const MapaPlayground = () => {
     cafProps,
     cozinhaStatus,
     cafByCity: cafsByCity,
+    cadinsanByCity,
     mode,
     cozinhasPoints,
   });

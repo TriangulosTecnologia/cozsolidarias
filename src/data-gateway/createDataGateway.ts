@@ -1,3 +1,4 @@
+import { readStaticCadinsanMunicipal } from '../data-source-static/readStaticCadinsanMunicipal';
 import { readStaticCadUnico } from '../data-source-static/readStaticCadUnico';
 import { readStaticCafProducao } from '../data-source-static/readStaticCafProducao';
 import { readStaticCafs } from '../data-source-static/readStaticCafs';
@@ -9,19 +10,24 @@ import {
   LATEST_COZINHA_YEAR,
   readStaticCozinhas,
 } from '../data-source-static/readStaticCozinhas';
+import { readStaticDataCatalogue } from '../data-source-static/readStaticDataCatalogue';
 import { readStaticIvs } from '../data-source-static/readStaticIvs';
 import { readStaticMunicipios } from '../data-source-static/readStaticMunicipios';
 import { readStaticPopulacao } from '../data-source-static/readStaticPopulacao';
 import type {
+  cadinsanByCity,
   cafByCity,
   CafDetalhe,
   CafsFeatureCollection,
+  CatalogueContract,
   CozinhaDetalhe,
   CozinhasBubblesFeatureCollection,
   CozinhasFeatureCollection,
   kitchenRateByCity,
   MunicipioIvs,
 } from './schema';
+import { toAppCatalogue } from './transformers/toAppCatalogue';
+import { toCadinsanPorMunicipio } from './transformers/toCadinsanPorMunicipio';
 import { toCafDetalhe } from './transformers/toCafDetalhe';
 import { toCafsFeatureCollection } from './transformers/toCafsFeatureCollection';
 import { toCafsPorMunicipio } from './transformers/toCafsPorMunicipio';
@@ -53,6 +59,23 @@ export type DataGateway = {
    * too large to aggregate at request time).
    */
   getCafsPorMunicipio: () => Promise<cafByCity[]>;
+  /**
+   * Returns one row per município (all 5,570) with its CADINSAN 2025
+   * food-insecurity headcounts (com/sem PBF), its CadÚnico total, and the
+   * derived shares (%), for the food-insecurity choropleths. The source is
+   * already per-município, so this is a cheap projection (no aggregation).
+   */
+  getCadinsanPorMunicipio: () => Promise<cadinsanByCity[]>;
+  /**
+   * Returns the data catalogue — every dataset's origin, coverage, access,
+   * volume and field-level dictionary — as rendered by `/dados`.
+   *
+   * Origin URLs, repository paths and file checksums are redacted: they have no
+   * field in the contract, so they never reach the app. Unlike the other reads
+   * this one is not memoized — the catalogue is hand-edited documentation, and
+   * every edit must reach the page without a restart.
+   */
+  getCatalogue: () => Promise<CatalogueContract>;
   /**
    * Returns cozinha locations as a GeoJSON FeatureCollection of Points for the
    * given snapshot year (see {@link getCozinhasYears}). Unknown/omitted years
@@ -113,6 +136,10 @@ const isKnownSource = (value: string): value is KnownSource => {
  * const cozinhas = await gateway.getCozinhas();
  * // { type: 'FeatureCollection', features: [...] }
  */
+/* eslint-disable-next-line max-lines-per-function -- The factory is a flat
+   map of read functions to their source implementation; each new dataset
+   adds a few lines. Splitting it would hide the one place that shows the
+   whole contract at a glance. Tracked as a follow-up. */
 export const createDataGateway = (): DataGateway => {
   const raw = process.env['DATA_SOURCE'] ?? 'static';
 
@@ -166,6 +193,12 @@ export const createDataGateway = (): DataGateway => {
       },
       getCafsPorMunicipio: async () => {
         return toCafsPorMunicipio(await readStaticCafsPorMunicipio());
+      },
+      getCadinsanPorMunicipio: async () => {
+        return toCadinsanPorMunicipio(await readStaticCadinsanMunicipal());
+      },
+      getCatalogue: async () => {
+        return toAppCatalogue(await readStaticDataCatalogue());
       },
       getCozinhas: async (year) => {
         const sources = await readStaticCozinhas({ year: resolveYear(year) });
