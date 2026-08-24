@@ -145,7 +145,7 @@ export const buildCozinhaStatusLegend = (active: boolean): LegendSpec => {
     id: COZINHA_STATUS_LEGEND_ID,
     title: COZINHA_STATUS_LEGEND_TITLE,
     subtitle: 'Cor pela situação de funcionamento informada pela cozinha.',
-    ...(active ? { position: 'bottom-right' as const } : {}),
+    ...(active ? { position: 'bottom-right' as const, offset: 12 } : {}),
     colorBy: {
       type: 'categorical',
       property: 'value',

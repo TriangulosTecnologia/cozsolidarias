@@ -4,9 +4,3 @@ allowBuilds:
 
 minimumReleaseAgeExclude:
   - '@ttoss/geovis@0.2.0'
-
-# geovis-workspace's peer range may lag the geovis line the app runs on; widen
-# it so the two @ttoss map packages can move together.
-peerDependencyRules:
-  allowedVersions:
-    '@ttoss/geovis-workspace>@ttoss/geovis': '^0.15.0'
