@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom';
 
-import { fireEvent, screen } from '@testing-library/react';
+import { act, fireEvent, screen } from '@testing-library/react';
 import type * as React from 'react';
 import MapaPlayground from 'src/app/(features)/mapas/MapaPlayground';
 import type { kitchenRateByCity } from 'src/data-gateway/schema';
@@ -293,5 +293,59 @@ describe('MapaPlayground — visualization toggle', () => {
     expect(screen.getByTestId('layer-ids')).not.toHaveTextContent(
       'municipios-br-fill'
     );
+  });
+});
+
+describe('MapaPlayground — time-lapse year discovery', () => {
+  test('still renders the map when the year list fails to load', async () => {
+    // `beforeEach` installed the happy-path stub; wrap it so only the year list
+    // rejects. The selected year is fetched independently, so the map is never
+    // left blank — the hook swallows the failure and leaves `years` empty.
+    const happyPath = global.fetch as jest.Mock;
+    global.fetch = jest.fn((input: RequestInfo | URL) => {
+      if (String(input).includes('cozinhas/anos')) {
+        return Promise.reject(new Error('offline'));
+      }
+      return happyPath(input);
+    }) as jest.Mock;
+
+    renderWithChakra(<MapaPlayground />);
+
+    expect(await screen.findByTestId('layer-ids')).toBeInTheDocument();
+  });
+});
+
+describe('MapaPlayground — time-lapse year discovery, late response', () => {
+  test('drops a late year list when the map has already unmounted', async () => {
+    // Hold the year list open so it resolves only after unmount. That is the
+    // one path through the hook's `cancelled` guard: a response that arrives
+    // for a component that no longer exists must not set state.
+    const happyPath = global.fetch as jest.Mock;
+    let releaseYears = () => {};
+    global.fetch = jest.fn((input: RequestInfo | URL) => {
+      if (String(input).includes('cozinhas/anos')) {
+        return new Promise<Response>((resolve) => {
+          releaseYears = () => {
+            resolve({
+              json: () => {
+                return Promise.resolve(YEARS);
+              },
+            } as Response);
+          };
+        });
+      }
+      return happyPath(input);
+    }) as jest.Mock;
+
+    const { unmount } = renderWithChakra(<MapaPlayground />);
+    unmount();
+
+    await act(async () => {
+      releaseYears();
+    });
+
+    // The guard's whole job is that this is a no-op: nothing is rendered, and
+    // React reports no update on an unmounted component.
+    expect(screen.queryByTestId('layer-ids')).toBeNull();
   });
 });

@@ -1,4 +1,9 @@
-import { parseCozinhasCsv } from 'src/data-source-static/readStaticCozinhas';
+import {
+  COZINHAS_YEARS,
+  isCozinhaYear,
+  LATEST_COZINHA_YEAR,
+  parseCozinhasCsv,
+} from 'src/data-source-static/readStaticCozinhas';
 
 /**
  * The 18 CSV headers, in order, exactly as `readStaticCozinhas` expects them.
@@ -205,5 +210,19 @@ describe('parseCozinhasCsv', () => {
     expect(() => {
       return parseCozinhasCsv('');
     }).toThrow(/empty/);
+  });
+});
+
+describe('isCozinhaYear', () => {
+  test('accepts every declared snapshot year', () => {
+    for (const year of COZINHAS_YEARS) {
+      expect(isCozinhaYear(year)).toBe(true);
+    }
+    expect(isCozinhaYear(LATEST_COZINHA_YEAR)).toBe(true);
+  });
+
+  test('rejects a year without a snapshot', () => {
+    expect(isCozinhaYear(1900)).toBe(false);
+    expect(isCozinhaYear(LATEST_COZINHA_YEAR + 1)).toBe(false);
   });
 });

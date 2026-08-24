@@ -263,6 +263,29 @@ describe('createDataGateway', () => {
     expect(second).toEqual(first);
   });
 
+  test('exposes the snapshot years available for the time-lapse', () => {
+    const gateway = createDataGateway();
+
+    expect(gateway.getCozinhasYears()).toEqual([2022, 2023, 2024, 2025, 2026]);
+
+    // A copy, not the source list: mutating the result must not corrupt it.
+    const years = gateway.getCozinhasYears();
+    years.push(9999);
+    expect(gateway.getCozinhasYears()).not.toContain(9999);
+  });
+
+  test('reads the requested snapshot year and falls back to the latest', async () => {
+    const gateway = createDataGateway();
+
+    const requested = await gateway.getCozinhas(2022);
+    expect(requested.features.length).toBeGreaterThan(0);
+
+    // A year with no snapshot resolves to the latest one instead of throwing.
+    expect(await gateway.getCozinhas(1900)).toEqual(
+      await gateway.getCozinhas()
+    );
+  });
+
   test('throws on an unknown DATA_SOURCE', () => {
     const previous = process.env['DATA_SOURCE'];
     process.env['DATA_SOURCE'] = 'bogus';
