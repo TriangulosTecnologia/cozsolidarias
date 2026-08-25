@@ -3,13 +3,38 @@ import { join } from 'node:path';
 
 import type { StaticCozinhaSource } from './types';
 
-const CSV_PATH = join(
-  process.cwd(),
-  'src',
-  'data-source-static',
-  'data',
-  'cozinhas_com_geolocalizacao_all.csv'
-);
+/**
+ * Available cozinha snapshot years, oldest to newest. **2022–2025 are temporary
+ * fictitious test snapshots** (same records as the `_all` file, only the
+ * coordinates differ; generated to build the time-lapse feature); **2026** maps
+ * to the real `_all` snapshot. Replace the `_teste` entries with real per-year
+ * files once they exist.
+ */
+export const COZINHAS_YEARS = [2022, 2023, 2024, 2025, 2026] as const;
+
+/** A year that has a cozinha snapshot. */
+export type CozinhaYear = (typeof COZINHAS_YEARS)[number];
+
+/** The most recent snapshot year; the default when no year is requested. */
+export const LATEST_COZINHA_YEAR: CozinhaYear = 2026;
+
+/** Type guard: whether a number is one of the {@link COZINHAS_YEARS}. */
+export const isCozinhaYear = (value: number): value is CozinhaYear => {
+  return (COZINHAS_YEARS as readonly number[]).includes(value);
+};
+
+/** Maps each snapshot year to its CSV filename under `data/`. */
+const YEAR_TO_FILE: Record<CozinhaYear, string> = {
+  2022: 'cozinhas_com_geolocalizacao_2022_teste.csv',
+  2023: 'cozinhas_com_geolocalizacao_2023_teste.csv',
+  2024: 'cozinhas_com_geolocalizacao_2024_teste.csv',
+  2025: 'cozinhas_com_geolocalizacao_2025_teste.csv',
+  2026: 'cozinhas_com_geolocalizacao_all.csv',
+};
+
+const dataPath = (file: string): string => {
+  return join(process.cwd(), 'src', 'data-source-static', 'data', file);
+};
 
 /**
  * Maps each CSV column header to the key used in {@link StaticCozinhaSource}.
@@ -191,29 +216,38 @@ export const parseCozinhasCsv = (text: string): StaticCozinhaSource[] => {
   );
 };
 
-let cache: StaticCozinhaSource[] | null = null;
+const cache = new Map<CozinhaYear, StaticCozinhaSource[]>();
 
 /**
- * Reads, parses and validates the static "cozinhas solidárias" CSV snapshot.
+ * Reads, parses and validates a static "cozinhas solidárias" CSV snapshot for a
+ * given year.
  *
  * Server-only: it reads the CSV from disk with `fs`, so it must be called from
- * a Server Component, route handler or other server context. The parsed result
- * is memoized for the lifetime of the process.
+ * a Server Component, route handler or other server context. Each year's parsed
+ * result is memoized for the lifetime of the process.
  *
- * @returns The list of cozinha records from `data/cozinhas_com_geolocalizacao_all.csv`.
+ * @param options.year - Snapshot year to read; one of {@link COZINHAS_YEARS}.
+ *   Defaults to {@link LATEST_COZINHA_YEAR}.
+ * @returns The list of cozinha records for that year.
  * @throws If the CSV header does not match the expected columns.
  *
  * @example
- * const cozinhas = await readStaticCozinhas();
+ * const cozinhas = await readStaticCozinhas({ year: 2024 });
  * const comCoordenadas = cozinhas.filter((c) => c.latitude !== null);
  */
-export const readStaticCozinhas = async (): Promise<StaticCozinhaSource[]> => {
-  if (cache) {
-    return cache;
+export const readStaticCozinhas = async (
+  options: { year?: CozinhaYear } = {}
+): Promise<StaticCozinhaSource[]> => {
+  const year = options.year ?? LATEST_COZINHA_YEAR;
+
+  const cached = cache.get(year);
+  if (cached) {
+    return cached;
   }
 
-  const raw = await readFile(CSV_PATH, 'utf8');
-  cache = parseCozinhasCsv(raw);
+  const raw = await readFile(dataPath(YEAR_TO_FILE[year]), 'utf8');
+  const parsed = parseCozinhasCsv(raw);
+  cache.set(year, parsed);
 
-  return cache;
+  return parsed;
 };

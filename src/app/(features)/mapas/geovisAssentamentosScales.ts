@@ -95,7 +95,7 @@ export const buildAssentamentoLegend = (active: boolean): LegendSpec => {
     id: ASSENTAMENTO_LEGEND_ID,
     title: ASSENTAMENTO_LEGEND_TITLE,
     subtitle: 'Cor pela situação do cadastro do assentamento no CAR.',
-    ...(active ? { position: 'bottom-right' as const } : {}),
+    ...(active ? { position: 'bottom-right' as const, offset: 12 } : {}),
     colorBy: {
       type: 'categorical',
       property: 'value',

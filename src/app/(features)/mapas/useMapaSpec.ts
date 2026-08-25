@@ -9,6 +9,7 @@ import type {
   cadinsanByCity,
   CafAreaFeature,
   cafByCity,
+  CozinhasFeatureCollection,
   kitchenRateByCity,
   MunicipioIvs,
 } from '@/data-gateway/schema';
@@ -16,6 +17,7 @@ import type {
 import {
   type AssentamentoAtributo,
   buildSpec,
+  COZINHAS_SOURCE_ID,
   type MapMode,
 } from './geovisSpec';
 import { type NomesPorCodigo, useMapaTooltips } from './useMapaTooltips';
@@ -92,6 +94,13 @@ type UseMapaSpecParams = {
   /** Per-município CADINSAN food-insecurity shares for the food-insecurity choropleths. */
   cadinsanByCity: cadinsanByCity[];
   mode: MapMode;
+  /**
+   * Kitchen points for the selected time-lapse year, held in memory. When set,
+   * it replaces the `cozinhas` source's `/api/cozinhas` URL so switching years
+   * (and the play animation) swap the points from memory. `undefined` until the
+   * year's data has loaded — the source then falls back to the URL.
+   */
+  cozinhasPoints?: CozinhasFeatureCollection;
 };
 
 /**
@@ -120,6 +129,7 @@ export const useMapaSpec = ({
   cafByCity,
   cadinsanByCity,
   mode,
+  cozinhasPoints,
 }: UseMapaSpecParams) => {
   const { hoverTooltip, assentamentoTooltip, cozinhaTooltip, cafTooltip } =
     useMapaTooltips({
@@ -135,7 +145,7 @@ export const useMapaSpec = ({
     });
 
   const baseSpec = React.useMemo(() => {
-    return buildSpec(kitchenByCity, mode, hoverTooltip, ivsByCity, {
+    const spec = buildSpec(kitchenByCity, mode, hoverTooltip, ivsByCity, {
       assentamentos: {
         atributos: assentamentos,
         hoverRender: assentamentoTooltip,
@@ -146,6 +156,22 @@ export const useMapaSpec = ({
       cafByCity,
       cadinsanByCity,
     });
+
+    // Time-lapse: serve the kitchen points from the selected year's in-memory
+    // FeatureCollection instead of the `/api/cozinhas` URL, so selecting a year
+    // (and the play animation) swaps them without a network round-trip. Until
+    // the year has loaded, keep buildSpec's URL as the fallback.
+    if (!cozinhasPoints) {
+      return spec;
+    }
+    return {
+      ...spec,
+      sources: spec.sources.map((source) => {
+        return source.type === 'geojson' && source.id === COZINHAS_SOURCE_ID
+          ? { ...source, data: cozinhasPoints }
+          : source;
+      }),
+    };
   }, [
     kitchenByCity,
     mode,
@@ -158,6 +184,7 @@ export const useMapaSpec = ({
     cozinhaStatus,
     cafByCity,
     cadinsanByCity,
+    cozinhasPoints,
   ]);
 
   // Assentamentos mode hides the município layers entirely — drop the município

@@ -3,7 +3,13 @@ import { readStaticCadUnico } from '../data-source-static/readStaticCadUnico';
 import { readStaticCafProducao } from '../data-source-static/readStaticCafProducao';
 import { readStaticCafs } from '../data-source-static/readStaticCafs';
 import { readStaticCafsPorMunicipio } from '../data-source-static/readStaticCafsPorMunicipio';
-import { readStaticCozinhas } from '../data-source-static/readStaticCozinhas';
+import {
+  COZINHAS_YEARS,
+  type CozinhaYear,
+  isCozinhaYear,
+  LATEST_COZINHA_YEAR,
+  readStaticCozinhas,
+} from '../data-source-static/readStaticCozinhas';
 import { readStaticDataCatalogue } from '../data-source-static/readStaticDataCatalogue';
 import { readStaticIvs } from '../data-source-static/readStaticIvs';
 import { readStaticMunicipios } from '../data-source-static/readStaticMunicipios';
@@ -70,8 +76,12 @@ export type DataGateway = {
    * every edit must reach the page without a restart.
    */
   getCatalogue: () => Promise<CatalogueContract>;
-  /** Returns cozinha locations as a GeoJSON FeatureCollection of Points. */
-  getCozinhas: () => Promise<CozinhasFeatureCollection>;
+  /**
+   * Returns cozinha locations as a GeoJSON FeatureCollection of Points for the
+   * given snapshot year (see {@link getCozinhasYears}). Unknown/omitted years
+   * fall back to the latest snapshot. Backs the time-lapse (`?ano=`).
+   */
+  getCozinhas: (year?: number) => Promise<CozinhasFeatureCollection>;
   /**
    * Returns the full detail of a single cozinha by its registration code
    * (`Código da Cozinha`, unique across the snapshot), or `null` when no cozinha
@@ -82,14 +92,22 @@ export type DataGateway = {
   /**
    * Returns one row per município with its cozinha count, Census population,
    * Cadastro Único registrations and the derived metrics (per-100k-inhabitants
-   * rate, share of Brazil, per-100k-CadÚnico rate) for the choropleth variants.
+   * rate, share of Brazil, per-100k-CadÚnico rate) for the choropleth variants,
+   * for the given snapshot year (see {@link getCozinhasYears}).
    */
-  getCozinhasPorMunicipio: () => Promise<kitchenRateByCity[]>;
+  getCozinhasPorMunicipio: (year?: number) => Promise<kitchenRateByCity[]>;
   /**
    * Returns one anchor Point per município with its cozinha count (for the
-   * proportional-circle map).
+   * proportional-circle map), for the given snapshot year.
    */
-  getCozinhasBubbles: () => Promise<CozinhasBubblesFeatureCollection>;
+  getCozinhasBubbles: (
+    year?: number
+  ) => Promise<CozinhasBubblesFeatureCollection>;
+  /**
+   * Returns the snapshot years available for the cozinha time-lapse, oldest to
+   * newest. Drives the timeline range and the client-side prefetch.
+   */
+  getCozinhasYears: () => number[];
   /**
    * Returns one row per município with a valid overall IVS score (Atlas da
    * Vulnerabilidade Social, IPEA) for the social-vulnerability choropleth.
@@ -118,6 +136,10 @@ const isKnownSource = (value: string): value is KnownSource => {
  * const cozinhas = await gateway.getCozinhas();
  * // { type: 'FeatureCollection', features: [...] }
  */
+/* eslint-disable-next-line max-lines-per-function -- The factory is a flat
+   map of read functions to their source implementation; each new dataset
+   adds a few lines. Splitting it would hide the one place that shows the
+   whole contract at a glance. Tracked as a follow-up. */
 export const createDataGateway = (): DataGateway => {
   const raw = process.env['DATA_SOURCE'] ?? 'static';
 
@@ -130,20 +152,30 @@ export const createDataGateway = (): DataGateway => {
   if (raw === 'static') {
     // The choropleth and the circle map are two projections of the same
     // point-in-polygon aggregation. It's the expensive step (every cozinha
-    // tested against ~5.5k município polygons), so memoize it for the process
-    // lifetime and let both endpoints share the result — the second caller
-    // (and every later request) only pays the cheap projection.
-    let aggregate: Promise<MunicipioAggregate[]> | null = null;
-    const getAggregate = () => {
-      if (!aggregate) {
-        aggregate = Promise.all([
-          readStaticCozinhas(),
-          readStaticMunicipios(),
-        ]).then(([cozinhas, municipios]) => {
-          return aggregateCozinhasPorMunicipio(cozinhas, municipios);
-        });
+    // tested against ~5.5k município polygons), so memoize it per year for the
+    // process lifetime and let both endpoints share each year's result — the
+    // second caller (and every later request) only pays the cheap projection.
+    const aggregates = new Map<CozinhaYear, Promise<MunicipioAggregate[]>>();
+    const getAggregate = (year: CozinhaYear) => {
+      const existing = aggregates.get(year);
+      if (existing) {
+        return existing;
       }
-      return aggregate;
+      const promise = Promise.all([
+        readStaticCozinhas({ year }),
+        readStaticMunicipios(),
+      ]).then(([cozinhas, municipios]) => {
+        return aggregateCozinhasPorMunicipio(cozinhas, municipios);
+      });
+      aggregates.set(year, promise);
+      return promise;
+    };
+
+    // Coerce a requested year to a known snapshot, falling back to the latest.
+    const resolveYear = (year?: number): CozinhaYear => {
+      return year !== undefined && isCozinhaYear(year)
+        ? year
+        : LATEST_COZINHA_YEAR;
     };
 
     return {
@@ -168,8 +200,8 @@ export const createDataGateway = (): DataGateway => {
       getCatalogue: async () => {
         return toAppCatalogue(await readStaticDataCatalogue());
       },
-      getCozinhas: async () => {
-        const sources = await readStaticCozinhas();
+      getCozinhas: async (year) => {
+        const sources = await readStaticCozinhas({ year: resolveYear(year) });
         return toCozinhasFeatureCollection(sources);
       },
       getCozinhaByCodigo: async (codigo) => {
@@ -179,16 +211,19 @@ export const createDataGateway = (): DataGateway => {
         });
         return match ? toCozinhaDetalhe(match) : null;
       },
-      getCozinhasPorMunicipio: async () => {
+      getCozinhasPorMunicipio: async (year) => {
         const [aggregate, populacao, cadunico] = await Promise.all([
-          getAggregate(),
+          getAggregate(resolveYear(year)),
           readStaticPopulacao(),
           readStaticCadUnico(),
         ]);
         return projectComTaxa({ aggregate, populacao, cadunico });
       },
-      getCozinhasBubbles: async () => {
-        return toCozinhasBubbles(await getAggregate());
+      getCozinhasBubbles: async (year) => {
+        return toCozinhasBubbles(await getAggregate(resolveYear(year)));
+      },
+      getCozinhasYears: () => {
+        return [...COZINHAS_YEARS];
       },
       getIvsPorMunicipio: async () => {
         return toMunicipioIvs(await readStaticIvs());

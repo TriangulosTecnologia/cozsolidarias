@@ -1,5 +1,10 @@
 'use client';
 
+/* eslint-disable max-lines -- The map page wires the whole workspace in one
+   place: sidebar sections, bootstrap fetches, selection state and the
+   time-lapse. Splitting it would scatter tightly coupled state across files.
+   Tracked as a follow-up. */
+
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 import { Box } from '@chakra-ui/react';
@@ -31,94 +36,202 @@ import {
   modeShowsCozinhaDetail,
 } from './mapaDetailSidebars';
 import MapLoadingIndicator from './MapLoadingIndicator';
+import { useKitchensByYear } from './useKitchensByYear';
 import { type NomesPorCodigo, useMapaSpec } from './useMapaSpec';
 
 /** Id of the left-sidebar menu group that drives the visualization mode. */
 const MODE_MENU_ID = 'visualizacao';
 
+/** Shared-selection key the time-lapse timeline writes the current year to. */
+const YEAR_MENU_ID = 'ano';
+
+/** Year shown before the timeline seeds `selection[YEAR_MENU_ID]` (latest snapshot). */
+const DEFAULT_YEAR = 2026;
+
 /** Left sidebar drives the visualization mode. */
+/**
+ * Left sidebar: the cozinhas visualizations as a card with two icon tabs —
+ * "Variações" (a flat, icon-led list) and "Timeline" — whose header mirrors the
+ * active tab. Drives the shared `visualizacao` selection (same `menuId` +
+ * values), so switching a variation recolors the map.
+ */
 const LEFT_SIDEBAR: NonNullable<GeovisWorkspaceConfig['leftSidebar']> = {
   initialState: 'open',
-  menus: [
+  sections: [
     {
-      id: MODE_MENU_ID,
-      title: 'Visualização',
-      defaultValue: 'coropletico',
-      items: [
-        { value: 'coropletico', label: 'Cozinhas por município (coroplético)' },
-        {
-          value: 'coropletico-taxa',
-          label: 'nº coz. no município / 100.000 hab.',
-        },
-        {
-          value: 'coropletico-percentual',
-          label: '% das cozinhas do Brasil no município',
-        },
-        {
-          value: 'coropletico-cafs-percentual',
-          label: '% dos CAFs do Brasil no município',
-        },
-        {
-          value: 'coropletico-cadinsan-com-pbf',
-          label: 'Insegurança alimentar — cenário com o Bolsa Família',
-        },
-        {
-          value: 'coropletico-cadinsan-sem-pbf',
-          label: 'Insegurança alimentar — cenário sem o Bolsa Família',
-        },
-        {
-          value: 'coropletico-cadunico',
-          label: 'nº coz. / 10 mil pessoas no CadÚnico',
-        },
-        {
-          value: 'coropletico-pessoas-cozinha',
-          label: 'pessoas no CadÚnico por cozinha',
-        },
-        {
-          value: 'coropletico-ivs',
-          label: 'Índice de vulnerabilidade social',
-        },
-        {
-          value: 'coropletico-ivs-infraestrutura',
-          label: 'IVS Infraestrutura Urbana',
-        },
-        {
-          value: 'coropletico-ivs-capital-humano',
-          label: 'IVS Capital Humano',
-        },
-        {
-          value: 'coropletico-ivs-renda-trabalho',
-          label: 'IVS Renda e Trabalho',
-        },
-        {
-          value: 'coropletico-idhm',
-          label: 'Índice de Desenvolvimento Humano Municipal',
-        },
-        {
-          value: 'coropletico-idhm-longevidade',
-          label: 'IDHM Longevidade',
-        },
-        {
-          value: 'coropletico-idhm-educacao',
-          label: 'IDHM Educação',
-        },
-        {
-          value: 'coropletico-idhm-renda',
-          label: 'IDHM Renda',
-        },
-        {
-          value: 'coropletico-idhm-educacao-escolaridade',
-          label: 'IDHM Educação — Escolaridade',
-        },
-        {
-          value: 'coropletico-idhm-educacao-frequencia',
-          label: 'IDHM Educação — Frequência Escolar',
-        },
-        { value: 'pontos', label: 'Localização das cozinhas' },
-        { value: 'circulos', label: 'Cozinhas por município' },
-        { value: 'assentamentos', label: 'Assentamentos e cozinhas' },
-        { value: 'cafs', label: 'CAFs' },
-      ],
+      id: 'cozinhas',
+      header: {
+        title: 'Variações',
+        icon: 'lucide:layout-list',
+      },
+      body: {
+        kind: 'variations',
+        menuId: MODE_MENU_ID,
+        defaultValue: 'coropletico',
+        groups: [
+          {
+            id: 'cozinhas',
+            label: 'Cozinhas',
+            variations: [
+              {
+                value: 'coropletico',
+                label: 'Cozinhas por município (coroplético)',
+                icon: 'lucide:map',
+              },
+              {
+                value: 'coropletico-taxa',
+                label: 'nº coz. no município / 100.000 hab.',
+                icon: 'lucide:users',
+              },
+              {
+                value: 'coropletico-percentual',
+                label: '% das cozinhas do Brasil no município',
+                icon: 'lucide:percent',
+              },
+              {
+                value: 'coropletico-cafs-percentual',
+                label: '% dos CAFs do Brasil no município',
+                icon: 'lucide:wheat',
+              },
+              {
+                value: 'coropletico-cadinsan-com-pbf',
+                label: 'Insegurança alimentar — cenário com o Bolsa Família',
+                icon: 'lucide:utensils-crossed',
+              },
+              {
+                value: 'coropletico-cadinsan-sem-pbf',
+                label: 'Insegurança alimentar — cenário sem o Bolsa Família',
+                icon: 'lucide:utensils',
+              },
+              {
+                value: 'coropletico-cadunico',
+                label: 'nº coz. / 10 mil pessoas no CadÚnico',
+                icon: 'lucide:clipboard-list',
+              },
+              {
+                value: 'coropletico-pessoas-cozinha',
+                label: 'pessoas no CadÚnico por cozinha',
+                icon: 'lucide:user-round',
+              },
+            ],
+          },
+          {
+            id: 'ivs',
+            label: 'IVS',
+            variations: [
+              {
+                value: 'coropletico-ivs',
+                label: 'Índice de vulnerabilidade social',
+                icon: 'lucide:shield-alert',
+              },
+              {
+                value: 'coropletico-ivs-infraestrutura',
+                label: 'IVS Infraestrutura Urbana',
+                icon: 'lucide:building-2',
+              },
+              {
+                value: 'coropletico-ivs-capital-humano',
+                label: 'IVS Capital Humano',
+                icon: 'lucide:graduation-cap',
+              },
+              {
+                value: 'coropletico-ivs-renda-trabalho',
+                label: 'IVS Renda e Trabalho',
+                icon: 'lucide:briefcase',
+              },
+            ],
+          },
+          {
+            id: 'idhm',
+            label: 'IDHM',
+            variations: [
+              {
+                value: 'coropletico-idhm',
+                label: 'Índice de Desenvolvimento Humano Municipal',
+                icon: 'lucide:trending-up',
+              },
+              {
+                value: 'coropletico-idhm-longevidade',
+                label: 'IDHM Longevidade',
+                icon: 'lucide:heart-pulse',
+              },
+              {
+                value: 'coropletico-idhm-educacao',
+                label: 'IDHM Educação',
+                icon: 'lucide:book-open',
+              },
+              {
+                value: 'coropletico-idhm-renda',
+                label: 'IDHM Renda',
+                icon: 'lucide:dollar-sign',
+              },
+              {
+                value: 'coropletico-idhm-educacao-escolaridade',
+                label: 'IDHM Educação — Escolaridade',
+                icon: 'lucide:pencil-ruler',
+              },
+              {
+                value: 'coropletico-idhm-educacao-frequencia',
+                label: 'IDHM Educação — Frequência Escolar',
+                icon: 'lucide:calendar-check',
+              },
+            ],
+          },
+          {
+            id: 'camadas',
+            label: 'Camadas',
+            variations: [
+              {
+                value: 'pontos',
+                label: 'Localização das cozinhas',
+                icon: 'lucide:map-pin',
+              },
+              {
+                value: 'circulos',
+                label: 'Cozinhas por município',
+                icon: 'lucide:circle-dot',
+              },
+              {
+                value: 'assentamentos',
+                label: 'Assentamentos e cozinhas',
+                icon: 'lucide:house',
+              },
+              {
+                value: 'cafs',
+                label: 'CAFs',
+                icon: 'lucide:sprout',
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
+      id: 'filtros',
+      header: {
+        title: 'Timeline',
+        icon: 'lucide:clock',
+      },
+      body: {
+        kind: 'filters',
+        blocks: [
+          {
+            id: 'periodo',
+            title: 'Linha do tempo',
+            icon: 'lucide:calendar-clock',
+            defaultOpen: true,
+            control: {
+              kind: 'timeline',
+              // Drives the shared selection so the map reacts to the year.
+              menuId: YEAR_MENU_ID,
+              min: 2022,
+              max: 2026,
+              step: 1,
+              defaultValue: DEFAULT_YEAR,
+            },
+          },
+        ],
+      },
     },
   ],
 };
@@ -284,8 +397,21 @@ const MapaPlayground = () => {
 
   const mode = (selection[MODE_MENU_ID] ?? 'coropletico') as MapMode;
 
+  // Time-lapse year, driven by the sidebar timeline (`selection[YEAR_MENU_ID]`).
+  // Falls back to the latest snapshot until the timeline seeds it on mount.
+  const yearFromSelection = Number(selection[YEAR_MENU_ID]);
+  const year = Number.isFinite(yearFromSelection)
+    ? yearFromSelection
+    : DEFAULT_YEAR;
+
+  // Kitchen points for the selected year, cached in memory and prefetched for
+  // every year so scrubbing and the play animation swap without a round-trip.
+  const { points: cozinhasPoints } = useKitchensByYear(year);
+
   const config = React.useMemo((): GeovisWorkspaceConfig => {
     return {
+      // Full-bleed map: no card border/radius so it fills the container.
+      appearance: 'bare',
       leftSidebar: LEFT_SIDEBAR,
       rightSidebar:
         mode === 'cafs'
@@ -343,48 +469,31 @@ const MapaPlayground = () => {
     cafByCity: cafsByCity,
     cadinsanByCity,
     mode,
+    cozinhasPoints,
   });
 
-  // `<GeovisWorkspace>` (0.6.x) wraps its map in an outer `position:relative`
-  // Box; inside it the map's Flex layout only sets `minHeight` (no `height`) and
-  // carries the card's border/radius. We turn the outer Box into a full-height
-  // flex column and let its in-flow child (the map layout) grow with `flex: 1`,
-  // dropping that card border/radius for a full-bleed map. The hover tooltip and
-  // legends are `position: absolute` siblings, which ignore flex-item props — so
-  // this stretches only the map, not the overlays. Applied only when the map is
-  // mounted (see the `css` prop below).
+  // `<GeovisWorkspace>` wraps its map in an outer `position:relative` Box; inside
+  // it the map's Flex layout only sets `minHeight` (no `height`). We turn the
+  // outer Box into a full-height flex column and let its in-flow child (the map
+  // layout) grow with `flex: 1` so the map fills the viewport. The card
+  // border/radius is dropped via `appearance: 'bare'` in the config, not here.
+  // Applied only when the map is mounted (see the `css` prop below).
   const mapLayoutCss = {
+    // Stretch the map to fill the container: make the workspace wrapper a
+    // full-height flex column and let the map layout (its in-flow child) grow.
+    // The card border/radius is dropped by `appearance: 'bare'` in the config,
+    // not here. The legends/tooltips are `position: absolute` siblings, so this
+    // stretches only the map, not the overlays.
     '& > *': {
       height: '100%',
       width: '100%',
       display: 'flex',
       flexDirection: 'column',
-      // geovis-workspace 0.6.1 draws the map's card border/shadow on the wrapper
-      // element(s), which varies by nesting level across versions. Strip it on
-      // both the direct child and its child so the map is full-bleed regardless
-      // of where the version places it. The legends/tooltips are `position:
-      // absolute` siblings, so their own borders are unaffected.
-      border: 'none',
-      boxShadow: 'none',
     },
     '& > * > *': {
       flex: '1',
       minHeight: 0,
-      border: 'none',
-      borderRadius: 0,
-      boxShadow: 'none',
     },
-    // geovis' provider auto-renders the choropleth legend with a fixed 10px
-    // inset from the map corner (`GeoVisLegend`'s corner position isn't further
-    // configurable via the spec). Nudge it inward so it doesn't crowd the edges.
-    // Selected by the legend list's aria-label (its title), one selector per
-    // choropleth legend (count, rate, share, CadÚnico, coverage, IVS) plus the
-    // categorical settlement legend.
-    '& div:has(> ul[aria-label="Cozinhas por município"]), & div:has(> ul[aria-label="nº coz. no município / 100.000 hab."]), & div:has(> ul[aria-label="% das cozinhas do Brasil no município"]), & div:has(> ul[aria-label="% dos CAFs do Brasil no município"]), & div:has(> ul[aria-label="Insegurança alimentar no CadÚnico — cenário com o Bolsa Família"]), & div:has(> ul[aria-label="Insegurança alimentar no CadÚnico — cenário sem o Bolsa Família"]), & div:has(> ul[aria-label="nº coz. / 10 mil pessoas no CadÚnico"]), & div:has(> ul[aria-label="pessoas no CadÚnico por cozinha"]), & div:has(> ul[aria-label="Índice de vulnerabilidade social"]), & div:has(> ul[aria-label="Assentamentos rurais"])':
-      {
-        bottom: '44px !important',
-        right: '44px !important',
-      },
   };
 
   return (

@@ -126,8 +126,12 @@ const TOOLTIP_STYLE: NonNullable<HoverTooltipConfig['style']> = {
  * {@link MapClickInfo} (or `null` when the selection is cleared). Omit to render
  * the points without click tracking.
  */
-/** GeoJSON source of kitchen points and the join that promotes `codigo`. */
-const COZINHAS_SOURCE_ID = 'cozinhas';
+/**
+ * GeoJSON source of kitchen points and the join that promotes `codigo`.
+ * Exported so the app can swap its `data` for a year-specific, in-memory
+ * FeatureCollection (the time-lapse).
+ */
+export const COZINHAS_SOURCE_ID = 'cozinhas';
 const COZINHAS_POINTS_MAP_DATA_ID = 'cozinhas-pts-promote';
 
 /**
@@ -156,6 +160,10 @@ const POINTS_LAYER: VisualizationLayer = {
   geometry: 'point',
   mapDataId: COZINHAS_POINTS_MAP_DATA_ID,
   activeLegendId: COZINHA_STATUS_LEGEND_ID,
+  // Time-lapse: when the timeline changes the year, `useMapaSpec` swaps this
+  // source's `data` to that year's points, so the geovis crossfade fades the
+  // previous year's dots out while the new year's fade in, instead of snapping.
+  transition: { kind: 'crossfade', durationMs: 500, easing: 'ease-in-out' },
   paint: {
     circleRadius: 4,
     circleOpacity: 0.9,
@@ -218,7 +226,13 @@ const buildControl = (
   return {
     id: 'camadas',
     label: 'Camadas',
+    icon: 'lucide:layers',
     position: 'bottom-left',
+    // Match the left sidebar card's inset (the overlay's `'3'` ≈ 12px on both
+    // axes) so the control's bottom-left corner lines up with the card's when
+    // closed. When the sidebar opens, the workspace shifts only `x` (clearing
+    // the sidebar) and preserves this `y`, keeping the vertical alignment.
+    offset: 12,
     trigger: 'hover',
     items: [
       {

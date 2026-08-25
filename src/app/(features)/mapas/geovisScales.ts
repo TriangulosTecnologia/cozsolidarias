@@ -884,7 +884,9 @@ export const buildLegends = (
       id: config.id,
       title: config.title,
       subtitle: config.subtitle,
-      ...(mode === config.mode ? { position: 'bottom-right' as const } : {}),
+      ...(mode === config.mode
+        ? { position: 'bottom-right' as const, offset: 12 }
+        : {}),
       colorBy: {
         type: 'quantitative',
         property: 'value',

@@ -4,7 +4,3 @@ allowBuilds:
 
 minimumReleaseAgeExclude:
   - '@ttoss/geovis@0.2.0'
-
-peerDependencyRules:
-  allowedVersions:
-    '@ttoss/geovis-workspace>@ttoss/geovis': ^0.15.0
