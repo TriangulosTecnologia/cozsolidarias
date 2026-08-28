@@ -4,7 +4,7 @@ import { gateway } from '../../../../gateway';
  * Returns one cozinha "bubble" per município (Brazil-wide) for the requested
  * snapshot year (`?ano=YYYY`, defaulting to the latest) as a GeoJSON
  * `FeatureCollection` of Points, ready to feed the proportional-circle map's
- * geojson source (`{ ..., data: '/api/cozinhas/bolhas?ano=2024' }`). Each
+ * geojson source (`{ ..., data: '/api/cozinhas/bolhas?ano=2025' }`). Each
  * feature carries `properties.codarea` (join key) and `properties.quantidade`
  * (drives the circle size).
  */

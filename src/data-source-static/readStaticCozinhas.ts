@@ -4,13 +4,12 @@ import { join } from 'node:path';
 import type { StaticCozinhaSource } from './types';
 
 /**
- * Available cozinha snapshot years, oldest to newest. **2022–2025 are temporary
- * fictitious test snapshots** (same records as the `_all` file, only the
- * coordinates differ; generated to build the time-lapse feature); **2026** maps
- * to the real `_all` snapshot. Replace the `_teste` entries with real per-year
- * files once they exist.
+ * Available cozinha snapshot years, oldest to newest. Both are real snapshots:
+ * 2025 is the full register (every `Situação`), while 2026 maps to the `_all`
+ * file, which only covers kitchens that reached `Habilitada`. The two therefore
+ * count different populations and are not a like-for-like series.
  */
-export const COZINHAS_YEARS = [2022, 2023, 2024, 2025, 2026] as const;
+export const COZINHAS_YEARS = [2025, 2026] as const;
 
 /** A year that has a cozinha snapshot. */
 export type CozinhaYear = (typeof COZINHAS_YEARS)[number];
@@ -25,10 +24,7 @@ export const isCozinhaYear = (value: number): value is CozinhaYear => {
 
 /** Maps each snapshot year to its CSV filename under `data/`. */
 const YEAR_TO_FILE: Record<CozinhaYear, string> = {
-  2022: 'cozinhas_com_geolocalizacao_2022_teste.csv',
-  2023: 'cozinhas_com_geolocalizacao_2023_teste.csv',
-  2024: 'cozinhas_com_geolocalizacao_2024_teste.csv',
-  2025: 'cozinhas_com_geolocalizacao_2025_teste.csv',
+  2025: 'cozinhas_com_geolocalizacao_2025.csv',
   2026: 'cozinhas_com_geolocalizacao_all.csv',
 };
 
@@ -232,7 +228,7 @@ const cache = new Map<CozinhaYear, StaticCozinhaSource[]>();
  * @throws If the CSV header does not match the expected columns.
  *
  * @example
- * const cozinhas = await readStaticCozinhas({ year: 2024 });
+ * const cozinhas = await readStaticCozinhas({ year: 2025 });
  * const comCoordenadas = cozinhas.filter((c) => c.latitude !== null);
  */
 export const readStaticCozinhas = async (

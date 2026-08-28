@@ -24,6 +24,14 @@ type KitchensByYear = {
   loading: boolean;
   /** The available snapshot years (empty until discovered). */
   years: number[];
+  /**
+   * Every year loaded so far, keyed by year. Callers that derive a per-`codigo`
+   * lookup used to paint the points must read from this, not from `points`
+   * alone: during a year change the outgoing year's dots stay on screen (the
+   * layer crossfades, and `points` is briefly `undefined` on a cache miss), so
+   * a lookup built from the selected year alone leaves them unpainted.
+   */
+  collections: Record<number, CozinhasFeatureCollection>;
 };
 
 /**
@@ -35,11 +43,12 @@ type KitchensByYear = {
  * before the year list arrives.
  *
  * @param year - The currently selected time-lapse year.
- * @returns The selected year's points, a loading flag, and the year list.
+ * @returns The selected year's points, a loading flag, the year list, and every
+ *   year loaded so far (`collections`).
  *
  * @example
- * const { points, loading } = useKitchensByYear(2024);
- * // points → the 2024 kitchens FeatureCollection (once loaded)
+ * const { points, loading } = useKitchensByYear(2025);
+ * // points → the 2025 kitchens FeatureCollection (once loaded)
  */
 export const useKitchensByYear = (year: number): KitchensByYear => {
   const [years, setYears] = React.useState<number[]>([]);
@@ -101,5 +110,6 @@ export const useKitchensByYear = (year: number): KitchensByYear => {
     points: cache[year],
     loading: !cache[year],
     years,
+    collections: cache,
   };
 };

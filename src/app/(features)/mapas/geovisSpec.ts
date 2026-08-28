@@ -1,7 +1,3 @@
-/* eslint-disable max-lines -- Full geovis spec assembly: sources, layers,
-   mapData joins, legends and control for every map mode, built here as one
-   cohesive unit. Grows a few lines per new map variant; splitting the mode
-   branches would scatter the spec and hurt readability. Tracked as a follow-up. */
 import type {
   GeoJSONSource,
   HoverTooltipConfig,
@@ -11,7 +7,6 @@ import type {
   VisualizationSpec,
 } from '@ttoss/geovis';
 
-import { mapTokens } from '@/config/theme';
 import type {
   cadinsanByCity,
   cafByCity,
@@ -78,8 +73,6 @@ type MapOverlays = {
   };
   /** Hover tooltip renderer for individual kitchen points (`pontos` and `assentamentos` modes). */
   cozinhaTooltipRender?: HoverTooltipConfig['render'];
-  /** Hover tooltip renderer for individual CAF area points (`cafs` mode). */
-  cafTooltipRender?: HoverTooltipConfig['render'];
   /**
    * `codigo → emFuncionamento` (source-native status text) for every kitchen
    * point, used to build the `cozinhas-status` join that colors the points by
@@ -182,8 +175,8 @@ const POINTS_LAYER: VisualizationLayer = {
  * `assentamentos` (points over the settlements), so the toggle defaults on
  * there. In `circulos` the primary layer is the proportional-circle overlay
  * (always visible, never toggled); the points are an *opt-in overlay* there,
- * so the toggle starts off — as it does on every choropleth and on `cafs`,
- * where the points layer is present but hidden until the user reveals it.
+ * so the toggle starts off — as it does on every choropleth, where the points
+ * layer is present but hidden until the user reveals it.
  *
  * The geovis control keys its remembered state by `item.id`, so `defaultActive`
  * only decides the initial state *before the first toggle*; after the user
@@ -358,50 +351,6 @@ const buildAssentamentosLayer = (
   };
 };
 
-/** GeoJSON source of CAF area points and the join that promotes `nrCaf`. */
-const CAFS_SOURCE_ID = 'cafs';
-const CAFS_POINTS_MAP_DATA_ID = 'cafs-pts-promote';
-
-/**
- * Layer id of the CAF area points layer. Exported so consumers can filter
- * interactions to CAF-point clicks.
- */
-export const CAFS_POINTS_LAYER_ID = 'cafs-pts';
-
-/**
- * CAF point color: the steel-blue (position 9) from the dataviz `categorical`
- * palette. A cool hue chosen to stay distinct from the kitchen points' warm
- * green/amber/red status colors when both overlays are shown together in `cafs`
- * mode.
- */
-const CAF_POINT_COLOR = mapTokens.dataviz.color.categorical[1][8];
-
-/**
- * The CAF area points layer. Steel-blue dots with a light halo rendered in `cafs`
- * mode. Static (no data-driven paint); each point carries all tooltip fields
- * directly in `properties`. The steel-blue (see {@link CAF_POINT_COLOR}) sets
- * them apart from the status-colored kitchen points.
- *
- * Declares `click: {}` to opt into geovis interactive-layer registration,
- * which also enables hover-tooltip tracking on point layers.
- */
-const CAFS_LAYER: VisualizationLayer = {
-  id: CAFS_POINTS_LAYER_ID,
-  sourceId: CAFS_SOURCE_ID,
-  geometry: 'point',
-  paint: {
-    circleColor: CAF_POINT_COLOR,
-    circleRadius: 4,
-    circleOpacity: 0.9,
-    circleStrokeColor: '#FAF9F7',
-    circleStrokeWidth: 1.2,
-  },
-  click: {},
-  clickAnchor: {
-    color: CAF_POINT_COLOR,
-  },
-};
-
 /** GeoJSON source + join key for the proportional-circle (bubble) overlay. */
 const BUBBLES_SOURCE_ID = 'cozinhas-bubbles';
 const BUBBLES_MAP_DATA_ID = 'cozinhas-bolhas-data';
@@ -452,12 +401,6 @@ const SOURCES: GeoJSONSource[] = [
     type: 'geojson',
     data: '/api/cozinhas/bolhas',
     attribution: '© Cozinhas Solidárias',
-  },
-  {
-    id: CAFS_SOURCE_ID,
-    type: 'geojson',
-    data: '/api/cafs',
-    attribution: '© CAF / Cadastro Ambiental Rural',
   },
 ];
 
@@ -579,7 +522,6 @@ const buildOverlayLayers = ({
     POINTS_LAYER,
     overlays.cozinhaTooltipRender
   );
-  const cafsLayer = withHoverTooltip(CAFS_LAYER, overlays.cafTooltipRender);
 
   if (mode === 'assentamentos') {
     // Bottom → top: near-white land backdrop, filled polygons, crisp outline.
@@ -597,10 +539,6 @@ const buildOverlayLayers = ({
     ...buildBubblesLayer(maxQuantidade),
     visible: mode === 'circulos',
   });
-
-  if (mode === 'cafs') {
-    layers.push(cafsLayer);
-  }
 
   // Kitchen points: always present and always added AFTER the bubbles, so they
   // render on top of the proportional circles. Visible where they are the
@@ -654,14 +592,6 @@ const buildMapData = ({
           return { geometryId: codigo, value: cozinhaStatusLabel(raw) };
         }
       ),
-    },
-    // Same promotion pattern for CAF points: promotes `nrCaf` to `feature.id`
-    // so hovers report it as `MapHoverInfo.featureId` for tooltip lookup.
-    {
-      mapDataId: CAFS_POINTS_MAP_DATA_ID,
-      mapId: CAFS_SOURCE_ID,
-      joinKey: 'nrCaf',
-      data: [],
     },
   ];
 

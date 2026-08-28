@@ -536,8 +536,7 @@ export type MapMode =
   | 'coropletico-idhm-educacao-frequencia'
   | 'pontos'
   | 'circulos'
-  | 'assentamentos'
-  | 'cafs';
+  | 'assentamentos';
 
 const CHOROPLETH_LEGEND_ID = 'legenda-cozinhas';
 const RATE_LEGEND_ID = 'legenda-taxa';

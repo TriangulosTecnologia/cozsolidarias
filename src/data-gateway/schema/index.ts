@@ -1,11 +1,4 @@
 export type { cadinsanByCity } from './cadinsanByCity';
-export type {
-  CafAreaFeature,
-  CafAreaProperties,
-  CafDetalhe,
-  CafProducaoItem,
-  CafsFeatureCollection,
-} from './caf';
 export type { cafByCity } from './cafByCity';
 export type {
   CatalogueAccessLevelContract,

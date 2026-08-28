@@ -1,10 +1,5 @@
 'use client';
 
-/* eslint-disable max-lines -- The map page wires the whole workspace in one
-   place: sidebar sections, bootstrap fetches, selection state and the
-   time-lapse. Splitting it would scatter tightly coupled state across files.
-   Tracked as a follow-up. */
-
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 import { Box } from '@chakra-ui/react';
@@ -21,9 +16,7 @@ import { ThemeUIProvider } from 'theme-ui';
 
 import type {
   cadinsanByCity,
-  CafAreaFeature,
   cafByCity,
-  CafsFeatureCollection,
   CozinhasFeatureCollection,
   kitchenRateByCity,
   MunicipioIvs,
@@ -31,8 +24,7 @@ import type {
 
 import { type AssentamentoAtributo, type MapMode } from './geovisSpec';
 import {
-  CAF_RIGHT_SIDEBAR,
-  COZINHA_RIGHT_SIDEBAR,
+  buildCozinhaRightSidebar,
   modeShowsCozinhaDetail,
 } from './mapaDetailSidebars';
 import MapLoadingIndicator from './MapLoadingIndicator';
@@ -196,11 +188,6 @@ const LEFT_SIDEBAR: NonNullable<GeovisWorkspaceConfig['leftSidebar']> = {
                 label: 'Assentamentos e cozinhas',
                 icon: 'lucide:house',
               },
-              {
-                value: 'cafs',
-                label: 'CAFs',
-                icon: 'lucide:sprout',
-              },
             ],
           },
         ],
@@ -224,7 +211,7 @@ const LEFT_SIDEBAR: NonNullable<GeovisWorkspaceConfig['leftSidebar']> = {
               kind: 'timeline',
               // Drives the shared selection so the map reacts to the year.
               menuId: YEAR_MENU_ID,
-              min: 2022,
+              min: 2025,
               max: 2026,
               step: 1,
               defaultValue: DEFAULT_YEAR,
@@ -265,12 +252,6 @@ type MapBootstrap = {
   ivs: MunicipioIvs[];
   nomes: NomesPorCodigo;
   settlements: AssentamentoAtributo[];
-  /** `codigo → nome` lookup for kitchen point hover tooltips. */
-  cozinhaNames: Record<string, string>;
-  /** `codigo → emFuncionamento` lookup that colors the kitchen points by status. */
-  cozinhaStatus: Record<string, string>;
-  /** `nrCaf → CafAreaFeature properties` lookup for CAF hover tooltips. */
-  cafProps: Record<string, CafAreaFeature['properties']>;
   /** Per-município CAF shares for the "% dos CAFs do Brasil" choropleth. */
   cafsByCity: cafByCity[];
   /** Per-município CADINSAN food-insecurity shares for the food-insecurity choropleths. */
@@ -282,9 +263,6 @@ const EMPTY_BOOTSTRAP: MapBootstrap = {
   ivs: [],
   nomes: {},
   settlements: [],
-  cozinhaNames: {},
-  cozinhaStatus: {},
-  cafProps: {},
   cafsByCity: [],
   cadinsanByCity: [],
 };
@@ -298,64 +276,32 @@ const EMPTY_BOOTSTRAP: MapBootstrap = {
  */
 const fetchMapData = async (): Promise<MapBootstrap> => {
   try {
-    const [
-      data,
-      ivs,
-      nomes,
-      settlements,
-      cozinhasGeoJSON,
-      cafsGeoJSON,
-      cafsByCity,
-      cadinsanByCity,
-    ] = await Promise.all([
-      fetch('/api/cozinhas/por-municipio').then((response) => {
-        return response.json() as Promise<kitchenRateByCity[]>;
-      }),
-      fetch('/api/municipios/ivs').then((response) => {
-        return response.json() as Promise<MunicipioIvs[]>;
-      }),
-      fetch('/geo/municipios-nomes.json').then((response) => {
-        return response.json() as Promise<NomesPorCodigo>;
-      }),
-      fetch('/geo/assentamentos-atributos.json').then((response) => {
-        return response.json() as Promise<AssentamentoAtributo[]>;
-      }),
-      fetch('/api/cozinhas').then((response) => {
-        return response.json() as Promise<CozinhasFeatureCollection>;
-      }),
-      fetch('/api/cafs').then((response) => {
-        return response.json() as Promise<CafsFeatureCollection>;
-      }),
-      fetch('/api/cafs/por-municipio').then((response) => {
-        return response.json() as Promise<cafByCity[]>;
-      }),
-      fetch('/api/cadinsan/por-municipio').then((response) => {
-        return response.json() as Promise<cadinsanByCity[]>;
-      }),
-    ]);
-    const cozinhaNames = Object.fromEntries(
-      cozinhasGeoJSON.features.map((f) => {
-        return [f.properties.codigo, f.properties.nome];
-      })
-    );
-    const cozinhaStatus = Object.fromEntries(
-      cozinhasGeoJSON.features.map((f) => {
-        return [f.properties.codigo, f.properties.emFuncionamento];
-      })
-    );
-    const cafProps = Object.fromEntries(
-      cafsGeoJSON.features.map((f) => {
-        return [f.properties.nrCaf, f.properties];
-      })
-    );
+    const [data, ivs, nomes, settlements, cafsByCity, cadinsanByCity] =
+      await Promise.all([
+        fetch('/api/cozinhas/por-municipio').then((response) => {
+          return response.json() as Promise<kitchenRateByCity[]>;
+        }),
+        fetch('/api/municipios/ivs').then((response) => {
+          return response.json() as Promise<MunicipioIvs[]>;
+        }),
+        fetch('/geo/municipios-nomes.json').then((response) => {
+          return response.json() as Promise<NomesPorCodigo>;
+        }),
+        fetch('/geo/assentamentos-atributos.json').then((response) => {
+          return response.json() as Promise<AssentamentoAtributo[]>;
+        }),
+        fetch('/api/cafs/por-municipio').then((response) => {
+          return response.json() as Promise<cafByCity[]>;
+        }),
+        fetch('/api/cadinsan/por-municipio').then((response) => {
+          return response.json() as Promise<cadinsanByCity[]>;
+        }),
+      ]);
     return {
       data,
       ivs,
       nomes,
       settlements,
-      cozinhaNames,
-      cozinhaStatus,
-      cafProps,
       cafsByCity,
       cadinsanByCity,
     };
@@ -376,15 +322,6 @@ const MapaPlayground = () => {
   const [assentamentos, setAssentamentos] = React.useState<
     AssentamentoAtributo[]
   >([]);
-  const [cozinhaNames, setCozinhaNames] = React.useState<
-    Record<string, string>
-  >({});
-  const [cozinhaStatus, setCozinhaStatus] = React.useState<
-    Record<string, string>
-  >({});
-  const [cafProps, setCafProps] = React.useState<
-    Record<string, CafAreaFeature['properties']>
-  >({});
   const [cafsByCity, setCafsByCity] = React.useState<cafByCity[]>([]);
   const [cadinsanByCity, setCadinsanByCity] = React.useState<cadinsanByCity[]>(
     []
@@ -406,19 +343,43 @@ const MapaPlayground = () => {
 
   // Kitchen points for the selected year, cached in memory and prefetched for
   // every year so scrubbing and the play animation swap without a round-trip.
-  const { points: cozinhasPoints } = useKitchensByYear(year);
+  const { points: cozinhasPoints, collections } = useKitchensByYear(year);
+
+  // `codigo → nome` and `codigo → emFuncionamento`. The status lookup is the
+  // join that colors the points, so a código it lacks falls through to the
+  // masked (white) fallback — which is why this spans *every* loaded year
+  // rather than just the selected one: on a year change the outgoing dots
+  // linger through the layer's crossfade (and `cozinhasPoints` is briefly
+  // undefined on a cache miss), so a single-year lookup would blank them out
+  // mid-transition. The selected year is merged last so it wins wherever a
+  // kitchen's status differs between snapshots.
+  const { cozinhaNames, cozinhaStatus } = React.useMemo(() => {
+    const names: Record<string, string> = {};
+    const status: Record<string, string> = {};
+
+    const absorb = (collection?: CozinhasFeatureCollection) => {
+      for (const feature of collection?.features ?? []) {
+        names[feature.properties.codigo] = feature.properties.nome;
+        status[feature.properties.codigo] = feature.properties.emFuncionamento;
+      }
+    };
+
+    for (const collection of Object.values(collections)) {
+      absorb(collection);
+    }
+    absorb(collections[year]);
+
+    return { cozinhaNames: names, cozinhaStatus: status };
+  }, [collections, year]);
 
   const config = React.useMemo((): GeovisWorkspaceConfig => {
     return {
       // Full-bleed map: no card border/radius so it fills the container.
       appearance: 'bare',
       leftSidebar: LEFT_SIDEBAR,
-      rightSidebar:
-        mode === 'cafs'
-          ? CAF_RIGHT_SIDEBAR
-          : modeShowsCozinhaDetail(mode)
-            ? COZINHA_RIGHT_SIDEBAR
-            : undefined,
+      rightSidebar: modeShowsCozinhaDetail(mode)
+        ? buildCozinhaRightSidebar(year)
+        : undefined,
       // geovis-workspace 0.6.x adds `legend`, `warnings` and `metadata` slots to
       // the right sidebar, and it stays open while *any* of them has content —
       // `metadata` always does (`spec.sources.length > 0`), so it never
@@ -432,7 +393,9 @@ const MapaPlayground = () => {
         metadata: { hidden: true },
       },
     };
-  }, [mode]);
+    // `year` is a dependency because the kitchen detail sidebar resolves the
+    // clicked código inside that year's snapshot.
+  }, [mode, year]);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -445,9 +408,6 @@ const MapaPlayground = () => {
       setIvsByCity(bootstrap.ivs);
       setNomesPorCodigo(bootstrap.nomes);
       setAssentamentos(bootstrap.settlements);
-      setCozinhaNames(bootstrap.cozinhaNames);
-      setCozinhaStatus(bootstrap.cozinhaStatus);
-      setCafProps(bootstrap.cafProps);
       setCafsByCity(bootstrap.cafsByCity);
       setCadinsanByCity(bootstrap.cadinsanByCity);
       setMounted(true);
@@ -464,7 +424,6 @@ const MapaPlayground = () => {
     nomesPorCodigo,
     assentamentos,
     cozinhaNames,
-    cafProps,
     cozinhaStatus,
     cafByCity: cafsByCity,
     cadinsanByCity,
