@@ -21,11 +21,12 @@ describe('DadosPage', () => {
     const user = userEvent.setup();
     renderWithChakra(await DadosPage());
 
-    // Open the one restricted dataset: its origin is an internal spreadsheet
-    // holding the personal data of every kitchen, so it is the worst case.
+    // Open a restricted dataset: its origin is an internal spreadsheet holding
+    // the personal data of every kitchen, so it is the worst case. Pinned to
+    // the 2026 snapshot because the 2025 one shares the title stem.
     await user.click(
       screen.getByRole('button', {
-        name: /Cozinhas Solidárias geolocalizadas/,
+        name: /Cozinhas Solidárias geolocalizadas \(2026\)/,
       })
     );
     await screen.findByRole('dialog');
@@ -80,9 +81,11 @@ describe('DadosPage', () => {
     const user = userEvent.setup();
     renderWithChakra(await DadosPage());
 
+    // The 2026 snapshot specifically: the 2025 one shares the title stem, and
+    // the row count asserted below is this one's.
     await user.click(
       screen.getByRole('button', {
-        name: /Cozinhas Solidárias geolocalizadas/,
+        name: /Cozinhas Solidárias geolocalizadas \(2026\)/,
       })
     );
 

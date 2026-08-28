@@ -126,7 +126,7 @@
       "id": "cozinhas_geolocalizadas",
       "collection_id": "dados_primarios",
       "slug": "cozinhas-geolocalizadas",
-      "title": "Cozinhas Solidárias geolocalizadas",
+      "title": "Cozinhas Solidárias geolocalizadas (2026)",
       "description": "Cadastro das cozinhas solidárias com endereço, situação de funcionamento, público atendido e coordenadas geográficas. Dado-núcleo do mapa.",
       "file": "src/data-source-static/data/cozinhas_com_geolocalizacao_all.csv",
       "format": "CSV",
@@ -236,6 +236,142 @@
           {
             "name": "Quantidade refeições produzidas por dia de trabalho",
             "description": "Refeições produzidas por dia de trabalho",
+            "unit": "refeições"
+          },
+          {
+            "name": "Latitude",
+            "description": "Latitude",
+            "role": "geometry",
+            "sensitive": true
+          },
+          {
+            "name": "Longitude",
+            "description": "Longitude",
+            "role": "geometry",
+            "sensitive": true
+          }
+        ]
+      }
+    },
+    "cozinhas_geolocalizadas_2025": {
+      "id": "cozinhas_geolocalizadas_2025",
+      "collection_id": "dados_primarios",
+      "slug": "cozinhas-geolocalizadas-2025",
+      "title": "Cozinhas Solidárias geolocalizadas (2025)",
+      "description": "Cadastro completo das cozinhas solidárias em 2025, cobrindo todas as situações do fluxo (Mapeada, Retirada, Habilitada, Não Habilitada e demais), com endereço, público atendido e coordenadas geográficas. Alimenta o ano de 2025 da linha do tempo do mapa.",
+      "file": "src/data-source-static/data/cozinhas_com_geolocalizacao_2025.csv",
+      "format": "CSV",
+      "source": {
+        "url": "https://docs.google.com/spreadsheets/d/1fEt1zRYwajWPqRGDXsHnUoHtEktxKeDC/edit?rtpof=true&sd=true&gid=297639936#gid=297639936",
+        "notes": "Dado primário coletado pela equipe do projeto;"
+      },
+      "temporal": {
+        "status": "described",
+        "extent": [["2025-01-01", "2025-12-31"]],
+        "grain": "P1Y",
+        "frequency": "one_time",
+        "history": "snapshot",
+        "timezone": "America/Sao_Paulo"
+      },
+      "spatial": {
+        "status": "described",
+        "extent": [
+          {
+            "scheme": "iso3166-1",
+            "code": "BR"
+          }
+        ],
+        "coverage": "partial",
+        "grain": {
+          "scheme": "custom",
+          "code": "kitchen",
+          "label": "cozinha"
+        },
+        "geometry": "point",
+        "precision": "unknown",
+        "field": "Código da Cozinha"
+      },
+      "access": {
+        "level": "restricted",
+        "contains_personal_data": true,
+        "notes": "Contém endereço, CEP, CNPJ, e-mail e coordenadas — publicar apenas de forma agregada. Abrange todas as situações do cadastro, diferente do recorte de habilitadas do snapshot mais recente. Da planilha de origem foram descartados 257 registros com coordenadas fora do território brasileiro e 1038 sem resposta em \"A cozinha está em funcionamento atualmente?\", campo que define a cor do ponto no mapa."
+      },
+      "stats": {
+        "rows": 4618,
+        "size_bytes": 1685548,
+        "checkSum": "sha256:9a6a22ff1be6719326661ba253eec852946f6bd4387e027e14f12a5e3de5260e"
+      },
+      "schema": {
+        "fields": [
+          {
+            "name": "Código da Cozinha",
+            "description": "Identificador da cozinha",
+            "role": "identifier"
+          },
+          {
+            "name": "Nome da Cozinha",
+            "description": "Nome da cozinha"
+          },
+          {
+            "name": "Endereço da Cozinha",
+            "description": "Logradouro",
+            "sensitive": true
+          },
+          {
+            "name": "Bairro da Cozinha",
+            "description": "Bairro"
+          },
+          {
+            "name": "CEP",
+            "description": "CEP",
+            "sensitive": true
+          },
+          {
+            "name": "Município da Cozinha",
+            "description": "Município"
+          },
+          {
+            "name": "Código IBGE",
+            "description": "Código IBGE do município — ausente na planilha de origem deste snapshot, portanto vazio em todos os registros.",
+            "role": "identifier"
+          },
+          {
+            "name": "UF",
+            "description": "Unidade federativa"
+          },
+          {
+            "name": "Email",
+            "description": "E-mail de contato",
+            "sensitive": true
+          },
+          {
+            "name": "CNPJ",
+            "description": "CNPJ da organização",
+            "sensitive": true
+          },
+          {
+            "name": "A cozinha está em funcionamento atualmente?",
+            "description": "Situação operacional"
+          },
+          {
+            "name": "Em quantos dias da semana a Cozinha Solidária funciona?",
+            "description": "Dias de funcionamento"
+          },
+          {
+            "name": "Situação",
+            "description": "Situação no fluxo de cadastro"
+          },
+          {
+            "name": "Público Atendido",
+            "description": "Tipo de público atendido"
+          },
+          {
+            "name": "Público Total Atendido",
+            "description": "Total de pessoas atendidas"
+          },
+          {
+            "name": "Quantidade refeições produzidas por dia de trabalho",
+            "description": "Refeições produzidas por dia de trabalho — ausente na planilha de origem deste snapshot, portanto vazio em todos os registros.",
             "unit": "refeições"
           },
           {

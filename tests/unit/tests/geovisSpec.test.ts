@@ -837,25 +837,6 @@ describe('buildSpec', () => {
     );
   });
 
-  test('cafs renders the CAF points overlay plus a hidden kitchen overlay', () => {
-    const spec = buildSpec(BY_CITY, 'cafs');
-
-    expect(layerIds(spec)).toContain('cafs-pts');
-    expect(mapDataById(spec, 'cozinhas-por-municipio')?.data).toEqual([]);
-
-    // CAF points are steel-blue, set apart from the status-colored kitchen points.
-    const cafs = spec.layers.find((layer) => {
-      return layer.id === 'cafs-pts';
-    });
-    expect(cafs?.paint?.circleColor).toBe('#5B87A8');
-
-    // Kitchens are an opt-in overlay here: present but hidden until toggled.
-    const points = spec.layers.find((layer) => {
-      return layer.id === 'cozinhas-pts';
-    });
-    expect(points?.visible).toBe(false);
-  });
-
   test('choropleths render the kitchen points as a hidden opt-in overlay', () => {
     const modes = [
       'coropletico',
@@ -908,14 +889,13 @@ describe('buildSpec', () => {
       'circulos',
       'coropletico',
       'coropletico-ivs',
-      'cafs',
     ] as const) {
       expect(cozinhasItem(mode)?.defaultActive).toBe(false);
     }
   });
 
   test('the "Camadas" kitchens toggle controls only the points layer, never the bubbles', () => {
-    for (const mode of ['pontos', 'circulos', 'coropletico', 'cafs'] as const) {
+    for (const mode of ['pontos', 'circulos', 'coropletico'] as const) {
       const item = buildSpec(BY_CITY, mode).control?.items.find((entry) => {
         return entry.id === 'cozinhas';
       });

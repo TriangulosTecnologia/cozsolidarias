@@ -1,7 +1,5 @@
 import { readStaticCadinsanMunicipal } from '../data-source-static/readStaticCadinsanMunicipal';
 import { readStaticCadUnico } from '../data-source-static/readStaticCadUnico';
-import { readStaticCafProducao } from '../data-source-static/readStaticCafProducao';
-import { readStaticCafs } from '../data-source-static/readStaticCafs';
 import { readStaticCafsPorMunicipio } from '../data-source-static/readStaticCafsPorMunicipio';
 import {
   COZINHAS_YEARS,
@@ -17,8 +15,6 @@ import { readStaticPopulacao } from '../data-source-static/readStaticPopulacao';
 import type {
   cadinsanByCity,
   cafByCity,
-  CafDetalhe,
-  CafsFeatureCollection,
   CatalogueContract,
   CozinhaDetalhe,
   CozinhasBubblesFeatureCollection,
@@ -28,8 +24,6 @@ import type {
 } from './schema';
 import { toAppCatalogue } from './transformers/toAppCatalogue';
 import { toCadinsanPorMunicipio } from './transformers/toCadinsanPorMunicipio';
-import { toCafDetalhe } from './transformers/toCafDetalhe';
-import { toCafsFeatureCollection } from './transformers/toCafsFeatureCollection';
 import { toCafsPorMunicipio } from './transformers/toCafsPorMunicipio';
 import { toCozinhaDetalhe } from './transformers/toCozinhaDetalhe';
 import { toCozinhasBubbles } from './transformers/toCozinhasBubbles';
@@ -43,15 +37,6 @@ import { toMunicipioIvs } from './transformers/toMunicipioIvs';
 
 /** Gateway interface exposing canonical read functions. */
 export type DataGateway = {
-  /** Returns CAF area locations as a GeoJSON FeatureCollection of Points. */
-  getCafs: () => Promise<CafsFeatureCollection>;
-  /**
-   * Returns the production and income detail of a single CAF by its
-   * registration number (`nrCaf`), or `null` when no production records exist
-   * for that CAF. Backs the click-to-inspect endpoint
-   * (`GET /api/cafs/[nrCaf]`).
-   */
-  getCafByNrCaf: (nrCaf: string) => Promise<CafDetalhe | null>;
   /**
    * Returns one row per município with its distinct-CAF count and the derived
    * share (%) of Brazil's CAFs, for the CAF share choropleth. Reads the
@@ -84,11 +69,19 @@ export type DataGateway = {
   getCozinhas: (year?: number) => Promise<CozinhasFeatureCollection>;
   /**
    * Returns the full detail of a single cozinha by its registration code
-   * (`Código da Cozinha`, unique across the snapshot), or `null` when no cozinha
-   * carries that code. Backs the click-to-inspect endpoint
+   * (`Código da Cozinha`, unique within a snapshot), or `null` when that
+   * snapshot has no cozinha with the code. Backs the click-to-inspect endpoint
    * (`GET /api/cozinhas/[codigo]`).
+   *
+   * The lookup is scoped to `year` (see {@link getCozinhasYears}) because the
+   * snapshots cover different populations: a código plotted for one year is
+   * frequently absent from another, so searching the wrong year returns `null`
+   * for a point the user can plainly see on the map.
    */
-  getCozinhaByCodigo: (codigo: string) => Promise<CozinhaDetalhe | null>;
+  getCozinhaByCodigo: (
+    codigo: string,
+    year?: number
+  ) => Promise<CozinhaDetalhe | null>;
   /**
    * Returns one row per município with its cozinha count, Census population,
    * Cadastro Único registrations and the derived metrics (per-100k-inhabitants
@@ -136,10 +129,7 @@ const isKnownSource = (value: string): value is KnownSource => {
  * const cozinhas = await gateway.getCozinhas();
  * // { type: 'FeatureCollection', features: [...] }
  */
-/* eslint-disable-next-line max-lines-per-function -- The factory is a flat
-   map of read functions to their source implementation; each new dataset
-   adds a few lines. Splitting it would hide the one place that shows the
-   whole contract at a glance. Tracked as a follow-up. */
+
 export const createDataGateway = (): DataGateway => {
   const raw = process.env['DATA_SOURCE'] ?? 'static';
 
@@ -179,18 +169,6 @@ export const createDataGateway = (): DataGateway => {
     };
 
     return {
-      getCafs: async () => {
-        const sources = await readStaticCafs();
-        return toCafsFeatureCollection(sources);
-      },
-      getCafByNrCaf: async (nrCaf) => {
-        const sources = await readStaticCafProducao();
-        const matched = sources.filter((s) => {
-          return s.nrCaf === nrCaf;
-        });
-        if (matched.length === 0) return null;
-        return toCafDetalhe({ nrCaf, sources: matched });
-      },
       getCafsPorMunicipio: async () => {
         return toCafsPorMunicipio(await readStaticCafsPorMunicipio());
       },
@@ -204,8 +182,8 @@ export const createDataGateway = (): DataGateway => {
         const sources = await readStaticCozinhas({ year: resolveYear(year) });
         return toCozinhasFeatureCollection(sources);
       },
-      getCozinhaByCodigo: async (codigo) => {
-        const sources = await readStaticCozinhas();
+      getCozinhaByCodigo: async (codigo, year) => {
+        const sources = await readStaticCozinhas({ year: resolveYear(year) });
         const match = sources.find((source) => {
           return source.codigo === codigo;
         });

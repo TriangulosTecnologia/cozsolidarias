@@ -1,25 +1,4 @@
 /**
- * Shape of a single CAF (Cadastro Ambiental Rural) area record after the
- * semicolon-delimited CSV snapshot is parsed. Numeric fields (`nrArea`,
- * `latitude`, `longitude`) are coerced to `number | null`; all others are
- * strings.
- */
-export type StaticCafAreaSource = {
-  nrCaf: string;
-  dsTipoArea: string;
-  dsTipoUnidadeMedida: string;
-  nrArea: number | null;
-  cdMunicipio: string;
-  sgUf: string;
-  nmMunicipio: string;
-  dsTipoLocalizacaoArea: string;
-  dsCondicaoDominio: string;
-  stImovelPrincipal: string;
-  latitude: number | null;
-  longitude: number | null;
-};
-
-/**
  * Shape of one município's pre-aggregated CAF count, read from the
  * `caf-por-municipio.json` snapshot generated offline by
  * `scripts/generateCafPorMunicipio.ts` (see that script for the aggregation
@@ -58,21 +37,6 @@ export type StaticCadinsanMunicipioSource = {
   absolutoSemPbf: number;
   /** Total CadÚnico registrations in the município (`Cadastros_Cadunico`); the share denominator. */
   cadastrosCadunico: number;
-};
-
-/**
- * Shape of a single CAF (Cadastro Ambiental Rural) production/income record
- * after the semicolon-delimited CSV snapshot is parsed. Numeric fields
- * (`vlRendaAuferida`, `vlRendaEstimada`) are coerced to `number | null`; all
- * others are strings.
- */
-export type StaticCafProducaoSource = {
-  nrCaf: string;
-  categoriaRenda: string;
-  dsTipoRenda: string;
-  dsProduto: string;
-  vlRendaAuferida: number | null;
-  vlRendaEstimada: number | null;
 };
 
 /**
