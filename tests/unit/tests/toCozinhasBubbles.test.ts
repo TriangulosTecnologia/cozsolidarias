@@ -9,6 +9,7 @@ const aggregate = (
     codigoIbge: '3550308',
     municipio: 'São Paulo',
     quantidade: 1,
+    pessoasAtendidas: null,
     centroid: [-46.6, -23.5],
     ...overrides,
   };

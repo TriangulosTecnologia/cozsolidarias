@@ -4,6 +4,7 @@ import {
   cozinhasPercentualDoBrasil,
   cozinhasPorCemMil,
   cozinhasPorDezMilCadUnico,
+  parsePessoasAtendidas,
   pessoasCadUnicoPorCozinha,
   projectComTaxa,
   toCozinhasPorMunicipio,
@@ -14,9 +15,15 @@ import type { StaticCozinhaSource } from 'src/data-source-static/types';
 const coz = (
   longitude: number | null,
   latitude: number | null,
-  municipio = 'Municipality'
+  municipio = 'Municipality',
+  publicoTotalAtendido = ''
 ): StaticCozinhaSource => {
-  return { longitude, latitude, municipio } as StaticCozinhaSource;
+  return {
+    longitude,
+    latitude,
+    municipio,
+    publicoTotalAtendido,
+  } as StaticCozinhaSource;
 };
 
 /** A square Polygon municipality feature `[minLng, minLat]` of the given size. */
@@ -55,7 +62,12 @@ describe('toCozinhasPorMunicipio', () => {
     const result = toCozinhasPorMunicipio([coz(5, 5, 'Alpha')], municipios);
 
     expect(result).toEqual([
-      { codigoIbge: '111', municipio: 'Alpha', quantidade: 1 },
+      {
+        codigoIbge: '111',
+        municipio: 'Alpha',
+        quantidade: 1,
+        pessoasAtendidas: null,
+      },
     ]);
   });
 
@@ -75,11 +87,13 @@ describe('toCozinhasPorMunicipio', () => {
       codigoIbge: '111',
       municipio: 'Alpha',
       quantidade: 1,
+      pessoasAtendidas: null,
     });
     expect(result).toContainEqual({
       codigoIbge: '222',
       municipio: 'Beta',
       quantidade: 1,
+      pessoasAtendidas: null,
     });
   });
 
@@ -92,7 +106,12 @@ describe('toCozinhasPorMunicipio', () => {
     );
 
     expect(result).toEqual([
-      { codigoIbge: '111', municipio: 'Alpha', quantidade: 1 },
+      {
+        codigoIbge: '111',
+        municipio: 'Alpha',
+        quantidade: 1,
+        pessoasAtendidas: null,
+      },
     ]);
   });
 
@@ -105,7 +124,12 @@ describe('toCozinhasPorMunicipio', () => {
     );
 
     expect(result).toEqual([
-      { codigoIbge: '111', municipio: 'Alpha', quantidade: 1 },
+      {
+        codigoIbge: '111',
+        municipio: 'Alpha',
+        quantidade: 1,
+        pessoasAtendidas: null,
+      },
     ]);
   });
 
@@ -118,7 +142,12 @@ describe('toCozinhasPorMunicipio', () => {
     );
 
     expect(result).toEqual([
-      { codigoIbge: '111', municipio: 'São Paulo', quantidade: 3 },
+      {
+        codigoIbge: '111',
+        municipio: 'São Paulo',
+        quantidade: 3,
+        pessoasAtendidas: null,
+      },
     ]);
   });
 
@@ -131,7 +160,12 @@ describe('toCozinhasPorMunicipio', () => {
     );
 
     expect(result).toEqual([
-      { codigoIbge: '111', municipio: 'Valid record', quantidade: 3 },
+      {
+        codigoIbge: '111',
+        municipio: 'Valid record',
+        quantidade: 3,
+        pessoasAtendidas: null,
+      },
     ]);
   });
 
@@ -170,7 +204,12 @@ describe('toCozinhasPorMunicipio', () => {
     );
 
     expect(result).toEqual([
-      { codigoIbge: '333', municipio: 'Island', quantidade: 1 },
+      {
+        codigoIbge: '333',
+        municipio: 'Island',
+        quantidade: 1,
+        pessoasAtendidas: null,
+      },
     ]);
   });
 
@@ -205,7 +244,12 @@ describe('toCozinhasPorMunicipio', () => {
     );
 
     expect(result).toEqual([
-      { codigoIbge: '444', municipio: 'On the solid edge', quantidade: 1 },
+      {
+        codigoIbge: '444',
+        municipio: 'On the solid edge',
+        quantidade: 1,
+        pessoasAtendidas: null,
+      },
     ]);
   });
 
@@ -232,6 +276,87 @@ describe('toCozinhasPorMunicipio', () => {
     );
 
     expect(result).toEqual([]);
+  });
+
+  test('sums parsed pessoasAtendidas per município', () => {
+    const municipios = collection([square('111', 0, 0, 10)]);
+
+    const result = toCozinhasPorMunicipio(
+      [coz(2, 2, 'Alpha', '200'), coz(3, 3, 'Alpha', '150')],
+      municipios
+    );
+
+    expect(result).toEqual([
+      {
+        codigoIbge: '111',
+        municipio: 'Alpha',
+        quantidade: 2,
+        pessoasAtendidas: 350,
+      },
+    ]);
+  });
+
+  test('sums only the known values, ignoring blank/unparseable ones', () => {
+    const municipios = collection([square('111', 0, 0, 10)]);
+
+    const result = toCozinhasPorMunicipio(
+      [
+        coz(2, 2, 'Alpha', '200'),
+        coz(3, 3, 'Alpha', ''),
+        coz(4, 4, 'Alpha', 'desconhecido'),
+      ],
+      municipios
+    );
+
+    expect(result).toEqual([
+      {
+        codigoIbge: '111',
+        municipio: 'Alpha',
+        quantidade: 3,
+        pessoasAtendidas: 200,
+      },
+    ]);
+  });
+
+  test('leaves pessoasAtendidas as null when no kitchen reports a parseable count', () => {
+    const municipios = collection([square('111', 0, 0, 10)]);
+
+    const result = toCozinhasPorMunicipio(
+      [coz(2, 2, 'Alpha', ''), coz(3, 3, 'Alpha', 'desconhecido')],
+      municipios
+    );
+
+    expect(result).toEqual([
+      {
+        codigoIbge: '111',
+        municipio: 'Alpha',
+        quantidade: 2,
+        pessoasAtendidas: null,
+      },
+    ]);
+  });
+});
+
+describe('parsePessoasAtendidas', () => {
+  test('parses a plain digit string', () => {
+    expect(parsePessoasAtendidas('200')).toBe(200);
+  });
+
+  test('returns null for a blank value', () => {
+    expect(parsePessoasAtendidas('')).toBeNull();
+    expect(parsePessoasAtendidas('   ')).toBeNull();
+  });
+
+  test('returns null for non-numeric text', () => {
+    expect(parsePessoasAtendidas('desconhecido')).toBeNull();
+  });
+
+  test('returns null for a negative number (never coerced to 0)', () => {
+    expect(parsePessoasAtendidas('-5')).toBeNull();
+  });
+
+  test('truncates a decimal value', () => {
+    expect(parsePessoasAtendidas('120.7')).toBe(120);
   });
 });
 
@@ -328,12 +453,14 @@ describe('projectComTaxa', () => {
       codigoIbge: '111',
       municipio: 'Alpha',
       quantidade: 5,
+      pessoasAtendidas: 1_000,
       centroid: [0, 0],
     },
     {
       codigoIbge: '222',
       municipio: 'Beta',
       quantidade: 2,
+      pessoasAtendidas: null,
       centroid: [1, 1],
     },
   ];
@@ -351,6 +478,7 @@ describe('projectComTaxa', () => {
         codigoIbge: '111',
         municipio: 'Alpha',
         quantidade: 5,
+        pessoasAtendidas: 1_000,
         populacao: 100_000,
         porCemMil: 5,
         percentualDoBrasil: 71.43,
@@ -366,6 +494,7 @@ describe('projectComTaxa', () => {
         codigoIbge: '222',
         municipio: 'Beta',
         quantidade: 2,
+        pessoasAtendidas: null,
         populacao: null,
         porCemMil: null,
         percentualDoBrasil: 28.57,

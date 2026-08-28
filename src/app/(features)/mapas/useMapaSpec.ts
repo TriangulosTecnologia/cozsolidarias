@@ -7,7 +7,6 @@ import * as React from 'react';
 
 import type {
   cadinsanByCity,
-  CafAreaFeature,
   cafByCity,
   CozinhasFeatureCollection,
   kitchenRateByCity,
@@ -38,16 +37,12 @@ const municipiosGroup = createBoundaryGroup({
 
 /**
  * Point/circle overlays that must always paint above the boundary outlines: the
- * kitchen points, the proportional circles, and the CAF points. `useBoundaryToggle`
+ * kitchen points and the proportional circles. `useBoundaryToggle`
  * appends the município/estado boundary groups *after* every `buildSpec` layer, so
  * without lifting these back to the top the thin boundary lines would render over
  * them (e.g. município borders drawn over the kitchen points).
  */
-const TOP_OVERLAY_LAYER_IDS = new Set([
-  'cozinhas-pts',
-  'cozinhas-bolhas',
-  'cafs-pts',
-]);
+const TOP_OVERLAY_LAYER_IDS = new Set(['cozinhas-pts', 'cozinhas-bolhas']);
 
 /**
  * Re-orders a spec's layers so the {@link TOP_OVERLAY_LAYER_IDS} overlays sit
@@ -86,7 +81,6 @@ type UseMapaSpecParams = {
   nomesPorCodigo: NomesPorCodigo;
   assentamentos: AssentamentoAtributo[];
   cozinhaNames: Record<string, string>;
-  cafProps: Record<string, CafAreaFeature['properties']>;
   /** `codigo → emFuncionamento` for every kitchen point; colors the points by status. */
   cozinhaStatus: Record<string, string>;
   /** Per-município CAF shares for the "% dos CAFs do Brasil" choropleth. */
@@ -115,7 +109,7 @@ type UseMapaSpecParams = {
  * @returns The geovis {@link VisualizationSpec} for the current mode.
  *
  * @example
- * const spec = useMapaSpec({ kitchenByCity, ivsByCity, nomesPorCodigo, assentamentos, cozinhaNames, cafProps, cozinhaStatus, cafByCity, cadinsanByCity, mode });
+ * const spec = useMapaSpec({ kitchenByCity, ivsByCity, nomesPorCodigo, assentamentos, cozinhaNames, cozinhaStatus, cafByCity, cadinsanByCity, mode });
  * // <GeovisWorkspace visualizationSpec={spec} ... />
  */
 export const useMapaSpec = ({
@@ -124,25 +118,24 @@ export const useMapaSpec = ({
   nomesPorCodigo,
   assentamentos,
   cozinhaNames,
-  cafProps,
   cozinhaStatus,
   cafByCity,
   cadinsanByCity,
   mode,
   cozinhasPoints,
 }: UseMapaSpecParams) => {
-  const { hoverTooltip, assentamentoTooltip, cozinhaTooltip, cafTooltip } =
-    useMapaTooltips({
+  const { hoverTooltip, assentamentoTooltip, cozinhaTooltip } = useMapaTooltips(
+    {
       kitchenByCity,
       nomesPorCodigo,
       assentamentos,
       cozinhaNames,
       cozinhaStatus,
-      cafProps,
       cafByCity,
       cadinsanByCity,
       mode,
-    });
+    }
+  );
 
   const baseSpec = React.useMemo(() => {
     const spec = buildSpec(kitchenByCity, mode, hoverTooltip, ivsByCity, {
@@ -151,7 +144,6 @@ export const useMapaSpec = ({
         hoverRender: assentamentoTooltip,
       },
       cozinhaTooltipRender: cozinhaTooltip,
-      cafTooltipRender: cafTooltip,
       cozinhaStatus,
       cafByCity,
       cadinsanByCity,
@@ -180,7 +172,6 @@ export const useMapaSpec = ({
     assentamentos,
     assentamentoTooltip,
     cozinhaTooltip,
-    cafTooltip,
     cozinhaStatus,
     cafByCity,
     cadinsanByCity,

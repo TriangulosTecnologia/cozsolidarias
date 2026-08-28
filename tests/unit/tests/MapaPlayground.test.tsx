@@ -154,6 +154,7 @@ const BY_CITY: kitchenRateByCity[] = [
     codigoIbge: '3550308',
     municipio: 'São Paulo',
     quantidade: 5,
+    pessoasAtendidas: 1_000,
     populacao: 11_451_999,
     porCemMil: 0.04,
     percentualDoBrasil: 100,
@@ -188,7 +189,7 @@ const CAF_BY_CITY = [
 
 /** Resolves each mount-time fetch to the right shape for the URL. */
 /** Snapshot years served to the time-lapse (`useKitchensByYear`). */
-const YEARS = [2022, 2023, 2024, 2025, 2026];
+const YEARS = [2025, 2026];
 
 /** Empty point layer: the assertions are about which layers the spec renders. */
 const EMPTY_FEATURE_COLLECTION = { type: 'FeatureCollection', features: [] };
@@ -208,9 +209,9 @@ const bodyForUrl = (url: string) => {
   if (url.includes('assentamentos-atributos')) {
     return ASSENTAMENTOS;
   }
-  // `/api/cozinhas`, `/api/cozinhas?ano=N` and `/api/cafs` are read as GeoJSON;
-  // `fetchMapData` maps over `.features`, so the shape has to be a collection.
-  if (url.includes('/api/cozinhas') || url.includes('/api/cafs')) {
+  // `/api/cozinhas?ano=N` is read as GeoJSON; the component derives the point
+  // name/status lookups from `.features`, so the shape has to be a collection.
+  if (url.includes('/api/cozinhas')) {
     return EMPTY_FEATURE_COLLECTION;
   }
   return {};

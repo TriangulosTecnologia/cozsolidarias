@@ -13,8 +13,7 @@ describe('modeShowsCozinhaDetail', () => {
     expect(modeShowsCozinhaDetail('coropletico-idhm-educacao')).toBe(true);
   });
 
-  test('is false for cafs (own combined sidebar) and circulos (no clickable points)', () => {
-    expect(modeShowsCozinhaDetail('cafs')).toBe(false);
+  test('is false for circulos (bubbles carry no clickable points)', () => {
     expect(modeShowsCozinhaDetail('circulos')).toBe(false);
   });
 });

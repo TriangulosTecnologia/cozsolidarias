@@ -1,6 +1,9 @@
 import { createDataGateway } from 'src/data-gateway/createDataGateway';
-import { readStaticCafProducao } from 'src/data-source-static/readStaticCafProducao';
-import { readStaticCozinhas } from 'src/data-source-static/readStaticCozinhas';
+import {
+  COZINHAS_YEARS,
+  LATEST_COZINHA_YEAR,
+  readStaticCozinhas,
+} from 'src/data-source-static/readStaticCozinhas';
 
 describe('createDataGateway', () => {
   test('returns kitchens as a GeoJSON FeatureCollection from the default static source', async () => {
@@ -29,6 +32,44 @@ describe('createDataGateway', () => {
     const gateway = createDataGateway();
 
     expect(await gateway.getCozinhaByCodigo('__no_such_code__')).toBeNull();
+  });
+
+  test('scopes the detail lookup to the requested snapshot year', async () => {
+    const gateway = createDataGateway();
+    const [oldestYear] = COZINHAS_YEARS;
+    const [oldest, latest] = await Promise.all([
+      readStaticCozinhas({ year: oldestYear }),
+      readStaticCozinhas({ year: LATEST_COZINHA_YEAR }),
+    ]);
+
+    // The snapshots cover different populations, so most códigos the oldest one
+    // plots are absent from the latest. Clicking such a point must resolve
+    // against the year on screen — looking it up in the latest snapshot returns
+    // null and the detail sidebar never opens.
+    const latestCodes = new Set(
+      latest.map((source) => {
+        return source.codigo;
+      })
+    );
+    const onlyInOldest = oldest.find((source) => {
+      return !latestCodes.has(source.codigo);
+    });
+
+    if (onlyInOldest === undefined) {
+      throw new Error(
+        `expected a código in ${oldestYear} that ${LATEST_COZINHA_YEAR} lacks`
+      );
+    }
+
+    const found = await gateway.getCozinhaByCodigo(
+      onlyInOldest.codigo,
+      oldestYear
+    );
+    expect(found?.codigo).toBe(onlyInOldest.codigo);
+
+    expect(
+      await gateway.getCozinhaByCodigo(onlyInOldest.codigo, LATEST_COZINHA_YEAR)
+    ).toBeNull();
   });
 
   test('aggregates kitchens per municipality from the default static source', async () => {
@@ -139,34 +180,6 @@ describe('createDataGateway', () => {
     }
   });
 
-  test('returns CAF areas as a GeoJSON FeatureCollection from the default static source', async () => {
-    const gateway = createDataGateway();
-
-    const cafs = await gateway.getCafs();
-
-    expect(cafs.type).toBe('FeatureCollection');
-    expect(cafs.features.length).toBeGreaterThan(0);
-    expect(cafs.features[0].geometry.type).toBe('Point');
-  });
-
-  test('returns the production detail of an existing CAF by its number', async () => {
-    const gateway = createDataGateway();
-    // Read a real nrCaf from the source so the test survives snapshot churn.
-    const [first] = await readStaticCafProducao();
-
-    const detail = await gateway.getCafByNrCaf(first.nrCaf);
-
-    expect(detail).not.toBeNull();
-    expect(detail?.nrCaf).toBe(first.nrCaf);
-    expect(detail?.producao.length).toBeGreaterThan(0);
-  });
-
-  test('returns null when no CAF carries the given number', async () => {
-    const gateway = createDataGateway();
-
-    expect(await gateway.getCafByNrCaf('__no_such_caf__')).toBeNull();
-  });
-
   test('aggregates CAFs per município with their share of Brazil from the default static source', async () => {
     const gateway = createDataGateway();
 
@@ -241,7 +254,7 @@ describe('createDataGateway', () => {
     expect(catalogue.meta.title).toBe(
       'Catálogo de Dados — Cozinhas Solidárias'
     );
-    expect(catalogue.datasets).toHaveLength(12);
+    expect(catalogue.datasets).toHaveLength(13);
     for (const dataset of catalogue.datasets) {
       expect(dataset.source.title).not.toBe('');
       expect(Array.isArray(dataset.fields)).toBe(true);
@@ -266,7 +279,7 @@ describe('createDataGateway', () => {
   test('exposes the snapshot years available for the time-lapse', () => {
     const gateway = createDataGateway();
 
-    expect(gateway.getCozinhasYears()).toEqual([2022, 2023, 2024, 2025, 2026]);
+    expect(gateway.getCozinhasYears()).toEqual([2025, 2026]);
 
     // A copy, not the source list: mutating the result must not corrupt it.
     const years = gateway.getCozinhasYears();
@@ -277,7 +290,7 @@ describe('createDataGateway', () => {
   test('reads the requested snapshot year and falls back to the latest', async () => {
     const gateway = createDataGateway();
 
-    const requested = await gateway.getCozinhas(2022);
+    const requested = await gateway.getCozinhas(2025);
     expect(requested.features.length).toBeGreaterThan(0);
 
     // A year with no snapshot resolves to the latest one instead of throwing.

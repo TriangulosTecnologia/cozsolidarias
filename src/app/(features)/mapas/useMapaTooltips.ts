@@ -3,14 +3,12 @@ import * as React from 'react';
 
 import type {
   cadinsanByCity,
-  CafAreaFeature,
   cafByCity,
   kitchenRateByCity,
 } from '@/data-gateway/schema';
 
 import { cozinhaStatusLabel } from './geovisCozinhaStatusScales';
 import { type AssentamentoAtributo, type MapMode } from './geovisSpec';
-import { renderCafTooltip } from './mapaCafTooltip';
 import {
   renderAssentamentoTooltip,
   renderCozinhaTooltip,
@@ -39,7 +37,6 @@ type UseMapaTooltipsParams = {
   cozinhaNames: Record<string, string>;
   /** `codigo → emFuncionamento`, so the kitchen hover shows the operating status. */
   cozinhaStatus: Record<string, string>;
-  cafProps: Record<string, CafAreaFeature['properties']>;
   /** Per-município CAF rows, so the CAF choropleth hover shows the share + count. */
   cafByCity: cafByCity[];
   /** Per-município CADINSAN rows, so the food-insecurity hover shows the share + counts. */
@@ -48,15 +45,15 @@ type UseMapaTooltipsParams = {
 };
 
 /**
- * Builds the four spec-driven hover-tooltip renderers (município, assentamento,
- * kitchen point, CAF point) for the maps playground. Each renderer and its
- * backing lookup is memoized so it only changes when its inputs change.
+ * Builds the three spec-driven hover-tooltip renderers (município, assentamento,
+ * kitchen point) for the maps playground. Each renderer and its backing lookup
+ * is memoized so it only changes when its inputs change.
  *
  * @param params - The lookups and the active {@link MapMode}.
- * @returns `{ hoverTooltip, assentamentoTooltip, cozinhaTooltip, cafTooltip }`.
+ * @returns `{ hoverTooltip, assentamentoTooltip, cozinhaTooltip }`.
  *
  * @example
- * const { hoverTooltip } = useMapaTooltips({ kitchenByCity, nomesPorCodigo, assentamentos, cozinhaNames, cozinhaStatus, cafProps, cafByCity, mode });
+ * const { hoverTooltip } = useMapaTooltips({ kitchenByCity, nomesPorCodigo, assentamentos, cozinhaNames, cozinhaStatus, cafByCity, mode });
  */
 export const useMapaTooltips = ({
   kitchenByCity,
@@ -64,7 +61,6 @@ export const useMapaTooltips = ({
   assentamentos,
   cozinhaNames,
   cozinhaStatus,
-  cafProps,
   cafByCity,
   cadinsanByCity,
   mode,
@@ -137,18 +133,5 @@ export const useMapaTooltips = ({
     [cozinhasByCodigo, statusByCodigo]
   );
 
-  const cafPropsByNrCaf = React.useMemo(() => {
-    return new Map(Object.entries(cafProps));
-  }, [cafProps]);
-
-  const cafTooltip = React.useCallback(
-    (info: MapHoverInfo) => {
-      const props = cafPropsByNrCaf.get(String(info.featureId));
-      if (!props) return null;
-      return renderCafTooltip(props);
-    },
-    [cafPropsByNrCaf]
-  );
-
-  return { hoverTooltip, assentamentoTooltip, cozinhaTooltip, cafTooltip };
+  return { hoverTooltip, assentamentoTooltip, cozinhaTooltip };
 };
