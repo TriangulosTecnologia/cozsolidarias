@@ -1,8 +1,10 @@
+import { resolveChoropleth } from 'src/app/(features)/mapas/geovisChoroplethRows';
 import {
   buildLegends,
   jenksBreaksForMode,
   type MapMode,
 } from 'src/app/(features)/mapas/geovisScales';
+import type { kitchenRateByCity } from 'src/data-gateway/schema';
 
 /** A wide, all-distinct sample that clears every ad-hoc mode's floor and band count. */
 const SAMPLE = Array.from({ length: 50 }, (_, index) => {
@@ -132,5 +134,85 @@ describe('buildLegends with Jenks breaks', () => {
       return entry.position === 'bottom-right';
     });
     expect(withBreaks?.colorBy).toEqual(withoutBreaks?.colorBy);
+  });
+});
+
+describe('resolveChoropleth', () => {
+  /** Eight municípios with distinct counts — enough to clear every ad-hoc floor. */
+  const buildByCity = (): kitchenRateByCity[] => {
+    return Array.from({ length: 8 }, (_, index) => {
+      return {
+        codigoIbge: String(100 + index),
+        municipio: `M${index}`,
+        quantidade: index + 1,
+        populacao: 100_000,
+        porCemMil: index + 1,
+        percentualDoBrasil: index + 1,
+        pessoasCadUnico: 50_000,
+        porDezMilCadUnico: index + 1,
+        pessoasPorCozinha: (index + 1) * 1000,
+      };
+    });
+  };
+
+  const sources = (byCity: kitchenRateByCity[]) => {
+    return { byCity, ivsByCity: [], cafByCity: [], cadinsanByCity: [] };
+  };
+
+  test('reuses the fit when a mode is revisited with the same snapshots', () => {
+    const snapshot = sources(buildByCity());
+
+    const first = resolveChoropleth({ mode: 'coropletico', ...snapshot });
+    const second = resolveChoropleth({ mode: 'coropletico', ...snapshot });
+
+    // Reference equality is the assertion: `classifyValues` returns a fresh
+    // array on every fit, so the same array can only mean it did not refit.
+    expect(second.jenksBreaks).toBe(first.jenksBreaks);
+    expect(first.jenksBreaks).not.toBeNull();
+
+    // Rows are deliberately not cached — cheap to rebuild, costly to pin.
+    expect(second.rows).not.toBe(first.rows);
+    expect(second.rows).toEqual(first.rows);
+  });
+
+  test('refits when a snapshot is replaced', () => {
+    const first = resolveChoropleth({
+      mode: 'coropletico-taxa',
+      ...sources(buildByCity()),
+    });
+    const second = resolveChoropleth({
+      mode: 'coropletico-taxa',
+      ...sources(buildByCity()),
+    });
+
+    // Same values, but a new array reference — the memo must not assume the
+    // data is unchanged just because it looks the same.
+    expect(second.jenksBreaks).not.toBe(first.jenksBreaks);
+    expect(second.jenksBreaks).toEqual(first.jenksBreaks);
+  });
+
+  test('caches each mode separately', () => {
+    const snapshot = sources(buildByCity());
+
+    const counts = resolveChoropleth({ mode: 'coropletico', ...snapshot });
+    const perCapita = resolveChoropleth({
+      mode: 'coropletico-percentual',
+      ...snapshot,
+    });
+
+    // Two modes off one snapshot: the second must not read the first's entry.
+    expect(perCapita.jenksBreaks).not.toBe(counts.jenksBreaks);
+    expect(
+      resolveChoropleth({ mode: 'coropletico', ...snapshot }).jenksBreaks
+    ).toBe(counts.jenksBreaks);
+  });
+
+  test('keeps the fixed scale for a mode that is not Jenks-eligible', () => {
+    const snapshot = sources(buildByCity());
+
+    // IVS reads official faixas, so there is nothing to fit and nothing to cache.
+    expect(
+      resolveChoropleth({ mode: 'coropletico-ivs', ...snapshot }).jenksBreaks
+    ).toBeNull();
   });
 });
