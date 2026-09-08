@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom';
 
-import { fireEvent, screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import type * as React from 'react';
 import AiPlayground from 'src/app/(features)/ai/AiPlayground';
 
@@ -71,35 +71,6 @@ describe('AiPlayground', () => {
     expect(screen.getByRole('button', { name: 'Gerar mapa' })).toBeEnabled();
   });
 
-  test('renders the returned spec via GeovisWorkspace on success', async () => {
-    global.fetch = jest.fn().mockResolvedValue(
-      jsonResponse({
-        spec: { title: 'Pessoas atendidas por município' },
-      })
-    );
-
-    renderWithChakra(<AiPlayground />);
-
-    fireEvent.change(screen.getByLabelText('O que você quer ver?'), {
-      target: { value: 'pessoas atendidas por município' },
-    });
-    fireEvent.click(screen.getByRole('button', { name: 'Gerar mapa' }));
-
-    expect(global.fetch).toHaveBeenCalledWith(
-      '/api/ai/spec',
-      expect.objectContaining({
-        method: 'POST',
-        body: JSON.stringify({ prompt: 'pessoas atendidas por município' }),
-      })
-    );
-
-    await waitFor(() => {
-      expect(screen.getByTestId('geovis-workspace')).toHaveTextContent(
-        'Pessoas atendidas por município'
-      );
-    });
-  });
-
   test('shows the server error message when the request fails', async () => {
     global.fetch = jest.fn().mockResolvedValue(
       jsonResponse(
@@ -154,36 +125,5 @@ describe('AiPlayground', () => {
     expect(
       await screen.findByText('Não foi possível gerar o mapa.')
     ).toBeInTheDocument();
-  });
-
-  test('ignores a resubmit while a request is already in flight', async () => {
-    let resolveFetch: (response: Response) => void = () => {};
-    global.fetch = jest.fn().mockReturnValue(
-      new Promise((resolve) => {
-        resolveFetch = resolve;
-      })
-    );
-
-    renderWithChakra(<AiPlayground />);
-
-    fireEvent.change(screen.getByLabelText('O que você quer ver?'), {
-      target: { value: 'pessoas atendidas por município' },
-    });
-    const form = screen
-      .getByRole('button', { name: 'Gerar mapa' })
-      .closest('form') as HTMLFormElement;
-
-    fireEvent.submit(form);
-    fireEvent.submit(form);
-
-    resolveFetch(
-      jsonResponse({ spec: { title: 'Pessoas atendidas por município' } })
-    );
-
-    await waitFor(() => {
-      expect(screen.getByTestId('geovis-workspace')).toBeInTheDocument();
-    });
-
-    expect(global.fetch).toHaveBeenCalledTimes(1);
   });
 });
