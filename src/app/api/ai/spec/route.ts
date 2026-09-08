@@ -1,14 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-import { z } from 'zod';
-
 const CATALOGUE_PATH = join(process.cwd(), 'public', 'dataset_catalogue.json');
-
-/** Strict schema for the client request body. */
-const RequestSchema = z.object({
-  prompt: z.string().trim().min(1).max(500),
-});
 
 const INSTRUCTIONS = `[APPLICATION].
 
@@ -250,6 +243,83 @@ const deleteSession = async (params: {
   }
 };
 
+const validatePrompt = (rawBody: unknown): string | Response => {
+  if (
+    !rawBody ||
+    typeof rawBody !== 'object' ||
+    !('prompt' in rawBody) ||
+    typeof (rawBody as { prompt?: unknown }).prompt !== 'string'
+  ) {
+    return Response.json(
+      { error: 'Prompt inválido: envie um texto entre 1 e 500 caracteres.' },
+      { status: 400 }
+    );
+  }
+
+  const prompt = (rawBody as { prompt: string }).prompt.trim();
+  if (prompt.length < 1 || prompt.length > 500) {
+    return Response.json(
+      { error: 'Prompt inválido: envie um texto entre 1 e 500 caracteres.' },
+      { status: 400 }
+    );
+  }
+
+  return prompt;
+};
+
+const validateEnv = ():
+  | {
+      apiKey: string;
+      agentId: string;
+      environmentId: string;
+    }
+  | Response => {
+  const apiKey = process.env['ANTHROPIC_API_KEY'];
+  const agentId = process.env['ANTHROPIC_AGENT_ID'];
+  const environmentId = process.env['ANTHROPIC_ENVIRONMENT_ID'];
+
+  if (!apiKey || !agentId || !environmentId) {
+    return Response.json(
+      {
+        error:
+          'Configuração ausente: defina ANTHROPIC_API_KEY, ANTHROPIC_AGENT_ID e ANTHROPIC_ENVIRONMENT_ID no ambiente do servidor.',
+      },
+      { status: 400 }
+    );
+  }
+
+  return { apiKey, agentId, environmentId };
+};
+
+const getAgentResponse = async (params: {
+  apiKey: string;
+  agentId: string;
+  environmentId: string;
+  prompt: string;
+}): Promise<string | Response> => {
+  let sessionId: string | null = null;
+  try {
+    const catalogueText = await readCatalogueContext();
+    sessionId = await createSession({
+      apiKey: params.apiKey,
+      agentId: params.agentId,
+      environmentId: params.environmentId,
+      catalogueText,
+      prompt: params.prompt,
+    });
+    return await pollForReply({ apiKey: params.apiKey, sessionId });
+  } catch {
+    return Response.json(
+      { error: 'Falha ao consultar o modelo de IA. Tente novamente.' },
+      { status: 502 }
+    );
+  } finally {
+    if (sessionId) {
+      await deleteSession({ apiKey: params.apiKey, sessionId });
+    }
+  }
+};
+
 /**
  * Turns a natural-language prompt into a `VisualizationSpec`, via a
  * single-use Anthropic Managed Agents session created fresh per request
@@ -271,55 +341,30 @@ export const POST = async (request: Request): Promise<Response> => {
   const rawBody: unknown = await request.json().catch(() => {
     return null;
   });
-  const parsedRequest = RequestSchema.safeParse(rawBody);
 
-  if (!parsedRequest.success) {
-    return Response.json(
-      { error: 'Prompt inválido: envie um texto entre 1 e 500 caracteres.' },
-      { status: 400 }
-    );
+  const promptOrError = validatePrompt(rawBody);
+  if (promptOrError instanceof Response) {
+    return promptOrError;
   }
 
-  const apiKey = process.env['ANTHROPIC_API_KEY'];
-  const agentId = process.env['ANTHROPIC_AGENT_ID'];
-  const environmentId = process.env['ANTHROPIC_ENVIRONMENT_ID'];
-
-  if (!apiKey || !agentId || !environmentId) {
-    return Response.json(
-      {
-        error:
-          'Configuração ausente: defina ANTHROPIC_API_KEY, ANTHROPIC_AGENT_ID e ANTHROPIC_ENVIRONMENT_ID no ambiente do servidor.',
-      },
-      { status: 400 }
-    );
+  const envOrError = validateEnv();
+  if (envOrError instanceof Response) {
+    return envOrError;
   }
 
-  let sessionId: string | null = null;
-  let modelText: string;
-  try {
-    const catalogueText = await readCatalogueContext();
-    sessionId = await createSession({
-      apiKey,
-      agentId,
-      environmentId,
-      catalogueText,
-      prompt: parsedRequest.data.prompt,
-    });
-    modelText = await pollForReply({ apiKey, sessionId });
-  } catch {
-    return Response.json(
-      { error: 'Falha ao consultar o modelo de IA. Tente novamente.' },
-      { status: 502 }
-    );
-  } finally {
-    if (sessionId) {
-      await deleteSession({ apiKey, sessionId });
-    }
+  const modelTextOrError = await getAgentResponse({
+    apiKey: envOrError.apiKey,
+    agentId: envOrError.agentId,
+    environmentId: envOrError.environmentId,
+    prompt: promptOrError,
+  });
+  if (modelTextOrError instanceof Response) {
+    return modelTextOrError;
   }
 
   let modelJson: unknown;
   try {
-    modelJson = JSON.parse(stripCodeFence(modelText));
+    modelJson = JSON.parse(stripCodeFence(modelTextOrError));
   } catch {
     return Response.json(
       {
