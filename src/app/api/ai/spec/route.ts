@@ -1,0 +1,334 @@
+import { readFile } from 'node:fs/promises';
+import { join } from 'node:path';
+
+import { z } from 'zod';
+
+const CATALOGUE_PATH = join(process.cwd(), 'public', 'dataset_catalogue.json');
+
+/** Strict schema for the client request body. */
+const RequestSchema = z.object({
+  prompt: z.string().trim().min(1).max(500),
+});
+
+const INSTRUCTIONS = `[APPLICATION].
+
+O catálogo de datasets do projeto (nomes, coleções, geografias e joins disponíveis) foi incluído acima como contexto adicional para calibrar sources, mapData e legends plausíveis.
+`;
+
+const ANTHROPIC_BETA_HEADER = 'managed-agents-2026-04-01';
+const ANTHROPIC_VERSION_HEADER = '2023-06-01';
+const SESSIONS_URL = 'https://api.anthropic.com/v1/sessions';
+
+const sessionUrl = (sessionId: string): string => {
+  return `${SESSIONS_URL}/${sessionId}`;
+};
+
+const sessionEventsUrl = (sessionId: string): string => {
+  return `${sessionUrl(sessionId)}/events`;
+};
+
+/** Strips a leading/trailing ` ```json ` fence, if the model added one. */
+const stripCodeFence = (text: string): string => {
+  const trimmed = text.trim();
+  const fenced = /^```(?:json)?\s*([\s\S]*?)\s*```$/.exec(trimmed);
+  return fenced ? fenced[1] : trimmed;
+};
+
+let cachedCatalogueText: Promise<string> | null = null;
+
+/**
+ * Loads `public/dataset_catalogue.json` once and keeps it in memory for the
+ * process lifetime — it's prompt context, not app data, so it doesn't go
+ * through `data-gateway`. Sent as `initial_events` on every new session (see
+ * {@link createSession}), never resent mid-turn.
+ */
+const readCatalogueContext = (): Promise<string> => {
+  if (!cachedCatalogueText) {
+    cachedCatalogueText = readFile(CATALOGUE_PATH, 'utf-8');
+  }
+  return cachedCatalogueText;
+};
+
+/** One event as returned by the Managed Agents session-events endpoints. */
+type SessionEvent = {
+  id: string;
+  type: string;
+  processed_at: string | null;
+  content?: Array<{ type: string; text?: string }>;
+  stop_reason?: { type: string };
+};
+
+/**
+ * Creates a fresh, single-use Managed Agents session pinned to the
+ * `geovis-spec-generator` agent, seeding it via `initial_events` with the
+ * dataset catalogue, the fixed instructions, and the user's prompt in one
+ * `user.message` — this starts the agent loop in the same call (the session
+ * is created directly in `running`, per the Managed Agents docs) instead of
+ * requiring a separate `POST /events` round trip.
+ *
+ * @returns The new session's id.
+ * @throws If the HTTP call fails or the response carries no session id.
+ */
+const createSession = async (params: {
+  apiKey: string;
+  agentId: string;
+  environmentId: string;
+  catalogueText: string;
+  prompt: string;
+}): Promise<string> => {
+  const response = await fetch(SESSIONS_URL, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-api-key': params.apiKey,
+      'anthropic-version': ANTHROPIC_VERSION_HEADER,
+      'anthropic-beta': ANTHROPIC_BETA_HEADER,
+    },
+    body: JSON.stringify({
+      agent: params.agentId,
+      environment_id: params.environmentId,
+      initial_events: [
+        {
+          type: 'user.message',
+          content: [
+            {
+              type: 'text',
+              text: `Catálogo de datasets:\n${params.catalogueText}`,
+            },
+            { type: 'text', text: INSTRUCTIONS },
+            { type: 'text', text: params.prompt },
+          ],
+        },
+      ],
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `Anthropic sessions POST responded with status ${response.status}`
+    );
+  }
+
+  const body = (await response.json()) as { id?: string };
+
+  if (!body.id) {
+    throw new Error('Anthropic sessions POST returned no session id');
+  }
+
+  return body.id;
+};
+
+const POLL_INTERVAL_MS = 1000;
+const MAX_POLL_ATTEMPTS = 30;
+/** Recent-events window per poll — generous for a tool-less classification turn. */
+const POLL_EVENTS_LIMIT = 100;
+
+const sleep = (ms: number): Promise<void> => {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+};
+
+const collectTextFromAgentMessage = (event: SessionEvent): string[] => {
+  const parts: string[] = [];
+  for (const block of event.content ?? []) {
+    if (block.type === 'text' && block.text) {
+      parts.push(block.text);
+    }
+  }
+  return parts;
+};
+
+const checkSessionEnd = (
+  event: SessionEvent,
+  messageParts: string[]
+): string | null => {
+  if (
+    event.type === 'session.status_idle' &&
+    event.stop_reason?.type !== 'requires_action'
+  ) {
+    if (messageParts.length === 0) {
+      throw new Error('Anthropic session turn ended with no agent.message');
+    }
+    return messageParts.join('\n');
+  }
+  return null;
+};
+
+const processSessionEvents = (events: SessionEvent[]): string => {
+  const messageParts: string[] = [];
+
+  for (const event of events) {
+    if (event.type === 'session.error') {
+      throw new Error('Anthropic session reported a session.error event');
+    }
+
+    if (event.type === 'agent.message') {
+      messageParts.push(...collectTextFromAgentMessage(event));
+    }
+
+    const result = checkSessionEnd(event, messageParts);
+    if (result) {
+      return result;
+    }
+  }
+
+  return '';
+};
+
+/**
+ * Polls a single-use session's event list until its one turn completes, and
+ * returns the concatenated text of every `agent.message` produced.
+ *
+ * The session exists solely for this request (see {@link createSession}), so
+ * every event in it belongs to this turn — this scans the full list oldest
+ * first and stops at the first `session.status_idle` whose `stop_reason`
+ * isn't `requires_action` (the documented idle-break gate).
+ *
+ * @throws If no session event ever arrives before {@link MAX_POLL_ATTEMPTS},
+ * the session reports a `session.error`, or the turn ends waiting on a
+ * client action this route doesn't handle (`requires_action` at the poll
+ * budget, e.g. a tool confirmation) — this route assumes a tool-less agent.
+ */
+const pollForReply = async (params: {
+  apiKey: string;
+  sessionId: string;
+}): Promise<string> => {
+  const url = new URL(sessionEventsUrl(params.sessionId));
+  url.searchParams.set('limit', String(POLL_EVENTS_LIMIT));
+  url.searchParams.set('order', 'desc');
+
+  for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS; attempt += 1) {
+    await sleep(POLL_INTERVAL_MS);
+
+    const response = await fetch(url, {
+      headers: {
+        'x-api-key': params.apiKey,
+        'anthropic-version': ANTHROPIC_VERSION_HEADER,
+        'anthropic-beta': ANTHROPIC_BETA_HEADER,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        `Anthropic session events GET responded with status ${response.status}`
+      );
+    }
+
+    const body = (await response.json()) as { data?: SessionEvent[] };
+    // Most-recent-first from the API; walk it oldest-first to scan forward.
+    const events = (body.data ?? []).slice().reverse();
+    const result = processSessionEvents(events);
+    if (result) {
+      return result;
+    }
+  }
+
+  throw new Error('Timed out waiting for the Anthropic session to reply');
+};
+
+/**
+ * Deletes a single-use session so it doesn't linger as billed, listable
+ * state — best-effort: a failure here doesn't affect the response already
+ * built for the client, so it's swallowed rather than surfaced.
+ */
+const deleteSession = async (params: {
+  apiKey: string;
+  sessionId: string;
+}): Promise<void> => {
+  try {
+    await fetch(sessionUrl(params.sessionId), {
+      method: 'DELETE',
+      headers: {
+        'x-api-key': params.apiKey,
+        'anthropic-version': ANTHROPIC_VERSION_HEADER,
+        'anthropic-beta': ANTHROPIC_BETA_HEADER,
+      },
+    });
+  } catch {
+    // Best-effort cleanup only.
+  }
+};
+
+/**
+ * Turns a natural-language prompt into a `VisualizationSpec`, via a
+ * single-use Anthropic Managed Agents session created fresh per request
+ * (`POST /v1/sessions` with `initial_events`, then `GET /v1/sessions/{id}/events`)
+ * — the session is bound to the `geovis-spec-generator` agent (see
+ * `geovis-spec-generator.en.agent.yaml`), provisioned once out of band (e.g.
+ * via the `ant` CLI) and referenced here only by ID, and is deleted once the
+ * reply is read.
+ *
+ * The agent's raw reply is parsed as JSON and returned as-is, without
+ * validating it against `VisualizationSpec`'s schema.
+ *
+ * @returns `{ result }` with the model's raw parsed JSON on success;
+ * `{ error }` with a Portuguese, dev-friendly message on any failure
+ * (missing config, prompt validation, upstream API failure, or a
+ * non-JSON reply).
+ */
+export const POST = async (request: Request): Promise<Response> => {
+  const rawBody: unknown = await request.json().catch(() => {
+    return null;
+  });
+  const parsedRequest = RequestSchema.safeParse(rawBody);
+
+  if (!parsedRequest.success) {
+    return Response.json(
+      { error: 'Prompt inválido: envie um texto entre 1 e 500 caracteres.' },
+      { status: 400 }
+    );
+  }
+
+  const apiKey = process.env['ANTHROPIC_API_KEY'];
+  const agentId = process.env['ANTHROPIC_AGENT_ID'];
+  const environmentId = process.env['ANTHROPIC_ENVIRONMENT_ID'];
+
+  if (!apiKey || !agentId || !environmentId) {
+    return Response.json(
+      {
+        error:
+          'Configuração ausente: defina ANTHROPIC_API_KEY, ANTHROPIC_AGENT_ID e ANTHROPIC_ENVIRONMENT_ID no ambiente do servidor.',
+      },
+      { status: 400 }
+    );
+  }
+
+  let sessionId: string | null = null;
+  let modelText: string;
+  try {
+    const catalogueText = await readCatalogueContext();
+    sessionId = await createSession({
+      apiKey,
+      agentId,
+      environmentId,
+      catalogueText,
+      prompt: parsedRequest.data.prompt,
+    });
+    modelText = await pollForReply({ apiKey, sessionId });
+  } catch {
+    return Response.json(
+      { error: 'Falha ao consultar o modelo de IA. Tente novamente.' },
+      { status: 502 }
+    );
+  } finally {
+    if (sessionId) {
+      await deleteSession({ apiKey, sessionId });
+    }
+  }
+
+  let modelJson: unknown;
+  try {
+    modelJson = JSON.parse(stripCodeFence(modelText));
+  } catch {
+    return Response.json(
+      {
+        error:
+          'O modelo retornou uma resposta inválida. Tente reformular o pedido.',
+      },
+      { status: 422 }
+    );
+  }
+
+  return Response.json({ result: modelJson });
+};
