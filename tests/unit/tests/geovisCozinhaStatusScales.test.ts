@@ -18,9 +18,9 @@ describe('cozinhaStatusLabel', () => {
     ).toBe('Paralisada');
   });
 
-  test('maps unknown or blank text to "Outros"', () => {
-    expect(cozinhaStatusLabel('')).toBe('Outros');
-    expect(cozinhaStatusLabel('qualquer outra coisa')).toBe('Outros');
+  test('maps unknown or blank text to "Não informado"', () => {
+    expect(cozinhaStatusLabel('')).toBe('Não informado');
+    expect(cozinhaStatusLabel('qualquer outra coisa')).toBe('Não informado');
   });
 });
 
@@ -31,15 +31,29 @@ describe('cozinhaStatusShortLabel', () => {
     expect(cozinhaStatusShortLabel('Paralisada')).toBe('Inativo');
   });
 
-  test('maps an unknown label or null to "Não informado"', () => {
-    expect(cozinhaStatusShortLabel('Outros')).toBe('Não informado');
+  test('maps the unknown class, an unmapped label and null alike', () => {
+    expect(cozinhaStatusShortLabel('Não informado')).toBe('Não informado');
+    expect(cozinhaStatusShortLabel('qualquer outra coisa')).toBe(
+      'Não informado'
+    );
     expect(cozinhaStatusShortLabel(null)).toBe('Não informado');
   });
 });
 
 describe('colorForCozinhaStatus', () => {
   test('null resolves to the masked fallback', () => {
-    expect(colorForCozinhaStatus(null)).toBe(colorForCozinhaStatus('Outros'));
+    expect(colorForCozinhaStatus(null)).toBe(
+      colorForCozinhaStatus('Não informado')
+    );
+  });
+
+  // `null` returns early and every other label asserted here is a real
+  // `COZINHA_STATUS_COLORS` key, so this is the only case that reaches the
+  // lookup's `??` fallback — a label the mapping has never heard of.
+  test('a label outside the mapping resolves to the masked fallback', () => {
+    expect(colorForCozinhaStatus('Situação inexistente')).toBe(
+      colorForCozinhaStatus(null)
+    );
   });
 
   test('each known status gets a distinct painted color, none equal to the fallback', () => {
@@ -63,5 +77,17 @@ describe('buildCozinhaStatusLegend', () => {
     const legend = buildCozinhaStatusLegend(true);
     expect(legend.colorBy.type).toBe('categorical');
     expect(legend.colorBy.property).toBe('value');
+  });
+
+  test('draws a named swatch for the unknown class', () => {
+    const { colorBy } = buildCozinhaStatusLegend(true);
+    const mapping =
+      colorBy.type === 'categorical' ? colorBy.mapping : undefined;
+
+    // A categorical legend draws one swatch per `mapping` entry, so the
+    // blank-status points get named only by being mapped — `defaultColor` alone
+    // paints them grey without ever explaining the grey.
+    expect(Object.keys(mapping ?? {})).toContain('Não informado');
+    expect(mapping?.['Não informado']).toBe(colorForCozinhaStatus(null));
   });
 });

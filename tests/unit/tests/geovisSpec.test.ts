@@ -791,10 +791,10 @@ describe('buildSpec', () => {
     expect(points?.activeLegendId).toBe('legenda-cozinhas-status');
 
     // The status join carries one row per point: codigo → descriptive label,
-    // with unknown/blank status folding to "Outros" (the masked swatch).
+    // with unknown/blank status folding to "Não informado" (the grey swatch).
     expect(mapDataById(spec, 'cozinhas-pts-promote')?.data).toEqual([
       { geometryId: 'CS1', value: 'Em funcionamento' },
-      { geometryId: 'CS2', value: 'Outros' },
+      { geometryId: 'CS2', value: 'Não informado' },
     ]);
 
     // The status legend is the positioned (visible) one in pontos mode.

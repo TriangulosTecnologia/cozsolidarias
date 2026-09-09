@@ -18,18 +18,13 @@ import {
   ASSENTAMENTO_LEGEND_ID,
   assentamentoStatusLabel,
 } from './geovisAssentamentosScales';
-import { resolveChoroplethRows, toValueRows } from './geovisChoroplethRows';
+import { resolveChoropleth, toValueRows } from './geovisChoroplethRows';
 import {
   buildCozinhaStatusLegend,
   COZINHA_STATUS_LEGEND_ID,
   cozinhaStatusLabel,
 } from './geovisCozinhaStatusScales';
-import {
-  buildLegends,
-  jenksBreaksForMode,
-  legendIdForMode,
-  type MapMode,
-} from './geovisScales';
+import { buildLegends, legendIdForMode, type MapMode } from './geovisScales';
 
 /** Re-exported so consumers keep importing the map's mode type from here. */
 export type { MapMode };
@@ -87,6 +82,16 @@ type MapOverlays = {
    */
   cadinsanByCity?: cadinsanByCity[];
 };
+
+/**
+ * Stand-ins for the optional overlay snapshots. Module constants rather than
+ * `[]` literals so an omitted overlay keeps the same reference across calls —
+ * `resolveChoropleth` memoizes on reference identity, and a fresh array per call
+ * would defeat it.
+ */
+const NO_CAF_ROWS: cafByCity[] = [];
+const NO_CADINSAN_ROWS: cadinsanByCity[] = [];
+const NO_IVS_ROWS: MunicipioIvs[] = [];
 
 /**
  * Card styling for the spec-driven hover tooltip — a warm ivory surface with a
@@ -648,29 +653,25 @@ export const buildSpec = (
   byCity: kitchenRateByCity[],
   mode: MapMode = 'coropletico',
   hoverTooltipRender?: HoverTooltipConfig['render'],
-  ivsByCity: MunicipioIvs[] = [],
+  ivsByCity: MunicipioIvs[] = NO_IVS_ROWS,
   overlays: MapOverlays = {}
 ): VisualizationSpec => {
   const showAssentamentos = mode === 'assentamentos';
 
-  const choroplethRows = resolveChoroplethRows(
+  // Value rows plus the data-driven Jenks breaks for the active ad-hoc
+  // choropleth, fitted to the exact values it paints (so the legend can never
+  // disagree with the fill). `jenksBreaks` is `null` for the IVS/IDHM families
+  // (fixed official faixas) and overlays, which keeps their official scale.
+  // Memoized per mode against these snapshots — see `resolveChoropleth`.
+  const { rows: choroplethRows, jenksBreaks } = resolveChoropleth({
     mode,
     byCity,
     ivsByCity,
-    overlays.cafByCity ?? [],
-    overlays.cadinsanByCity ?? []
-  );
-
-  // Data-driven Jenks breaks for the active ad-hoc choropleth, computed from the
-  // exact values it paints (so the legend can never disagree with the fill).
-  // `null` for the IVS/IDHM families (fixed official faixas) and overlays, which
-  // keeps their hand-picked/official scale.
-  const jenksBreaks = jenksBreaksForMode(
-    mode,
-    choroplethRows.map((row) => {
-      return row.value;
-    })
-  );
+    // Stable empties, not fresh `[]` literals: the memo keys on reference
+    // identity, and a new array every call would miss on every call.
+    cafByCity: overlays.cafByCity ?? NO_CAF_ROWS,
+    cadinsanByCity: overlays.cadinsanByCity ?? NO_CADINSAN_ROWS,
+  });
 
   // Bounds for the circle-size scale: the largest per-município count. Falls
   // back to 1 when there's no data so `buildBubblesLayer` can still clamp it.
