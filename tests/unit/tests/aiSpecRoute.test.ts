@@ -1,5 +1,13 @@
 import { POST } from 'src/app/api/ai/spec/route';
 
+import { gateway } from '@/gateway';
+
+jest.mock('@ttoss/geovis', () => {
+  return {
+    validateSpec: jest.fn().mockReturnValue({ status: 'resolved' }),
+  };
+});
+
 type ErrorBody = { error?: string };
 
 const ENV_KEYS = [
@@ -23,6 +31,24 @@ const jsonResponse = (body: unknown, ok = true): Response => {
       return Promise.resolve(body);
     },
   } as Response;
+};
+
+/** Mocks a full successful session turn whose agent reply is `text`. */
+const mockAgentReply = (text: string): jest.Mock => {
+  const fetchMock = jest
+    .fn()
+    .mockResolvedValueOnce(jsonResponse({ id: 'session_123' }))
+    .mockResolvedValueOnce(
+      jsonResponse({
+        data: [
+          { type: 'session.status_idle', stop_reason: { type: 'completed' } },
+          { type: 'agent.message', content: [{ type: 'text', text }] },
+        ],
+      })
+    )
+    .mockResolvedValueOnce(jsonResponse({}));
+  global.fetch = fetchMock;
+  return fetchMock;
 };
 
 describe('POST /api/ai/spec', () => {
@@ -286,6 +312,309 @@ describe('POST /api/ai/spec', () => {
       )
       // deleteSession
       .mockResolvedValueOnce(jsonResponse({}));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de cozinhas por município' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(422);
+    expect(body.error).toMatch(/resposta inválida/);
+  }, 10000);
+
+  test('sends a two-tier catalogue context: full index, detail only for renderable datasets', async () => {
+    const fetchMock = mockAgentReply(JSON.stringify({ mapData: [] }));
+
+    await POST(jsonRequest({ prompt: 'mapa de cozinhas por município' }));
+
+    const createSessionCall = fetchMock.mock.calls[0] as [
+      string,
+      { body: string },
+    ];
+    const sentBody = JSON.parse(createSessionCall[1].body) as {
+      initial_events: Array<{ content: Array<{ text: string }> }>;
+    };
+    const catalogueTextWithPrefix = sentBody.initial_events[0].content[0].text;
+    const catalogueJsonString = catalogueTextWithPrefix
+      .split('\n')
+      .slice(1)
+      .join('\n');
+
+    // Catalogue is JSON: { allDatasets: [...], renderableDatasets: [...] }
+    const catalogueJson = JSON.parse(catalogueJsonString) as {
+      allDatasets: Array<{ id: string }>;
+      renderableDatasets: Array<{ id: string }>;
+    };
+
+    // Every dataset appears in the lightweight index, including non-renderable ones.
+    expect(
+      catalogueJson.allDatasets.some((d) => {
+        return d.id === 'caf_areas';
+      })
+    ).toBe(true);
+    expect(
+      catalogueJson.allDatasets.some((d) => {
+        return d.id === 'assentamentos';
+      })
+    ).toBe(true);
+    // Only renderable datasets get full field-level detail.
+    expect(
+      catalogueJson.renderableDatasets.some((d) => {
+        return d.id === 'municipios_ivs';
+      })
+    ).toBe(true);
+    expect(
+      catalogueJson.renderableDatasets.some((d) => {
+        return d.id === 'caf_areas';
+      })
+    ).toBe(false);
+  }, 10000);
+
+  test('replaces placeholder mapData with real gateway data for a renderable dataset', async () => {
+    jest.spyOn(gateway, 'getIvsPorMunicipio').mockResolvedValue([
+      {
+        codigoIbge: '3550308',
+        municipio: 'São Paulo (SP)',
+        ivs: 0.321,
+        ivsInfraestruturaUrbana: 0.1,
+        ivsCapitalHumano: 0.2,
+        ivsRendaETrabalho: 0.3,
+        idhm: 0.8,
+        idhmLongevidade: 0.85,
+        idhmEducacao: 0.75,
+        idhmRenda: 0.78,
+        idhmEducacaoEscolaridade: 0.7,
+        idhmEducacaoFrequencia: 0.9,
+      },
+    ]);
+
+    const placeholderSpec = {
+      title: 'IVS por município',
+      mapData: [
+        {
+          mapDataId: 'municipios_ivs',
+          mapId: 'municipios-boundary',
+          joinKey: 'codarea',
+          data: [{ geometryId: 'fictício', value: 999 }],
+        },
+      ],
+    };
+
+    mockAgentReply(JSON.stringify(placeholderSpec));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de IVS por município' })
+    );
+    const body = (await response.json()) as {
+      result?: { mapData?: Array<{ data: Array<{ geometryId: string }> }> };
+    };
+
+    expect(response.status).toBe(200);
+    expect(body.result?.mapData?.[0].data).toEqual([
+      { geometryId: '3550308', value: 0.321 },
+    ]);
+  }, 10000);
+
+  test('returns 422 when the spec references a dataset outside the renderable list', async () => {
+    const unsupportedSpec = {
+      title: 'Volume de alimentos',
+      mapData: [
+        {
+          mapDataId: 'caf_areas',
+          mapId: 'municipios-boundary',
+          joinKey: 'codarea',
+          data: [],
+        },
+      ],
+    };
+
+    mockAgentReply(JSON.stringify(unsupportedSpec));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'média de volume de alimentos por pessoa' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(422);
+    expect(body.error).toMatch(/caf_areas/);
+  }, 10000);
+
+  test('resolves cozinhas_geolocalizadas via the default-year fetcher', async () => {
+    jest.spyOn(gateway, 'getCozinhasPorMunicipio').mockResolvedValue([
+      {
+        codigoIbge: '3550308',
+        municipio: 'São Paulo (SP)',
+        quantidade: 12,
+        pessoasAtendidas: 1000,
+        populacao: 12000000,
+        porCemMil: 0.14,
+        percentualDoBrasil: 0.05,
+        pessoasCadUnico: 5000,
+        porDezMilCadUnico: 0.9,
+        pessoasPorCozinha: 800,
+      },
+    ]);
+
+    const spec = {
+      mapData: [
+        {
+          mapDataId: 'cozinhas_geolocalizadas',
+          mapId: 'municipios-boundary',
+          joinKey: 'codarea',
+          data: [],
+        },
+      ],
+    };
+    mockAgentReply(JSON.stringify(spec));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de cozinhas por município' })
+    );
+    const body = (await response.json()) as {
+      result?: { mapData?: Array<{ data: Array<{ value: number }> }> };
+    };
+
+    expect(response.status).toBe(200);
+    expect(gateway.getCozinhasPorMunicipio).toHaveBeenCalledWith();
+    expect(body.result?.mapData?.[0].data).toEqual([
+      { geometryId: '3550308', value: 12 },
+    ]);
+  }, 10000);
+
+  test('resolves cozinhas_geolocalizadas_2025 via the 2025-year fetcher', async () => {
+    const getCozinhasSpy = jest
+      .spyOn(gateway, 'getCozinhasPorMunicipio')
+      .mockResolvedValue([
+        {
+          codigoIbge: '3550308',
+          municipio: 'São Paulo (SP)',
+          quantidade: 20,
+          pessoasAtendidas: 1500,
+          populacao: 12000000,
+          porCemMil: 0.2,
+          percentualDoBrasil: 0.08,
+          pessoasCadUnico: 5200,
+          porDezMilCadUnico: 1.1,
+          pessoasPorCozinha: 600,
+        },
+      ]);
+
+    const spec = {
+      mapData: [
+        {
+          mapDataId: 'cozinhas_geolocalizadas_2025',
+          mapId: 'municipios-boundary',
+          joinKey: 'codarea',
+          data: [],
+        },
+      ],
+    };
+    mockAgentReply(JSON.stringify(spec));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de cozinhas 2025 por município' })
+    );
+    const body = (await response.json()) as {
+      result?: { mapData?: Array<{ data: Array<{ value: number }> }> };
+    };
+
+    expect(response.status).toBe(200);
+    expect(getCozinhasSpy).toHaveBeenCalledWith(2025);
+    expect(body.result?.mapData?.[0].data).toEqual([
+      { geometryId: '3550308', value: 20 },
+    ]);
+  }, 10000);
+
+  test('resolves municipios_cadinsan via the com-PBF share fetcher, dropping municípios with no share', async () => {
+    jest.spyOn(gateway, 'getCadinsanPorMunicipio').mockResolvedValue([
+      {
+        codigoIbge: '3550308',
+        municipio: 'São Paulo (SP)',
+        uf: 'SP',
+        regiao: 'Sudeste',
+        absolutoComPbf: 10,
+        absolutoSemPbf: 5,
+        cadastrosCadunico: 100,
+        proporcaoComPbf: 0.1,
+        proporcaoSemPbf: 0.05,
+      },
+      {
+        // No CadÚnico registrations at all: `proporcaoComPbf` is `null`, so
+        // this município must be dropped, not sent as a `0`.
+        codigoIbge: '3106200',
+        municipio: 'Belo Horizonte (MG)',
+        uf: 'MG',
+        regiao: 'Sudeste',
+        absolutoComPbf: 0,
+        absolutoSemPbf: 0,
+        cadastrosCadunico: 0,
+        proporcaoComPbf: null,
+        proporcaoSemPbf: null,
+      },
+    ]);
+
+    const spec = {
+      mapData: [
+        {
+          mapDataId: 'municipios_cadinsan',
+          mapId: 'municipios-boundary',
+          joinKey: 'codarea',
+          data: [],
+        },
+      ],
+    };
+    mockAgentReply(JSON.stringify(spec));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de insegurança alimentar por município' })
+    );
+    const body = (await response.json()) as {
+      result?: { mapData?: Array<{ data: Array<{ value: number }> }> };
+    };
+
+    expect(response.status).toBe(200);
+    expect(body.result?.mapData?.[0].data).toEqual([
+      { geometryId: '3550308', value: 0.1 },
+    ]);
+  }, 10000);
+
+  test('returns the spec unchanged when it declares no mapData at all', async () => {
+    const spec = { title: 'Só o mapa base, sem camada de valores' };
+    mockAgentReply(JSON.stringify(spec));
+
+    const response = await POST(jsonRequest({ prompt: 'mapa base do Brasil' }));
+    const body = (await response.json()) as { result?: unknown };
+
+    expect(response.status).toBe(200);
+    expect(body.result).toEqual(spec);
+  }, 10000);
+
+  test('returns 422 when mapData is not an array', async () => {
+    mockAgentReply(JSON.stringify({ mapData: 'not-an-array' }));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de cozinhas por município' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(422);
+    expect(body.error).toMatch(/resposta inválida/);
+  }, 10000);
+
+  test('returns 422 when a mapData entry has no mapDataId', async () => {
+    mockAgentReply(JSON.stringify({ mapData: [{ data: [] }] }));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de cozinhas por município' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(422);
+    expect(body.error).toMatch(/resposta inválida/);
+  }, 10000);
+
+  test('returns 422 when the model reply is valid JSON but not an object', async () => {
+    mockAgentReply(JSON.stringify(['not', 'an', 'object']));
 
     const response = await POST(
       jsonRequest({ prompt: 'mapa de cozinhas por município' })

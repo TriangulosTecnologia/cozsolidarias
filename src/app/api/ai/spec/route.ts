@@ -1,12 +1,27 @@
-import { readFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { validateSpec } from '@ttoss/geovis';
 
-const CATALOGUE_PATH = join(process.cwd(), 'public', 'dataset_catalogue.json');
+import { gateway } from '@/gateway';
 
-const INSTRUCTIONS = `[APPLICATION].
+import { buildCatalogueContext } from './mapDataCatalogue';
+import {
+  appendRealMapData,
+  findInvalidGeojsonSource,
+  invalidSpecResponse,
+  isRecord,
+  KNOWN_SOURCE_URLS,
+} from './specValidation';
 
-O catálogo de datasets do projeto (nomes, coleções, geografias e joins disponíveis) foi incluído acima como contexto adicional para calibrar sources, mapData e legends plausíveis.
-`;
+const INSTRUCTIONS = `Os datasets acima são um parcial do catalogo json schema do projeto Cozinha Solidária em Rede, com todos os datasets conhecidos e o detalhe completo apenas dos datasets que podem popular \`mapData\` hoje. Use-o para gerar um spec de visualização geográfica (um mapa) que atenda ao pedido do usuário.
+
+Seu ambiente de execução não tem acesso a nenhum checkout local do monorepo \`ttoss\` — não tente localizar ou ler arquivos locais. Consulte o JSON Schema vigente do \`VisualizationSpec\` (draft 2020-12) na fonte pública indicada nas suas instruções.
+
+Regra obrigatória: \`mapData\` é só para valores que colorem/dimensionam uma layer (join por \`geometryId\`) — nunca para a geometria de base. A geometria de municípios já existe como GeoJSON público em \`/geo/geojs-100-mun.json\` (propriedade de join: \`codarea\`); referencie-a em \`sources\` (\`data: "/geo/geojs-100-mun.json"\`), nunca em \`mapData\`. \`mapData[].mapDataId\` só pode usar um dos ids da lista "renderableDatasets" do catálogo, exatamente como aparecem. Nunca invente um mapDataId fora dessa lista. Nunca preencha \`mapData[].data\` com valores fictícios — o \`data\` enviado aqui é sempre substituído por dados reais depois de gerado; um array vazio é aceitável.
+
+Se o pedido do usuário só corresponder a um dataset do catálogo que NÃO está na lista "renderableDatasets" (ainda não disponível), responda apenas com {"error": "..."} explicando em português que aquele dado ainda não está disponível para visualização — não mapeie para outro dataset ao acaso.
+
+\`engine\`, \`sources\` e \`layers\` são sempre obrigatórios no spec, mesmo quando \`mapType\` é usado — \`mapType\` nunca substitui \`layers\`. Toda layer precisa referenciar um \`sourceId\` existente em \`sources\`.
+
+Regra obrigatória sobre \`sources[].data\`: diferente de \`mapData[].data\`, o \`data\` de uma source NUNCA é substituído depois — o que você escrever aí é exatamente o que chega ao mapa. É proibido usar um \`FeatureCollection\` vazio/fictício, ou inventar uma URL, como \`data\` de uma source. As únicas URLs válidas de geometria neste app são: \`/geo/geojs-100-mun.json\` (municípios, join \`codarea\`), \`/geo/estados.json\`, \`/geo/assentamentos.json\`, \`/api/cozinhas\` (pontos de cozinhas) e \`/api/cozinhas/bolhas\`. Nunca use qualquer outra URL. Se o pedido for agregado "por município", não crie uma source de pontos — use só \`/geo/geojs-100-mun.json\` com o valor via \`mapData\`.`;
 
 const ANTHROPIC_BETA_HEADER = 'managed-agents-2026-04-01';
 const ANTHROPIC_VERSION_HEADER = '2023-06-01';
@@ -30,14 +45,14 @@ const stripCodeFence = (text: string): string => {
 let cachedCatalogueText: Promise<string> | null = null;
 
 /**
- * Loads `public/dataset_catalogue.json` once and keeps it in memory for the
- * process lifetime — it's prompt context, not app data, so it doesn't go
- * through `data-gateway`. Sent as `initial_events` on every new session (see
- * {@link createSession}), never resent mid-turn.
+ * Builds the two-tier catalog context (see {@link buildCatalogueContext})
+ * once and keeps it in memory for the process lifetime. Sent as
+ * `initial_events` on every new session (see {@link createSession}), never
+ * resent mid-turn.
  */
 const readCatalogueContext = (): Promise<string> => {
   if (!cachedCatalogueText) {
-    cachedCatalogueText = readFile(CATALOGUE_PATH, 'utf-8');
+    cachedCatalogueText = gateway.getCatalogue().then(buildCatalogueContext);
   }
   return cachedCatalogueText;
 };
@@ -112,7 +127,7 @@ const createSession = async (params: {
 };
 
 const POLL_INTERVAL_MS = 1000;
-const MAX_POLL_ATTEMPTS = 30;
+const MAX_POLL_ATTEMPTS = 60;
 /** Recent-events window per poll — generous for a tool-less classification turn. */
 const POLL_EVENTS_LIMIT = 100;
 
@@ -329,13 +344,15 @@ const getAgentResponse = async (params: {
  * via the `ant` CLI) and referenced here only by ID, and is deleted once the
  * reply is read.
  *
- * The agent's raw reply is parsed as JSON and returned as-is, without
- * validating it against `VisualizationSpec`'s schema.
+ * The agent's raw reply is parsed as JSON, then its `mapData` is resolved
+ * against real `data-gateway` values (see {@link appendRealMapData}) before
+ * being returned — the agent's own `mapData[].data` is never sent to the
+ * client as-is.
  *
- * @returns `{ result }` with the model's raw parsed JSON on success;
- * `{ error }` with a Portuguese, dev-friendly message on any failure
- * (missing config, prompt validation, upstream API failure, or a
- * non-JSON reply).
+ * @returns `{ result }` with the spec (real `mapData`) on success; `{ error }`
+ * with a Portuguese, dev-friendly message on any failure (missing config,
+ * prompt validation, upstream API failure, non-JSON reply, or an unsupported
+ * dataset reference).
  */
 export const POST = async (request: Request): Promise<Response> => {
   const rawBody: unknown = await request.json().catch(() => {
@@ -365,15 +382,45 @@ export const POST = async (request: Request): Promise<Response> => {
   let modelJson: unknown;
   try {
     modelJson = JSON.parse(stripCodeFence(modelTextOrError));
-  } catch {
-    return Response.json(
-      {
-        error:
-          'O modelo retornou uma resposta inválida. Tente reformular o pedido.',
-      },
-      { status: 422 }
-    );
+  } catch (parseError) {
+    return invalidSpecResponse({
+      message: `A resposta do modelo não é um JSON válido: ${
+        parseError instanceof Error ? parseError.message : String(parseError)
+      }`,
+      spec: modelTextOrError,
+    });
   }
 
-  return Response.json({ result: modelJson });
+  if (!isRecord(modelJson)) {
+    return invalidSpecResponse({
+      message:
+        'A resposta do modelo deveria ser um objeto JSON representando o spec.',
+      spec: modelJson,
+    });
+  }
+
+  const invalidSourceId = findInvalidGeojsonSource(modelJson);
+  if (invalidSourceId) {
+    return invalidSpecResponse({
+      message: `A source "${invalidSourceId}" não referencia um endpoint real de geometria (URLs válidas: ${KNOWN_SOURCE_URLS.join(', ')}) ou veio com uma coleção de feições vazia inventada pelo modelo. Tente reformular o pedido.`,
+      spec: modelJson,
+    });
+  }
+
+  const specOrError = await appendRealMapData(modelJson);
+  if (specOrError instanceof Response) {
+    return specOrError;
+  }
+
+  const validation = validateSpec(specOrError);
+  if (validation.status !== 'resolved') {
+    return invalidSpecResponse({
+      issues: validation.issues.map((issue) => {
+        return { code: issue.code, message: issue.message };
+      }),
+      spec: specOrError,
+    });
+  }
+
+  return Response.json({ result: specOrError });
 };

@@ -2,10 +2,11 @@
 const JSDOMEnvironment = require('jest-environment-jsdom').default;
 
 /**
- * jsdom test environment that injects Node globals jsdom omits but that Chakra
- * UI v3 relies on (`structuredClone`, `TextEncoder`/`TextDecoder`). This module
- * runs in the main Node realm, so those identifiers are the real Node globals —
- * we copy them into the jsdom sandbox.
+ * jsdom test environment that injects Node globals jsdom omits: `structuredClone`
+ * and `TextEncoder`/`TextDecoder` (Chakra UI v3 relies on them), and the Fetch
+ * API (`Request`/`Response`/`Headers`/`fetch`, needed to exercise Route Handlers
+ * under test). This module runs in the main Node realm, so those identifiers
+ * are the real Node globals — we copy them into the jsdom sandbox.
  */
 module.exports = class FixedJSDOMEnvironment extends JSDOMEnvironment {
   constructor(config, context) {
@@ -17,6 +18,12 @@ module.exports = class FixedJSDOMEnvironment extends JSDOMEnvironment {
     if (typeof this.global.TextEncoder === 'undefined') {
       this.global.TextEncoder = TextEncoder;
       this.global.TextDecoder = TextDecoder;
+    }
+    if (typeof this.global.Request === 'undefined') {
+      this.global.Request = Request;
+      this.global.Response = Response;
+      this.global.Headers = Headers;
+      this.global.fetch = fetch;
     }
   }
 };

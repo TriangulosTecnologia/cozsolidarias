@@ -26,7 +26,11 @@ import type {
  * `outputFileTracingIncludes` in `next.config.ts` pins the file into the
  * serverless bundle so the read also works in production.
  */
-const CATALOGUE_PATH = join(process.cwd(), 'public', 'dataset_catalogue.json');
+const CATALOGUE_PATH = join(
+  process.cwd(),
+  'public',
+  'filtered_dataset_catalogue.json'
+);
 
 const SEVERITIES = ['low', 'medium', 'high'] as const;
 const ACCESS_LEVELS = ['public', 'restricted'] as const;
