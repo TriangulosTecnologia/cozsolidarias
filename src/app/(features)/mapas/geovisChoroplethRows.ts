@@ -8,7 +8,7 @@ import type {
   MunicipioIvs,
 } from '@/data-gateway/schema';
 
-import type { MapMode } from './geovisScales';
+import { jenksBreaksForMode, type MapMode } from './geovisScales';
 
 /**
  * Maps per-município counts to geovis `mapData` value rows.
@@ -237,4 +237,98 @@ export const resolveChoroplethRows = (
   }
   const buildRows = CHOROPLETH_ROW_BUILDERS[mode];
   return buildRows ? buildRows(byCity) : [];
+};
+
+/** The snapshots a mode's choropleth is derived from; the memo's identity key. */
+export type ChoroplethSources = {
+  byCity: kitchenRateByCity[];
+  ivsByCity: MunicipioIvs[];
+  cafByCity: cafByCity[];
+  cadinsanByCity: cadinsanByCity[];
+};
+
+/** What a mode paints: its value rows and the Jenks breaks fitted to them. */
+export type Choropleth = {
+  /** The mode's `mapData` value rows. */
+  rows: MapDataRow[];
+  /** Data-driven breaks, or `null` for the modes that keep a fixed scale. */
+  jenksBreaks: number[] | null;
+};
+
+/**
+ * Jenks breaks already fitted, per mode, alongside the snapshot references they
+ * were fitted to. Bounded by the number of modes; only the breaks are held, not
+ * the rows, so revisiting every mode costs a handful of number arrays.
+ */
+const jenksCache = new Map<
+  MapMode,
+  { sources: ChoroplethSources; jenksBreaks: number[] | null }
+>();
+
+/**
+ * Whether two source sets are the same snapshots. Reference equality, not deep:
+ * every array here is fetched once and never mutated, so a new reference is
+ * exactly what "the data changed" means.
+ */
+const sameSources = (a: ChoroplethSources, b: ChoroplethSources): boolean => {
+  return (
+    a.byCity === b.byCity &&
+    a.ivsByCity === b.ivsByCity &&
+    a.cafByCity === b.cafByCity &&
+    a.cadinsanByCity === b.cadinsanByCity
+  );
+};
+
+/**
+ * Resolves what a mode paints: its value rows, plus the Jenks breaks fitted to
+ * them — reusing a previous fit whenever the mode is revisited with the same
+ * snapshots.
+ *
+ * The fit is the reason this exists. It is an `O(classes·n²)` dynamic program
+ * over every painted município (~350 ms for the CADINSAN and CAF modes, whose
+ * floor lets nearly all of them through), it runs synchronously on the main
+ * thread, and its result depends on nothing but `(mode, snapshots)`. Without the
+ * memo it re-ran on every spec rebuild — including the ones triggered by the
+ * time-lapse year cache filling in, which cannot change a single break.
+ *
+ * Rows are rebuilt on every call and deliberately not cached: they are a linear
+ * map, cheap next to the fit, and caching them would pin ~5.500 objects per mode.
+ *
+ * @param params.mode - Active {@link MapMode}.
+ * @param params.byCity - Per-município canonical cozinha rows.
+ * @param params.ivsByCity - Per-município IVS/IDHM score rows.
+ * @param params.cafByCity - Per-município CAF share rows.
+ * @param params.cadinsanByCity - Per-município CADINSAN share rows.
+ * @returns The mode's {@link Choropleth}: fresh `rows`, memoized `jenksBreaks`.
+ *
+ * @example
+ * resolveChoropleth({ mode: 'coropletico', byCity, ivsByCity, cafByCity, cadinsanByCity });
+ * // → { rows: [...], jenksBreaks: [1, 2, 5, 12, 47] }
+ */
+export const resolveChoropleth = ({
+  mode,
+  ...sources
+}: ChoroplethSources & { mode: MapMode }): Choropleth => {
+  const rows = resolveChoroplethRows(
+    mode,
+    sources.byCity,
+    sources.ivsByCity,
+    sources.cafByCity,
+    sources.cadinsanByCity
+  );
+
+  const cached = jenksCache.get(mode);
+  if (cached && sameSources(cached.sources, sources)) {
+    return { rows, jenksBreaks: cached.jenksBreaks };
+  }
+
+  const jenksBreaks = jenksBreaksForMode(
+    mode,
+    rows.map((row) => {
+      return row.value;
+    })
+  );
+
+  jenksCache.set(mode, { sources, jenksBreaks });
+  return { rows, jenksBreaks };
 };
