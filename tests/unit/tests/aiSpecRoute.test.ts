@@ -1,4 +1,6 @@
+import { validateSpec } from '@ttoss/geovis';
 import { POST } from 'src/app/api/ai/spec/route';
+import { invalidSpecResponse } from 'src/app/api/ai/spec/specValidation';
 
 import { gateway } from '@/gateway';
 
@@ -211,8 +213,8 @@ describe('POST /api/ai/spec', () => {
       jsonRequest({ prompt: 'mapa de cozinhas por município' })
     );
 
-    // POLL_INTERVAL_MS (1000) * MAX_POLL_ATTEMPTS (30), route.ts's own budget.
-    await jest.advanceTimersByTimeAsync(30_000);
+    // POLL_INTERVAL_MS (1000) * MAX_POLL_ATTEMPTS (60), route.ts's own budget.
+    await jest.advanceTimersByTimeAsync(60_000);
     const response = await responsePromise;
 
     expect(response.status).toBe(502);
@@ -319,10 +321,10 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as ErrorBody;
 
     expect(response.status).toBe(422);
-    expect(body.error).toMatch(/resposta inválida/);
+    expect(body.error).toMatch(/não é um JSON válido/);
   }, 10000);
 
-  test('sends a two-tier catalogue context: full index, detail only for renderable datasets', async () => {
+  test('sends the full dataset catalogue as context, renderable and non-renderable datasets alike', async () => {
     const fetchMock = mockAgentReply(JSON.stringify({ mapData: [] }));
 
     await POST(jsonRequest({ prompt: 'mapa de cozinhas por município' }));
@@ -340,34 +342,28 @@ describe('POST /api/ai/spec', () => {
       .slice(1)
       .join('\n');
 
-    // Catalogue is JSON: { allDatasets: [...], renderableDatasets: [...] }
+    // buildCatalogueContext sends the raw CatalogueContract under `catalogue`.
     const catalogueJson = JSON.parse(catalogueJsonString) as {
-      allDatasets: Array<{ id: string }>;
-      renderableDatasets: Array<{ id: string }>;
+      catalogue: { datasets: Array<{ id: string }> };
     };
 
-    // Every dataset appears in the lightweight index, including non-renderable ones.
+    // Every dataset is included, renderable or not — the agent's own
+    // instructions restrict which ids it may use for `mapData`.
     expect(
-      catalogueJson.allDatasets.some((d) => {
+      catalogueJson.catalogue.datasets.some((d) => {
         return d.id === 'caf_areas';
       })
     ).toBe(true);
     expect(
-      catalogueJson.allDatasets.some((d) => {
+      catalogueJson.catalogue.datasets.some((d) => {
         return d.id === 'assentamentos';
       })
     ).toBe(true);
-    // Only renderable datasets get full field-level detail.
     expect(
-      catalogueJson.renderableDatasets.some((d) => {
+      catalogueJson.catalogue.datasets.some((d) => {
         return d.id === 'municipios_ivs';
       })
     ).toBe(true);
-    expect(
-      catalogueJson.renderableDatasets.some((d) => {
-        return d.id === 'caf_areas';
-      })
-    ).toBe(false);
   }, 10000);
 
   test('replaces placeholder mapData with real gateway data for a renderable dataset', async () => {
@@ -525,6 +521,48 @@ describe('POST /api/ai/spec', () => {
     ]);
   }, 10000);
 
+  test('resolves cozinhas_pessoas_atendidas via the people-served fetcher', async () => {
+    jest.spyOn(gateway, 'getCozinhasPorMunicipio').mockResolvedValue([
+      {
+        codigoIbge: '3550308',
+        municipio: 'São Paulo (SP)',
+        quantidade: 12,
+        pessoasAtendidas: 1000,
+        populacao: 12000000,
+        porCemMil: 0.14,
+        percentualDoBrasil: 0.05,
+        pessoasCadUnico: 5000,
+        porDezMilCadUnico: 0.9,
+        pessoasPorCozinha: 800,
+      },
+    ]);
+
+    const spec = {
+      mapData: [
+        {
+          mapDataId: 'cozinhas_pessoas_atendidas',
+          mapId: 'municipios-boundary',
+          joinKey: 'codarea',
+          data: [],
+        },
+      ],
+    };
+    mockAgentReply(JSON.stringify(spec));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de pessoas atendidas por município' })
+    );
+    const body = (await response.json()) as {
+      result?: { mapData?: Array<{ data: Array<{ value: number }> }> };
+    };
+
+    expect(response.status).toBe(200);
+    expect(gateway.getCozinhasPorMunicipio).toHaveBeenCalledWith();
+    expect(body.result?.mapData?.[0].data).toEqual([
+      { geometryId: '3550308', value: 1000 },
+    ]);
+  }, 10000);
+
   test('resolves municipios_cadinsan via the com-PBF share fetcher, dropping municípios with no share', async () => {
     jest.spyOn(gateway, 'getCadinsanPorMunicipio').mockResolvedValue([
       {
@@ -578,6 +616,111 @@ describe('POST /api/ai/spec', () => {
     ]);
   }, 10000);
 
+  test('accepts geojson sources that reference known geometry endpoints, skipping non-geojson entries', async () => {
+    const spec = {
+      sources: [
+        // Not a record at all — must be skipped, not crash the loop.
+        'not-a-source',
+        // A record, but not a `geojson` source — must be skipped too.
+        { id: 'points', type: 'raster' },
+        { id: 'municipios', type: 'geojson', data: '/geo/estados.json' },
+      ],
+      mapData: [],
+    };
+    mockAgentReply(JSON.stringify(spec));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de estados do Brasil' })
+    );
+
+    expect(response.status).toBe(200);
+  }, 10000);
+
+  test('returns 422 when a geojson source is an inline, empty FeatureCollection', async () => {
+    const spec = {
+      sources: [
+        {
+          id: 'municipios-fictício',
+          type: 'geojson',
+          data: { type: 'FeatureCollection', features: [] },
+        },
+      ],
+      mapData: [],
+    };
+    mockAgentReply(JSON.stringify(spec));
+
+    const response = await POST(jsonRequest({ prompt: 'mapa de municípios' }));
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(422);
+    expect(body.error).toMatch(/"municipios-fictício"/);
+  }, 10000);
+
+  test('returns 422 when a geojson source references a URL outside the known geometry endpoints', async () => {
+    const spec = {
+      sources: [
+        { id: 'inventada', type: 'geojson', data: '/geo/nao-existe.json' },
+      ],
+      mapData: [],
+    };
+    mockAgentReply(JSON.stringify(spec));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de uma geometria inventada' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(422);
+    expect(body.error).toMatch(/"inventada"/);
+  }, 10000);
+
+  test('names the invalid source as "desconhecida" when it has no id', async () => {
+    const spec = {
+      sources: [{ type: 'geojson', data: '/geo/nao-existe.json' }],
+      mapData: [],
+    };
+    mockAgentReply(JSON.stringify(spec));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de uma geometria sem id' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(422);
+    expect(body.error).toMatch(/"desconhecida"/);
+  }, 10000);
+
+  test('returns 422 with the geovis issues, defaulting the message, when validateSpec rejects the resolved spec', async () => {
+    jest.mocked(validateSpec).mockReturnValueOnce({
+      status: 'invalid',
+      issues: [
+        {
+          code: 'invalid-schema',
+          subject: { path: 'mapData[0].joinKey' },
+          message: 'mapData[0].joinKey is required',
+        },
+      ],
+    });
+
+    mockAgentReply(JSON.stringify({ mapData: [] }));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de cozinhas por município' })
+    );
+    const body = (await response.json()) as ErrorBody & {
+      issues?: Array<{ code: string; message: string }>;
+    };
+
+    expect(response.status).toBe(422);
+    expect(body.error).toMatch(/resposta inválida/);
+    expect(body.issues).toEqual([
+      {
+        code: 'invalid-schema',
+        message: 'mapData[0].joinKey is required',
+      },
+    ]);
+  }, 10000);
+
   test('returns the spec unchanged when it declares no mapData at all', async () => {
     const spec = { title: 'Só o mapa base, sem camada de valores' };
     mockAgentReply(JSON.stringify(spec));
@@ -598,7 +741,7 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as ErrorBody;
 
     expect(response.status).toBe(422);
-    expect(body.error).toMatch(/resposta inválida/);
+    expect(body.error).toMatch(/campo "mapData" deveria ser uma lista/);
   }, 10000);
 
   test('returns 422 when a mapData entry has no mapDataId', async () => {
@@ -610,7 +753,7 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as ErrorBody;
 
     expect(response.status).toBe(422);
-    expect(body.error).toMatch(/resposta inválida/);
+    expect(body.error).toMatch(/precisa ser um objeto com "mapDataId"/);
   }, 10000);
 
   test('returns 422 when the model reply is valid JSON but not an object', async () => {
@@ -622,6 +765,44 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as ErrorBody;
 
     expect(response.status).toBe(422);
-    expect(body.error).toMatch(/resposta inválida/);
+    expect(body.error).toMatch(
+      /deveria ser um objeto JSON representando o spec/
+    );
   }, 10000);
+
+  test('falls back to String() for the parse-error detail when JSON.parse throws a non-Error value', async () => {
+    const realParse = JSON.parse.bind(JSON);
+    jest.spyOn(JSON, 'parse').mockImplementation((text: string) => {
+      if (text === 'not a json reply') {
+        throw 'boom';
+      }
+      return realParse(text) as unknown;
+    });
+
+    mockAgentReply('not a json reply');
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de cozinhas por município' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(422);
+    expect(body.error).toMatch(/não é um JSON válido: boom/);
+  }, 10000);
+});
+
+describe('invalidSpecResponse', () => {
+  test('defaults the message and omits issues/spec when called with no params', async () => {
+    const response = invalidSpecResponse();
+    const body = (await response.json()) as {
+      error?: string;
+      issues?: unknown;
+      spec?: unknown;
+    };
+
+    expect(response.status).toBe(422);
+    expect(body.error).toMatch(/resposta inválida/);
+    expect(body.issues).toBeUndefined();
+    expect(body.spec).toBeUndefined();
+  });
 });
