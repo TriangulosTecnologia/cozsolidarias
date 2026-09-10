@@ -18,5 +18,9 @@ module.exports = class FixedJSDOMEnvironment extends JSDOMEnvironment {
       this.global.TextEncoder = TextEncoder;
       this.global.TextDecoder = TextDecoder;
     }
+    if (typeof this.global.Request === 'undefined') {
+      this.global.Request = Request;
+      this.global.Response = Response;
+    }
   }
 };
