@@ -13,12 +13,37 @@ const COZINHA_STATUS_AMBER = mapTokens.dataviz.color.sequential[3][2];
 const COZINHA_STATUS_RED = mapTokens.dataviz.color.sequential[5][6];
 
 /**
+ * The class a cozinha falls into when the source leaves
+ * `A cozinha está em funcionamento atualmente?` blank — a large share of the
+ * snapshot. Those kitchens carry coordinates and are plotted like any other, so
+ * the legend has to name their grey swatch instead of leaving it unexplained.
+ *
+ * Listed as a status rather than handled as a fallback: being in
+ * {@link COZINHA_STATUS} is what puts it in `colorBy.mapping`, and a categorical
+ * legend draws one swatch per mapping entry. `raw: ''` is what the source
+ * actually carries; any text outside the domain folds here too.
+ */
+const COZINHA_STATUS_UNKNOWN = {
+  raw: '',
+  label: 'Não informado',
+  short: 'Não informado',
+  // The categorical palette's warm gray, not `status.masked`: that token is
+  // built for choropleth polygons, where a near-white fill still reads across a
+  // whole município. It sits at 1.03:1 against the map's paper background —
+  // lighter than the background itself — which a few-pixel dot with no stroke
+  // cannot survive. This gray holds 3.11:1, on par with the most visible of the
+  // three painted classes, while staying neutral so it reads as absence of data
+  // rather than a fourth category competing with the traffic light.
+  color: mapTokens.dataviz.color.categorical[1][7],
+} as const;
+
+/**
  * Operating-status classes of a cozinha — the single source of truth for the
- * three states. Each entry pins together:
+ * four states. Each entry pins together:
  * - `raw`: the source-native `A cozinha está em funcionamento atualmente?` text;
  * - `label`: the descriptive legend/join label (the categorical join `value`);
  * - `short`: the terse tooltip label (traffic-light wording);
- * - `color`: the point/swatch color (green / amber / red).
+ * - `color`: the point/swatch color (green / amber / red / grey).
  *
  * The categorical join uses `label` as the joined value, so the legend swatch
  * labels and the hovered feature's `value` both read from it. Deriving the
@@ -44,6 +69,7 @@ const COZINHA_STATUS = [
     short: 'Inativo',
     color: COZINHA_STATUS_RED,
   },
+  COZINHA_STATUS_UNKNOWN,
 ] as const;
 
 /**
@@ -56,11 +82,12 @@ const COZINHA_STATUS_COLORS: Record<string, string> = Object.fromEntries(
   })
 );
 
-/** Fallback color for a cozinha whose status is outside the known domain. */
-const COZINHA_STATUS_DEFAULT_COLOR = mapTokens.dataviz.color.status.masked;
-
-/** Short label shown for a status outside the known domain (blank/unknown). */
-const COZINHA_STATUS_UNKNOWN_SHORT = 'Não informado';
+/**
+ * Fallback color for a value that never reaches {@link COZINHA_STATUS_COLORS}.
+ * Read off the unknown class so the swatch the legend draws for "Não informado"
+ * and the color an unmapped point gets can never diverge.
+ */
+const COZINHA_STATUS_DEFAULT_COLOR = COZINHA_STATUS_UNKNOWN.color;
 
 /** Id of the categorical cozinha-status legend; the points layer's `activeLegendId`. */
 export const COZINHA_STATUS_LEGEND_ID = 'legenda-cozinhas-status';
@@ -70,21 +97,22 @@ const COZINHA_STATUS_LEGEND_TITLE = 'Situação das cozinhas';
 
 /**
  * Maps a source-native `emFuncionamento` value to its descriptive status label
- * (the categorical join `value`). Unknown or blank values return `'Outros'` so
- * they still color/join to the fallback swatch instead of leaking the raw text.
+ * (the categorical join `value`). Unknown or blank values return
+ * `'Não informado'` so they join to that legend swatch instead of leaking the
+ * raw text.
  *
  * @param raw - Source-native `emFuncionamento` text (e.g. `'Sim, está funcionando normalmente'`).
- * @returns The descriptive label (e.g. `'Em funcionamento'`), or `'Outros'` when unknown/blank.
+ * @returns The descriptive label (e.g. `'Em funcionamento'`), or `'Não informado'` when unknown/blank.
  *
  * @example
  * cozinhaStatusLabel('Sim, está funcionando normalmente'); // 'Em funcionamento'
- * cozinhaStatusLabel(''); // 'Outros'
+ * cozinhaStatusLabel(''); // 'Não informado'
  */
 export const cozinhaStatusLabel = (raw: string): string => {
   const match = COZINHA_STATUS.find((entry) => {
     return entry.raw === raw;
   });
-  return match?.label ?? 'Outros';
+  return match?.label ?? COZINHA_STATUS_UNKNOWN.label;
 };
 
 /**
@@ -104,7 +132,7 @@ export const cozinhaStatusShortLabel = (label: string | null): string => {
   const match = COZINHA_STATUS.find((entry) => {
     return entry.label === label;
   });
-  return match?.short ?? COZINHA_STATUS_UNKNOWN_SHORT;
+  return match?.short ?? COZINHA_STATUS_UNKNOWN.short;
 };
 
 /**
