@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom';
 
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import type * as React from 'react';
 import AiPlayground from 'src/app/(features)/ai/AiPlayground';
 
@@ -125,5 +125,64 @@ describe('AiPlayground', () => {
     expect(
       await screen.findByText('Não foi possível gerar o mapa.')
     ).toBeInTheDocument();
+  });
+
+  test('renders the spec JSON on a successful submission', async () => {
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue(
+        jsonResponse({ result: { title: 'Mapa de IVS por município' } })
+      );
+
+    const { container } = renderWithChakra(<AiPlayground />);
+
+    fireEvent.change(screen.getByLabelText('O que você quer ver?'), {
+      target: { value: 'IVS por município' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Gerar mapa' }));
+
+    await waitFor(() => {
+      expect(container.textContent).toContain('Mapa de IVS por município');
+    });
+  });
+
+  test('does nothing when the form is submitted with a blank prompt', () => {
+    global.fetch = jest.fn();
+
+    const { container } = renderWithChakra(<AiPlayground />);
+    // Direct form submit bypasses the disabled submit button, exercising the
+    // handler's own blank-prompt guard.
+    const form = container.querySelector('form');
+    expect(form).not.toBeNull();
+    fireEvent.submit(form as HTMLFormElement);
+
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  test('ignores a duplicate submit while a request is already loading', async () => {
+    let resolveFetch: (response: Response) => void = () => {
+      return undefined;
+    };
+    global.fetch = jest.fn().mockReturnValue(
+      new Promise<Response>((resolve) => {
+        resolveFetch = resolve;
+      })
+    );
+
+    const { container } = renderWithChakra(<AiPlayground />);
+    fireEvent.change(screen.getByLabelText('O que você quer ver?'), {
+      target: { value: 'pessoas atendidas por município' },
+    });
+
+    const form = container.querySelector('form') as HTMLFormElement;
+    fireEvent.submit(form);
+    // Bypasses the disabled submit button, exercising the handler's own
+    // in-flight guard rather than the DOM's `disabled` attribute.
+    fireEvent.submit(form);
+
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+
+    resolveFetch(jsonResponse({ result: {} }));
+    await screen.findByRole('button', { name: 'Gerar mapa' });
   });
 });

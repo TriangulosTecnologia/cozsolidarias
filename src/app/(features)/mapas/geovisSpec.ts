@@ -259,7 +259,7 @@ const ASSENTAMENTOS_MAP_DATA_ID = 'assentamentos-status';
  * views; the adapter's source sync adds/removes it (with the `cod_imovel` join
  * key) on mode switch.
  */
-const ASSENTAMENTOS_SOURCE: GeoJSONSource = {
+export const ASSENTAMENTOS_SOURCE: GeoJSONSource = {
   id: ASSENTAMENTOS_SOURCE_ID,
   type: 'geojson',
   data: '/geo/assentamentos.json',
@@ -274,7 +274,7 @@ const ASSENTAMENTOS_SOURCE: GeoJSONSource = {
  */
 const ESTADOS_SOURCE_ID = 'estados-fill';
 
-const ESTADOS_SOURCE: GeoJSONSource = {
+export const ESTADOS_SOURCE: GeoJSONSource = {
   id: ESTADOS_SOURCE_ID,
   type: 'geojson',
   data: '/geo/estados.json',
@@ -444,7 +444,7 @@ const SUDESTE_VIEW = {
 };
 
 /** Picks the camera for the active mode (Southeast for assentamentos, else Brazil). */
-const resolveView = (showAssentamentos: boolean) => {
+export const resolveView = (showAssentamentos: boolean) => {
   return showAssentamentos ? SUDESTE_VIEW : BRAZIL_VIEW;
 };
 

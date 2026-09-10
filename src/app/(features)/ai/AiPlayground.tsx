@@ -1,5 +1,7 @@
 'use client';
 
+import 'maplibre-gl/dist/maplibre-gl.css';
+
 import {
   Alert,
   Box,
@@ -11,10 +13,27 @@ import {
   Text,
   Textarea,
 } from '@chakra-ui/react';
+import type { VisualizationSpec } from '@ttoss/geovis';
+import { GeovisWorkspace } from '@ttoss/geovis-workspace';
+import { I18nProvider } from '@ttoss/react-i18n';
+import { BruttalTheme } from '@ttoss/theme/Bruttal';
 import * as React from 'react';
+import { ThemeUIProvider } from 'theme-ui';
 
 /** Submission lifecycle for the prompt-to-map form. */
 type Status = 'idle' | 'loading' | 'error' | 'success';
+
+/**
+ * National camera fallback: frames the whole of Brazil. Applied when the
+ * model's spec omits `view` — every município-level choropleth this route
+ * can generate is national in scope, so this is always a sane default.
+ */
+const BRAZIL_VIEW = {
+  center: [-53.0, -14.5] as [number, number],
+  zoom: 4,
+  maxZoomIn: 9,
+  maxZoomOut: 4,
+};
 
 /**
  * `/ai` page body: a textarea prompt that calls `POST /api/ai/spec` and
@@ -28,7 +47,7 @@ const AiPlayground = () => {
   const [prompt, setPrompt] = React.useState('');
   const [status, setStatus] = React.useState<Status>('idle');
   const [errorMessage, setErrorMessage] = React.useState('');
-  const [result, setResult] = React.useState<unknown>(null);
+  const [result, setResult] = React.useState<VisualizationSpec | null>(null);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -48,11 +67,11 @@ const AiPlayground = () => {
       });
 
       const body = (await response.json()) as {
-        result?: unknown;
+        result?: VisualizationSpec;
         error?: string;
       };
 
-      if (!response.ok) {
+      if (!response.ok || !body.result) {
         setErrorMessage(body.error ?? 'Não foi possível gerar o mapa.');
         setStatus('error');
         return;
@@ -123,11 +142,38 @@ const AiPlayground = () => {
         </Alert.Root>
       ) : null}
 
-      {status === 'success' ? (
-        <Box as="pre" bg="gray.100" p={4} borderRadius="md" overflow="auto">
-          <Text as="code" fontSize="sm">
-            {JSON.stringify(result, null, 2)}
-          </Text>
+      {status === 'success' && result ? (
+        <Box
+          position="relative"
+          w="100%"
+          h="85vh"
+          minH="640px"
+          borderRadius="md"
+          overflow="hidden"
+          css={{
+            '& > *': {
+              height: '100%',
+              width: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+            },
+            '& > * > *': {
+              flex: '1',
+              minHeight: 0,
+            },
+          }}
+        >
+          <I18nProvider locale="pt-BR">
+            <ThemeUIProvider theme={BruttalTheme}>
+              <GeovisWorkspace
+                config={{ appearance: 'bare' }}
+                visualizationSpec={{
+                  ...result,
+                  view: result.view ?? BRAZIL_VIEW,
+                }}
+              />
+            </ThemeUIProvider>
+          </I18nProvider>
         </Box>
       ) : null}
     </Stack>

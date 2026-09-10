@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 
-import AiPlayground from './AiPlayground';
+import AiPlayground from './AiPlaygroundClient';
 
 export const metadata: Metadata = {
   title: 'IA — Cozinha Solidária em Rede',
