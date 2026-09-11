@@ -23,6 +23,7 @@ const REGISTER: kitchenRateByCity = {
   codigoIbge: '3550308',
   municipio: 'São Paulo',
   quantidade: 5,
+  pessoasAtendidas: 1_000,
   populacao: 11_451_999,
   porCemMil: 0.04,
   percentualDoBrasil: 12.5,

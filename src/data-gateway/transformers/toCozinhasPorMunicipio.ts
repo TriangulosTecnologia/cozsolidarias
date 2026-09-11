@@ -146,6 +146,32 @@ const indexMunicipios = (
   return indexed;
 };
 
+/**
+ * Parses the free-text `publicoTotalAtendido` cell into a whole number of
+ * people served. Blank or non-numeric text is unknown and becomes `null` —
+ * never coerced to `0`, so a kitchen that didn't report a count is never
+ * confused with one that reported serving nobody.
+ *
+ * @param raw - Raw `publicoTotalAtendido` value from a {@link StaticCozinhaSource}.
+ * @returns The parsed count, or `null` when unknown.
+ *
+ * @example
+ * parsePessoasAtendidas('200'); // 200
+ * parsePessoasAtendidas(''); // null
+ * parsePessoasAtendidas('desconhecido'); // null
+ */
+export const parsePessoasAtendidas = (raw: string): number | null => {
+  const trimmed = raw.trim();
+
+  if (trimmed === '') {
+    return null;
+  }
+
+  const parsed = Number(trimmed);
+
+  return Number.isFinite(parsed) && parsed >= 0 ? Math.trunc(parsed) : null;
+};
+
 /** Returns the most frequent (non-empty) name, ties broken by first seen. */
 const mostVotedName = (nameVotes: Map<string, number>): string => {
   let best = '';
@@ -203,6 +229,8 @@ export const aggregateCozinhasPorMunicipio = (
       nameVotes: Map<string, number>;
       sumLng: number;
       sumLat: number;
+      pessoasAtendidas: number;
+      pessoasAtendidasKnown: boolean;
     }
   >();
 
@@ -225,7 +253,14 @@ export const aggregateCozinhasPorMunicipio = (
 
     let current = counts.get(match.codigoIbge);
     if (!current) {
-      current = { quantidade: 0, nameVotes: new Map(), sumLng: 0, sumLat: 0 };
+      current = {
+        quantidade: 0,
+        nameVotes: new Map(),
+        sumLng: 0,
+        sumLat: 0,
+        pessoasAtendidas: 0,
+        pessoasAtendidasKnown: false,
+      };
       counts.set(match.codigoIbge, current);
     }
 
@@ -234,14 +269,31 @@ export const aggregateCozinhasPorMunicipio = (
     current.sumLat += cozinha.latitude;
     const name = cozinha.municipio;
     current.nameVotes.set(name, (current.nameVotes.get(name) ?? 0) + 1);
+
+    const pessoas = parsePessoasAtendidas(cozinha.publicoTotalAtendido);
+    if (pessoas !== null) {
+      current.pessoasAtendidas += pessoas;
+      current.pessoasAtendidasKnown = true;
+    }
   }
 
   return [...counts].map(
-    ([codigoIbge, { quantidade, nameVotes, sumLng, sumLat }]) => {
+    ([
+      codigoIbge,
+      {
+        quantidade,
+        nameVotes,
+        sumLng,
+        sumLat,
+        pessoasAtendidas,
+        pessoasAtendidasKnown,
+      },
+    ]) => {
       return {
         codigoIbge,
         municipio: mostVotedName(nameVotes),
         quantidade,
+        pessoasAtendidas: pessoasAtendidasKnown ? pessoasAtendidas : null,
         centroid: [sumLng / quantidade, sumLat / quantidade] as [
           number,
           number,
@@ -264,8 +316,8 @@ export const toCozinhasPorMunicipio = (
   municipios: GeoJSONFeatureCollection
 ): kitchenByCity[] => {
   return aggregateCozinhasPorMunicipio(cozinhas, municipios).map(
-    ({ codigoIbge, municipio, quantidade }) => {
-      return { codigoIbge, municipio, quantidade };
+    ({ codigoIbge, municipio, quantidade, pessoasAtendidas }) => {
+      return { codigoIbge, municipio, quantidade, pessoasAtendidas };
     }
   );
 };
@@ -417,25 +469,28 @@ export const projectComTaxa = ({
     return sum + quantidade;
   }, 0);
 
-  return aggregate.map(({ codigoIbge, municipio, quantidade }) => {
-    const habitantes = populacao[codigoIbge] ?? null;
-    const pessoasCadUnico = cadunico[codigoIbge] ?? null;
-    return {
-      codigoIbge,
-      municipio,
-      quantidade,
-      populacao: habitantes,
-      porCemMil: cozinhasPorCemMil({ quantidade, populacao: habitantes }),
-      percentualDoBrasil: cozinhasPercentualDoBrasil({ quantidade, total }),
-      pessoasCadUnico,
-      porDezMilCadUnico: cozinhasPorDezMilCadUnico({
+  return aggregate.map(
+    ({ codigoIbge, municipio, quantidade, pessoasAtendidas }) => {
+      const habitantes = populacao[codigoIbge] ?? null;
+      const pessoasCadUnico = cadunico[codigoIbge] ?? null;
+      return {
+        codigoIbge,
+        municipio,
         quantidade,
-        pessoas: pessoasCadUnico,
-      }),
-      pessoasPorCozinha: pessoasCadUnicoPorCozinha({
-        pessoas: pessoasCadUnico,
-        quantidade,
-      }),
-    };
-  });
+        pessoasAtendidas,
+        populacao: habitantes,
+        porCemMil: cozinhasPorCemMil({ quantidade, populacao: habitantes }),
+        percentualDoBrasil: cozinhasPercentualDoBrasil({ quantidade, total }),
+        pessoasCadUnico,
+        porDezMilCadUnico: cozinhasPorDezMilCadUnico({
+          quantidade,
+          pessoas: pessoasCadUnico,
+        }),
+        pessoasPorCozinha: pessoasCadUnicoPorCozinha({
+          pessoas: pessoasCadUnico,
+          quantidade,
+        }),
+      };
+    }
+  );
 };

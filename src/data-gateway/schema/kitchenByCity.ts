@@ -15,6 +15,13 @@ export type kitchenByCity = {
   municipio: string;
   /** Number of cozinhas located inside this município's polygon. */
   quantidade: number;
+  /**
+   * Total people served, summed from each cozinha's free-text
+   * `publicoTotalAtendido` in this município. Only cozinhas with a parseable
+   * count contribute to the sum; `null` when none of the município's cozinhas
+   * report a parseable count (unknown, never coerced to `0`).
+   */
+  pessoasAtendidas: number | null;
 };
 
 /**
