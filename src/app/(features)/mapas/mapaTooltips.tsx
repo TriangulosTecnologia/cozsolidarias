@@ -558,6 +558,37 @@ const RATE_TOOLTIPS: Partial<
   'coropletico-pessoas-cozinha': renderPessoasPorCozinhaTooltip,
 };
 
+/**
+ * Município tooltip for the CAF points view: how many CAFs the município holds.
+ *
+ * The points themselves carry no properties — the tiles are geometry only — so
+ * the count comes from the same per-município aggregate the CAF choropleth
+ * paints. Without this the hover would fall through to the kitchen count and
+ * report cozinhas while the user is looking at CAF dots.
+ */
+const renderCafCountTooltip = ({
+  name,
+  register,
+}: {
+  name: string;
+  register?: cafByCity;
+}) => {
+  const quantidade = register?.quantidade ?? 0;
+
+  return (
+    <TooltipCard
+      name={name}
+      primary={
+        quantidade > 0
+          ? `${quantidade.toLocaleString('pt-BR')} ${
+              quantidade === 1 ? 'CAF' : 'CAFs'
+            }`
+          : 'Sem CAF registrado'
+      }
+    />
+  );
+};
+
 /** The two CADINSAN modes and the com/sem-PBF scenario each one shows. */
 const CADINSAN_VARIANTS: Partial<Record<MapMode, 'com' | 'sem'>> = {
   'coropletico-cadinsan-com-pbf': 'com',
@@ -567,7 +598,8 @@ const CADINSAN_VARIANTS: Partial<Record<MapMode, 'com' | 'sem'>> = {
 /**
  * Resolves the hover-tooltip content for a município, dispatching on the active
  * map mode. Each choropleth mode renders the metric it colors by (rate, share,
- * CadÚnico rate, coverage, any IVS- or IDHM-family score); every other mode
+ * CadÚnico rate, coverage, any IVS- or IDHM-family score), `cafs` renders the
+ * município's CAF count; every other mode
  * (`coropletico`, `pontos`, `circulos`) falls back to the raw kitchen count,
  * taken from the map's feature-state `value` when present, otherwise from the
  * joined `register`.
@@ -613,6 +645,10 @@ export const renderMunicipioTooltip = ({
     return renderCafPercentTooltip({ name, register: cafRegister });
   }
 
+  if (mode === 'cafs') {
+    return renderCafCountTooltip({ name, register: cafRegister });
+  }
+
   const cadinsanVariant = CADINSAN_VARIANTS[mode];
   if (cadinsanVariant) {
     return renderCadinsanTooltip({
@@ -638,4 +674,42 @@ export const renderMunicipioTooltip = ({
     quantity,
     showSwatch: mode === 'coropletico',
   });
+};
+
+/**
+ * Hover card for the CAF map's country level: the state's name and how many
+ * CAFs it holds.
+ *
+ * Both come straight from the hover info — the `caf-ufs` join promotes each
+ * anchor's `nome` to the feature id and carries its total as the value — so the
+ * card never disagrees with the number drawn on the circle.
+ *
+ * @param params.nome - The UF's name, from `MapHoverInfo.featureId`.
+ * @param params.quantidade - The UF's CAF total, from `MapHoverInfo.value`, or
+ * `null` before the join has loaded.
+ * @returns The tooltip card.
+ *
+ * @example
+ * renderCafUfTooltip({ nome: 'Bahia', quantidade: 712480 });
+ * // <TooltipCard name="Bahia" primary="712.480 CAFs" />
+ */
+export const renderCafUfTooltip = ({
+  nome,
+  quantidade,
+}: {
+  nome: string;
+  quantidade: number | null;
+}) => {
+  return (
+    <TooltipCard
+      name={nome}
+      primary={
+        quantidade === null
+          ? 'Carregando…'
+          : `${quantidade.toLocaleString('pt-BR')} ${
+              quantidade === 1 ? 'CAF' : 'CAFs'
+            }`
+      }
+    />
+  );
 };

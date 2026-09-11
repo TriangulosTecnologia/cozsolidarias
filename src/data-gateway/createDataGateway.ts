@@ -1,5 +1,6 @@
 import { readStaticCadinsanMunicipal } from '../data-source-static/readStaticCadinsanMunicipal';
 import { readStaticCadUnico } from '../data-source-static/readStaticCadUnico';
+import { readStaticCafPontos } from '../data-source-static/readStaticCafPontos';
 import { readStaticCafsPorMunicipio } from '../data-source-static/readStaticCafsPorMunicipio';
 import {
   COZINHAS_YEARS,
@@ -15,6 +16,7 @@ import { readStaticPopulacao } from '../data-source-static/readStaticPopulacao';
 import type {
   cadinsanByCity,
   cafByCity,
+  CafUfFeatureCollection,
   CatalogueContract,
   CozinhaDetalhe,
   CozinhasBubblesFeatureCollection,
@@ -24,6 +26,7 @@ import type {
 } from './schema';
 import { toAppCatalogue } from './transformers/toAppCatalogue';
 import { toCadinsanPorMunicipio } from './transformers/toCadinsanPorMunicipio';
+import { toCafUfPontos } from './transformers/toCafPontos';
 import { toCafsPorMunicipio } from './transformers/toCafsPorMunicipio';
 import { toCozinhaDetalhe } from './transformers/toCozinhaDetalhe';
 import { toCozinhasBubbles } from './transformers/toCozinhasBubbles';
@@ -44,6 +47,12 @@ export type DataGateway = {
    * too large to aggregate at request time).
    */
   getCafsPorMunicipio: () => Promise<cafByCity[]>;
+  /**
+   * Returns one GeoJSON Point per UF, positioned at the CAF-weighted centroid of
+   * its municípios and carrying the UF's CAF total — the country level of the
+   * CAF map's zoom hierarchy.
+   */
+  getCafPontosPorUf: () => Promise<CafUfFeatureCollection>;
   /**
    * Returns one row per município (all 5,570) with its CADINSAN 2025
    * food-insecurity headcounts (com/sem PBF), its CadÚnico total, and the
@@ -110,6 +119,20 @@ export type DataGateway = {
   getIvsPorMunicipio: () => Promise<MunicipioIvs[]>;
 };
 
+/**
+ * Reads the two artefacts the CAF map's country level is built from: the UF
+ * anchor positions and the canonical per-município counts that sum into their
+ * totals. Both reads are memoized for the process.
+ */
+const readCafAnchors = async () => {
+  const [anchors, counts] = await Promise.all([
+    readStaticCafPontos(),
+    readStaticCafsPorMunicipio(),
+  ]);
+
+  return { anchors, porMunicipio: toCafsPorMunicipio(counts) };
+};
+
 const KNOWN_SOURCES = ['static'] as const;
 type KnownSource = (typeof KNOWN_SOURCES)[number];
 
@@ -171,6 +194,9 @@ export const createDataGateway = (): DataGateway => {
     return {
       getCafsPorMunicipio: async () => {
         return toCafsPorMunicipio(await readStaticCafsPorMunicipio());
+      },
+      getCafPontosPorUf: async () => {
+        return toCafUfPontos(await readCafAnchors());
       },
       getCadinsanPorMunicipio: async () => {
         return toCadinsanPorMunicipio(await readStaticCadinsanMunicipal());

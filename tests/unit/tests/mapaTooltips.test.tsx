@@ -7,6 +7,7 @@ import type {
 } from 'src/app/(features)/mapas/geovisSpec';
 import {
   renderAssentamentoTooltip,
+  renderCafUfTooltip,
   renderCozinhaTooltip,
   renderMunicipioTooltip,
 } from 'src/app/(features)/mapas/mapaTooltips';
@@ -175,6 +176,46 @@ describe('renderMunicipioTooltip', () => {
       mode: 'coropletico-cafs-percentual',
       cafRegister: undefined,
     });
+
+    expect(screen.getByText('Sem CAF registrado')).toBeInTheDocument();
+  });
+
+  /*
+   * The `cafs` mode's município-level hover: the circles themselves carry no
+   * card (the fill underneath answers), and without this branch the hover would
+   * fall through to the kitchen count and report cozinhas while the reader is
+   * looking at CAFs.
+   */
+  test('CAF hierarchy mode shows the município CAF count', () => {
+    renderTooltip({
+      mode: 'cafs',
+      cafRegister: {
+        codigoIbge: '2910800',
+        municipio: 'Feira de Santana',
+        quantidade: 8412,
+        percentualDoBrasil: 0.215,
+      },
+    });
+
+    expect(screen.getByText('8.412 CAFs')).toBeInTheDocument();
+  });
+
+  test('CAF hierarchy mode uses the singular "CAF" for a count of one', () => {
+    renderTooltip({
+      mode: 'cafs',
+      cafRegister: {
+        codigoIbge: '2910800',
+        municipio: 'Feira de Santana',
+        quantidade: 1,
+        percentualDoBrasil: 0.0001,
+      },
+    });
+
+    expect(screen.getByText('1 CAF')).toBeInTheDocument();
+  });
+
+  test('CAF hierarchy mode reads "sem CAF" for a município with none', () => {
+    renderTooltip({ mode: 'cafs', cafRegister: undefined });
 
     expect(screen.getByText('Sem CAF registrado')).toBeInTheDocument();
   });
@@ -432,5 +473,32 @@ describe('renderAssentamentoTooltip', () => {
 
     expect(screen.getByText('Assentamento')).toBeInTheDocument();
     expect(screen.getByText('Situação desconhecida')).toBeInTheDocument();
+  });
+});
+
+describe('renderCafUfTooltip', () => {
+  test('names the state and its CAF total, grouped pt-BR', () => {
+    renderWithChakra(
+      renderCafUfTooltip({ nome: 'Bahia', quantidade: 712_480 })
+    );
+
+    expect(screen.getByText('Bahia')).toBeInTheDocument();
+    expect(screen.getByText('712.480 CAFs')).toBeInTheDocument();
+  });
+
+  test('keeps the noun singular for a lone CAF', () => {
+    renderWithChakra(renderCafUfTooltip({ nome: 'Sergipe', quantidade: 1 }));
+
+    expect(screen.getByText('1 CAF')).toBeInTheDocument();
+  });
+
+  /*
+   * The anchors arrive from their own fetch, so the card can be hovered before
+   * the join has any value to give — saying so beats printing a wrong `0`.
+   */
+  test('says it is still loading before the join has a value', () => {
+    renderWithChakra(renderCafUfTooltip({ nome: 'Bahia', quantidade: null }));
+
+    expect(screen.getByText('Carregando…')).toBeInTheDocument();
   });
 });

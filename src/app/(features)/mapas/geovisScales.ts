@@ -9,6 +9,7 @@ import { mapTokens } from '@/config/theme';
 
 import { classifyValues } from './classifyValues';
 import { buildAssentamentoLegend } from './geovisAssentamentosScales';
+import { buildCafLegend } from './geovisCafLayers';
 import {
   IDHM_FAMILY_COLORS,
   IDHM_FAMILY_REFERENCE,
@@ -509,7 +510,11 @@ export const buildLegendItems = (): LegendItem[] => {
  * - `circulos`: flat background with one proportional circle per município
  *   (radius encodes the kitchen count);
  * - `assentamentos`: SICAR rural-settlement (AST) polygons of SP, filled and
- *   colored by registration status, with the kitchen points overlaid on top.
+ *   colored by registration status, with the kitchen points overlaid on top;
+ * - `cafs`: the ~3.9M CAFs as a zoom hierarchy — one circle per UF, then one
+ *   per município, then an H3 density grid, then the individual properties —
+ *   so each zoom band shows the aggregation it can actually be read at, and the
+ *   browser only ever holds one band.
  *
  * The fill, the municipality/state borders and the background color stay the
  * same across modes — only the data coloring and the points/circles overlays
@@ -536,7 +541,8 @@ export type MapMode =
   | 'coropletico-idhm-educacao-frequencia'
   | 'pontos'
   | 'circulos'
-  | 'assentamentos';
+  | 'assentamentos'
+  | 'cafs';
 
 const CHOROPLETH_LEGEND_ID = 'legenda-cozinhas';
 const RATE_LEGEND_ID = 'legenda-taxa';
@@ -852,9 +858,10 @@ const LEGEND_CONFIGS: LegendConfig[] = [
  * rendered); the others keep the same `colorBy` (still driving fill/tooltip) but
  * stay hidden.
  *
- * The `assentamentos` mode positions a **categorical** legend (status → color)
- * instead of a quantitative one; it's appended after the choropleth legends and
- * only positioned when its mode is active.
+ * The `assentamentos` and `cafs` modes position a **categorical** legend
+ * instead of a quantitative one (settlement status → color, CAF density →
+ * color); both are appended after the choropleth legends and only positioned
+ * when their own mode is active.
  *
  * @param mode - Active {@link MapMode}; positions the matching legend.
  * @returns One {@link LegendSpec} per choropleth variant, plus the settlement one.
@@ -862,6 +869,7 @@ const LEGEND_CONFIGS: LegendConfig[] = [
  * @example
  * buildLegends('coropletico-taxa').find((l) => l.position); // the rate legend
  * buildLegends('assentamentos').find((l) => l.position); // the settlement legend
+ * buildLegends('cafs').find((l) => l.position); // the CAF density legend
  */
 export const buildLegends = (
   mode: MapMode,
@@ -900,7 +908,11 @@ export const buildLegends = (
     };
   });
 
-  return [...choropleths, buildAssentamentoLegend(mode === 'assentamentos')];
+  return [
+    ...choropleths,
+    buildAssentamentoLegend(mode === 'assentamentos'),
+    buildCafLegend(mode === 'cafs'),
+  ];
 };
 
 /**

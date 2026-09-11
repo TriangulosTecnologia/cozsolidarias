@@ -14,22 +14,18 @@ import { BruttalTheme } from '@ttoss/theme/Bruttal';
 import * as React from 'react';
 import { ThemeUIProvider } from 'theme-ui';
 
-import type {
-  cadinsanByCity,
-  cafByCity,
-  CozinhasFeatureCollection,
-  kitchenRateByCity,
-  MunicipioIvs,
-} from '@/data-gateway/schema';
+import type { CozinhasFeatureCollection } from '@/data-gateway/schema';
 
-import { type AssentamentoAtributo, type MapMode } from './geovisSpec';
+import CafMapPanel from './CafMapPanel';
+import { type MapMode } from './geovisSpec';
 import {
   buildCozinhaRightSidebar,
   modeShowsCozinhaDetail,
 } from './mapaDetailSidebars';
 import MapLoadingIndicator from './MapLoadingIndicator';
 import { useKitchensByYear } from './useKitchensByYear';
-import { type NomesPorCodigo, useMapaSpec } from './useMapaSpec';
+import { useMapaDatasets } from './useMapaDatasets';
+import { useMapaSpec } from './useMapaSpec';
 
 /** Id of the left-sidebar menu group that drives the visualization mode. */
 const MODE_MENU_ID = 'visualizacao';
@@ -37,27 +33,60 @@ const MODE_MENU_ID = 'visualizacao';
 /** Shared-selection key the time-lapse timeline writes the current year to. */
 const YEAR_MENU_ID = 'ano';
 
+/** Mode shown before the sidebar seeds `selection[MODE_MENU_ID]`. */
+const DEFAULT_MODE: MapMode = 'coropletico';
+
 /** Year shown before the timeline seeds `selection[YEAR_MENU_ID]` (latest snapshot). */
 const DEFAULT_YEAR = 2026;
+
+/**
+ * Visualization modes whose data carries a year, so the timeline describes
+ * something. Only the kitchen locations do: every choropleth here is a single
+ * snapshot per município, and the assentamentos overlay has no time dimension
+ * either.
+ *
+ * Typed as `MapMode[]` on purpose. The gate below matches these strings against
+ * the shared selection, and the variations that produce that selection are
+ * declared as plain strings further down — so the type is what keeps the two
+ * from drifting: renaming a member of the `MapMode` union breaks this line at
+ * compile time instead of quietly leaving the tab disabled forever.
+ */
+const MODES_WITH_TIMELINE: MapMode[] = ['pontos'];
 
 /** Left sidebar drives the visualization mode. */
 /**
  * Left sidebar: the cozinhas visualizations as a card with two icon tabs —
- * "Variações" (a flat, icon-led list) and "Timeline" — whose header mirrors the
- * active tab. Drives the shared `visualizacao` selection (same `menuId` +
- * values), so switching a variation recolors the map.
+ * "Variações" (a flat, icon-led list) and "Timeline". Drives the shared
+ * `visualizacao` selection (same `menuId` + values), so switching a variation
+ * recolors the map.
+ *
+ * Neither section declares `header.title`, so geovis-workspace 0.13 draws no
+ * header band at all and the tab bar takes the top of the card, close button
+ * included. Two consequences shape the config below. Each tab is named by its
+ * section `id` (`header.title ?? section.id`), on hover and for assistive tech
+ * alike, so those ids read as labels — declaring a title to name one tab would
+ * bring the band back for both. And the `variations` body heads itself with its
+ * own `title`/`icon`, since with no band its rows would otherwise start against
+ * the tab bar with nothing naming them.
+ *
+ * The "Timeline" tab is gated on the variation: it is live only for
+ * {@link MODES_WITH_TIMELINE} and dims everywhere else. Dimming rather than
+ * dropping the section is deliberate — the tab bar would reflow on every
+ * variation switch, and a dimmed tab reads as *unavailable* where a missing one
+ * reads as *gone*.
  */
 const LEFT_SIDEBAR: NonNullable<GeovisWorkspaceConfig['leftSidebar']> = {
   initialState: 'open',
   sections: [
     {
-      id: 'cozinhas',
+      id: 'Variações',
       header: {
-        title: 'Variações',
         icon: 'lucide:layout-list',
       },
       body: {
         kind: 'variations',
+        title: 'Variações',
+        icon: 'lucide:layout-list',
         menuId: MODE_MENU_ID,
         defaultValue: 'coropletico',
         groups: [
@@ -188,17 +217,26 @@ const LEFT_SIDEBAR: NonNullable<GeovisWorkspaceConfig['leftSidebar']> = {
                 label: 'Assentamentos e cozinhas',
                 icon: 'lucide:house',
               },
+              {
+                value: 'cafs',
+                label: 'CAFs',
+                icon: 'lucide:tractor',
+              },
             ],
           },
         ],
       },
     },
     {
-      id: 'filtros',
+      id: 'Timeline',
       header: {
-        title: 'Timeline',
         icon: 'lucide:clock',
       },
+      // Live only where the data has a year. While the gate is closed the tab
+      // dims, playback is suspended, and the year already published stays in the
+      // selection — a closed gate freezes the timeline, it does not reset it, so
+      // returning to a kitchen-locations view lands on the same year.
+      enabledWhen: { menuId: MODE_MENU_ID, values: MODES_WITH_TIMELINE },
       body: {
         kind: 'filters',
         blocks: [
@@ -206,7 +244,11 @@ const LEFT_SIDEBAR: NonNullable<GeovisWorkspaceConfig['leftSidebar']> = {
             id: 'periodo',
             title: 'Linha do tempo',
             icon: 'lucide:calendar-clock',
-            defaultOpen: true,
+            // No `collapsible`: geovis-workspace 0.13 stopped collapsing filter
+            // blocks by default, and this is the only block in its tab — there
+            // is no neighbour for it to push off screen. A fixed header, so the
+            // timeline is always in reach. (`defaultOpen` lived here and is now
+            // read only when a block opts into collapsing.)
             control: {
               kind: 'timeline',
               // Drives the shared selection so the map reacts to the year.
@@ -246,93 +288,54 @@ const scopedSidebarTheme = {
   },
 };
 
-/** Everything the map loads once at mount. */
-type MapBootstrap = {
-  data: kitchenRateByCity[];
-  ivs: MunicipioIvs[];
-  nomes: NomesPorCodigo;
-  settlements: AssentamentoAtributo[];
-  /** Per-município CAF shares for the "% dos CAFs do Brasil" choropleth. */
-  cafsByCity: cafByCity[];
-  /** Per-município CADINSAN food-insecurity shares for the food-insecurity choropleths. */
-  cadinsanByCity: cadinsanByCity[];
-};
-
-const EMPTY_BOOTSTRAP: MapBootstrap = {
-  data: [],
-  ivs: [],
-  nomes: {},
-  settlements: [],
-  cafsByCity: [],
-  cadinsanByCity: [],
-};
-
-/**
- * Fetches the map's mount-time data in parallel. The assentamentos attribute
- * sidecar (~560 KB) is loaded here; the multi-MB geometry is fetched lazily by
- * the map source only when the user switches to the assentamentos mode. On any
- * failure it resolves to empty data — the map renders in the "sem dado" color
- * and tooltips fall back to their default labels.
- */
-const fetchMapData = async (): Promise<MapBootstrap> => {
-  try {
-    const [data, ivs, nomes, settlements, cafsByCity, cadinsanByCity] =
-      await Promise.all([
-        fetch('/api/cozinhas/por-municipio').then((response) => {
-          return response.json() as Promise<kitchenRateByCity[]>;
-        }),
-        fetch('/api/municipios/ivs').then((response) => {
-          return response.json() as Promise<MunicipioIvs[]>;
-        }),
-        fetch('/geo/municipios-nomes.json').then((response) => {
-          return response.json() as Promise<NomesPorCodigo>;
-        }),
-        fetch('/geo/assentamentos-atributos.json').then((response) => {
-          return response.json() as Promise<AssentamentoAtributo[]>;
-        }),
-        fetch('/api/cafs/por-municipio').then((response) => {
-          return response.json() as Promise<cafByCity[]>;
-        }),
-        fetch('/api/cadinsan/por-municipio').then((response) => {
-          return response.json() as Promise<cadinsanByCity[]>;
-        }),
-      ]);
-    return {
-      data,
-      ivs,
-      nomes,
-      settlements,
-      cafsByCity,
-      cadinsanByCity,
-    };
-  } catch {
-    return EMPTY_BOOTSTRAP;
-  }
-};
-
 const MapaPlayground = () => {
-  const [mounted, setMounted] = React.useState(false);
-  const [kitchenByCity, setKitchenByCity] = React.useState<kitchenRateByCity[]>(
-    []
-  );
-  const [ivsByCity, setIvsByCity] = React.useState<MunicipioIvs[]>([]);
-  const [nomesPorCodigo, setNomesPorCodigo] = React.useState<NomesPorCodigo>(
-    {}
-  );
-  const [assentamentos, setAssentamentos] = React.useState<
-    AssentamentoAtributo[]
-  >([]);
-  const [cafsByCity, setCafsByCity] = React.useState<cafByCity[]>([]);
-  const [cadinsanByCity, setCadinsanByCity] = React.useState<cadinsanByCity[]>(
-    []
-  );
   const [selection, setSelection] = React.useState<GeovisWorkspaceSelection>(
     () => {
       return getInitialSelection({ config: { leftSidebar: LEFT_SIDEBAR } });
     }
   );
 
-  const mode = (selection[MODE_MENU_ID] ?? 'coropletico') as MapMode;
+  const mode = (selection[MODE_MENU_ID] ?? DEFAULT_MODE) as MapMode;
+
+  // One snapshot per mode, loaded on the pick that needs it. `ensure` is handed
+  // straight back to the workspace below, which is what holds the menus while
+  // a mode's data is in flight.
+  const { datasets, ready, ensure } = useMapaDatasets(mode);
+
+  /*
+   * The mode the map draws, which lags the picked one by exactly the request
+   * it costs. Drawing a mode before its snapshots arrive draws a lie: the CAF
+   * hierarchy sizes its 27 UF circles from a `mapData` join, so an empty join
+   * puts every state at the size scale's floor, and a choropleth would flash
+   * "sem dado" over the whole country before repainting.
+   */
+  const [specMode, setSpecMode] = React.useState(mode);
+
+  /**
+   * Commits the pick, then reports the wait it costs — in that order, so the
+   * row the user just lit is the one that spins while every other row dims.
+   * The map itself only moves to the new mode when that wait resolves; a
+   * rejection leaves the last good paint where it is, and returning
+   * `undefined` (a mode already loaded, a timeline tick) keeps the menus live.
+   */
+  const handleVariableChange = React.useCallback(
+    (next: GeovisWorkspaceSelection) => {
+      setSelection(next);
+
+      const nextMode = (next[MODE_MENU_ID] ?? DEFAULT_MODE) as MapMode;
+      const pending = ensure(nextMode);
+
+      if (!pending) {
+        setSpecMode(nextMode);
+        return undefined;
+      }
+
+      return pending.then(() => {
+        setSpecMode(nextMode);
+      });
+    },
+    [ensure]
+  );
 
   // Time-lapse year, driven by the sidebar timeline (`selection[YEAR_MENU_ID]`).
   // Falls back to the latest snapshot until the timeline seeds it on mount.
@@ -373,13 +376,18 @@ const MapaPlayground = () => {
   }, [collections, year]);
 
   const config = React.useMemo((): GeovisWorkspaceConfig => {
+    // The kitchen detail, in the modes where kitchen points are clickable.
+    // The CAF mode has no detail to open: a point stands for one registration,
+    // and this app publishes nothing per registration.
+    const rightSidebar = modeShowsCozinhaDetail(specMode)
+      ? buildCozinhaRightSidebar(year)
+      : undefined;
+
     return {
       // Full-bleed map: no card border/radius so it fills the container.
       appearance: 'bare',
       leftSidebar: LEFT_SIDEBAR,
-      rightSidebar: modeShowsCozinhaDetail(mode)
-        ? buildCozinhaRightSidebar(year)
-        : undefined,
+      rightSidebar,
       // geovis-workspace 0.6.x adds `legend`, `warnings` and `metadata` slots to
       // the right sidebar, and it stays open while *any* of them has content —
       // `metadata` always does (`spec.sources.length > 0`), so it never
@@ -387,47 +395,40 @@ const MapaPlayground = () => {
       // `inspector` (the clicked feature's detail): it then shows on a point
       // click and closes on a click outside a point (empty inspector → no
       // content → sidebar hides), like the previous version.
+      //
+      // The `inspector` goes with them wherever no `rightSidebar` is
+      // configured. Omitting the sidebar config is NOT enough to keep it shut:
+      // the workspace's built-in inspector panel treats any registered click as
+      // content of its own (`hasInspectorDefaultContent` returns `true` when no
+      // `onFeatureSelect`/`renderDetails` is set), so the sidebar would open on
+      // a clicked feature to report a layer id and a raw value. `hidden` wins
+      // over content, which is what actually closes that door.
       slots: {
+        // Overridden in every mode, not just `cafs`: the drill-down listens on
+        // layer ids no other mode's spec declares, so it is inert elsewhere
+        // without this having to branch on the mode.
+        map: { component: CafMapPanel },
         legend: { hidden: true },
         warnings: { hidden: true },
         metadata: { hidden: true },
+        inspector: { hidden: rightSidebar === undefined },
       },
     };
     // `year` is a dependency because the kitchen detail sidebar resolves the
     // clicked código inside that year's snapshot.
-  }, [mode, year]);
-
-  React.useEffect(() => {
-    let cancelled = false;
-
-    fetchMapData().then((bootstrap) => {
-      if (cancelled) {
-        return;
-      }
-      setKitchenByCity(bootstrap.data);
-      setIvsByCity(bootstrap.ivs);
-      setNomesPorCodigo(bootstrap.nomes);
-      setAssentamentos(bootstrap.settlements);
-      setCafsByCity(bootstrap.cafsByCity);
-      setCadinsanByCity(bootstrap.cadinsanByCity);
-      setMounted(true);
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  }, [specMode, year]);
 
   const spec = useMapaSpec({
-    kitchenByCity,
-    ivsByCity,
-    nomesPorCodigo,
-    assentamentos,
+    kitchenByCity: datasets.data,
+    ivsByCity: datasets.ivs,
+    nomesPorCodigo: datasets.nomes,
+    assentamentos: datasets.settlements,
     cozinhaNames,
     cozinhaStatus,
-    cafByCity: cafsByCity,
-    cadinsanByCity,
-    mode,
+    cafByCity: datasets.cafsByCity,
+    cafPontosPorUf: datasets.cafPontosPorUf,
+    cadinsanByCity: datasets.cadinsanByCity,
+    mode: specMode,
     cozinhasPoints,
   });
 
@@ -436,7 +437,7 @@ const MapaPlayground = () => {
   // outer Box into a full-height flex column and let its in-flow child (the map
   // layout) grow with `flex: 1` so the map fills the viewport. The card
   // border/radius is dropped via `appearance: 'bare'` in the config, not here.
-  // Applied only when the map is mounted (see the `css` prop below).
+  // Applied only once the map is on screen (see the `css` prop below).
   const mapLayoutCss = {
     // Stretch the map to fill the container: make the workspace wrapper a
     // full-height flex column and let the map layout (its in-flow child) grow.
@@ -458,17 +459,22 @@ const MapaPlayground = () => {
   return (
     <Box
       position="relative"
-      h="calc(100vh - 72px)"
+      // `dvh`, not `vh`: on mobile browsers `100vh` is the viewport with the URL
+      // bar hidden, so the map would start taller than the screen — its bottom
+      // under the browser chrome, and the page with a scrollbar it should not
+      // have. `dvh` tracks the space actually visible, which is also the height
+      // the camera fit in `useMapaSpec` measures.
+      h="calc(100dvh - 72px)"
       w="100%"
       bg="ivory.200"
-      // Gated on `mounted`: these rules restyle `<GeovisWorkspace>`'s DOM, and
+      // Gated on `ready`: these rules restyle `<GeovisWorkspace>`'s DOM, and
       // their `& > *` / `& > * > *` selectors would otherwise also match the
       // loading indicator's own children while loading — flexing the mark and
       // caption apart and pushing the mark off-centre. Only apply once the map
       // (not the loading indicator) is the child.
-      css={mounted ? mapLayoutCss : undefined}
+      css={ready ? mapLayoutCss : undefined}
     >
-      {mounted ? (
+      {ready ? (
         // `<GeovisWorkspace>` renders theme-ui and `@ttoss/react-i18n`
         // components internally, so it needs both a theme-ui provider and the
         // `<I18nProvider>` ancestor.
@@ -486,7 +492,7 @@ const MapaPlayground = () => {
               config={config}
               visualizationSpec={spec}
               variables={selection}
-              onVariableChange={setSelection}
+              onVariableChange={handleVariableChange}
             />
           </ThemeUIProvider>
         </I18nProvider>

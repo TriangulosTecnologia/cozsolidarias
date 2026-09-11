@@ -64,3 +64,33 @@ export type StaticCozinhaSource = {
   latitude: number | null;
   longitude: number | null;
 };
+
+/**
+ * Shape of the CAF anchor snapshot (`caf-pontos.json`), generated offline by
+ * `scripts/generateCafPontos.ts`: one position per federative unit, the CAF
+ * map's country level.
+ *
+ * Geometry only, deliberately: how many CAFs a UF holds is answered by summing
+ * `caf-por-municipio.json` over `codigoUf`. Carrying counts here too would
+ * create a second copy that can drift from the first.
+ */
+export type StaticCafPontosSource = {
+  /** One anchor per federative unit (27), sorted by sigla. */
+  ufs: {
+    /** Two-digit IBGE code every município of the UF starts with, e.g. `29`. */
+    codigoUf: string;
+    /** Two-letter sigla, e.g. `BA`. */
+    uf: string;
+    /** Full state name, e.g. `Bahia`; the map's join key and hover title. */
+    nome: string;
+    /**
+     * CAF-count-weighted mean of the UF's município centroids. The six
+     * municípios created after the 2010 geometry vintage have no polygon and so
+     * do not pull the anchor — they hold 2,608 CAFs (0.07%), and their counts
+     * are still added to the UF's total.
+     */
+    longitude: number;
+    /** CAF-count-weighted mean of the UF's município centroids. */
+    latitude: number;
+  }[];
+};
