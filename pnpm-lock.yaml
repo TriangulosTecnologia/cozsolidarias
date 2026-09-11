@@ -4,9 +4,6 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-patchedDependencies:
-  '@ttoss/geovis@0.19.4': 126f20f1f18b09b529bdba6024da893f3d219897e8f43e9f2d81b5c256447dff
-
 importers:
 
   .:
@@ -21,11 +18,11 @@ importers:
         specifier: ^6.0.2
         version: 6.0.2(react@19.2.7)
       '@ttoss/geovis':
-        specifier: ^0.19.4
-        version: 0.19.4(patch_hash=126f20f1f18b09b529bdba6024da893f3d219897e8f43e9f2d81b5c256447dff)(@ttoss/react-icons@0.8.0(react@19.2.7))(@ttoss/ui@6.9.29(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.7)(supports-color@8.1.1))(@theme-ui/core@0.17.4(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.7)(supports-color@8.1.1))(react@19.2.7))(@theme-ui/css@0.17.4(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.7)(supports-color@8.1.1)))(@ttoss/react-icons@0.8.0(react@19.2.7))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(supports-color@8.1.1))(maplibre-gl@5.24.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: ^0.21.0
+        version: 0.21.0(@ttoss/react-icons@0.8.0(react@19.2.7))(@ttoss/ui@6.9.29(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.7)(supports-color@8.1.1))(@theme-ui/core@0.17.4(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.7)(supports-color@8.1.1))(react@19.2.7))(@theme-ui/css@0.17.4(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.7)(supports-color@8.1.1)))(@ttoss/react-icons@0.8.0(react@19.2.7))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(supports-color@8.1.1))(maplibre-gl@5.24.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@ttoss/geovis-workspace':
-        specifier: ^0.13.0
-        version: 0.13.0(4a9ce7cc382b73738cb363279d5a9c0f)
+        specifier: ^0.13.3
+        version: 0.13.3(84184548de703c2fbbbdc8a3a369f7ff)
       '@ttoss/react-i18n':
         specifier: ^2.3.1
         version: 2.3.1(@types/react@19.2.17)(react@19.2.7)
@@ -1602,17 +1599,17 @@ packages:
     peerDependencies:
       eslint: ^9
 
-  '@ttoss/geovis-workspace@0.13.0':
-    resolution: {integrity: sha512-9KbM5FcX1Yb4rNVXTg+sZEdSwL5sx4iMcnOYyOWepAvJNMRSu3dtrPDaQzzJb9dEqXrraF6WO9OYY6KoJGgpRQ==}
+  '@ttoss/geovis-workspace@0.13.3':
+    resolution: {integrity: sha512-g5Ha8c5y2Ixc+24Fyw0IjzHcuMgZ3Fxg8r99qNdJOlqO2plyOc6Fagfu635LL/dGq59brsb8JiumbsKT8GxDlg==}
     peerDependencies:
-      '@ttoss/geovis': ^0.19.4
+      '@ttoss/geovis': ^0.21.0
       '@ttoss/react-i18n': ^2.3.1
       '@ttoss/react-icons': ^0.8.0
       '@ttoss/ui': ^6.9.30
       react: '>=16.8.0'
 
-  '@ttoss/geovis@0.19.4':
-    resolution: {integrity: sha512-q+PDtulrMxDK2ZMvZ2VHn5aQpTccm7lxmDAvM0ayT8p4ERn2KOliJrygAouxR+mEUjsrVFzS0UCyFFJalGMZ2Q==}
+  '@ttoss/geovis@0.21.0':
+    resolution: {integrity: sha512-11Wbrd78lV+qxM/wKzX297E3RU7qJ+VUtMG+WbjyVuAWbUwvMhLK9iYK1ov5SxFNrZilTLaLSmBi33SNWnauPw==}
     peerDependencies:
       '@ttoss/react-icons': ^0.8.0
       '@ttoss/ui': ^6.9.30
@@ -6557,15 +6554,15 @@ snapshots:
       - ts-jest
       - typescript
 
-  '@ttoss/geovis-workspace@0.13.0(4a9ce7cc382b73738cb363279d5a9c0f)':
+  '@ttoss/geovis-workspace@0.13.3(84184548de703c2fbbbdc8a3a369f7ff)':
     dependencies:
-      '@ttoss/geovis': 0.19.4(patch_hash=126f20f1f18b09b529bdba6024da893f3d219897e8f43e9f2d81b5c256447dff)(@ttoss/react-icons@0.8.0(react@19.2.7))(@ttoss/ui@6.9.29(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.7)(supports-color@8.1.1))(@theme-ui/core@0.17.4(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.7)(supports-color@8.1.1))(react@19.2.7))(@theme-ui/css@0.17.4(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.7)(supports-color@8.1.1)))(@ttoss/react-icons@0.8.0(react@19.2.7))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(supports-color@8.1.1))(maplibre-gl@5.24.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      '@ttoss/geovis': 0.21.0(@ttoss/react-icons@0.8.0(react@19.2.7))(@ttoss/ui@6.9.29(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.7)(supports-color@8.1.1))(@theme-ui/core@0.17.4(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.7)(supports-color@8.1.1))(react@19.2.7))(@theme-ui/css@0.17.4(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.7)(supports-color@8.1.1)))(@ttoss/react-icons@0.8.0(react@19.2.7))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(supports-color@8.1.1))(maplibre-gl@5.24.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@ttoss/react-i18n': 2.3.1(@types/react@19.2.17)(react@19.2.7)
       '@ttoss/react-icons': 0.8.0(react@19.2.7)
       '@ttoss/ui': 6.9.29(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.7)(supports-color@8.1.1))(@theme-ui/core@0.17.4(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.7)(supports-color@8.1.1))(react@19.2.7))(@theme-ui/css@0.17.4(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.7)(supports-color@8.1.1)))(@ttoss/react-icons@0.8.0(react@19.2.7))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(supports-color@8.1.1)
       react: 19.2.7
 
-  '@ttoss/geovis@0.19.4(patch_hash=126f20f1f18b09b529bdba6024da893f3d219897e8f43e9f2d81b5c256447dff)(@ttoss/react-icons@0.8.0(react@19.2.7))(@ttoss/ui@6.9.29(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.7)(supports-color@8.1.1))(@theme-ui/core@0.17.4(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.7)(supports-color@8.1.1))(react@19.2.7))(@theme-ui/css@0.17.4(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.7)(supports-color@8.1.1)))(@ttoss/react-icons@0.8.0(react@19.2.7))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(supports-color@8.1.1))(maplibre-gl@5.24.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
+  '@ttoss/geovis@0.21.0(@ttoss/react-icons@0.8.0(react@19.2.7))(@ttoss/ui@6.9.29(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.7)(supports-color@8.1.1))(@theme-ui/core@0.17.4(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.7)(supports-color@8.1.1))(react@19.2.7))(@theme-ui/css@0.17.4(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.7)(supports-color@8.1.1)))(@ttoss/react-icons@0.8.0(react@19.2.7))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(supports-color@8.1.1))(maplibre-gl@5.24.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
     dependencies:
       '@ttoss/logger': 0.8.20
       '@ttoss/react-icons': 0.8.0(react@19.2.7)
