@@ -11,6 +11,7 @@ import { cozinhaStatusLabel } from './geovisCozinhaStatusScales';
 import { type AssentamentoAtributo, type MapMode } from './geovisSpec';
 import {
   renderAssentamentoTooltip,
+  renderCafUfTooltip,
   renderCozinhaTooltip,
   renderMunicipioTooltip,
 } from './mapaTooltips';
@@ -45,12 +46,12 @@ type UseMapaTooltipsParams = {
 };
 
 /**
- * Builds the three spec-driven hover-tooltip renderers (município, assentamento,
- * kitchen point) for the maps playground. Each renderer and its backing lookup
- * is memoized so it only changes when its inputs change.
+ * Builds the four spec-driven hover-tooltip renderers (município, assentamento,
+ * kitchen point, CAF UF circle) for the maps playground. Each renderer and its
+ * backing lookup is memoized so it only changes when its inputs change.
  *
  * @param params - The lookups and the active {@link MapMode}.
- * @returns `{ hoverTooltip, assentamentoTooltip, cozinhaTooltip }`.
+ * @returns `{ hoverTooltip, assentamentoTooltip, cozinhaTooltip, cafUfTooltip }`.
  *
  * @example
  * const { hoverTooltip } = useMapaTooltips({ kitchenByCity, nomesPorCodigo, assentamentos, cozinhaNames, cozinhaStatus, cafByCity, mode });
@@ -133,5 +134,16 @@ export const useMapaTooltips = ({
     [cozinhasByCodigo, statusByCodigo]
   );
 
-  return { hoverTooltip, assentamentoTooltip, cozinhaTooltip };
+  // The CAF country level. Both halves come from the hover info itself — the
+  // `caf-ufs` join promotes `nome` to the feature id and carries the UF's total
+  // as the value — so no lookup table is needed and nothing can drift from the
+  // number drawn on the circle.
+  const cafUfTooltip = React.useCallback((info: MapHoverInfo) => {
+    return renderCafUfTooltip({
+      nome: String(info.featureId),
+      quantidade: typeof info.value === 'number' ? info.value : null,
+    });
+  }, []);
+
+  return { hoverTooltip, assentamentoTooltip, cozinhaTooltip, cafUfTooltip };
 };

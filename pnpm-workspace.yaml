@@ -6,4 +6,5 @@ allowBuilds:
   unrs-resolver: true
 
 minimumReleaseAgeExclude:
-  - '@ttoss/geovis@0.2.0'
+  - '@ttoss/geovis@0.2.0 || 0.19.1 || 0.19.4 || 0.21.0'
+  - '@ttoss/geovis-workspace@0.11.1 || 0.13.0 || 0.13.3'

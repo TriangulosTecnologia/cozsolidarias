@@ -1,4 +1,5 @@
 import type {
+  DataSource,
   GeoJSONSource,
   HoverTooltipConfig,
   MapData,
@@ -10,6 +11,7 @@ import type {
 import type {
   cadinsanByCity,
   cafByCity,
+  CafUfFeatureCollection,
   kitchenRateByCity,
   MunicipioIvs,
 } from '@/data-gateway/schema';
@@ -18,6 +20,14 @@ import {
   ASSENTAMENTO_LEGEND_ID,
   assentamentoStatusLabel,
 } from './geovisAssentamentosScales';
+import {
+  buildCafsLayers,
+  buildCafsSources,
+  CAF_UFS_MAP_DATA_ID,
+  CAF_UFS_SOURCE_ID,
+  CAFS_LAYER_IDS,
+  toCafUfRows,
+} from './geovisCafLayers';
 import { resolveChoropleth, toValueRows } from './geovisChoroplethRows';
 import {
   buildCozinhaStatusLegend,
@@ -25,9 +35,14 @@ import {
   cozinhaStatusLabel,
 } from './geovisCozinhaStatusScales';
 import { buildLegends, legendIdForMode, type MapMode } from './geovisScales';
+import { TOOLTIP_STYLE } from './mapaTooltipStyle';
+import { viewForMode } from './mapCamera';
 
 /** Re-exported so consumers keep importing the map's mode type from here. */
 export type { MapMode };
+
+/** Re-exported so consumers keep importing the CAF layer ids from here. */
+export { CAFS_LAYER_IDS };
 
 /**
  * One SICAR settlement's map-facing attributes, from the
@@ -77,6 +92,15 @@ type MapOverlays = {
   /** Per-município CAF share rows; painted in `coropletico-cafs-percentual` mode. */
   cafByCity?: cafByCity[];
   /**
+   * The 27 UF anchors with their CAF totals, held by the app. Feeds both the
+   * `cafs` mode's country level (as the source's data, so the anchors are not
+   * fetched twice) and the join behind its hover card. `undefined` until it
+   * loads, which leaves the source on its URL and the card without a value.
+   */
+  cafPontosPorUf?: CafUfFeatureCollection;
+  /** Hover tooltip renderer for the `cafs` mode's UF circles. */
+  cafUfHoverRender?: HoverTooltipConfig['render'];
+  /**
    * Per-município CADINSAN food-insecurity share rows; painted in the
    * `coropletico-cadinsan-com-pbf` and `coropletico-cadinsan-sem-pbf` modes.
    */
@@ -92,24 +116,6 @@ type MapOverlays = {
 const NO_CAF_ROWS: cafByCity[] = [];
 const NO_CADINSAN_ROWS: cadinsanByCity[] = [];
 const NO_IVS_ROWS: MunicipioIvs[] = [];
-
-/**
- * Card styling for the spec-driven hover tooltip — a warm ivory surface with a
- * subtle border and elevation so it reads as a floating card above the map.
- * Values reference the Chakra design tokens (exposed as `--chakra-*` custom
- * properties on the document root by `<ChakraProvider>`), keeping the tooltip in
- * step with the app's visual language. The tooltip *content* (name + count) is
- * built with Chakra components in `MapaPlayground`.
- */
-const TOOLTIP_STYLE: NonNullable<HoverTooltipConfig['style']> = {
-  background: 'var(--chakra-colors-ivory-50)',
-  color: 'var(--chakra-colors-charcoal-900)',
-  border: '1px solid var(--chakra-colors-ivory-300)',
-  borderRadius: 'var(--chakra-radii-lg)',
-  boxShadow: '0 4px 16px rgba(36, 31, 33, 0.12)',
-  padding: 'var(--chakra-spacing-2) var(--chakra-spacing-3)',
-  zIndex: 50,
-};
 
 /**
  * The kitchen points layer. Larger, more opaque dots with a thick light halo so
@@ -410,43 +416,45 @@ const SOURCES: GeoJSONSource[] = [
 ];
 
 /**
- * Zoom-in ceiling shared by every camera. Caps how close the user can get so
- * the view stays at município scale and avoids the high-zoom range where point
- * pins drift from their rendered circles.
+ * The sources for the active mode: the always-on cozinha pair, plus the heavy
+ * geometry each overlay mode needs.
+ *
+ * Gating is what keeps those requests off every other view — the assentamentos
+ * GeoJSON is multi-MB and the CAF tiles are a pyramid — and the adapter's
+ * source sync adds and removes them as the mode changes.
+ *
+ * @param params.mode - Active {@link MapMode}.
+ * @param params.overlays - The optional overlay snapshots; only the CAF UF
+ * anchors are read here, to spare the country level a second fetch.
+ * @returns The spec's `sources` for that mode.
+ *
+ * @example
+ * buildSources({ mode: 'cafs', overlays: {} }); // the cozinha sources plus the CAF hierarchy
  */
-const MAX_ZOOM_IN = 9;
-
-/**
- * Zoom-out floor shared by every camera. Caps how far the user can zoom out at
- * the level where Brazil's whole territory fills the view — the same zoom as the
- * default {@link BRAZIL_VIEW} — so the map never recedes to a global/ocean scale.
- */
-const MAX_ZOOM_OUT = 4;
-
-/** Default camera: the whole of Brazil (all cozinha-based modes). */
-const BRAZIL_VIEW = {
-  center: [-53.0, -14.5] as [number, number],
-  zoom: 4,
-  maxZoomIn: MAX_ZOOM_IN,
-  maxZoomOut: MAX_ZOOM_OUT,
+const buildSources = ({
+  mode,
+  overlays,
+}: {
+  mode: MapMode;
+  overlays: MapOverlays;
+}): DataSource[] => {
+  if (mode === 'assentamentos') {
+    return [...SOURCES, ASSENTAMENTOS_SOURCE, ESTADOS_SOURCE];
+  }
+  if (mode === 'cafs') {
+    return [...SOURCES, ...buildCafsSources(overlays.cafPontosPorUf)];
+  }
+  return SOURCES;
 };
 
-/**
- * Camera for the assentamentos mode: framed on the Southeast, which covers the
- * currently included states (SP, MG, RJ, ES). Widen/re-center as coverage grows
- * (and revert to {@link BRAZIL_VIEW} once it's national).
+/*
+ * The cameras live in `mapCamera`: `viewForMode` pairs each mode with the
+ * extent it frames (the country, or the Southeast for assentamentos) and, when
+ * given a container to measure, fits the zoom to it. `buildSpec` has no
+ * viewport, so the spec it returns carries the unmeasured camera — the same
+ * zooms the map used before fitting — and `useMapaSpec` overrides `view` once
+ * the container is known.
  */
-const SUDESTE_VIEW = {
-  center: [-45.5, -20.0] as [number, number],
-  zoom: 5,
-  maxZoomIn: MAX_ZOOM_IN,
-  maxZoomOut: MAX_ZOOM_OUT,
-};
-
-/** Picks the camera for the active mode (Southeast for assentamentos, else Brazil). */
-export const resolveView = (showAssentamentos: boolean) => {
-  return showAssentamentos ? SUDESTE_VIEW : BRAZIL_VIEW;
-};
 
 /**
  * The município fill layer — identical across modes (keeps its `mapDataId` +
@@ -537,6 +545,14 @@ const buildOverlayLayers = ({
     layers.push(buildFillLayer(mode, hoverTooltipRender));
   }
 
+  // CAF points: added only in their own mode, and only there, so the tiles are
+  // requested when the user asks for them and never again. Pushed after the
+  // fill and before the kitchen overlays, which is the order they read in —
+  // millions of small dots would otherwise bury the few thousand kitchens.
+  if (mode === 'cafs') {
+    layers.push(...buildCafsLayers(overlays.cafUfHoverRender));
+  }
+
   // Proportional circles: always present so their stacking position *below* the
   // points is fixed at mount and never reordered by a later mode switch. Only
   // visible in `circulos`, where they are the primary layer.
@@ -567,11 +583,13 @@ const buildOverlayLayers = ({
 const buildMapData = ({
   byCity,
   choroplethRows,
+  mode,
   showAssentamentos,
   overlays,
 }: {
   byCity: kitchenRateByCity[];
   choroplethRows: MapDataRow[];
+  mode: MapMode;
   showAssentamentos: boolean;
   overlays: MapOverlays;
 }): MapData[] => {
@@ -617,6 +635,20 @@ const buildMapData = ({
       data: toAssentamentoStatusRows(overlays.assentamentos?.atributos ?? []),
     });
   }
+
+  // The CAF country level: promotes each anchor's `nome` to the MapLibre
+  // `feature.id` (without it the hover reports `0`) and carries the UF's total
+  // as the value the hover card and the circle radius both read.
+  if (mode === 'cafs') {
+    data.push({
+      mapDataId: CAF_UFS_MAP_DATA_ID,
+      mapId: CAF_UFS_SOURCE_ID,
+      joinKey: 'nome',
+      title: 'CAFs por UF',
+      data: toCafUfRows(overlays.cafPontosPorUf),
+    });
+  }
+
   return data;
 };
 
@@ -682,21 +714,40 @@ export const buildSpec = (
   return {
     engine: 'maplibre',
     // The assentamentos data covers only some states, so frame that region when
-    // the mode is active; every other (Brazil-wide) mode keeps the national view.
-    view: resolveView(showAssentamentos),
+    // the mode is active; every other mode frames the country. Unmeasured here
+    // (see the note by the imports) — `useMapaSpec` fits it to the container.
+    view: viewForMode({ mode }),
     // Hide the basemap's text/icon labels (place, road and POI names) so the
-    // choropleths, points and bubbles read against a clean geography. Only the
-    // basemap's own `symbol` layers are affected — we declare none of our own.
+    // choropleths, points and bubbles read against a clean geography.
+    //
+    // This only spares our own `cafs-labels` layer because of the geovis patch:
+    // upstream, `labels: false` sets `visibility: 'none'` on EVERY symbol layer
+    // in the live style — the check that skips geovis-managed layers exists only
+    // on the show path — and re-applies it on `idle` and after each layer sync,
+    // so the cluster counts could never render. The patch makes the skip
+    // symmetric, leaving managed layers to their own visibility.
     basemap: { labels: false },
+    /*
+     * Drops MapLibre's attribution control — the round toggle in the map's
+     * bottom-right corner, which crowded the legend panel sharing that corner.
+     *
+     * It was the only surface rendering each source's `attribution` string, so
+     * those credits (SICAR, IBGE, CAF/MDA, Cozinhas Solidárias) and the
+     * basemap's now live nowhere. The data sources are still named in every
+     * legend's `reference` line; the basemap credit is not, and OpenFreeMap
+     * serves OpenStreetMap-derived tiles under the ODbL, whose attribution
+     * requirement does not go away with the control. Restoring it means adding
+     * it to those `reference` lines.
+     */
+    attributionControlEnabled: false,
     // The assentamentos geometry and the state backdrop are added only in this
     // mode, so other views never fetch them; the adapter's source sync
     // adds/removes them on switch.
-    sources: showAssentamentos
-      ? [...SOURCES, ASSENTAMENTOS_SOURCE, ESTADOS_SOURCE]
-      : SOURCES,
+    sources: buildSources({ mode, overlays }),
     mapData: buildMapData({
       byCity,
       choroplethRows,
+      mode,
       showAssentamentos,
       overlays,
     }),

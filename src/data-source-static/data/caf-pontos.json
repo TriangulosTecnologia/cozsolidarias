@@ -1,0 +1,193 @@
+{
+  "ufs": [
+    {
+      "codigoUf": "12",
+      "uf": "AC",
+      "nome": "Acre",
+      "longitude": -69.96959,
+      "latitude": -9.38332
+    },
+    {
+      "codigoUf": "27",
+      "uf": "AL",
+      "nome": "Alagoas",
+      "longitude": -36.82737,
+      "latitude": -9.55048
+    },
+    {
+      "codigoUf": "13",
+      "uf": "AM",
+      "nome": "Amazonas",
+      "longitude": -62.87752,
+      "latitude": -4.09198
+    },
+    {
+      "codigoUf": "16",
+      "uf": "AP",
+      "nome": "Amapá",
+      "longitude": -51.47064,
+      "latitude": 0.68367
+    },
+    {
+      "codigoUf": "29",
+      "uf": "BA",
+      "nome": "Bahia",
+      "longitude": -40.76652,
+      "latitude": -12.34337
+    },
+    {
+      "codigoUf": "23",
+      "uf": "CE",
+      "nome": "Ceará",
+      "longitude": -39.53604,
+      "latitude": -5.19589
+    },
+    {
+      "codigoUf": "53",
+      "uf": "DF",
+      "nome": "Distrito Federal",
+      "longitude": -47.79686,
+      "latitude": -15.78076
+    },
+    {
+      "codigoUf": "32",
+      "uf": "ES",
+      "nome": "Espírito Santo",
+      "longitude": -40.78946,
+      "latitude": -19.69715
+    },
+    {
+      "codigoUf": "52",
+      "uf": "GO",
+      "nome": "Goiás",
+      "longitude": -49.09691,
+      "latitude": -15.62583
+    },
+    {
+      "codigoUf": "21",
+      "uf": "MA",
+      "nome": "Maranhão",
+      "longitude": -44.75669,
+      "latitude": -4.12448
+    },
+    {
+      "codigoUf": "31",
+      "uf": "MG",
+      "nome": "Minas Gerais",
+      "longitude": -43.73947,
+      "latitude": -17.93002
+    },
+    {
+      "codigoUf": "50",
+      "uf": "MS",
+      "nome": "Mato Grosso do Sul",
+      "longitude": -54.78266,
+      "latitude": -21.50823
+    },
+    {
+      "codigoUf": "51",
+      "uf": "MT",
+      "nome": "Mato Grosso",
+      "longitude": -55.85052,
+      "latitude": -12.85343
+    },
+    {
+      "codigoUf": "15",
+      "uf": "PA",
+      "nome": "Pará",
+      "longitude": -50.00925,
+      "latitude": -2.77859
+    },
+    {
+      "codigoUf": "25",
+      "uf": "PB",
+      "nome": "Paraíba",
+      "longitude": -36.64652,
+      "latitude": -7.07301
+    },
+    {
+      "codigoUf": "26",
+      "uf": "PE",
+      "nome": "Pernambuco",
+      "longitude": -37.55221,
+      "latitude": -8.26552
+    },
+    {
+      "codigoUf": "22",
+      "uf": "PI",
+      "nome": "Piauí",
+      "longitude": -42.18061,
+      "latitude": -6.6552
+    },
+    {
+      "codigoUf": "41",
+      "uf": "PR",
+      "nome": "Paraná",
+      "longitude": -52.03005,
+      "latitude": -24.94384
+    },
+    {
+      "codigoUf": "33",
+      "uf": "RJ",
+      "nome": "Rio de Janeiro",
+      "longitude": -42.42768,
+      "latitude": -22.07176
+    },
+    {
+      "codigoUf": "24",
+      "uf": "RN",
+      "nome": "Rio Grande do Norte",
+      "longitude": -36.61736,
+      "latitude": -5.94207
+    },
+    {
+      "codigoUf": "11",
+      "uf": "RO",
+      "nome": "Rondônia",
+      "longitude": -62.68375,
+      "latitude": -10.64292
+    },
+    {
+      "codigoUf": "14",
+      "uf": "RR",
+      "nome": "Roraima",
+      "longitude": -60.97759,
+      "latitude": 2.18342
+    },
+    {
+      "codigoUf": "43",
+      "uf": "RS",
+      "nome": "Rio Grande do Sul",
+      "longitude": -52.88644,
+      "latitude": -28.92751
+    },
+    {
+      "codigoUf": "42",
+      "uf": "SC",
+      "nome": "Santa Catarina",
+      "longitude": -51.123,
+      "latitude": -27.17937
+    },
+    {
+      "codigoUf": "28",
+      "uf": "SE",
+      "nome": "Sergipe",
+      "longitude": -37.47961,
+      "latitude": -10.52577
+    },
+    {
+      "codigoUf": "35",
+      "uf": "SP",
+      "nome": "São Paulo",
+      "longitude": -49.24527,
+      "latitude": -22.23654
+    },
+    {
+      "codigoUf": "17",
+      "uf": "TO",
+      "nome": "Tocantins",
+      "longitude": -48.3356,
+      "latitude": -8.41313
+    }
+  ]
+}

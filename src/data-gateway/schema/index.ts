@@ -1,5 +1,6 @@
 export type { cadinsanByCity } from './cadinsanByCity';
 export type { cafByCity } from './cafByCity';
+export type { CafUfFeature, CafUfFeatureCollection } from './cafPontos';
 export type {
   CatalogueAccessLevelContract,
   CatalogueContract,

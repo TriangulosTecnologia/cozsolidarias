@@ -180,6 +180,43 @@ describe('createDataGateway', () => {
     }
   });
 
+  /*
+   * The invariant behind the CAF map's country level: its 27 numbers are the
+   * per-município counts regrouped, so the total the map states matches the one
+   * the choropleth paints — no second aggregation to drift from the first.
+   */
+  test('anchors the CAF hierarchy: 27 UFs totalling the município counts', async () => {
+    const gateway = createDataGateway();
+
+    const [ufs, porMunicipio] = await Promise.all([
+      gateway.getCafPontosPorUf(),
+      gateway.getCafsPorMunicipio(),
+    ]);
+
+    expect(ufs.features).toHaveLength(27);
+
+    const nacional = ufs.features.reduce((total, feature) => {
+      return total + feature.properties.quantidade;
+    }, 0);
+    const somaMunicipios = porMunicipio.reduce((total, row) => {
+      return total + row.quantidade;
+    }, 0);
+
+    expect(nacional).toBe(somaMunicipios);
+    expect(nacional).toBeGreaterThan(3_000_000);
+
+    for (const feature of ufs.features) {
+      expect(feature.geometry.type).toBe('Point');
+      const [longitude, latitude] = feature.geometry.coordinates;
+      // Inside Brazil's bounding box — a weighted centroid that escaped it
+      // would mean the weighting itself is broken.
+      expect(longitude).toBeGreaterThan(-74);
+      expect(longitude).toBeLessThan(-33);
+      expect(latitude).toBeGreaterThan(-34);
+      expect(latitude).toBeLessThan(6);
+    }
+  });
+
   test('aggregates CAFs per município with their share of Brazil from the default static source', async () => {
     const gateway = createDataGateway();
 
@@ -254,7 +291,7 @@ describe('createDataGateway', () => {
     expect(catalogue.meta.title).toBe(
       'Catálogo de Dados — Cozinhas Solidárias'
     );
-    expect(catalogue.datasets).toHaveLength(13);
+    expect(catalogue.datasets).toHaveLength(12);
     for (const dataset of catalogue.datasets) {
       expect(dataset.source.title).not.toBe('');
       expect(Array.isArray(dataset.fields)).toBe(true);

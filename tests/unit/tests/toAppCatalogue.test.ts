@@ -85,7 +85,7 @@ describe('toAppCatalogue', () => {
   test('resolves publisher, source and volume for every dataset in the real catalogue', async () => {
     const catalogue = toAppCatalogue(await readStaticDataCatalogue());
 
-    expect(catalogue.datasets).toHaveLength(13);
+    expect(catalogue.datasets).toHaveLength(12);
     const byId = (id: string) => {
       return catalogue.datasets.find((dataset) => {
         return dataset.id === id;
@@ -125,8 +125,9 @@ describe('toAppCatalogue', () => {
       'temporalUnknown',
       'precisionUnknown',
     ]);
-    expect(byId('caf_producao')?.gaps).toEqual([
+    expect(byId('caf_areas')?.gaps).toEqual([
       'temporalUnknown',
+      'precisionUnknown',
       'originUndocumented',
     ]);
     expect(byId('municipios_populacao')?.gaps).toEqual([]);

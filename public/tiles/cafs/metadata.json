@@ -1,0 +1,17 @@
+{
+  "name": "/home/rener/projetos/cozsolidarias/public/tiles/cafs",
+  "description": "/home/rener/projetos/cozsolidarias/public/tiles/cafs",
+  "version": "2",
+  "minzoom": "10",
+  "maxzoom": "11",
+  "center": "-38.583984,-12.983133,11",
+  "bounds": "-73.994770,-33.933480,-33.042970,6.000000",
+  "antimeridian_adjusted_bounds": "-73.994770,-33.933480,-33.042970,6.000000",
+  "type": "overlay",
+  "attribution": "CAF — Cadastro Nacional da Agricultura Familiar (MDA)",
+  "strategies": "[{},{},{},{},{},{},{},{},{},{},{\"dropped_by_rate\":2044537},{}]",
+  "format": "pbf",
+  "generator": "tippecanoe v2.80.0",
+  "generator_options": "tippecanoe --output-to-directory /home/rener/projetos/cozsolidarias/public/tiles/cafs --force --layer cafs --minimum-zoom 10 --maximum-zoom 11 --drop-densest-as-needed '--use-attribute-for-id=nr_caf' --no-tile-compression --no-progress-indicator --attribution 'CAF — Cadastro Nacional da Agricultura Familiar (MDA)'",
+  "json": "{\"vector_layers\":[{\"id\":\"cafs\",\"description\":\"\",\"minzoom\":10,\"maxzoom\":11,\"fields\":{\"count\":\"Number\"}}],\"tilestats\":{\"layerCount\":1,\"layers\":[{\"layer\":\"cafs\",\"count\":3163015,\"geometry\":\"Point\",\"attributeCount\":1,\"attributes\":[{\"attribute\":\"count\",\"count\":1,\"type\":\"number\",\"values\":[1],\"min\":1,\"max\":1}]}]}}"
+}

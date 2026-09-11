@@ -12,6 +12,7 @@ This is the public Next.js application. It owns routes, screens, UI composition,
 - Prefer explicit loading, empty, error, and reset states.
 - Keep permalink state serializable, stable, and URL-safe.
 - Small helpers stay next to the component that uses them. Extract to a shared module only after 3 uses.
+- Before creating a component, search `src/components` for one that already covers the need. If a close match exists, extend it with a new variant — another prop value, another branch of an existing variant — instead of adding a new file. Create a new component only when nothing there fits its shape.
 
 ## Boundaries
 

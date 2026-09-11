@@ -25,6 +25,7 @@ import {
 import type {
   cadinsanByCity,
   cafByCity,
+  CafUfFeatureCollection,
   kitchenRateByCity,
   MunicipioIvs,
 } from 'src/data-gateway/schema';
@@ -536,6 +537,492 @@ describe('buildSpec', () => {
       return layer.id === 'municipios-br-fill';
     });
     expect(fill?.activeLegendId).toBe('legenda-cafs-percentual');
+  });
+
+  describe('cafs — the UF → H3 grid → points hierarchy', () => {
+    const CAF_UF_POINTS: CafUfFeatureCollection = {
+      type: 'FeatureCollection',
+      features: [
+        {
+          type: 'Feature',
+          geometry: { type: 'Point', coordinates: [-40.77, -12.34] },
+          properties: { nome: 'Bahia', quantidade: 712_480 },
+        },
+      ],
+    };
+
+    const cafUfHoverRender = () => {
+      return null;
+    };
+
+    const cafsSpec = () => {
+      return buildSpec(BY_CITY, 'cafs', undefined, [], {
+        cafPontosPorUf: CAF_UF_POINTS,
+        cafUfHoverRender,
+      });
+    };
+
+    const CAF_SOURCE_IDS = [
+      'caf-ufs',
+      'caf-h3-r3',
+      'caf-h3-r4',
+      'caf-h3-r5',
+      'caf-h3-r6',
+      'cafs',
+    ];
+
+    const cafLayers = () => {
+      return cafsSpec().layers.filter((layer) => {
+        return CAF_SOURCE_IDS.includes(layer.sourceId);
+      });
+    };
+
+    const layerById = (id: string) => {
+      return cafLayers().find((layer) => {
+        return layer.id === id;
+      });
+    };
+
+    const sourceById = (id: string) => {
+      return cafsSpec().sources.find((source) => {
+        return source.id === id;
+      });
+    };
+
+    /*
+     * The whole point of the hierarchy: one representation per zoom band, and
+     * the bands must tile the zoom range without a gap (a zoom showing nothing)
+     * or an overlap (two aggregations of the same CAFs drawn at once).
+     */
+    test('partitions the zoom range across the three levels', () => {
+      const bands = cafLayers().map((layer) => {
+        return [layer.id, layer.minzoom, layer.maxzoom];
+      });
+
+      // One band per grid resolution — its lone-CAF dots, its four colour
+      // layers and its labels all share it.
+      const grid = ([resolution, minzoom, maxzoom]: [
+        number,
+        number,
+        number,
+      ]) => {
+        return [
+          [`cafs-h3-r${resolution}-single`, minzoom, maxzoom],
+          ...[0, 1, 2, 3].map((band) => {
+            return [`cafs-h3-r${resolution}-b${band}`, minzoom, maxzoom];
+          }),
+          [`cafs-h3-r${resolution}-labels`, minzoom, maxzoom],
+        ];
+      };
+
+      expect(bands.slice(0, 24)).toEqual([
+        ...grid([3, 5, 7]),
+        ...grid([4, 7, 8]),
+        ...grid([5, 8, 9]),
+        ...grid([6, 9, 10]),
+      ]);
+      expect(bands.slice(24)).toEqual([
+        ['cafs-pts', 10, undefined],
+        ['cafs-uf', undefined, 5],
+        ['cafs-uf-labels', undefined, 5],
+      ]);
+    });
+
+    /*
+     * A tile source renders nothing below its own `minzoom`, so each window has
+     * to start where the generator built it. The point pyramid stops at z11 and
+     * is over-zoomed above, which is lossless for points.
+     */
+    test('declares each tile pyramid over the zooms it was generated for', () => {
+      expect(
+        ['caf-h3-r3', 'caf-h3-r4', 'caf-h3-r5', 'caf-h3-r6', 'cafs'].map(
+          (id) => {
+            const source = sourceById(id);
+            return [id, source?.minzoom, source?.maxzoom];
+          }
+        )
+      ).toEqual([
+        ['caf-h3-r3', 5, 6],
+        ['caf-h3-r4', 7, 7],
+        ['caf-h3-r5', 8, 8],
+        ['caf-h3-r6', 9, 9],
+        ['cafs', 10, 11],
+      ]);
+    });
+
+    /*
+     * MapLibre fetches vector tiles from a worker, where a relative URL has no
+     * base to resolve against — `new Request('/tiles/…')` throws and the layer
+     * stays empty. GeoJSON is fetched on the main thread and gets away with it.
+     */
+    test('addresses the tiles absolutely and the UF level by path', () => {
+      expect(sourceById('caf-h3-r4')).toMatchObject({
+        type: 'vector-tiles',
+        tiles: [`${window.location.origin}/tiles/caf-h3-r4/{z}/{x}/{y}.pbf`],
+      });
+      expect(
+        buildSpec(BY_CITY, 'cafs').sources.find((source) => {
+          return source.id === 'caf-ufs';
+        })
+      ).toMatchObject({ type: 'geojson', data: '/api/cafs/pontos-por-uf' });
+    });
+
+    /*
+     * The app already holds the 27 anchors to drive the hover join; handing them
+     * to the source too is what stops the map fetching the same 2 KB again.
+     */
+    test('serves the UF level from memory once the app has the anchors', () => {
+      expect(sourceById('caf-ufs')).toMatchObject({ data: CAF_UF_POINTS });
+    });
+
+    /*
+     * The join does double duty: it promotes `nome` to the MapLibre feature id
+     * (without it the hover reports `0`) and carries the total the hover card
+     * and the circle radius both read. Rows come off the FeatureCollection, so
+     * the card can never disagree with the label.
+     */
+    test('joins the UF level on the name it labels itself with', () => {
+      expect(mapDataById(cafsSpec(), 'caf-ufs-data')).toMatchObject({
+        mapId: 'caf-ufs',
+        joinKey: 'nome',
+        data: [{ geometryId: 'Bahia', value: 712_480 }],
+      });
+      expect(layerById('cafs-uf')?.mapDataId).toBe('caf-ufs-data');
+    });
+
+    /*
+     * The mode's only hover card: the tiled levels below cannot have one, since
+     * geovis exposes no feature properties for them.
+     */
+    test('attaches the hover card to the UF circles, and only there', () => {
+      expect(layerById('cafs-uf')?.hoverTooltip?.render).toBe(cafUfHoverRender);
+      expect(
+        cafLayers().filter((layer) => {
+          return layer.hoverTooltip !== undefined;
+        })
+      ).toHaveLength(1);
+      expect(
+        buildSpec(BY_CITY, 'cafs').layers.find((layer) => {
+          return layer.id === 'cafs-uf';
+        })?.hoverTooltip
+      ).toBeUndefined();
+    });
+
+    /*
+     * Circles, never hexagons — and `propertyName` WITHOUT `mapDataId` is what
+     * compiles the radius to `['get', 'count']` instead of the feature-state
+     * path a tiled source has no way to fill. Every band of a resolution shares
+     * the ladder, so a circle keeps its size whichever band draws it.
+     */
+    test('draws every grid level as circles sized by the cell count', () => {
+      const grid = cafLayers().filter((layer) => {
+        return layer.sourceId.startsWith('caf-h3-');
+      });
+
+      for (const layer of grid) {
+        expect(layer.sourceLayer).toBe('caf-h3');
+        expect(layer.mapDataId).toBeUndefined();
+      }
+      for (const band of [0, 1, 2, 3]) {
+        expect(layerById(`cafs-h3-r5-b${band}`)?.propertyName).toBe('count');
+      }
+
+      // One ladder on the absolute count, shared by every level including the
+      // UF circles: a cell's children sum to it, so a step function on the
+      // count can never grow on the way down.
+      const ladder = {
+        mode: 'stepped',
+        range: [7, 34],
+        thresholds: [
+          3, 10, 30, 100, 300, 1_000, 3_000, 10_000, 30_000, 100_000, 300_000,
+        ],
+      };
+      expect(layerById('cafs-h3-r6-b0')?.sizeBy).toEqual(ladder);
+      expect(layerById('cafs-h3-r3-b3')?.sizeBy).toEqual(ladder);
+      expect(layerById('cafs-uf')?.sizeBy).toEqual(ladder);
+    });
+
+    /*
+     * One-sided `gte` filters in ascending order, so the topmost match wins: a
+     * `LayerFilter` holds a single predicate, so a closed range is not
+     * expressible, and a tiled source cannot drive colour from `mapData` at all.
+     * The breaks are each grid's own p75/p90/p98, measured over the full
+     * snapshot, so three quarters of the cells read as the pale background dot
+     * at every zoom.
+     */
+    test('bands each grid by ascending count, topmost match winning', () => {
+      const breaks = (resolution: number) => {
+        return cafLayers()
+          .filter((layer) => {
+            return layer.id.startsWith(`cafs-h3-r${resolution}-b`);
+          })
+          .map((layer) => {
+            return layer.filter?.value;
+          });
+      };
+
+      expect(breaks(3)).toEqual([2, 1_800, 8_500, 28_000]);
+      expect(breaks(4)).toEqual([2, 400, 1_750, 5_000]);
+      expect(breaks(5)).toEqual([2, 100, 350, 1_000]);
+      expect(breaks(6)).toEqual([2, 30, 75, 200]);
+
+      for (const layer of cafLayers()) {
+        if (layer.id.includes('-b') && layer.filter) {
+          expect(layer.filter.operator).toBe('gte');
+          expect(layer.filter.property).toBe('count');
+        }
+      }
+    });
+
+    /*
+     * The legend is explanatory, not data-driven: the four bands are painted
+     * by four static-coloured layers, so no layer carries the legend as its
+     * `activeLegendId` and only its `position` puts it on screen.
+     */
+    test('positions the density legend for this mode and no other', () => {
+      const legendOf = (spec: ReturnType<typeof cafsSpec>) => {
+        return spec.legends?.find((entry) => {
+          return entry.id === 'legenda-cafs';
+        });
+      };
+
+      const legend = legendOf(cafsSpec());
+      expect(legend?.position).toBe('bottom-right');
+      expect(legend?.colorBy?.type).toBe('categorical');
+      // Light to dark, the same four the grid circles step through.
+      expect(
+        legend?.colorBy?.type === 'categorical'
+          ? Object.values(legend.colorBy.mapping)
+          : []
+      ).toEqual(['#9CC7B0', '#5FA37F', '#2F6F4E', '#1B4632']);
+
+      expect(
+        legendOf(buildSpec(BY_CITY, 'coropletico'))?.position
+      ).toBeUndefined();
+    });
+
+    /*
+     * No click in this mode opens anything. A CAF point stands for one
+     * registration and the app publishes no per-registration detail, so a click
+     * that opened an empty panel — or a pin marking a point that leads nowhere —
+     * would promise something that does not exist.
+     *
+     * The aggregates do answer to a click, but only by moving the camera (the
+     * drill-down in `useCafDrilldown`). They say so with a bare `click: {}`,
+     * which is what geovis reads to draw a pointer cursor; an `onSelect` inside
+     * it would register geovis's own selection path, and a `clickAnchor` would
+     * drop a pin. Neither appears anywhere here, which is the invariant above
+     * stated as what it always meant.
+     */
+    test('opens nothing on click — no selection panel, no pin', () => {
+      expect(
+        cafLayers().filter((layer) => {
+          return (
+            layer.click?.onSelect !== undefined ||
+            layer.clickAnchor !== undefined
+          );
+        })
+      ).toHaveLength(0);
+    });
+
+    /*
+     * Only the aggregates drill. An individual CAF is the end of the hierarchy,
+     * a cell of one is not an aggregate of anything, and the labels sit above
+     * the circles — a pointer over any of the three would advertise a move that
+     * does not happen.
+     */
+    test('advertises the drill-down on the aggregates alone', () => {
+      expect(layerById('cafs-uf')?.click).toEqual({});
+      expect(layerById('cafs-h3-r3-b0')?.click).toEqual({});
+      expect(layerById('cafs-h3-r6-b3')?.click).toEqual({});
+
+      expect(layerById('cafs-pts')?.click).toBeUndefined();
+      expect(layerById('cafs-pts')?.mapDataId).toBeUndefined();
+      expect(layerById('cafs-h3-r5-single')?.click).toBeUndefined();
+      expect(layerById('cafs-h3-r5-labels')?.click).toBeUndefined();
+      expect(layerById('cafs-uf-labels')?.click).toBeUndefined();
+    });
+
+    /*
+     * A cell holding one CAF is not an aggregate: its weighted centroid IS that
+     * CAF's coordinate, so it is drawn as the individual dot it is — same paint
+     * as the point tiles use below z10 — and the labels skip it. A circle
+     * reading `1` claims to summarise something that is not there.
+     */
+    test('draws a cell of one CAF as that CAF, unlabelled', () => {
+      const single = layerById('cafs-h3-r5-single');
+
+      expect(single?.geometry).toBe('point');
+      expect(single?.filter).toEqual({
+        property: 'count',
+        operator: 'lt',
+        value: 2,
+      });
+      // The exact complement of the first band, so no count falls through both
+      // or matches neither.
+      expect(layerById('cafs-h3-r5-b0')?.filter?.value).toBe(2);
+      // Same shape and colour as the individual points at the deep end.
+      expect(single?.paint).toEqual({
+        circleColor: '#2F6F4E',
+        circleRadius: 4,
+        circleStrokeWidth: 0,
+      });
+      // The tiled points differ in one thing only: they overlap by the million,
+      // and letting them accumulate is what darkens a crowded município.
+      expect(layerById('cafs-pts')?.paint).toEqual({
+        ...single?.paint,
+        circleOpacity: 0.9,
+      });
+
+      expect(layerById('cafs-h3-r5-labels')?.filter).toEqual({
+        property: 'count',
+        operator: 'gte',
+        value: 2,
+      });
+    });
+
+    /*
+     * Every aggregate circle states its count — the grid's as much as the UFs'.
+     * The individual CAFs are the exception: each stands for exactly one
+     * property, and a map of dots all labelled `1` says nothing.
+     */
+    test('labels every aggregate level, and only those', () => {
+      expect(
+        cafLayers()
+          .filter((layer) => {
+            return layer.geometry === 'symbol';
+          })
+          .map((layer) => {
+            return layer.id;
+          })
+      ).toEqual([
+        'cafs-h3-r3-labels',
+        'cafs-h3-r4-labels',
+        'cafs-h3-r5-labels',
+        'cafs-h3-r6-labels',
+        'cafs-uf-labels',
+      ]);
+    });
+
+    /*
+     * The grid labels read the tiles' own `count`, and step on the same
+     * percentile breaks the radius does, so the number grows with its circle.
+     */
+    test('labels the grid from the count the tiles carry', () => {
+      expect(layerById('cafs-h3-r6-labels')?.paint).toMatchObject({
+        textField: expect.arrayContaining([
+          ['>=', ['get', 'count'], 999500],
+        ]) as unknown,
+        textSize: [
+          'step',
+          ['get', 'count'],
+          11,
+          3,
+          11.6,
+          10,
+          12.3,
+          30,
+          12.9,
+          100,
+          13.5,
+          300,
+          14.2,
+          1000,
+          14.8,
+          3000,
+          15.5,
+          10000,
+          16.1,
+          30000,
+          16.7,
+          100000,
+          17.4,
+          300000,
+          18,
+        ],
+      });
+    });
+
+    /*
+     * The compact pt-BR formatting is what lets the UF circles be labelled at
+     * all: a UF reads 712.480, and seven digits fit in no circle this map draws.
+     * Pinned in full because the expression IS the contract — geovis passes
+     * `paint.textField` to `text-field` verbatim, so a malformed one fails
+     * inside MapLibre, where no test can see it.
+     */
+    test('labels the UF circles with the count, compacted', () => {
+      expect(layerById('cafs-uf-labels')?.paint).toMatchObject({
+        textField: [
+          'case',
+          // Not a round million: that is where the branch below would round to
+          // `1.000 mil`.
+          ['>=', ['get', 'quantidade'], 999500],
+          [
+            'concat',
+            [
+              'number-format',
+              ['/', ['get', 'quantidade'], 1000000],
+              { locale: 'pt-BR', 'max-fraction-digits': 1 },
+            ],
+            ' mi',
+          ],
+          ['>=', ['get', 'quantidade'], 10000],
+          [
+            'concat',
+            // Rounded here, not by the formatter: MapLibre reads
+            // `max-fraction-digits` under a truthiness check, so a `0` is
+            // dropped and `Intl`'s three decimals print `33,675 mil`.
+            [
+              'number-format',
+              ['round', ['/', ['get', 'quantidade'], 1000]],
+              { locale: 'pt-BR' },
+            ],
+            ' mil',
+          ],
+          ['number-format', ['get', 'quantidade'], { locale: 'pt-BR' }],
+        ],
+        // Stepped on the same ladder the radius uses, so the label grows with
+        // its circle and never outgrows it.
+        textSize: [
+          'step',
+          ['get', 'quantidade'],
+          11,
+          3,
+          11.6,
+          10,
+          12.3,
+          30,
+          12.9,
+          100,
+          13.5,
+          300,
+          14.2,
+          1000,
+          14.8,
+          3000,
+          15.5,
+          10000,
+          16.1,
+          30000,
+          16.7,
+          100000,
+          17.4,
+          300000,
+          18,
+        ],
+      });
+    });
+
+    test('keeps the CAF layers out of every other mode', () => {
+      expect(
+        buildSpec(BY_CITY, 'coropletico').layers.filter((layer) => {
+          return CAF_SOURCE_IDS.includes(layer.sourceId);
+        })
+      ).toEqual([]);
+      expect(
+        mapDataById(buildSpec(BY_CITY, 'coropletico'), 'caf-ufs-data')
+      ).toBeUndefined();
+    });
   });
 
   test('coropletico-cafs-percentual feeds nothing when no CAF data is provided', () => {
