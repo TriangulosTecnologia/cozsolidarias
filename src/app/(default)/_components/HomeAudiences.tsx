@@ -28,19 +28,14 @@ const HomeAudiences = () => {
         >
           {/* Map illustration — cols 1–6 */}
           <GridItem colSpan={{ base: 1, lg: 6 }}>
-            <Box
-              bg="ivory.50"
-              borderRadius="card"
-              overflow="hidden"
-              position="relative"
-              aspectRatio={16 / 9}
-            >
+            <Box borderRadius="card" overflow="hidden">
               <NextImage
-                src="/images/home_map.png"
+                src="/images/home_map.webp"
                 alt="Mapa do Brasil com círculos proporcionais ao número de cozinhas solidárias registradas por município, com as maiores concentrações no Sudeste, no litoral do Nordeste e no Sul."
-                fill
+                width={1457}
+                height={831}
                 sizes="(max-width: 1024px) 100vw, 50vw"
-                style={{ objectFit: 'cover' }}
+                style={{ display: 'block', width: '100%', height: 'auto' }}
               />
             </Box>
           </GridItem>
