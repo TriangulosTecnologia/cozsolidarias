@@ -1,11 +1,11 @@
 {
   "meta": {
     "schema_version": 4,
-    "version": "1.0.0",
+    "version": "1.1.0",
     "brand_name": "Cozinha Solidária em Rede",
     "tier": "provisional",
     "touchpoints": [
-      "public website (cozsolidarias, Next.js)",
+      "public website",
       "research and policy documents",
       "presentation decks",
       "kitchen signage and window application",
@@ -17,7 +17,7 @@
   "strategy": {
     "brand_job": {
       "statement": "Make a dispersed set of community kitchens, researchers, ministry technicians, social movements and family farmers recognise themselves as one working network, so that the structural SAN model the project is building can be joined rather than merely studied.",
-      "evidence_refs": ["E-004"]
+      "evidence_refs": ["E-006"]
     },
     "audience": {
       "primary": "Community kitchens in vulnerabilised territories and the people who cook in them.",
@@ -26,7 +26,7 @@
     },
     "offer_truth": {
       "statement": "An interdisciplinary research-action project on food and nutrition security (SAN) that builds an intersectoral structural model — from production and distribution through to preparation in the kitchens themselves — in tune with local community needs.",
-      "evidence_refs": ["E-004"]
+      "evidence_refs": ["E-006"]
     },
     "alternatives": [
       "The Brazilian federal Programa Cozinha Solidária, which shares the name and is frequently mistaken for this project",
@@ -35,11 +35,11 @@
     ],
     "position": {
       "statement": "The connective layer that the kitchens, the researchers, the public bodies and the farmers all share — legible as the network they belong to, not as a donor, a government seal or a university department.",
-      "evidence_refs": ["E-004"]
+      "evidence_refs": ["E-006"]
     },
     "right_to_win": {
       "statement": "The team holds both ends of the problem at once: researchers from UNIFESP and USP alongside MDS and MDA technicians, social movements and CEAGESP, giving it simultaneous access to public policy and to the territories where the kitchens operate.",
-      "evidence_refs": ["E-004"]
+      "evidence_refs": ["E-006"]
     },
     "desired_meaning": "Cooking that belongs to many people at once. Plural hands reaching into a shared pot; popular food identity and food sovereignty preserved, not replaced by assistance."
   },
@@ -219,7 +219,7 @@
     },
 
     "imagery": {
-      "illustration": "A 24-piece drawn food set in brand/illustration/ — fruit, vegetables, fish, eggs, rice and beans, preserves. Built entirely from filled shapes with no stroke anywhere; apparent contours are dark shapes behind lighter ones. They depict real Brazilian everyday food, not generic 'healthy eating' iconography; that specificity is the point and should survive any extension of the set. The set deliberately runs on its own naturalistic palette of 81 colours rather than the brand palette — brand colours appear only where a piece carries the logo. Coherence comes from the drawing hand and the flat fill construction, not shared hues; do not recolour the set to the brand palette.",
+      "illustration": "A 34-piece drawn food set — fruit, vegetables, fish, eggs, rice and beans, preserves. 24 are vector masters in brand/illustration/; the remaining 10 are raster-only stopgaps in brand/illustration/raster-only/ (see E-007) and must not be scaled beyond their pixel size or recoloured. Built entirely from filled shapes with no stroke anywhere; apparent contours are dark shapes behind lighter ones. They depict real Brazilian everyday food, not generic 'healthy eating' iconography; that specificity is the point and should survive any extension of the set. The set deliberately runs on its own naturalistic palette of 81 colours rather than the brand palette — brand colours appear only where a piece carries the logo. Coherence comes from the drawing hand and the flat fill construction, not shared hues; do not recolour the set to the brand palette.",
       "pattern": "A seamless 280×280 food-drawing tile in brand/pattern/. Verified seamless. Supplied in the dark ink for light grounds and in Branco Leitura for dark grounds. It is a texture, not a focal element — keep it behind content, never under the logo's clear space.",
       "photography": "Real kitchens, real hands, real food in preparation. Not styled studio food, not stock images of empty plates."
     }
@@ -228,9 +228,9 @@
   "evidence": [
     {
       "id": "E-001",
-      "claim": "Every native vector master renders the brand red as #AE1616, while page 13 of the 2026 manual documents it as #B21616 and prints its own swatch at a third value (#AB1616). The masters — including the SVGs already deployed in this repository's public/ directory — are consistent with each other; only the typed documentation differs.",
+      "claim": "Every native vector master renders the brand red as #AE1616, while page 13 of the 2026 manual documents it as #B21616 and prints its own swatch at a third value (#AB1616). All 26 logo artboards agree with each other; only the typed documentation differs.",
       "kind": "observation",
-      "source": "Fill values parsed from all 26 logo artboards of the native .ai file; public/logo_h.svg and public/logo_mark.svg; manual p13 swatch rendered at 300dpi.",
+      "source": "Fill values parsed from all 26 logo artboards of the native .ai file; manual p13 swatch rendered at 300dpi.",
       "status": "active"
     },
     {
@@ -248,23 +248,30 @@
       "status": "active"
     },
     {
-      "id": "E-004",
-      "claim": "The running application declares a different palette from the brand manual. src/config/theme.ts defines verde #337C59, coral #E45946, roxo #69448C and laranja #FF9D00, each commented 'oficial do Programa Cozinha Solidária' — none of which appear in the manual, whose brand colours are #AE1616 and #1E5A36. The two sets appear to come from two different organisations that share a name.",
-      "kind": "observation",
-      "source": "src/config/theme.ts compared against the 2026 visual identity manual.",
-      "status": "active"
-    },
-    {
       "id": "E-005",
       "claim": "Rendered reduction tests put the legibility floor at roughly 120px wide for the horizontal lockup and 90px for the vertical and stacked lockups; below those widths the hand lettering's counters close. The pot badge stays readable to 24px.",
       "kind": "observation",
       "source": "Chromium renders of the SVG masters at 240/160/120/96/80/64/48px and 96/64/48/40/32/24/16px, inspected at 2× device scale.",
       "status": "active"
+    },
+    {
+      "id": "E-006",
+      "claim": "The strategic frame in this contract is reconstructed from the 2026 manual, not authored fresh: the brand job, offer truth, position and right to win restate what its 'sobre', 'conceituação' and 'briefing' pages already assert about the project. They carry that document's authority and no more — none has been checked against the organisation itself.",
+      "kind": "observation",
+      "source": "Manual pages 3 (sobre), 4 (conceituação) and 9 (sobre o briefing).",
+      "status": "active"
+    },
+    {
+      "id": "E-007",
+      "claim": "The delivered illustration library is 34 pieces, but only 24 have vector masters. The manual's .ai carries 24; the remaining 10 exist solely as palette-indexed PNG exports between 182×238 and 313×213, with no vector source in the handoff.",
+      "kind": "observation",
+      "source": "The 18 ILUSTRAÇÕES and 16 icon exports in the delivered Identidade Visual archive, compared against artboards 59–82 of the native .ai.",
+      "status": "active"
     }
   ],
 
   "unresolved": [
-    "Which palette governs the application — the manual's or the one currently in src/config/theme.ts (E-004). This is an ownership question about which organisation the site represents, and it needs the project's answer, not a design decision.",
+    "Vector masters for the 10 raster-only illustrations (E-007) were never delivered. Request the illustration source file from the designer; until then those pieces are usable at small sizes only and cannot be recoloured or rescaled.",
     "Whether the project holds a Neue Haas Grotesk licence for its declared touchpoints.",
     "Spot-colour references for print (E-003) need verification against a physical PANTONE guide before any spot run.",
     "Whether the CSR badge is still in use, and what it is meant to abbreviate — it appears in the manual without explanation."

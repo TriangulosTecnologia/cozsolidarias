@@ -3,13 +3,14 @@
 Canonical brand package for **Cozinha Solidária em Rede**. Everything downstream — the
 site, decks, print, partner materials — should resolve here rather than to a copy.
 
-| File                                   | What it is                                                                                                                                                                                                         |
-| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| [`brand-spec.json`](./brand-spec.json) | Canonical operating contract (Branding Studio schema v4). Strategy, creative direction, design tokens, verified contrast pairs, evidence, open questions. Machine-readable; the single source of truth for values. |
-| [`brand-book.md`](./brand-book.md)     | The teaching document. Why the system behaves as it does and how to apply it. Read this first.                                                                                                                     |
-| [`logo/`](./logo)                      | 24 signature masters (4 lockups × 6 variants) plus 2 badges.                                                                                                                                                       |
-| [`illustration/`](./illustration)      | 24 drawn food illustrations.                                                                                                                                                                                       |
-| [`pattern/`](./pattern)                | Seamless food pattern tile, in two inks.                                                                                                                                                                           |
+| File                                                      | What it is                                                                                                                                                                                                         |
+| --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [`brand-spec.json`](./brand-spec.json)                    | Canonical operating contract (Branding Studio schema v4). Strategy, creative direction, design tokens, verified contrast pairs, evidence, open questions. Machine-readable; the single source of truth for values. |
+| [`brand-book.md`](./brand-book.md)                        | The teaching document. Why the system behaves as it does and how to apply it. Read this first.                                                                                                                     |
+| [`logo/`](./logo)                                         | 24 signature masters (4 lockups × 6 variants) plus 2 badges.                                                                                                                                                       |
+| [`illustration/`](./illustration)                         | 24 drawn food illustrations as vector masters.                                                                                                                                                                     |
+| [`illustration/raster-only/`](./illustration/raster-only) | 10 further illustrations that exist only as small PNGs — no vector source was delivered. Small sizes only; do not enlarge or recolour.                                                                             |
+| [`pattern/`](./pattern)                                   | Seamless food pattern tile, in two inks.                                                                                                                                                                           |
 
 ## Picking an asset
 
@@ -39,14 +40,18 @@ spec. Read those before "correcting" either one back.
 
 ## Conventions
 
-Asset filenames are English kebab-case: they are design artifacts referenced by designers,
-vendors and `public/`, not TypeScript modules, so the repository's camelCase rule for
-source files does not apply to them. SVG `<title>` text is pt-BR because screen readers
-announce it to site visitors.
+Asset filenames are English kebab-case: they are design artifacts handled by designers and
+vendors, not source modules, so the repository's camelCase rule does not apply to them.
+SVG `<title>` text is pt-BR because screen readers announce it to the people who read the
+brand's own materials.
+
+This folder is derived from the brand handoff alone — the 2026 manual and the delivered
+Identidade Visual archive. Nothing here is decided by, or documents, anything elsewhere in
+the repository.
 
 Colour values live in `brand-spec.json` under `visual.tokens` and are deliberately not
-duplicated into a second tokens file — a second copy is how the palette drift recorded in
-`E-004` happened in the first place.
+duplicated into a second tokens file. Two copies of a palette drift apart, and the red
+recorded in `E-001` is what that looks like when it happens.
 
 ## Verifying a change
 
@@ -55,7 +60,7 @@ properties — schema, token resolution, contrast maths, SVG portability. They e
 nothing about strategic or aesthetic quality.
 
 ```bash
-SKILL=path/to/skills/skills/branding-studio/scripts
+SKILL=.claude/skills/branding-studio/scripts
 
 python3 "$SKILL/validate_structure.py" brand/brand-spec.json
 python3 "$SKILL/asset_checks.py" brand/logo/horizontal-color.svg

@@ -174,11 +174,18 @@ of receding behind it. Licence coverage for this project is unconfirmed.
 
 ## Illustration and pattern
 
-Twenty-four drawn food pieces in [`illustration/`](./illustration) — fruit, vegetables,
-fish, eggs, rice and beans, preserves. Flat and organic, built entirely from filled
-shapes: there is not a single `stroke` in the set, and where a piece appears to have a
-contour it is a dark shape sitting behind a lighter one. Keep that construction when
-extending the set; an outlined addition will not sit with the rest.
+Thirty-four drawn food pieces — fruit, vegetables, fish, eggs, rice and beans, preserves.
+Flat and organic, built entirely from filled shapes: there is not a single `stroke` in the
+set, and where a piece appears to have a contour it is a dark shape sitting behind a
+lighter one. Keep that construction when extending the set; an outlined addition will not
+sit with the rest.
+
+**Twenty-four are vector masters** in [`illustration/`](./illustration) and behave like
+the logo files — scale them freely. **Ten are raster-only** in
+[`illustration/raster-only/`](./illustration/raster-only), because the handoff never
+included their vector source. Those ten are small PNGs, between 182×238 and 313×213: use
+them at or below their pixel size, never enlarged, never recoloured, and never in print at
+size. They are a stopgap that ends when the designer supplies the source file.
 
 They depict **real Brazilian everyday food**, not generic healthy-eating iconography. That
 specificity is the point: rice and beans, papaya, a preserve jar and a sardine say
@@ -205,12 +212,10 @@ Photography, where used, shows real kitchens, real hands and food actually being
 Four things this book cannot settle on its own; all four are recorded in the spec under
 `unresolved`.
 
-The most consequential: **the application's palette does not match this one.**
-`src/config/theme.ts` declares verde `#337C59`, coral `#E45946`, roxo `#69448C` and
-laranja `#FF9D00`, each commented as official — none of which appear in this manual. The
-two palettes appear to belong to two different organisations that share a name. Which one
-governs the site is an ownership question for the project, not a design decision, and it
-should be answered before either set is changed.
+The most consequential: **ten of the thirty-four illustrations have no vector master.**
+The handoff delivered them only as small PNG exports, so they cannot be scaled, recoloured
+or printed at size. Requesting the illustration source file from the designer closes this
+properly; nothing else does.
 
 The others: whether the project holds a Neue Haas Grotesk licence; whether the spot-colour
 references survive a physical check; and whether the CSR badge is still in use and what it
