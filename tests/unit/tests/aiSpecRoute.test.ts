@@ -89,7 +89,7 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as ErrorBody;
 
     expect(response.status).toBe(400);
-    expect(body.error).toMatch(/Prompt inválido/);
+    expect(body.error).toMatch(/Campo "prompt": envie um corpo JSON/);
   });
 
   test('rejects a request with no prompt field', async () => {
@@ -97,7 +97,7 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as ErrorBody;
 
     expect(response.status).toBe(400);
-    expect(body.error).toMatch(/Prompt inválido/);
+    expect(body.error).toMatch(/Campo "prompt": campo obrigatório ausente/);
   });
 
   test('rejects a blank prompt', async () => {
@@ -105,7 +105,31 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as ErrorBody;
 
     expect(response.status).toBe(400);
-    expect(body.error).toMatch(/Prompt inválido/);
+    expect(body.error).toMatch(/Campo "prompt": não pode ser vazio/);
+  });
+
+  test('rejects a prompt field that is null', async () => {
+    const response = await POST(jsonRequest({ prompt: null }));
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(400);
+    expect(body.error).toMatch(/esperado texto, recebido null/);
+  });
+
+  test('rejects a prompt field that is neither a string nor null', async () => {
+    const response = await POST(jsonRequest({ prompt: 42 }));
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(400);
+    expect(body.error).toMatch(/esperado texto, recebido number/);
+  });
+
+  test('rejects a prompt longer than 500 characters', async () => {
+    const response = await POST(jsonRequest({ prompt: 'a'.repeat(501) }));
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(400);
+    expect(body.error).toMatch(/máximo de 500 caracteres \(recebido 501\)/);
   });
 
   test('rejects the request when server config is missing', async () => {
@@ -120,6 +144,19 @@ describe('POST /api/ai/spec', () => {
     expect(body.error).toMatch(/Configuração ausente/);
   });
 
+  test('names every missing env var when more than one is absent', async () => {
+    delete process.env['ANTHROPIC_AGENT_ID'];
+    delete process.env['ANTHROPIC_ENVIRONMENT_ID'];
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de cozinhas por município' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(400);
+    expect(body.error).toMatch(/ANTHROPIC_AGENT_ID, ANTHROPIC_ENVIRONMENT_ID/);
+  });
+
   test('returns a gateway error when the upstream session creation fails', async () => {
     global.fetch = jest.fn().mockResolvedValue(jsonResponse({}, false));
 
@@ -129,7 +166,9 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as ErrorBody;
 
     expect(response.status).toBe(502);
-    expect(body.error).toMatch(/Falha ao consultar o modelo de IA/);
+    expect(body.error).toMatch(
+      /Não foi possível iniciar a sessão com o modelo de IA/
+    );
   });
 
   test('returns a gateway error when session creation returns no id', async () => {
@@ -141,7 +180,35 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as ErrorBody;
 
     expect(response.status).toBe(502);
-    expect(body.error).toMatch(/Falha ao consultar o modelo de IA/);
+    expect(body.error).toMatch(
+      /não retornou um identificador de sessão válido/
+    );
+  });
+
+  test('falls back to a generic message when the agent failure matches no known cause', async () => {
+    global.fetch = jest.fn().mockRejectedValue(new Error('boom'));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de cozinhas por município' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(502);
+    expect(body.error).toMatch(/Falha de comunicação com o modelo de IA: boom/);
+  });
+
+  test('stringifies a non-Error thrown value for the fallback agent-failure message', async () => {
+    global.fetch = jest.fn().mockRejectedValue('boom-string');
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de cozinhas por município' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(502);
+    expect(body.error).toMatch(
+      /Falha de comunicação com o modelo de IA: boom-string/
+    );
   });
 
   test('returns a gateway error when the session reports a session.error event', async () => {
@@ -916,7 +983,21 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as ErrorBody;
 
     expect(response.status).toBe(422);
-    expect(body.error).toMatch(/precisa ser um objeto com "mapDataId"/);
+    expect(body.error).toMatch(/precisa ter "mapDataId" em formato de texto/);
+  }, 10000);
+
+  test('returns 422 when a mapData entry is not an object', async () => {
+    mockAgentReply(
+      JSON.stringify({ mapData: ['not-an-object'], legends: A_LEGEND })
+    );
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de cozinhas por município' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(422);
+    expect(body.error).toMatch(/O item 0 de "mapData" precisa ser um objeto/);
   }, 10000);
 
   test('returns 422 when the model reply is valid JSON but not an object', async () => {
