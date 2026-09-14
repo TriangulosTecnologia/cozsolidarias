@@ -1,0 +1,272 @@
+{
+  "meta": {
+    "schema_version": 4,
+    "version": "1.0.0",
+    "brand_name": "Cozinha Solidária em Rede",
+    "tier": "provisional",
+    "touchpoints": [
+      "public website (cozsolidarias, Next.js)",
+      "research and policy documents",
+      "presentation decks",
+      "kitchen signage and window application",
+      "aprons, packaging and food labels",
+      "social media"
+    ]
+  },
+
+  "strategy": {
+    "brand_job": {
+      "statement": "Make a dispersed set of community kitchens, researchers, ministry technicians, social movements and family farmers recognise themselves as one working network, so that the structural SAN model the project is building can be joined rather than merely studied.",
+      "evidence_refs": ["E-004"]
+    },
+    "audience": {
+      "primary": "Community kitchens in vulnerabilised territories and the people who cook in them.",
+      "also_serves": "The intersectoral partners the network depends on: UNIFESP and USP researchers, MDS and MDA technicians, social movements, CEAGESP, family farmers, health and social-assistance professionals.",
+      "not_for": "Donors seeking a charity brand. The project supports kitchens and farmers; it does not run kitchens or distribute food under its own name."
+    },
+    "offer_truth": {
+      "statement": "An interdisciplinary research-action project on food and nutrition security (SAN) that builds an intersectoral structural model — from production and distribution through to preparation in the kitchens themselves — in tune with local community needs.",
+      "evidence_refs": ["E-004"]
+    },
+    "alternatives": [
+      "The Brazilian federal Programa Cozinha Solidária, which shares the name and is frequently mistaken for this project",
+      "Charity and food-bank identities, which position the kitchen as a recipient of aid",
+      "Conventional academic project identities, which read as institutional and do not invite participation"
+    ],
+    "position": {
+      "statement": "The connective layer that the kitchens, the researchers, the public bodies and the farmers all share — legible as the network they belong to, not as a donor, a government seal or a university department.",
+      "evidence_refs": ["E-004"]
+    },
+    "right_to_win": {
+      "statement": "The team holds both ends of the problem at once: researchers from UNIFESP and USP alongside MDS and MDA technicians, social movements and CEAGESP, giving it simultaneous access to public policy and to the territories where the kitchens operate.",
+      "evidence_refs": ["E-004"]
+    },
+    "desired_meaning": "Cooking that belongs to many people at once. Plural hands reaching into a shared pot; popular food identity and food sovereignty preserved, not replaced by assistance."
+  },
+
+  "creative_direction": {
+    "thesis": "The shared pot. Every mark the project makes is drawn by hand, in the register of a kitchen's own handwriting rather than an institution's typography, and everything it signs is a place where visibly different hands reach into the same pot.",
+    "signature": "Hand-drawn lettering locked to a red pot holding hands of three different skin tones — never one hand, never a single tone.",
+    "principles": [
+      "The lettering is artwork, not type. Redraw or re-scale the master; never re-set the name in a font, and never letterspace, condense or slant it.",
+      "The hands stay plural and stay different. Three tones is the minimum expression of the idea; reducing them to one tone or one hand destroys the argument the mark is making.",
+      "In single-ink production the hands become cut-outs, not silhouettes. The pot is filled and the hands are knocked out of it, so plurality survives where colour cannot.",
+      "Colour roles are fixed: red is the pot and the kitchen, green is the network and carries 'Em Rede', black or white carries the name. Swapping the roles breaks recognition faster than changing the hues would.",
+      "Choose the lockup by the ground it sits on, not by preference — light ground takes the colour version, dark ground the on-dark version, single-ink production the monochrome. A version chosen against its ground is the most common failure this system has.",
+      "Shapes stay organic and colours stay sober. Nothing in the system is geometric, gradient or corporate; the illustrations and the pattern are drawn with the same hand as the logo."
+    ],
+    "excludes": [
+      "Do not present the UNIFESP mark as this project's own mark. UNIFESP is an institutional condition of the brief and appears as a partner signature, never as the project's identity.",
+      "Do not borrow the visual language of the federal Programa Cozinha Solidária. The name collision is already the main source of confusion; shared styling would complete it."
+    ]
+  },
+
+  "verbal": {
+    "name_usage": "The full name is 'Cozinha Solidária em Rede'. 'Em Rede' is load-bearing — it is what separates this project from the federal programme of the same name — and is dropped only in the reduced badge, where the pot alone is the signature.",
+    "excludes": [
+      "Do not describe the project as donating, distributing or serving meals. It builds the model and supports the kitchens that do."
+    ]
+  },
+
+  "visual": {
+    "tokens": {
+      "color": {
+        "red": {
+          "$value": "#AE1616",
+          "$type": "color",
+          "$description": "Vermelho. The pot. Primary brand colour; the value carried by every native master."
+        },
+        "green": {
+          "$value": "#1E5A36",
+          "$type": "color",
+          "$description": "Verde UNIFESP. The network; sets 'Em Rede' on light grounds."
+        },
+        "green-light": {
+          "$value": "#559870",
+          "$type": "color",
+          "$description": "Verde Claro. Carries the green role on dark grounds, where Verde UNIFESP is illegible. Already present in the artwork as the pot badge's ground."
+        },
+        "white": {
+          "$value": "#FAFAFA",
+          "$type": "color",
+          "$description": "Branco Leitura. Reading surface and reversed text. Logo knock-outs use pure #FFFFFF, which is ink absence rather than a surface colour."
+        },
+        "black": {
+          "$value": "#000000",
+          "$type": "color",
+          "$description": "Preto. Sets the name on light grounds; the brand's dark ground."
+        },
+        "skin-light": {
+          "$value": "#E9BBAF",
+          "$type": "color",
+          "$description": "Pele Clara."
+        },
+        "skin-brown": {
+          "$value": "#AE7F74",
+          "$type": "color",
+          "$description": "Pele Parda."
+        },
+        "skin-black": {
+          "$value": "#422018",
+          "$type": "color",
+          "$description": "Pele Negra."
+        },
+        "badge-grey": {
+          "$value": "#D5D5D5",
+          "$type": "color",
+          "$description": "Ground of the CSR badge only. Not a surface colour for layouts."
+        },
+        "pattern-ink": {
+          "$value": "#3F3F3F",
+          "$type": "color",
+          "$description": "Ink of the food pattern. Softened off-black so a dense field does not read as a black block."
+        }
+      }
+    },
+
+    "contrast_pairs": [
+      {
+        "text": "{color.black}",
+        "background": "{color.white}",
+        "usage": "body"
+      },
+      { "text": "{color.red}", "background": "{color.white}", "usage": "body" },
+      {
+        "text": "{color.green}",
+        "background": "{color.white}",
+        "usage": "body"
+      },
+      { "text": "{color.white}", "background": "{color.red}", "usage": "body" },
+      {
+        "text": "{color.white}",
+        "background": "{color.green}",
+        "usage": "body"
+      },
+      {
+        "text": "{color.white}",
+        "background": "{color.black}",
+        "usage": "body"
+      },
+      {
+        "text": "{color.green-light}",
+        "background": "{color.black}",
+        "usage": "large"
+      }
+    ],
+
+    "palette": {
+      "roles": "Red and green are the only two colours that carry meaning; the skin tones belong to the hands and are not a decorative palette. Branco Leitura is the reading surface, Preto the dark ground.",
+      "excludes": "Verde UNIFESP must not set text or lettering on a dark ground — it measures 1.99:1 on Preto-adjacent surfaces. Use Verde Claro there.",
+      "green_light_tradeoff": "Verde Claro on a dark ground clears WCAG AA (6.11:1) but carries a modest APCA signal (Lc 39.9), below the Lc 45 guideline for 24px bold text. It is accepted because its only job is display lettering at 90px and above, where that guideline no longer binds, and because the colour already exists in the artwork as the pot badge's disc. A lighter green would clear the advisory at the cost of adding a fourth green to a palette that documents one; do not make that trade for body text either — set body text in Branco Leitura on dark grounds.",
+      "print": "CMYK and PANTONE references inherited from the 2026 manual are unverified against a physical guide; see E-003 before committing a spot-colour run."
+    },
+
+    "typography": {
+      "lettering": "The name is custom hand lettering by Lucas Melara. There is no font that reproduces it — it exists only as the supplied vector masters.",
+      "families": {
+        "display": "Neue Haas Grotesk Display 75 Bold — headings",
+        "text": "Neue Haas Grotesk Display 45 Light — body"
+      },
+      "hierarchy": {
+        "mode": "custom",
+        "rules": [
+          "Headings set in Display 75 Bold; body in Display 45 Light. The weight jump, not size alone, carries the hierarchy.",
+          "Never set the brand name in Neue Haas Grotesk as a substitute for the lettering master.",
+          "Where Neue Haas Grotesk is unlicensed, substitute a neutral grotesque of the same proportion and record the substitution; do not switch to a humanist or geometric face, which would compete with the hand lettering."
+        ]
+      },
+      "licensing": "Neue Haas Grotesk is a commercial typeface. Licence coverage for this project is unconfirmed — see the unresolved dependencies."
+    },
+
+    "logo": {
+      "lockups": {
+        "vertical": "Name above the pot, 'Em Rede' below. The primary signature.",
+        "horizontal": "Pot left, name right. For wide, short spaces — site headers, document footers, banners.",
+        "stacked": "Pot above, name below. Alternative vertical for tall, narrow spaces.",
+        "wordmark": "Lettering only, no pot. For contexts where the pot already appears nearby.",
+        "badge-pot": "Pot in a Verde Claro disc. The reduced signature for avatars, favicons and stamps — the only asset that survives below 90px.",
+        "badge-csr": "CSR monogram in a grey disc. Secondary; use only where the abbreviation is already understood."
+      },
+      "variants": {
+        "color": "Light grounds.",
+        "color-on-dark": "Dark grounds. Name reverses to white and 'Em Rede' takes Verde Claro.",
+        "white": "Single-ink on dark or photographic grounds.",
+        "black": "Single-ink on light grounds.",
+        "red": "Single-ink where only the brand red is available.",
+        "green": "Single-ink where only the brand green is available."
+      },
+      "clear_space": "The 'e' of 'Em Rede', scaled with the mark, on every contour. Nothing enters that margin — not partner marks, not page edges, not image content.",
+      "min_size": {
+        "horizontal": "120px wide on screen",
+        "vertical": "90px wide on screen",
+        "stacked": "90px wide on screen",
+        "badge-pot": "24px",
+        "basis": "Measured, not assumed — see E-005."
+      },
+      "misuse": [
+        "Do not distort, stretch or rotate.",
+        "Do not recolour outside the declared variants.",
+        "Do not place a light variant on a light ground, or a dark variant on a dark ground.",
+        "Do not violate the clear-space margin.",
+        "Do not place the mark on a busy photograph without a plain ground behind it — the hand lettering loses its counters first."
+      ],
+      "production": {
+        "status": "final",
+        "master_format": "SVG",
+        "master_path": "brand/logo/",
+        "source": "Vector masters extracted from the native Adobe Illustrator file 'MANUAL DE IDENTIDADE VISUAL - COZINHA SOLIDÁRIA.ai' (2026-06-23). No raster tracing at any step."
+      }
+    },
+
+    "imagery": {
+      "illustration": "A 24-piece drawn food set in brand/illustration/ — fruit, vegetables, fish, eggs, rice and beans, preserves. Built entirely from filled shapes with no stroke anywhere; apparent contours are dark shapes behind lighter ones. They depict real Brazilian everyday food, not generic 'healthy eating' iconography; that specificity is the point and should survive any extension of the set. The set deliberately runs on its own naturalistic palette of 81 colours rather than the brand palette — brand colours appear only where a piece carries the logo. Coherence comes from the drawing hand and the flat fill construction, not shared hues; do not recolour the set to the brand palette.",
+      "pattern": "A seamless 280×280 food-drawing tile in brand/pattern/. Verified seamless. Supplied in the dark ink for light grounds and in Branco Leitura for dark grounds. It is a texture, not a focal element — keep it behind content, never under the logo's clear space.",
+      "photography": "Real kitchens, real hands, real food in preparation. Not styled studio food, not stock images of empty plates."
+    }
+  },
+
+  "evidence": [
+    {
+      "id": "E-001",
+      "claim": "Every native vector master renders the brand red as #AE1616, while page 13 of the 2026 manual documents it as #B21616 and prints its own swatch at a third value (#AB1616). The masters — including the SVGs already deployed in this repository's public/ directory — are consistent with each other; only the typed documentation differs.",
+      "kind": "observation",
+      "source": "Fill values parsed from all 26 logo artboards of the native .ai file; public/logo_h.svg and public/logo_mark.svg; manual p13 swatch rendered at 300dpi.",
+      "status": "active"
+    },
+    {
+      "id": "E-002",
+      "claim": "Verde UNIFESP #1E5A36 reaches only 1.99:1 against a #241F21 ground and 2.57:1 against pure black, so the 'Em Rede' lettering in the manual's own dark-ground lockup is effectively illegible. Verde Claro #559870 — the colour already used for the pot badge's disc — reaches 4.73:1 and 6.11:1 on the same grounds.",
+      "kind": "fact",
+      "source": "WCAG 2.x relative-luminance computation over the declared hex values, confirmed by rendering the manual's own dark-ground artboards (pages 38–41) in Chromium.",
+      "status": "active"
+    },
+    {
+      "id": "E-003",
+      "claim": "The manual's spot-colour references are internally inconsistent with the RGB values beside them. PANTONE 327 C is a published teal and does not correspond to the warm forest green #1E5A36 it is paired with. No reference in the manual was checked against a physical Pantone guide.",
+      "kind": "observation",
+      "source": "Manual p13 compared against published PANTONE sRGB renderings.",
+      "status": "active"
+    },
+    {
+      "id": "E-004",
+      "claim": "The running application declares a different palette from the brand manual. src/config/theme.ts defines verde #337C59, coral #E45946, roxo #69448C and laranja #FF9D00, each commented 'oficial do Programa Cozinha Solidária' — none of which appear in the manual, whose brand colours are #AE1616 and #1E5A36. The two sets appear to come from two different organisations that share a name.",
+      "kind": "observation",
+      "source": "src/config/theme.ts compared against the 2026 visual identity manual.",
+      "status": "active"
+    },
+    {
+      "id": "E-005",
+      "claim": "Rendered reduction tests put the legibility floor at roughly 120px wide for the horizontal lockup and 90px for the vertical and stacked lockups; below those widths the hand lettering's counters close. The pot badge stays readable to 24px.",
+      "kind": "observation",
+      "source": "Chromium renders of the SVG masters at 240/160/120/96/80/64/48px and 96/64/48/40/32/24/16px, inspected at 2× device scale.",
+      "status": "active"
+    }
+  ],
+
+  "unresolved": [
+    "Which palette governs the application — the manual's or the one currently in src/config/theme.ts (E-004). This is an ownership question about which organisation the site represents, and it needs the project's answer, not a design decision.",
+    "Whether the project holds a Neue Haas Grotesk licence for its declared touchpoints.",
+    "Spot-colour references for print (E-003) need verification against a physical PANTONE guide before any spot run.",
+    "Whether the CSR badge is still in use, and what it is meant to abbreviate — it appears in the manual without explanation."
+  ]
+}
