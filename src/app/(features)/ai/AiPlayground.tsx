@@ -218,6 +218,13 @@ const AiPlayground = () => {
             </ThemeUIProvider>
           </I18nProvider>
 
+          {/* Deliberately public: the `/ai` page is an experimental, transparent
+              playground — showing the raw generated spec lets anyone verify what
+              the model actually produced (including the real `mapData` values
+              after MapData Append). No secrets or personal data ever reach this
+              payload (see route.ts's INSTRUCTIONS on municipal aggregation). Not
+              gated behind a dev-only flag; revisit before treating `/ai` as a
+              finished, non-experimental product surface. */}
           {JSON.stringify(result, null, 2) !== '{}' ? (
             <Box
               position="absolute"

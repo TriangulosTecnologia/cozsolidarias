@@ -1,4 +1,5 @@
 import { validateSpec } from '@ttoss/geovis';
+import { after } from 'next/server';
 import { POST } from 'src/app/api/ai/spec/route';
 import { invalidSpecResponse } from 'src/app/api/ai/spec/specValidation';
 
@@ -7,6 +8,18 @@ import { gateway } from '@/gateway';
 jest.mock('@ttoss/geovis', () => {
   return {
     validateSpec: jest.fn().mockReturnValue({ status: 'resolved' }),
+  };
+});
+
+// `after()` requires a real Next.js request-scope (AsyncLocalStorage) that
+// doesn't exist under a plain unit test. It's only ever used here to defer
+// `deleteSession` past the response, so every test but the dedicated one
+// below just needs the callback recorded, never invoked — invoking it
+// synchronously would fire `deleteSession`'s own `fetch` call out of order,
+// stealing a response queued for `pollForReply`.
+jest.mock('next/server', () => {
+  return {
+    after: jest.fn(),
   };
 });
 
@@ -321,6 +334,24 @@ describe('POST /api/ai/spec', () => {
 
     expect(response.status).toBe(200);
     expect(body.result).toEqual(spec);
+  }, 10000);
+
+  test('schedules session deletion via after() once a session is created', async () => {
+    const fetchMock = mockAgentReply(JSON.stringify({ mapData: [] }));
+
+    await POST(jsonRequest({ prompt: 'mapa de cozinhas por município' }));
+
+    const scheduled = jest.mocked(after).mock.calls.at(-1)?.[0];
+    expect(scheduled).toBeDefined();
+
+    await scheduled?.();
+
+    const deleteCall = fetchMock.mock.calls.find(([, init]) => {
+      return (init as RequestInit | undefined)?.method === 'DELETE';
+    });
+    expect(deleteCall?.[0]).toBe(
+      'https://api.anthropic.com/v1/sessions/session_123'
+    );
   }, 10000);
 
   test('strips a ```json code fence from the model reply before parsing', async () => {
@@ -916,6 +947,113 @@ describe('POST /api/ai/spec', () => {
 
     expect(response.status).toBe(422);
     expect(body.error).toMatch(/legend/);
+  }, 10000);
+
+  test('returns 422 when an absolute-total dataset is painted as a choropleth', async () => {
+    const spec = {
+      mapType: 'choropleth',
+      mapData: [
+        {
+          mapDataId: 'cozinhas_pessoas_atendidas',
+          mapId: 'municipios-boundary',
+          joinKey: 'codarea',
+          data: [],
+        },
+      ],
+      legends: A_LEGEND,
+    };
+    mockAgentReply(JSON.stringify(spec));
+
+    const response = await POST(
+      jsonRequest({
+        prompt: 'mapa coroplético de pessoas atendidas por município',
+      })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(422);
+    expect(body.error).toMatch(/nunca uma variável relativa/);
+  }, 10000);
+
+  test('accepts a choropleth mapType whose mapData is not an array (rejected downstream instead)', async () => {
+    const spec = {
+      mapType: 'choropleth',
+      mapData: 'not-an-array',
+      legends: A_LEGEND,
+    };
+    mockAgentReply(JSON.stringify(spec));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa coroplético qualquer' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(422);
+    expect(body.error).toMatch(/campo "mapData" deveria ser uma lista/);
+  }, 10000);
+
+  test('skips a non-object mapData entry while scanning for a choropleth-painted absolute total', async () => {
+    const spec = {
+      mapType: 'choropleth',
+      mapData: ['not-an-object'],
+      legends: A_LEGEND,
+    };
+    mockAgentReply(JSON.stringify(spec));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa coroplético qualquer' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(422);
+    expect(body.error).toMatch(/O item 0 de "mapData" precisa ser um objeto/);
+  }, 10000);
+
+  test('accepts a choropleth mapType whose mapData references no absolute-total dataset', async () => {
+    const spec = {
+      mapType: 'choropleth',
+      mapData: [
+        {
+          mapDataId: 'cozinhas_geolocalizadas',
+          mapId: 'municipios-boundary',
+          joinKey: 'codarea',
+          data: [],
+        },
+      ],
+      legends: A_LEGEND,
+    };
+    mockAgentReply(JSON.stringify(spec));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa coroplético de cozinhas por município' })
+    );
+
+    expect(response.status).toBe(200);
+  }, 10000);
+
+  test('accepts an absolute-total dataset painted with a non-choropleth mapType', async () => {
+    const spec = {
+      mapType: 'proportionalCircles',
+      mapData: [
+        {
+          mapDataId: 'cozinhas_pessoas_atendidas',
+          mapId: 'municipios-boundary',
+          joinKey: 'codarea',
+          data: [],
+        },
+      ],
+      legends: A_LEGEND,
+    };
+    mockAgentReply(JSON.stringify(spec));
+
+    const response = await POST(
+      jsonRequest({
+        prompt:
+          'mapa de círculos proporcionais de pessoas atendidas por município',
+      })
+    );
+
+    expect(response.status).toBe(200);
   }, 10000);
 
   test('returns 422 with the geovis issues, defaulting the message, when validateSpec rejects the resolved spec', async () => {

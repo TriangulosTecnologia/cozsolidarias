@@ -1,4 +1,5 @@
 import {
+  ABSOLUTE_TOTAL_DATASET_IDS,
   isRenderableDatasetId,
   RENDERABLE_DATASET_FETCHERS,
   RENDERABLE_DATASET_IDS,
@@ -185,6 +186,47 @@ export const findMissingLegend = (spec: UnknownRecord): boolean => {
   }
 
   return !hasLegendEntries(spec['legends']) && !hasLayerLegend(spec);
+};
+
+/**
+ * Finds the first `mapData[].mapDataId` that references an absolute-total
+ * dataset (see {@link ABSOLUTE_TOTAL_DATASET_IDS}) while the spec paints it
+ * as a choropleth (`spec.mapType === 'choropleth'`) — Bertin's area-bias
+ * rule, already stated in prose in both the dataset's own catalogue
+ * `description` and `route.ts`'s `INSTRUCTIONS`, enforced here structurally
+ * instead of trusting the model to follow the prompt.
+ *
+ * A spec with no `mapType` (or a hand-built spec that never sets it) isn't
+ * checked — this guard only catches the `mapType` shorthand the agent is
+ * instructed to use, the same scope as the rest of this file's structural
+ * checks.
+ */
+export const findChoroplethOnAbsoluteTotal = (
+  spec: UnknownRecord
+): string | null => {
+  if (spec['mapType'] !== 'choropleth') {
+    return null;
+  }
+
+  const mapData = spec['mapData'];
+  if (!Array.isArray(mapData)) {
+    return null;
+  }
+
+  for (const entry of mapData) {
+    if (!isRecord(entry)) {
+      continue;
+    }
+    const mapDataId = entry['mapDataId'];
+    if (
+      typeof mapDataId === 'string' &&
+      (ABSOLUTE_TOTAL_DATASET_IDS as readonly string[]).includes(mapDataId)
+    ) {
+      return mapDataId;
+    }
+  }
+
+  return null;
 };
 
 /**

@@ -30,6 +30,21 @@ export const isRenderableDatasetId = (
   return (RENDERABLE_DATASET_IDS as readonly string[]).includes(value);
 };
 
+/**
+ * Renderable datasets whose value is an absolute total (a raw sum), never a
+ * relative variable (rate/ratio/percentage) — per Bertin's graphic semiology
+ * (*Sémiologie Graphique*, 1967) and IBGE's technical cartography manuals,
+ * painting an absolute total as a choropleth (area/color) introduces area
+ * bias: a geographically large município reads as more intense with no
+ * relation to the measured quantity. `cozinhas_pessoas_atendidas`'s own
+ * catalogue `description` already states this ("nunca um coroplético");
+ * `findChoroplethOnAbsoluteTotal` in `specValidation.ts` enforces it
+ * deterministically instead of relying only on `route.ts`'s `INSTRUCTIONS`.
+ */
+export const ABSOLUTE_TOTAL_DATASET_IDS = [
+  'cozinhas_pessoas_atendidas',
+] as const;
+
 /** One `MapDataRow`-shaped value per município, dropping unscored ones. */
 const toMapDataRows = <T extends { codigoIbge: string }>(
   rows: T[],
@@ -84,11 +99,14 @@ export const RENDERABLE_DATASET_FETCHERS: Record<
 };
 
 /** The index-only shape a non-renderable dataset is reduced to — enough for
- * the agent to recognize the dataset exists and respond "not available",
- * never enough to reference it in `mapData`. */
+ * the agent to recognize the dataset exists, compare `description` against
+ * the request (per `route.ts`'s "resolução de mapDataId" instruction, which
+ * requires scanning every dataset, not just the renderable ones) and respond
+ * "not available" instead of silently mismapping to a wrong renderable
+ * dataset — never enough to reference it in `mapData` (no `fields`). */
 type CatalogueDatasetIndexEntry = Pick<
   CatalogueDatasetContract,
-  'id' | 'title'
+  'id' | 'title' | 'description'
 >;
 
 /** The full shape a renderable dataset keeps — every field the `route.ts`
@@ -105,8 +123,9 @@ type CatalogueDatasetDetailEntry = Pick<
 /**
  * Projects one catalogue dataset down to what the agent needs: non-renderable
  * datasets (can never populate `mapData`, see {@link RENDERABLE_DATASET_IDS})
- * collapse to `{id, title}`; renderable ones keep only the fields each
- * `route.ts` instruction reads, dropping provenance (`source`, `organization`,
+ * collapse to `{id, title, description}` — enough to match/reject a request,
+ * never enough to reference in `mapData`; renderable ones keep only the
+ * fields each `route.ts` instruction reads, dropping provenance (`source`, `organization`,
  * `originNotes`), volume/size, derived `gaps`, unused spatial detail
  * (`geometry`, `precision`, `srid`), unused field `role`, and — critically —
  * any `sensitive` field entirely, since no instruction ever needs one.
@@ -115,7 +134,11 @@ const toAiDatasetProjection = (
   dataset: CatalogueDatasetContract
 ): CatalogueDatasetIndexEntry | CatalogueDatasetDetailEntry => {
   if (!isRenderableDatasetId(dataset.id)) {
-    return { id: dataset.id, title: dataset.title };
+    return {
+      id: dataset.id,
+      title: dataset.title,
+      description: dataset.description,
+    };
   }
 
   return {
@@ -141,9 +164,10 @@ const toAiDatasetProjection = (
 
 /**
  * Builds the catalogue context sent to the agent: a structured JSON object
- * containing a two-tier view — an index of all datasets (id + title) and, for
- * only the {@link RENDERABLE_DATASET_IDS} (the ones the agent may reference
- * in `mapData`), just the fields the `route.ts` instructions read (see
+ * containing a two-tier view — an index of all datasets (id + title +
+ * description) and, for only the {@link RENDERABLE_DATASET_IDS} (the ones
+ * the agent may reference in `mapData`), just the fields the `route.ts`
+ * instructions read (see
  * {@link toAiDatasetProjection}). See ADR-0001 for why the split exists (token
  * cost vs. silent mismapping).
  */
