@@ -174,6 +174,26 @@ const AiPlayground = () => {
               />
             </ThemeUIProvider>
           </I18nProvider>
+
+          {JSON.stringify(result, null, 2) !== '{}' ? (
+            <Box
+              position="absolute"
+              bottom={0}
+              left={0}
+              right={0}
+              maxH="50%"
+              overflowY="auto"
+              bgColor="bg.surface"
+              borderTopWidth={1}
+              borderTopColor="border.default"
+              p={4}
+            >
+              <Heading as="h2" size="sm" mb={2}>
+                Especificação do mapa
+              </Heading>
+              <pre>{JSON.stringify(result, null, 2)}</pre>
+            </Box>
+          ) : null}
         </Box>
       ) : null}
     </Stack>

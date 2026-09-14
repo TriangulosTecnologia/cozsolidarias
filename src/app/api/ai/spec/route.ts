@@ -78,7 +78,7 @@ const sessionEventsUrl = (sessionId: string): string => {
 };
 
 /** Strips a leading/trailing ` ```json ` fence, if the model added one. */
-const stripCodeFence = (text: string): string => {
+const _stripCodeFence = (text: string): string => {
   const trimmed = text.trim();
   const fenced = /^```(?:json)?\s*([\s\S]*?)\s*```$/.exec(trimmed);
   return fenced ? fenced[1] : trimmed;
@@ -282,7 +282,7 @@ const pollForReply = async (params: {
  * state — best-effort: a failure here doesn't affect the response already
  * built for the client, so it's swallowed rather than surfaced.
  */
-const deleteSession = async (params: {
+const _deleteSession = async (params: {
   apiKey: string;
   sessionId: string;
 }): Promise<void> => {
@@ -413,9 +413,9 @@ const getAgentResponse = async (params: {
       { status: 502 }
     );
   } finally {
-    if (sessionId) {
-      await deleteSession({ apiKey: params.apiKey, sessionId });
-    }
+    // if (sessionId) {
+    //   await deleteSession({ apiKey: params.apiKey, sessionId });
+    // }
   }
 };
 
@@ -464,16 +464,16 @@ export const POST = async (request: Request): Promise<Response> => {
   }
 
   let modelJson: unknown;
-  try {
-    modelJson = JSON.parse(stripCodeFence(modelTextOrError));
-  } catch (parseError) {
-    return invalidSpecResponse({
-      message: `A resposta do modelo não é um JSON válido: ${
-        parseError instanceof Error ? parseError.message : String(parseError)
-      }`,
-      spec: modelTextOrError,
-    });
-  }
+  // try {
+  //   modelJson = JSON.parse(stripCodeFence(modelTextOrError));
+  // } catch (parseError) {
+  //   return invalidSpecResponse({
+  //     message: `A resposta do modelo não é um JSON válido: ${
+  //       parseError instanceof Error ? parseError.message : String(parseError)
+  //     }`,
+  //     spec: modelTextOrError,
+  //   });
+  // }
 
   if (!isRecord(modelJson)) {
     return invalidSpecResponse({
