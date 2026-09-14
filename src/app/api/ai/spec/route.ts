@@ -5,23 +5,65 @@ import { gateway } from '@/gateway';
 import { buildCatalogueContext } from './mapDataCatalogue';
 import {
   appendRealMapData,
+  findGeometryInMapData,
   findInvalidGeojsonSource,
+  findMissingLegend,
   invalidSpecResponse,
   isRecord,
   KNOWN_SOURCE_URLS,
+  type UnknownRecord,
 } from './specValidation';
 
-const INSTRUCTIONS = `Os datasets acima são um parcial do catalogo json schema do projeto Cozinha Solidária em Rede, com todos os datasets conhecidos e o detalhe completo apenas dos datasets que podem popular \`mapData\` hoje. Use-o para gerar um spec de visualização geográfica (um mapa) que atenda ao pedido do usuário.
+const INSTRUCTIONS = `## O que é
 
-Seu ambiente de execução não tem acesso a nenhum checkout local do monorepo \`ttoss\` — não tente localizar ou ler arquivos locais. Consulte o JSON Schema vigente do \`VisualizationSpec\` (draft 2020-12) na fonte pública indicada nas suas instruções.
+Cozinhas Solidárias é uma aplicação pública que mapeia cozinhas comunitárias
+de combate à fome no Brasil — onde estão, quantas pessoas atendem e como essa
+presença se relaciona com vulnerabilidade social, insegurança alimentar e
+agricultura familiar em cada município. O público-alvo é qualquer pessoa
+interessada em segurança alimentar (jornalistas, gestores públicos,
+pesquisadores, a própria rede de cozinhas), não apenas especialistas em SIG.
+Todo dado exibido é agregado por município — o cadastro individual das
+cozinhas contém dados pessoais (endereço, CNPJ, e-mail) e nunca é exposto
+linha a linha.
 
-Regra obrigatória: \`mapData\` é só para valores que colorem/dimensionam uma layer (join por \`geometryId\`) — nunca para a geometria de base. A geometria de municípios já existe como GeoJSON público em \`/geo/geojs-100-mun.json\` (propriedade de join: \`codarea\`); referencie-a em \`sources\` (\`data: "/geo/geojs-100-mun.json"\`), nunca em \`mapData\`. \`mapData[].mapDataId\` só pode usar um dos ids da lista "renderableDatasets" do catálogo, exatamente como aparecem. Nunca invente um mapDataId fora dessa lista. Nunca preencha \`mapData[].data\` com valores fictícios — o \`data\` enviado aqui é sempre substituído por dados reais depois de gerado; um array vazio é aceitável.
+## Para resolver os campos da spec, siga as instruções abaixo:
 
-Se o pedido do usuário só corresponder a um dataset do catálogo que NÃO está na lista "renderableDatasets" (ainda não disponível), responda apenas com {"error": "..."} explicando em português que aquele dado ainda não está disponível para visualização — não mapeie para outro dataset ao acaso.
+tipo de mapa (mapType):
+"Dado pergunta '[pergunta usuário]', qual tipo cartográfico melhor representa? Considerar: coroplético (área agregada) - válido somente para variáveis relativas (razões, taxas e percentuais), não utilizar para contagens absolutas, pontos proporcionais (unidade individual) - para constagens, dot density - escolha quando uma unidade representar uma quantidade fixa (ex: 1 ponto = 1.000 habitantes, 1 ponto = 1 cozinha. Sempre adicione esta informação na legenda), cluster. Justificar pela granularidade real do dado — se maioria município tem só 1-2 pontos, coroplético mascara variação, pontos melhor. Listar tipo recomendado + 1 alternativa com trade-off."                                                                                            Variável:
+"Varrer dataset_catalogue.json (campo schema.fields[].name/description/unit) e achar campo cujo description bata literal com conceito pedido — não sinônimo, não correlato. Se não existir pronto, apontar campo-base + operação necessária (soma/agregação/join) pra derivar. Retornar: dataset_id, campo, grain (spatial.grain.code), se precisa agregação e por qual chave (Código IBGE/codarea)."
 
-\`engine\`, \`sources\` e \`layers\` são sempre obrigatórios no spec, mesmo quando \`mapType\` é usado — \`mapType\` nunca substitui \`layers\`. Toda layer precisa referenciar um \`sourceId\` existente em \`sources\`.
+Prompt ampliado — proxy seguro:
+"Antes de aceitar variável como resposta: (1) listar todo campo do catálogo cujo description/tags toquem tema semelhante (ex.: cadastro, vulnerabilidade, cobertura); (2) pra cada um, testar se mede exatamente o pedido ou mede algo adjacente (input, causa, correlato) — declarar explicitamente a diferença semântica; (3) só aceitar como resposta direta campo cujo description bate 1:1 com a pergunta; (4) todo outro campo correlato entra como 'proxy descartado' com motivo, nunca usado sem aviso. Objetivo: nunca responder pergunta X com dado que mede Y só por estarem no mesmo domínio."
 
-Regra obrigatória sobre \`sources[].data\`: diferente de \`mapData[].data\`, o \`data\` de uma source NUNCA é substituído depois — o que você escrever aí é exatamente o que chega ao mapa. É proibido usar um \`FeatureCollection\` vazio/fictício, ou inventar uma URL, como \`data\` de uma source. As únicas URLs válidas de geometria neste app são: \`/geo/geojs-100-mun.json\` (municípios, join \`codarea\`), \`/geo/estados.json\`, \`/geo/assentamentos.json\`, \`/api/cozinhas\` (pontos de cozinhas) e \`/api/cozinhas/bolhas\`. Nunca use qualquer outra URL. Se o pedido for agregado "por município", não crie uma source de pontos — use só \`/geo/geojs-100-mun.json\` com o valor via \`mapData\`.`;
+abrangência espacial (spatial.coverage + spatial.extent):
+"Ler spatial.coverage (exhaustive/partial) e spatial.extent do dataset escolhido. Se partial, listar em access.notes/description o que fica de fora (ex.: sem coordenada, só habilitadas) e se isso muda leitura do mapa (sub-representação real vs. dado ausente). Retornar abrangência = extent + ressalva de cobertura. Se houver incerteza, baixa confiança, escolha a menor granularidade representada pelos dados: estado(s) ou Brasil (BRAZIL_VIEW)"
+
+intervalo temporal (temporal.extent + temporal.grain + temporal.frequency + temporal.history):
+"Ler temporal.status. Se described, retornar extent+grain+frequency+history (snapshot/overwrite). Se unknown, declarar explicitamente que não há corte de data — é snapshot do estado atual — e não inventar intervalo. Se não informado e houver dados do último ano, escolha-o. Se não, se existir mais de uma versão temporal do mesmo dataset (ex.: _2025 vs _all), perguntar qual ano o usuário quer antes de escolher."
+
+## legenda (legends):
+
+Todo spec gerado DEVE incluir ao menos uma legend em \`legends[]\` cobrindo a variável
+pintada. Coroplético: legend quantitativa com os mesmos breaks usados no colorBy
+(nunca inventar breaks novos). Pontos proporcionais/dot density: legend com valor de
+referência explícito (ex: '1 ponto = 1.000 pessoas'). Nunca retornar spec com
+\`legends\` ausente ou vazio.
+
+## mapData nunca é geometria:
+
+\`mapData\` carrega só valores de join, indexados por \`geometryId\` — nunca a
+geometria de base. A geometria de municípios já existe como GeoJSON público em
+\`/geo/geojs-100-mun.json\` (propriedade de join: \`codarea\`); referencie-a em
+\`sources\`, nunca em \`mapData\`. Um \`mapData[].mapDataId\` nunca pode repetir o
+\`id\` de uma source, e \`mapData[].data\` nunca pode ser uma \`FeatureCollection\`.
+
+## label deve nomear a variável, nunca o id bruto:
+
+Todo \`label\` de \`mapData\`/\`legends\` é uma frase legível em pt-BR que nomeia a
+variável pedida pelo usuário (ex.: "Pessoas atendidas"), igual ao \`description\` do
+campo do catálogo usado para responder a instrução "variável" acima — nunca o id
+bruto do dataset/campo (ex.: \`pessoasAtendidas\`, \`cozinhas_pessoas_atendidas\`).
+`;
 
 const ANTHROPIC_BETA_HEADER = 'managed-agents-2026-04-01';
 const ANTHROPIC_VERSION_HEADER = '2023-06-01';
@@ -258,6 +300,48 @@ const deleteSession = async (params: {
   }
 };
 
+/**
+ * Runs the deterministic, code-enforced structural checks against the
+ * agent's raw JSON reply, before any real data is fetched: an invalid
+ * geometry source, geometry smuggled into `mapData` (see
+ * {@link findGeometryInMapData}), and a painted variable with no
+ * `legends[]` entry (see {@link findMissingLegend}). Extracted out of
+ * {@link POST} purely to keep its own branching under the lint complexity
+ * budget — each check already carries its own docs at its definition.
+ *
+ * @returns The 422 `Response` for the first violation found, or `null` when
+ * `modelJson` passes every structural check.
+ */
+const validateGeneratedSpecStructure = (
+  modelJson: UnknownRecord
+): Response | null => {
+  const invalidSourceId = findInvalidGeojsonSource(modelJson);
+  if (invalidSourceId) {
+    return invalidSpecResponse({
+      message: `A source "${invalidSourceId}" não referencia um endpoint real de geometria (URLs válidas: ${KNOWN_SOURCE_URLS.join(', ')}) ou veio com uma coleção de feições vazia inventada pelo modelo. Tente reformular o pedido.`,
+      spec: modelJson,
+    });
+  }
+
+  const geometryMapDataId = findGeometryInMapData(modelJson);
+  if (geometryMapDataId) {
+    return invalidSpecResponse({
+      message: `O item "${geometryMapDataId}" de "mapData" carrega geometria (repete o id de uma source, ou traz uma FeatureCollection embutida) em vez de um valor de join por "geometryId". Tente reformular o pedido.`,
+      spec: modelJson,
+    });
+  }
+
+  if (findMissingLegend(modelJson)) {
+    return invalidSpecResponse({
+      message:
+        'Todo spec com uma variável pintada precisa de ao menos uma legend em "legends[]" descrevendo-a. Tente reformular o pedido.',
+      spec: modelJson,
+    });
+  }
+
+  return null;
+};
+
 const validatePrompt = (rawBody: unknown): string | Response => {
   if (
     !rawBody ||
@@ -399,12 +483,9 @@ export const POST = async (request: Request): Promise<Response> => {
     });
   }
 
-  const invalidSourceId = findInvalidGeojsonSource(modelJson);
-  if (invalidSourceId) {
-    return invalidSpecResponse({
-      message: `A source "${invalidSourceId}" não referencia um endpoint real de geometria (URLs válidas: ${KNOWN_SOURCE_URLS.join(', ')}) ou veio com uma coleção de feições vazia inventada pelo modelo. Tente reformular o pedido.`,
-      spec: modelJson,
-    });
+  const structuralError = validateGeneratedSpecStructure(modelJson);
+  if (structuralError) {
+    return structuralError;
   }
 
   const specOrError = await appendRealMapData(modelJson);

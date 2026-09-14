@@ -97,6 +97,74 @@ export const findInvalidGeojsonSource = (
   return null;
 };
 
+/** A `mapData[]` entry's own `data`, when it's an inline `FeatureCollection` (geometry, not a join value). */
+const isFeatureCollection = (data: unknown): boolean => {
+  return isRecord(data) && data['type'] === 'FeatureCollection';
+};
+
+/**
+ * Finds the first `mapData[]` entry that smuggles geometry instead of a join
+ * value: either its `mapDataId` doubles as a `sources[].id` (so the agent
+ * pointed the join at a geometry source itself, not a value keyed by
+ * `geometryId`), or its own `data` is an inline `FeatureCollection`. Both
+ * shapes pass `appendRealMapData`'s structural checks (a string
+ * `mapDataId`), so this runs separately and first — `mapData` is a join,
+ * never geometry, and a `sources[].id` collision or an embedded
+ * `FeatureCollection` proves the model conflated the two.
+ *
+ * Ignores a non-array `mapData` (or non-record `sources`/entries) — those
+ * shapes are already rejected by {@link appendRealMapData} and
+ * {@link findInvalidGeojsonSource} respectively.
+ */
+export const findGeometryInMapData = (spec: UnknownRecord): string | null => {
+  const mapData = spec['mapData'];
+  if (!Array.isArray(mapData)) {
+    return null;
+  }
+
+  const sources = spec['sources'];
+  const sourceIds = new Set(
+    Array.isArray(sources)
+      ? sources.flatMap((source) => {
+          return isRecord(source) && typeof source['id'] === 'string'
+            ? [source['id']]
+            : [];
+        })
+      : []
+  );
+
+  for (const entry of mapData) {
+    if (!isRecord(entry)) {
+      continue;
+    }
+    const mapDataId = entry['mapDataId'];
+    const pointsAtASource =
+      typeof mapDataId === 'string' && sourceIds.has(mapDataId);
+    if (pointsAtASource || isFeatureCollection(entry['data'])) {
+      return typeof mapDataId === 'string' ? mapDataId : 'desconhecido';
+    }
+  }
+
+  return null;
+};
+
+/**
+ * Whether the spec paints a variable (a non-empty `mapData[]`) without
+ * declaring at least one `legends[]` entry to describe it. A spec with no
+ * `mapData` at all (a bare base map) needs no legend — there is nothing
+ * painted to explain.
+ */
+export const findMissingLegend = (spec: UnknownRecord): boolean => {
+  const mapData = spec['mapData'];
+  const paintsAVariable = Array.isArray(mapData) && mapData.length > 0;
+  if (!paintsAVariable) {
+    return false;
+  }
+
+  const legends = spec['legends'];
+  return !Array.isArray(legends) || legends.length === 0;
+};
+
 /**
  * MapData Append (ADR-0001): resolves each `mapData[].mapDataId` the agent
  * emitted against {@link RENDERABLE_DATASET_FETCHERS} and replaces its
