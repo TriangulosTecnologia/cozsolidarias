@@ -50,8 +50,7 @@ const mockAgentReply = (text: string): jest.Mock => {
           { type: 'agent.message', content: [{ type: 'text', text }] },
         ],
       })
-    )
-    .mockResolvedValueOnce(jsonResponse({}));
+    );
   global.fetch = fetchMock;
   return fetchMock;
 };
@@ -153,9 +152,7 @@ describe('POST /api/ai/spec', () => {
       // pollForReply
       .mockResolvedValueOnce(
         jsonResponse({ data: [{ type: 'session.error' }] })
-      )
-      // deleteSession
-      .mockResolvedValueOnce(jsonResponse({}));
+      );
 
     const response = await POST(
       jsonRequest({ prompt: 'mapa de cozinhas por município' })
@@ -314,9 +311,7 @@ describe('POST /api/ai/spec', () => {
             },
           ],
         })
-      )
-      // deleteSession
-      .mockResolvedValueOnce(jsonResponse({}));
+      );
 
     const response = await POST(
       jsonRequest({ prompt: 'mapa de cozinhas por município' })
@@ -795,6 +790,59 @@ describe('POST /api/ai/spec', () => {
     const response = await POST(
       jsonRequest({
         prompt: 'mapa de cozinhas por município com legenda vazia',
+      })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(422);
+    expect(body.error).toMatch(/legend/);
+  }, 10000);
+
+  test('accepts a legend declared at layers[].legends instead of the spec-level legends[]', async () => {
+    const spec = {
+      mapData: [
+        {
+          mapDataId: 'cozinhas_geolocalizadas',
+          mapId: 'municipios-boundary',
+          joinKey: 'codarea',
+          data: [],
+        },
+      ],
+      layers: [
+        {
+          id: 'municipios-boundary',
+          legends: [{ id: 'legend-1', title: 'Valor' }],
+        },
+      ],
+    };
+    mockAgentReply(JSON.stringify(spec));
+
+    const response = await POST(
+      jsonRequest({
+        prompt: 'mapa de cozinhas por município com legenda na layer',
+      })
+    );
+
+    expect(response.status).toBe(200);
+  }, 10000);
+
+  test('returns 422 when neither spec-level legends[] nor any layers[].legends is declared', async () => {
+    const spec = {
+      mapData: [
+        {
+          mapDataId: 'cozinhas_geolocalizadas',
+          mapId: 'municipios-boundary',
+          joinKey: 'codarea',
+          data: [],
+        },
+      ],
+      layers: [{ id: 'municipios-boundary', legends: [] }],
+    };
+    mockAgentReply(JSON.stringify(spec));
+
+    const response = await POST(
+      jsonRequest({
+        prompt: 'mapa de cozinhas por município com legenda de layer vazia',
       })
     );
     const body = (await response.json()) as ErrorBody;

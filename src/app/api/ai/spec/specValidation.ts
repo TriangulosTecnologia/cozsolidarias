@@ -148,11 +148,34 @@ export const findGeometryInMapData = (spec: UnknownRecord): string | null => {
   return null;
 };
 
+/** Whether a `legends[]` value carries at least one entry. */
+const hasLegendEntries = (legends: unknown): boolean => {
+  return Array.isArray(legends) && legends.length > 0;
+};
+
+/**
+ * Whether any `layers[]` entry declares its own non-empty `legends[]` — a
+ * legend scoped to one layer, as valid per `@ttoss/geovis` as the spec-level
+ * `legends[]` (see `GeoVisLegend.utils.tsx`'s `layer.legends?.find(...) ??
+ * specLegends?.find(...)` resolution order).
+ */
+const hasLayerLegend = (spec: UnknownRecord): boolean => {
+  const layers = spec['layers'];
+  if (!Array.isArray(layers)) {
+    return false;
+  }
+
+  return layers.some((layer) => {
+    return isRecord(layer) && hasLegendEntries(layer['legends']);
+  });
+};
+
 /**
  * Whether the spec paints a variable (a non-empty `mapData[]`) without
- * declaring at least one `legends[]` entry to describe it. A spec with no
- * `mapData` at all (a bare base map) needs no legend — there is nothing
- * painted to explain.
+ * declaring at least one legend to describe it — either at the top level
+ * (`spec.legends[]`) or scoped to a layer (`layers[].legends[]`, see
+ * {@link hasLayerLegend}). A spec with no `mapData` at all (a bare base map)
+ * needs no legend — there is nothing painted to explain.
  */
 export const findMissingLegend = (spec: UnknownRecord): boolean => {
   const mapData = spec['mapData'];
@@ -161,8 +184,7 @@ export const findMissingLegend = (spec: UnknownRecord): boolean => {
     return false;
   }
 
-  const legends = spec['legends'];
-  return !Array.isArray(legends) || legends.length === 0;
+  return !hasLegendEntries(spec['legends']) && !hasLayerLegend(spec);
 };
 
 /**
@@ -188,11 +210,16 @@ export const appendRealMapData = async (
   }
 
   const resolvedMapData: UnknownRecord[] = [];
-  for (const entry of mapData) {
-    if (!isRecord(entry) || typeof entry['mapDataId'] !== 'string') {
+  for (const [index, entry] of mapData.entries()) {
+    if (!isRecord(entry)) {
       return invalidSpecResponse({
-        message:
-          'Cada item de "mapData" precisa ser um objeto com "mapDataId" em formato de texto.',
+        message: `O item ${index} de "mapData" precisa ser um objeto, mas veio ${typeof entry}.`,
+        spec,
+      });
+    }
+    if (typeof entry['mapDataId'] !== 'string') {
+      return invalidSpecResponse({
+        message: `O item ${index} de "mapData" precisa ter "mapDataId" em formato de texto, mas veio ${typeof entry['mapDataId']}.`,
         spec,
       });
     }

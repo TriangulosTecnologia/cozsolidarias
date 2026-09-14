@@ -35,6 +35,66 @@ const BRAZIL_VIEW = {
   maxZoomOut: 4,
 };
 
+/** Outcome of one `POST /api/ai/spec` submission. */
+type SubmitOutcome =
+  | { ok: true; result: VisualizationSpec }
+  | { ok: false; message: string };
+
+/**
+ * Calls `POST /api/ai/spec` with `prompt` and reduces every failure mode
+ * (network failure, non-JSON body, non-2xx status, a 2xx with no `result`)
+ * to a single pt-BR message — {@link AiPlayground.handleSubmit} only has to
+ * branch on {@link SubmitOutcome.ok}.
+ */
+const submitPrompt = async (prompt: string): Promise<SubmitOutcome> => {
+  let response: Response;
+  try {
+    response = await fetch('/api/ai/spec', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ prompt }),
+    });
+  } catch {
+    return {
+      ok: false,
+      message: 'Falha de conexão. Verifique sua internet e tente novamente.',
+    };
+  }
+
+  let body: { result?: VisualizationSpec; error?: string };
+  try {
+    body = (await response.json()) as {
+      result?: VisualizationSpec;
+      error?: string;
+    };
+  } catch {
+    return {
+      ok: false,
+      message: `O servidor respondeu com um conteúdo inesperado (status ${response.status}). Tente novamente.`,
+    };
+  }
+
+  if (!response.ok) {
+    return {
+      ok: false,
+      message:
+        body.error ??
+        `O servidor recusou o pedido (status ${response.status}), sem detalhar o motivo.`,
+    };
+  }
+
+  if (!body.result) {
+    return {
+      ok: false,
+      message:
+        body.error ??
+        'O servidor respondeu com sucesso, mas sem a especificação do mapa ("result" ausente).',
+    };
+  }
+
+  return { ok: true, result: body.result };
+};
+
 /**
  * `/ai` page body: a textarea prompt that calls `POST /api/ai/spec` and
  * renders the raw JSON returned by the model. Each submission replaces the
@@ -59,32 +119,15 @@ const AiPlayground = () => {
     setStatus('loading');
     setErrorMessage('');
 
-    try {
-      const response = await fetch('/api/ai/spec', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ prompt }),
-      });
-
-      const body = (await response.json()) as {
-        result?: VisualizationSpec;
-        error?: string;
-      };
-
-      if (!response.ok || !body.result) {
-        setErrorMessage(body.error ?? 'Não foi possível gerar o mapa.');
-        setStatus('error');
-        return;
-      }
-
-      setResult(body.result);
-      setStatus('success');
-    } catch {
-      setErrorMessage(
-        'Falha de conexão. Verifique sua internet e tente novamente.'
-      );
+    const outcome = await submitPrompt(prompt);
+    if (!outcome.ok) {
+      setErrorMessage(outcome.message);
       setStatus('error');
+      return;
     }
+
+    setResult(outcome.result);
+    setStatus('success');
   };
 
   return (

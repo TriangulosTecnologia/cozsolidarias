@@ -1,6 +1,8 @@
 import type {
   cadinsanByCity,
   CatalogueContract,
+  CatalogueDatasetContract,
+  CatalogueFieldContract,
   kitchenRateByCity,
   MunicipioIvs,
 } from '@/data-gateway/schema';
@@ -81,15 +83,75 @@ export const RENDERABLE_DATASET_FETCHERS: Record<
   },
 };
 
+/** The index-only shape a non-renderable dataset is reduced to — enough for
+ * the agent to recognize the dataset exists and respond "not available",
+ * never enough to reference it in `mapData`. */
+type CatalogueDatasetIndexEntry = Pick<
+  CatalogueDatasetContract,
+  'id' | 'title'
+>;
+
+/** The full shape a renderable dataset keeps — every field the `route.ts`
+ * instructions actually read (mapType, variável, abrangência espacial,
+ * intervalo temporal), nothing else. */
+type CatalogueDatasetDetailEntry = Pick<
+  CatalogueDatasetContract,
+  'id' | 'title' | 'description' | 'spatial' | 'temporal'
+> & {
+  access: { notes: string | null };
+  fields: Array<Pick<CatalogueFieldContract, 'name' | 'description' | 'unit'>>;
+};
+
+/**
+ * Projects one catalogue dataset down to what the agent needs: non-renderable
+ * datasets (can never populate `mapData`, see {@link RENDERABLE_DATASET_IDS})
+ * collapse to `{id, title}`; renderable ones keep only the fields each
+ * `route.ts` instruction reads, dropping provenance (`source`, `organization`,
+ * `originNotes`), volume/size, derived `gaps`, unused spatial detail
+ * (`geometry`, `precision`, `srid`), unused field `role`, and — critically —
+ * any `sensitive` field entirely, since no instruction ever needs one.
+ */
+const toAiDatasetProjection = (
+  dataset: CatalogueDatasetContract
+): CatalogueDatasetIndexEntry | CatalogueDatasetDetailEntry => {
+  if (!isRenderableDatasetId(dataset.id)) {
+    return { id: dataset.id, title: dataset.title };
+  }
+
+  return {
+    id: dataset.id,
+    title: dataset.title,
+    description: dataset.description,
+    spatial: dataset.spatial,
+    temporal: dataset.temporal,
+    access: { notes: dataset.access.notes },
+    fields: dataset.fields
+      .filter((field) => {
+        return !field.sensitive;
+      })
+      .map((field) => {
+        return {
+          name: field.name,
+          description: field.description,
+          unit: field.unit,
+        };
+      }),
+  };
+};
+
 /**
  * Builds the catalogue context sent to the agent: a structured JSON object
- * containing a two-tier view — an index of all datasets (id + title) and full
- * field-level detail of only the {@link RENDERABLE_DATASET_IDS} — the ones
- * it's allowed to reference in `mapData`. See ADR-0001 for why (token cost vs.
- * silent mismapping).
+ * containing a two-tier view — an index of all datasets (id + title) and, for
+ * only the {@link RENDERABLE_DATASET_IDS} (the ones the agent may reference
+ * in `mapData`), just the fields the `route.ts` instructions read (see
+ * {@link toAiDatasetProjection}). See ADR-0001 for why the split exists (token
+ * cost vs. silent mismapping).
  */
 export const buildCatalogueContext = (catalogue: CatalogueContract): string => {
   return JSON.stringify({
-    catalogue,
+    catalogue: {
+      ...catalogue,
+      datasets: catalogue.datasets.map(toAiDatasetProjection),
+    },
   });
 };

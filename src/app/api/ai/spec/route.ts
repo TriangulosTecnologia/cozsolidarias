@@ -26,6 +26,12 @@ Todo dado exibido é agregado por município — o cadastro individual das
 cozinhas contém dados pessoais (endereço, CNPJ, e-mail) e nunca é exposto
 linha a linha.
 
+## O catálogo:
+
+O catalogo json schema do projeto Cozinha Solidária em Rede contém todos os datasets conhecidos e o detalhe completo apenas dos datasets que podem popular \`mapData\` hoje. Use-o para gerar um spec de visualização geográfica (um mapa) que atenda ao pedido do usuário.
+
+Se o pedido do usuário só corresponder a um dataset do catálogo que NÃO está na lista "renderableDatasets" (ainda não disponível), responda apenas com {"error": "..."} explicando em português que aquele dado ainda não está disponível para visualização — não mapeie para outro dataset ao acaso.
+
 ## Para resolver os campos da spec, siga as instruções abaixo:
 
 tipo de mapa (mapType):
@@ -35,6 +41,12 @@ tipo de mapa (mapType):
 Prompt ampliado — proxy seguro:
 "Antes de aceitar variável como resposta: (1) listar todo campo do catálogo cujo description/tags toquem tema semelhante (ex.: cadastro, vulnerabilidade, cobertura); (2) pra cada um, testar se mede exatamente o pedido ou mede algo adjacente (input, causa, correlato) — declarar explicitamente a diferença semântica; (3) só aceitar como resposta direta campo cujo description bate 1:1 com a pergunta; (4) todo outro campo correlato entra como 'proxy descartado' com motivo, nunca usado sem aviso. Objetivo: nunca responder pergunta X com dado que mede Y só por estarem no mesmo domínio."
 
+resolução de mapDataId (obrigatório, antes de montar mapData):
+"\`mapData[].mapDataId\` NUNCA é inventado: é sempre, literalmente, o \`id\` de um dataset do catálogo (um dos \`renderableDatasets\`) — nunca um nome de join, nunca o \`id\` de uma source. Para escolher esse \`id\`: (1) percorrer TODOS os datasets do catálogo (não só renderableDatasets) comparando \`description\`/\`fields[].description\` com o pedido, seguindo a instrução 'Variável' e o 'Prompt ampliado — proxy seguro' acima; (2) restringir o resultado aos \`renderableDatasets\`; (3) se o dataset que bate 1:1 não estiver em \`renderableDatasets\`, responder \`{"error": "..."}\` (não há mapDataId alternativo aceitável). Nunca gerar um \`mapDataId\` que só 'parece' com o pedido — ele tem que ser exatamente um \`id\` presente no catálogo."
+
+combinação com abrangência de município/estado:
+"A geometria de \`sources\` e o grain de \`mapData\` têm que casar. Hoje todo dataset em \`renderableDatasets\` tem grain de município (join por \`codarea\`/Código IBGE contra \`/geo/geojs-100-mun.json\`) — não existe dataset renderável em grain de estado. Se o pedido pede a variável agregada por estado, ou combinada com estado, usar \`/geo/estados.json\` apenas como camada de contorno/contexto (uma layer sem \`mapDataId\`, sem legend própria), nunca como source de um \`mapData\` pintado — pintar a variável sempre no fill de município. Se o pedido só faz sentido em grain de estado (nenhuma leitura por município resolve o pedido), tratar como dataset indisponível e responder \`{"error": "..."}\`. Quando o pedido combina duas variáveis (ex.: pontos de cozinhas sobre coroplético de IVS), gerar um \`mapData\` (e uma layer com sua própria \`activeLegendId\`) por variável — nunca misturar dois \`mapDataId\` numa mesma entrada."
+
 abrangência espacial (spatial.coverage + spatial.extent):
 "Ler spatial.coverage (exhaustive/partial) e spatial.extent do dataset escolhido. Se partial, listar em access.notes/description o que fica de fora (ex.: sem coordenada, só habilitadas) e se isso muda leitura do mapa (sub-representação real vs. dado ausente). Retornar abrangência = extent + ressalva de cobertura. Se houver incerteza, baixa confiança, escolha a menor granularidade representada pelos dados: estado(s) ou Brasil (BRAZIL_VIEW)"
 
@@ -43,18 +55,22 @@ intervalo temporal (temporal.extent + temporal.grain + temporal.frequency + temp
 
 ## legenda (legends):
 
-Todo spec gerado DEVE incluir ao menos uma legend em \`legends[]\` cobrindo a variável
-pintada. Coroplético: legend quantitativa com os mesmos breaks usados no colorBy
-(nunca inventar breaks novos). Pontos proporcionais/dot density: legend com valor de
-referência explícito (ex: '1 ponto = 1.000 pessoas'). Nunca retornar spec com
-\`legends\` ausente ou vazio.
+Todo spec gerado DEVE incluir ao menos uma legend cobrindo a variável pintada —
+tanto no nível do spec (\`legends[]\`) quanto no nível da layer (\`layers[].legends[]\`)
+conta para essa exigência. Coroplético: legend quantitativa com os mesmos breaks
+usados no colorBy (nunca inventar breaks novos). Pontos proporcionais/dot density:
+legend com valor de referência explícito (ex: '1 ponto = 1.000 pessoas'). Nunca
+retornar spec cujo mapa pintado não tenha nenhuma legend, nem no spec nem em
+nenhuma layer.
 
 ## mapData nunca é geometria:
 
 \`mapData\` carrega só valores de join, indexados por \`geometryId\` — nunca a
 geometria de base. A geometria de municípios já existe como GeoJSON público em
 \`/geo/geojs-100-mun.json\` (propriedade de join: \`codarea\`); referencie-a em
-\`sources\`, nunca em \`mapData\`. Um \`mapData[].mapDataId\` nunca pode repetir o
+\`sources\`, nunca em \`mapData\`. 
+
+Um \`mapData[].mapDataId\` nunca pode repetir o
 \`id\` de uma source, e \`mapData[].data\` nunca pode ser uma \`FeatureCollection\`.
 
 ## label deve nomear a variável, nunca o id bruto:
@@ -78,7 +94,7 @@ const sessionEventsUrl = (sessionId: string): string => {
 };
 
 /** Strips a leading/trailing ` ```json ` fence, if the model added one. */
-const _stripCodeFence = (text: string): string => {
+const stripCodeFence = (text: string): string => {
   const trimmed = text.trim();
   const fenced = /^```(?:json)?\s*([\s\S]*?)\s*```$/.exec(trimmed);
   return fenced ? fenced[1] : trimmed;
@@ -278,29 +294,6 @@ const pollForReply = async (params: {
 };
 
 /**
- * Deletes a single-use session so it doesn't linger as billed, listable
- * state — best-effort: a failure here doesn't affect the response already
- * built for the client, so it's swallowed rather than surfaced.
- */
-const _deleteSession = async (params: {
-  apiKey: string;
-  sessionId: string;
-}): Promise<void> => {
-  try {
-    await fetch(sessionUrl(params.sessionId), {
-      method: 'DELETE',
-      headers: {
-        'x-api-key': params.apiKey,
-        'anthropic-version': ANTHROPIC_VERSION_HEADER,
-        'anthropic-beta': ANTHROPIC_BETA_HEADER,
-      },
-    });
-  } catch {
-    // Best-effort cleanup only.
-  }
-};
-
-/**
  * Runs the deterministic, code-enforced structural checks against the
  * agent's raw JSON reply, before any real data is fetched: an invalid
  * geometry source, geometry smuggled into `mapData` (see
@@ -334,7 +327,7 @@ const validateGeneratedSpecStructure = (
   if (findMissingLegend(modelJson)) {
     return invalidSpecResponse({
       message:
-        'Todo spec com uma variável pintada precisa de ao menos uma legend em "legends[]" descrevendo-a. Tente reformular o pedido.',
+        'Todo spec com uma variável pintada precisa de ao menos uma legend descrevendo-a, no spec ("legends[]") ou em alguma layer ("layers[].legends[]"). Tente reformular o pedido.',
       spec: modelJson,
     });
   }
@@ -342,25 +335,35 @@ const validateGeneratedSpecStructure = (
   return null;
 };
 
+const promptError = (message: string): Response => {
+  return Response.json(
+    { error: `Campo "prompt": ${message}` },
+    { status: 400 }
+  );
+};
+
 const validatePrompt = (rawBody: unknown): string | Response => {
-  if (
-    !rawBody ||
-    typeof rawBody !== 'object' ||
-    !('prompt' in rawBody) ||
-    typeof (rawBody as { prompt?: unknown }).prompt !== 'string'
-  ) {
-    return Response.json(
-      { error: 'Prompt inválido: envie um texto entre 1 e 500 caracteres.' },
-      { status: 400 }
+  if (!rawBody || typeof rawBody !== 'object') {
+    return promptError('envie um corpo JSON com um campo "prompt" de texto.');
+  }
+
+  if (!('prompt' in rawBody)) {
+    return promptError('campo obrigatório ausente no corpo da requisição.');
+  }
+
+  const rawPrompt = (rawBody as { prompt?: unknown }).prompt;
+  if (typeof rawPrompt !== 'string') {
+    return promptError(
+      `esperado texto, recebido ${rawPrompt === null ? 'null' : typeof rawPrompt}.`
     );
   }
 
-  const prompt = (rawBody as { prompt: string }).prompt.trim();
-  if (prompt.length < 1 || prompt.length > 500) {
-    return Response.json(
-      { error: 'Prompt inválido: envie um texto entre 1 e 500 caracteres.' },
-      { status: 400 }
-    );
+  const prompt = rawPrompt.trim();
+  if (prompt.length < 1) {
+    return promptError('não pode ser vazio.');
+  }
+  if (prompt.length > 500) {
+    return promptError(`máximo de 500 caracteres (recebido ${prompt.length}).`);
   }
 
   return prompt;
@@ -378,10 +381,17 @@ const validateEnv = ():
   const environmentId = process.env['ANTHROPIC_ENVIRONMENT_ID'];
 
   if (!apiKey || !agentId || !environmentId) {
+    const missing = [
+      !apiKey ? 'ANTHROPIC_API_KEY' : null,
+      !agentId ? 'ANTHROPIC_AGENT_ID' : null,
+      !environmentId ? 'ANTHROPIC_ENVIRONMENT_ID' : null,
+    ].filter((name): name is string => {
+      return name !== null;
+    });
+
     return Response.json(
       {
-        error:
-          'Configuração ausente: defina ANTHROPIC_API_KEY, ANTHROPIC_AGENT_ID e ANTHROPIC_ENVIRONMENT_ID no ambiente do servidor.',
+        error: `Configuração ausente no ambiente do servidor: ${missing.join(', ')}.`,
       },
       { status: 400 }
     );
@@ -390,16 +400,50 @@ const validateEnv = ():
   return { apiKey, agentId, environmentId };
 };
 
+/**
+ * Turns one of {@link createSession}/{@link pollForReply}'s thrown errors
+ * into a Portuguese, cause-specific message — so a 502 never collapses a
+ * session-creation failure, a session-side error, an empty reply, and a
+ * timeout into the same generic sentence. Matches on the fixed prefixes
+ * those two functions throw; anything else (e.g. a network-level fetch
+ * failure) falls back to the raw `error.message` so it's still legible.
+ */
+const describeAgentFailure = (error: unknown): string => {
+  const message = error instanceof Error ? error.message : String(error);
+
+  if (message.startsWith('Anthropic sessions POST responded with status')) {
+    return `Não foi possível iniciar a sessão com o modelo de IA (${message}). Tente novamente em instantes.`;
+  }
+  if (message === 'Anthropic sessions POST returned no session id') {
+    return 'O modelo de IA não retornou um identificador de sessão válido. Tente novamente.';
+  }
+  if (
+    message.startsWith('Anthropic session events GET responded with status')
+  ) {
+    return `Não foi possível acompanhar o andamento da sessão com o modelo de IA (${message}). Tente novamente em instantes.`;
+  }
+  if (message === 'Anthropic session reported a session.error event') {
+    return 'O modelo de IA reportou um erro interno ao processar o pedido. Tente reformular o pedido ou tentar novamente.';
+  }
+  if (message === 'Anthropic session turn ended with no agent.message') {
+    return 'O modelo de IA encerrou a resposta sem gerar nenhum conteúdo. Tente reformular o pedido.';
+  }
+  if (message === 'Timed out waiting for the Anthropic session to reply') {
+    return 'O modelo de IA demorou demais para responder. Tente novamente em instantes.';
+  }
+
+  return `Falha de comunicação com o modelo de IA: ${message}`;
+};
+
 const getAgentResponse = async (params: {
   apiKey: string;
   agentId: string;
   environmentId: string;
   prompt: string;
 }): Promise<string | Response> => {
-  let sessionId: string | null = null;
   try {
     const catalogueText = await readCatalogueContext();
-    sessionId = await createSession({
+    const sessionId = await createSession({
       apiKey: params.apiKey,
       agentId: params.agentId,
       environmentId: params.environmentId,
@@ -407,15 +451,11 @@ const getAgentResponse = async (params: {
       prompt: params.prompt,
     });
     return await pollForReply({ apiKey: params.apiKey, sessionId });
-  } catch {
+  } catch (error) {
     return Response.json(
-      { error: 'Falha ao consultar o modelo de IA. Tente novamente.' },
+      { error: describeAgentFailure(error) },
       { status: 502 }
     );
-  } finally {
-    // if (sessionId) {
-    //   await deleteSession({ apiKey: params.apiKey, sessionId });
-    // }
   }
 };
 
@@ -425,8 +465,7 @@ const getAgentResponse = async (params: {
  * (`POST /v1/sessions` with `initial_events`, then `GET /v1/sessions/{id}/events`)
  * — the session is bound to the `geovis-spec-generator` agent (see
  * `geovis-spec-generator.en.agent.yaml`), provisioned once out of band (e.g.
- * via the `ant` CLI) and referenced here only by ID, and is deleted once the
- * reply is read.
+ * via the `ant` CLI) and referenced here only by ID.
  *
  * The agent's raw reply is parsed as JSON, then its `mapData` is resolved
  * against real `data-gateway` values (see {@link appendRealMapData}) before
@@ -464,16 +503,16 @@ export const POST = async (request: Request): Promise<Response> => {
   }
 
   let modelJson: unknown;
-  // try {
-  //   modelJson = JSON.parse(stripCodeFence(modelTextOrError));
-  // } catch (parseError) {
-  //   return invalidSpecResponse({
-  //     message: `A resposta do modelo não é um JSON válido: ${
-  //       parseError instanceof Error ? parseError.message : String(parseError)
-  //     }`,
-  //     spec: modelTextOrError,
-  //   });
-  // }
+  try {
+    modelJson = JSON.parse(stripCodeFence(modelTextOrError));
+  } catch (parseError) {
+    return invalidSpecResponse({
+      message: `A resposta do modelo não é um JSON válido: ${
+        parseError instanceof Error ? parseError.message : String(parseError)
+      }`,
+      spec: modelTextOrError,
+    });
+  }
 
   if (!isRecord(modelJson)) {
     return invalidSpecResponse({
