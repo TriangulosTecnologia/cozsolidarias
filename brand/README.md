@@ -3,15 +3,14 @@
 Canonical brand package for **Cozinha Solidária em Rede**. Everything downstream — the
 site, decks, print, partner materials — should resolve here rather than to a copy.
 
-| File                                                      | What it is                                                                                                                                                                                                         |
-| --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| [`brand-spec.json`](./brand-spec.json)                    | Canonical operating contract (Branding Studio schema v4). Strategy, creative direction, design tokens, verified contrast pairs, evidence, open questions. Machine-readable; the single source of truth for values. |
-| [`brand-book.md`](./brand-book.md)                        | The teaching document. Why the system behaves as it does and how to apply it. Read this first.                                                                                                                     |
-| [`logo/`](./logo)                                         | 24 signature masters (4 lockups × 6 variants) plus 2 badges.                                                                                                                                                       |
-| [`illustration/`](./illustration)                         | 24 drawn food illustrations as vector masters.                                                                                                                                                                     |
-| [`illustration/raster-only/`](./illustration/raster-only) | 10 further illustrations that exist only as small PNGs — no vector source was delivered. Small sizes only; do not enlarge or recolour.                                                                             |
-| [`pattern/`](./pattern)                                   | Seamless food pattern tile, in two inks.                                                                                                                                                                           |
-| [`reference/`](./reference)                               | Rendered applications showing the composition grammar across five different jobs.                                                                                                                                  |
+| File                                   | What it is                                                                                                                                                                                                         |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [`brand-spec.json`](./brand-spec.json) | Canonical operating contract (Branding Studio schema v4). Strategy, creative direction, design tokens, verified contrast pairs, evidence, open questions. Machine-readable; the single source of truth for values. |
+| [`brand-book.md`](./brand-book.md)     | The teaching document. Why the system behaves as it does and how to apply it. Read this first.                                                                                                                     |
+| [`logo/`](./logo)                      | 24 signature masters (4 lockups × 6 variants) plus 2 badges.                                                                                                                                                       |
+| [`illustration/`](./illustration)      | 34 drawn food illustrations as vector masters. 24 from the native source, 10 reconstructed from raster exports (`E-011`).                                                                                          |
+| [`pattern/`](./pattern)                | Seamless food pattern tile, in two inks.                                                                                                                                                                           |
+| [`reference/`](./reference)            | Rendered applications showing the composition grammar across five different jobs.                                                                                                                                  |
 
 ## Picking an asset
 
@@ -47,10 +46,12 @@ Three rules cover most of it; the [brand book](./brand-book.md) covers the rest.
 ## Provenance
 
 The mark, lettering, illustrations and pattern come from the identity delivered by LM&Co.
-in June 2026. Masters were extracted as vector directly from its native Adobe Illustrator
-source (`MANUAL DE IDENTIDADE VISUAL - COZINHA SOLIDÁRIA.ai`, 2026-06-23) — no raster
-tracing, no retyped values. Each file is plain `<path>` geometry with a `viewBox`, no
-embedded images, no external references, no script, and no live font dependency.
+in June 2026. Every logo, the pattern and 24 of the 34 illustrations were extracted as
+vector directly from its native Adobe Illustrator source
+(`MANUAL DE IDENTIDADE VISUAL - COZINHA SOLIDÁRIA.ai`, 2026-06-23), with no retyped values.
+The remaining 10 illustrations had no vector source in the handoff and were reconstructed
+from the delivered PNG exports (`E-011`). Each file is plain `<path>` geometry with a
+`viewBox`, no embedded images, no external references, no script, no font dependency.
 
 The system around them — typography, the voz/mesa composition grammar, voice and the
 partner signature — was designed on top of that handoff, which resolved the signature but

@@ -239,11 +239,14 @@ Thirty-four drawn food pieces. Flat and organic, built entirely from filled shap
 is not a single `stroke` in the set, and where a piece appears to have a contour it is a
 dark shape sitting behind a lighter one. Keep that construction when extending the set.
 
-**Twenty-four are vector masters** in [`illustration/`](./illustration) — scale them
-freely. **Ten are raster-only** in
-[`illustration/raster-only/`](./illustration/raster-only), because the handoff never
-included their vector source: small PNGs between 182×238 and 313×213, to be used at or
-below their pixel size, never enlarged, never recoloured, never printed at size.
+All thirty-four are vector masters in [`illustration/`](./illustration) and scale freely.
+Twenty-four came out of the native Illustrator file. The other ten had no vector source in
+the handoff and were reconstructed from the delivered PNG exports — the art is flat
+colour, so the regions were separated and refitted rather than traced blind, and each was
+checked against its source on white and on grey, where the near-white highlights the page
+hides become visible. They are faithful, but they are a reconstruction: heavier in nodes
+than a hand-drawn path, and their finest contours carry the resolution of a ~250px export.
+If the set is ever reworked, ask the designer for the original file.
 
 They depict **real Brazilian everyday food**, not healthy-eating iconography. Rice and
 beans, papaya, a preserve jar and a sardine say something about whose kitchen this is that
@@ -310,7 +313,8 @@ printer. Print from the CMYK builds, treat them as unverified, and proof on pres
 
 Three things this book cannot settle; all three are in the spec under `unresolved`.
 
-Ten of the thirty-four illustrations have no vector master — only the designer's source
-file closes that. No print proof exists, so every spot and CMYK reference is unverified.
-And the CSR badge appears in the manual without explanation: find out whether anything
-still depends on it, and retire it if not.
+No print proof exists, so every spot and CMYK reference is unverified. The illustration
+source file was never delivered — nothing is blocked now that the ten pieces are vector,
+but the designer's own geometry would be better to edit from. And the CSR badge appears in
+the manual without explanation: find out whether anything still depends on it, and retire
+it if not.
