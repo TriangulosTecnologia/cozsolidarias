@@ -1,7 +1,7 @@
 {
   "meta": {
     "schema_version": 4,
-    "version": "2.0.0",
+    "version": "2.2.0",
     "brand_name": "Cozinha Solidária em Rede",
     "tier": "full",
     "touchpoints": [
@@ -221,7 +221,7 @@
         "horizontal": "Pot left, name right. For wide, short spaces — site headers, document footers, banners.",
         "stacked": "Pot above, name below. Alternative vertical for tall, narrow spaces.",
         "wordmark": "Lettering only, no pot. For contexts where the pot already appears nearby.",
-        "badge-pot": "Pot in a Verde Claro disc. The reduced signature for avatars, favicons and stamps — the only asset that survives below 90px.",
+        "badge-pot": "Pot in a Verde Claro disc. The reduced signature for avatars, favicons and stamps — the only asset that stays readable below the lettered lockups' minimum widths.",
         "badge-csr": "CSR monogram in a grey disc. Secondary; use only where the abbreviation is already understood."
       },
       "variant_by_ground": {
@@ -231,13 +231,25 @@
         "single-ink-production": "black, red or green, whichever ink is available",
         "photography": "white, over a plain area of the image"
       },
-      "clear_space": "The 'e' of 'Em Rede', scaled with the mark, on every contour. Nothing enters that margin — not partner marks, not page edges, not image content.",
+      "artboard": "Every master is trimmed to the artwork: the file's edge is the mark's edge, with no padding inside it. That is what makes clear space applicable and alignment predictable — see E-012. Do not re-introduce padding into a master; add margin in the layout instead.",
+      "clear_space": {
+        "rule": "The final 'e' of 'Em Rede', taken from the lockup being placed and scaled with it, on every contour, measured outward from the file's edge. Nothing enters that margin — not partner marks, not page edges, not image content. Using a letter from the mark itself means the margin scales without anyone computing a ratio.",
+        "as_fraction_of_placed_width": {
+          "vertical": "22%",
+          "horizontal": "8%",
+          "stacked": "16%",
+          "wordmark": "20%",
+          "badge-pot": "20% of the diameter",
+          "badge-csr": "20% of the diameter"
+        },
+        "basis": "The lettering is drawn at a different size in each lockup, so one rule yields a different margin in each. Measured from the artwork — see E-013. The badges carry no lettering; a fifth of the diameter lands in the same range as the lettered lockups."
+      },
       "min_size": {
-        "horizontal": "120px wide on screen",
-        "vertical": "90px wide on screen",
-        "stacked": "90px wide on screen",
+        "horizontal": "110px wide",
+        "vertical": "70px wide",
+        "stacked": "70px wide",
         "badge-pot": "24px",
-        "basis": "Measured, not assumed — see E-005."
+        "basis": "Width of the mark itself, the files being trimmed to it. Measured on a rendered size ladder, not assumed — see E-005 and E-012."
       },
       "misuse": [
         "Do not distort, stretch or rotate.",
@@ -292,9 +304,9 @@
     },
     {
       "id": "E-005",
-      "claim": "Rendered reduction tests put the legibility floor at roughly 120px wide for the horizontal lockup and 90px for the vertical and stacked lockups; below those widths the hand lettering's counters close. The pot badge stays readable to 24px.",
+      "claim": "Rendered reduction tests put the legibility floor at 110px wide for the horizontal lockup and 70px for the vertical and stacked lockups, measured on masters trimmed to the artwork; below those widths the hand lettering's counters close. The pot badge stays readable to 24px.",
       "kind": "observation",
-      "source": "Chromium renders of the SVG masters at 240/160/120/96/80/64/48px and 96/64/48/40/32/24/16px, inspected at 2× device scale.",
+      "source": "Chromium size ladders at 200/140/110/96/84/72/60px and 110/84/70/60/52/44/36px, inspected at 2× device scale, re-run after the masters were trimmed (E-012).",
       "status": "active"
     },
     {
@@ -337,6 +349,20 @@
       "claim": "Libre Franklin sets the same Portuguese copy in fewer lines than Inter and materially fewer than Archivo at equal size, and covers the pt-BR diacritic set. Neue Haas Grotesk, specified by the 2026 manual, is a commercial licence whose coverage for this project was never confirmed.",
       "kind": "observation",
       "source": "Three-way specimen rendered in Chromium with project copy at display, dense-text, tabular and small-caps sizes, with the fonts embedded rather than linked.",
+      "status": "active"
+    },
+    {
+      "id": "E-013",
+      "claim": "The clear-space unit measures 22% of the placed width on the vertical lockup, 8% on the horizontal, 16% on the stacked and 20% on the wordmark. The lettering is drawn at its own size in each lockup, so a single rule expressed in the mark's own letter produces four different ratios — which is why the rule is stated as the letter and the percentages are given only as its implementation.",
+      "kind": "observation",
+      "source": "Alpha bounding box of the last run of green ink — the final 'e' of 'Em Rede' — measured against the declared viewBox in a 1200px render of each colour lockup.",
+      "status": "active"
+    },
+    {
+      "id": "E-012",
+      "claim": "The masters carried incidental artboard padding: the artwork filled 55% of the vertical lockup's width, 52% of the horizontal lockup's height and 67% of the stacked one, at inconsistent ratios and offset 10–22% inside the frame. Inconsistent ratios mark it as leftover framing rather than a designed margin. It made the clear-space rule inapplicable — a designer adding one 'e' was adding it on top of an unknown one — and pushed the mark off any edge it was aligned to. All 26 logo masters and the one illustration with the same fault are now trimmed to their artwork. The previously documented minimums described that padded frame, so 'vertical 90px' permitted a mark only 50px wide, which the size ladder shows is already past legibility.",
+      "kind": "observation",
+      "source": "Alpha bounding box of each master measured against its declared viewBox in a 2400px render, before and after trimming.",
       "status": "active"
     }
   ],

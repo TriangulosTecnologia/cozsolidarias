@@ -3,14 +3,14 @@
 Canonical brand package for **Cozinha Solidária em Rede**. Everything downstream — the
 site, decks, print, partner materials — should resolve here rather than to a copy.
 
-| File                                   | What it is                                                                                                                                                                                                         |
-| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| [`brand-spec.json`](./brand-spec.json) | Canonical operating contract (Branding Studio schema v4). Strategy, creative direction, design tokens, verified contrast pairs, evidence, open questions. Machine-readable; the single source of truth for values. |
-| [`brand-book.md`](./brand-book.md)     | The teaching document. Why the system behaves as it does and how to apply it. Read this first.                                                                                                                     |
-| [`logo/`](./logo)                      | 24 signature masters (4 lockups × 6 variants) plus 2 badges.                                                                                                                                                       |
-| [`illustration/`](./illustration)      | 34 drawn food illustrations as vector masters. 24 from the native source, 10 reconstructed from raster exports (`E-011`).                                                                                          |
-| [`pattern/`](./pattern)                | Seamless food pattern tile, in two inks.                                                                                                                                                                           |
-| [`reference/`](./reference)            | Rendered applications showing the composition grammar across five different jobs.                                                                                                                                  |
+| File                                   | What it is                                                                                                                                                                                                                                                                                                                 |
+| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`brand-spec.json`](./brand-spec.json) | Canonical operating contract (Branding Studio schema v4). Strategy, creative direction, design tokens, verified contrast pairs, evidence, open questions. Machine-readable; the single source of truth for values.                                                                                                         |
+| [`brand-book.html`](./brand-book.html) | The teaching document. Why the system behaves as it does and how to apply it. Read this first — open it in a browser; it is a designed artifact, set in the brand's own typeface and built from the composition grammar it describes. Self-contained apart from the assets in the folders below, which it references live. |
+| [`logo/`](./logo)                      | 24 signature masters (4 lockups × 6 variants) plus 2 badges.                                                                                                                                                                                                                                                               |
+| [`illustration/`](./illustration)      | 34 drawn food illustrations as vector masters. 24 from the native source, 10 reconstructed from raster exports (`E-011`).                                                                                                                                                                                                  |
+| [`pattern/`](./pattern)                | Seamless food pattern tile, in two inks.                                                                                                                                                                                                                                                                                   |
+| [`reference/`](./reference)            | Rendered applications showing the composition grammar across five different jobs.                                                                                                                                                                                                                                          |
 
 ## Picking an asset
 
@@ -29,11 +29,12 @@ Choose the variant by the ground, never by preference:
 | **Vermelho or Verde**               | **`white`**               |
 | Single-ink production               | `black`, `red` or `green` |
 
-Below 90 px wide, switch to `badge-pot` instead of scaling the signature down further.
+Below the minimum width — 110 px for `horizontal`, 70 px for the others — switch to
+`badge-pot` instead of scaling the signature down further.
 
 ## Making something new
 
-Three rules cover most of it; the [brand book](./brand-book.md) covers the rest.
+Three rules cover most of it; the [brand book](./brand-book.html) covers the rest.
 
 1. **Split the surface into voz and mesa.** Voz is a flat brand colour and carries the
    signature and the headline. Mesa is Branco Leitura and carries the food, the data and
@@ -76,6 +77,10 @@ the repository.
 Colour values live in `brand-spec.json` under `visual.tokens` and are deliberately not
 duplicated into a second tokens file. Two copies of a palette drift apart, and the red
 recorded in `E-001` is what that looks like when it happens.
+
+For the same reason the brand book shows the masters themselves, by relative path, rather
+than pictures of them: replace an SVG and the book shows the new one, with nothing to
+regenerate. Only the typeface is embedded, so the document reads correctly offline.
 
 ## Verifying a change
 
