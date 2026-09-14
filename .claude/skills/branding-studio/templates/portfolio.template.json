@@ -1,0 +1,65 @@
+{
+  "studio": {
+    "name": "",
+    "default_architecture": "house-of-brands | endorsed | branded-house | hybrid",
+    "relationship_policies": {
+      "house-of-brands": {
+        "name": "usually_separate",
+        "morphology": "usually_separate",
+        "color": "contextual",
+        "creative_territory": "usually_separate"
+      },
+      "endorsed": {
+        "name": "usually_separate",
+        "morphology": "contextual",
+        "color": "may_share_parent_cues",
+        "creative_territory": "contextual"
+      },
+      "branded-house": {
+        "name": "related_expected",
+        "morphology": "related_expected",
+        "color": "related_expected",
+        "creative_territory": "related_expected"
+      },
+      "hybrid": {
+        "name": "custom_policy_required",
+        "morphology": "custom_policy_required",
+        "color": "custom_policy_required",
+        "creative_territory": "custom_policy_required"
+      }
+    },
+    "shared_tokens": {},
+    "shared_cues": []
+  },
+  "brands": [
+    {
+      "brand_name": "ExampleCo",
+      "spec_path": "specs/exampleco/brand-spec.json",
+      "status": "active | discontinued | in_creation",
+      "tier": "provisional | full",
+      "category": "",
+      "architecture_model": "house-of-brands",
+      "portfolio_summary": {
+        "name": {
+          "name": "ExampleCo",
+          "approach": "suggestive",
+          "construct": "compound"
+        },
+        "primary_color_oklch": {
+          "L": 0.55,
+          "C": 0.21,
+          "H": 263
+        },
+        "logo_morphology": [
+          "geometric",
+          "monogram"
+        ],
+        "creative_territory": [
+          "precise",
+          "approachable"
+        ],
+        "shared_cues": []
+      }
+    }
+  ]
+}

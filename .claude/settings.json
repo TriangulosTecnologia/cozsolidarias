@@ -1,12 +1,4 @@
 {
-  "extraKnownMarketplaces": {
-    "enniolopes": {
-      "source": {
-        "source": "github",
-        "repo": "enniolopes/skills"
-      }
-    }
-  },
   "mcpServers": {
     "chakra-ui": {
       "command": "npx",
@@ -16,8 +8,5 @@
       "command": "npx",
       "args": ["@playwright/mcp@latest"]
     }
-  },
-  "enabledPlugins": {
-    "branding-studio@enniolopes": true
   }
 }

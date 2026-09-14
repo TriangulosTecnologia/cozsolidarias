@@ -1,6 +1,12 @@
 {
   "version": 1,
   "skills": {
+    "branding-studio": {
+      "source": "enniolopes/skills",
+      "sourceType": "github",
+      "skillPath": "skills/branding-studio/SKILL.md",
+      "computedHash": "eb6eb95ec8280c7e57379743f27071e1ca3e05e2c8ef6a810c949fdd9040d419"
+    },
     "chakra-ui-builder": {
       "source": "chakra-ui/chakra-ui",
       "sourceType": "github",
