@@ -11,6 +11,7 @@ site, decks, print, partner materials — should resolve here rather than to a c
 | [`illustration/`](./illustration)                         | 24 drawn food illustrations as vector masters.                                                                                                                                                                     |
 | [`illustration/raster-only/`](./illustration/raster-only) | 10 further illustrations that exist only as small PNGs — no vector source was delivered. Small sizes only; do not enlarge or recolour.                                                                             |
 | [`pattern/`](./pattern)                                   | Seamless food pattern tile, in two inks.                                                                                                                                                                           |
+| [`reference/`](./reference)                               | Rendered applications showing the composition grammar across five different jobs.                                                                                                                                  |
 
 ## Picking an asset
 
@@ -18,25 +19,47 @@ Logo files are named `<lockup>-<variant>.svg`.
 
 - **Lockup** — `vertical` (primary), `horizontal`, `stacked`, `wordmark`, or `badge-pot` /
   `badge-csr`.
-- **Variant** — `color` (light grounds), `color-on-dark` (dark grounds), `white`, `black`,
-  `red`, `green` (single-ink production).
+- **Variant** — `color`, `color-on-dark`, `white`, `black`, `red`, `green`.
 
-Choose the variant by the ground it sits on. Below 90 px wide, switch to `badge-pot`
-instead of scaling the signature down further. Both rules, and the reasoning behind them,
-are in the [brand book](./brand-book.md#choosing-a-variant).
+Choose the variant by the ground, never by preference:
+
+| Ground                              | Variant                   |
+| ----------------------------------- | ------------------------- |
+| Branco Leitura, paper, pale imagery | `color`                   |
+| Preto or neutral dark               | `color-on-dark`           |
+| **Vermelho or Verde**               | **`white`**               |
+| Single-ink production               | `black`, `red` or `green` |
+
+Below 90 px wide, switch to `badge-pot` instead of scaling the signature down further.
+
+## Making something new
+
+Three rules cover most of it; the [brand book](./brand-book.md) covers the rest.
+
+1. **Split the surface into voz and mesa.** Voz is a flat brand colour and carries the
+   signature and the headline. Mesa is Branco Leitura and carries the food, the data and
+   the body text. Illustrations go on mesa, never on a saturated ground.
+2. **Set everything in Libre Franklin.** Weight carries the hierarchy; Light only at 18px
+   and above.
+3. **Name the actor.** Write who does what, let numbers carry the argument, and never use
+   the charity register — no _beneficiários_, no _doação_.
 
 ## Provenance
 
-Masters were extracted as vector directly from the native Adobe Illustrator source
-(`MANUAL DE IDENTIDADE VISUAL - COZINHA SOLIDÁRIA.ai`, LM&Co., 2026-06-23) — no raster
+The mark, lettering, illustrations and pattern come from the identity delivered by LM&Co.
+in June 2026. Masters were extracted as vector directly from its native Adobe Illustrator
+source (`MANUAL DE IDENTIDADE VISUAL - COZINHA SOLIDÁRIA.ai`, 2026-06-23) — no raster
 tracing, no retyped values. Each file is plain `<path>` geometry with a `viewBox`, no
-embedded images, no external references, no script, and no live font dependency, so it
-renders identically anywhere.
+embedded images, no external references, no script, and no live font dependency.
 
-Two values deliberately differ from the 2026 manual: the brand red, and the green used for
-_Em Rede_ on dark grounds. Both departures are argued in the
-[brand book](./brand-book.md#colour) and recorded as evidence `E-001` and `E-002` in the
-spec. Read those before "correcting" either one back.
+The system around them — typography, the voz/mesa composition grammar, voice and the
+partner signature — was designed on top of that handoff, which resolved the signature but
+not what to do with it. Every rule was tested by building the artefact and looking at it.
+
+Four decisions deliberately depart from the 2026 manual, each recorded as evidence in the
+spec and argued in the brand book: the brand red (`E-001`), the green used for _Em Rede_
+on dark grounds (`E-002`), the typeface (`E-010`), and the white lockup on saturated
+grounds (`E-009`). Read those before "correcting" any of them back.
 
 ## Conventions
 

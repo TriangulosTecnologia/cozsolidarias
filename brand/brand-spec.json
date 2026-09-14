@@ -1,9 +1,9 @@
 {
   "meta": {
     "schema_version": 4,
-    "version": "1.1.0",
+    "version": "2.0.0",
     "brand_name": "Cozinha Solidária em Rede",
-    "tier": "provisional",
+    "tier": "full",
     "touchpoints": [
       "public website",
       "research and policy documents",
@@ -46,25 +46,41 @@
 
   "creative_direction": {
     "thesis": "The shared pot. Every mark the project makes is drawn by hand, in the register of a kitchen's own handwriting rather than an institution's typography, and everything it signs is a place where visibly different hands reach into the same pot.",
-    "signature": "Hand-drawn lettering locked to a red pot holding hands of three different skin tones — never one hand, never a single tone.",
+    "signature": "Hand-drawn lettering locked to a red pot holding hands of three different skin tones, and a surface that divides into a colour field that speaks and a pale field that holds the food.",
     "principles": [
       "The lettering is artwork, not type. Redraw or re-scale the master; never re-set the name in a font, and never letterspace, condense or slant it.",
       "The hands stay plural and stay different. Three tones is the minimum expression of the idea; reducing them to one tone or one hand destroys the argument the mark is making.",
       "In single-ink production the hands become cut-outs, not silhouettes. The pot is filled and the hands are knocked out of it, so plurality survives where colour cannot.",
       "Colour roles are fixed: red is the pot and the kitchen, green is the network and carries 'Em Rede', black or white carries the name. Swapping the roles breaks recognition faster than changing the hues would.",
-      "Choose the lockup by the ground it sits on, not by preference — light ground takes the colour version, dark ground the on-dark version, single-ink production the monochrome. A version chosen against its ground is the most common failure this system has.",
+      "Food goes on the plate, never on the tablecloth. Illustrations sit on a pale field, never directly on a saturated brand ground — see visual.composition.",
+      "Choose the lockup by the ground it sits on, not by preference. A version chosen against its ground is the most common failure this system has.",
       "Shapes stay organic and colours stay sober. Nothing in the system is geometric, gradient or corporate; the illustrations and the pattern are drawn with the same hand as the logo."
     ],
     "excludes": [
-      "Do not present the UNIFESP mark as this project's own mark. UNIFESP is an institutional condition of the brief and appears as a partner signature, never as the project's identity.",
+      "Do not present the UNIFESP mark as this project's own mark. UNIFESP is an institutional condition of the brief and appears in the partner signature, never as the project's identity.",
       "Do not borrow the visual language of the federal Programa Cozinha Solidária. The name collision is already the main source of confusion; shared styling would complete it."
     ]
   },
 
   "verbal": {
     "name_usage": "The full name is 'Cozinha Solidária em Rede'. 'Em Rede' is load-bearing — it is what separates this project from the federal programme of the same name — and is dropped only in the reduced badge, where the pot alone is the signature.",
+    "principles": [
+      "Name the actor. Write who does what: 'as cozinhas alcançam', not 'é alcançado'. The passive voice hides who feeds whom, and who does the work is this brand's entire argument.",
+      "Numbers carry the argument; adjectives do not. Prefer '1.348 cozinhas em operação' to 'milhares de cozinhas'. Where there is no number, say what was observed instead of reaching for an intensifier.",
+      "Cook, do not feed. Nobody in this brand's language is a recipient. Write 'quem cozinha', 'as cozinhas', 'a rede'; never 'beneficiários', 'carentes', 'doação' or 'ajudar quem precisa'.",
+      "State, then draw the consequence. One short sentence carrying the fact, then one carrying what it implies. Do not stack subordinate clauses — that is policy writing's default failure and it makes the network sound like a ministry.",
+      "Say 'ainda não' out loud. This is a research project; naming what is not yet measured is credibility, not weakness. Prefer 'ainda não medimos' to silence or to an overclaim."
+    ],
+    "tone_by_moment": {
+      "institutional_and_policy": "Precise and numbered. No metaphor — the pot does not appear in the language when the reader is a ministry.",
+      "territory_and_kitchens": "Direct and second-person, about what to do next: 'sua cozinha pode entrar na rede'.",
+      "campaign_and_social": "One idea per piece, carried by the strongest single sentence, with nothing explaining it afterwards.",
+      "data_and_technical_notes": "State the finding, then state its limit in the same breath."
+    },
     "excludes": [
-      "Do not describe the project as donating, distributing or serving meals. It builds the model and supports the kitchens that do."
+      "Charity register: doação, carente, beneficiário, ajudar quem precisa, 'levar comida a quem tem fome'.",
+      "Development-sector autocomplete: empoderar, impactar, solução inovadora, 'juntos podemos'.",
+      "Exclamation marks, and any sentence that would survive unchanged if the brand name were swapped for a generic NGO."
     ]
   },
 
@@ -84,17 +100,17 @@
         "green-light": {
           "$value": "#559870",
           "$type": "color",
-          "$description": "Verde Claro. Carries the green role on dark grounds, where Verde UNIFESP is illegible. Already present in the artwork as the pot badge's ground."
+          "$description": "Verde Claro. Carries the green role on neutral dark grounds only, where Verde UNIFESP is illegible. Already present in the artwork as the pot badge's ground. Never used on Verde itself (2.38:1)."
         },
         "white": {
           "$value": "#FAFAFA",
           "$type": "color",
-          "$description": "Branco Leitura. Reading surface and reversed text. Logo knock-outs use pure #FFFFFF, which is ink absence rather than a surface colour."
+          "$description": "Branco Leitura. The mesa field, reading surface and reversed text. Logo knock-outs use pure #FFFFFF, which is ink absence rather than a surface colour."
         },
         "black": {
           "$value": "#000000",
           "$type": "color",
-          "$description": "Preto. Sets the name on light grounds; the brand's dark ground."
+          "$description": "Preto. Sets the name on light grounds; the brand's neutral dark ground."
         },
         "skin-light": {
           "$value": "#E9BBAF",
@@ -155,27 +171,48 @@
     ],
 
     "palette": {
-      "roles": "Red and green are the only two colours that carry meaning; the skin tones belong to the hands and are not a decorative palette. Branco Leitura is the reading surface, Preto the dark ground.",
-      "excludes": "Verde UNIFESP must not set text or lettering on a dark ground — it measures 1.99:1 on Preto-adjacent surfaces. Use Verde Claro there.",
-      "green_light_tradeoff": "Verde Claro on a dark ground clears WCAG AA (6.11:1) but carries a modest APCA signal (Lc 39.9), below the Lc 45 guideline for 24px bold text. It is accepted because its only job is display lettering at 90px and above, where that guideline no longer binds, and because the colour already exists in the artwork as the pot badge's disc. A lighter green would clear the advisory at the cost of adding a fourth green to a palette that documents one; do not make that trade for body text either — set body text in Branco Leitura on dark grounds.",
-      "print": "CMYK and PANTONE references inherited from the 2026 manual are unverified against a physical guide; see E-003 before committing a spot-colour run."
+      "roles": "Red and green are the only two colours that carry meaning; the skin tones belong to the hands and are not a decorative palette. Branco Leitura is the reading surface, Preto the neutral dark ground.",
+      "excludes": "Verde UNIFESP must not set text or lettering on a dark ground — 1.99:1. Verde Claro must not set text on Verde — 2.38:1. On a saturated brand ground, text is Branco Leitura.",
+      "green_light_tradeoff": "Verde Claro on a neutral dark ground clears WCAG AA (6.11:1) but carries a modest APCA signal (Lc 39.9), below the Lc 45 guideline for 24px bold text. It is accepted because its only job is display lettering at 90px and above, where that guideline no longer binds, and because the colour already exists in the artwork. Body text on dark grounds is Branco Leitura.",
+      "print": "No spot reference has been proofed; see E-003. PANTONE 327 C as printed in the 2026 manual does not match Verde UNIFESP and must not be specified. Until a press proof exists, print from the CMYK builds and treat them as unverified."
     },
 
     "typography": {
-      "lettering": "The name is custom hand lettering by Lucas Melara. There is no font that reproduces it — it exists only as the supplied vector masters.",
+      "lettering": "The name is custom hand lettering. There is no font that reproduces it — it exists only as the supplied vector masters.",
       "families": {
-        "display": "Neue Haas Grotesk Display 75 Bold — headings",
-        "text": "Neue Haas Grotesk Display 45 Light — body"
+        "primary": "Libre Franklin (SIL OFL 1.1). Single family across display and text; weight, not family, carries the hierarchy."
+      },
+      "roles": {
+        "display": "700, tracking -0.035em, line-height 0.99 — headlines and poster statements.",
+        "heading": "700, tracking -0.03em — document and section headings.",
+        "lead": "300 at 18px and above — opening paragraphs.",
+        "body": "400 — running text at 17px and below.",
+        "label": "600 uppercase, tracking 0.11em — eyebrows, captions and the partner signature."
       },
       "hierarchy": {
         "mode": "custom",
         "rules": [
-          "Headings set in Display 75 Bold; body in Display 45 Light. The weight jump, not size alone, carries the hierarchy.",
-          "Never set the brand name in Neue Haas Grotesk as a substitute for the lettering master.",
-          "Where Neue Haas Grotesk is unlicensed, substitute a neutral grotesque of the same proportion and record the substitution; do not switch to a humanist or geometric face, which would compete with the hand lettering."
+          "Weight and tracking carry the hierarchy, not a modular size ratio. Display and heading are the same weight; size and measure separate them.",
+          "Light (300) is permitted only at 18px and above. Below that it thins out in print and on low-quality screens — set body at 400.",
+          "Never set the brand name in Libre Franklin as a substitute for the lettering master. The single exception is plain-text contexts that cannot carry an image, where the name is written as ordinary text and not styled to imitate the logo.",
+          "Headlines are left-aligned and ragged right. Do not centre or justify — the hand lettering is already irregular and a centred axis fights it."
         ]
       },
-      "licensing": "Neue Haas Grotesk is a commercial typeface. Licence coverage for this project is unconfirmed — see the unresolved dependencies."
+      "substitution": "Where Libre Franklin cannot be installed, substitute a neutral grotesque of similar width and x-height and record the substitution. Do not switch to a humanist or geometric face, which would compete with the hand lettering instead of receding behind it."
+    },
+
+    "composition": {
+      "grammar": "A brand surface is built from two fields. **Voz** is a flat brand colour — Vermelho, Verde or Preto — and carries the signature, the headline and the partner line; it never carries illustration. **Mesa** is Branco Leitura and carries the food, the data, the body text and the long-form reading. A surface may be all voz, all mesa, or split between them on a straight horizontal edge.",
+      "why": "It restates the mark's own logic — the pot contains, the ingredients arrive — and it resolves a real defect structurally: the illustration set runs on its own naturalistic palette, which clashes on saturated grounds and settles on a pale one. See E-008.",
+      "rules": [
+        "The split is a straight horizontal edge across the full width. Do not feather, curve, angle or round it; the drawing in this system is done by the lettering and the illustrations, not by the layout.",
+        "Proportion is free but never half and half — one field must clearly dominate, or the surface reads as two unrelated posters.",
+        "The signature sits in the voz field, top-left, inside the clear-space margin. When a surface is all mesa, it sits top-left of the page margin.",
+        "Illustrations sit on mesa, anchored to its bottom edge, at large scale and overlapping each other — arriving, not arranged in a grid. Never scale one below 40% of the mesa's height, which turns it into an icon.",
+        "The partner signature occupies a reserved strip at the foot of the surface that no illustration, image or text may enter.",
+        "The pattern is the only texture permitted on a voz field, at low opacity behind everything, and never under the signature's clear space."
+      ],
+      "variation_boundaries": "What must stay constant: the two-field logic, the straight edge, the signature in the top-left, food only on mesa. What may vary freely: which colour the voz field takes, the split proportion and orientation of dominance, how many illustrations arrive and how they overlap, whether a surface uses one field or both."
     },
 
     "logo": {
@@ -187,13 +224,12 @@
         "badge-pot": "Pot in a Verde Claro disc. The reduced signature for avatars, favicons and stamps — the only asset that survives below 90px.",
         "badge-csr": "CSR monogram in a grey disc. Secondary; use only where the abbreviation is already understood."
       },
-      "variants": {
-        "color": "Light grounds.",
-        "color-on-dark": "Dark grounds. Name reverses to white and 'Em Rede' takes Verde Claro.",
-        "white": "Single-ink on dark or photographic grounds.",
-        "black": "Single-ink on light grounds.",
-        "red": "Single-ink where only the brand red is available.",
-        "green": "Single-ink where only the brand green is available."
+      "variant_by_ground": {
+        "branco-leitura-or-pale": "color",
+        "neutral-dark-preto": "color-on-dark",
+        "saturated-brand-ground-vermelho-or-verde": "white — the colour lockups fail here: on Vermelho the pot disappears into its own colour, and on Verde the 'Em Rede' lettering drops to 2.38:1. See E-009.",
+        "single-ink-production": "black, red or green, whichever ink is available",
+        "photography": "white, over a plain area of the image"
       },
       "clear_space": "The 'e' of 'Em Rede', scaled with the mark, on every contour. Nothing enters that margin — not partner marks, not page edges, not image content.",
       "min_size": {
@@ -206,6 +242,7 @@
       "misuse": [
         "Do not distort, stretch or rotate.",
         "Do not recolour outside the declared variants.",
+        "Do not place a lockup on a ground that matches one of its own inks.",
         "Do not place a light variant on a light ground, or a dark variant on a dark ground.",
         "Do not violate the clear-space margin.",
         "Do not place the mark on a busy photograph without a plain ground behind it — the hand lettering loses its counters first."
@@ -219,10 +256,16 @@
     },
 
     "imagery": {
-      "illustration": "A 34-piece drawn food set — fruit, vegetables, fish, eggs, rice and beans, preserves. 24 are vector masters in brand/illustration/; the remaining 10 are raster-only stopgaps in brand/illustration/raster-only/ (see E-007) and must not be scaled beyond their pixel size or recoloured. Built entirely from filled shapes with no stroke anywhere; apparent contours are dark shapes behind lighter ones. They depict real Brazilian everyday food, not generic 'healthy eating' iconography; that specificity is the point and should survive any extension of the set. The set deliberately runs on its own naturalistic palette of 81 colours rather than the brand palette — brand colours appear only where a piece carries the logo. Coherence comes from the drawing hand and the flat fill construction, not shared hues; do not recolour the set to the brand palette.",
+      "illustration": "A 34-piece drawn food set — fruit, vegetables, fish, eggs, rice and beans, preserves. 24 are vector masters in brand/illustration/; the remaining 10 are raster-only stopgaps in brand/illustration/raster-only/ (see E-007) and must not be scaled beyond their pixel size or recoloured. Built entirely from filled shapes with no stroke anywhere; apparent contours are dark shapes behind lighter ones. They depict real Brazilian everyday food, not generic 'healthy eating' iconography; that specificity is the point and should survive any extension of the set. The set deliberately runs on its own naturalistic palette of 81 colours rather than the brand palette — brand colours appear only where a piece carries the logo. Coherence comes from the drawing hand and the flat fill construction, not shared hues; do not recolour the set to the brand palette. Place them per visual.composition: on mesa only.",
       "pattern": "A seamless 280×280 food-drawing tile in brand/pattern/. Verified seamless. Supplied in the dark ink for light grounds and in Branco Leitura for dark grounds. It is a texture, not a focal element — keep it behind content, never under the logo's clear space.",
       "photography": "Real kitchens, real hands, real food in preparation. Not styled studio food, not stock images of empty plates."
     }
+  },
+
+  "architecture": {
+    "model": "endorsed",
+    "partner_signature": "The project signs its own work; the institutions that make it possible sign beneath. The partner line is a single row in the label style — the word 'Realização' at reduced opacity followed by the institution names separated by middots — set in the reserved foot strip, never larger than the label size and never competing with the signature. Partner logotypes are used only where an institution's own rules require the mark rather than the name; in that case they sit in the same reserved strip, optically matched in height to each other, never to the project's signature.",
+    "rationale": "UNIFESP is a pre-existing condition of the brief, not a co-brand. Setting partners as text by default keeps the project legible as the network rather than as a university output, and avoids a row of competing logos crowding the signature."
   },
 
   "evidence": [
@@ -267,13 +310,33 @@
       "kind": "observation",
       "source": "The 18 ILUSTRAÇÕES and 16 icon exports in the delivered Identidade Visual archive, compared against artboards 59–82 of the native .ai.",
       "status": "active"
+    },
+    {
+      "id": "E-008",
+      "claim": "Illustrations placed directly on a saturated brand ground clash with it: the set's own naturalistic palette puts a cerulean bowl and orange carrots against Verde UNIFESP with no shared hue. The same illustrations settle immediately when moved onto a Branco Leitura field on the same surface, which is what produced the voz/mesa split rather than any recolouring of the set.",
+      "kind": "observation",
+      "source": "Three poster variants rendered and compared in Chromium: green ground with illustrations, green ground with pattern only, and green-over-Branco-Leitura split.",
+      "status": "active"
+    },
+    {
+      "id": "E-009",
+      "claim": "The colour lockups fail on saturated brand grounds. On Vermelho the pot is #AE1616 on #AE1616 and disappears, leaving only the knocked-out hands; on Verde the 'Em Rede' lettering sits at 2.38:1. The white monochrome lockup reads correctly on both.",
+      "kind": "observation",
+      "source": "Social and poster applications rendered in Chromium with colour-on-dark and white lockups on Vermelho and Verde grounds.",
+      "status": "active"
+    },
+    {
+      "id": "E-010",
+      "claim": "Libre Franklin sets the same Portuguese copy in fewer lines than Inter and materially fewer than Archivo at equal size, and covers the pt-BR diacritic set. Neue Haas Grotesk, specified by the 2026 manual, is a commercial licence whose coverage for this project was never confirmed.",
+      "kind": "observation",
+      "source": "Three-way specimen rendered in Chromium with project copy at display, dense-text, tabular and small-caps sizes, with the fonts embedded rather than linked.",
+      "status": "active"
     }
   ],
 
   "unresolved": [
-    "Vector masters for the 10 raster-only illustrations (E-007) were never delivered. Request the illustration source file from the designer; until then those pieces are usable at small sizes only and cannot be recoloured or rescaled.",
-    "Whether the project holds a Neue Haas Grotesk licence for its declared touchpoints.",
-    "Spot-colour references for print (E-003) need verification against a physical PANTONE guide before any spot run.",
-    "Whether the CSR badge is still in use, and what it is meant to abbreviate — it appears in the manual without explanation."
+    "Vector masters for the 10 raster-only illustrations (E-007) were never delivered. Request the illustration source file from the designer; until then those pieces are usable at small sizes only.",
+    "No print proof exists. Spot and CMYK references (E-003) must be proofed on press before any run; the PANTONE numbers inherited from the 2026 manual should not be forwarded to a printer as they stand.",
+    "Whether the CSR badge is still in use, and what it is meant to abbreviate — it appears in the manual without explanation. Retire it if nothing depends on it."
   ]
 }
