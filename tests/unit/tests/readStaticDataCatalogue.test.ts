@@ -8,7 +8,7 @@ describe('readStaticDataCatalogue', () => {
       'Catálogo de Dados — Cozinhas Solidárias'
     );
     expect(catalogue.catalog.language).toBe('pt-BR');
-    expect(Object.keys(catalogue.datasets)).toHaveLength(12);
+    expect(Object.keys(catalogue.datasets)).toHaveLength(13);
     // Every dataset must belong to a declared collection.
     for (const dataset of Object.values(catalogue.datasets)) {
       expect(catalogue.collections[dataset.collection_id]).toBeDefined();

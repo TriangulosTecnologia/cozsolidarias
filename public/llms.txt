@@ -1,0 +1,30 @@
+# cozsolidarias
+
+> Public Next.js app (Node 24, React 19, Chakra UI v3, TypeScript) that visualizes food-security and social-assistance data for Brazilian municipalities. Site language is pt-BR; repo language (code, docs, commits) is English.
+
+Data flows through one boundary: `src/app → src/data-gateway → src/data-source-static`. The browser never knows whether data came from static files, an API, or a database. Each layer's domain rules live in its own `CLAUDE.md`.
+
+## Documentation
+
+- [Root CLAUDE.md](CLAUDE.md): repo-wide constraints, naming, quality gates, debugging protocol.
+- [CONTEXT.md](CONTEXT.md): domain glossary (Dataset Catalog, Renderable Dataset, MapData Append).
+- [README.md](README.md): municipality geodata provenance (IBGE via tbrugz/geodata-br).
+- [tests/CLAUDE.md](tests/CLAUDE.md): test running, mocking, coverage rules.
+
+## Layers
+
+- [src/CLAUDE.md](src/CLAUDE.md): UI component rules (Chakra v3, server/client split, accessibility).
+- [src/app/CLAUDE.md](src/app/CLAUDE.md): app layer principles, boundaries, secrets, runtime constraints.
+- [src/data-gateway/CLAUDE.md](src/data-gateway/CLAUDE.md): canonical data contract, transformer pattern, naming.
+- [src/data-source-static/CLAUDE.md](src/data-source-static/CLAUDE.md): static JSON/GEOJSON source rules.
+
+## Configuration
+
+- [package.json](package.json): scripts (`dev`, `build`, `test`, `lint`, `typecheck`) and dependencies.
+- [tsconfig.json](tsconfig.json): TypeScript configuration.
+- [jest.config.ts](jest.config.ts): test runner entry (delegates to `tests/unit`).
+- [public/dataset_catalogue.json](public/dataset_catalogue.json): descriptive registry of all known datasets, for humans and AI grounding.
+
+## Optional
+
+- [scripts](scripts): data-generation scripts (CAF tiles, municípios population/names, geocoding).
