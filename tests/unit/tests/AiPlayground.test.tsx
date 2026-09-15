@@ -2,7 +2,7 @@ import '@testing-library/jest-dom';
 
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import type * as React from 'react';
-import AiPlayground from 'src/app/(features)/ai/AiPlayground';
+import AiPlayground from 'src/app/(features)/ia/AiPlayground';
 
 import { renderWithChakra } from './renderWithChakra';
 
@@ -167,7 +167,47 @@ describe('AiPlayground', () => {
     ).toBeInTheDocument();
   });
 
-  test('renders the spec JSON on a successful submission', async () => {
+  test('shows an unexpected-content message when the response body is not JSON', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: () => {
+        return Promise.reject(new Error('not json'));
+      },
+    } as unknown as Response);
+
+    renderWithChakra(<AiPlayground />);
+
+    fireEvent.change(screen.getByLabelText('O que você quer ver?'), {
+      target: { value: 'pessoas atendidas por município' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Gerar mapa' }));
+
+    expect(
+      await screen.findByText(
+        'O servidor respondeu com um conteúdo inesperado (status 200). Tente novamente.'
+      )
+    ).toBeInTheDocument();
+  });
+
+  test('falls back to a default message when a successful response carries no result', async () => {
+    global.fetch = jest.fn().mockResolvedValue(jsonResponse({}));
+
+    renderWithChakra(<AiPlayground />);
+
+    fireEvent.change(screen.getByLabelText('O que você quer ver?'), {
+      target: { value: 'pessoas atendidas por município' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Gerar mapa' }));
+
+    expect(
+      await screen.findByText(
+        'O servidor respondeu com sucesso, mas sem a especificação do mapa ("result" ausente).'
+      )
+    ).toBeInTheDocument();
+  });
+
+  test('renders the spec JSON on a successful submission after clicking "Ver JSON"', async () => {
     global.fetch = jest
       .fn()
       .mockResolvedValue(
@@ -182,7 +222,50 @@ describe('AiPlayground', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Gerar mapa' }));
 
     await waitFor(() => {
+      expect(
+        screen.getByRole('button', { name: 'Ver JSON' })
+      ).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Ver JSON' }));
+
+    await waitFor(() => {
       expect(container.textContent).toContain('Mapa de IVS por município');
+    });
+  });
+
+  test('displays error spec and issues in JSON panel when validation fails', async () => {
+    global.fetch = jest.fn().mockResolvedValue(
+      jsonResponse(
+        {
+          error: 'Especificação inválida',
+          spec: { type: 'choropleth', data: {} },
+          issues: [
+            { code: 'INVALID_DATA_TYPE', message: 'Data type mismatch' },
+          ],
+        },
+        false
+      )
+    );
+
+    const { container } = renderWithChakra(<AiPlayground />);
+
+    fireEvent.change(screen.getByLabelText('O que você quer ver?'), {
+      target: { value: 'choropleth inválido' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Gerar mapa' }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole('button', { name: 'Ver JSON' })
+      ).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Ver JSON' }));
+
+    await waitFor(() => {
+      expect(container.textContent).toContain('INVALID_DATA_TYPE');
+      expect(container.textContent).toContain('Data type mismatch');
     });
   });
 
