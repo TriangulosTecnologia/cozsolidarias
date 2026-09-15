@@ -12,6 +12,8 @@ src/app  →  src/data-gateway  →  src/data-source-*
 
 The browser never knows whether data came from static files, an API, a database, or cache. Domain rules for each layer live in that layer's `CLAUDE.md`.
 
+`public/llms.txt` and `public/llms-full.txt` are machine-curated entry points for AI agents/crawlers (per the [llms.txt spec](https://llmstxt.org/)), generated from this repo's structure. Regenerate them (via the `create-llms` skill) whenever the top-level layout or documentation surfaces change meaningfully; they are not hand-maintained day to day.
+
 ## Constraints
 
 - **No new dependencies** without explicit request.
@@ -26,13 +28,13 @@ Website language is Portuguese (pt-BR). Everything in this repository — code i
 
 ## Naming
 
-| Scope | Convention |
-|---|---|
-| Folder names | `kebab-case` |
-| File names, variables, functions | `camelCase` |
-| Types, interfaces, React components | `PascalCase` |
-| Constants | `UPPER_SNAKE_CASE` |
-| Test files | `myFile.test.ts` (mirror the source path) |
+| Scope                               | Convention                                |
+| ----------------------------------- | ----------------------------------------- |
+| Folder names                        | `kebab-case`                              |
+| File names, variables, functions    | `camelCase`                               |
+| Types, interfaces, React components | `PascalCase`                              |
+| Constants                           | `UPPER_SNAKE_CASE`                        |
+| Test files                          | `myFile.test.ts` (mirror the source path) |
 
 ## Function Arguments
 
@@ -78,7 +80,7 @@ When something breaks:
 
 ## Divergence Is Evidence
 
-When code diverges from a spec or convention, treat the divergence as evidence of an unstated invariant until proven otherwise. Stop-signal phrases — *"just a notation change"*, *"output is identical"*, *"zero risk"*, *"one-line fix"*, *"purely cosmetic"* — correlate with skipped investigation. Before changing, locate the test that pins the current behaviour; if none exists, that gap is the real finding.
+When code diverges from a spec or convention, treat the divergence as evidence of an unstated invariant until proven otherwise. Stop-signal phrases — _"just a notation change"_, _"output is identical"_, _"zero risk"_, _"one-line fix"_, _"purely cosmetic"_ — correlate with skipped investigation. Before changing, locate the test that pins the current behaviour; if none exists, that gap is the real finding.
 
 ## Avoid Over-Engineering
 

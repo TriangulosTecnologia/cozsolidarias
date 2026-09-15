@@ -123,7 +123,47 @@ describe('AiPlayground', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Gerar mapa' }));
 
     expect(
-      await screen.findByText('Não foi possível gerar o mapa.')
+      await screen.findByText('Não foi possível gerar o mapa')
+    ).toBeInTheDocument();
+  });
+
+  test('shows an unexpected-content message when the response body is not JSON', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: () => {
+        return Promise.reject(new Error('not json'));
+      },
+    } as unknown as Response);
+
+    renderWithChakra(<AiPlayground />);
+
+    fireEvent.change(screen.getByLabelText('O que você quer ver?'), {
+      target: { value: 'pessoas atendidas por município' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Gerar mapa' }));
+
+    expect(
+      await screen.findByText(
+        'O servidor respondeu com um conteúdo inesperado (status 200). Tente novamente.'
+      )
+    ).toBeInTheDocument();
+  });
+
+  test('falls back to a default message when a successful response carries no result', async () => {
+    global.fetch = jest.fn().mockResolvedValue(jsonResponse({}));
+
+    renderWithChakra(<AiPlayground />);
+
+    fireEvent.change(screen.getByLabelText('O que você quer ver?'), {
+      target: { value: 'pessoas atendidas por município' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Gerar mapa' }));
+
+    expect(
+      await screen.findByText(
+        'O servidor respondeu com sucesso, mas sem a especificação do mapa ("result" ausente).'
+      )
     ).toBeInTheDocument();
   });
 

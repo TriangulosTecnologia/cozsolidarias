@@ -9,7 +9,7 @@ The descriptive registry of all known datasets (`public/dataset_catalogue.json`)
 _Avoid_: catalogue, data catalog (when referring to actual data)
 
 **Renderable Dataset**:
-A Dataset Catalog entry that has a complete path to real values through `data-gateway`, and can therefore be used to populate a spec's `mapData`. As of this writing: `cozinhas_geolocalizadas`, `cozinhas_geolocalizadas_2025`, `municipios_ivs`, `municipios_cadinsan`. Most catalog entries are not renderable — they are pure geometry, unexposed, or only partially wired.
+A Dataset Catalog entry that has a complete path to real values through `data-gateway`, and can therefore be used to populate a spec's `mapData`. As of this writing: `cozinhas_geolocalizadas`, `cozinhas_geolocalizadas_2025`, `cozinhas_pessoas_atendidas`, `municipios_ivs`, `municipios_cadinsan`. Most catalog entries are not renderable — they are pure geometry, unexposed, or only partially wired.
 _Avoid_: available dataset, real dataset
 
 **MapData Append**:

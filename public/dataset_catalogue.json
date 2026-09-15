@@ -389,6 +389,59 @@
         ]
       }
     },
+    "cozinhas_pessoas_atendidas": {
+      "id": "cozinhas_pessoas_atendidas",
+      "collection_id": "dados_primarios",
+      "slug": "cozinhas-pessoas-atendidas",
+      "title": "Total de pessoas atendidas por município (agregado)",
+      "description": "Soma, por município, do campo de texto livre \"Público Total Atendido\" de cozinhas_geolocalizadas, parseado com segurança (texto vazio, não numérico ou negativo → sem dado, nunca 0) e somado pela coluna `Código IBGE`. Não é um arquivo próprio — é uma agregação computada pela aplicação sobre cozinhas_geolocalizadas. No mapa alimenta a métrica \"Pessoas atendidas (total)\" do overlay de círculos proporcionais (modo `circulos`), nunca um coroplético: por ser um total absoluto (não uma taxa), pintá-lo por área do município introduziria viés de tamanho do polígono (semiologia gráfica de Bertin; manuais técnicos de cartografia do IBGE). Município sem nenhuma cozinha com valor parseável fica sem círculo — nunca aparece como zero.",
+      "file": "src/data-source-static/data/cozinhas_com_geolocalizacao_all.csv",
+      "format": "CSV",
+      "source": {
+        "url": "https://docs.google.com/spreadsheets/d/1fEt1zRYwajWPqRGDXsHnUoHtEktxKeDC/edit?rtpof=true&sd=true&gid=297639936#gid=297639936",
+        "notes": "Mesma planilha de cozinhas_geolocalizadas; este dataset é a agregação por município do campo \"Público Total Atendido\", computada em data-gateway (`aggregateCozinhasPorMunicipio` / `parsePessoasAtendidas`), não uma leitura direta do CSV."
+      },
+      "temporal": {
+        "status": "unknown"
+      },
+      "spatial": {
+        "status": "described",
+        "extent": [
+          {
+            "scheme": "iso3166-1",
+            "code": "BR"
+          }
+        ],
+        "coverage": "partial",
+        "grain": {
+          "scheme": "admin",
+          "code": "municipality",
+          "label": "município"
+        },
+        "geometry": "none",
+        "precision": "not_applicable",
+        "field": "Código IBGE"
+      },
+      "access": {
+        "level": "public",
+        "contains_personal_data": false,
+        "notes": "Agregado por município; não expõe registros individuais de cozinha."
+      },
+      "schema": {
+        "fields": [
+          {
+            "name": "Código IBGE",
+            "description": "Código IBGE do município (7 dígitos), chave de join com o mapa (↔ codarea)",
+            "role": "identifier"
+          },
+          {
+            "name": "pessoasAtendidas",
+            "description": "Total de pessoas atendidas, somado a partir do campo de texto livre \"Público Total Atendido\" de cada cozinha do município parseável como número não negativo. `null` quando nenhuma cozinha do município reporta um valor parseável — nunca 0.",
+            "unit": "pessoas"
+          }
+        ]
+      }
+    },
     "municipios_contorno": {
       "id": "municipios_contorno",
       "collection_id": "ibge",

@@ -1,0 +1,48 @@
+# cozsolidarias
+
+> Public Next.js app (Node 24, React 19, Chakra UI v3, TypeScript) that visualizes food-security and social-assistance data for Brazilian municipalities. Site language is pt-BR; repo language (code, docs, commits) is English.
+
+Data flows through one boundary: `src/app → src/data-gateway → src/data-source-static`. The browser never knows whether data came from static files, an API, or a database. Each layer's domain rules live in its own `CLAUDE.md`.
+
+## Documentation
+
+- [Root CLAUDE.md](CLAUDE.md): repo-wide constraints, naming, quality gates, debugging protocol.
+- [CONTEXT.md](CONTEXT.md): domain glossary (Dataset Catalog, Renderable Dataset, MapData Append).
+- [README.md](README.md): municipality geodata provenance (IBGE via tbrugz/geodata-br).
+- [tests/CLAUDE.md](tests/CLAUDE.md): test running, mocking, coverage rules.
+
+## Layers
+
+- [src/CLAUDE.md](src/CLAUDE.md): UI component rules (Chakra v3, server/client split, accessibility).
+- [src/app/CLAUDE.md](src/app/CLAUDE.md): app layer principles, boundaries, secrets, runtime constraints.
+- [src/data-gateway/CLAUDE.md](src/data-gateway/CLAUDE.md): canonical data contract, transformer pattern, naming.
+- [src/data-source-static/CLAUDE.md](src/data-source-static/CLAUDE.md): static JSON/GEOJSON source rules.
+
+## Data Gateway
+
+- [src/data-gateway/createDataGateway.ts](src/data-gateway/createDataGateway.ts): gateway factory, source selection via `DATA_SOURCE`, `KNOWN_SOURCES`.
+- [src/data-gateway/schema](src/data-gateway/schema): canonical `*Contract` types (catalogue, CAF points/by-city, CADINSAN, IVS, kitchens).
+- [src/data-gateway/transformers](src/data-gateway/transformers): `toApp*` functions that convert source-native records into canonical contracts.
+- [src/data-source-static](src/data-source-static): `readStatic*` functions and `data/` snapshots (CAF, CADINSAN, IVS, kitchens, população) backing the default source.
+
+## App & Config
+
+- [src/app](src/app): Next.js routes — `api/` (Route Handlers), `(default)`, `(features)`, `(legal)` route groups, `layout.tsx`, `providers.tsx`.
+- [src/components](src/components): `ui/` generic Chakra primitives, `layouts/`, `site/` domain components.
+- [src/config](src/config): `navigation.ts`, `site.ts`, `theme.ts`, `themeGeovis.ts` — app-wide configuration and theming.
+
+## Configuration
+
+- [package.json](package.json): scripts (`dev`, `build`, `test`, `lint`, `typecheck`) and dependencies.
+- [tsconfig.json](tsconfig.json): TypeScript configuration.
+- [jest.config.ts](jest.config.ts): test runner entry (delegates to `tests/unit`).
+- [next.config.ts](next.config.ts): Next.js build/runtime configuration.
+- [eslint.config.mjs](eslint.config.mjs): lint rules.
+- [public/dataset_catalogue.json](public/dataset_catalogue.json): descriptive registry of all known datasets, for humans and AI grounding.
+
+## Optional
+
+- [scripts](scripts): data-generation scripts (CAF tiles and per-município aggregation, assentamentos, municípios nomes/população/CadÚnico, geocoding de cozinhas).
+- [.github/copilot-instructions.md](.github/copilot-instructions.md): Copilot-specific repo instructions.
+- [public/geo](public/geo): raw/simplified GeoJSON boundaries for Brazilian municipalities.
+- [public/tiles](public/tiles): generated CAF vector tiles.

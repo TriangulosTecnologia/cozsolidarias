@@ -13,6 +13,7 @@ import {
   Text,
   Textarea,
 } from '@chakra-ui/react';
+import type { VisualizationSpec } from '@ttoss/geovis';
 import { GeovisWorkspace } from '@ttoss/geovis-workspace';
 import { I18nProvider } from '@ttoss/react-i18n';
 import { BruttalTheme } from '@ttoss/theme/Bruttal';
@@ -26,6 +27,75 @@ const BRAZIL_VIEW = {
   zoom: 4,
   maxZoomIn: 9,
   maxZoomOut: 4,
+};
+
+/**
+ * Renders the map workspace for a successful submission, plus the
+ * deliberately-public raw spec panel. Extracted from `AiPlayground` to keep
+ * that component's cyclomatic complexity within the lint threshold.
+ */
+const MapResultView = ({ result }: { result: VisualizationSpec }) => {
+  return (
+    <Box
+      position="relative"
+      w="100%"
+      h="85vh"
+      minH="640px"
+      borderRadius="md"
+      overflow="hidden"
+      css={{
+        '& > *': {
+          height: '100%',
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+        },
+        '& > * > *': {
+          flex: '1',
+          minHeight: 0,
+        },
+      }}
+    >
+      <I18nProvider locale="pt-BR">
+        <ThemeUIProvider theme={BruttalTheme}>
+          <GeovisWorkspace
+            config={{ appearance: 'bare' }}
+            visualizationSpec={{
+              ...result,
+              view: result.view ?? BRAZIL_VIEW,
+            }}
+          />
+        </ThemeUIProvider>
+      </I18nProvider>
+
+      {/* Deliberately public: the `/ai` page is an experimental, transparent
+          playground — showing the raw generated spec lets anyone verify what
+          the model actually produced (including the real `mapData` values
+          after MapData Append). No secrets or personal data ever reach this
+          payload (see route.ts's INSTRUCTIONS on municipal aggregation). Not
+          gated behind a dev-only flag; revisit before treating `/ai` as a
+          finished, non-experimental product surface. */}
+      {JSON.stringify(result, null, 2) !== '{}' ? (
+        <Box
+          position="absolute"
+          bottom={0}
+          left={0}
+          right={0}
+          maxH="50%"
+          overflowY="auto"
+          bgColor="bg.surface"
+          borderTopWidth={1}
+          borderTopColor="border.default"
+          p={4}
+        >
+          <Heading as="h2" size="sm" mb={2}>
+            Especificação do mapa
+          </Heading>
+          <pre>{JSON.stringify(result, null, 2)}</pre>
+        </Box>
+      ) : null}
+    </Box>
+  );
 };
 
 const AiPlayground = () => {
@@ -113,40 +183,7 @@ const AiPlayground = () => {
         }}
       />
 
-      {status === 'success' && result && (
-        <Box
-          position="relative"
-          w="100%"
-          h="85vh"
-          minH="640px"
-          borderRadius="md"
-          overflow="hidden"
-          css={{
-            '& > *': {
-              height: '100%',
-              width: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-            },
-            '& > * > *': {
-              flex: '1',
-              minHeight: 0,
-            },
-          }}
-        >
-          <I18nProvider locale="pt-BR">
-            <ThemeUIProvider theme={BruttalTheme}>
-              <GeovisWorkspace
-                config={{ appearance: 'bare' }}
-                visualizationSpec={{
-                  ...result,
-                  view: result.view ?? BRAZIL_VIEW,
-                }}
-              />
-            </ThemeUIProvider>
-          </I18nProvider>
-        </Box>
-      )}
+      {status === 'success' && result && <MapResultView result={result} />}
     </Stack>
   );
 };

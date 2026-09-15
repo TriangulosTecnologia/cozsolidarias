@@ -291,7 +291,7 @@ describe('createDataGateway', () => {
     expect(catalogue.meta.title).toBe(
       'Catálogo de Dados — Cozinhas Solidárias'
     );
-    expect(catalogue.datasets).toHaveLength(12);
+    expect(catalogue.datasets).toHaveLength(13);
     for (const dataset of catalogue.datasets) {
       expect(dataset.source.title).not.toBe('');
       expect(Array.isArray(dataset.fields)).toBe(true);
