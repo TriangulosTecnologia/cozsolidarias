@@ -1,7 +1,7 @@
 {
   "meta": {
     "schema_version": 4,
-    "version": "2.4.0",
+    "version": "2.5.0",
     "brand_name": "Cozinha Solidária em Rede",
     "tier": "full",
     "touchpoints": [
@@ -21,39 +21,28 @@
     },
     "audience": {
       "primary": "Community kitchens in vulnerabilised territories and the people who cook in them.",
-      "also_serves": "The intersectoral partners the network depends on: UNIFESP and USP researchers, MDS and MDA technicians, social movements, CEAGESP, family farmers, health and social-assistance professionals.",
       "not_for": "Donors seeking a charity brand. The project supports kitchens and farmers; it does not run kitchens or distribute food under its own name."
     },
     "offer_truth": {
-      "statement": "An interdisciplinary research-action project on food and nutrition security (SAN) that builds an intersectoral structural model — from production and distribution through to preparation in the kitchens themselves — in tune with local community needs.",
+      "statement": "A research-action project that builds an intersectoral SAN model spanning production, distribution and preparation — not a food programme.",
       "evidence_refs": ["E-006"]
     },
-    "alternatives": [
-      "The Brazilian federal Programa Cozinha Solidária, which shares the name and is frequently mistaken for this project",
-      "Charity and food-bank identities, which position the kitchen as a recipient of aid",
-      "Conventional academic project identities, which read as institutional and do not invite participation"
-    ],
     "position": {
       "statement": "The connective layer that the kitchens, the researchers, the public bodies and the farmers all share — legible as the network they belong to, not as a donor, a government seal or a university department.",
       "evidence_refs": ["E-006"]
     },
     "right_to_win": {
-      "statement": "The team holds both ends of the problem at once: researchers from UNIFESP and USP alongside MDS and MDA technicians, social movements and CEAGESP, giving it simultaneous access to public policy and to the territories where the kitchens operate.",
+      "statement": "The team holds both ends at once: UNIFESP and USP researchers alongside MDS and MDA technicians, social movements and CEAGESP, so it reaches public policy and the territories in the same move.",
       "evidence_refs": ["E-006"]
     },
-    "desired_meaning": "Cooking that belongs to many people at once. Plural hands reaching into a shared pot; popular food identity and food sovereignty preserved, not replaced by assistance."
+    "desired_meaning": "Food sovereignty preserved, not replaced by assistance."
   },
 
   "creative_direction": {
     "thesis": "The shared pot. Every mark the project makes is drawn by hand, in the register of a kitchen's own handwriting rather than an institution's typography, and everything it signs is a place where visibly different hands reach into the same pot.",
-    "signature": "Hand-drawn lettering locked to a red pot holding hands of three different skin tones, and a surface that divides into a colour field that speaks and a pale field that holds the food.",
+    "signature": "Hand-drawn lettering locked to a red pot of plural hands, on a surface split between a colour field that speaks and a pale field that holds the food.",
     "principles": [
-      "The lettering is artwork, not type. Redraw or re-scale the master; never re-set the name in a font, and never letterspace, condense or slant it.",
-      "The hands stay plural and stay different. Three tones is the minimum expression of the idea; reducing them to one tone or one hand destroys the argument the mark is making.",
-      "In single-ink production the hands become cut-outs, not silhouettes. The pot is filled and the hands are knocked out of it, so plurality survives where colour cannot.",
-      "Colour roles are fixed: red is the pot and the kitchen, green is the network and carries 'Em Rede', black or white carries the name. Swapping the roles breaks recognition faster than changing the hues would.",
-      "Food goes on the plate, never on the tablecloth. Illustrations sit on a pale field, never directly on a saturated brand ground — see visual.composition.",
-      "Choose the lockup by the ground it sits on, not by preference. A version chosen against its ground is the most common failure this system has.",
+      "The hands stay plural and stay different. Three tones is the minimum expression of the idea; reducing them to one tone or one hand destroys the argument the mark is making. In single-ink production they become cut-outs knocked out of a filled pot, not a silhouette, so plurality survives where colour cannot.",
       "Shapes stay organic and colours stay sober. Nothing in the system is geometric, gradient or corporate; the illustrations and the pattern are drawn with the same hand as the logo."
     ],
     "excludes": [
@@ -171,7 +160,7 @@
     ],
 
     "palette": {
-      "roles": "Red and green are the only two colours that carry meaning; the skin tones belong to the hands and are not a decorative palette. Branco Leitura is the reading surface, Preto the neutral dark ground.",
+      "roles": "Red and green are the only two colours that carry meaning: red is the pot and the kitchen, green is the network and carries 'Em Rede'. Swapping those roles breaks recognition faster than changing the hues would. The skin tones belong to the hands and are not a decorative palette. Branco Leitura is the reading surface, Preto the neutral dark ground.",
       "excludes": "Verde UNIFESP must not set text or lettering on a dark ground — 1.99:1. Verde Claro must not set text on Verde — 2.38:1. On a saturated brand ground, text is Branco Leitura.",
       "green_light_tradeoff": "Verde Claro on a neutral dark ground clears WCAG AA (6.11:1) but carries a modest APCA signal (Lc 39.9), below the Lc 45 guideline for 24px bold text. It is accepted because its only job is display lettering at 90px and above, where that guideline no longer binds, and because the colour already exists in the artwork. Body text on dark grounds is Branco Leitura.",
       "print": "No spot reference has been proofed; see E-003. PANTONE 327 C as printed in the 2026 manual does not match Verde UNIFESP and must not be specified. Until a press proof exists, print from the CMYK builds and treat them as unverified."
@@ -212,7 +201,7 @@
         "The partner signature occupies a reserved strip at the foot of the surface that no illustration, image or text may enter.",
         "The pattern is the only texture permitted on a voz field, at low opacity behind everything, and never under the signature's clear space."
       ],
-      "variation_boundaries": "What must stay constant: the two-field logic, the straight edge, the signature in the top-left, food only on mesa. What may vary freely: which colour the voz field takes, the split proportion and orientation of dominance, how many illustrations arrive and how they overlap, whether a surface uses one field or both."
+      "free_to_vary": "Which colour the voz field takes, the split proportion and which field dominates, how many illustrations arrive and how they overlap, and whether a surface uses one field or both."
     },
 
     "logo": {
@@ -249,14 +238,11 @@
         "vertical": "70px wide",
         "stacked": "70px wide",
         "badge-pot": "24px",
-        "basis": "Width of the mark itself, the files being trimmed to it. Measured on a rendered size ladder, not assumed — see E-005 and E-012."
+        "basis": "Width of the mark itself, the files being trimmed to it. Measured on a rendered size ladder, not assumed — see E-005."
       },
       "misuse": [
         "Do not distort, stretch or rotate.",
         "Do not recolour outside the declared variants.",
-        "Do not place a lockup on a ground that matches one of its own inks.",
-        "Do not place a light variant on a light ground, or a dark variant on a dark ground.",
-        "Do not violate the clear-space margin.",
         "Do not place the mark on a busy photograph without a plain ground behind it — the hand lettering loses its counters first."
       ],
       "production": {
@@ -268,8 +254,8 @@
     },
 
     "imagery": {
-      "illustration": "A 34-piece drawn food set in brand/illustration/ — fruit, vegetables, fish, eggs, rice and beans, preserves. All are vector masters and scale freely: 23 extracted from the native .ai, 11 redrawn in Illustrator from the raster exports (see E-015) — ten because no vector source was ever delivered for them, and rice-and-beans.svg because the source that was delivered could not be printed (E-014). Built entirely from filled shapes with no stroke anywhere; apparent contours are dark shapes behind lighter ones. Every piece exports to PDF, and the whole set is 463 KB. They depict real Brazilian everyday food, not generic 'healthy eating' iconography; that specificity is the point and should survive any extension of the set. The set deliberately runs on its own naturalistic palette of 81 colours rather than the brand palette — brand colours appear only where a piece carries the logo. Coherence comes from the drawing hand and the flat fill construction, not shared hues; do not recolour the set to the brand palette. Place them per visual.composition: on mesa only.",
-      "pattern": "A seamless 280×280 food-drawing tile in brand/pattern/. Verified seamless. Supplied in the dark ink for light grounds and in Branco Leitura for dark grounds. It is a texture, not a focal element — keep it behind content, never under the logo's clear space.",
+      "illustration": "A 34-piece drawn food set in brand/illustration/, all vector and all exporting to PDF. Built entirely from filled shapes with no stroke anywhere; apparent contours are dark shapes behind lighter ones — keep that construction when extending the set. Eleven pieces were redrawn from raster exports about 250px across (E-015), so their finest interior detail is coarser than the native ones; the rest came from the .ai. They depict real Brazilian everyday food, not generic 'healthy eating' iconography; that specificity is the point and should survive any extension of the set. The set deliberately runs on its own naturalistic palette rather than the brand palette — do not recolour it, because its coherence comes from the drawing hand and the flat fill construction, not from shared hues.",
+      "pattern": "A seamless 280×280 food-drawing tile in brand/pattern/. Supplied in the dark ink for light grounds and in Branco Leitura for dark grounds. It is a texture, not a focal element — keep it behind content, never under the logo's clear space.",
       "photography": "Real kitchens, real hands, real food in preparation. Not styled studio food, not stock images of empty plates."
     }
   },
@@ -306,35 +292,14 @@
       "id": "E-005",
       "claim": "Rendered reduction tests put the legibility floor at 110px wide for the horizontal lockup and 70px for the vertical and stacked lockups, measured on masters trimmed to the artwork; below those widths the hand lettering's counters close. The pot badge stays readable to 24px.",
       "kind": "observation",
-      "source": "Chromium size ladders at 200/140/110/96/84/72/60px and 110/84/70/60/52/44/36px, inspected at 2× device scale, re-run after the masters were trimmed (E-012).",
+      "source": "Chromium size ladders at 200/140/110/96/84/72/60px and 110/84/70/60/52/44/36px, inspected at 2× device scale.",
       "status": "active"
     },
     {
       "id": "E-006",
-      "claim": "The strategic frame in this contract is reconstructed from the 2026 manual, not authored fresh: the brand job, offer truth, position and right to win restate what its 'sobre', 'conceituação' and 'briefing' pages already assert about the project. They carry that document's authority and no more — none has been checked against the organisation itself.",
+      "claim": "The strategic frame in this contract is reconstructed from the 2026 manual, not authored fresh: the brand job and position restate what its 'sobre', 'conceituação' and 'briefing' pages already assert about the project. They carry that document's authority and no more — neither has been checked against the organisation itself.",
       "kind": "observation",
       "source": "Manual pages 3 (sobre), 4 (conceituação) and 9 (sobre o briefing).",
-      "status": "active"
-    },
-    {
-      "id": "E-007",
-      "claim": "The delivered illustration library is 34 pieces, but only 24 have vector masters. The manual's .ai carries 24; the remaining 10 exist solely as palette-indexed PNG exports between 182×238 and 313×213, with no vector source in the handoff.",
-      "kind": "observation",
-      "source": "The 18 ILUSTRAÇÕES and 16 icon exports in the delivered Identidade Visual archive, compared against artboards 59–82 of the native .ai.",
-      "status": "superseded"
-    },
-    {
-      "id": "E-011",
-      "claim": "The 10 pieces without a vector master (E-007) were reconstructed as vector by region separation rather than conventional tracing: the PNGs are flat-colour art whose antialiased edges encode sub-pixel contour position, so interpolating the source before assigning pixels to the recovered flat palette yields smooth region boundaries. The results were compared against the sources at native size and over a mid-grey ground, which exposes the near-white highlights the white page hides; shapes, colours and details match. They are a faithful reconstruction, not the designer's original geometry — node counts are higher than hand-drawn paths and the finest contours carry the resolution of a roughly 250px source.",
-      "kind": "observation",
-      "source": "Region-separated vectorisation of the 10 raster exports, inspected side by side with the PNGs on white and on #9AA0A6 at several magnifications.",
-      "status": "superseded"
-    },
-    {
-      "id": "E-015",
-      "claim": "The 11 pieces without a usable vector master — the 10 of E-007 and rice-and-beans.svg from E-014 — were redrawn in Illustrator from the raster exports and delivered as SVG. They are plain filled paths: no stroke, mask, filter, embedded raster, script or font anywhere, and all 34 illustrations now export to PDF. They replace the region-separated reconstructions of E-011 and are 6 to 30 times lighter: the set fell from roughly 2.9 MB to 463 KB, and the largest single piece from 631 KB to 53 KB. Against their raster sources at 3x, rendered on white and on #9AA0A6, between 2% and 13% of pixels differ by more than 40 — contour-level in every case except cherries-and-nuts.svg, where the almonds lose their interior veins and the white shape under the bowl reduces to an arc. Every viewBox is trimmed to its artwork, at 99.3% occupancy or better.",
-      "kind": "observation",
-      "source": "Element census and per-file Chrome print-to-PDF runs over all 34 illustrations; three-way renders of raster source, superseded reconstruction and delivered vector at 3x on both grounds; alpha bounding box against the declared viewBox in a 900px render.",
       "status": "active"
     },
     {
@@ -359,30 +324,37 @@
       "status": "active"
     },
     {
-      "id": "E-014",
-      "claim": "Three of the 62 vector masters carried the transparency machinery pdftocairo emits for PDF soft masks and blend groups, which the contract's 'entirely filled shapes' claim did not cover. In avocado.svg (89) and nuts.svg (5) it was the simple form — a full-canvas rect at constant alpha behind a colour matrix — and collapses to a group opacity with a maximum channel-sum difference of 5 out of 765 on white and on mid grey. rice-and-beans.svg carries the hard form: 21 chained PDF multiply groups expressed as 42 filters pulling each other in through <feImage href>, 84 in total. That construct hangs Chrome's print rasteriser outright, so any PDF export of any document containing the file never completes, and it is the reason the brand book could not be exported. It renders correctly on screen: 5.4% of pixels differ from the page poppler renders from the native .ai, at antialiasing level. No logo or pattern master is affected. All three are resolved: avocado.svg and nuts.svg by collapsing the masks to opacity, rice-and-beans.svg by the redrawn vector of E-015, which is why the native artboard is no longer the master for that one piece.",
+      "id": "E-012",
+      "claim": "The masters arrived with incidental artboard padding — the artwork filled 55% of the vertical lockup's width and 52% of the horizontal lockup's height, at inconsistent ratios — which made the clear-space rule inapplicable, since a designer adding one 'e' was adding it on top of an unknown one. All 26 logo masters are now trimmed to their artwork. Re-extracting one from the .ai reintroduces the padding, and the minimums and clear-space ratios in this contract are measured against the trimmed files.",
       "kind": "observation",
-      "source": "Element census of all 62 masters; per-file Chrome print-to-PDF runs with a 20s budget; before-and-after renders at 700px on #FFFFFF and #9AA0A6; the artboard rendered from the native .ai at 400dpi by pdftocairo as the reference.",
+      "source": "Alpha bounding box of each master measured against its declared viewBox in a 2400px render, before and after trimming.",
       "status": "active"
     },
     {
       "id": "E-013",
-      "claim": "The clear-space unit measures 22% of the placed width on the vertical lockup, 8% on the horizontal, 16% on the stacked and 20% on the wordmark. The lettering is drawn at its own size in each lockup, so a single rule expressed in the mark's own letter produces four different ratios — which is why the rule is stated as the letter and the percentages are given only as its implementation.",
+      "claim": "The clear-space unit measures 22% of the placed width on the vertical lockup, 8% on the horizontal, 16% on the stacked and 20% on the wordmark. The lettering is drawn at its own size in each lockup, so one rule expressed in the mark's own letter yields four different ratios.",
       "kind": "observation",
       "source": "Alpha bounding box of the last run of green ink — the final 'e' of 'Em Rede' — measured against the declared viewBox in a 1200px render of each colour lockup.",
       "status": "active"
     },
     {
-      "id": "E-012",
-      "claim": "The masters carried incidental artboard padding: the artwork filled 55% of the vertical lockup's width, 52% of the horizontal lockup's height and 67% of the stacked one, at inconsistent ratios and offset 10–22% inside the frame. Inconsistent ratios mark it as leftover framing rather than a designed margin. It made the clear-space rule inapplicable — a designer adding one 'e' was adding it on top of an unknown one — and pushed the mark off any edge it was aligned to. All 26 logo masters and the one illustration with the same fault are now trimmed to their artwork. The previously documented minimums described that padded frame, so 'vertical 90px' permitted a mark only 50px wide, which the size ladder shows is already past legibility.",
+      "id": "E-014",
+      "claim": "pdftocairo emits PDF soft masks and blend groups as SVG transparency machinery, and three artboards of this .ai use them. The hard form — 21 chained multiply groups pulling each other in through <feImage href> — hangs Chrome's print rasteriser outright, so any PDF export of any document containing such a file never completes. Do not re-extract avocado, nuts or rice-and-beans from the .ai with pdftocairo: the first two were resolved by collapsing their constant-alpha masks to group opacity, and rice-and-beans is now the redrawn vector of E-015 rather than the native artboard.",
       "kind": "observation",
-      "source": "Alpha bounding box of each master measured against its declared viewBox in a 2400px render, before and after trimming.",
+      "source": "Element census of all 62 masters; per-file Chrome print-to-PDF runs with a 20s budget; before-and-after renders at 700px on #FFFFFF and #9AA0A6.",
+      "status": "active"
+    },
+    {
+      "id": "E-015",
+      "claim": "Eleven illustrations have no usable native vector: ten were delivered only as palette-indexed PNG exports between 182×238 and 313×213, and rice-and-beans could not be printed (E-014). All eleven were redrawn in Illustrator from those rasters and are plain filled paths. Against their sources at 3x, on white and on #9AA0A6, between 2% and 13% of pixels differ by more than 40 — contour-level except cherries-and-nuts, where the almonds lose their interior veins and the white shape under the bowl reduces to an arc, which was reviewed and kept. The raster ceiling is what bounds how large these eleven can be placed before the native ones.",
+      "kind": "observation",
+      "source": "Three-way renders of raster source, the superseded region-separated reconstruction and the delivered vector at 3x on both grounds; per-file print-to-PDF runs over all 34.",
       "status": "active"
     }
   ],
 
   "unresolved": [
-    "No print proof exists. Spot and CMYK references (E-003) must be proofed on press before any run; the PANTONE numbers inherited from the 2026 manual should not be forwarded to a printer as they stand.",
+    "No press proof exists. The PANTONE numbers inherited from the 2026 manual are wrong on their face (E-003) and must not be forwarded to a printer; the CMYK builds need proofing before any run.",
     "Whether the CSR badge is still in use, and what it is meant to abbreviate — it appears in the manual without explanation. Retire it if nothing depends on it."
   ]
 }
