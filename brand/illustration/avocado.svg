@@ -2,17 +2,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 141.85 139.08">
 <title>Ilustração — Abacate</title>
 <defs>
-<filter id="filter-remove-color" x="0%" y="0%" width="100%" height="100%">
-<feColorMatrix color-interpolation-filters="sRGB" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0" />
-</filter>
 <clipPath id="clip-0">
 <path clip-rule="nonzero" d="M 0.39 0 L 141.31 0 L 141.31 138.17 L 0.39 138.17 Z M 0.39 0 "/>
 </clipPath>
-<mask id="mask-0">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-1">
 <path clip-rule="nonzero" d="M 0.55 0.64 L 13.23 0.64 L 13.23 17.41 L 0.55 17.41 Z M 0.55 0.64 "/>
 </clipPath>
@@ -24,11 +16,6 @@
 <path fill="#FF6859" d="M 0.55 3.19 C 3.63 7.9 6.66 12.64 9.64 17.41 C 10.75 16.72 11.95 15.97 13.23 15.18 C 10.23 10.3 7.19 5.45 4.1 0.63 C 2.92 1.48 1.73 2.34 0.55 3.19 "/>
 </g>
 </g>
-<mask id="mask-1">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-3">
 <path clip-rule="nonzero" d="M 0.25 0.63 L 14.05 0.63 L 14.05 17.18 L 0.25 17.18 Z M 0.25 0.63 "/>
 </clipPath>
@@ -40,11 +27,6 @@
 <path fill="#FF6859" d="M 10.87 9.97 C 8.68 6.84 6.45 3.73 4.21 0.63 C 2.89 1.5 1.57 2.36 0.25 3.22 C 3.64 7.84 7 12.49 10.3 17.18 C 11.54 16.29 12.79 15.42 14.05 14.56 C 12.99 13.03 11.94 11.5 10.87 9.97 "/>
 </g>
 </g>
-<mask id="mask-2">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-5">
 <path clip-rule="nonzero" d="M 0.61 0.79 L 10.83 0.79 L 10.83 13.33 L 0.61 13.33 Z M 0.61 0.79 "/>
 </clipPath>
@@ -56,11 +38,6 @@
 <path fill="#FF6859" d="M 10.83 10.9 C 8.38 7.61 5.98 4.26 3.81 0.79 C 2.69 1.62 1.62 2.43 0.61 3.2 C 2.43 6.71 4.54 10.07 6.8 13.33 C 8.12 12.5 9.47 11.69 10.83 10.9 "/>
 </g>
 </g>
-<mask id="mask-3">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-7">
 <path clip-rule="nonzero" d="M 0.56 0.78 L 14.48 0.78 L 14.48 16.45 L 0.56 16.45 Z M 0.56 0.78 "/>
 </clipPath>
@@ -72,11 +49,6 @@
 <path fill="#FF6859" d="M 4.75 0.78 C 3.34 1.57 1.94 2.38 0.56 3.2 C 1.6 4.61 2.65 6.02 3.71 7.42 C 5.98 10.42 8.23 13.43 10.47 16.45 C 11.81 15.6 13.15 14.74 14.48 13.87 C 11.27 9.48 8.02 5.12 4.75 0.78 "/>
 </g>
 </g>
-<mask id="mask-4">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-9">
 <path clip-rule="nonzero" d="M 0.89 0.36 L 15.64 0.36 L 15.64 19.43 L 0.89 19.43 Z M 0.89 0.36 "/>
 </clipPath>
@@ -88,11 +60,6 @@
 <path fill="#FF6859" d="M 4.66 0.36 C 3.4 1.2 2.14 2.04 0.89 2.91 C 4.69 8.37 8.42 13.88 12.09 19.43 C 13.27 18.57 14.46 17.71 15.64 16.85 C 12.05 11.31 8.39 5.81 4.66 0.36 "/>
 </g>
 </g>
-<mask id="mask-5">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-11">
 <path clip-rule="nonzero" d="M 0.42 0.82 L 14.05 0.82 L 14.05 19.68 L 0.42 19.68 Z M 0.42 0.82 "/>
 </clipPath>
@@ -104,11 +71,6 @@
 <path fill="#FF6859" d="M 0.42 3.25 C 3.82 8.73 7.21 14.21 10.61 19.68 C 11.75 18.86 12.9 18.04 14.05 17.21 C 10.66 11.75 7.27 6.29 3.89 0.82 C 2.74 1.64 1.59 2.45 0.42 3.25 "/>
 </g>
 </g>
-<mask id="mask-6">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-13">
 <path clip-rule="nonzero" d="M 0.88 0.17 L 13.5 0.17 L 13.5 17.34 L 0.88 17.34 Z M 0.88 0.17 "/>
 </clipPath>
@@ -120,11 +82,6 @@
 <path fill="#FF6859" d="M 4.32 0.17 C 3.18 0.99 2.03 1.81 0.88 2.62 C 3.92 7.53 6.96 12.44 10 17.34 C 11.18 16.56 12.34 15.77 13.5 14.96 C 10.44 10.03 7.38 5.1 4.32 0.17 "/>
 </g>
 </g>
-<mask id="mask-7">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-15">
 <path clip-rule="nonzero" d="M 0.99 0.05 L 13.98 0.05 L 13.98 17.74 L 0.99 17.74 Z M 0.99 0.05 "/>
 </clipPath>
@@ -136,11 +93,6 @@
 <path fill="#FF6859" d="M 0.99 2.52 C 4.13 7.59 7.28 12.67 10.42 17.74 C 11.59 17 12.78 16.24 13.98 15.47 C 10.8 10.33 7.61 5.19 4.42 0.05 C 3.28 0.87 2.13 1.7 0.99 2.52 "/>
 </g>
 </g>
-<mask id="mask-8">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-17">
 <path clip-rule="nonzero" d="M 0.54 0.35 L 11.67 0.35 L 11.67 14.89 L 0.54 14.89 Z M 0.54 0.35 "/>
 </clipPath>
@@ -152,11 +104,6 @@
 <path fill="#FF6859" d="M 11.67 12.75 C 9.11 8.61 6.54 4.48 3.98 0.35 C 2.85 1.16 1.7 1.98 0.54 2.8 C 3.03 6.84 5.53 10.87 8.03 14.89 C 9.25 14.19 10.46 13.48 11.67 12.75 "/>
 </g>
 </g>
-<mask id="mask-9">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-19">
 <path clip-rule="nonzero" d="M 0.55 0.75 L 11.95 0.75 L 11.95 15.76 L 0.55 15.76 Z M 0.55 0.75 "/>
 </clipPath>
@@ -168,11 +115,6 @@
 <path fill="#FF6859" d="M 11.95 13.33 C 9.34 9.13 6.75 4.94 4.15 0.75 C 2.96 1.5 1.77 2.24 0.55 2.97 C 3.2 7.23 5.84 11.49 8.48 15.76 C 9.64 14.95 10.8 14.14 11.95 13.33 "/>
 </g>
 </g>
-<mask id="mask-10">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-21">
 <path clip-rule="nonzero" d="M 0.15 0.91 L 12.95 0.91 L 12.95 20.02 L 0.15 20.02 Z M 0.15 0.91 "/>
 </clipPath>
@@ -184,11 +126,6 @@
 <path fill="#FF6859" d="M 0.15 3.29 C 3.3 8.87 6.45 14.45 9.62 20.02 C 10.75 19.28 11.86 18.55 12.95 17.84 C 9.73 12.21 6.53 6.57 3.34 0.91 C 2.28 1.71 1.22 2.5 0.15 3.29 "/>
 </g>
 </g>
-<mask id="mask-11">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-23">
 <path clip-rule="nonzero" d="M 0.36 0.9 L 12.82 0.9 L 12.82 15.1 L 0.36 15.1 Z M 0.36 0.9 "/>
 </clipPath>
@@ -200,11 +137,6 @@
 <path fill="#FF6859" d="M 12.82 11.83 C 9.9 8.22 7 4.61 4.21 0.9 C 3.21 1.61 1.89 2.54 0.36 3.62 C 3.11 7.55 6.02 11.35 9 15.1 C 10.27 14 11.54 12.91 12.82 11.83 "/>
 </g>
 </g>
-<mask id="mask-12">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-25">
 <path clip-rule="nonzero" d="M 0.65 0.98 L 13 0.98 L 13 18.17 L 0.65 18.17 Z M 0.65 0.98 "/>
 </clipPath>
@@ -216,11 +148,6 @@
 <path fill="#FF6859" d="M 4.24 0.98 C 3.05 1.91 1.85 2.83 0.65 3.75 C 3.95 8.41 7.02 13.22 9.92 18.17 C 10.96 17.29 11.98 16.41 13 15.51 C 12.66 14.92 12.33 14.33 12 13.74 C 9.53 9.39 6.96 5.13 4.24 0.98 "/>
 </g>
 </g>
-<mask id="mask-13">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-27">
 <path clip-rule="nonzero" d="M 0.07 0.2 L 13.14 0.2 L 13.14 20.38 L 0.07 20.38 Z M 0.07 0.2 "/>
 </clipPath>
@@ -232,11 +159,6 @@
 <path fill="#FF6859" d="M 2.23 0.98 C 1.52 1.62 0.79 2.25 0.07 2.88 C 3.37 8.71 6.66 14.54 9.95 20.38 C 11.01 19.59 12.07 18.8 13.14 18.01 C 9.79 12.07 6.44 6.14 3.09 0.2 C 2.8 0.46 2.52 0.72 2.23 0.98 "/>
 </g>
 </g>
-<mask id="mask-14">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-29">
 <path clip-rule="nonzero" d="M 0.64 0.16 L 13.79 0.16 L 13.79 15.19 L 0.64 15.19 Z M 0.64 0.16 "/>
 </clipPath>
@@ -248,11 +170,6 @@
 <path fill="#FF6859" d="M 10.05 15.19 C 11.3 14.24 12.54 13.29 13.79 12.33 C 11.45 8.95 9 5.65 6.4 2.45 C 5.78 1.68 5.16 0.92 4.53 0.16 C 3.21 1.21 1.92 2.29 0.64 3.39 C 2.43 5.6 4.23 7.8 6.04 10.02 C 7.42 11.71 8.75 13.45 10.05 15.19 "/>
 </g>
 </g>
-<mask id="mask-15">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-31">
 <path clip-rule="nonzero" d="M 0.81 0.45 L 12.08 0.45 L 12.08 14.57 L 0.81 14.57 Z M 0.81 0.45 "/>
 </clipPath>
@@ -264,11 +181,6 @@
 <path fill="#FF6859" d="M 12.08 11.83 C 9.64 8.02 7.16 4.22 4.65 0.45 C 3.38 1.2 2.09 1.94 0.81 2.68 C 3.45 6.63 6.07 10.59 8.67 14.57 C 9.81 13.66 10.95 12.75 12.08 11.83 "/>
 </g>
 </g>
-<mask id="mask-16">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-33">
 <path clip-rule="nonzero" d="M 0.57 0.43 L 13.44 0.43 L 13.44 22.73 L 0.57 22.73 Z M 0.57 0.43 "/>
 </clipPath>
@@ -280,11 +192,6 @@
 <path fill="#FF6859" d="M 3.53 0.43 C 2.54 1.39 1.56 2.35 0.57 3.3 C 2.25 6.17 3.89 9.06 5.47 11.98 C 7.38 15.49 9.09 19.1 10.75 22.73 C 11.65 22.04 12.54 21.34 13.44 20.64 C 10.91 15.03 8.41 9.39 5.47 3.96 C 4.83 2.78 4.18 1.6 3.53 0.43 "/>
 </g>
 </g>
-<mask id="mask-17">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-35">
 <path clip-rule="nonzero" d="M 0.61 0.74 L 12.95 0.74 L 12.95 21.12 L 0.61 21.12 Z M 0.61 0.74 "/>
 </clipPath>
@@ -296,11 +203,6 @@
 <path fill="#FF6859" d="M 3.31 0.74 C 2.41 1.44 1.51 2.14 0.61 2.84 C 2.88 7.88 5.15 12.93 7.77 17.8 C 8.36 18.91 8.98 20.02 9.6 21.12 C 10.77 20.34 11.89 19.59 12.95 18.88 C 11.16 15.88 9.42 12.85 7.77 9.78 C 6.17 6.82 4.72 3.79 3.31 0.74 "/>
 </g>
 </g>
-<mask id="mask-18">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-37">
 <path clip-rule="nonzero" d="M 0.86 0.36 L 12 0.36 L 12 13.7 L 0.86 13.7 Z M 0.86 0.36 "/>
 </clipPath>
@@ -312,11 +214,6 @@
 <path fill="#FF6859" d="M 12 11.45 C 9.54 7.75 7.07 4.05 4.62 0.36 C 3.34 1.14 2.07 1.92 0.86 2.68 C 3.27 6.35 5.71 10.02 8.15 13.7 C 9.43 12.93 10.71 12.19 12 11.45 "/>
 </g>
 </g>
-<mask id="mask-19">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-39">
 <path clip-rule="nonzero" d="M 0.04 0.5 L 11.49 0.5 L 11.49 16.76 L 0.04 16.76 Z M 0.04 0.5 "/>
 </clipPath>
@@ -328,11 +225,6 @@
 <path fill="#FF6859" d="M 8.48 16.76 C 9.49 15.8 10.49 14.83 11.49 13.86 C 8.89 9.36 6.19 4.91 3.41 0.5 C 2.29 1.41 1.16 2.32 0.04 3.22 C 2.92 7.7 5.75 12.2 8.48 16.76 "/>
 </g>
 </g>
-<mask id="mask-20">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-41">
 <path clip-rule="nonzero" d="M 0.18 0.79 L 10.87 0.79 L 10.87 13.6 L 0.18 13.6 Z M 0.18 0.79 "/>
 </clipPath>
@@ -344,11 +236,6 @@
 <path fill="#FF6859" d="M 7.08 13.13 C 7.19 13.29 7.29 13.45 7.4 13.6 C 8.55 12.64 9.71 11.69 10.87 10.73 C 9.61 8.85 8.36 6.98 7.08 5.11 C 6.08 3.66 5.04 2.22 3.99 0.79 C 2.73 1.76 1.46 2.72 0.18 3.68 C 2.53 6.83 4.9 9.95 7.08 13.13 "/>
 </g>
 </g>
-<mask id="mask-21">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-43">
 <path clip-rule="nonzero" d="M 0.77 0.4 L 16.42 0.4 L 16.42 23.49 L 0.77 23.49 Z M 0.77 0.4 "/>
 </clipPath>
@@ -360,11 +247,6 @@
 <path fill="#FF6859" d="M 6.84 13.11 C 8.98 16.56 11.1 20.03 13.21 23.49 C 14.28 22.59 15.35 21.67 16.42 20.75 C 13.25 15.52 10.06 10.3 6.84 5.09 C 5.87 3.52 4.89 1.96 3.91 0.4 C 2.86 1.41 1.81 2.41 0.77 3.43 C 2.81 6.64 4.84 9.87 6.84 13.11 "/>
 </g>
 </g>
-<mask id="mask-22">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-45">
 <path clip-rule="nonzero" d="M 0.6 0.12 L 11.36 0.12 L 11.36 13.08 L 0.6 13.08 Z M 0.6 0.12 "/>
 </clipPath>
@@ -376,11 +258,6 @@
 <path fill="#FF6859" d="M 11.36 10.25 C 8.88 6.93 6.39 3.59 4.14 0.13 C 3.03 0.76 1.84 1.45 0.6 2.18 C 2.59 5.96 5 9.56 7.54 13.08 C 8.82 12.15 10.09 11.2 11.36 10.25 "/>
 </g>
 </g>
-<mask id="mask-23">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-47">
 <path clip-rule="nonzero" d="M 0.44 0.39 L 14.16 0.39 L 14.16 20.85 L 0.44 20.85 Z M 0.44 0.39 "/>
 </clipPath>
@@ -392,11 +269,6 @@
 <path fill="#FF6859" d="M 0.43 3.15 C 4.02 9.05 7.59 14.96 11.18 20.85 C 12.22 19.8 13.22 18.75 14.16 17.71 C 10.62 11.95 7.12 6.17 3.62 0.39 C 2.57 1.32 1.5 2.24 0.43 3.15 "/>
 </g>
 </g>
-<mask id="mask-24">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-49">
 <path clip-rule="nonzero" d="M 0.8 0.31 L 11.74 0.31 L 11.74 15 L 0.8 15 Z M 0.8 0.31 "/>
 </clipPath>
@@ -408,11 +280,6 @@
 <path fill="#FF6859" d="M 8.59 15 C 9.63 13.98 10.69 12.96 11.74 11.94 C 9.28 8.04 6.78 4.16 4.24 0.31 C 3.1 1.26 1.95 2.22 0.8 3.17 C 3.44 7.09 6.04 11.03 8.59 15 "/>
 </g>
 </g>
-<mask id="mask-25">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-51">
 <path clip-rule="nonzero" d="M 0.83 0.89 L 17.55 0.89 L 17.55 12.78 L 0.83 12.78 Z M 0.83 0.89 "/>
 </clipPath>
@@ -424,11 +291,6 @@
 <path fill="#FF6859" d="M 3.75 12.78 C 8.34 10.18 13.03 7.67 17.55 4.96 C 16.71 3.61 15.87 2.25 15.03 0.89 C 10.33 3.61 5.51 6.17 0.83 8.9 C 1.56 9.88 2.29 10.86 3.03 11.82 C 3.27 12.14 3.51 12.46 3.75 12.78 "/>
 </g>
 </g>
-<mask id="mask-26">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-53">
 <path clip-rule="nonzero" d="M 0.82 0.33 L 12.56 0.33 L 12.56 10.52 L 0.82 10.52 Z M 0.82 0.33 "/>
 </clipPath>
@@ -440,11 +302,6 @@
 <path fill="#FF6859" d="M 9.8 0.33 C 6.68 2.27 3.66 4.34 0.82 6.62 C 1.55 7.95 2.29 9.28 2.95 10.52 C 6.01 8.24 9.24 6.17 12.56 4.2 C 11.62 2.92 10.7 1.63 9.8 0.33 "/>
 </g>
 </g>
-<mask id="mask-27">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-55">
 <path clip-rule="nonzero" d="M 0.82 0.7 L 14.81 0.7 L 14.81 12.16 L 0.82 12.16 Z M 0.82 0.7 "/>
 </clipPath>
@@ -456,11 +313,6 @@
 <path fill="#FF6859" d="M 9.38 7.94 C 11.16 6.81 12.98 5.74 14.81 4.68 C 13.93 3.35 13.04 2.02 12.15 0.7 C 11.22 1.25 10.29 1.81 9.38 2.39 C 6.34 4.31 3.55 6.53 0.82 8.83 C 1.73 9.94 2.63 11.05 3.53 12.16 C 5.41 10.66 7.34 9.23 9.38 7.94 "/>
 </g>
 </g>
-<mask id="mask-28">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-57">
 <path clip-rule="nonzero" d="M 1 0.08 L 15.18 0.08 L 15.18 11.45 L 1 11.45 Z M 1 0.08 "/>
 </clipPath>
@@ -472,11 +324,6 @@
 <path fill="#FF6859" d="M 8.86 8.2 C 11.01 6.75 13.11 5.23 15.18 3.68 C 14.29 2.48 13.41 1.29 12.54 0.08 C 11.32 0.95 10.1 1.81 8.86 2.64 C 6.3 4.36 3.65 5.91 1 7.45 C 1.88 8.78 2.77 10.11 3.65 11.45 C 5.41 10.41 7.16 9.34 8.86 8.2 "/>
 </g>
 </g>
-<mask id="mask-29">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-59">
 <path clip-rule="nonzero" d="M 0.36 0.22 L 10.83 0.22 L 10.83 9.79 L 0.36 9.79 Z M 0.36 0.22 "/>
 </clipPath>
@@ -488,11 +335,6 @@
 <path fill="#FF6859" d="M 2.99 9.79 C 5.61 7.76 8.21 5.71 10.83 3.68 C 9.89 2.46 8.98 1.29 8.14 0.22 C 5.56 2.24 2.98 4.27 0.36 6.25 C 1.24 7.43 2.12 8.61 2.99 9.79 "/>
 </g>
 </g>
-<mask id="mask-30">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-61">
 <path clip-rule="nonzero" d="M 0.67 0.1 L 16.64 0.1 L 16.64 13.75 L 0.67 13.75 Z M 0.67 0.1 "/>
 </clipPath>
@@ -504,11 +346,6 @@
 <path fill="#FF6859" d="M 12.33 7.07 C 13.78 5.85 15.2 4.61 16.64 3.39 C 15.75 2.29 14.87 1.2 14 0.1 C 13.45 0.57 12.89 1.05 12.33 1.52 C 8.71 4.59 4.76 7.26 0.67 9.75 C 1.5 11.08 2.32 12.41 3.15 13.75 C 6.36 11.7 9.45 9.52 12.33 7.07 "/>
 </g>
 </g>
-<mask id="mask-31">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-63">
 <path clip-rule="nonzero" d="M 0.8 0.9 L 7.75 0.9 L 7.75 7.2 L 0.8 7.2 Z M 0.8 0.9 "/>
 </clipPath>
@@ -520,11 +357,6 @@
 <path fill="#FF6859" d="M 7.03 3.83 C 6.29 2.86 5.56 1.88 4.83 0.9 C 3.47 1.69 2.12 2.5 0.8 3.33 C 1.7 4.63 2.62 5.92 3.56 7.2 C 4.94 6.38 6.34 5.57 7.75 4.78 C 7.51 4.46 7.27 4.14 7.03 3.83 "/>
 </g>
 </g>
-<mask id="mask-32">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-65">
 <path clip-rule="nonzero" d="M 0.8 0.9 L 7.75 0.9 L 7.75 7.2 L 0.8 7.2 Z M 0.8 0.9 "/>
 </clipPath>
@@ -536,11 +368,6 @@
 <path fill="#FF6859" d="M 7.03 3.83 C 6.29 2.86 5.56 1.88 4.83 0.9 C 3.47 1.69 2.12 2.5 0.8 3.33 C 1.7 4.63 2.62 5.92 3.56 7.2 C 4.94 6.38 6.34 5.57 7.75 4.78 C 7.51 4.46 7.27 4.14 7.03 3.83 "/>
 </g>
 </g>
-<mask id="mask-33">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-67">
 <path clip-rule="nonzero" d="M 0.03 0.75 L 6.15 0.75 L 6.15 6.96 L 0.03 6.96 Z M 0.03 0.75 "/>
 </clipPath>
@@ -552,11 +379,6 @@
 <path fill="#FF6859" d="M 6.15 4.75 C 5.32 3.41 4.5 2.08 3.67 0.75 C 2.46 1.48 1.25 2.19 0.03 2.89 C 0.87 4.25 1.71 5.61 2.55 6.97 C 3.77 6.24 4.96 5.5 6.15 4.75 "/>
 </g>
 </g>
-<mask id="mask-34">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-69">
 <path clip-rule="nonzero" d="M 0.03 0.75 L 6.15 0.75 L 6.15 6.96 L 0.03 6.96 Z M 0.03 0.75 "/>
 </clipPath>
@@ -568,11 +390,6 @@
 <path fill="#FF6859" d="M 6.15 4.75 C 5.32 3.41 4.5 2.08 3.67 0.75 C 2.46 1.48 1.25 2.19 0.03 2.89 C 0.87 4.25 1.71 5.61 2.55 6.97 C 3.77 6.24 4.96 5.5 6.15 4.75 "/>
 </g>
 </g>
-<mask id="mask-35">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-71">
 <path clip-rule="nonzero" d="M 0 0.83 L 6.53 0.83 L 6.53 7.39 L 0 7.39 Z M 0 0.83 "/>
 </clipPath>
@@ -584,11 +401,6 @@
 <path fill="#FF6859" d="M 6.53 4.16 C 5.63 3.05 4.73 1.94 3.82 0.83 C 2.54 1.91 1.27 3 0 4.1 C 0.87 5.2 1.75 6.29 2.64 7.39 C 3.92 6.29 5.21 5.21 6.53 4.16 "/>
 </g>
 </g>
-<mask id="mask-36">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-73">
 <path clip-rule="nonzero" d="M 0 0.83 L 6.53 0.83 L 6.53 7.39 L 0 7.39 Z M 0 0.83 "/>
 </clipPath>
@@ -600,11 +412,6 @@
 <path fill="#FF6859" d="M 6.53 4.16 C 5.63 3.05 4.73 1.94 3.82 0.83 C 2.54 1.91 1.27 3 0 4.1 C 0.87 5.2 1.75 6.29 2.64 7.39 C 3.92 6.29 5.21 5.21 6.53 4.16 "/>
 </g>
 </g>
-<mask id="mask-37">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-75">
 <path clip-rule="nonzero" d="M 0.15 0.45 L 6.65 0.45 L 6.65 6.68 L 0.15 6.68 Z M 0.15 0.45 "/>
 </clipPath>
@@ -616,11 +423,6 @@
 <path fill="#FF6859" d="M 6.65 4.45 C 5.77 3.11 4.89 1.78 4 0.45 C 2.71 1.19 1.43 1.93 0.15 2.7 C 1.04 4.02 1.93 5.35 2.81 6.68 C 4.09 5.94 5.38 5.2 6.65 4.45 "/>
 </g>
 </g>
-<mask id="mask-38">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-77">
 <path clip-rule="nonzero" d="M 0.15 0.45 L 6.65 0.45 L 6.65 6.68 L 0.15 6.68 Z M 0.15 0.45 "/>
 </clipPath>
@@ -632,11 +434,6 @@
 <path fill="#FF6859" d="M 6.65 4.45 C 5.77 3.11 4.89 1.78 4 0.45 C 2.71 1.19 1.43 1.93 0.15 2.7 C 1.04 4.02 1.93 5.35 2.81 6.68 C 4.09 5.94 5.38 5.2 6.65 4.45 "/>
 </g>
 </g>
-<mask id="mask-39">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-79">
 <path clip-rule="nonzero" d="M 0.54 0.25 L 6.99 0.25 L 6.99 6.68 L 0.54 6.68 Z M 0.54 0.25 "/>
 </clipPath>
@@ -648,11 +445,6 @@
 <path fill="#FF6859" d="M 6.99 3.79 C 6.12 2.61 5.24 1.43 4.36 0.25 C 3.09 1.2 1.82 2.15 0.54 3.08 C 1.41 4.29 2.29 5.48 3.18 6.68 C 4.46 5.72 5.73 4.76 6.99 3.79 "/>
 </g>
 </g>
-<mask id="mask-40">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-81">
 <path clip-rule="nonzero" d="M 0.54 0.25 L 6.99 0.25 L 6.99 6.68 L 0.54 6.68 Z M 0.54 0.25 "/>
 </clipPath>
@@ -664,11 +456,6 @@
 <path fill="#FF6859" d="M 6.99 3.79 C 6.12 2.61 5.24 1.43 4.36 0.25 C 3.09 1.2 1.82 2.15 0.54 3.08 C 1.41 4.29 2.29 5.48 3.18 6.68 C 4.46 5.72 5.73 4.76 6.99 3.79 "/>
 </g>
 </g>
-<mask id="mask-41">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-83">
 <path clip-rule="nonzero" d="M 0.46 0.45 L 14.25 0.45 L 14.25 11.11 L 0.46 11.11 Z M 0.46 0.45 "/>
 </clipPath>
@@ -680,11 +467,6 @@
 <path fill="#FF6859" d="M 14.25 4.22 C 13.33 2.96 12.4 1.71 11.47 0.45 C 9.27 1.85 7.05 3.23 4.82 4.58 C 3.37 5.45 1.9 6.3 0.45 7.17 C 1.3 8.41 2.22 9.73 3.17 11.11 C 3.72 10.79 4.27 10.46 4.82 10.13 C 7.99 8.21 11.13 6.23 14.25 4.22 "/>
 </g>
 </g>
-<mask id="mask-42">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-85">
 <path clip-rule="nonzero" d="M 0.87 0.02 L 11.48 0.02 L 11.48 10.31 L 0.87 10.31 Z M 0.87 0.02 "/>
 </clipPath>
@@ -696,11 +478,6 @@
 <path fill="#FF6859" d="M 3.24 10.31 C 5.99 8.02 8.73 5.73 11.48 3.43 C 10.61 2.27 9.76 1.14 8.92 0.02 C 6.24 2.26 3.56 4.5 0.87 6.73 C 1.66 7.92 2.45 9.11 3.24 10.31 "/>
 </g>
 </g>
-<mask id="mask-43">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-87">
 <path clip-rule="nonzero" d="M 0.95 0.19 L 18.65 0.19 L 18.65 15.17 L 0.95 15.17 Z M 0.95 0.19 "/>
 </clipPath>
@@ -712,11 +489,6 @@
 <path fill="#FF6859" d="M 14.72 6.76 C 16.04 5.77 17.34 4.75 18.65 3.75 C 17.8 2.55 16.93 1.36 16.05 0.19 C 15.61 0.53 15.17 0.88 14.72 1.21 C 10.18 4.65 5.59 8.02 0.95 11.33 C 1.74 12.61 2.53 13.89 3.32 15.17 C 7.16 12.41 10.96 9.61 14.72 6.76 "/>
 </g>
 </g>
-<mask id="mask-44">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-89">
 <path clip-rule="nonzero" d="M 0.08 0.6 L 13.8 0.6 L 13.8 13.5 L 0.08 13.5 Z M 0.08 0.6 "/>
 </clipPath>
@@ -728,11 +500,6 @@
 <path fill="#FF6859" d="M 2.41 13.5 C 6.23 10.41 10.02 7.3 13.8 4.17 C 13 2.98 12.21 1.79 11.39 0.6 C 7.64 3.7 3.88 6.78 0.08 9.83 C 0.86 11.05 1.64 12.28 2.41 13.5 "/>
 </g>
 </g>
-<mask id="mask-45">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-91">
 <path clip-rule="nonzero" d="M 0.48 0.76 L 14.88 0.76 L 14.88 12.63 L 0.48 12.63 Z M 0.48 0.76 "/>
 </clipPath>
@@ -744,11 +511,6 @@
 <path fill="#FF6859" d="M 14.88 4.62 C 14.08 3.34 13.28 2.05 12.48 0.75 C 9.43 2.88 6.38 4.98 3.28 7.04 C 2.35 7.65 1.42 8.26 0.48 8.87 C 1.39 10.12 2.3 11.38 3.21 12.63 C 3.23 12.62 3.26 12.6 3.28 12.59 C 7.19 10 11.05 7.33 14.88 4.62 "/>
 </g>
 </g>
-<mask id="mask-46">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-93">
 <path clip-rule="nonzero" d="M 0.79 0.57 L 13.04 0.57 L 13.04 11.98 L 0.79 11.98 Z M 0.79 0.57 "/>
 </clipPath>
@@ -760,11 +522,6 @@
 <path fill="#FF6859" d="M 13.04 4.22 C 12.25 3 11.46 1.78 10.67 0.57 C 7.39 3.18 4.1 5.77 0.79 8.33 C 1.62 9.54 2.43 10.75 3.24 11.98 C 6.52 9.42 9.79 6.83 13.04 4.22 "/>
 </g>
 </g>
-<mask id="mask-47">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-95">
 <path clip-rule="nonzero" d="M 0.47 0.87 L 7.21 0.87 L 7.21 7.22 L 0.47 7.22 Z M 0.47 0.87 "/>
 </clipPath>
@@ -776,11 +533,6 @@
 <path fill="#FF6859" d="M 4.48 0.87 C 3.15 1.74 1.81 2.6 0.47 3.45 C 1.4 4.71 2.33 5.96 3.25 7.22 C 4.57 6.36 5.89 5.5 7.21 4.63 C 6.3 3.38 5.39 2.12 4.48 0.87 "/>
 </g>
 </g>
-<mask id="mask-48">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-97">
 <path clip-rule="nonzero" d="M 0.47 0.87 L 7.21 0.87 L 7.21 7.22 L 0.47 7.22 Z M 0.47 0.87 "/>
 </clipPath>
@@ -792,11 +544,6 @@
 <path fill="#FF6859" d="M 4.48 0.87 C 3.15 1.74 1.81 2.6 0.47 3.45 C 1.4 4.71 2.33 5.96 3.25 7.22 C 4.57 6.36 5.89 5.5 7.21 4.63 C 6.3 3.38 5.39 2.12 4.48 0.87 "/>
 </g>
 </g>
-<mask id="mask-49">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-99">
 <path clip-rule="nonzero" d="M 0.48 0.33 L 6.32 0.33 L 6.32 6.62 L 0.48 6.62 Z M 0.48 0.33 "/>
 </clipPath>
@@ -808,11 +555,6 @@
 <path fill="#FF6859" d="M 3.95 0.33 C 2.8 1.14 1.64 1.95 0.48 2.76 C 1.28 4.05 2.08 5.34 2.88 6.62 C 4.03 5.81 5.18 4.99 6.32 4.17 C 5.53 2.89 4.74 1.61 3.95 0.33 "/>
 </g>
 </g>
-<mask id="mask-50">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-101">
 <path clip-rule="nonzero" d="M 0.48 0.33 L 6.32 0.33 L 6.32 6.62 L 0.48 6.62 Z M 0.48 0.33 "/>
 </clipPath>
@@ -824,11 +566,6 @@
 <path fill="#FF6859" d="M 3.95 0.33 C 2.8 1.14 1.64 1.95 0.48 2.76 C 1.28 4.05 2.08 5.34 2.88 6.62 C 4.03 5.81 5.18 4.99 6.32 4.17 C 5.53 2.89 4.74 1.61 3.95 0.33 "/>
 </g>
 </g>
-<mask id="mask-51">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-103">
 <path clip-rule="nonzero" d="M 0.05 0.33 L 6.24 0.33 L 6.24 6.75 L 0.05 6.75 Z M 0.05 0.33 "/>
 </clipPath>
@@ -840,11 +577,6 @@
 <path fill="#FF6859" d="M 6.24 3.98 C 5.43 2.75 4.62 1.54 3.79 0.33 C 2.54 1.29 1.3 2.24 0.05 3.19 C 0.93 4.36 1.8 5.55 2.65 6.75 C 3.85 5.83 5.05 4.91 6.24 3.98 "/>
 </g>
 </g>
-<mask id="mask-52">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-105">
 <path clip-rule="nonzero" d="M 0.05 0.33 L 6.24 0.33 L 6.24 6.75 L 0.05 6.75 Z M 0.05 0.33 "/>
 </clipPath>
@@ -856,11 +588,6 @@
 <path fill="#FF6859" d="M 6.24 3.98 C 5.43 2.75 4.62 1.54 3.79 0.33 C 2.54 1.29 1.3 2.24 0.05 3.19 C 0.93 4.36 1.8 5.55 2.65 6.75 C 3.85 5.83 5.05 4.91 6.24 3.98 "/>
 </g>
 </g>
-<mask id="mask-53">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-107">
 <path clip-rule="nonzero" d="M 0.67 0.83 L 6.41 0.83 L 6.41 7.22 L 0.67 7.22 Z M 0.67 0.83 "/>
 </clipPath>
@@ -872,11 +599,6 @@
 <path fill="#FF6859" d="M 6.41 4.5 C 5.64 3.28 4.86 2.05 4.08 0.83 C 2.95 1.75 1.81 2.66 0.67 3.57 C 1.46 4.78 2.25 6 3.04 7.22 C 4.16 6.32 5.29 5.41 6.41 4.5 "/>
 </g>
 </g>
-<mask id="mask-54">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-109">
 <path clip-rule="nonzero" d="M 0.67 0.83 L 6.41 0.83 L 6.41 7.22 L 0.67 7.22 Z M 0.67 0.83 "/>
 </clipPath>
@@ -888,11 +610,6 @@
 <path fill="#FF6859" d="M 6.41 4.5 C 5.64 3.28 4.86 2.05 4.08 0.83 C 2.95 1.75 1.81 2.66 0.67 3.57 C 1.46 4.78 2.25 6 3.04 7.22 C 4.16 6.32 5.29 5.41 6.41 4.5 "/>
 </g>
 </g>
-<mask id="mask-55">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-111">
 <path clip-rule="nonzero" d="M 0.39 0.73 L 6.24 0.73 L 6.24 7.17 L 0.39 7.17 Z M 0.39 0.73 "/>
 </clipPath>
@@ -904,11 +621,6 @@
 <path fill="#FF6859" d="M 2.8 7.17 C 3.95 6.22 5.1 5.26 6.24 4.31 C 5.46 3.11 4.66 1.92 3.87 0.73 C 2.71 1.69 1.55 2.64 0.4 3.6 C 1.21 4.79 2 5.98 2.8 7.17 "/>
 </g>
 </g>
-<mask id="mask-56">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-113">
 <path clip-rule="nonzero" d="M 0.39 0.73 L 6.24 0.73 L 6.24 7.17 L 0.39 7.17 Z M 0.39 0.73 "/>
 </clipPath>
@@ -920,11 +632,6 @@
 <path fill="#FF6859" d="M 2.8 7.17 C 3.95 6.22 5.1 5.26 6.24 4.31 C 5.46 3.11 4.66 1.92 3.87 0.73 C 2.71 1.69 1.55 2.64 0.4 3.6 C 1.21 4.79 2 5.98 2.8 7.17 "/>
 </g>
 </g>
-<mask id="mask-57">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-115">
 <path clip-rule="nonzero" d="M 0.49 0 L 13.77 0 L 13.77 14.43 L 0.49 14.43 Z M 0.49 0 "/>
 </clipPath>
@@ -936,11 +643,6 @@
 <path fill="#FF6859" d="M 2.53 14.43 C 6.28 10.77 10.01 7.08 13.77 3.43 C 13.04 2.29 12.32 1.14 11.59 0 C 7.89 3.62 4.21 7.26 0.49 10.86 C 1.18 12.05 1.86 13.23 2.53 14.43 "/>
 </g>
 </g>
-<mask id="mask-58">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-117">
 <path clip-rule="nonzero" d="M 0.74 0.89 L 11.72 0.89 L 11.72 12.4 L 0.74 12.4 Z M 0.74 0.89 "/>
 </clipPath>
@@ -952,11 +654,6 @@
 <path fill="#FF6859" d="M 2.91 12.4 C 5.81 9.62 8.74 6.89 11.73 4.21 C 10.91 3.11 10.09 2 9.27 0.89 C 6.39 3.53 3.55 6.22 0.74 8.94 C 1.47 10.09 2.19 11.24 2.91 12.4 "/>
 </g>
 </g>
-<mask id="mask-59">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-119">
 <path clip-rule="nonzero" d="M 0.11 0.18 L 12.89 0.18 L 12.89 11.9 L 0.11 11.9 Z M 0.11 0.18 "/>
 </clipPath>
@@ -968,11 +665,6 @@
 <path fill="#FF6859" d="M 10.87 0.99 C 10.68 0.72 10.49 0.45 10.3 0.18 C 6.72 2.76 3.28 5.51 0.11 8.57 C 0.9 9.68 1.71 10.79 2.51 11.9 C 5.79 9.01 9.29 6.39 12.89 3.91 C 12.22 2.93 11.55 1.96 10.87 0.99 "/>
 </g>
 </g>
-<mask id="mask-60">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-121">
 <path clip-rule="nonzero" d="M 0.05 0.34 L 13.42 0.34 L 13.42 11.36 L 0.05 11.36 Z M 0.05 0.34 "/>
 </clipPath>
@@ -984,11 +676,6 @@
 <path fill="#FF6859" d="M 13.42 4.25 C 12.62 2.95 11.81 1.64 11 0.34 C 10.01 1.01 9.01 1.67 8.01 2.32 C 5.34 4.05 2.68 5.78 0.05 7.56 C 0.93 8.82 1.8 10.09 2.66 11.36 C 4.44 10.18 6.23 9.03 8.01 7.87 C 9.84 6.69 11.64 5.48 13.42 4.25 "/>
 </g>
 </g>
-<mask id="mask-61">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-123">
 <path clip-rule="nonzero" d="M 0.5 0.17 L 18.07 0.17 L 18.07 15.82 L 0.5 15.82 Z M 0.5 0.17 "/>
 </clipPath>
@@ -1000,11 +687,6 @@
 <path fill="#FF6859" d="M 15.92 0.17 C 10.96 4.35 5.82 8.27 0.5 11.96 C 1.29 13.25 2.09 14.54 2.89 15.82 C 8.13 12.08 13.19 8.12 18.07 3.88 C 18.04 3.84 18.02 3.8 18 3.76 C 17.32 2.55 16.62 1.36 15.92 0.17 "/>
 </g>
 </g>
-<mask id="mask-62">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-125">
 <path clip-rule="nonzero" d="M 0 0.76 L 11.57 0.76 L 11.57 13.2 L 0 13.2 Z M 0 0.76 "/>
 </clipPath>
@@ -1016,11 +698,6 @@
 <path fill="#FF6859" d="M 1.23 8.43 C 0.82 8.8 0.41 9.15 0 9.51 C 0.7 10.74 1.39 11.97 2.09 13.2 C 5.3 10.29 8.45 7.31 11.57 4.3 C 10.88 3.12 10.18 1.93 9.48 0.76 C 6.77 3.36 4.03 5.92 1.23 8.43 "/>
 </g>
 </g>
-<mask id="mask-63">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-127">
 <path clip-rule="nonzero" d="M 0.3 0.56 L 6.66 0.56 L 6.66 6.91 L 0.3 6.91 Z M 0.3 0.56 "/>
 </clipPath>
@@ -1032,11 +709,6 @@
 <path fill="#FF6859" d="M 4.05 0.56 C 2.79 1.42 1.54 2.29 0.3 3.18 C 0.49 3.45 0.68 3.72 0.87 3.99 C 1.55 4.96 2.22 5.93 2.89 6.91 C 4.14 6.05 5.4 5.2 6.66 4.36 C 5.8 3.09 4.93 1.82 4.05 0.56 "/>
 </g>
 </g>
-<mask id="mask-64">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-129">
 <path clip-rule="nonzero" d="M 0.3 0.56 L 6.66 0.56 L 6.66 6.91 L 0.3 6.91 Z M 0.3 0.56 "/>
 </clipPath>
@@ -1048,11 +720,6 @@
 <path fill="#FF6859" d="M 4.05 0.56 C 2.79 1.42 1.54 2.29 0.3 3.18 C 0.49 3.45 0.68 3.72 0.87 3.99 C 1.55 4.96 2.22 5.93 2.89 6.91 C 4.14 6.05 5.4 5.2 6.66 4.36 C 5.8 3.09 4.93 1.82 4.05 0.56 "/>
 </g>
 </g>
-<mask id="mask-65">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-131">
 <path clip-rule="nonzero" d="M 0 0.96 L 5.89 0.96 L 5.89 7.25 L 0 7.25 Z M 0 0.96 "/>
 </clipPath>
@@ -1064,11 +731,6 @@
 <path fill="#FF6859" d="M 0 3.34 C 0.81 4.64 1.62 5.95 2.42 7.25 C 3.59 6.45 4.74 5.64 5.89 4.82 C 5.09 3.54 4.29 2.25 3.5 0.96 C 2.34 1.77 1.18 2.56 0 3.34 "/>
 </g>
 </g>
-<mask id="mask-66">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-133">
 <path clip-rule="nonzero" d="M 0 0.96 L 5.89 0.96 L 5.89 7.25 L 0 7.25 Z M 0 0.96 "/>
 </clipPath>
@@ -1080,11 +742,6 @@
 <path fill="#FF6859" d="M 0 3.34 C 0.81 4.64 1.62 5.95 2.42 7.25 C 3.59 6.45 4.74 5.64 5.89 4.82 C 5.09 3.54 4.29 2.25 3.5 0.96 C 2.34 1.77 1.18 2.56 0 3.34 "/>
 </g>
 </g>
-<mask id="mask-67">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-135">
 <path clip-rule="nonzero" d="M 0.92 0.51 L 6.09 0.51 L 6.09 6.88 L 0.92 6.88 Z M 0.92 0.51 "/>
 </clipPath>
@@ -1096,11 +753,6 @@
 <path fill="#FF6859" d="M 0.92 3.17 C 1.62 4.36 2.32 5.55 3 6.76 C 3.02 6.8 3.04 6.84 3.07 6.88 C 3.79 6.25 4.52 5.62 5.23 4.98 C 5.52 4.72 5.8 4.46 6.09 4.2 C 5.39 2.97 4.7 1.74 4 0.51 C 2.98 1.41 1.96 2.29 0.92 3.17 "/>
 </g>
 </g>
-<mask id="mask-68">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-137">
 <path clip-rule="nonzero" d="M 0.92 0.51 L 6.09 0.51 L 6.09 6.88 L 0.92 6.88 Z M 0.92 0.51 "/>
 </clipPath>
@@ -1112,11 +764,6 @@
 <path fill="#FF6859" d="M 0.92 3.17 C 1.62 4.36 2.32 5.55 3 6.76 C 3.02 6.8 3.04 6.84 3.07 6.88 C 3.79 6.25 4.52 5.62 5.23 4.98 C 5.52 4.72 5.8 4.46 6.09 4.2 C 5.39 2.97 4.7 1.74 4 0.51 C 2.98 1.41 1.96 2.29 0.92 3.17 "/>
 </g>
 </g>
-<mask id="mask-69">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-139">
 <path clip-rule="nonzero" d="M 0.48 0.86 L 5.53 0.86 L 5.53 7.3 L 0.48 7.3 Z M 0.48 0.86 "/>
 </clipPath>
@@ -1128,11 +775,6 @@
 <path fill="#FF6859" d="M 0.48 3.76 C 1.18 4.94 1.88 6.12 2.57 7.3 C 3.56 6.35 4.55 5.39 5.53 4.43 C 4.86 3.23 4.18 2.05 3.49 0.86 C 2.49 1.83 1.49 2.8 0.48 3.76 "/>
 </g>
 </g>
-<mask id="mask-70">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-141">
 <path clip-rule="nonzero" d="M 0.48 0.86 L 5.53 0.86 L 5.53 7.3 L 0.48 7.3 Z M 0.48 0.86 "/>
 </clipPath>
@@ -1144,11 +786,6 @@
 <path fill="#FF6859" d="M 0.48 3.76 C 1.18 4.94 1.88 6.12 2.57 7.3 C 3.56 6.35 4.55 5.39 5.53 4.43 C 4.86 3.23 4.18 2.05 3.49 0.86 C 2.49 1.83 1.49 2.8 0.48 3.76 "/>
 </g>
 </g>
-<mask id="mask-71">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-143">
 <path clip-rule="nonzero" d="M 0.59 0.94 L 5.91 0.94 L 5.91 7.43 L 0.59 7.43 Z M 0.59 0.94 "/>
 </clipPath>
@@ -1160,11 +797,6 @@
 <path fill="#FF6859" d="M 2.77 7.43 C 3.81 6.41 4.86 5.4 5.91 4.4 C 5.19 3.24 4.47 2.09 3.74 0.94 C 2.69 1.96 1.64 2.98 0.59 4 C 1.32 5.14 2.04 6.29 2.77 7.43 "/>
 </g>
 </g>
-<mask id="mask-72">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-145">
 <path clip-rule="nonzero" d="M 0.59 0.94 L 5.91 0.94 L 5.91 7.43 L 0.59 7.43 Z M 0.59 0.94 "/>
 </clipPath>
@@ -1176,11 +808,6 @@
 <path fill="#FF6859" d="M 2.77 7.43 C 3.81 6.41 4.86 5.4 5.91 4.4 C 5.19 3.24 4.47 2.09 3.74 0.94 C 2.69 1.96 1.64 2.98 0.59 4 C 1.32 5.14 2.04 6.29 2.77 7.43 "/>
 </g>
 </g>
-<mask id="mask-73">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-147">
 <path clip-rule="nonzero" d="M 0.17 0.43 L 12.55 0.43 L 12.55 11.24 L 0.17 11.24 Z M 0.17 0.43 "/>
 </clipPath>
@@ -1192,11 +819,6 @@
 <path fill="#FF6859" d="M 10.09 0.43 C 6.77 2.84 3.46 5.25 0.17 7.69 C 1.11 8.92 2.01 10.11 2.88 11.24 C 6.09 8.88 9.32 6.53 12.55 4.19 C 11.73 2.93 10.91 1.68 10.09 0.43 "/>
 </g>
 </g>
-<mask id="mask-74">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-149">
 <path clip-rule="nonzero" d="M 0.05 0.38 L 17.15 0.38 L 17.15 15.05 L 0.05 15.05 Z M 0.05 0.38 "/>
 </clipPath>
@@ -1208,11 +830,6 @@
 <path fill="#FF6859" d="M 0.05 11.21 C 0.84 12.49 1.63 13.77 2.43 15.05 C 7.36 11.49 12.27 7.91 17.15 4.29 C 16.42 2.99 15.68 1.68 14.95 0.38 C 13.88 1.23 9.73 4.23 0.05 11.21 "/>
 </g>
 </g>
-<mask id="mask-75">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-151">
 <path clip-rule="nonzero" d="M 0.64 0.68 L 12.99 0.68 L 12.99 11.64 L 0.64 11.64 Z M 0.64 0.68 "/>
 </clipPath>
@@ -1224,11 +841,6 @@
 <path fill="#FF6859" d="M 0.64 7.85 C 1.46 9.11 2.29 10.37 3.1 11.64 C 6.39 9.26 9.69 6.89 12.99 4.52 C 12.2 3.24 11.4 1.96 10.61 0.68 C 7.29 3.07 3.96 5.46 0.64 7.85 "/>
 </g>
 </g>
-<mask id="mask-76">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-153">
 <path clip-rule="nonzero" d="M 0.44 0.49 L 16.44 0.49 L 16.44 15.74 L 0.44 15.74 Z M 0.44 0.49 "/>
 </clipPath>
@@ -1240,11 +852,6 @@
 <path fill="#FF6859" d="M 0.44 11.64 C 1.05 13.01 1.68 14.38 2.31 15.73 C 7.09 11.97 11.81 8.12 16.44 4.15 C 15.7 2.93 14.95 1.71 14.21 0.49 C 9.69 4.3 5.1 8.01 0.44 11.64 "/>
 </g>
 </g>
-<mask id="mask-77">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-155">
 <path clip-rule="nonzero" d="M 0.14 0.73 L 11.61 0.73 L 11.61 11.91 L 0.14 11.91 Z M 0.14 0.73 "/>
 </clipPath>
@@ -1256,11 +863,6 @@
 <path fill="#FF6859" d="M 0.14 8.01 C 0.87 9.32 1.6 10.61 2.34 11.91 C 5.45 9.58 8.55 7.23 11.61 4.84 C 11 3.47 10.38 2.1 9.75 0.73 C 6.57 3.19 3.36 5.61 0.14 8.01 "/>
 </g>
 </g>
-<mask id="mask-78">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.8"/>
-</g>
-</mask>
 <clipPath id="clip-157">
 <path clip-rule="nonzero" d="M 0.42 0.41 L 13.21 0.41 L 13.21 13.39 L 0.42 13.39 Z M 0.42 0.41 "/>
 </clipPath>
@@ -1272,11 +874,6 @@
 <path fill="#FF6859" d="M 2.62 13.39 C 6.22 10.24 9.75 7.01 13.21 3.69 C 12.51 2.73 11.71 1.62 10.82 0.41 C 7.42 3.6 3.95 6.71 0.42 9.75 C 1.15 10.96 1.89 12.18 2.62 13.39 "/>
 </g>
 </g>
-<mask id="mask-79">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-159">
 <path clip-rule="nonzero" d="M 0.09 0.85 L 6.1 0.85 L 6.1 7.19 L 0.09 7.19 Z M 0.09 0.85 "/>
 </clipPath>
@@ -1288,11 +885,6 @@
 <path fill="#FF6859" d="M 0.09 3.43 C 0.91 4.68 1.73 5.93 2.55 7.19 C 3.73 6.34 4.92 5.49 6.1 4.64 C 5.29 3.37 4.46 2.11 3.64 0.85 C 2.46 1.71 1.27 2.57 0.09 3.43 "/>
 </g>
 </g>
-<mask id="mask-80">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-161">
 <path clip-rule="nonzero" d="M 0.09 0.85 L 6.1 0.85 L 6.1 7.19 L 0.09 7.19 Z M 0.09 0.85 "/>
 </clipPath>
@@ -1304,11 +896,6 @@
 <path fill="#FF6859" d="M 0.09 3.43 C 0.91 4.68 1.73 5.93 2.55 7.19 C 3.73 6.34 4.92 5.49 6.1 4.64 C 5.29 3.37 4.46 2.11 3.64 0.85 C 2.46 1.71 1.27 2.57 0.09 3.43 "/>
 </g>
 </g>
-<mask id="mask-81">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-163">
 <path clip-rule="nonzero" d="M 0.61 0.21 L 6.43 0.21 L 6.43 6.52 L 0.61 6.52 Z M 0.61 0.21 "/>
 </clipPath>
@@ -1320,11 +907,6 @@
 <path fill="#FF6859" d="M 0.61 2.68 C 1.4 3.96 2.2 5.24 2.99 6.52 C 4.13 5.7 5.28 4.87 6.43 4.05 C 5.63 2.77 4.84 1.49 4.05 0.21 C 2.9 1.04 1.75 1.86 0.61 2.68 "/>
 </g>
 </g>
-<mask id="mask-82">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-165">
 <path clip-rule="nonzero" d="M 0.61 0.21 L 6.43 0.21 L 6.43 6.52 L 0.61 6.52 Z M 0.61 0.21 "/>
 </clipPath>
@@ -1336,11 +918,6 @@
 <path fill="#FF6859" d="M 0.61 2.68 C 1.4 3.96 2.2 5.24 2.99 6.52 C 4.13 5.7 5.28 4.87 6.43 4.05 C 5.63 2.77 4.84 1.49 4.05 0.21 C 2.9 1.04 1.75 1.86 0.61 2.68 "/>
 </g>
 </g>
-<mask id="mask-83">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-167">
 <path clip-rule="nonzero" d="M 0.95 0.01 L 6.34 0.01 L 6.34 6.29 L 0.95 6.29 Z M 0.95 0.01 "/>
 </clipPath>
@@ -1352,11 +929,6 @@
 <path fill="#FF6859" d="M 0.95 2.38 C 1.68 3.68 2.42 4.99 3.15 6.29 C 4.21 5.5 5.28 4.71 6.34 3.91 C 5.61 2.61 4.87 1.32 4.14 0.01 C 3.07 0.8 2.01 1.59 0.95 2.38 "/>
 </g>
 </g>
-<mask id="mask-84">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-169">
 <path clip-rule="nonzero" d="M 0.95 0.01 L 6.34 0.01 L 6.34 6.29 L 0.95 6.29 Z M 0.95 0.01 "/>
 </clipPath>
@@ -1368,11 +940,6 @@
 <path fill="#FF6859" d="M 0.95 2.38 C 1.68 3.68 2.42 4.99 3.15 6.29 C 4.21 5.5 5.28 4.71 6.34 3.91 C 5.61 2.61 4.87 1.32 4.14 0.01 C 3.07 0.8 2.01 1.59 0.95 2.38 "/>
 </g>
 </g>
-<mask id="mask-85">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-171">
 <path clip-rule="nonzero" d="M 0.75 0.64 L 5.31 0.64 L 5.31 6.84 L 0.75 6.84 Z M 0.75 0.64 "/>
 </clipPath>
@@ -1384,11 +951,6 @@
 <path fill="#FF6859" d="M 0.75 2.73 C 1.38 4.1 2 5.47 2.61 6.84 C 3.52 6.14 4.41 5.44 5.31 4.73 C 4.68 3.38 4.05 2.01 3.44 0.64 C 2.55 1.34 1.65 2.04 0.75 2.73 "/>
 </g>
 </g>
-<mask id="mask-86">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-173">
 <path clip-rule="nonzero" d="M 0.75 0.64 L 5.31 0.64 L 5.31 6.84 L 0.75 6.84 Z M 0.75 0.64 "/>
 </clipPath>
@@ -1400,11 +962,6 @@
 <path fill="#FF6859" d="M 0.75 2.73 C 1.38 4.1 2 5.47 2.61 6.84 C 3.52 6.14 4.41 5.44 5.31 4.73 C 4.68 3.38 4.05 2.01 3.44 0.64 C 2.55 1.34 1.65 2.04 0.75 2.73 "/>
 </g>
 </g>
-<mask id="mask-87">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-175">
 <path clip-rule="nonzero" d="M 0.21 0.75 L 5.62 0.75 L 5.62 7.15 L 0.21 7.15 Z M 0.21 0.75 "/>
 </clipPath>
@@ -1416,11 +973,6 @@
 <path fill="#FF6859" d="M 3.42 0.75 C 2.35 1.67 1.28 2.59 0.21 3.49 C 0.95 4.71 1.7 5.93 2.43 7.15 C 3.5 6.24 4.57 5.32 5.62 4.39 C 4.89 3.18 4.15 1.96 3.42 0.75 "/>
 </g>
 </g>
-<mask id="mask-88">
-<g filter="url(#filter-remove-color)">
-<rect x="-14.19" y="-13.91" width="170.22" height="166.9" fill="#000000" fill-opacity="0.5"/>
-</g>
-</mask>
 <clipPath id="clip-177">
 <path clip-rule="nonzero" d="M 0.21 0.75 L 5.62 0.75 L 5.62 7.15 L 0.21 7.15 Z M 0.21 0.75 "/>
 </clipPath>
@@ -1436,271 +988,271 @@
 <g clip-path="url(#clip-0)">
 <path fill="#FFE7E3" d="M 0.39 57.11 C 4.08 52.5 40 27.63 46.45 23.03 C 52.89 18.42 83.29 0 85.13 0 C 86.97 0 129.34 58.03 133.95 64.47 C 138.55 70.92 141.31 74.61 141.31 74.61 C 141.31 74.61 132.1 89.34 119.21 98.55 C 106.31 107.76 60.26 137.24 57.5 138.16 C 54.73 139.08 12.37 79.21 9.6 73.68 C 6.84 68.16 0.39 57.11 0.39 57.11 "/>
 </g>
-<g mask="url(#mask-0)">
+<g opacity="0.5">
 <use xlink:href="#source-5" transform="matrix(1, 0, 0, 1, 56, 116)"/>
 </g>
-<g mask="url(#mask-1)">
+<g opacity="0.5">
 <use xlink:href="#source-8" transform="matrix(1, 0, 0, 1, 30, 78)"/>
 </g>
-<g mask="url(#mask-2)">
+<g opacity="0.5">
 <use xlink:href="#source-11" transform="matrix(1, 0, 0, 1, 8, 47)"/>
 </g>
-<g mask="url(#mask-3)">
+<g opacity="0.5">
 <use xlink:href="#source-14" transform="matrix(1, 0, 0, 1, 17, 61)"/>
 </g>
-<g mask="url(#mask-4)">
+<g opacity="0.5">
 <use xlink:href="#source-17" transform="matrix(1, 0, 0, 1, 42, 96)"/>
 </g>
-<g mask="url(#mask-5)">
+<g opacity="0.5">
 <use xlink:href="#source-20" transform="matrix(1, 0, 0, 1, 57, 86)"/>
 </g>
-<g mask="url(#mask-6)">
+<g opacity="0.5">
 <use xlink:href="#source-23" transform="matrix(1, 0, 0, 1, 45, 68)"/>
 </g>
-<g mask="url(#mask-7)">
+<g opacity="0.5">
 <use xlink:href="#source-26" transform="matrix(1, 0, 0, 1, 69, 107)"/>
 </g>
-<g mask="url(#mask-8)">
+<g opacity="0.5">
 <use xlink:href="#source-29" transform="matrix(1, 0, 0, 1, 25, 35)"/>
 </g>
-<g mask="url(#mask-9)">
+<g opacity="0.5">
 <use xlink:href="#source-32" transform="matrix(1, 0, 0, 1, 35, 51)"/>
 </g>
-<g mask="url(#mask-10)">
+<g opacity="0.5">
 <use xlink:href="#source-35" transform="matrix(1, 0, 0, 1, 88, 93)"/>
 </g>
-<g mask="url(#mask-11)">
+<g opacity="0.5">
 <use xlink:href="#source-38" transform="matrix(1, 0, 0, 1, 41, 23)"/>
 </g>
-<g mask="url(#mask-12)">
+<g opacity="0.5">
 <use xlink:href="#source-41" transform="matrix(1, 0, 0, 1, 64, 53)"/>
 </g>
-<g mask="url(#mask-13)">
+<g opacity="0.5">
 <use xlink:href="#source-44" transform="matrix(1, 0, 0, 1, 76, 72)"/>
 </g>
-<g mask="url(#mask-14)">
+<g opacity="0.5">
 <use xlink:href="#source-47" transform="matrix(1, 0, 0, 1, 52, 38)"/>
 </g>
-<g mask="url(#mask-15)">
+<g opacity="0.5">
 <use xlink:href="#source-50" transform="matrix(1, 0, 0, 1, 67, 28)"/>
 </g>
-<g mask="url(#mask-16)">
+<g opacity="0.5">
 <use xlink:href="#source-53" transform="matrix(1, 0, 0, 1, 88, 60)"/>
 </g>
-<g mask="url(#mask-17)">
+<g opacity="0.5">
 <use xlink:href="#source-56" transform="matrix(1, 0, 0, 1, 100, 84)"/>
 </g>
-<g mask="url(#mask-18)">
+<g opacity="0.5">
 <use xlink:href="#source-59" transform="matrix(1, 0, 0, 1, 57, 13)"/>
 </g>
-<g mask="url(#mask-19)">
+<g opacity="0.5">
 <use xlink:href="#source-62" transform="matrix(1, 0, 0, 1, 78, 43)"/>
 </g>
-<g mask="url(#mask-20)">
+<g opacity="0.5">
 <use xlink:href="#source-65" transform="matrix(1, 0, 0, 1, 83, 17)"/>
 </g>
-<g mask="url(#mask-21)">
+<g opacity="0.5">
 <use xlink:href="#source-68" transform="matrix(1, 0, 0, 1, 102, 46)"/>
 </g>
-<g mask="url(#mask-22)">
+<g opacity="0.5">
 <use xlink:href="#source-71" transform="matrix(1, 0, 0, 1, 73, 4)"/>
 </g>
-<g mask="url(#mask-23)">
+<g opacity="0.5">
 <use xlink:href="#source-74" transform="matrix(1, 0, 0, 1, 117, 70)"/>
 </g>
-<g mask="url(#mask-24)">
+<g opacity="0.5">
 <use xlink:href="#source-77" transform="matrix(1, 0, 0, 1, 92, 31)"/>
 </g>
-<g mask="url(#mask-25)">
+<g opacity="0.5">
 <use xlink:href="#source-80" transform="matrix(1, 0, 0, 1, 18, 49)"/>
 </g>
-<g mask="url(#mask-26)">
+<g opacity="0.5">
 <use xlink:href="#source-83" transform="matrix(1, 0, 0, 1, 5, 60)"/>
 </g>
-<g mask="url(#mask-27)">
+<g opacity="0.5">
 <use xlink:href="#source-86" transform="matrix(1, 0, 0, 1, 53, 26)"/>
 </g>
-<g mask="url(#mask-28)">
+<g opacity="0.5">
 <use xlink:href="#source-89" transform="matrix(1, 0, 0, 1, 68, 17)"/>
 </g>
-<g mask="url(#mask-29)">
+<g opacity="0.5">
 <use xlink:href="#source-92" transform="matrix(1, 0, 0, 1, 84, 8)"/>
 </g>
-<g mask="url(#mask-30)">
+<g opacity="0.5">
 <use xlink:href="#source-95" transform="matrix(1, 0, 0, 1, 36, 38)"/>
 </g>
-<g mask="url(#mask-31)">
+<g opacity="0.5">
 <use xlink:href="#source-98" transform="matrix(1, 0, 0, 1, 14, 57)"/>
 </g>
-<g mask="url(#mask-32)">
+<g opacity="0.5">
 <use xlink:href="#source-101" transform="matrix(1, 0, 0, 1, 14, 57)"/>
 </g>
-<g mask="url(#mask-33)">
+<g opacity="0.5">
 <use xlink:href="#source-104" transform="matrix(1, 0, 0, 1, 33, 47)"/>
 </g>
-<g mask="url(#mask-34)">
+<g opacity="0.5">
 <use xlink:href="#source-107" transform="matrix(1, 0, 0, 1, 33, 47)"/>
 </g>
-<g mask="url(#mask-35)">
+<g opacity="0.5">
 <use xlink:href="#source-110" transform="matrix(1, 0, 0, 1, 50, 34)"/>
 </g>
-<g mask="url(#mask-36)">
+<g opacity="0.5">
 <use xlink:href="#source-113" transform="matrix(1, 0, 0, 1, 50, 34)"/>
 </g>
-<g mask="url(#mask-37)">
+<g opacity="0.5">
 <use xlink:href="#source-116" transform="matrix(1, 0, 0, 1, 65, 24)"/>
 </g>
-<g mask="url(#mask-38)">
+<g opacity="0.5">
 <use xlink:href="#source-119" transform="matrix(1, 0, 0, 1, 65, 24)"/>
 </g>
-<g mask="url(#mask-39)">
+<g opacity="0.5">
 <use xlink:href="#source-122" transform="matrix(1, 0, 0, 1, 80, 14)"/>
 </g>
-<g mask="url(#mask-40)">
+<g opacity="0.5">
 <use xlink:href="#source-125" transform="matrix(1, 0, 0, 1, 80, 14)"/>
 </g>
-<g mask="url(#mask-41)">
+<g opacity="0.5">
 <use xlink:href="#source-128" transform="matrix(1, 0, 0, 1, 16, 77)"/>
 </g>
-<g mask="url(#mask-42)">
+<g opacity="0.5">
 <use xlink:href="#source-131" transform="matrix(1, 0, 0, 1, 93, 21)"/>
 </g>
-<g mask="url(#mask-43)">
+<g opacity="0.5">
 <use xlink:href="#source-134" transform="matrix(1, 0, 0, 1, 46, 53)"/>
 </g>
-<g mask="url(#mask-44)">
+<g opacity="0.5">
 <use xlink:href="#source-137" transform="matrix(1, 0, 0, 1, 79, 30)"/>
 </g>
-<g mask="url(#mask-45)">
+<g opacity="0.5">
 <use xlink:href="#source-140" transform="matrix(1, 0, 0, 1, 31, 66)"/>
 </g>
-<g mask="url(#mask-46)">
+<g opacity="0.5">
 <use xlink:href="#source-143" transform="matrix(1, 0, 0, 1, 65, 42)"/>
 </g>
-<g mask="url(#mask-47)">
+<g opacity="0.5">
 <use xlink:href="#source-146" transform="matrix(1, 0, 0, 1, 27, 74)"/>
 </g>
-<g mask="url(#mask-48)">
+<g opacity="0.5">
 <use xlink:href="#source-149" transform="matrix(1, 0, 0, 1, 27, 74)"/>
 </g>
-<g mask="url(#mask-49)">
+<g opacity="0.5">
 <use xlink:href="#source-152" transform="matrix(1, 0, 0, 1, 43, 64)"/>
 </g>
-<g mask="url(#mask-50)">
+<g opacity="0.5">
 <use xlink:href="#source-155" transform="matrix(1, 0, 0, 1, 43, 64)"/>
 </g>
-<g mask="url(#mask-51)">
+<g opacity="0.5">
 <use xlink:href="#source-158" transform="matrix(1, 0, 0, 1, 62, 50)"/>
 </g>
-<g mask="url(#mask-52)">
+<g opacity="0.5">
 <use xlink:href="#source-161" transform="matrix(1, 0, 0, 1, 62, 50)"/>
 </g>
-<g mask="url(#mask-53)">
+<g opacity="0.5">
 <use xlink:href="#source-164" transform="matrix(1, 0, 0, 1, 75, 39)"/>
 </g>
-<g mask="url(#mask-54)">
+<g opacity="0.5">
 <use xlink:href="#source-167" transform="matrix(1, 0, 0, 1, 75, 39)"/>
 </g>
-<g mask="url(#mask-55)">
+<g opacity="0.5">
 <use xlink:href="#source-170" transform="matrix(1, 0, 0, 1, 90, 27)"/>
 </g>
-<g mask="url(#mask-56)">
+<g opacity="0.5">
 <use xlink:href="#source-173" transform="matrix(1, 0, 0, 1, 90, 27)"/>
 </g>
-<g mask="url(#mask-57)">
+<g opacity="0.5">
 <use xlink:href="#source-176" transform="matrix(1, 0, 0, 1, 89, 46)"/>
 </g>
-<g mask="url(#mask-58)">
+<g opacity="0.5">
 <use xlink:href="#source-179" transform="matrix(1, 0, 0, 1, 103, 34)"/>
 </g>
-<g mask="url(#mask-59)">
+<g opacity="0.5">
 <use xlink:href="#source-182" transform="matrix(1, 0, 0, 1, 30, 95)"/>
 </g>
-<g mask="url(#mask-60)">
+<g opacity="0.5">
 <use xlink:href="#source-185" transform="matrix(1, 0, 0, 1, 44, 85)"/>
 </g>
-<g mask="url(#mask-61)">
+<g opacity="0.5">
 <use xlink:href="#source-188" transform="matrix(1, 0, 0, 1, 58, 71)"/>
 </g>
-<g mask="url(#mask-62)">
+<g opacity="0.5">
 <use xlink:href="#source-191" transform="matrix(1, 0, 0, 1, 77, 59)"/>
 </g>
-<g mask="url(#mask-63)">
+<g opacity="0.5">
 <use xlink:href="#source-194" transform="matrix(1, 0, 0, 1, 40, 92)"/>
 </g>
-<g mask="url(#mask-64)">
+<g opacity="0.5">
 <use xlink:href="#source-197" transform="matrix(1, 0, 0, 1, 40, 92)"/>
 </g>
-<g mask="url(#mask-65)">
+<g opacity="0.5">
 <use xlink:href="#source-200" transform="matrix(1, 0, 0, 1, 55, 82)"/>
 </g>
-<g mask="url(#mask-66)">
+<g opacity="0.5">
 <use xlink:href="#source-203" transform="matrix(1, 0, 0, 1, 55, 82)"/>
 </g>
-<g mask="url(#mask-67)">
+<g opacity="0.5">
 <use xlink:href="#source-206" transform="matrix(1, 0, 0, 1, 73, 68)"/>
 </g>
-<g mask="url(#mask-68)">
+<g opacity="0.5">
 <use xlink:href="#source-209" transform="matrix(1, 0, 0, 1, 73, 68)"/>
 </g>
-<g mask="url(#mask-69)">
+<g opacity="0.5">
 <use xlink:href="#source-212" transform="matrix(1, 0, 0, 1, 86, 56)"/>
 </g>
-<g mask="url(#mask-70)">
+<g opacity="0.5">
 <use xlink:href="#source-215" transform="matrix(1, 0, 0, 1, 86, 56)"/>
 </g>
-<g mask="url(#mask-71)">
+<g opacity="0.5">
 <use xlink:href="#source-218" transform="matrix(1, 0, 0, 1, 100, 42)"/>
 </g>
-<g mask="url(#mask-72)">
+<g opacity="0.5">
 <use xlink:href="#source-221" transform="matrix(1, 0, 0, 1, 100, 42)"/>
 </g>
-<g mask="url(#mask-73)">
+<g opacity="0.5">
 <use xlink:href="#source-224" transform="matrix(1, 0, 0, 1, 44, 115)"/>
 </g>
-<g mask="url(#mask-74)">
+<g opacity="0.5">
 <use xlink:href="#source-227" transform="matrix(1, 0, 0, 1, 71, 92)"/>
 </g>
-<g mask="url(#mask-75)">
+<g opacity="0.5">
 <use xlink:href="#source-230" transform="matrix(1, 0, 0, 1, 57, 105)"/>
 </g>
-<g mask="url(#mask-76)">
+<g opacity="0.5">
 <use xlink:href="#source-233" transform="matrix(1, 0, 0, 1, 101, 69)"/>
 </g>
-<g mask="url(#mask-77)">
+<g opacity="0.5">
 <use xlink:href="#source-236" transform="matrix(1, 0, 0, 1, 89, 82)"/>
 </g>
-<g mask="url(#mask-78)">
+<g opacity="0.8">
 <use xlink:href="#source-239" transform="matrix(1, 0, 0, 1, 118, 57)"/>
 </g>
-<g mask="url(#mask-79)">
+<g opacity="0.5">
 <use xlink:href="#source-242" transform="matrix(1, 0, 0, 1, 54, 112)"/>
 </g>
-<g mask="url(#mask-80)">
+<g opacity="0.5">
 <use xlink:href="#source-245" transform="matrix(1, 0, 0, 1, 54, 112)"/>
 </g>
-<g mask="url(#mask-81)">
+<g opacity="0.5">
 <use xlink:href="#source-248" transform="matrix(1, 0, 0, 1, 67, 103)"/>
 </g>
-<g mask="url(#mask-82)">
+<g opacity="0.5">
 <use xlink:href="#source-251" transform="matrix(1, 0, 0, 1, 67, 103)"/>
 </g>
-<g mask="url(#mask-83)">
+<g opacity="0.5">
 <use xlink:href="#source-254" transform="matrix(1, 0, 0, 1, 85, 90)"/>
 </g>
-<g mask="url(#mask-84)">
+<g opacity="0.5">
 <use xlink:href="#source-257" transform="matrix(1, 0, 0, 1, 85, 90)"/>
 </g>
-<g mask="url(#mask-85)">
+<g opacity="0.5">
 <use xlink:href="#source-260" transform="matrix(1, 0, 0, 1, 98, 80)"/>
 </g>
-<g mask="url(#mask-86)">
+<g opacity="0.5">
 <use xlink:href="#source-263" transform="matrix(1, 0, 0, 1, 98, 80)"/>
 </g>
-<g mask="url(#mask-87)">
+<g opacity="0.5">
 <use xlink:href="#source-266" transform="matrix(1, 0, 0, 1, 115, 66)"/>
 </g>
-<g mask="url(#mask-88)">
+<g opacity="0.5">
 <use xlink:href="#source-269" transform="matrix(1, 0, 0, 1, 115, 66)"/>
 </g>
 <path fill="#004249" d="M 123.39 20.71 C 119.45 16.38 112.56 16.2 107.04 18.15 C 101.72 20.04 97.12 23.49 92.06 26 C 89.45 27.87 86.23 29.28 83.16 28.92 C 81.82 29.18 80.43 29.3 79.05 29.34 C 77.92 29.37 76.78 29.33 75.64 29.39 C 74.36 29.46 73.08 29.59 71.8 29.71 C 71.27 29.77 70.73 29.83 70.2 29.89 C 70.2 29.89 69.98 29.92 69.82 29.95 C 69.67 29.96 69.46 30 69.46 30 C 64.89 30.72 60.58 32.05 56.28 33.73 C 55.77 33.93 55.27 34.14 54.77 34.34 C 54.75 34.35 54.67 34.38 54.58 34.42 C 54.41 34.5 54.15 34.61 54.09 34.64 C 53.95 34.7 53.81 34.77 53.67 34.82 C 53.45 34.96 53.23 35.1 53.01 35.24 C 52.14 35.79 51.31 36.38 50.49 36.98 C 50.41 37.05 49.73 37.59 49.57 37.72 C 49.2 38.04 48.82 38.36 48.46 38.7 C 47.57 39.51 46.72 40.37 45.91 41.27 C 45.58 41.64 45.26 42.02 44.94 42.4 C 44.9 42.45 44.76 42.63 44.66 42.76 C 44.57 42.88 44.46 43.02 44.43 43.07 C 43.1 44.93 42.05 46.9 41.05 48.95 C 41.46 48.12 40.74 49.79 40.63 50.14 C 40.48 50.61 40.34 51.09 40.21 51.58 C 39.93 52.66 39.72 53.77 39.52 54.87 C 39.5 54.97 39.49 55.05 39.48 55.12 C 39.47 55.18 39.46 55.25 39.46 55.33 C 39.43 55.56 39.41 55.79 39.38 56.03 C 39.32 56.65 39.27 57.27 39.24 57.89 C 39.23 58.09 39.22 58.29 39.21 58.49 C 39.31 68.04 41.58 73.24 46.16 79.28 C 48.2 81.98 50.73 84.24 53.36 86.38 C 55.97 88.5 58.91 90.43 62.09 91.5 C 64.15 92.19 68.95 92.65 71.12 92.7 C 84.19 93.02 94.46 86.29 101.87 75.53 C 103.56 73.07 104.97 70.43 106.62 67.93 C 108.96 64.39 111.77 61.18 114.29 57.77 C 118.37 52.23 121.71 46.15 124.18 39.73 C 125.38 36.61 126.39 33.35 126.48 30 C 126.57 26.66 125.64 23.18 123.39 20.71 "/>

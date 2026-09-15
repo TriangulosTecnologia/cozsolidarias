@@ -723,22 +723,50 @@
         }
       }
 
+      /* The document is a continuous stack of bands, and it prints as one. Forcing a
+   page per band leaves most pages empty and cuts the long ones in half anyway;
+   letting it flow keeps the voz fields bleeding edge to edge, which is the
+   whole point of them. The page carries no margin of its own — the bands
+   already have theirs, and a page margin would put white around every field. */
       @media print {
+        @page {
+          size: A4;
+          margin: 0;
+        }
         .band {
-          padding: 28px 32px 32px;
-          page-break-after: always;
+          padding: 52px 56px 56px;
           -webkit-print-color-adjust: exact;
           print-color-adjust: exact;
         }
-        .band:last-child {
-          page-break-after: auto;
-        }
         .cover {
-          min-height: auto;
-          padding: 48px 32px;
+          min-height: 0;
+          height: 297mm;
+          padding: 56px;
         }
         .toc {
           display: none;
+        }
+        .in {
+          max-width: none;
+        }
+        h2,
+        h3,
+        .rail {
+          break-inside: avoid;
+          break-after: avoid;
+        }
+        figure,
+        table,
+        .csfig,
+        .proof,
+        .lockups figure,
+        .note,
+        .swatches,
+        .spec .row,
+        .chain li,
+        .ptdemo,
+        .tile {
+          break-inside: avoid;
         }
       }
     </style>
@@ -790,7 +818,7 @@
             <a href="#open"><span>11</span>Open questions</a>
           </li>
         </ul>
-        <p class="cover-meta">Contract 2.2.0 · September 2026</p>
+        <p class="cover-meta">Contract 2.3.0 · September 2026</p>
       </div>
     </section>
 
@@ -1651,7 +1679,10 @@
           </p>
 
           <div class="strip">
-            <img src="illustration/rice-and-beans.svg" alt="Rice and beans" />
+            <img
+              src="illustration/bananas-on-plate.svg"
+              alt="Bananas on a plate"
+            />
             <img src="illustration/papaya.svg" alt="Papaya" />
             <img
               src="illustration/carrots-in-bowl.svg"
@@ -1697,6 +1728,18 @@
             </div>
           </div>
 
+          <div class="note">
+            <p>
+              <b>One file will not print.</b>
+              <code>rice-and-beans.svg</code> still carries the blend machinery
+              the extractor emitted for its shading, and that construction hangs
+              Chrome's print rasteriser: any PDF export of a document containing
+              it never finishes. On screen it is correct. Until it is rebuilt,
+              keep it out of anything destined for PDF or press — which is why
+              it is not in the row above — or place a rendered copy instead.
+            </p>
+          </div>
+
           <h3>The pattern</h3>
           <div class="tile"></div>
           <p class="cap">
@@ -1719,11 +1762,19 @@
             src="logo/vertical-color-on-dark.svg"
             alt="Cozinha Solidária em Rede"
           />
-          <h2>Three things this book cannot settle</h2>
+          <h2>Four things this book cannot settle</h2>
           <p>
-            All three are recorded in the spec under <code>unresolved</code>.
+            All four are recorded in the spec under <code>unresolved</code>.
           </p>
           <ol class="open">
+            <li>
+              <b>One illustration cannot be printed.</b>
+              <code>rice-and-beans.svg</code> carries the extractor's emulation
+              of its shading — twenty-one chained blend groups — and that hangs
+              the print rasteriser. Three rebuilds were tried and rejected on
+              the evidence; the designer's own file for that piece would settle
+              it.
+            </li>
             <li>
               <b>No print proof exists.</b> Every spot and CMYK reference is
               unverified, and the manual's PANTONE numbers are wrong on their

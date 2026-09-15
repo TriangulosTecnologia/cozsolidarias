@@ -1,7 +1,7 @@
 {
   "meta": {
     "schema_version": 4,
-    "version": "2.2.0",
+    "version": "2.3.0",
     "brand_name": "Cozinha Solidária em Rede",
     "tier": "full",
     "touchpoints": [
@@ -268,7 +268,7 @@
     },
 
     "imagery": {
-      "illustration": "A 34-piece drawn food set in brand/illustration/ — fruit, vegetables, fish, eggs, rice and beans, preserves. All are vector masters and scale freely: 24 extracted from the native .ai, 10 reconstructed from raster exports because no vector source was delivered for them (see E-011). Built entirely from filled shapes with no stroke anywhere; apparent contours are dark shapes behind lighter ones. They depict real Brazilian everyday food, not generic 'healthy eating' iconography; that specificity is the point and should survive any extension of the set. The set deliberately runs on its own naturalistic palette of 81 colours rather than the brand palette — brand colours appear only where a piece carries the logo. Coherence comes from the drawing hand and the flat fill construction, not shared hues; do not recolour the set to the brand palette. Place them per visual.composition: on mesa only.",
+      "illustration": "A 34-piece drawn food set in brand/illustration/ — fruit, vegetables, fish, eggs, rice and beans, preserves. All are vector masters and scale freely: 24 extracted from the native .ai, 10 reconstructed from raster exports because no vector source was delivered for them (see E-011). Built entirely from filled shapes with no stroke anywhere; apparent contours are dark shapes behind lighter ones. One exception, recorded in E-014 and unresolved: rice-and-beans.svg still carries the transparency machinery the extractor emitted for its shading, and hangs Chrome's print rasteriser. They depict real Brazilian everyday food, not generic 'healthy eating' iconography; that specificity is the point and should survive any extension of the set. The set deliberately runs on its own naturalistic palette of 81 colours rather than the brand palette — brand colours appear only where a piece carries the logo. Coherence comes from the drawing hand and the flat fill construction, not shared hues; do not recolour the set to the brand palette. Place them per visual.composition: on mesa only.",
       "pattern": "A seamless 280×280 food-drawing tile in brand/pattern/. Verified seamless. Supplied in the dark ink for light grounds and in Branco Leitura for dark grounds. It is a texture, not a focal element — keep it behind content, never under the logo's clear space.",
       "photography": "Real kitchens, real hands, real food in preparation. Not styled studio food, not stock images of empty plates."
     }
@@ -352,6 +352,13 @@
       "status": "active"
     },
     {
+      "id": "E-014",
+      "claim": "Three of the 62 vector masters carried the transparency machinery pdftocairo emits for PDF soft masks and blend groups, which the contract's 'entirely filled shapes' claim did not cover. In avocado.svg (89) and nuts.svg (5) it was the simple form — a full-canvas rect at constant alpha behind a colour matrix — and collapses to a group opacity with a maximum channel-sum difference of 5 out of 765 on white and on mid grey. rice-and-beans.svg carries the hard form: 21 chained PDF multiply groups expressed as 42 filters pulling each other in through <feImage href>, 84 in total. That construct hangs Chrome's print rasteriser outright, so any PDF export of any document containing the file never completes, and it is the reason the brand book could not be exported. It renders correctly on screen: 5.4% of pixels differ from the page poppler renders from the native .ai, at antialiasing level. No logo or pattern master is affected.",
+      "kind": "observation",
+      "source": "Element census of all 62 masters; per-file Chrome print-to-PDF runs with a 20s budget; before-and-after renders at 700px on #FFFFFF and #9AA0A6; the artboard rendered from the native .ai at 400dpi by pdftocairo as the reference.",
+      "status": "active"
+    },
+    {
       "id": "E-013",
       "claim": "The clear-space unit measures 22% of the placed width on the vertical lockup, 8% on the horizontal, 16% on the stacked and 20% on the wordmark. The lettering is drawn at its own size in each lockup, so a single rule expressed in the mark's own letter produces four different ratios — which is why the rule is stated as the letter and the percentages are given only as its implementation.",
       "kind": "observation",
@@ -368,6 +375,7 @@
   ],
 
   "unresolved": [
+    "rice-and-beans.svg hangs Chrome's print rasteriser and therefore blocks PDF export of anything it appears in (E-014). Three fixes were tried and rejected on evidence: rewriting each blend filter in place expands the chain exponentially through <use> and hangs on screen too; flattening the chain to mix-blend-mode drifts 64% from the reference render, so the chain is not the simple backdrop-plus-layers it looks like; re-tracing it as flat regions loses the rice grain and costs 2 MB. The designer's own file for this piece would settle it, or the artboard needs re-exporting from an application that resolves the blend rather than emulating it.",
     "The illustration source file was never delivered. The 10 pieces it covers are now usable vector (E-011), so nothing is blocked, but the designer's own geometry would still be better to edit from — fewer nodes and the original construction. Ask for it if the set is ever extended or reworked.",
     "No print proof exists. Spot and CMYK references (E-003) must be proofed on press before any run; the PANTONE numbers inherited from the 2026 manual should not be forwarded to a printer as they stand.",
     "Whether the CSR badge is still in use, and what it is meant to abbreviate — it appears in the manual without explanation. Retire it if nothing depends on it."
