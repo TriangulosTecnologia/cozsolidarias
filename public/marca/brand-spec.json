@@ -1,0 +1,260 @@
+{
+  "meta": {
+    "schema_version": 4,
+    "version": "4.0.0",
+    "brand_name": "Cozinha Solidária em Rede",
+    "tier": "full",
+    "touchpoints": [
+      "public website",
+      "research and policy documents",
+      "presentation decks",
+      "kitchen signage and window application",
+      "aprons, packaging and food labels",
+      "social media"
+    ]
+  },
+  "strategy": {
+    "brand_job": {
+      "statement": "Make a dispersed set of community kitchens, researchers, ministry technicians, social movements and family farmers recognise themselves as one working network, so that the structural SAN model the project is building can be joined rather than merely studied."
+    },
+    "audience": {
+      "primary": "Community kitchens in vulnerabilised territories and the people who cook in them.",
+      "not_for": "Donors seeking a charity brand. The project supports kitchens and farmers; it does not run kitchens or distribute food under its own name."
+    },
+    "offer_truth": {
+      "statement": "A research-action project that builds an intersectoral SAN model spanning production, distribution and preparation — not a food programme."
+    },
+    "position": {
+      "statement": "The connective layer that the kitchens, the researchers, the public bodies and the farmers all share — legible as the network they belong to, not as a donor, a government seal or a university department."
+    },
+    "right_to_win": {
+      "statement": "The team holds both ends at once: UNIFESP and USP researchers alongside MDS and MDA technicians, social movements and CEAGESP, so it reaches public policy and the territories in the same move."
+    },
+    "desired_meaning": "Food sovereignty preserved, not replaced by assistance."
+  },
+  "creative_direction": {
+    "thesis": "The shared pot. Every mark the project makes is drawn by hand, in the register of a kitchen's own handwriting rather than an institution's typography, and everything it signs is a place where visibly different hands reach into the same pot.",
+    "signature": "Hand-drawn lettering locked to a red pot of plural hands, on a surface split between a colour field that speaks and a pale field that holds the food.",
+    "principles": [
+      "The hands stay plural and stay different. Three tones is the minimum expression of the idea; reducing them to one tone or one hand destroys the argument the mark is making. In single-ink production they become cut-outs knocked out of a filled pot, not a silhouette, so plurality survives where colour cannot.",
+      "Shapes stay organic and colours stay sober. Nothing in the system is geometric, gradient or corporate; the illustrations and the pattern are drawn with the same hand as the logo."
+    ],
+    "excludes": [
+      "Do not present the UNIFESP mark as this project's own mark. UNIFESP is an institutional condition of the brief and appears in the partner signature, never as the project's identity.",
+      "Do not borrow the visual language of the federal Programa Cozinha Solidária. The name collision is already the main source of confusion; shared styling would complete it."
+    ]
+  },
+  "verbal": {
+    "name_usage": "The full name is 'Cozinha Solidária em Rede'. 'Em Rede' is load-bearing — it is what separates this project from the federal programme of the same name — and is dropped only in the reduced badge, where the pot alone is the signature.",
+    "principles": [
+      "Name the actor. Write who does what: 'as cozinhas alcançam', not 'é alcançado'. The passive voice hides who feeds whom, and who does the work is this brand's entire argument.",
+      "Numbers carry the argument; adjectives do not. Prefer '1.348 cozinhas em operação' to 'milhares de cozinhas'. Where there is no number, say what was observed instead of reaching for an intensifier.",
+      "Cook, do not feed. Nobody in this brand's language is a recipient. Write 'quem cozinha', 'as cozinhas', 'a rede'; never 'beneficiários', 'carentes', 'doação' or 'ajudar quem precisa'.",
+      "State, then draw the consequence. One short sentence carrying the fact, then one carrying what it implies. Do not stack subordinate clauses — that is policy writing's default failure and it makes the network sound like a ministry.",
+      "Say 'ainda não' out loud. This is a research project; naming what is not yet measured is credibility, not weakness. Prefer 'ainda não medimos' to silence or to an overclaim."
+    ],
+    "tone_by_moment": {
+      "institutional_and_policy": "Precise and numbered. No metaphor — the pot does not appear in the language when the reader is a ministry.",
+      "territory_and_kitchens": "Direct and second-person, about what to do next: 'sua cozinha pode entrar na rede'.",
+      "campaign_and_social": "One idea per piece, carried by the strongest single sentence, with nothing explaining it afterwards.",
+      "data_and_technical_notes": "State the finding, then state its limit in the same breath."
+    },
+    "excludes": [
+      "Charity register: doação, carente, beneficiário, ajudar quem precisa, 'levar comida a quem tem fome'.",
+      "Development-sector autocomplete: empoderar, impactar, solução inovadora, 'juntos podemos'.",
+      "Exclamation marks, and any sentence that would survive unchanged if the brand name were swapped for a generic NGO."
+    ]
+  },
+  "visual": {
+    "tokens": {
+      "color": {
+        "red": {
+          "$value": "#AE1616",
+          "$type": "color",
+          "$description": "Vermelho Cozinhas. The pot. Primary brand colour; the value carried by every native master."
+        },
+        "green": {
+          "$value": "#1E5A36",
+          "$type": "color",
+          "$description": "Verde Rede. The network; sets 'Em Rede' on light grounds."
+        },
+        "green-light": {
+          "$value": "#559870",
+          "$type": "color",
+          "$description": "Verde Claro. Carries the green role on neutral dark grounds only, where Verde Rede is illegible. Already present in the artwork as the pot badge's ground. Never used on Verde Rede itself (2.38:1)."
+        },
+        "white": {
+          "$value": "#FAFAFA",
+          "$type": "color",
+          "$description": "Branco Leitura. The mesa field, reading surface and reversed text. Logo knock-outs use pure #FFFFFF, which is ink absence rather than a surface colour."
+        },
+        "black": {
+          "$value": "#000000",
+          "$type": "color",
+          "$description": "Preto. Sets the name on light grounds; the brand's neutral dark ground."
+        },
+        "skin-light": {
+          "$value": "#E9BBAF",
+          "$type": "color",
+          "$description": "Pele Clara."
+        },
+        "skin-brown": {
+          "$value": "#AE7F74",
+          "$type": "color",
+          "$description": "Pele Parda."
+        },
+        "skin-black": {
+          "$value": "#422018",
+          "$type": "color",
+          "$description": "Pele Negra."
+        },
+        "badge-grey": {
+          "$value": "#D5D5D5",
+          "$type": "color",
+          "$description": "Ground of the CSR badge only. Not a surface colour for layouts."
+        },
+        "pattern-ink": {
+          "$value": "#3F3F3F",
+          "$type": "color",
+          "$description": "Ink of the food pattern. Softened off-black so a dense field does not read as a black block."
+        }
+      }
+    },
+    "contrast_pairs": [
+      {
+        "text": "{color.black}",
+        "background": "{color.white}",
+        "usage": "body"
+      },
+      {
+        "text": "{color.red}",
+        "background": "{color.white}",
+        "usage": "body"
+      },
+      {
+        "text": "{color.green}",
+        "background": "{color.white}",
+        "usage": "body"
+      },
+      {
+        "text": "{color.white}",
+        "background": "{color.red}",
+        "usage": "body"
+      },
+      {
+        "text": "{color.white}",
+        "background": "{color.green}",
+        "usage": "body"
+      },
+      {
+        "text": "{color.white}",
+        "background": "{color.black}",
+        "usage": "body"
+      },
+      {
+        "text": "{color.green-light}",
+        "background": "{color.black}",
+        "usage": "large"
+      }
+    ],
+    "palette": {
+      "roles": "Vermelho Cozinhas and Verde Rede are the only two colours that carry meaning: the red is the pot and the kitchen, the green is the network and sets 'Em Rede'. Swapping those roles breaks recognition faster than changing the hues would. The skin tones belong to the hands and are not a decorative palette. Branco Leitura is the reading surface, Preto the neutral dark ground.",
+      "excludes": "Verde Rede must not set text or lettering on a dark ground — 1.99:1. Verde Claro must not set text on Verde Rede — 2.38:1. Verde Claro is for display lettering at 90px and above only — at smaller sizes it carries too weak an APCA signal (Lc 39.9). On a saturated brand ground and for body text on dark, text is Branco Leitura.",
+      "print": "No spot colour is specified for this brand. Print from the CMYK builds and proof on press before any run."
+    },
+    "typography": {
+      "lettering": "The name is custom hand lettering. There is no font that reproduces it — it exists only as the supplied vector masters.",
+      "families": {
+        "primary": "Libre Franklin (SIL OFL 1.1). Single family across display and text; weight, not family, carries the hierarchy."
+      },
+      "roles": {
+        "display": "700, tracking -0.035em, line-height 0.99 — headlines and poster statements.",
+        "heading": "700, tracking -0.03em — document and section headings.",
+        "lead": "300 at 18px and above — opening paragraphs.",
+        "body": "400 — running text at 17px and below.",
+        "label": "600 uppercase, tracking 0.11em — eyebrows, captions and the partner signature."
+      },
+      "hierarchy": {
+        "mode": "custom",
+        "rules": [
+          "Weight and tracking carry the hierarchy, not a modular size ratio. Display and heading are the same weight; size and measure separate them.",
+          "Light (300) is permitted only at 18px and above. Below that it thins out in print and on low-quality screens — set body at 400.",
+          "Never set the brand name in Libre Franklin as a substitute for the lettering master. The single exception is plain-text contexts that cannot carry an image, where the name is written as ordinary text and not styled to imitate the logo.",
+          "Headlines are left-aligned and ragged right. Do not centre or justify — the hand lettering is already irregular and a centred axis fights it."
+        ]
+      },
+      "substitution": "Where Libre Franklin cannot be installed, substitute a neutral grotesque of similar width and x-height and record the substitution. Do not switch to a humanist or geometric face, which would compete with the hand lettering instead of receding behind it."
+    },
+    "composition": {
+      "grammar": "A brand surface is built from two fields. **Voz** is a flat brand colour — Vermelho Cozinhas, Verde Rede or Preto — and carries the signature, the headline and the partner line; it never carries illustration. **Mesa** is Branco Leitura and carries the food, the data, the body text and the long-form reading. A surface may be all voz, all mesa, or split between them on a straight horizontal edge.",
+      "why": "The illustration set runs on its own naturalistic palette, which clashes on a saturated ground and settles on a pale one. The split resolves that by moving the food, not the colours.",
+      "rules": [
+        "The split is a straight horizontal edge across the full width. Do not feather, curve, angle or round it; the drawing in this system is done by the lettering and the illustrations, not by the layout.",
+        "Proportion is free but never half and half — one field must clearly dominate, or the surface reads as two unrelated posters.",
+        "The signature sits in the voz field, top-left, inside the clear-space margin. When a surface is all mesa, it sits top-left of the page margin.",
+        "Illustrations sit on mesa, anchored to its bottom edge, at large scale and overlapping each other — arriving, not arranged in a grid. Never scale one below 40% of the mesa's height, which turns it into an icon.",
+        "The partner signature occupies a reserved strip at the foot of the surface that no illustration, image or text may enter.",
+        "The pattern is the only texture permitted on a voz field, at low opacity behind everything, and never under the signature's clear space."
+      ],
+      "free_to_vary": "Which colour the voz field takes, the split proportion and which field dominates, how many illustrations arrive and how they overlap, and whether a surface uses one field or both."
+    },
+    "logo": {
+      "lockups": {
+        "vertical": "Name above the pot, 'Em Rede' below. The primary signature.",
+        "horizontal": "Pot left, name right. For wide, short spaces — site headers, document footers, banners.",
+        "stacked": "Pot above, name below. Alternative vertical for tall, narrow spaces.",
+        "wordmark": "Lettering only, no pot. For contexts where the pot already appears nearby.",
+        "badge-pot": "Pot in a Verde Claro disc. The reduced signature for avatars, favicons and stamps — the only asset that stays readable below the lettered lockups' minimum widths.",
+        "badge-csr": "CSR monogram in a grey disc. Secondary; use only where the abbreviation is already understood."
+      },
+      "variant_by_ground": {
+        "branco-leitura-or-pale": "color",
+        "neutral-dark-preto": "color-on-dark",
+        "saturated-brand-ground-vermelho-or-verde": "white — the colour lockups fail here: on Vermelho Cozinhas the pot disappears into its own colour, and on Verde Rede the 'Em Rede' lettering drops to 2.38:1.",
+        "single-ink-production": "black, red or green, whichever ink is available",
+        "photography": "white, over a plain area of the image"
+      },
+      "artboard": "Every master is trimmed to the artwork: the file's edge is the mark's edge, with no padding inside it. That is what makes clear space applicable and alignment predictable. Do not re-introduce padding into a master; add margin in the layout instead.",
+      "clear_space": {
+        "rule": "The final 'e' of 'Em Rede', taken from the lockup being placed and scaled with it, on every contour, measured outward from the file's edge. Nothing enters that margin — not partner marks, not page edges, not image content. Using a letter from the mark itself means the margin scales without anyone computing a ratio.",
+        "as_fraction_of_placed_width": {
+          "vertical": "22%",
+          "horizontal": "8%",
+          "stacked": "16%",
+          "wordmark": "20%",
+          "badge-pot": "20% of the diameter",
+          "badge-csr": "20% of the diameter"
+        },
+        "basis": "The lettering is drawn at a different size in each lockup, so one rule yields a different margin in each. The badges carry no lettering; a fifth of the diameter lands in the same range."
+      },
+      "min_size": {
+        "horizontal": "110px wide",
+        "vertical": "70px wide",
+        "stacked": "70px wide",
+        "wordmark": "70px wide",
+        "badge-pot": "24px",
+        "basis": "Width of the mark itself, the files being trimmed to it."
+      },
+      "misuse": [
+        "Do not distort, stretch or rotate.",
+        "Do not recolour outside the declared variants.",
+        "Do not place the mark on a busy photograph without a plain ground behind it — the hand lettering loses its counters first."
+      ],
+      "production": {
+        "status": "final",
+        "master_format": "SVG",
+        "master_path": "public/marca/logo/"
+      }
+    },
+    "imagery": {
+      "illustration": "A 34-piece drawn food set in public/marca/illustration/, all vector and all exporting to PDF. Built entirely from filled shapes with no stroke anywhere — apparent contours are dark shapes behind lighter ones. Extend the set the same way, and keep depicting real Brazilian everyday food rather than generic 'healthy eating' iconography. Do not recolour it to the brand palette: its coherence comes from the drawing hand and the flat construction, not from shared hues.",
+      "pattern": "A seamless 280×280 food-drawing tile in public/marca/pattern/. Supplied in the dark ink for light grounds and in Branco Leitura for dark grounds. It is a texture, not a focal element — keep it behind content, never under the logo's clear space.",
+      "photography": "Real kitchens, real hands, real food in preparation. Not styled studio food, not stock images of empty plates."
+    }
+  },
+  "architecture": {
+    "model": "endorsed",
+    "partner_signature": "The project signs its own work; the institutions that make it possible sign beneath. The partner line is a single row in the label style — 'Realização' at reduced opacity, then the institution names separated by middots — set in the reserved foot strip and never larger than the label size. Partner logotypes appear only where an institution's own rules require the mark rather than the name; they sit in the same strip, optically matched in height to each other, never to the project's signature.",
+    "rationale": "UNIFESP is a pre-existing condition of the brief, not a co-brand. Setting partners as text by default keeps the project legible as the network rather than as a university output, and avoids a row of competing logos crowding the signature."
+  }
+}
