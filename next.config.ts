@@ -19,6 +19,25 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     '/dados': ['./public/dataset_catalogue.json'],
   },
+  // `/marca` is the brand book. It lives in `public/marca/` as a self-contained
+  // document, so there is no page component to look for in `src/app`.
+  //
+  // This is a redirect rather than a rewrite because the document references its
+  // assets relatively (`logo/…`, `illustration/…`, and `url(pattern/…)` in its
+  // stylesheet). The browser resolves those against the directory of the URL it
+  // is on, so the document has to be served from inside `/marca/` — at `/marca`
+  // they would resolve against the site root and 404. Rewriting `/marca/` to the
+  // file instead would loop: Next redirects the trailing slash away by default,
+  // and turning that off is a site-wide routing change for one unindexed page.
+  redirects: async () => {
+    return [
+      {
+        source: '/marca',
+        destination: '/marca/brand-book.html',
+        permanent: false,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
