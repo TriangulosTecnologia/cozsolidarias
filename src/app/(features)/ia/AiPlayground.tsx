@@ -13,21 +13,14 @@ import {
   Text,
   Textarea,
 } from '@chakra-ui/react';
-import type { VisualizationSpec } from '@ttoss/geovis';
 import { GeovisWorkspace } from '@ttoss/geovis-workspace';
 import { I18nProvider } from '@ttoss/react-i18n';
 import { BruttalTheme } from '@ttoss/theme/Bruttal';
-import * as React from 'react';
 import { ThemeUIProvider } from 'theme-ui';
 
-/** Submission lifecycle for the prompt-to-map form. */
-type Status = 'idle' | 'loading' | 'error' | 'success';
+import { JsonPanel } from './JsonPanel';
+import { useAiPlaygroundLogic } from './useAiPlaygroundLogic';
 
-/**
- * National camera fallback: frames the whole of Brazil. Applied when the
- * model's spec omits `view` — every município-level choropleth this route
- * can generate is national in scope, so this is always a sane default.
- */
 const BRAZIL_VIEW = {
   center: [-53.0, -14.5] as [number, number],
   zoom: 4,
@@ -35,57 +28,25 @@ const BRAZIL_VIEW = {
   maxZoomOut: 4,
 };
 
-/**
- * `/ai` page body: a textarea prompt that calls `POST /api/ai/spec` and
- * renders the raw JSON returned by the model. Each submission replaces the
- * previous result — results never accumulate.
- *
- * @returns The prompt form, above the loading/error/result state for the
- * last submission.
- */
 const AiPlayground = () => {
-  const [prompt, setPrompt] = React.useState('');
-  const [status, setStatus] = React.useState<Status>('idle');
-  const [errorMessage, setErrorMessage] = React.useState('');
-  const [result, setResult] = React.useState<VisualizationSpec | null>(null);
+  const {
+    prompt,
+    setPrompt,
+    status,
+    errorMessage,
+    result,
+    showJson,
+    setShowJson,
+    errorDetails,
+    handleSubmit,
+  } = useAiPlaygroundLogic();
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    if (prompt.trim() === '' || status === 'loading') {
-      return;
-    }
-
-    setStatus('loading');
-    setErrorMessage('');
-
-    try {
-      const response = await fetch('/api/ai/spec', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ prompt }),
-      });
-
-      const body = (await response.json()) as {
-        result?: VisualizationSpec;
-        error?: string;
-      };
-
-      if (!response.ok || !body.result) {
-        setErrorMessage(body.error ?? 'Não foi possível gerar o mapa.');
-        setStatus('error');
-        return;
-      }
-
-      setResult(body.result);
-      setStatus('success');
-    } catch {
-      setErrorMessage(
-        'Falha de conexão. Verifique sua internet e tente novamente.'
-      );
-      setStatus('error');
-    }
-  };
+  const jsonPayload =
+    status === 'success' && result
+      ? result
+      : status === 'error' && errorDetails
+        ? errorDetails
+        : null;
 
   return (
     <Stack gap={6} p={{ base: 4, md: 8 }} maxW="container.lg" mx="auto">
@@ -125,14 +86,14 @@ const AiPlayground = () => {
         </Stack>
       </form>
 
-      {status === 'loading' ? (
+      {status === 'loading' && (
         <Stack direction="row" align="center" gap={3} role="status">
           <Spinner size="sm" />
           <Text color="fg.muted">Gerando mapa…</Text>
         </Stack>
-      ) : null}
+      )}
 
-      {status === 'error' ? (
+      {status === 'error' && (
         <Alert.Root status="error">
           <Alert.Indicator />
           <Alert.Content>
@@ -140,9 +101,19 @@ const AiPlayground = () => {
             <Alert.Description>{errorMessage}</Alert.Description>
           </Alert.Content>
         </Alert.Root>
-      ) : null}
+      )}
 
-      {status === 'success' && result ? (
+      <JsonPanel
+        jsonPayload={jsonPayload}
+        showJson={showJson}
+        onToggle={() => {
+          return setShowJson((prev) => {
+            return !prev;
+          });
+        }}
+      />
+
+      {status === 'success' && result && (
         <Box
           position="relative"
           w="100%"
@@ -175,7 +146,7 @@ const AiPlayground = () => {
             </ThemeUIProvider>
           </I18nProvider>
         </Box>
-      ) : null}
+      )}
     </Stack>
   );
 };
