@@ -1,7 +1,7 @@
 {
   "meta": {
     "schema_version": 4,
-    "version": "3.2.0",
+    "version": "4.0.0",
     "brand_name": "Cozinha Solidária em Rede",
     "tier": "full",
     "touchpoints": [
@@ -13,31 +13,25 @@
       "social media"
     ]
   },
-
   "strategy": {
     "brand_job": {
-      "statement": "Make a dispersed set of community kitchens, researchers, ministry technicians, social movements and family farmers recognise themselves as one working network, so that the structural SAN model the project is building can be joined rather than merely studied.",
-      "evidence_refs": ["E-006"]
+      "statement": "Make a dispersed set of community kitchens, researchers, ministry technicians, social movements and family farmers recognise themselves as one working network, so that the structural SAN model the project is building can be joined rather than merely studied."
     },
     "audience": {
       "primary": "Community kitchens in vulnerabilised territories and the people who cook in them.",
       "not_for": "Donors seeking a charity brand. The project supports kitchens and farmers; it does not run kitchens or distribute food under its own name."
     },
     "offer_truth": {
-      "statement": "A research-action project that builds an intersectoral SAN model spanning production, distribution and preparation — not a food programme.",
-      "evidence_refs": ["E-006"]
+      "statement": "A research-action project that builds an intersectoral SAN model spanning production, distribution and preparation — not a food programme."
     },
     "position": {
-      "statement": "The connective layer that the kitchens, the researchers, the public bodies and the farmers all share — legible as the network they belong to, not as a donor, a government seal or a university department.",
-      "evidence_refs": ["E-006"]
+      "statement": "The connective layer that the kitchens, the researchers, the public bodies and the farmers all share — legible as the network they belong to, not as a donor, a government seal or a university department."
     },
     "right_to_win": {
-      "statement": "The team holds both ends at once: UNIFESP and USP researchers alongside MDS and MDA technicians, social movements and CEAGESP, so it reaches public policy and the territories in the same move.",
-      "evidence_refs": ["E-006"]
+      "statement": "The team holds both ends at once: UNIFESP and USP researchers alongside MDS and MDA technicians, social movements and CEAGESP, so it reaches public policy and the territories in the same move."
     },
     "desired_meaning": "Food sovereignty preserved, not replaced by assistance."
   },
-
   "creative_direction": {
     "thesis": "The shared pot. Every mark the project makes is drawn by hand, in the register of a kitchen's own handwriting rather than an institution's typography, and everything it signs is a place where visibly different hands reach into the same pot.",
     "signature": "Hand-drawn lettering locked to a red pot of plural hands, on a surface split between a colour field that speaks and a pale field that holds the food.",
@@ -50,7 +44,6 @@
       "Do not borrow the visual language of the federal Programa Cozinha Solidária. The name collision is already the main source of confusion; shared styling would complete it."
     ]
   },
-
   "verbal": {
     "name_usage": "The full name is 'Cozinha Solidária em Rede'. 'Em Rede' is load-bearing — it is what separates this project from the federal programme of the same name — and is dropped only in the reduced badge, where the pot alone is the signature.",
     "principles": [
@@ -72,7 +65,6 @@
       "Exclamation marks, and any sentence that would survive unchanged if the brand name were swapped for a generic NGO."
     ]
   },
-
   "visual": {
     "tokens": {
       "color": {
@@ -128,20 +120,27 @@
         }
       }
     },
-
     "contrast_pairs": [
       {
         "text": "{color.black}",
         "background": "{color.white}",
         "usage": "body"
       },
-      { "text": "{color.red}", "background": "{color.white}", "usage": "body" },
+      {
+        "text": "{color.red}",
+        "background": "{color.white}",
+        "usage": "body"
+      },
       {
         "text": "{color.green}",
         "background": "{color.white}",
         "usage": "body"
       },
-      { "text": "{color.white}", "background": "{color.red}", "usage": "body" },
+      {
+        "text": "{color.white}",
+        "background": "{color.red}",
+        "usage": "body"
+      },
       {
         "text": "{color.white}",
         "background": "{color.green}",
@@ -158,14 +157,11 @@
         "usage": "large"
       }
     ],
-
     "palette": {
       "roles": "Vermelho Cozinhas and Verde Rede are the only two colours that carry meaning: the red is the pot and the kitchen, the green is the network and sets 'Em Rede'. Swapping those roles breaks recognition faster than changing the hues would. The skin tones belong to the hands and are not a decorative palette. Branco Leitura is the reading surface, Preto the neutral dark ground.",
-      "excludes": "Verde Rede must not set text or lettering on a dark ground — 1.99:1. Verde Claro must not set text on Verde Rede — 2.38:1. On a saturated brand ground, text is Branco Leitura.",
-      "green_light_tradeoff": "Verde Claro on a neutral dark ground clears WCAG AA (6.11:1) but carries a modest APCA signal (Lc 39.9), below the Lc 45 guideline for 24px bold text. It is accepted because its only job is display lettering at 90px and above, where that guideline no longer binds, and because the colour already exists in the artwork. Body text on dark grounds is Branco Leitura.",
-      "print": "PANTONE 327 C as printed in the 2026 manual does not match Verde Rede and must not be specified — see E-003. Print from the CMYK builds and proof on press before any run."
+      "excludes": "Verde Rede must not set text or lettering on a dark ground — 1.99:1. Verde Claro must not set text on Verde Rede — 2.38:1. Verde Claro is for display lettering at 90px and above only — at smaller sizes it carries too weak an APCA signal (Lc 39.9). On a saturated brand ground and for body text on dark, text is Branco Leitura.",
+      "print": "No spot colour is specified for this brand. Print from the CMYK builds and proof on press before any run."
     },
-
     "typography": {
       "lettering": "The name is custom hand lettering. There is no font that reproduces it — it exists only as the supplied vector masters.",
       "families": {
@@ -189,10 +185,9 @@
       },
       "substitution": "Where Libre Franklin cannot be installed, substitute a neutral grotesque of similar width and x-height and record the substitution. Do not switch to a humanist or geometric face, which would compete with the hand lettering instead of receding behind it."
     },
-
     "composition": {
       "grammar": "A brand surface is built from two fields. **Voz** is a flat brand colour — Vermelho Cozinhas, Verde Rede or Preto — and carries the signature, the headline and the partner line; it never carries illustration. **Mesa** is Branco Leitura and carries the food, the data, the body text and the long-form reading. A surface may be all voz, all mesa, or split between them on a straight horizontal edge.",
-      "why": "It resolves a real defect structurally: the illustration set runs on its own naturalistic palette, which clashes on a saturated ground and settles on a pale one, so the food moves rather than the colours. See E-008.",
+      "why": "The illustration set runs on its own naturalistic palette, which clashes on a saturated ground and settles on a pale one. The split resolves that by moving the food, not the colours.",
       "rules": [
         "The split is a straight horizontal edge across the full width. Do not feather, curve, angle or round it; the drawing in this system is done by the lettering and the illustrations, not by the layout.",
         "Proportion is free but never half and half — one field must clearly dominate, or the surface reads as two unrelated posters.",
@@ -203,7 +198,6 @@
       ],
       "free_to_vary": "Which colour the voz field takes, the split proportion and which field dominates, how many illustrations arrive and how they overlap, and whether a surface uses one field or both."
     },
-
     "logo": {
       "lockups": {
         "vertical": "Name above the pot, 'Em Rede' below. The primary signature.",
@@ -216,11 +210,11 @@
       "variant_by_ground": {
         "branco-leitura-or-pale": "color",
         "neutral-dark-preto": "color-on-dark",
-        "saturated-brand-ground-vermelho-or-verde": "white — the colour lockups fail here: on Vermelho Cozinhas the pot disappears into its own colour, and on Verde Rede the 'Em Rede' lettering drops to 2.38:1. See E-009.",
+        "saturated-brand-ground-vermelho-or-verde": "white — the colour lockups fail here: on Vermelho Cozinhas the pot disappears into its own colour, and on Verde Rede the 'Em Rede' lettering drops to 2.38:1.",
         "single-ink-production": "black, red or green, whichever ink is available",
         "photography": "white, over a plain area of the image"
       },
-      "artboard": "Every master is trimmed to the artwork: the file's edge is the mark's edge, with no padding inside it. That is what makes clear space applicable and alignment predictable — see E-012. Do not re-introduce padding into a master; add margin in the layout instead.",
+      "artboard": "Every master is trimmed to the artwork: the file's edge is the mark's edge, with no padding inside it. That is what makes clear space applicable and alignment predictable. Do not re-introduce padding into a master; add margin in the layout instead.",
       "clear_space": {
         "rule": "The final 'e' of 'Em Rede', taken from the lockup being placed and scaled with it, on every contour, measured outward from the file's edge. Nothing enters that margin — not partner marks, not page edges, not image content. Using a letter from the mark itself means the margin scales without anyone computing a ratio.",
         "as_fraction_of_placed_width": {
@@ -231,7 +225,7 @@
           "badge-pot": "20% of the diameter",
           "badge-csr": "20% of the diameter"
         },
-        "basis": "The lettering is drawn at a different size in each lockup, so one rule yields a different margin in each. Measured from the artwork — see E-013. The badges carry no lettering; a fifth of the diameter lands in the same range as the lettered lockups."
+        "basis": "The lettering is drawn at a different size in each lockup, so one rule yields a different margin in each. The badges carry no lettering; a fifth of the diameter lands in the same range."
       },
       "min_size": {
         "horizontal": "110px wide",
@@ -239,7 +233,7 @@
         "stacked": "70px wide",
         "wordmark": "70px wide",
         "badge-pot": "24px",
-        "basis": "Width of the mark itself, the files being trimmed to it. Measured on a rendered size ladder, not assumed — see E-005."
+        "basis": "Width of the mark itself, the files being trimmed to it."
       },
       "misuse": [
         "Do not distort, stretch or rotate.",
@@ -249,113 +243,18 @@
       "production": {
         "status": "final",
         "master_format": "SVG",
-        "master_path": "public/marca/logo/",
-        "source": "Vector masters extracted from the native Adobe Illustrator file 'MANUAL DE IDENTIDADE VISUAL - COZINHA SOLIDÁRIA.ai' (2026-06-23). No raster tracing at any step."
+        "master_path": "public/marca/logo/"
       }
     },
-
     "imagery": {
-      "illustration": "A 34-piece drawn food set in public/marca/illustration/, all vector and all exporting to PDF. Built entirely from filled shapes with no stroke anywhere — apparent contours are dark shapes behind lighter ones. Extend the set the same way, and keep depicting real Brazilian everyday food rather than generic 'healthy eating' iconography. Do not recolour it to the brand palette: its coherence comes from the drawing hand and the flat construction, not from shared hues. Eleven pieces were redrawn from small rasters — E-015 bounds how large those can be placed.",
+      "illustration": "A 34-piece drawn food set in public/marca/illustration/, all vector and all exporting to PDF. Built entirely from filled shapes with no stroke anywhere — apparent contours are dark shapes behind lighter ones. Extend the set the same way, and keep depicting real Brazilian everyday food rather than generic 'healthy eating' iconography. Do not recolour it to the brand palette: its coherence comes from the drawing hand and the flat construction, not from shared hues.",
       "pattern": "A seamless 280×280 food-drawing tile in public/marca/pattern/. Supplied in the dark ink for light grounds and in Branco Leitura for dark grounds. It is a texture, not a focal element — keep it behind content, never under the logo's clear space.",
       "photography": "Real kitchens, real hands, real food in preparation. Not styled studio food, not stock images of empty plates."
     }
   },
-
   "architecture": {
     "model": "endorsed",
     "partner_signature": "The project signs its own work; the institutions that make it possible sign beneath. The partner line is a single row in the label style — 'Realização' at reduced opacity, then the institution names separated by middots — set in the reserved foot strip and never larger than the label size. Partner logotypes appear only where an institution's own rules require the mark rather than the name; they sit in the same strip, optically matched in height to each other, never to the project's signature.",
     "rationale": "UNIFESP is a pre-existing condition of the brief, not a co-brand. Setting partners as text by default keeps the project legible as the network rather than as a university output, and avoids a row of competing logos crowding the signature."
-  },
-
-  "evidence": [
-    {
-      "id": "E-001",
-      "claim": "Every native vector master renders the brand red as #AE1616, while page 13 of the 2026 manual documents it as #B21616 and prints its own swatch at a third value (#AB1616). All 26 logo artboards agree with each other; only the typed documentation differs.",
-      "kind": "observation",
-      "source": "Fill values parsed from all 26 logo artboards of the native .ai file; manual p13 swatch rendered at 300dpi.",
-      "status": "active"
-    },
-    {
-      "id": "E-002",
-      "claim": "Verde Rede #1E5A36 reaches only 1.99:1 against a #241F21 ground and 2.57:1 against pure black, so the 'Em Rede' lettering in the manual's own dark-ground lockup is effectively illegible. Verde Claro #559870 — the colour already used for the pot badge's disc — reaches 4.73:1 and 6.11:1 on the same grounds.",
-      "kind": "fact",
-      "source": "WCAG 2.x relative-luminance computation over the declared hex values, confirmed by rendering the manual's own dark-ground artboards (pages 38–41) in Chromium.",
-      "status": "active"
-    },
-    {
-      "id": "E-003",
-      "claim": "The manual's spot-colour references are internally inconsistent with the RGB values beside them. PANTONE 327 C is a published teal and does not correspond to the warm forest green #1E5A36 it is paired with. No reference in the manual was checked against a physical Pantone guide.",
-      "kind": "observation",
-      "source": "Manual p13 compared against published PANTONE sRGB renderings.",
-      "status": "active"
-    },
-    {
-      "id": "E-005",
-      "claim": "Rendered reduction tests put the legibility floor at 110px wide for the horizontal lockup and 70px for the vertical and stacked lockups, measured on masters trimmed to the artwork; below those widths the hand lettering's counters close. The pot badge stays readable to 24px.",
-      "kind": "observation",
-      "source": "Chromium size ladders at 200/140/110/96/84/72/60px and 110/84/70/60/52/44/36px, inspected at 2× device scale.",
-      "status": "active"
-    },
-    {
-      "id": "E-006",
-      "claim": "The strategic frame in this contract is reconstructed from the 2026 manual, not authored fresh: the brand job and position restate what its 'sobre', 'conceituação' and 'briefing' pages already assert about the project. They carry that document's authority and no more — neither has been checked against the organisation itself.",
-      "kind": "observation",
-      "source": "Manual pages 3 (sobre), 4 (conceituação) and 9 (sobre o briefing).",
-      "status": "active"
-    },
-    {
-      "id": "E-008",
-      "claim": "Illustrations placed directly on a saturated brand ground clash with it: the set's own naturalistic palette puts a cerulean bowl and orange carrots against Verde Rede with no shared hue. The same illustrations settle immediately when moved onto a Branco Leitura field on the same surface, which is what produced the voz/mesa split rather than any recolouring of the set.",
-      "kind": "observation",
-      "source": "Three poster variants rendered and compared in Chromium: green ground with illustrations, green ground with pattern only, and green-over-Branco-Leitura split.",
-      "status": "active"
-    },
-    {
-      "id": "E-009",
-      "claim": "The colour lockups fail on saturated brand grounds. On Vermelho Cozinhas the pot is #AE1616 on #AE1616 and disappears, leaving only the knocked-out hands; on Verde Rede the 'Em Rede' lettering sits at 2.38:1. The white monochrome lockup reads correctly on both.",
-      "kind": "observation",
-      "source": "Social and poster applications rendered in Chromium with colour-on-dark and white lockups on Vermelho Cozinhas and Verde Rede grounds.",
-      "status": "active"
-    },
-    {
-      "id": "E-010",
-      "claim": "Libre Franklin sets the same Portuguese copy in fewer lines than Inter and materially fewer than Archivo at equal size, and covers the pt-BR diacritic set. Neue Haas Grotesk, specified by the 2026 manual, is a commercial licence whose coverage for this project was never confirmed.",
-      "kind": "observation",
-      "source": "Three-way specimen rendered in Chromium with project copy at display, dense-text, tabular and small-caps sizes, with the fonts embedded rather than linked.",
-      "status": "active"
-    },
-    {
-      "id": "E-012",
-      "claim": "The masters arrived with incidental artboard padding — the artwork filled 55% of the vertical lockup's width and 52% of the horizontal lockup's height, at inconsistent ratios — which made the clear-space rule inapplicable, since a designer adding one 'e' was adding it on top of an unknown one. All 26 logo masters are now trimmed to their artwork. Re-extracting one from the .ai reintroduces the padding, and the minimums and clear-space ratios in this contract are measured against the trimmed files.",
-      "kind": "observation",
-      "source": "Alpha bounding box of each master measured against its declared viewBox in a 2400px render, before and after trimming.",
-      "status": "active"
-    },
-    {
-      "id": "E-013",
-      "claim": "The clear-space unit measures 22% of the placed width on the vertical lockup, 8% on the horizontal, 16% on the stacked and 20% on the wordmark. The lettering is drawn at its own size in each lockup, so one rule expressed in the mark's own letter yields four different ratios.",
-      "kind": "observation",
-      "source": "Alpha bounding box of the last run of green ink — the final 'e' of 'Em Rede' — measured against the declared viewBox in a 1200px render of each colour lockup.",
-      "status": "active"
-    },
-    {
-      "id": "E-014",
-      "claim": "pdftocairo emits PDF soft masks and blend groups as SVG transparency machinery, and three artboards of this .ai use them. The hard form — 21 chained multiply groups pulling each other in through <feImage href> — hangs Chrome's print rasteriser outright, so any PDF export of any document containing such a file never completes. Do not re-extract avocado, nuts or rice-and-beans from the .ai with pdftocairo: the first two were resolved by collapsing their constant-alpha masks to group opacity, and rice-and-beans is now the redrawn vector of E-015 rather than the native artboard.",
-      "kind": "observation",
-      "source": "Element census of all 62 masters; per-file Chrome print-to-PDF runs with a 20s budget; before-and-after renders at 700px on #FFFFFF and #9AA0A6.",
-      "status": "active"
-    },
-    {
-      "id": "E-015",
-      "claim": "Eleven illustrations have no usable native vector: ten were delivered only as palette-indexed PNG exports between 182×238 and 313×213, and rice-and-beans could not be printed (E-014). All eleven were redrawn in Illustrator from those rasters and are plain filled paths. Against their sources at 3x, on white and on #9AA0A6, between 2% and 13% of pixels differ by more than 40 — contour-level except cherries-and-nuts, where the almonds lose their interior veins and the white shape under the bowl reduces to an arc, which was reviewed and kept. The raster ceiling is what bounds how large these eleven can be placed before the native ones.",
-      "kind": "observation",
-      "source": "Three-way renders of raster source, the superseded region-separated reconstruction and the delivered vector at 3x on both grounds; per-file print-to-PDF runs over all 34.",
-      "status": "active"
-    }
-  ],
-
-  "unresolved": [
-    "No press proof exists. The PANTONE numbers inherited from the 2026 manual are wrong on their face (E-003) and must not be forwarded to a printer; the CMYK builds need proofing before any run.",
-    "Whether the CSR badge is still in use, and what it is meant to abbreviate — it appears in the manual without explanation. Retire it if nothing depends on it."
-  ]
+  }
 }
