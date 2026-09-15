@@ -3,22 +3,20 @@
 Canonical brand package for **Cozinha Solidária em Rede**. Everything downstream — the
 site, decks, print, partner materials — should resolve here rather than to a copy.
 
-| File                                   | What it is                                                                                                                                                                                                                                                                                                                 |
-| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`brand-spec.json`](./brand-spec.json) | Canonical operating contract (Branding Studio schema v4). Strategy, creative direction, design tokens, verified contrast pairs, evidence, open questions. Machine-readable; the single source of truth for values.                                                                                                         |
-| [`brand-book.html`](./brand-book.html) | The teaching document. Why the system behaves as it does and how to apply it. Read this first — open it in a browser; it is a designed artifact, set in the brand's own typeface and built from the composition grammar it describes. Self-contained apart from the assets in the folders below, which it references live. |
-| [`logo/`](./logo)                      | 24 signature masters (4 lockups × 6 variants) plus 2 badges.                                                                                                                                                                                                                                                               |
-| [`illustration/`](./illustration)      | 34 drawn food illustrations as vector masters, 463 KB in total. 23 from the native source, 11 redrawn from the raster exports (`E-015`).                                                                                                                                                                                   |
-| [`pattern/`](./pattern)                | Seamless food pattern tile, in two inks.                                                                                                                                                                                                                                                                                   |
-| [`reference/`](./reference)            | Rendered applications showing the composition grammar across five different jobs.                                                                                                                                                                                                                                          |
+| File                                   | What it is                                                                                                                                           |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`brand-book.html`](./brand-book.html) | The teaching document: why the system behaves as it does and how to apply it. Read this first, in a browser. Printing it from there gives an A4 PDF. |
+| [`brand-spec.json`](./brand-spec.json) | The operating contract (Branding Studio schema v4). The single source of truth for values.                                                           |
+| [`logo/`](./logo)                      | 24 signature masters (4 lockups × 6 variants) plus 2 badges.                                                                                         |
+| [`illustration/`](./illustration)      | 34 drawn food illustrations. 23 from the native source, 11 redrawn from small raster exports, so their interior detail is coarser (`E-015`).         |
+| [`pattern/`](./pattern)                | Seamless food pattern tile, in two inks.                                                                                                             |
+| [`reference/`](./reference)            | Rendered applications, five different jobs.                                                                                                          |
 
 ## Picking an asset
 
-Logo files are named `<lockup>-<variant>.svg`.
-
-- **Lockup** — `vertical` (primary), `horizontal`, `stacked`, `wordmark`, or `badge-pot` /
-  `badge-csr`.
-- **Variant** — `color`, `color-on-dark`, `white`, `black`, `red`, `green`.
+Logo files are named `<lockup>-<variant>.svg` — `vertical` (primary), `horizontal`,
+`stacked`, `wordmark`, `badge-pot` or `badge-csr`, each in `color`, `color-on-dark`,
+`white`, `black`, `red` and `green`.
 
 Choose the variant by the ground, never by preference:
 
@@ -47,17 +45,15 @@ Three rules cover most of it; the [brand book](./brand-book.html) covers the res
 ## Provenance
 
 The mark, lettering, illustrations and pattern come from the identity delivered by LM&Co.
-in June 2026. Every logo, the pattern and 23 of the 34 illustrations were extracted as
-vector directly from its native Adobe Illustrator source
-(`MANUAL DE IDENTIDADE VISUAL - COZINHA SOLIDÁRIA.ai`, 2026-06-23), with no retyped values.
-The other 11 were redrawn in Illustrator from the delivered PNG exports (`E-015`): ten had
-no vector source in the handoff, and `rice-and-beans.svg` had one no printer could resolve
-(`E-014`). Each file is plain `<path>` geometry with a `viewBox`, no embedded images, no
-external references, no script, no font dependency — and every one exports to PDF.
+in June 2026, extracted as vector from its native Adobe Illustrator source
+(`MANUAL DE IDENTIDADE VISUAL - COZINHA SOLIDÁRIA.ai`, 2026-06-23). Eleven illustrations
+had no usable vector there and were redrawn from the delivered PNG exports (`E-015`).
+Every file is plain `<path>` geometry with a `viewBox` — no embedded images, no external
+references, no script, no font dependency — so it travels anywhere and exports to PDF.
 
 The system around them — typography, the voz/mesa composition grammar, voice and the
 partner signature — was designed on top of that handoff, which resolved the signature but
-not what to do with it. Every rule was tested by building the artefact and looking at it.
+not what to do with it.
 
 Four decisions deliberately depart from the 2026 manual, each recorded as evidence in the
 spec and argued in the brand book: the brand red (`E-001`), the green used for _Em Rede_
@@ -71,23 +67,20 @@ vendors, not source modules, so the repository's camelCase rule does not apply t
 SVG `<title>` text is pt-BR because screen readers announce it to the people who read the
 brand's own materials.
 
-This folder is derived from the brand handoff alone — the 2026 manual and the delivered
-Identidade Visual archive. Nothing here is decided by, or documents, anything elsewhere in
-the repository.
+This folder is derived from the brand handoff alone. Nothing here is decided by, or
+documents, anything elsewhere in the repository.
 
 Colour values live in `brand-spec.json` under `visual.tokens` and are deliberately not
 duplicated into a second tokens file. Two copies of a palette drift apart, and the red
-recorded in `E-001` is what that looks like when it happens.
-
-For the same reason the brand book shows the masters themselves, by relative path, rather
-than pictures of them: replace an SVG and the book shows the new one, with nothing to
-regenerate. Only the typeface is embedded, so the document reads correctly offline.
+recorded in `E-001` is what that looks like when it happens. For the same reason the brand
+book shows the masters themselves, by relative path: replace an SVG and the book shows the
+new one. Only the typeface is embedded, so the document still reads offline.
 
 ## Verifying a change
 
 The [Branding Studio](https://github.com/enniolopes/skills) scripts check the mechanical
-properties — schema, token resolution, contrast maths, SVG portability. They establish
-nothing about strategic or aesthetic quality.
+properties — schema, token resolution, contrast maths, SVG portability — and nothing about
+strategic or aesthetic quality.
 
 ```bash
 SKILL=.claude/skills/branding-studio/scripts
