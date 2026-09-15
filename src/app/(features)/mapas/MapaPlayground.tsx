@@ -222,6 +222,11 @@ const LEFT_SIDEBAR: NonNullable<GeovisWorkspaceConfig['leftSidebar']> = {
                 label: 'CAFs',
                 icon: 'lucide:tractor',
               },
+              {
+                value: 'cafs-hexbin',
+                label: 'CAFs (hexbin)',
+                icon: 'lucide:hexagon',
+              },
             ],
           },
         ],
@@ -428,6 +433,7 @@ const MapaPlayground = () => {
     cafByCity: datasets.cafsByCity,
     cafPontosPorUf: datasets.cafPontosPorUf,
     cadinsanByCity: datasets.cadinsanByCity,
+    cafHexbin: datasets.cafHexbin,
     mode: specMode,
     cozinhasPoints,
   });
@@ -459,14 +465,11 @@ const MapaPlayground = () => {
   return (
     <Box
       position="relative"
-      // `dvh`, not `vh`: on mobile browsers `100vh` is the viewport with the URL
-      // bar hidden, so the map would start taller than the screen — its bottom
-      // under the browser chrome, and the page with a scrollbar it should not
-      // have. `dvh` tracks the space actually visible, which is also the height
-      // the camera fit in `useMapaSpec` measures.
-      h="calc(100dvh - 72px)"
+      // Size and background come from the server-rendered box in `page.tsx`,
+      // which reserves them before this chunk exists. This one fills it and
+      // hosts the workspace overrides below.
+      h="100%"
       w="100%"
-      bg="ivory.200"
       // Gated on `ready`: these rules restyle `<GeovisWorkspace>`'s DOM, and
       // their `& > *` / `& > * > *` selectors would otherwise also match the
       // loading indicator's own children while loading — flexing the mark and

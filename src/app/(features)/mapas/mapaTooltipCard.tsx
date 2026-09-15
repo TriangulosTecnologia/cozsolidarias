@@ -2,8 +2,8 @@ import { Box, Text } from '@chakra-ui/react';
 import type * as React from 'react';
 
 /**
- * Tooltip card shared by every município/point hover tooltip: a bold title, an
- * optional band swatch next to the primary label, an optional secondary line,
+ * Tooltip card shared by every município/point/cell hover tooltip: a bold title,
+ * an optional band swatch next to the primary label, an optional secondary line,
  * and optional extra detail lines. Omit `swatchColor` in modes without
  * data-driven paint (e.g. `pontos`), where a colored square would represent no
  * band.
@@ -38,12 +38,18 @@ export const TooltipCard = ({
       </Text>
       <Box display="flex" alignItems="center" gap="2">
         {swatchColor === undefined ? null : (
+          // Hairline border, same token as the card's own: the palest bands are
+          // within a few percent of the card's ivory surface, so without it a
+          // "sem dado" swatch reads as a gap where a colour should be rather
+          // than as the colour it is.
           <Box
             w="12px"
             h="12px"
             borderRadius="sm"
             flexShrink={0}
             bg={swatchColor}
+            borderWidth="1px"
+            borderColor="ivory.300"
           />
         )}
         <Text fontSize="xs" color="text.secondary" lineHeight="tight">

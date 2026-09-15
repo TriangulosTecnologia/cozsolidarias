@@ -35,6 +35,11 @@ describe('fetchMapDataset', () => {
 
     await fetchMapDataset('cadinsanByCity');
     expect(global.fetch).toHaveBeenCalledWith('/api/cadinsan/por-municipio');
+
+    // The grid is a GeoJSON snapshot the app fetches like any other, so the
+    // route it comes from is the one the map's source would otherwise hold.
+    await fetchMapDataset('cafHexbin');
+    expect(global.fetch).toHaveBeenCalledWith('/api/cafs/hexbin');
   });
 
   /*
@@ -87,5 +92,19 @@ describe('datasetsForMode', () => {
       'cafPontosPorUf',
       'cafsByCity',
     ]);
+  });
+
+  /*
+   * The grid carries its own counts, so it adds one snapshot and no more — but
+   * it keeps the base pair, because the município fill stays underneath it and
+   * its hover tooltip still names what the cursor is over.
+   */
+  test('the hexbin grid adds only itself, keeping the base pair', () => {
+    expect(datasetsForMode('cafs-hexbin')).toEqual([
+      'data',
+      'nomes',
+      'cafHexbin',
+    ]);
+    expect(datasetsForMode('cafs-hexbin')).not.toContain('cafsByCity');
   });
 });

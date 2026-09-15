@@ -1,11 +1,13 @@
 import type {
   cadinsanByCity,
   cafByCity,
+  CafHexbinFeatureCollection,
   CafUfFeatureCollection,
   kitchenRateByCity,
   MunicipioIvs,
 } from '@/data-gateway/schema';
 
+import { CAF_HEXBIN_URL } from './geovisCafHexbin';
 import type { AssentamentoAtributo, MapMode } from './geovisSpec';
 import type { NomesPorCodigo } from './useMapaSpec';
 
@@ -32,6 +34,12 @@ export type MapDatasets = {
   cafPontosPorUf?: CafUfFeatureCollection;
   /** Per-município CADINSAN food-insecurity shares for the food-insecurity choropleths. */
   cadinsanByCity: cadinsanByCity[];
+  /**
+   * The H3 hexagon grid with its CAF counts, behind the `cafs-hexbin` mode.
+   * Held here rather than left to the map source so the join reads exactly the
+   * counts the fill paints.
+   */
+  cafHexbin?: CafHexbinFeatureCollection;
 };
 
 /** One snapshot's name. */
@@ -76,6 +84,9 @@ const FETCHERS: { [K in MapDatasetKey]: () => Promise<MapDatasets[K]> } = {
   },
   cadinsanByCity: () => {
     return fetchJson<cadinsanByCity[]>('/api/cadinsan/por-municipio');
+  },
+  cafHexbin: () => {
+    return fetchJson<CafHexbinFeatureCollection>(CAF_HEXBIN_URL);
   },
 };
 
@@ -129,6 +140,12 @@ export const datasetsForMode = (mode: MapMode): MapDatasetKey[] => {
   // reads the per-município counts, so the mode needs both.
   if (mode === 'cafs') {
     return [...BASE_DATASETS, 'cafPontosPorUf', 'cafsByCity'];
+  }
+  // The grid carries its own counts, so this mode needs nothing else — but the
+  // base snapshots come along anyway: the município fill stays underneath and
+  // its hover tooltip still names what the cursor is over.
+  if (mode === 'cafs-hexbin') {
+    return [...BASE_DATASETS, 'cafHexbin'];
   }
   if (mode === 'coropletico-cafs-percentual') {
     return [...BASE_DATASETS, 'cafsByCity'];
