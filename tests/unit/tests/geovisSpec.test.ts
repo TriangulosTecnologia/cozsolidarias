@@ -25,6 +25,7 @@ import {
 import type {
   cadinsanByCity,
   cafByCity,
+  CafHexbinFeatureCollection,
   CafUfFeatureCollection,
   kitchenRateByCity,
   MunicipioIvs,
@@ -1503,5 +1504,101 @@ describe('buildSpec', () => {
       return layer.id === 'municipios-br-fill';
     });
     expect(fill?.activeLegendId).toBe('legenda-cozinhas');
+  });
+
+  describe('cafs-hexbin', () => {
+    const ring: [number, number][] = [
+      [-46, -23],
+      [-45, -23],
+      [-45, -22],
+      [-46, -23],
+    ];
+
+    const HEXBIN: CafHexbinFeatureCollection = {
+      type: 'FeatureCollection',
+      features: [
+        {
+          type: 'Feature',
+          geometry: { type: 'Polygon', coordinates: [ring] },
+          properties: { h3: '84occupied', count: 7 },
+        },
+        {
+          type: 'Feature',
+          geometry: { type: 'Polygon', coordinates: [ring] },
+          properties: { h3: '84empty', count: 0 },
+        },
+      ],
+    };
+
+    const hexbinSpec = () => {
+      return buildSpec(BY_CITY, 'cafs-hexbin', undefined, [], {
+        cafHexbin: HEXBIN,
+      });
+    };
+
+    test('adds the grid source carrying the passed collection', () => {
+      const source = hexbinSpec().sources.find((entry) => {
+        return entry.id === 'caf-hexbin';
+      });
+
+      expect(source).toBeDefined();
+      expect(source).toMatchObject({ data: HEXBIN });
+    });
+
+    test('adds the grid layer joined to the cell counts', () => {
+      const layer = hexbinSpec().layers.find((entry) => {
+        return entry.id === 'caf-hexbin-fill';
+      });
+
+      expect(layer?.sourceId).toBe('caf-hexbin');
+      expect(layer?.mapDataId).toBe('caf-hexbin-counts');
+    });
+
+    /*
+     * Hidden, not dropped: the `cozinhas-por-municipio` join points at this
+     * layer's source, so removing it would strand that reference and make
+     * geovis refuse the whole spec. The grid covers it at 0.85 opacity anyway.
+     */
+    test('hides the município fill instead of removing it', () => {
+      const fill = hexbinSpec().layers.find((entry) => {
+        return entry.id === 'municipios-br-fill';
+      });
+
+      expect(fill).toBeDefined();
+      expect(fill?.visible).toBe(false);
+      expect(
+        buildSpec(BY_CITY, 'coropletico').layers.find((entry) => {
+          return entry.id === 'municipios-br-fill';
+        })?.visible
+      ).not.toBe(false);
+    });
+
+    /*
+     * The split the mode rests on: the source carries the whole grid so it has
+     * no holes, while the join carries only the occupied cells — an empty one
+     * takes the fill's `defaultColor` rather than a painted band.
+     */
+    test('joins the occupied cells by h3, leaving empty ones to the default fill', () => {
+      const join = hexbinSpec().mapData?.find((entry) => {
+        return entry.mapDataId === 'caf-hexbin-counts';
+      });
+
+      expect(join?.mapId).toBe('caf-hexbin');
+      expect(join?.joinKey).toBe('h3');
+      expect(join?.data).toEqual([{ geometryId: '84occupied', value: 7 }]);
+    });
+
+    test('anchors the grid legend only while the mode is active', () => {
+      const legendOf = (spec: ReturnType<typeof buildSpec>) => {
+        return spec.legends?.find((entry) => {
+          return entry.id === 'legenda-cafs-hexbin';
+        });
+      };
+
+      expect(legendOf(hexbinSpec())?.position).toBe('bottom-right');
+      expect(
+        legendOf(buildSpec(BY_CITY, 'coropletico'))?.position
+      ).toBeUndefined();
+    });
   });
 });

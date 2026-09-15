@@ -1,5 +1,6 @@
 import { readStaticCadinsanMunicipal } from '../data-source-static/readStaticCadinsanMunicipal';
 import { readStaticCadUnico } from '../data-source-static/readStaticCadUnico';
+import { readStaticCafHexbin } from '../data-source-static/readStaticCafHexbin';
 import { readStaticCafPontos } from '../data-source-static/readStaticCafPontos';
 import { readStaticCafsPorMunicipio } from '../data-source-static/readStaticCafsPorMunicipio';
 import {
@@ -16,6 +17,7 @@ import { readStaticPopulacao } from '../data-source-static/readStaticPopulacao';
 import type {
   cadinsanByCity,
   cafByCity,
+  CafHexbinFeatureCollection,
   CafUfFeatureCollection,
   CatalogueContract,
   CozinhaDetalhe,
@@ -26,6 +28,7 @@ import type {
 } from './schema';
 import { toAppCatalogue } from './transformers/toAppCatalogue';
 import { toCadinsanPorMunicipio } from './transformers/toCadinsanPorMunicipio';
+import { toCafHexbin } from './transformers/toCafHexbin';
 import { toCafUfPontos } from './transformers/toCafPontos';
 import { toCafsPorMunicipio } from './transformers/toCafsPorMunicipio';
 import { toCozinhaDetalhe } from './transformers/toCozinhaDetalhe';
@@ -53,6 +56,17 @@ export type DataGateway = {
    * CAF map's zoom hierarchy.
    */
   getCafPontosPorUf: () => Promise<CafUfFeatureCollection>;
+  /**
+   * Returns one GeoJSON Polygon per H3 cell covering Brazil, carrying the CAFs
+   * counted inside it — the `cafs-hexbin` map mode's whole dataset. Reads the
+   * pre-binned `caf-hexbin-r4.json` snapshot; the raw `caf-area.csv` is far too
+   * large to bin at request time.
+   *
+   * Counts only CAFs whose principal property has a usable coordinate, so its
+   * total is below `getCafsPorMunicipio`'s, which counts from the município
+   * code and needs no coordinate.
+   */
+  getCafHexbin: () => Promise<CafHexbinFeatureCollection>;
   /**
    * Returns one row per município (all 5,570) with its CADINSAN 2025
    * food-insecurity headcounts (com/sem PBF), its CadÚnico total, and the
@@ -197,6 +211,9 @@ export const createDataGateway = (): DataGateway => {
       },
       getCafPontosPorUf: async () => {
         return toCafUfPontos(await readCafAnchors());
+      },
+      getCafHexbin: async () => {
+        return toCafHexbin(await readStaticCafHexbin());
       },
       getCadinsanPorMunicipio: async () => {
         return toCadinsanPorMunicipio(await readStaticCadinsanMunicipal());

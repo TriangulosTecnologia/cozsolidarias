@@ -94,3 +94,30 @@ export type StaticCafPontosSource = {
     latitude: number;
   }[];
 };
+
+/**
+ * Shape of the CAF hexbin snapshot, generated offline by
+ * `scripts/generateCafHexbin.ts` from `caf-area.csv` (far too large to read at
+ * request time) and read here as a ~6k-cell artefact.
+ *
+ * Plain cells rather than GeoJSON: the source layer holds what the generator
+ * produced, and assembling the FeatureCollection the map draws is the gateway's
+ * job — the same split `caf-pontos.json` uses.
+ */
+export type StaticCafHexbinSource = {
+  /** The H3 resolution every cell belongs to. */
+  resolution: number;
+  /** One entry per cell covering Brazil, occupied or not. */
+  cells: {
+    /** H3 index, unique per cell; the map's join key. */
+    h3: string;
+    /** CAFs whose principal property falls in this cell. `0` is a real answer. */
+    count: number;
+    /**
+     * The hexagon's vertices as `[longitude, latitude]`, OPEN — the closing
+     * vertex is the first one repeated, appended by the transformer rather than
+     * stored.
+     */
+    ring: [number, number][];
+  }[];
+};

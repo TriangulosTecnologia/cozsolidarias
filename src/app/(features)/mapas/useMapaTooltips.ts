@@ -9,6 +9,7 @@ import type {
 
 import { cozinhaStatusLabel } from './geovisCozinhaStatusScales';
 import { type AssentamentoAtributo, type MapMode } from './geovisSpec';
+import { renderCafHexbinTooltip } from './mapaCafHexbinTooltip';
 import {
   renderAssentamentoTooltip,
   renderCafUfTooltip,
@@ -30,6 +31,29 @@ const indexByCodigoIbge = <T extends { codigoIbge: string }>(
   );
 };
 
+/**
+ * The two CAF renderers take everything they show from the hover info itself —
+ * their joins carry the value, and the UF join also promotes the state's name
+ * to the feature id — so neither needs a lookup table and neither can drift
+ * from the number the map draws.
+ *
+ * Module-level rather than `useCallback(fn, [])` inside the hook: with no
+ * dependencies there is nothing to memoize, and a constant is the stabler
+ * reference of the two.
+ */
+const cafUfTooltip = (info: MapHoverInfo) => {
+  return renderCafUfTooltip({
+    nome: String(info.featureId),
+    quantidade: typeof info.value === 'number' ? info.value : null,
+  });
+};
+
+const cafHexbinTooltip = (info: MapHoverInfo) => {
+  return renderCafHexbinTooltip({
+    quantidade: typeof info.value === 'number' ? info.value : null,
+  });
+};
+
 /** The lookups and active mode each hover tooltip is derived from. */
 type UseMapaTooltipsParams = {
   kitchenByCity: kitchenRateByCity[];
@@ -46,12 +70,13 @@ type UseMapaTooltipsParams = {
 };
 
 /**
- * Builds the four spec-driven hover-tooltip renderers (município, assentamento,
- * kitchen point, CAF UF circle) for the maps playground. Each renderer and its
+ * Builds the five spec-driven hover-tooltip renderers (município, assentamento,
+ * kitchen point, CAF UF circle, CAF hexbin cell) for the maps playground. Each renderer and its
  * backing lookup is memoized so it only changes when its inputs change.
  *
  * @param params - The lookups and the active {@link MapMode}.
- * @returns `{ hoverTooltip, assentamentoTooltip, cozinhaTooltip, cafUfTooltip }`.
+ * @returns `{ hoverTooltip, assentamentoTooltip, cozinhaTooltip, cafUfTooltip,
+ * cafHexbinTooltip }`.
  *
  * @example
  * const { hoverTooltip } = useMapaTooltips({ kitchenByCity, nomesPorCodigo, assentamentos, cozinhaNames, cozinhaStatus, cafByCity, mode });
@@ -134,16 +159,17 @@ export const useMapaTooltips = ({
     [cozinhasByCodigo, statusByCodigo]
   );
 
-  // The CAF country level. Both halves come from the hover info itself — the
-  // `caf-ufs` join promotes `nome` to the feature id and carries the UF's total
-  // as the value — so no lookup table is needed and nothing can drift from the
-  // number drawn on the circle.
-  const cafUfTooltip = React.useCallback((info: MapHoverInfo) => {
-    return renderCafUfTooltip({
-      nome: String(info.featureId),
-      quantidade: typeof info.value === 'number' ? info.value : null,
-    });
-  }, []);
-
-  return { hoverTooltip, assentamentoTooltip, cozinhaTooltip, cafUfTooltip };
+  // Memoized as a whole, not just per renderer: `useMapaSpec` feeds these into
+  // the spec's own `useMemo`, so a fresh object here would rebuild the spec on
+  // every render. The two CAF renderers are module constants and so are not
+  // dependencies.
+  return React.useMemo(() => {
+    return {
+      hoverTooltip,
+      assentamentoTooltip,
+      cozinhaTooltip,
+      cafUfTooltip,
+      cafHexbinTooltip,
+    };
+  }, [hoverTooltip, assentamentoTooltip, cozinhaTooltip]);
 };
