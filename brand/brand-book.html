@@ -818,7 +818,7 @@
             <a href="#open"><span>11</span>Open questions</a>
           </li>
         </ul>
-        <p class="cover-meta">Contract 2.3.0 · September 2026</p>
+        <p class="cover-meta">Contract 2.4.0 · September 2026</p>
       </div>
     </section>
 
@@ -1679,10 +1679,7 @@
           </p>
 
           <div class="strip">
-            <img
-              src="illustration/bananas-on-plate.svg"
-              alt="Bananas on a plate"
-            />
+            <img src="illustration/rice-and-beans.svg" alt="Rice and beans" />
             <img src="illustration/papaya.svg" alt="Papaya" />
             <img
               src="illustration/carrots-in-bowl.svg"
@@ -1715,29 +1712,18 @@
             </div>
             <div>
               <p>
-                Twenty-four came out of the native Illustrator file. The other
-                ten had no vector source in the handoff and were reconstructed
-                from the delivered PNG exports — the art is flat colour, so the
-                regions were separated and refitted rather than traced blind,
-                and each was checked against its source on white and on grey,
-                where the near-white highlights a white page hides become
-                visible. They are faithful, but they are a reconstruction:
-                heavier in nodes than a hand-drawn path, and their finest
-                contours carry the resolution of a roughly 250 px export.
+                Twenty-three came out of the native Illustrator file. The other
+                eleven were redrawn in Illustrator from the delivered PNG
+                exports: ten had no vector source in the handoff at all, and
+                <code>rice-and-beans.svg</code> had one that no printer could
+                resolve. Each was compared against its raster source on white
+                and on a mid grey, where the near-white shapes a white page
+                hides become visible. They are faithful; where they differ it is
+                the finest interior detail, because the raster they were drawn
+                from is about 250 px across. The set is 463 KB in total, and
+                every piece exports to PDF.
               </p>
             </div>
-          </div>
-
-          <div class="note">
-            <p>
-              <b>One file will not print.</b>
-              <code>rice-and-beans.svg</code> still carries the blend machinery
-              the extractor emitted for its shading, and that construction hangs
-              Chrome's print rasteriser: any PDF export of a document containing
-              it never finishes. On screen it is correct. Until it is rebuilt,
-              keep it out of anything destined for PDF or press — which is why
-              it is not in the row above — or place a rendered copy instead.
-            </p>
           </div>
 
           <h3>The pattern</h3>
@@ -1762,28 +1748,14 @@
             src="logo/vertical-color-on-dark.svg"
             alt="Cozinha Solidária em Rede"
           />
-          <h2>Four things this book cannot settle</h2>
-          <p>
-            All four are recorded in the spec under <code>unresolved</code>.
-          </p>
+          <h2>Two things this book cannot settle</h2>
+          <p>Both are recorded in the spec under <code>unresolved</code>.</p>
           <ol class="open">
-            <li>
-              <b>One illustration cannot be printed.</b>
-              <code>rice-and-beans.svg</code> carries the extractor's emulation
-              of its shading — twenty-one chained blend groups — and that hangs
-              the print rasteriser. Three rebuilds were tried and rejected on
-              the evidence; the designer's own file for that piece would settle
-              it.
-            </li>
             <li>
               <b>No print proof exists.</b> Every spot and CMYK reference is
               unverified, and the manual's PANTONE numbers are wrong on their
-              face.
-            </li>
-            <li>
-              <b>The illustration source file was never delivered.</b> Nothing
-              is blocked now that the ten pieces are vector, but the designer's
-              own geometry would be better to edit from.
+              face. This is the last thing standing between the system and a
+              press run.
             </li>
             <li>
               <b>The CSR badge appears in the manual without explanation.</b>

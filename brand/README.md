@@ -8,7 +8,7 @@ site, decks, print, partner materials — should resolve here rather than to a c
 | [`brand-spec.json`](./brand-spec.json) | Canonical operating contract (Branding Studio schema v4). Strategy, creative direction, design tokens, verified contrast pairs, evidence, open questions. Machine-readable; the single source of truth for values.                                                                                                         |
 | [`brand-book.html`](./brand-book.html) | The teaching document. Why the system behaves as it does and how to apply it. Read this first — open it in a browser; it is a designed artifact, set in the brand's own typeface and built from the composition grammar it describes. Self-contained apart from the assets in the folders below, which it references live. |
 | [`logo/`](./logo)                      | 24 signature masters (4 lockups × 6 variants) plus 2 badges.                                                                                                                                                                                                                                                               |
-| [`illustration/`](./illustration)      | 34 drawn food illustrations as vector masters. 24 from the native source, 10 reconstructed from raster exports (`E-011`).                                                                                                                                                                                                  |
+| [`illustration/`](./illustration)      | 34 drawn food illustrations as vector masters, 463 KB in total. 23 from the native source, 11 redrawn from the raster exports (`E-015`).                                                                                                                                                                                   |
 | [`pattern/`](./pattern)                | Seamless food pattern tile, in two inks.                                                                                                                                                                                                                                                                                   |
 | [`reference/`](./reference)            | Rendered applications showing the composition grammar across five different jobs.                                                                                                                                                                                                                                          |
 
@@ -47,12 +47,13 @@ Three rules cover most of it; the [brand book](./brand-book.html) covers the res
 ## Provenance
 
 The mark, lettering, illustrations and pattern come from the identity delivered by LM&Co.
-in June 2026. Every logo, the pattern and 24 of the 34 illustrations were extracted as
+in June 2026. Every logo, the pattern and 23 of the 34 illustrations were extracted as
 vector directly from its native Adobe Illustrator source
 (`MANUAL DE IDENTIDADE VISUAL - COZINHA SOLIDÁRIA.ai`, 2026-06-23), with no retyped values.
-The remaining 10 illustrations had no vector source in the handoff and were reconstructed
-from the delivered PNG exports (`E-011`). Each file is plain `<path>` geometry with a
-`viewBox`, no embedded images, no external references, no script, no font dependency.
+The other 11 were redrawn in Illustrator from the delivered PNG exports (`E-015`): ten had
+no vector source in the handoff, and `rice-and-beans.svg` had one no printer could resolve
+(`E-014`). Each file is plain `<path>` geometry with a `viewBox`, no embedded images, no
+external references, no script, no font dependency — and every one exports to PDF.
 
 The system around them — typography, the voz/mesa composition grammar, voice and the
 partner signature — was designed on top of that handoff, which resolved the signature but
