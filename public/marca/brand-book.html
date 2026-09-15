@@ -196,6 +196,19 @@
       a {
         color: inherit;
       }
+      /* Every asset shown is also the file you can take: the name under it is the
+   link. Underlined only on hover so the pages stay quiet. */
+      a.f {
+        text-decoration: none;
+        border-bottom: 1px solid transparent;
+      }
+      a.f:hover,
+      a.f:focus {
+        border-bottom-color: currentColor;
+      }
+      .lockups figcaption a.f {
+        color: var(--preto);
+      }
 
       .note {
         border-left: 3px solid var(--red);
@@ -613,6 +626,78 @@
       }
 
       /* ---- figures ------------------------------------------------------------ */
+      .apps {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 26px 22px;
+        margin: 20px 0 14px;
+        align-items: start;
+      }
+      .apps figure {
+        margin: 0;
+      }
+      .apps .wide {
+        grid-column: 1/-1;
+      }
+      .apps .wide a {
+        max-width: 520px;
+      }
+      .apps a {
+        display: block;
+        background: #fff;
+        border: 1px solid var(--rule);
+        border-radius: 4px;
+        overflow: hidden;
+      }
+      .apps img {
+        width: 100%;
+        display: block;
+      }
+      .apps figcaption {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.11em;
+        text-transform: uppercase;
+        color: var(--ink-mute);
+        margin-top: 10px;
+      }
+
+      /* ---- downloads ---------------------------------------------------------- */
+      .dl {
+        border-top: 1px solid var(--rule);
+        margin: 6px 0 0;
+      }
+      .dl .row {
+        display: grid;
+        grid-template-columns: 150px 1fr;
+        gap: 12px 24px;
+        padding: 14px 0;
+        border-bottom: 1px solid var(--rule);
+        align-items: baseline;
+      }
+      .dl .k {
+        font-size: 10.5px;
+        font-weight: 600;
+        letter-spacing: 0.11em;
+        text-transform: uppercase;
+        color: var(--ink-mute);
+        line-height: 1.5;
+      }
+      .dl .v {
+        font-size: 13.5px;
+        line-height: 1.9;
+        min-width: 0;
+      }
+      .dl .v a {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 12px;
+        white-space: nowrap;
+      }
+      .dl .sep {
+        color: rgba(0, 0, 0, 0.32);
+        margin: 0 3px;
+      }
+
       figure.full {
         margin: 24px 0 30px;
       }
@@ -637,7 +722,10 @@
         grid-template-columns: repeat(6, 1fr);
         gap: 18px;
         align-items: end;
-        margin: 6px 0 4px;
+        margin: 6px 0 34px;
+      }
+      .strip a {
+        display: block;
       }
       .strip img {
         width: 100%;
@@ -707,16 +795,27 @@
         .proof,
         .lockups,
         .swatches,
-        .toc {
+        .toc,
+        .apps {
           grid-template-columns: 1fr;
         }
         .strip {
           grid-template-columns: repeat(3, 1fr);
         }
         .spec .row,
-        .chain li {
+        .chain li,
+        .dl .row {
           grid-template-columns: 1fr;
-          gap: 8px;
+          gap: 6px;
+        }
+        /* Fingers, not a cursor: the links get room to be hit without changing the
+     rhythm of the list. */
+        .dl .v {
+          line-height: 2.4;
+        }
+        .dl .v a {
+          display: inline-block;
+          padding: 2px 0;
         }
         .cover {
           padding: 40px 24px 44px;
@@ -817,7 +916,10 @@
             <a href="#ilustracao"><span>10</span>Ilustração e padronagem</a>
           </li>
           <li>
-            <a href="#abertas"><span>11</span>Questões em aberto</a>
+            <a href="#downloads"><span>11</span>Downloads</a>
+          </li>
+          <li>
+            <a href="#abertas"><span>12</span>Questões em aberto</a>
           </li>
         </ul>
         <p class="cover-meta">Contrato 2.5.0 · setembro de 2026</p>
@@ -830,10 +932,9 @@
         <div class="col">
           <p class="lede">
             Este manual ensina a identidade bem o bastante para fazer peça nova
-            com ela. Não é uma serialização do <code>brand-spec.json</code> —
-            aquele arquivo é o contrato de máquina e o registro completo de
-            evidências e questões abertas. Aqui está por que o sistema se
-            comporta como se comporta.
+            com ela — cartaz, rótulo, apresentação, placa. Ele não descreve a
+            marca por fora: mostra por que cada decisão é como é, para a próxima
+            peça sair certa sem depender de quem desenhou esta.
           </p>
 
           <p>
@@ -911,7 +1012,7 @@
       <div class="in">
         <p class="eyebrow rail"><b>02</b>A marca</p>
         <div class="col">
-          <h2>Lettering à mão travado numa panela de mãos plurais</h2>
+          <h2>Lettering à mão e panela de mãos plurais, numa peça só</h2>
           <p>Duas propriedades carregam o sentido, e nenhuma é negociável.</p>
           <div class="two">
             <div>
@@ -949,8 +1050,12 @@
                 />
               </div>
               <figcaption>
-                <b>vertical</b>A assinatura principal, e o padrão para tudo que
-                não é obviamente largo ou estreito.
+                <b
+                  ><a class="f" href="logo/vertical-color.svg" download
+                    >vertical-color.svg</a
+                  ></b
+                >A assinatura principal, e o padrão para tudo que não é
+                obviamente largo ou estreito.
               </figcaption>
             </figure>
             <figure>
@@ -962,8 +1067,12 @@
                 />
               </div>
               <figcaption>
-                <b>horizontal</b>Espaços largos e baixos: cabeçalho de site,
-                rodapé de documento, faixa.
+                <b
+                  ><a class="f" href="logo/horizontal-color.svg" download
+                    >horizontal-color.svg</a
+                  ></b
+                >Espaços largos e baixos: cabeçalho de site, rodapé de
+                documento, faixa.
               </figcaption>
             </figure>
             <figure>
@@ -975,8 +1084,12 @@
                 />
               </div>
               <figcaption>
-                <b>stacked</b>Espaços altos e estreitos, onde o vertical ainda é
-                largo demais.
+                <b
+                  ><a class="f" href="logo/stacked-color.svg" download
+                    >stacked-color.svg</a
+                  ></b
+                >Espaços altos e estreitos, onde o vertical ainda é largo
+                demais.
               </figcaption>
             </figure>
             <figure>
@@ -988,8 +1101,11 @@
                 />
               </div>
               <figcaption>
-                <b>wordmark</b>Onde a panela já aparece por perto e repeti-la
-                seria ruído.
+                <b
+                  ><a class="f" href="logo/wordmark-color.svg" download
+                    >wordmark-color.svg</a
+                  ></b
+                >Onde a panela já aparece por perto e repeti-la seria ruído.
               </figcaption>
             </figure>
             <figure>
@@ -1001,8 +1117,12 @@
                 />
               </div>
               <figcaption>
-                <b>badge-pot</b>A assinatura reduzida: avatar, favicon, carimbo,
-                e tudo abaixo da largura mínima.
+                <b
+                  ><a class="f" href="logo/badge-pot.svg" download
+                    >badge-pot.svg</a
+                  ></b
+                >A assinatura reduzida: avatar, favicon, carimbo, e tudo abaixo
+                da largura mínima.
               </figcaption>
             </figure>
             <figure>
@@ -1014,7 +1134,11 @@
                 />
               </div>
               <figcaption>
-                <b>badge-csr</b>Secundário, e só onde a sigla já é entendida.
+                <b
+                  ><a class="f" href="logo/badge-csr.svg" download
+                    >badge-csr.svg</a
+                  ></b
+                >Secundário, e só onde a sigla já é entendida.
               </figcaption>
             </figure>
           </div>
@@ -1248,25 +1372,49 @@
           <p>
             O conjunto de ilustrações roda na própria paleta naturalista — 81
             cores escolhidas para que uma cenoura pareça uma cenoura. Ponha uma
-            tigela cerúlea sobre Verde UNIFESP e nada compartilha matiz. A
+            tigela cerúlea sobre Verde Cozinhas e nada compartilha matiz. A
             correção óbvia, recolorir as ilustrações, custaria o realismo que as
             torna específicas de uma cozinha brasileira. A divisão resolve
             estruturalmente: a comida vai no prato, não na toalha. E repete a
             lógica da própria marca — a panela contém, os ingredientes chegam.
           </p>
 
-          <figure class="full">
-            <img
-              src="reference/applications.png"
-              alt="Cinco aplicações construídas com a gramática voz e mesa"
-            />
-            <figcaption>
-              Cinco peças com trabalhos diferentes, uma gramática: voz sobre
-              mesa, só mesa, só voz, tinta única, e mesa com padronagem. Cada
-              uma foi renderizada e conferida em tamanho real antes desta folha
-              ser montada.
-            </figcaption>
-          </figure>
+          <div class="apps">
+            <figure>
+              <a href="reference/poster.png" download
+                ><img src="reference/poster.png" alt="Cartaz A4"
+              /></a>
+              <figcaption>Cartaz A4 · voz + mesa</figcaption>
+            </figure>
+            <figure>
+              <a href="reference/note.png" download
+                ><img src="reference/note.png" alt="Nota técnica A4"
+              /></a>
+              <figcaption>Nota técnica A4 · só mesa</figcaption>
+            </figure>
+            <figure>
+              <a href="reference/social.png" download
+                ><img src="reference/social.png" alt="Post 1:1"
+              /></a>
+              <figcaption>Social 1:1 · só voz</figcaption>
+            </figure>
+            <figure>
+              <a href="reference/sign.png" download
+                ><img src="reference/sign.png" alt="Placa"
+              /></a>
+              <figcaption>Placa · tinta única</figcaption>
+            </figure>
+            <figure class="wide">
+              <a href="reference/label.png" download
+                ><img src="reference/label.png" alt="Rótulo"
+              /></a>
+              <figcaption>Rótulo · mesa + padronagem</figcaption>
+            </figure>
+          </div>
+          <p class="cap">
+            Cinco peças com trabalhos diferentes, uma gramática. Clique em
+            qualquer uma para baixar em tamanho cheio.
+          </p>
 
           <h3>As regras que decorrem</h3>
           <ul>
@@ -1532,7 +1680,7 @@
             </figure>
             <figure>
               <div class="chip" style="background: #1e5a36"></div>
-              <b>Verde UNIFESP</b> <code>#1E5A36</code>
+              <b>Verde Cozinhas</b> <code>#1E5A36</code>
               <figcaption>A rede, em fundos claros.</figcaption>
             </figure>
             <figure>
@@ -1585,7 +1733,7 @@
 
           <div class="note">
             <p>
-              <b>Verde UNIFESP não vai no escuro.</b> Mede 2,57:1 no Preto e
+              <b>Verde Cozinhas não vai no escuro.</b> Mede 2,57:1 no Preto e
               1,99:1 no quase-preto que o próprio manual usa — o lettering
               <i>Em Rede</i> no lockup escuro dele é praticamente invisível. As
               variantes <code>color-on-dark</code> usam <b>Verde Claro</b>, um
@@ -1609,7 +1757,7 @@
               <td>20,1:1</td>
             </tr>
             <tr>
-              <td>Verde UNIFESP</td>
+              <td>Verde Cozinhas</td>
               <td>Branco Leitura</td>
               <td>7,8:1</td>
             </tr>
@@ -1620,7 +1768,7 @@
             </tr>
             <tr>
               <td>Branco Leitura</td>
-              <td>Verde UNIFESP</td>
+              <td>Verde Cozinhas</td>
               <td>7,8:1</td>
             </tr>
             <tr>
@@ -1670,15 +1818,26 @@
           </p>
 
           <div class="strip">
-            <img src="illustration/rice-and-beans.svg" alt="Arroz e feijão" />
-            <img src="illustration/papaya.svg" alt="Mamão" />
-            <img
-              src="illustration/carrots-in-bowl.svg"
-              alt="Cenouras na tigela"
-            />
-            <img src="illustration/fish-on-plate.svg" alt="Peixe no prato" />
-            <img src="illustration/preserve-jar.svg" alt="Pote de conserva" />
-            <img src="illustration/lemons.svg" alt="Limões" />
+            <a class="f" href="illustration/rice-and-beans.svg" download
+              ><img src="illustration/rice-and-beans.svg" alt="Arroz e feijão"
+            /></a>
+            <a class="f" href="illustration/papaya.svg" download
+              ><img src="illustration/papaya.svg" alt="Mamão"
+            /></a>
+            <a class="f" href="illustration/carrots-in-bowl.svg" download
+              ><img
+                src="illustration/carrots-in-bowl.svg"
+                alt="Cenouras na tigela"
+            /></a>
+            <a class="f" href="illustration/fish-on-plate.svg" download
+              ><img src="illustration/fish-on-plate.svg" alt="Peixe no prato"
+            /></a>
+            <a class="f" href="illustration/preserve-jar.svg" download
+              ><img src="illustration/preserve-jar.svg" alt="Pote de conserva"
+            /></a>
+            <a class="f" href="illustration/lemons.svg" download
+              ><img src="illustration/lemons.svg" alt="Limões"
+            /></a>
           </div>
 
           <div class="two">
@@ -1723,9 +1882,250 @@
             Um ladrilho 280×280 sem emenda, verificado por repetição em várias
             escalas. É textura — atrás do conteúdo, fora da área de respiro do
             logo, em opacidade baixa. Duas tintas:
-            <code>foods-tile.svg</code> para fundos claros,
-            <code>foods-tile-white.svg</code> para escuros, mostrada aqui sobre
-            Vermelho em força total para o desenho aparecer.
+            <code
+              ><a class="f" href="pattern/foods-tile.svg" download
+                >foods-tile.svg</a
+              ></code
+            >
+            para fundos claros,
+            <code
+              ><a class="f" href="pattern/foods-tile-white.svg" download
+                >foods-tile-white.svg</a
+              ></code
+            >
+            para escuros, mostrada aqui sobre Vermelho em força total para o
+            desenho aparecer.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="band" id="downloads">
+      <div class="in">
+        <p class="eyebrow rail"><b>11</b>Downloads</p>
+        <div class="col">
+          <h2>Tudo que está aqui, para baixar</h2>
+          <p>
+            Todo arquivo deste manual é público e mora no endereço em que ele
+            aparece. Clique para baixar. Os logos e as ilustrações são SVG:
+            escalam sem perder nada e abrem em qualquer editor de vetor.
+          </p>
+          <div class="dl">
+            <div class="row">
+              <div class="k">vertical</div>
+              <div class="v">
+                <a class="f" href="logo/vertical-color.svg" download>color</a
+                ><span class="sep"> · </span
+                ><a class="f" href="logo/vertical-color-on-dark.svg" download
+                  >color-on-dark</a
+                ><span class="sep"> · </span
+                ><a class="f" href="logo/vertical-white.svg" download>white</a
+                ><span class="sep"> · </span
+                ><a class="f" href="logo/vertical-black.svg" download>black</a
+                ><span class="sep"> · </span
+                ><a class="f" href="logo/vertical-red.svg" download>red</a
+                ><span class="sep"> · </span
+                ><a class="f" href="logo/vertical-green.svg" download>green</a>
+              </div>
+            </div>
+            <div class="row">
+              <div class="k">horizontal</div>
+              <div class="v">
+                <a class="f" href="logo/horizontal-color.svg" download>color</a
+                ><span class="sep"> · </span
+                ><a class="f" href="logo/horizontal-color-on-dark.svg" download
+                  >color-on-dark</a
+                ><span class="sep"> · </span
+                ><a class="f" href="logo/horizontal-white.svg" download>white</a
+                ><span class="sep"> · </span
+                ><a class="f" href="logo/horizontal-black.svg" download>black</a
+                ><span class="sep"> · </span
+                ><a class="f" href="logo/horizontal-red.svg" download>red</a
+                ><span class="sep"> · </span
+                ><a class="f" href="logo/horizontal-green.svg" download
+                  >green</a
+                >
+              </div>
+            </div>
+            <div class="row">
+              <div class="k">stacked</div>
+              <div class="v">
+                <a class="f" href="logo/stacked-color.svg" download>color</a
+                ><span class="sep"> · </span
+                ><a class="f" href="logo/stacked-color-on-dark.svg" download
+                  >color-on-dark</a
+                ><span class="sep"> · </span
+                ><a class="f" href="logo/stacked-white.svg" download>white</a
+                ><span class="sep"> · </span
+                ><a class="f" href="logo/stacked-black.svg" download>black</a
+                ><span class="sep"> · </span
+                ><a class="f" href="logo/stacked-red.svg" download>red</a
+                ><span class="sep"> · </span
+                ><a class="f" href="logo/stacked-green.svg" download>green</a>
+              </div>
+            </div>
+            <div class="row">
+              <div class="k">wordmark</div>
+              <div class="v">
+                <a class="f" href="logo/wordmark-color.svg" download>color</a
+                ><span class="sep"> · </span
+                ><a class="f" href="logo/wordmark-color-on-dark.svg" download
+                  >color-on-dark</a
+                ><span class="sep"> · </span
+                ><a class="f" href="logo/wordmark-white.svg" download>white</a
+                ><span class="sep"> · </span
+                ><a class="f" href="logo/wordmark-black.svg" download>black</a
+                ><span class="sep"> · </span
+                ><a class="f" href="logo/wordmark-red.svg" download>red</a
+                ><span class="sep"> · </span
+                ><a class="f" href="logo/wordmark-green.svg" download>green</a>
+              </div>
+            </div>
+            <div class="row">
+              <div class="k">Selos</div>
+              <div class="v">
+                <a class="f" href="logo/badge-csr.svg" download>badge-csr</a
+                ><span class="sep"> · </span
+                ><a class="f" href="logo/badge-pot.svg" download>badge-pot</a>
+              </div>
+            </div>
+            <div class="row">
+              <div class="k">Ilustrações · 34</div>
+              <div class="v">
+                <a class="f" href="illustration/artichokes.svg" download
+                  >artichokes</a
+                ><span class="sep"> · </span
+                ><a class="f" href="illustration/asparagus.svg" download
+                  >asparagus</a
+                ><span class="sep"> · </span
+                ><a class="f" href="illustration/avocado-whole.svg" download
+                  >avocado-whole</a
+                ><span class="sep"> · </span
+                ><a class="f" href="illustration/avocado.svg" download
+                  >avocado</a
+                ><span class="sep"> · </span
+                ><a class="f" href="illustration/bananas-on-plate.svg" download
+                  >bananas-on-plate</a
+                ><span class="sep"> · </span
+                ><a class="f" href="illustration/bananas.svg" download
+                  >bananas</a
+                ><span class="sep"> · </span
+                ><a class="f" href="illustration/beetroot.svg" download
+                  >beetroot</a
+                ><span class="sep"> · </span
+                ><a class="f" href="illustration/carrot-on-tile.svg" download
+                  >carrot-on-tile</a
+                ><span class="sep"> · </span
+                ><a class="f" href="illustration/carrot-with-tops.svg" download
+                  >carrot-with-tops</a
+                ><span class="sep"> · </span
+                ><a class="f" href="illustration/carrots-in-bowl.svg" download
+                  >carrots-in-bowl</a
+                ><span class="sep"> · </span
+                ><a class="f" href="illustration/cherries-and-nuts.svg" download
+                  >cherries-and-nuts</a
+                ><span class="sep"> · </span
+                ><a class="f" href="illustration/cherry-tomatoes.svg" download
+                  >cherry-tomatoes</a
+                ><span class="sep"> · </span
+                ><a class="f" href="illustration/coconut.svg" download
+                  >coconut</a
+                ><span class="sep"> · </span
+                ><a class="f" href="illustration/fish-on-plate.svg" download
+                  >fish-on-plate</a
+                ><span class="sep"> · </span
+                ><a class="f" href="illustration/fish.svg" download>fish</a
+                ><span class="sep"> · </span
+                ><a class="f" href="illustration/fried-egg.svg" download
+                  >fried-egg</a
+                ><span class="sep"> · </span
+                ><a class="f" href="illustration/greens-in-bowl.svg" download
+                  >greens-in-bowl</a
+                ><span class="sep"> · </span
+                ><a class="f" href="illustration/lemons.svg" download>lemons</a
+                ><span class="sep"> · </span
+                ><a class="f" href="illustration/lime-slice.svg" download
+                  >lime-slice</a
+                ><span class="sep"> · </span
+                ><a class="f" href="illustration/melon-slice.svg" download
+                  >melon-slice</a
+                ><span class="sep"> · </span
+                ><a class="f" href="illustration/nuts.svg" download>nuts</a
+                ><span class="sep"> · </span
+                ><a class="f" href="illustration/papaya.svg" download>papaya</a
+                ><span class="sep"> · </span
+                ><a class="f" href="illustration/pear.svg" download>pear</a
+                ><span class="sep"> · </span
+                ><a class="f" href="illustration/pineapple.svg" download
+                  >pineapple</a
+                ><span class="sep"> · </span
+                ><a class="f" href="illustration/preserve-jar-blue.svg" download
+                  >preserve-jar-blue</a
+                ><span class="sep"> · </span
+                ><a class="f" href="illustration/preserve-jar.svg" download
+                  >preserve-jar</a
+                ><span class="sep"> · </span
+                ><a class="f" href="illustration/purple-turnip.svg" download
+                  >purple-turnip</a
+                ><span class="sep"> · </span
+                ><a class="f" href="illustration/rice-and-beans.svg" download
+                  >rice-and-beans</a
+                ><span class="sep"> · </span
+                ><a class="f" href="illustration/salmon-on-plate.svg" download
+                  >salmon-on-plate</a
+                ><span class="sep"> · </span
+                ><a class="f" href="illustration/squash.svg" download>squash</a
+                ><span class="sep"> · </span
+                ><a class="f" href="illustration/tomato-halved.svg" download
+                  >tomato-halved</a
+                ><span class="sep"> · </span
+                ><a class="f" href="illustration/tomatoes.svg" download
+                  >tomatoes</a
+                ><span class="sep"> · </span
+                ><a class="f" href="illustration/watermelon.svg" download
+                  >watermelon</a
+                ><span class="sep"> · </span
+                ><a class="f" href="illustration/white-turnip.svg" download
+                  >white-turnip</a
+                >
+              </div>
+            </div>
+            <div class="row">
+              <div class="k">Padronagem</div>
+              <div class="v">
+                <a class="f" href="pattern/foods-tile-white.svg" download
+                  >foods-tile-white</a
+                ><span class="sep"> · </span
+                ><a class="f" href="pattern/foods-tile.svg" download
+                  >foods-tile</a
+                >
+              </div>
+            </div>
+            <div class="row">
+              <div class="k">Aplicações</div>
+              <div class="v">
+                <a class="f" href="reference/poster.png" download>Cartaz A4</a
+                ><span class="sep"> · </span
+                ><a class="f" href="reference/note.png" download
+                  >Nota técnica A4</a
+                ><span class="sep"> · </span
+                ><a class="f" href="reference/social.png" download>Social 1:1</a
+                ><span class="sep"> · </span
+                ><a class="f" href="reference/sign.png" download>Placa</a
+                ><span class="sep"> · </span
+                ><a class="f" href="reference/label.png" download>Rótulo</a>
+              </div>
+            </div>
+            <div class="row">
+              <div class="k">Contrato</div>
+              <div class="v">
+                <a class="f" href="brand-spec.json" download>brand-spec.json</a>
+              </div>
+            </div>
+          </div>
+          <p class="cap">
+            Precisa de um PDF do manual inteiro? Imprima esta página pelo
+            navegador — o arquivo já vem paginado em A4.
           </p>
         </div>
       </div>
@@ -1733,7 +2133,7 @@
 
     <section class="band voz-black" id="abertas">
       <div class="in">
-        <p class="eyebrow rail"><b>11</b>Questões<br />em aberto</p>
+        <p class="eyebrow rail"><b>12</b>Questões<br />em aberto</p>
         <div class="col">
           <img
             class="sign-off"
@@ -1741,10 +2141,7 @@
             alt="Cozinha Solidária em Rede"
           />
           <h2>Clareza também é dizer limite</h2>
-          <p>
-            Duas coisas este manual não resolve. As duas estão no spec, em
-            <code>unresolved</code>.
-          </p>
+          <p>Duas coisas este manual não resolve.</p>
           <ol class="open">
             <li>
               <b>Não existe prova de impressão.</b> Toda referência de cor

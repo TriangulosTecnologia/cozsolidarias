@@ -14,7 +14,7 @@ the files in place; there is nothing to build or sync.
 | [`logo/`](./logo)                      | 24 signature masters (4 lockups × 6 variants) plus 2 badges.                                                                                         |
 | [`illustration/`](./illustration)      | 34 drawn food illustrations. 23 from the native source, 11 redrawn from small raster exports, so their interior detail is coarser (`E-015`).         |
 | [`pattern/`](./pattern)                | Seamless food pattern tile, in two inks.                                                                                                             |
-| [`reference/`](./reference)            | Rendered applications, five different jobs.                                                                                                          |
+| [`reference/`](./reference)            | Five rendered applications, one PNG each.                                                                                                            |
 
 ## Picking an asset
 
