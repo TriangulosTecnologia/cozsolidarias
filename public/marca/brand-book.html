@@ -90,8 +90,8 @@
         max-width: 1000px;
         margin: 0 auto;
         display: grid;
-        grid-template-columns: 150px 1fr;
-        column-gap: 48px;
+        grid-template-columns: 168px 1fr;
+        column-gap: 44px;
       }
       .rail {
         grid-column: 1;
@@ -105,7 +105,7 @@
 
       /* ---- type roles, exactly as the contract declares them ------------------- */
       .eyebrow {
-        font-size: 10.5px;
+        font-size: 12px;
         font-weight: 600;
         letter-spacing: 0.11em;
         text-transform: uppercase;
@@ -204,7 +204,7 @@
       }
       code {
         font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-        font-size: 0.85em;
+        font-size: max(12px, 0.85em);
         background: rgba(0, 0, 0, 0.055);
         padding: 1px 5px;
         border-radius: 3px;
@@ -329,14 +329,14 @@
       }
       .chain li {
         display: grid;
-        grid-template-columns: 118px 1fr;
+        grid-template-columns: 140px 1fr;
         gap: 20px;
         padding: 12px 0;
         border-bottom: 1px solid var(--rule);
         align-items: baseline;
       }
       .chain b {
-        font-size: 10.5px;
+        font-size: 12px;
         font-weight: 600;
         letter-spacing: 0.11em;
         text-transform: uppercase;
@@ -385,7 +385,7 @@
       .lockups figcaption b {
         display: block;
         font-family: ui-monospace, monospace;
-        font-size: 11.5px;
+        font-size: 12px;
         font-weight: 400;
         color: var(--preto);
         margin-bottom: 3px;
@@ -400,7 +400,7 @@
       }
       th {
         text-align: left;
-        font-size: 10px;
+        font-size: 12px;
         font-weight: 600;
         letter-spacing: 0.11em;
         text-transform: uppercase;
@@ -525,14 +525,14 @@
       }
       .spec .row {
         display: grid;
-        grid-template-columns: 132px 1fr;
+        grid-template-columns: 152px 1fr;
         gap: 24px;
         padding: 18px 0;
         border-bottom: 1px solid var(--rule);
         align-items: baseline;
       }
       .spec .lab {
-        font-size: 10px;
+        font-size: 12px;
         font-weight: 600;
         letter-spacing: 0.1em;
         text-transform: uppercase;
@@ -562,7 +562,7 @@
         line-height: 1.55;
       }
       .spec .label {
-        font-size: 11px;
+        font-size: 12px;
         font-weight: 600;
         letter-spacing: 0.11em;
         text-transform: uppercase;
@@ -600,7 +600,7 @@
         border-top: 1px solid var(--rule);
         margin: 16px 0 0;
         padding-top: 15px;
-        font-size: 11px;
+        font-size: 12px;
         font-weight: 600;
         letter-spacing: 0.11em;
         text-transform: uppercase;
@@ -636,12 +636,12 @@
         display: block;
         background: none;
         padding: 0;
-        font-size: 11.5px;
+        font-size: 12px;
         color: var(--ink-mute);
         margin: 1px 0 3px;
       }
       .swatches figcaption {
-        font-size: 11.5px;
+        font-size: 12px;
         line-height: 1.38;
         color: var(--ink-mute);
       }
@@ -675,7 +675,7 @@
         display: block;
       }
       .apps figcaption {
-        font-size: 11px;
+        font-size: 12px;
         font-weight: 600;
         letter-spacing: 0.11em;
         text-transform: uppercase;
@@ -690,14 +690,14 @@
       }
       .dl .row {
         display: grid;
-        grid-template-columns: 150px 1fr;
+        grid-template-columns: 166px 1fr;
         gap: 12px 24px;
         padding: 14px 0;
         border-bottom: 1px solid var(--rule);
         align-items: baseline;
       }
       .dl .k {
-        font-size: 10.5px;
+        font-size: 12px;
         font-weight: 600;
         letter-spacing: 0.11em;
         text-transform: uppercase;
@@ -711,12 +711,17 @@
       }
       .dl .v a {
         font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-        font-size: 12px;
+        font-size: 12.5px;
         white-space: nowrap;
+      }
+      /* Illustration names are words, not file stems, so they keep the text face. */
+      .dl .v.words a {
+        font-family: inherit;
+        font-size: 13.5px;
       }
       .dl .sep {
         color: rgba(0, 0, 0, 0.32);
-        margin: 0 3px;
+        margin: 0 5px;
       }
 
       figure.full {
@@ -906,7 +911,7 @@
         </p>
         <ul class="toc">
           <li>
-            <a href="#logica"><span>01</span>A lógica</a>
+            <a href="#logica"><span>01</span>Antes de começar</a>
           </li>
           <li>
             <a href="#marca"><span>02</span>A marca</a>
@@ -926,7 +931,7 @@
             <a href="#tipografia"><span>06</span>Tipografia</a>
           </li>
           <li>
-            <a href="#voz"><span>07</span>Voz</a>
+            <a href="#voz"><span>07</span>Linguagem</a>
           </li>
           <li>
             <a href="#parceiros"><span>08</span>Assinatura dos parceiros</a>
@@ -944,13 +949,13 @@
             <a href="#abertas"><span>12</span>Questões em aberto</a>
           </li>
         </ul>
-        <p class="cover-meta">Contrato 3.0.0 · setembro de 2026</p>
+        <p class="cover-meta">Versão 3.0.0 · setembro de 2026</p>
       </div>
     </section>
 
     <section class="band" id="logica">
       <div class="in">
-        <p class="eyebrow rail"><b>01</b>A lógica</p>
+        <p class="eyebrow rail"><b>01</b>Antes<br />de começar</p>
         <div class="col">
           <p class="lede">
             Este manual serve para fazer peça nova: cartaz, rótulo,
@@ -964,10 +969,10 @@
           </p>
 
           <p>
-            A marca, o lettering, as ilustrações e a padronagem vêm da
-            identidade entregue pela LM&amp;Co. em junho de 2026. Ela resolveu a
-            assinatura, mas não o que fazer com ela: tipografia, composição, voz
-            e assinatura dos parceiros foram desenhadas depois.
+            A panela, o nome desenhado à mão, as ilustrações e a padronagem vêm
+            da identidade entregue pela LM&amp;Co. em junho de 2026. Ela
+            resolveu a assinatura, mas não o que fazer com ela: tipografia,
+            composição, voz e assinatura dos parceiros foram desenhadas depois.
           </p>
 
           <ol class="chain">
@@ -1035,14 +1040,15 @@
       <div class="in">
         <p class="eyebrow rail"><b>02</b>A marca</p>
         <div class="col">
-          <h2>Lettering à mão e panela de mãos plurais, numa peça só</h2>
+          <h2>O nome é desenhado à mão; a panela tem três mãos diferentes</h2>
           <p>Duas coisas não são negociáveis.</p>
           <div class="two">
             <div>
-              <h3>O lettering é arte, não tipo</h3>
+              <h3>O nome é desenho, não fonte</h3>
               <p>
-                Nenhuma fonte reproduz esse desenho. Escale o master. Nunca
-                redigite o nome, nunca espaceje, condense ou incline.
+                Nenhuma fonte reproduz esse desenho. Escale o arquivo original —
+                o <i>master</i>. Nunca redigite o nome, nunca espaceje, condense
+                ou incline.
               </p>
               <p>
                 Onde o sistema não aceita imagem — assinatura em texto puro, um
@@ -1051,7 +1057,7 @@
               </p>
             </div>
             <div>
-              <h3>As mãos são plurais e diferentes</h3>
+              <h3>As três mãos são diferentes entre si</h3>
               <p>
                 Três tons de pele, sempre. Nunca reduza a uma mão só, nem a um
                 tom só.
@@ -1065,7 +1071,7 @@
             </div>
           </div>
 
-          <h3>Seis lockups</h3>
+          <h3>As seis versões da assinatura</h3>
           <div class="lockups">
             <figure>
               <div class="art">
@@ -1169,9 +1175,10 @@
             </figure>
           </div>
           <p class="cap">
-            Acima, todos com o lettering no mesmo tamanho: é assim que se
-            comparam e é assim que se trocam entre si. Cada um vem em seis
-            variantes — <code>color</code>, <code>color-on-dark</code>,
+            Acima, todas com o nome no mesmo tamanho: é assim que se comparam e
+            é assim que se trocam entre si. Cada versão — o que os arquivos e as
+            tabelas deste manual chamam de <i>lockup</i> — vem em seis variantes
+            de cor: <code>color</code>, <code>color-on-dark</code>,
             <code>white</code>, <code>black</code>, <code>red</code>,
             <code>green</code> — em <code>logo/</code>, nomeadas
             <code>&lt;lockup&gt;-&lt;variante&gt;.svg</code>.
@@ -1227,8 +1234,7 @@
               </div>
               <figcaption>
                 <b>Evite.</b> Sobre Vermelho, a panela é <code>#AE1616</code> em
-                <code>#AE1616</code>: some. Sobram meio lettering e três mãos
-                soltas.
+                <code>#AE1616</code>: some. Sobram meio nome e três mãos soltas.
               </figcaption>
             </figure>
             <figure class="yes">
@@ -1255,15 +1261,16 @@
           <b>04</b>Área de respiro<br />e tamanho mínimo
         </p>
         <div class="col">
-          <h2>Um e de ar, e um mínimo que não se negocia</h2>
+          <h2>Deixe espaço em volta da marca, e não reduza além do mínimo</h2>
           <p>
-            A área de respiro é o <b>e de <i>Em Rede</i></b
-            >, na escala do lockup aplicado, nos quatro lados. Nada entra: nem
-            marca de parceiro, nem borda de página, nem conteúdo de imagem.
+            Deixe, nos quatro lados da marca, uma margem do tamanho da letra
+            <b>e</b> de <i>Em Rede</i> — medida na versão que você está
+            aplicando. Nada entra nessa margem: nem marca de parceiro, nem borda
+            de página, nem conteúdo de imagem.
           </p>
           <p class="why">
-            Usar uma letra da própria marca faz a margem escalar junto com ela,
-            sem ninguém calcular proporção.
+            Usar uma letra da própria marca faz a margem crescer e diminuir
+            junto com ela, sem ninguém calcular proporção.
           </p>
 
           <div class="csfig">
@@ -1285,8 +1292,8 @@
           </div>
 
           <p>
-            O lettering tem tamanho diferente em cada lockup, então a mesma
-            regra dá uma margem diferente em cada um:
+            O nome tem tamanho diferente em cada versão, então a mesma regra dá
+            uma margem diferente em cada uma:
           </p>
           <table class="num">
             <tr>
@@ -1325,17 +1332,17 @@
             para <code>badge-pot</code>. É para isso que ele existe.
           </p>
           <p class="why">
-            No mínimo, os contornos do lettering começam a fechar:
+            No mínimo, os contornos das letras começam a fechar:
             <i>Em Rede</i> preenche primeiro, depois as mãos do selo borram
-            juntas. Os selos não têm lettering, então usam um quinto do diâmetro
+            juntas. Os selos não trazem o nome, então usam um quinto do diâmetro
             no lugar da letra.
           </p>
 
           <div class="note">
             <p>
               <b>Os masters são aparados na arte.</b> A borda do arquivo é a
-              borda da marca: meça a margem para fora dela. Não reintroduza
-              padding dentro de um master — coloque a margem no layout.
+              borda da marca: meça a margem para fora dela. Não acrescente
+              espaço em branco dentro de um master — coloque a margem no layout.
             </p>
           </div>
 
@@ -1366,15 +1373,15 @@
         <div class="col">
           <h2>Voz e mesa</h2>
           <p class="lede">
-            Toda superfície da marca é feita de dois campos. Esta faixa é um
-            deles.
+            Toda peça se divide em duas partes: <b>voz</b>, uma faixa de cor
+            chapada da marca — esta aqui — e <b>mesa</b>, a área clara onde
+            entram a comida, os dados e o texto.
           </p>
           <p>
-            <b>Voz</b> é uma cor chapada da marca — Vermelho, Verde ou Preto.
-            Carrega a assinatura, o título e a linha dos parceiros, e
-            <b>nunca carrega ilustração</b>. Uma superfície pode ser toda voz,
-            toda mesa, ou dividida entre as duas numa aresta horizontal reta — a
-            que está no pé desta faixa.
+            A voz é Vermelho, Verde ou Preto. Carrega a assinatura, o título e a
+            linha dos parceiros, e <b>nunca carrega ilustração</b>. Uma peça
+            pode ser toda voz, toda mesa, ou dividida entre as duas numa linha
+            horizontal reta — a que está no pé desta faixa.
           </p>
         </div>
       </div>
@@ -1385,16 +1392,16 @@
         <p class="eyebrow rail">Mesa</p>
         <div class="col">
           <p>
-            <b>Mesa</b> é Branco Leitura: a comida, os dados, o texto corrido, a
-            leitura longa. É o campo que você está lendo agora, e é o único
-            campo onde uma ilustração pode ficar.
+            A mesa é Branco Leitura, e é a parte que você está lendo agora. Leva
+            a comida, os dados e o texto longo, e é o
+            <b>único lugar onde uma ilustração pode ficar</b>.
           </p>
           <p class="why">
             As ilustrações rodam na própria paleta naturalista: 81 cores
             escolhidas para que uma cenoura pareça uma cenoura. Sobre Verde
             Cozinhas nada compartilha matiz, e recolorir custaria o realismo.
-            Separar os campos resolve sem mexer nelas — a comida vai no prato,
-            não na toalha.
+            Separar as duas partes resolve sem mexer nelas — a comida vai no
+            prato, não na toalha.
           </p>
 
           <div class="apps">
@@ -1434,22 +1441,22 @@
             qualquer uma para baixar em tamanho cheio.
           </p>
 
-          <h3>As regras que decorrem</h3>
+          <h3>As regras da divisão</h3>
           <ul>
             <li>
-              A divisão é uma <b>aresta horizontal reta</b> na largura inteira.
-              Não esfume, curve, incline ou arredonde — o desenho vem do
-              lettering e das ilustrações, e o layout fica parado para que eles
-              possam se mexer.
+              A divisão é uma <b>linha horizontal reta</b> na largura inteira.
+              Não esfume, curve, incline ou arredonde — o desenho vem do nome e
+              das ilustrações, e o layout fica parado para que eles possam se
+              mexer.
             </li>
             <li>
-              A proporção é livre, mas <b>nunca meio a meio</b>: um campo
-              domina, ou a superfície lê como dois cartazes sem relação.
+              A proporção é livre, mas <b>nunca meio a meio</b>: uma parte
+              domina, ou a peça lê como dois cartazes sem relação.
             </li>
             <li>
-              A assinatura fica no campo voz, no alto à esquerda, dentro da área
-              de respiro. Em superfície toda mesa, no alto à esquerda da margem
-              da página.
+              A assinatura fica na voz, no alto à esquerda, dentro da área de
+              respiro. Em peça toda mesa, no alto à esquerda da margem da
+              página.
             </li>
             <li>
               As ilustrações ficam na mesa, <b>ancoradas na borda de baixo</b>,
@@ -1462,14 +1469,14 @@
             </li>
           </ul>
 
-          <h3>O que fica, o que se move</h3>
+          <h3>O que é fixo e o que é livre</h3>
           <p>
-            <b>Fica:</b> os dois campos, a aresta reta, a assinatura no alto à
+            <b>Fixo:</b> as duas partes, a linha reta, a assinatura no alto à
             esquerda, comida só na mesa.
           </p>
           <p>
             <b>Livre:</b> que cor a voz assume, a proporção da divisão, qual
-            campo domina, quantas ilustrações entram e como se sobrepõem.
+            parte domina, quantas ilustrações entram e como se sobrepõem.
           </p>
         </div>
       </div>
@@ -1479,9 +1486,9 @@
       <div class="in">
         <p class="eyebrow rail"><b>06</b>Tipografia</p>
         <div class="col">
-          <h2>Uma família, regida pelo peso</h2>
+          <h2>Use Libre Franklin em tudo, menos no nome</h2>
           <p>
-            Fora o nome, que é lettering, tudo é <b>Libre Franklin</b> — uma
+            Fora o nome, que é desenho, tudo é <b>Libre Franklin</b> — uma
             família só, do display ao texto. Licença SIL Open Font 1.1, no
             Google Fonts: fornecedores e parceiros instalam sem comprar nada.
           </p>
@@ -1516,14 +1523,14 @@
             </div>
           </div>
 
-          <h3>Como a hierarquia funciona</h3>
+          <h3>O peso define a hierarquia, não o tamanho</h3>
           <p>
             Quem conduz é o peso, não uma razão de tamanhos: display e título
-            são os dois 700, e o que os separa é tamanho e medida. Títulos
-            sempre alinhados à esquerda, nunca centralizados.
+            são os dois 700, e o que os separa é o tamanho e a largura da linha.
+            Títulos sempre alinhados à esquerda, nunca centralizados.
           </p>
           <p class="why">
-            O lettering já é irregular, e um eixo centrado briga com ele.
+            O nome é irregular de propósito, e um eixo centrado briga com ele.
           </p>
 
           <div class="note">
@@ -1542,7 +1549,7 @@
             humanista, nem geométrica.
           </p>
           <p class="why">
-            As duas competem com o lettering em vez de recuar atrás dele.
+            As duas competem com o nome em vez de recuar atrás dele.
           </p>
         </div>
       </div>
@@ -1550,9 +1557,9 @@
 
     <section class="band" id="voz">
       <div class="in">
-        <p class="eyebrow rail"><b>07</b>Voz</p>
+        <p class="eyebrow rail"><b>07</b>Linguagem</p>
         <div class="col">
-          <h2>Linguagem que nomeia quem faz o trabalho</h2>
+          <h2>Escreva sempre quem faz o quê</h2>
           <p>
             O sistema visual diz que o projeto é manual e plural. A linguagem
             precisa dizer o mesmo.
@@ -1592,7 +1599,7 @@
             </dd>
           </dl>
 
-          <h3>Tom por momento</h3>
+          <h3>O tom muda conforme o público</h3>
           <table>
             <tr>
               <th>Momento</th>
@@ -1638,14 +1645,14 @@
         <div class="col">
           <h2>O projeto assina; as instituições assinam embaixo</h2>
           <div class="ptdemo">
-            <p class="cap">Pé de qualquer superfície, no tamanho de rótulo:</p>
+            <p class="cap">Pé de qualquer peça, no tamanho de rótulo:</p>
             <p class="ptstrip"><b>Realização</b>UNIFESP · USP · CEAGESP</p>
           </div>
           <p>
             Uma linha em estilo de rótulo: <b>Realização</b> em opacidade
             reduzida, depois as instituições separadas por ponto médio. Ela
-            ocupa uma <b>faixa no pé da superfície onde nada mais entra</b> —
-            nem ilustração, nem imagem, nem texto.
+            ocupa uma <b>faixa no pé da peça onde nada mais entra</b> — nem
+            ilustração, nem imagem, nem texto.
           </p>
           <p class="why">
             A faixa é a área de respiro dos parceiros. Sem ela, a primeira
@@ -1670,12 +1677,12 @@
       <div class="in">
         <p class="eyebrow rail"><b>09</b>Cor</p>
         <div class="col">
-          <h2>Duas cores carregam sentido, e os papéis são fixos</h2>
+          <h2>Vermelho é a cozinha, verde é a rede</h2>
           <p>
-            <b>Vermelho é a panela e a cozinha; verde é a rede</b>, e compõe
-            <i>Em Rede</i>. Não troque os papéis: isso danifica o reconhecimento
-            mais rápido do que mudar os matizes. Os três tons de pele são das
-            mãos, não paleta decorativa.
+            O verde compõe <i>Em Rede</i>; o vermelho, a panela. Não troque as
+            duas funções — isso danifica o reconhecimento mais rápido do que
+            mudar os tons. E os três tons de pele são das mãos, não uma paleta
+            para usar livremente.
           </p>
 
           <div class="swatches">
@@ -1703,7 +1710,7 @@
                 "
               ></div>
               <b>Branco Leitura</b><code>#FAFAFA</code>
-              <figcaption>O campo mesa.</figcaption>
+              <figcaption>A parte mesa.</figcaption>
             </figure>
             <figure>
               <div class="chip" style="background: #000000"></div>
@@ -1742,12 +1749,12 @@
               <b>Verde Cozinhas não vai em fundo escuro:</b> dá 2,57:1 no Preto.
               As variantes <code>color-on-dark</code> usam <b>Verde Claro</b>,
               que já existe na arte como disco do selo, a 6,11:1. Verde Claro
-              serve só para lettering de display a 90 px ou mais em escuro
-              neutro — nunca para texto, e nunca sobre Verde, onde dá 2,38:1.
+              serve só para texto grande, a 90 px ou mais, em escuro neutro —
+              nunca para texto corrido, e nunca sobre Verde, onde dá 2,38:1.
             </p>
           </div>
 
-          <h3>Pares verificados</h3>
+          <h3>Combinações de contraste já conferidas</h3>
           <table class="num">
             <tr>
               <th>Texto</th>
@@ -1812,10 +1819,10 @@
       <div class="in">
         <p class="eyebrow rail"><b>10</b>Ilustração<br />e padronagem</p>
         <div class="col">
-          <h2>Trinta e quatro comidas desenhadas, e um ladrilho</h2>
+          <h2>34 ilustrações de comida e uma padronagem</h2>
           <p>
-            Chapadas e orgânicas, feitas só de formas preenchidas: não há um
-            <code>stroke</code> no conjunto. Onde parece haver contorno, é uma
+            Chapadas e orgânicas, feitas só de formas preenchidas: nenhuma tem
+            contorno de traço (<code>stroke</code>). Onde parece haver um, é uma
             forma escura atrás de uma mais clara. Estenda o conjunto do mesmo
             jeito.
           </p>
@@ -1854,9 +1861,10 @@
             </div>
             <div>
               <p>
-                Vinte e três vieram do arquivo nativo. As outras onze foram
-                redesenhadas a partir dos PNGs entregues, de cerca de 250 px: o
-                detalhe interno delas é mais grosso. Todas exportam para PDF.
+                Vinte e três vieram do arquivo original da entrega. As outras
+                onze foram redesenhadas a partir dos PNGs entregues, de cerca de
+                250 px: o detalhe interno delas é mais grosso. Todas exportam
+                para PDF.
               </p>
             </div>
           </div>
@@ -1866,15 +1874,16 @@
               <b>O conjunto não usa a paleta da marca. Não corrija para ela.</b>
               A coerência vem da mão que desenha e do preenchimento chapado, não
               de matizes compartilhados. Quem reconcilia as ilustrações com as
-              cores da marca é a divisão voz/mesa.
+              cores da marca é a divisão entre voz e mesa.
             </p>
           </div>
 
           <h3>A padronagem</h3>
           <div class="tile"></div>
           <p class="cap">
-            Ladrilho 280×280 sem emenda. É textura: atrás do conteúdo, fora da
-            área de respiro do logo, em opacidade baixa. Duas tintas —
+            Um módulo de 280×280 que se repete sem emenda. É textura: atrás do
+            conteúdo, fora da área de respiro do logo, em opacidade baixa. Duas
+            tintas —
             <code
               ><a class="f" href="pattern/foods-tile.svg" download
                 >foods-tile.svg</a
@@ -1905,181 +1914,352 @@
           </p>
           <div class="dl">
             <div class="row">
-              <div class="k">vertical</div>
+              <div class="k">Logo vertical</div>
               <div class="v">
                 <a class="f" href="logo/vertical-color.svg" download>color</a
-                ><span class="sep"> · </span
-                ><a class="f" href="logo/vertical-color-on-dark.svg" download
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="logo/vertical-color-on-dark.svg"
+                  download
                   >color-on-dark</a
-                ><span class="sep"> · </span
-                ><a class="f" href="logo/vertical-white.svg" download>white</a
-                ><span class="sep"> · </span
-                ><a class="f" href="logo/vertical-black.svg" download>black</a
-                ><span class="sep"> · </span
-                ><a class="f" href="logo/vertical-red.svg" download>red</a
-                ><span class="sep"> · </span
-                ><a class="f" href="logo/vertical-green.svg" download>green</a>
-              </div>
-            </div>
-            <div class="row">
-              <div class="k">horizontal</div>
-              <div class="v">
-                <a class="f" href="logo/horizontal-color.svg" download>color</a
-                ><span class="sep"> · </span
-                ><a class="f" href="logo/horizontal-color-on-dark.svg" download
-                  >color-on-dark</a
-                ><span class="sep"> · </span
-                ><a class="f" href="logo/horizontal-white.svg" download>white</a
-                ><span class="sep"> · </span
-                ><a class="f" href="logo/horizontal-black.svg" download>black</a
-                ><span class="sep"> · </span
-                ><a class="f" href="logo/horizontal-red.svg" download>red</a
-                ><span class="sep"> · </span
-                ><a class="f" href="logo/horizontal-green.svg" download
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="logo/vertical-white.svg"
+                  download
+                  >white</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="logo/vertical-black.svg"
+                  download
+                  >black</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="logo/vertical-red.svg"
+                  download
+                  >red</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="logo/vertical-green.svg"
+                  download
                   >green</a
                 >
               </div>
             </div>
             <div class="row">
-              <div class="k">stacked</div>
+              <div class="k">Logo horizontal</div>
               <div class="v">
-                <a class="f" href="logo/stacked-color.svg" download>color</a
-                ><span class="sep"> · </span
-                ><a class="f" href="logo/stacked-color-on-dark.svg" download
+                <a class="f" href="logo/horizontal-color.svg" download>color</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="logo/horizontal-color-on-dark.svg"
+                  download
                   >color-on-dark</a
-                ><span class="sep"> · </span
-                ><a class="f" href="logo/stacked-white.svg" download>white</a
-                ><span class="sep"> · </span
-                ><a class="f" href="logo/stacked-black.svg" download>black</a
-                ><span class="sep"> · </span
-                ><a class="f" href="logo/stacked-red.svg" download>red</a
-                ><span class="sep"> · </span
-                ><a class="f" href="logo/stacked-green.svg" download>green</a>
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="logo/horizontal-white.svg"
+                  download
+                  >white</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="logo/horizontal-black.svg"
+                  download
+                  >black</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="logo/horizontal-red.svg"
+                  download
+                  >red</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="logo/horizontal-green.svg"
+                  download
+                  >green</a
+                >
               </div>
             </div>
             <div class="row">
-              <div class="k">wordmark</div>
+              <div class="k">Logo empilhado</div>
+              <div class="v">
+                <a class="f" href="logo/stacked-color.svg" download>color</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="logo/stacked-color-on-dark.svg"
+                  download
+                  >color-on-dark</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="logo/stacked-white.svg"
+                  download
+                  >white</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="logo/stacked-black.svg"
+                  download
+                  >black</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="logo/stacked-red.svg"
+                  download
+                  >red</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="logo/stacked-green.svg"
+                  download
+                  >green</a
+                >
+              </div>
+            </div>
+            <div class="row">
+              <div class="k">Logo só o nome</div>
               <div class="v">
                 <a class="f" href="logo/wordmark-color.svg" download>color</a
-                ><span class="sep"> · </span
-                ><a class="f" href="logo/wordmark-color-on-dark.svg" download
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="logo/wordmark-color-on-dark.svg"
+                  download
                   >color-on-dark</a
-                ><span class="sep"> · </span
-                ><a class="f" href="logo/wordmark-white.svg" download>white</a
-                ><span class="sep"> · </span
-                ><a class="f" href="logo/wordmark-black.svg" download>black</a
-                ><span class="sep"> · </span
-                ><a class="f" href="logo/wordmark-red.svg" download>red</a
-                ><span class="sep"> · </span
-                ><a class="f" href="logo/wordmark-green.svg" download>green</a>
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="logo/wordmark-white.svg"
+                  download
+                  >white</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="logo/wordmark-black.svg"
+                  download
+                  >black</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="logo/wordmark-red.svg"
+                  download
+                  >red</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="logo/wordmark-green.svg"
+                  download
+                  >green</a
+                >
               </div>
             </div>
             <div class="row">
               <div class="k">Selos</div>
               <div class="v">
                 <a class="f" href="logo/badge-csr.svg" download>badge-csr</a
-                ><span class="sep"> · </span
-                ><a class="f" href="logo/badge-pot.svg" download>badge-pot</a>
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="logo/badge-pot.svg"
+                  download
+                  >badge-pot</a
+                >
               </div>
             </div>
             <div class="row">
               <div class="k">Ilustrações · 34</div>
-              <div class="v">
-                <a class="f" href="illustration/artichokes.svg" download
-                  >artichokes</a
-                ><span class="sep"> · </span
-                ><a class="f" href="illustration/asparagus.svg" download
-                  >asparagus</a
-                ><span class="sep"> · </span
-                ><a class="f" href="illustration/avocado-whole.svg" download
-                  >avocado-whole</a
-                ><span class="sep"> · </span
-                ><a class="f" href="illustration/avocado.svg" download
-                  >avocado</a
-                ><span class="sep"> · </span
-                ><a class="f" href="illustration/bananas-on-plate.svg" download
-                  >bananas-on-plate</a
-                ><span class="sep"> · </span
-                ><a class="f" href="illustration/bananas.svg" download
-                  >bananas</a
-                ><span class="sep"> · </span
-                ><a class="f" href="illustration/beetroot.svg" download
-                  >beetroot</a
-                ><span class="sep"> · </span
-                ><a class="f" href="illustration/carrot-on-tile.svg" download
-                  >carrot-on-tile</a
-                ><span class="sep"> · </span
-                ><a class="f" href="illustration/carrot-with-tops.svg" download
-                  >carrot-with-tops</a
-                ><span class="sep"> · </span
-                ><a class="f" href="illustration/carrots-in-bowl.svg" download
-                  >carrots-in-bowl</a
-                ><span class="sep"> · </span
-                ><a class="f" href="illustration/cherries-and-nuts.svg" download
-                  >cherries-and-nuts</a
-                ><span class="sep"> · </span
-                ><a class="f" href="illustration/cherry-tomatoes.svg" download
-                  >cherry-tomatoes</a
-                ><span class="sep"> · </span
-                ><a class="f" href="illustration/coconut.svg" download
-                  >coconut</a
-                ><span class="sep"> · </span
-                ><a class="f" href="illustration/fish-on-plate.svg" download
-                  >fish-on-plate</a
-                ><span class="sep"> · </span
-                ><a class="f" href="illustration/fish.svg" download>fish</a
-                ><span class="sep"> · </span
-                ><a class="f" href="illustration/fried-egg.svg" download
-                  >fried-egg</a
-                ><span class="sep"> · </span
-                ><a class="f" href="illustration/greens-in-bowl.svg" download
-                  >greens-in-bowl</a
-                ><span class="sep"> · </span
-                ><a class="f" href="illustration/lemons.svg" download>lemons</a
-                ><span class="sep"> · </span
-                ><a class="f" href="illustration/lime-slice.svg" download
-                  >lime-slice</a
-                ><span class="sep"> · </span
-                ><a class="f" href="illustration/melon-slice.svg" download
-                  >melon-slice</a
-                ><span class="sep"> · </span
-                ><a class="f" href="illustration/nuts.svg" download>nuts</a
-                ><span class="sep"> · </span
-                ><a class="f" href="illustration/papaya.svg" download>papaya</a
-                ><span class="sep"> · </span
-                ><a class="f" href="illustration/pear.svg" download>pear</a
-                ><span class="sep"> · </span
-                ><a class="f" href="illustration/pineapple.svg" download
-                  >pineapple</a
-                ><span class="sep"> · </span
-                ><a class="f" href="illustration/preserve-jar-blue.svg" download
-                  >preserve-jar-blue</a
-                ><span class="sep"> · </span
-                ><a class="f" href="illustration/preserve-jar.svg" download
-                  >preserve-jar</a
-                ><span class="sep"> · </span
-                ><a class="f" href="illustration/purple-turnip.svg" download
-                  >purple-turnip</a
-                ><span class="sep"> · </span
-                ><a class="f" href="illustration/rice-and-beans.svg" download
-                  >rice-and-beans</a
-                ><span class="sep"> · </span
-                ><a class="f" href="illustration/salmon-on-plate.svg" download
-                  >salmon-on-plate</a
-                ><span class="sep"> · </span
-                ><a class="f" href="illustration/squash.svg" download>squash</a
-                ><span class="sep"> · </span
-                ><a class="f" href="illustration/tomato-halved.svg" download
-                  >tomato-halved</a
-                ><span class="sep"> · </span
-                ><a class="f" href="illustration/tomatoes.svg" download
-                  >tomatoes</a
-                ><span class="sep"> · </span
-                ><a class="f" href="illustration/watermelon.svg" download
-                  >watermelon</a
-                ><span class="sep"> · </span
-                ><a class="f" href="illustration/white-turnip.svg" download
-                  >white-turnip</a
+              <div class="v words">
+                <a
+                  class="f"
+                  href="illustration/avocado.svg"
+                  title="avocado.svg"
+                  download
+                  >Abacate</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="illustration/avocado-whole.svg"
+                  title="avocado-whole.svg"
+                  download
+                  >Abacate inteiro</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="illustration/pineapple.svg"
+                  title="pineapple.svg"
+                  download
+                  >Abacaxi</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="illustration/squash.svg"
+                  title="squash.svg"
+                  download
+                  >Abóbora</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="illustration/artichokes.svg"
+                  title="artichokes.svg"
+                  download
+                  >Alcachofras</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="illustration/rice-and-beans.svg"
+                  title="rice-and-beans.svg"
+                  download
+                  >Arroz e feijão</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="illustration/asparagus.svg"
+                  title="asparagus.svg"
+                  download
+                  >Aspargos</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="illustration/bananas.svg"
+                  title="bananas.svg"
+                  download
+                  >Bananas</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="illustration/bananas-on-plate.svg"
+                  title="bananas-on-plate.svg"
+                  download
+                  >Bananas no prato</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="illustration/beetroot.svg"
+                  title="beetroot.svg"
+                  download
+                  >Beterraba</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="illustration/nuts.svg"
+                  title="nuts.svg"
+                  download
+                  >Castanhas</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="illustration/carrot-with-tops.svg"
+                  title="carrot-with-tops.svg"
+                  download
+                  >Cenoura com ramas</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="illustration/carrot-on-tile.svg"
+                  title="carrot-on-tile.svg"
+                  download
+                  >Cenoura no ladrilho</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="illustration/carrots-in-bowl.svg"
+                  title="carrots-in-bowl.svg"
+                  download
+                  >Cenouras em tigela</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="illustration/cherries-and-nuts.svg"
+                  title="cherries-and-nuts.svg"
+                  download
+                  >Cerejas e castanhas</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="illustration/coconut.svg"
+                  title="coconut.svg"
+                  download
+                  >Coco</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="illustration/lime-slice.svg"
+                  title="lime-slice.svg"
+                  download
+                  >Fatia de limão</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="illustration/watermelon.svg"
+                  title="watermelon.svg"
+                  download
+                  >Fatia de melancia</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="illustration/melon-slice.svg"
+                  title="melon-slice.svg"
+                  download
+                  >Fatia de melão</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="illustration/greens-in-bowl.svg"
+                  title="greens-in-bowl.svg"
+                  download
+                  >Folhas verdes em tigela</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="illustration/lemons.svg"
+                  title="lemons.svg"
+                  download
+                  >Limões</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="illustration/papaya.svg"
+                  title="papaya.svg"
+                  download
+                  >Mamão</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="illustration/white-turnip.svg"
+                  title="white-turnip.svg"
+                  download
+                  >Nabo branco</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="illustration/purple-turnip.svg"
+                  title="purple-turnip.svg"
+                  download
+                  >Nabo roxo</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="illustration/fried-egg.svg"
+                  title="fried-egg.svg"
+                  download
+                  >Ovo frito</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="illustration/fish.svg"
+                  title="fish.svg"
+                  download
+                  >Peixe</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="illustration/fish-on-plate.svg"
+                  title="fish-on-plate.svg"
+                  download
+                  >Peixe no prato</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="illustration/pear.svg"
+                  title="pear.svg"
+                  download
+                  >Pera</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="illustration/preserve-jar.svg"
+                  title="preserve-jar.svg"
+                  download
+                  >Pote de conserva</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="illustration/preserve-jar-blue.svg"
+                  title="preserve-jar-blue.svg"
+                  download
+                  >Pote de conserva azul</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="illustration/salmon-on-plate.svg"
+                  title="salmon-on-plate.svg"
+                  download
+                  >Salmão no prato</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="illustration/tomato-halved.svg"
+                  title="tomato-halved.svg"
+                  download
+                  >Tomate cortado</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="illustration/tomatoes.svg"
+                  title="tomatoes.svg"
+                  download
+                  >Tomates</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="illustration/cherry-tomatoes.svg"
+                  title="cherry-tomatoes.svg"
+                  download
+                  >Tomatinhos no prato</a
                 >
               </div>
             </div>
@@ -2088,8 +2268,10 @@
               <div class="v">
                 <a class="f" href="pattern/foods-tile-white.svg" download
                   >foods-tile-white</a
-                ><span class="sep"> · </span
-                ><a class="f" href="pattern/foods-tile.svg" download
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="pattern/foods-tile.svg"
+                  download
                   >foods-tile</a
                 >
               </div>
@@ -2098,19 +2280,31 @@
               <div class="k">Aplicações</div>
               <div class="v">
                 <a class="f" href="reference/poster.png" download>Cartaz A4</a
-                ><span class="sep"> · </span
-                ><a class="f" href="reference/note.png" download
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="reference/note.png"
+                  download
                   >Nota técnica A4</a
-                ><span class="sep"> · </span
-                ><a class="f" href="reference/social.png" download>Social 1:1</a
-                ><span class="sep"> · </span
-                ><a class="f" href="reference/sign.png" download>Placa</a
-                ><span class="sep"> · </span
-                ><a class="f" href="reference/label.png" download>Rótulo</a>
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="reference/social.png"
+                  download
+                  >Social 1:1</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="reference/sign.png"
+                  download
+                  >Placa</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="reference/label.png"
+                  download
+                  >Rótulo</a
+                >
               </div>
             </div>
             <div class="row">
-              <div class="k">Contrato</div>
+              <div class="k">Especificação</div>
               <div class="v">
                 <a class="f" href="brand-spec.json" download>brand-spec.json</a>
               </div>
@@ -2149,10 +2343,10 @@
           </ol>
           <p class="colophon">
             Composto em Libre Franklin, SIL Open Font License 1.1, embutida
-            neste arquivo. A marca, o lettering, as ilustrações e a padronagem
-            são da LM&amp;Co., 2026. A tipografia, a composição, a voz e a
-            assinatura dos parceiros foram desenhadas sobre aquela entrega. Os
-            arquivos originais ficam ao lado deste, em
+            neste arquivo. A panela, o nome desenhado à mão, as ilustrações e a
+            padronagem são da LM&amp;Co., 2026. A tipografia, a composição, a
+            voz e a assinatura dos parceiros foram desenhadas sobre aquela
+            entrega. Os arquivos originais ficam ao lado deste, em
             <code>public/marca/</code>.
           </p>
         </div>
