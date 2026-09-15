@@ -1,87 +1,13 @@
 import { Box, Grid, GridItem, Stack, Text } from '@chakra-ui/react';
+import NextImage from 'next/image';
 
 import Container from '../../../components/ui/Container';
 import CtaLink from '../../../components/ui/CtaLink';
 
-type StatusEntry = { label: string; color: string };
-
-const STATUS_LEGEND: StatusEntry[] = [
-  { label: 'Validado', color: 'verde.600' },
-  { label: 'Em tratamento', color: 'laranja.500' },
-  { label: 'Cobertura parcial', color: 'roxo.600' },
-  { label: 'Não identificado', color: 'charcoal.500' },
-];
-
-const DOTS: [number, number][] = [
-  [130, 60],
-  [160, 50],
-  [190, 70],
-  [210, 100],
-  [185, 130],
-  [155, 145],
-  [130, 160],
-  [110, 140],
-  [95, 110],
-  [115, 90],
-  [170, 110],
-  [145, 80],
-];
-
-const DOT_FILL = ['#337C59', '#FF9D00', '#69448C', '#7A716D'];
-
-const LINES: [number, number, number, number][] = [
-  [130, 60, 160, 50],
-  [160, 50, 190, 70],
-  [190, 70, 210, 100],
-  [155, 145, 185, 130],
-  [115, 90, 130, 60],
-];
-
-/** Abstract Brazil SVG map — decorative, aria-hidden. */
-const MockMap = () => {
-  return (
-    <svg viewBox="0 0 320 260" width="100%" height="100%" aria-hidden="true">
-      <path
-        d="M100 20 L200 15 L240 40 L260 80 L250 130 L220 160 L200 200 L160 220 L120 210 L80 190 L60 150 L50 110 L60 70 Z"
-        fill="none"
-        stroke="#D8D1C5"
-        strokeWidth="1.5"
-        strokeLinejoin="round"
-      />
-      {LINES.map(([x1, y1, x2, y2], i) => {
-        return (
-          <line
-            key={i}
-            x1={x1}
-            y1={y1}
-            x2={x2}
-            y2={y2}
-            stroke="#D8D1C5"
-            strokeWidth="1"
-            opacity="0.6"
-          />
-        );
-      })}
-      {DOTS.map(([cx, cy], i) => {
-        return (
-          <circle
-            key={i}
-            cx={cx}
-            cy={cy}
-            r={i % 3 === 0 ? 5 : 3.5}
-            fill={DOT_FILL[i % 4]}
-            opacity={0.8}
-          />
-        );
-      })}
-    </svg>
-  );
-};
-
 /**
- * MapEntrySection — abstract map preview on the left, text and CTA on the right.
- * Mock map shows Brazil outline with territorial dots and status legend.
- * No functional map code — pure CSS/SVG composition.
+ * MapEntrySection — territorial map illustration on the left, text and CTA on
+ * the right. The illustration is a static render of the kitchen distribution
+ * across Brazilian municipalities; the live map lives on `/mapas`.
  *
  * @example
  * <HomeAudiences />
@@ -100,75 +26,17 @@ const HomeAudiences = () => {
           gap="clamp(1rem, calc(0.75rem + 1vw), 1.75rem)"
           alignItems="center"
         >
-          {/* Mock map — cols 1–6 */}
+          {/* Map illustration — cols 1–6 */}
           <GridItem colSpan={{ base: 1, lg: 6 }}>
-            <Box
-              bg="ivory.50"
-              borderRadius="card"
-              overflow="hidden"
-              position="relative"
-              style={{ paddingBottom: '72%' }}
-              aria-hidden="true"
-            >
-              <Box position="absolute" inset={0} p={6}>
-                <MockMap />
-
-                {/* Legend */}
-                <Box
-                  position="absolute"
-                  bottom={5}
-                  left={5}
-                  display="flex"
-                  flexDirection="column"
-                  gap={1.5}
-                >
-                  {STATUS_LEGEND.map((s) => {
-                    return (
-                      <Box
-                        key={s.label}
-                        display="flex"
-                        alignItems="center"
-                        gap={2}
-                      >
-                        <Box w="6px" h="6px" borderRadius="full" bg={s.color} />
-                        <Text textStyle="caption" color="charcoal.500">
-                          {s.label}
-                        </Text>
-                      </Box>
-                    );
-                  })}
-                </Box>
-
-                {/* Mock filters */}
-                <Box
-                  position="absolute"
-                  top={5}
-                  right={5}
-                  display="flex"
-                  flexDirection="column"
-                  gap={2}
-                >
-                  {['UF', 'Fonte', 'Status'].map((f) => {
-                    return (
-                      <Box
-                        key={f}
-                        px={3}
-                        py={1}
-                        borderRadius="pill"
-                        border="1px solid"
-                        borderColor="ivory.400"
-                        bg="ivory.100"
-                        fontSize="0.6875rem"
-                        letterSpacing="0.04em"
-                        textTransform="uppercase"
-                        color="charcoal.500"
-                      >
-                        {f}
-                      </Box>
-                    );
-                  })}
-                </Box>
-              </Box>
+            <Box borderRadius="card" overflow="hidden">
+              <NextImage
+                src="/images/home_map.webp"
+                alt="Mapa do Brasil com círculos proporcionais ao número de cozinhas solidárias registradas por município, com as maiores concentrações no Sudeste, no litoral do Nordeste e no Sul."
+                width={1457}
+                height={831}
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                style={{ display: 'block', width: '100%', height: 'auto' }}
+              />
             </Box>
           </GridItem>
 
