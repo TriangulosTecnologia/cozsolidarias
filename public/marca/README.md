@@ -81,21 +81,3 @@ duplicated into a second tokens file. Two copies of a palette drift apart, and t
 recorded in `E-001` is what that looks like when it happens. For the same reason the brand
 book shows the masters themselves, by relative path: replace an SVG and the book shows the
 new one. Only the typeface is embedded, so the document still reads offline.
-
-## Verifying a change
-
-The [Branding Studio](https://github.com/enniolopes/skills) scripts check the mechanical
-properties — schema, token resolution, contrast maths, SVG portability — and nothing about
-strategic or aesthetic quality.
-
-```bash
-SKILL=.claude/skills/branding-studio/scripts
-
-python3 "$SKILL/validate_structure.py" public/marca/brand-spec.json
-python3 "$SKILL/asset_checks.py" public/marca/logo/horizontal-color.svg
-python3 "$SKILL/color_tools.py" contrast '#559870' '#000000' large
-```
-
-`validate_structure.py` reports one standing advisory: the Verde Claro pairing carries a
-modest APCA signal. That is expected and explained in `visual.palette.green_light_tradeoff`
-— it is not a regression.
