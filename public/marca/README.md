@@ -28,7 +28,7 @@ Choose the variant by the ground, never by preference:
 | ----------------------------------- | ------------------------- |
 | Branco Leitura, paper, pale imagery | `color`                   |
 | Preto or neutral dark               | `color-on-dark`           |
-| **Vermelho or Verde**               | **`white`**               |
+| **Vermelho Cozinhas or Verde Rede** | **`white`**               |
 | Single-ink production               | `black`, `red` or `green` |
 
 Below the minimum width — 110 px for `horizontal`, 70 px for the others — switch to
