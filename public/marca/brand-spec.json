@@ -248,14 +248,14 @@
       "production": {
         "status": "final",
         "master_format": "SVG",
-        "master_path": "brand/logo/",
+        "master_path": "public/marca/logo/",
         "source": "Vector masters extracted from the native Adobe Illustrator file 'MANUAL DE IDENTIDADE VISUAL - COZINHA SOLIDÁRIA.ai' (2026-06-23). No raster tracing at any step."
       }
     },
 
     "imagery": {
-      "illustration": "A 34-piece drawn food set in brand/illustration/, all vector and all exporting to PDF. Built entirely from filled shapes with no stroke anywhere; apparent contours are dark shapes behind lighter ones — keep that construction when extending the set. Eleven pieces were redrawn from raster exports about 250px across (E-015), so their finest interior detail is coarser than the native ones; the rest came from the .ai. They depict real Brazilian everyday food, not generic 'healthy eating' iconography; that specificity is the point and should survive any extension of the set. The set deliberately runs on its own naturalistic palette rather than the brand palette — do not recolour it, because its coherence comes from the drawing hand and the flat fill construction, not from shared hues.",
-      "pattern": "A seamless 280×280 food-drawing tile in brand/pattern/. Supplied in the dark ink for light grounds and in Branco Leitura for dark grounds. It is a texture, not a focal element — keep it behind content, never under the logo's clear space.",
+      "illustration": "A 34-piece drawn food set in public/marca/illustration/, all vector and all exporting to PDF. Built entirely from filled shapes with no stroke anywhere; apparent contours are dark shapes behind lighter ones — keep that construction when extending the set. Eleven pieces were redrawn from raster exports about 250px across (E-015), so their finest interior detail is coarser than the native ones; the rest came from the .ai. They depict real Brazilian everyday food, not generic 'healthy eating' iconography; that specificity is the point and should survive any extension of the set. The set deliberately runs on its own naturalistic palette rather than the brand palette — do not recolour it, because its coherence comes from the drawing hand and the flat fill construction, not from shared hues.",
+      "pattern": "A seamless 280×280 food-drawing tile in public/marca/pattern/. Supplied in the dark ink for light grounds and in Branco Leitura for dark grounds. It is a texture, not a focal element — keep it behind content, never under the logo's clear space.",
       "photography": "Real kitchens, real hands, real food in preparation. Not styled studio food, not stock images of empty plates."
     }
   },

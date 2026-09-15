@@ -1,7 +1,11 @@
-# brand
+# marca
 
 Canonical brand package for **Cozinha Solidária em Rede**. Everything downstream — the
 site, decks, print, partner materials — should resolve here rather than to a copy.
+
+It sits in `public/` so the app serves it without a second copy: `/marca` redirects to the
+brand book, and every master is reachable at the path it has here — `/marca/logo/…`. Edit
+the files in place; there is nothing to build or sync.
 
 | File                                   | What it is                                                                                                                                           |
 | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -87,8 +91,8 @@ strategic or aesthetic quality.
 ```bash
 SKILL=.claude/skills/branding-studio/scripts
 
-python3 "$SKILL/validate_structure.py" brand/brand-spec.json
-python3 "$SKILL/asset_checks.py" brand/logo/horizontal-color.svg
+python3 "$SKILL/validate_structure.py" public/marca/brand-spec.json
+python3 "$SKILL/asset_checks.py" public/marca/logo/horizontal-color.svg
 python3 "$SKILL/color_tools.py" contrast '#559870' '#000000' large
 ```
 
