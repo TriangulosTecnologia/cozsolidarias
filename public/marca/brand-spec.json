@@ -1,7 +1,7 @@
 {
   "meta": {
     "schema_version": 4,
-    "version": "3.1.0",
+    "version": "3.2.0",
     "brand_name": "Cozinha Solidária em Rede",
     "tier": "full",
     "touchpoints": [
@@ -160,10 +160,10 @@
     ],
 
     "palette": {
-      "roles": "Red and green are the only two colours that carry meaning: red is the pot and the kitchen, green is the network and carries 'Em Rede'. Swapping those roles breaks recognition faster than changing the hues would. The skin tones belong to the hands and are not a decorative palette. Branco Leitura is the reading surface, Preto the neutral dark ground.",
+      "roles": "Vermelho Cozinhas and Verde Rede are the only two colours that carry meaning: the red is the pot and the kitchen, the green is the network and sets 'Em Rede'. Swapping those roles breaks recognition faster than changing the hues would. The skin tones belong to the hands and are not a decorative palette. Branco Leitura is the reading surface, Preto the neutral dark ground.",
       "excludes": "Verde Rede must not set text or lettering on a dark ground — 1.99:1. Verde Claro must not set text on Verde Rede — 2.38:1. On a saturated brand ground, text is Branco Leitura.",
       "green_light_tradeoff": "Verde Claro on a neutral dark ground clears WCAG AA (6.11:1) but carries a modest APCA signal (Lc 39.9), below the Lc 45 guideline for 24px bold text. It is accepted because its only job is display lettering at 90px and above, where that guideline no longer binds, and because the colour already exists in the artwork. Body text on dark grounds is Branco Leitura.",
-      "print": "No spot reference has been proofed; see E-003. PANTONE 327 C as printed in the 2026 manual does not match Verde Rede and must not be specified. Until a press proof exists, print from the CMYK builds and treat them as unverified."
+      "print": "PANTONE 327 C as printed in the 2026 manual does not match Verde Rede and must not be specified — see E-003. Print from the CMYK builds and proof on press before any run."
     },
 
     "typography": {
@@ -192,7 +192,7 @@
 
     "composition": {
       "grammar": "A brand surface is built from two fields. **Voz** is a flat brand colour — Vermelho Cozinhas, Verde Rede or Preto — and carries the signature, the headline and the partner line; it never carries illustration. **Mesa** is Branco Leitura and carries the food, the data, the body text and the long-form reading. A surface may be all voz, all mesa, or split between them on a straight horizontal edge.",
-      "why": "It restates the mark's own logic — the pot contains, the ingredients arrive — and it resolves a real defect structurally: the illustration set runs on its own naturalistic palette, which clashes on saturated grounds and settles on a pale one. See E-008.",
+      "why": "It resolves a real defect structurally: the illustration set runs on its own naturalistic palette, which clashes on a saturated ground and settles on a pale one, so the food moves rather than the colours. See E-008.",
       "rules": [
         "The split is a straight horizontal edge across the full width. Do not feather, curve, angle or round it; the drawing in this system is done by the lettering and the illustrations, not by the layout.",
         "Proportion is free but never half and half — one field must clearly dominate, or the surface reads as two unrelated posters.",
@@ -237,6 +237,7 @@
         "horizontal": "110px wide",
         "vertical": "70px wide",
         "stacked": "70px wide",
+        "wordmark": "70px wide",
         "badge-pot": "24px",
         "basis": "Width of the mark itself, the files being trimmed to it. Measured on a rendered size ladder, not assumed — see E-005."
       },
@@ -254,7 +255,7 @@
     },
 
     "imagery": {
-      "illustration": "A 34-piece drawn food set in public/marca/illustration/, all vector and all exporting to PDF. Built entirely from filled shapes with no stroke anywhere; apparent contours are dark shapes behind lighter ones — keep that construction when extending the set. Eleven pieces were redrawn from raster exports about 250px across (E-015), so their finest interior detail is coarser than the native ones; the rest came from the .ai. They depict real Brazilian everyday food, not generic 'healthy eating' iconography; that specificity is the point and should survive any extension of the set. The set deliberately runs on its own naturalistic palette rather than the brand palette — do not recolour it, because its coherence comes from the drawing hand and the flat fill construction, not from shared hues.",
+      "illustration": "A 34-piece drawn food set in public/marca/illustration/, all vector and all exporting to PDF. Built entirely from filled shapes with no stroke anywhere — apparent contours are dark shapes behind lighter ones. Extend the set the same way, and keep depicting real Brazilian everyday food rather than generic 'healthy eating' iconography. Do not recolour it to the brand palette: its coherence comes from the drawing hand and the flat construction, not from shared hues. Eleven pieces were redrawn from small rasters — E-015 bounds how large those can be placed.",
       "pattern": "A seamless 280×280 food-drawing tile in public/marca/pattern/. Supplied in the dark ink for light grounds and in Branco Leitura for dark grounds. It is a texture, not a focal element — keep it behind content, never under the logo's clear space.",
       "photography": "Real kitchens, real hands, real food in preparation. Not styled studio food, not stock images of empty plates."
     }
@@ -262,7 +263,7 @@
 
   "architecture": {
     "model": "endorsed",
-    "partner_signature": "The project signs its own work; the institutions that make it possible sign beneath. The partner line is a single row in the label style — the word 'Realização' at reduced opacity followed by the institution names separated by middots — set in the reserved foot strip, never larger than the label size and never competing with the signature. Partner logotypes are used only where an institution's own rules require the mark rather than the name; in that case they sit in the same reserved strip, optically matched in height to each other, never to the project's signature.",
+    "partner_signature": "The project signs its own work; the institutions that make it possible sign beneath. The partner line is a single row in the label style — 'Realização' at reduced opacity, then the institution names separated by middots — set in the reserved foot strip and never larger than the label size. Partner logotypes appear only where an institution's own rules require the mark rather than the name; they sit in the same strip, optically matched in height to each other, never to the project's signature.",
     "rationale": "UNIFESP is a pre-existing condition of the brief, not a co-brand. Setting partners as text by default keeps the project legible as the network rather than as a university output, and avoids a row of competing logos crowding the signature."
   },
 
