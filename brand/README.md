@@ -65,7 +65,9 @@ grounds (`E-009`). Read those before "correcting" any of them back.
 Asset filenames are English kebab-case: they are design artifacts handled by designers and
 vendors, not source modules, so the repository's camelCase rule does not apply to them.
 SVG `<title>` text is pt-BR because screen readers announce it to the people who read the
-brand's own materials.
+brand's own materials, and the brand book is pt-BR for the same reason: it is a touchpoint
+the kitchens, designers and partners read, not developer documentation. Everything else
+here follows the repository's English rule.
 
 This folder is derived from the brand handoff alone. Nothing here is decided by, or
 documents, anything elsewhere in the repository.
