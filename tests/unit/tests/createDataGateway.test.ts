@@ -217,6 +217,35 @@ describe('createDataGateway', () => {
     }
   });
 
+  /*
+   * The hexbin mode's whole point is that every cell is the same size, so the
+   * colour compares density rather than município area. That only holds if the
+   * grid is emitted whole — empty cells included, which is why the occupied
+   * ones are a strict subset rather than the entire collection.
+   */
+  test('assembles the hexbin grid, empty cells included, as closed polygons', async () => {
+    const gateway = createDataGateway();
+
+    const { type, features } = await gateway.getCafHexbin();
+
+    expect(type).toBe('FeatureCollection');
+    expect(features.length).toBeGreaterThan(5000);
+
+    const occupied = features.filter((feature) => {
+      return feature.properties.count > 0;
+    });
+    expect(occupied.length).toBeGreaterThan(0);
+    expect(occupied.length).toBeLessThan(features.length);
+
+    for (const feature of features) {
+      expect(feature.geometry.type).toBe('Polygon');
+      const [ring] = feature.geometry.coordinates;
+      // GeoJSON requires the ring to close on its first vertex.
+      expect(ring?.[0]).toEqual(ring?.[ring.length - 1]);
+      expect(feature.properties.h3).not.toBe('');
+    }
+  });
+
   test('aggregates CAFs per município with their share of Brazil from the default static source', async () => {
     const gateway = createDataGateway();
 

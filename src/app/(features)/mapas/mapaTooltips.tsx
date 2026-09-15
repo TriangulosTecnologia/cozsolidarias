@@ -1,7 +1,3 @@
-/* eslint-disable max-lines -- Cohesive hover-tooltip renderer registry: one
-   renderer per map mode (choropleth variants, points, settlements) plus the
-   mode→content dispatcher, kept together so the whole hover surface reads as one
-   unit. Splitting would scatter closely-related copy. Tracked as a follow-up. */
 import { Box, Text } from '@chakra-ui/react';
 import type { MapHoverInfo } from '@ttoss/geovis';
 import type * as React from 'react';
@@ -12,10 +8,6 @@ import type {
   kitchenRateByCity,
 } from '@/data-gateway/schema';
 
-import {
-  assentamentoStatusLabel,
-  colorForAssentamentoStatus,
-} from './geovisAssentamentosScales';
 import {
   colorForCozinhaStatus,
   cozinhaStatusShortLabel,
@@ -30,14 +22,12 @@ import {
   colorForTaxa,
   type MapMode,
 } from './geovisScales';
-import {
-  colorForIdhm,
-  colorForIvs,
-  idhmFaixaLabel,
-  ivsFaixaLabel,
-} from './geovisScoreScales';
-import type { AssentamentoAtributo } from './geovisSpec';
+import { renderAssentamentoTooltip } from './mapaAssentamentoTooltip';
+import { renderScoreTooltip, SCORE_TOOLTIPS } from './mapaScoreTooltips';
 import { TooltipCard } from './mapaTooltipCard';
+
+/** Re-exported so consumers keep importing every tooltip from here. */
+export { renderAssentamentoTooltip };
 
 /** `"N cozinhas"` / `"1 cozinha"`, com o número no formato pt-BR. */
 const formatCozinhas = (quantidade: number): string => {
@@ -376,169 +366,6 @@ const renderPessoasPorCozinhaTooltip = ({
       secondary={secondary}
     />
   );
-};
-
-/** A score family's tooltip copy + scale resolvers, shared by every member. */
-type ScoreTooltip = {
-  label: string;
-  colorFor: (value: number | null) => string;
-  faixaLabel: (value: number | null) => string | null;
-};
-
-/**
- * Score-family tooltip (IVS or IDHM): swatch da faixa + "<label> 0,xxx ·
- * <faixa>". Serve qualquer índice na escala `[0, 1]`, variando o `label` e os
- * resolvedores de cor/faixa. O valor vem do feature-state do mapa (o índice já
- * unido ao polígono); municípios ausentes do recorte caem em "Sem dado de
- * <label>".
- */
-const renderScoreTooltip = ({
-  name,
-  value,
-  score,
-}: {
-  name: string;
-  value: MapHoverInfo['value'];
-  score: ScoreTooltip;
-}) => {
-  const numeric = typeof value === 'number' ? value : null;
-  const faixa = score.faixaLabel(numeric);
-
-  const primary =
-    numeric === null || faixa === null
-      ? `Sem dado de ${score.label}`
-      : `${score.label} ${numeric.toLocaleString('pt-BR', {
-          minimumFractionDigits: 3,
-          maximumFractionDigits: 3,
-        })} · ${faixa}`;
-
-  return (
-    <TooltipCard
-      name={name}
-      swatchColor={score.colorFor(numeric)}
-      primary={primary}
-    />
-  );
-};
-
-/** Linhas de detalhe do tooltip de assentamento, a partir dos atributos do bruto. */
-const assentamentoDetails = (atributo: AssentamentoAtributo): string[] => {
-  const area = atributo.areaHa.toLocaleString('pt-BR', {
-    maximumFractionDigits: 1,
-  });
-  const modulos = atributo.modulosFiscais.toLocaleString('pt-BR', {
-    maximumFractionDigits: 2,
-  });
-  return [
-    `${atributo.municipio} — ${atributo.uf}`,
-    `Área: ${area} ha · ${modulos} módulos fiscais`,
-    `Condição: ${atributo.condicao}`,
-    `Criado em ${atributo.dtCriacao} · atualizado em ${atributo.dtAtualizacao}`,
-  ];
-};
-
-/**
- * Assentamentos-mode tooltip: título = `cod_imovel` (a base bruta não tem nome
- * de assentamento), swatch da situação + "Situação: <label>" e linhas de detalhe
- * com município/UF, área, módulos fiscais, condição ambiental e datas. O rótulo
- * de situação vem do `value` do feature-state (o que o mapa pintou) quando
- * presente; senão é derivado do `atributo`.
- *
- * @param params.atributo - Atributos do assentamento sob o cursor, ou
- * `undefined` quando o `cod_imovel` não está no sidecar.
- * @param params.value - `value` do feature-state (o rótulo de situação pintado).
- * @returns O card de tooltip do assentamento.
- *
- * @example
- * renderAssentamentoTooltip({ atributo, value: 'Ativo' });
- * // <TooltipCard> com "Situação: Ativo" e os detalhes do imóvel
- */
-export const renderAssentamentoTooltip = ({
-  atributo,
-  value,
-}: {
-  atributo?: AssentamentoAtributo;
-  value: MapHoverInfo['value'];
-}): React.ReactNode => {
-  const label =
-    typeof value === 'string'
-      ? value
-      : atributo
-        ? assentamentoStatusLabel(atributo.status)
-        : null;
-
-  const name = atributo?.codImovel ?? 'Assentamento';
-  const primary =
-    label === null ? 'Situação desconhecida' : `Situação: ${label}`;
-
-  return (
-    <TooltipCard
-      name={name}
-      swatchColor={colorForAssentamentoStatus(label)}
-      primary={primary}
-      details={
-        atributo === undefined ? undefined : assentamentoDetails(atributo)
-      }
-    />
-  );
-};
-
-/**
- * IVS- and IDHM-family modes and each one's tooltip copy + scale resolvers.
- * Keyed by {@link MapMode} so the dispatcher resolves the whole family in one
- * lookup.
- */
-const SCORE_TOOLTIPS: Partial<Record<MapMode, ScoreTooltip>> = {
-  'coropletico-ivs': {
-    label: 'IVS',
-    colorFor: colorForIvs,
-    faixaLabel: ivsFaixaLabel,
-  },
-  'coropletico-ivs-infraestrutura': {
-    label: 'Infraestrutura urbana',
-    colorFor: colorForIvs,
-    faixaLabel: ivsFaixaLabel,
-  },
-  'coropletico-ivs-capital-humano': {
-    label: 'Capital humano',
-    colorFor: colorForIvs,
-    faixaLabel: ivsFaixaLabel,
-  },
-  'coropletico-ivs-renda-trabalho': {
-    label: 'Renda e trabalho',
-    colorFor: colorForIvs,
-    faixaLabel: ivsFaixaLabel,
-  },
-  'coropletico-idhm': {
-    label: 'IDHM',
-    colorFor: colorForIdhm,
-    faixaLabel: idhmFaixaLabel,
-  },
-  'coropletico-idhm-longevidade': {
-    label: 'IDHM Longevidade',
-    colorFor: colorForIdhm,
-    faixaLabel: idhmFaixaLabel,
-  },
-  'coropletico-idhm-educacao': {
-    label: 'IDHM Educação',
-    colorFor: colorForIdhm,
-    faixaLabel: idhmFaixaLabel,
-  },
-  'coropletico-idhm-renda': {
-    label: 'IDHM Renda',
-    colorFor: colorForIdhm,
-    faixaLabel: idhmFaixaLabel,
-  },
-  'coropletico-idhm-educacao-escolaridade': {
-    label: 'IDHM Escolaridade',
-    colorFor: colorForIdhm,
-    faixaLabel: idhmFaixaLabel,
-  },
-  'coropletico-idhm-educacao-frequencia': {
-    label: 'IDHM Frequência escolar',
-    colorFor: colorForIdhm,
-    faixaLabel: idhmFaixaLabel,
-  },
 };
 
 /**
