@@ -177,6 +177,27 @@
       .voz-black .cap {
         color: var(--voz-mute);
       }
+      /* The rule is the reading path. The reason it exists sits beside it, smaller,
+   for whoever wants to know before breaking it — so someone applying the
+   system can read only the black text and still get everything right. */
+      .why {
+        font-size: 12.5px;
+        line-height: 1.55;
+        color: var(--ink-mute);
+        max-width: 66ch;
+        margin: -6px 0 20px;
+        padding-left: 15px;
+        border-left: 1px solid var(--rule);
+      }
+      .two .why:last-child {
+        margin-bottom: 0;
+      }
+      .voz .why,
+      .voz-green .why,
+      .voz-black .why {
+        color: var(--voz-mute);
+        border-left-color: var(--voz-rule);
+      }
       b,
       strong {
         font-weight: 700;
@@ -860,6 +881,7 @@
         .proof,
         .lockups figure,
         .note,
+        .why,
         .swatches,
         .spec .row,
         .chain li,
@@ -922,7 +944,7 @@
             <a href="#abertas"><span>12</span>Questões em aberto</a>
           </li>
         </ul>
-        <p class="cover-meta">Contrato 2.5.0 · setembro de 2026</p>
+        <p class="cover-meta">Contrato 3.0.0 · setembro de 2026</p>
       </div>
     </section>
 
@@ -931,20 +953,21 @@
         <p class="eyebrow rail"><b>01</b>A lógica</p>
         <div class="col">
           <p class="lede">
-            Este manual ensina a identidade bem o bastante para fazer peça nova
-            com ela — cartaz, rótulo, apresentação, placa. Ele não descreve a
-            marca por fora: mostra por que cada decisão é como é, para a próxima
-            peça sair certa sem depender de quem desenhou esta.
+            Este manual serve para fazer peça nova: cartaz, rótulo,
+            apresentação, placa.
+          </p>
+
+          <p>
+            As regras estão no texto preto. As linhas menores, recuadas,
+            explicam por que cada uma existe — leia se quiser saber; aplicando
+            só o texto preto, a peça sai certa.
           </p>
 
           <p>
             A marca, o lettering, as ilustrações e a padronagem vêm da
-            identidade entregue pela LM&amp;Co. em junho de 2026. O sistema em
-            volta delas — tipografia, composição, voz e assinatura dos parceiros
-            — foi desenhado sobre aquele trabalho, porque a entrega resolveu a
-            assinatura mas não o que fazer com ela. Toda regra aqui foi testada
-            construindo a peça e olhando para ela. Onde existe regra, alguma
-            coisa falhou antes.
+            identidade entregue pela LM&amp;Co. em junho de 2026. Ela resolveu a
+            assinatura, mas não o que fazer com ela: tipografia, composição, voz
+            e assinatura dos parceiros foram desenhadas depois.
           </p>
 
           <ol class="chain">
@@ -966,9 +989,8 @@
             <li>
               <b>Tese</b
               ><span
-                >A panela compartilhada. Desenhada à mão, na letra de uma
-                cozinha; mãos visivelmente diferentes alcançando a mesma
-                panela.</span
+                >A panela compartilhada: desenhada à mão, com mãos visivelmente
+                diferentes alcançando a mesma panela.</span
               >
             </li>
             <li>
@@ -989,19 +1011,20 @@
 
           <p>
             O projeto é uma rede de pesquisa-ação, não um programa de
-            alimentação. Ele não cozinha nem distribui: constrói o modelo
-            intersetorial e apoia as cozinhas e os agricultores que fazem isso.
-            É por isso que a identidade é manual e não institucional. Uma marca
-            institucional colocaria o projeto acima das cozinhas, e o argumento
-            inteiro é que ele está entre elas.
+            alimentação. Não cozinha nem distribui: apoia quem faz isso.
+          </p>
+          <p class="why">
+            Por isso a identidade é manual, e não institucional. Uma marca
+            institucional colocaria o projeto acima das cozinhas; ele está entre
+            elas.
           </p>
 
           <div class="note">
             <p>
-              <b>Em Rede carrega peso.</b> Um programa federal brasileiro tem o
-              mesmo nome, <i>Cozinha Solidária</i>. <i>Em Rede</i> é o que
-              separa este projeto dele, e por isso só desaparece no selo
-              reduzido, onde a panela assina sozinha.
+              <b>Em Rede não é opcional.</b> Um programa federal tem o mesmo
+              nome, <i>Cozinha Solidária</i>. <i>Em Rede</i> é o que separa este
+              projeto dele, e por isso só sai no selo reduzido, onde a panela
+              assina sozinha.
             </p>
           </div>
         </div>
@@ -1013,28 +1036,31 @@
         <p class="eyebrow rail"><b>02</b>A marca</p>
         <div class="col">
           <h2>Lettering à mão e panela de mãos plurais, numa peça só</h2>
-          <p>Duas propriedades carregam o sentido, e nenhuma é negociável.</p>
+          <p>Duas coisas não são negociáveis.</p>
           <div class="two">
             <div>
               <h3>O lettering é arte, não tipo</h3>
               <p>
-                Nenhuma fonte reproduz esse desenho. Escale o master; nunca
-                redigite o nome, nunca espaceje, condense ou incline. Uma
-                exceção, porque vai aparecer: onde um sistema realmente não
-                consegue colocar imagem — assinatura em texto puro, um atributo
-                <code>alt</code> — escreva o nome como texto comum. Isso é
-                texto, não logo, e não deve ser estilizado para imitar um.
+                Nenhuma fonte reproduz esse desenho. Escale o master. Nunca
+                redigite o nome, nunca espaceje, condense ou incline.
+              </p>
+              <p>
+                Onde o sistema não aceita imagem — assinatura em texto puro, um
+                atributo <code>alt</code> — escreva o nome como texto comum, sem
+                estilizar para imitar o logo.
               </p>
             </div>
             <div>
-              <h3>As mãos continuam plurais e continuam diferentes</h3>
+              <h3>As mãos são plurais e diferentes</h3>
               <p>
-                Três tons é a expressão mínima da ideia. Reduzir a uma mão ou a
-                um tom não simplifica a marca — contradiz. Em produção de tinta
-                única as mãos sobrevivem como recortes vazados numa panela cheia
-                — é por isso que as variantes monocromáticas são assim, e por
-                que uma silhueta sólida seria uma simplificação pior do que
-                parece.
+                Três tons de pele, sempre. Nunca reduza a uma mão só, nem a um
+                tom só.
+              </p>
+              <p class="why">
+                Três é o mínimo que expressa a ideia: uma mão contradiz a marca
+                em vez de simplificá-la. Em tinta única as mãos viram recortes
+                vazados na panela — por isso as variantes monocromáticas não são
+                silhueta sólida.
               </p>
             </div>
           </div>
@@ -1054,8 +1080,8 @@
                   ><a class="f" href="logo/vertical-color.svg" download
                     >vertical-color.svg</a
                   ></b
-                >A assinatura principal, e o padrão para tudo que não é
-                obviamente largo ou estreito.
+                >Principal. Use por padrão, salvo em espaço obviamente largo ou
+                estreito.
               </figcaption>
             </figure>
             <figure>
@@ -1121,8 +1147,8 @@
                   ><a class="f" href="logo/badge-pot.svg" download
                     >badge-pot.svg</a
                   ></b
-                >A assinatura reduzida: avatar, favicon, carimbo, e tudo abaixo
-                da largura mínima.
+                >Assinatura reduzida: avatar, favicon, carimbo e tudo abaixo da
+                largura mínima.
               </figcaption>
             </figure>
             <figure>
@@ -1143,11 +1169,11 @@
             </figure>
           </div>
           <p class="cap">
-            Mostrados com o lettering no mesmo tamanho, que é como os lockups se
-            comparam e como devem ser trocados entre si. Cada um vem em seis
+            Acima, todos com o lettering no mesmo tamanho: é assim que se
+            comparam e é assim que se trocam entre si. Cada um vem em seis
             variantes — <code>color</code>, <code>color-on-dark</code>,
             <code>white</code>, <code>black</code>, <code>red</code>,
-            <code>green</code> — em <code>logo/</code>, no formato
+            <code>green</code> — em <code>logo/</code>, nomeadas
             <code>&lt;lockup&gt;-&lt;variante&gt;.svg</code>.
           </p>
         </div>
@@ -1189,11 +1215,7 @@
               <td><code>white</code>, sobre área limpa</td>
             </tr>
           </table>
-          <p>
-            A linha destacada é a que as pessoas erram, e não é questão de
-            preferência. Os dois casos abaixo foram construídos e olhados antes
-            da regra existir.
-          </p>
+          <p>A linha destacada é a que mais se erra.</p>
 
           <div class="proof">
             <figure class="no">
@@ -1204,9 +1226,9 @@
                 />
               </div>
               <figcaption>
-                <b>Evite.</b> No Vermelho a panela é <code>#AE1616</code> sobre
-                <code>#AE1616</code> e desaparece, sobrando um fragmento de
-                lettering e três mãos flutuando no nada.
+                <b>Evite.</b> Sobre Vermelho, a panela é <code>#AE1616</code> em
+                <code>#AE1616</code>: some. Sobram meio lettering e três mãos
+                soltas.
               </figcaption>
             </figure>
             <figure class="yes">
@@ -1217,9 +1239,9 @@
                 />
               </div>
               <figcaption>
-                <b>Use.</b> O lockup branco se segura nos dois fundos saturados.
-                No Verde o lockup colorido falha de outro jeito —
-                <i>Em Rede</i> cai para 2,38:1.
+                <b>Use.</b> O branco funciona nos dois fundos saturados. Sobre
+                Verde o colorido falha de outro jeito: <i>Em Rede</i> cai a
+                2,38:1.
               </figcaption>
             </figure>
           </div>
@@ -1233,14 +1255,15 @@
           <b>04</b>Área de respiro<br />e tamanho mínimo
         </p>
         <div class="col">
-          <h2>Um e de ar, e um tamanho mínimo que não se negocia</h2>
+          <h2>Um e de ar, e um mínimo que não se negocia</h2>
           <p>
             A área de respiro é o <b>e de <i>Em Rede</i></b
-            >, tirado do lockup que está sendo aplicado e escalado junto com
-            ele, em todo contorno. Nada entra nessa margem — nem marca de
-            parceiro, nem borda de página, nem conteúdo de imagem. Usar uma
-            letra da própria marca faz a margem escalar certo sem ninguém
-            calcular proporção.
+            >, na escala do lockup aplicado, nos quatro lados. Nada entra: nem
+            marca de parceiro, nem borda de página, nem conteúdo de imagem.
+          </p>
+          <p class="why">
+            Usar uma letra da própria marca faz a margem escalar junto com ela,
+            sem ninguém calcular proporção.
           </p>
 
           <div class="csfig">
@@ -1255,15 +1278,15 @@
                 ><img src="logo/vertical-color.svg" alt=""
               /></span>
               <p>
-                Um e, recortado do próprio master ao lado, na mesma escala. A
-                linha tracejada é o limite, não uma moldura para desenhar.
+                O e, recortado do master ao lado, na mesma escala. A tracejada é
+                o limite, não uma moldura para desenhar.
               </p>
             </div>
           </div>
 
           <p>
-            Como o lettering tem tamanho diferente em cada lockup, a mesma regra
-            dá margem diferente em cada um. Sobre a largura aplicada:
+            O lettering tem tamanho diferente em cada lockup, então a mesma
+            regra dá uma margem diferente em cada um:
           </p>
           <table class="num">
             <tr>
@@ -1297,23 +1320,22 @@
               <td>24 px</td>
             </tr>
           </table>
-          <p class="cap">
-            Medido a partir do e em cada master; os selos não têm lettering,
-            então ficam com um quinto do diâmetro, que cai na mesma faixa. Os
-            mínimos são a largura da marca em si, encontrados numa escada de
-            redução renderizada. Abaixo deles os contornos do lettering fecham:
+          <p>
+            Chegando na largura mínima, pare de reduzir a assinatura e troque
+            para <code>badge-pot</code>. É para isso que ele existe.
+          </p>
+          <p class="why">
+            No mínimo, os contornos do lettering começam a fechar:
             <i>Em Rede</i> preenche primeiro, depois as mãos do selo borram
-            juntas. Chegando lá, pare de reduzir a assinatura e troque para
-            <code>badge-pot</code> — é para isso que ele existe.
+            juntas. Os selos não têm lettering, então usam um quinto do diâmetro
+            no lugar da letra.
           </p>
 
           <div class="note">
             <p>
               <b>Os masters são aparados na arte.</b> A borda do arquivo é a
-              borda da marca, sem padding dentro dela. É isso que torna a regra
-              acima aplicável — meça a margem para fora da borda do arquivo — e
-              o que torna o alinhamento previsível. Não reintroduza padding num
-              master; coloque a margem no layout.
+              borda da marca: meça a margem para fora dela. Não reintroduza
+              padding dentro de um master — coloque a margem no layout.
             </p>
           </div>
 
@@ -1351,7 +1373,7 @@
             <b>Voz</b> é uma cor chapada da marca — Vermelho, Verde ou Preto.
             Carrega a assinatura, o título e a linha dos parceiros, e
             <b>nunca carrega ilustração</b>. Uma superfície pode ser toda voz,
-            toda mesa, ou dividida entre as duas numa aresta horizontal reta: a
+            toda mesa, ou dividida entre as duas numa aresta horizontal reta — a
             que está no pé desta faixa.
           </p>
         </div>
@@ -1367,16 +1389,12 @@
             leitura longa. É o campo que você está lendo agora, e é o único
             campo onde uma ilustração pode ficar.
           </p>
-
-          <h3>Por que a divisão existe</h3>
-          <p>
-            O conjunto de ilustrações roda na própria paleta naturalista — 81
-            cores escolhidas para que uma cenoura pareça uma cenoura. Ponha uma
-            tigela cerúlea sobre Verde Cozinhas e nada compartilha matiz. A
-            correção óbvia, recolorir as ilustrações, custaria o realismo que as
-            torna específicas de uma cozinha brasileira. A divisão resolve
-            estruturalmente: a comida vai no prato, não na toalha. E repete a
-            lógica da própria marca — a panela contém, os ingredientes chegam.
+          <p class="why">
+            As ilustrações rodam na própria paleta naturalista: 81 cores
+            escolhidas para que uma cenoura pareça uma cenoura. Sobre Verde
+            Cozinhas nada compartilha matiz, e recolorir custaria o realismo.
+            Separar os campos resolve sem mexer nelas — a comida vai no prato,
+            não na toalha.
           </p>
 
           <div class="apps">
@@ -1420,12 +1438,12 @@
           <ul>
             <li>
               A divisão é uma <b>aresta horizontal reta</b> na largura inteira.
-              Não esfume, curve, incline ou arredonde. O desenho neste sistema é
-              feito pelo lettering e pelas ilustrações; o layout fica parado
-              para que eles possam se mexer.
+              Não esfume, curve, incline ou arredonde — o desenho vem do
+              lettering e das ilustrações, e o layout fica parado para que eles
+              possam se mexer.
             </li>
             <li>
-              A proporção é livre, mas <b>nunca meio a meio</b> — um campo
+              A proporção é livre, mas <b>nunca meio a meio</b>: um campo
               domina, ou a superfície lê como dois cartazes sem relação.
             </li>
             <li>
@@ -1435,9 +1453,8 @@
             </li>
             <li>
               As ilustrações ficam na mesa, <b>ancoradas na borda de baixo</b>,
-              grandes e sobrepostas — chegando, não arrumadas numa grade. Nunca
-              abaixo de 40% da altura da mesa; menores que isso viram ícone, e
-              este não é um conjunto de ícones.
+              grandes e sobrepostas. Nunca abaixo de 40% da altura da mesa —
+              menores que isso viram ícone, e este não é um conjunto de ícones.
             </li>
             <li>
               A padronagem é a única textura permitida na voz, em opacidade
@@ -1452,7 +1469,7 @@
           </p>
           <p>
             <b>Livre:</b> que cor a voz assume, a proporção da divisão, qual
-            campo domina, quantas ilustrações chegam e como se sobrepõem.
+            campo domina, quantas ilustrações entram e como se sobrepõem.
           </p>
         </div>
       </div>
@@ -1464,11 +1481,9 @@
         <div class="col">
           <h2>Uma família, regida pelo peso</h2>
           <p>
-            O nome é lettering desenhado à mão e não tem equivalente em fonte.
-            Todo o resto é <b>Libre Franklin</b> — uma família só, do display ao
-            texto, sob a SIL Open Font License 1.1 e disponível no Google Fonts,
-            para que fornecedores e parceiros instalem sem compra. Este manual
-            está composto nela.
+            Fora o nome, que é lettering, tudo é <b>Libre Franklin</b> — uma
+            família só, do display ao texto. Licença SIL Open Font 1.1, no
+            Google Fonts: fornecedores e parceiros instalam sem comprar nada.
           </p>
 
           <div class="spec">
@@ -1501,32 +1516,33 @@
             </div>
           </div>
 
-          <h3>Como a hierarquia é conduzida</h3>
+          <h3>Como a hierarquia funciona</h3>
           <p>
-            Peso e espacejamento conduzem, não uma razão de tamanhos. Display e
-            título dividem o peso; tamanho e medida os separam. Títulos são
-            alinhados à esquerda e com bandeira à direita — o lettering já é
-            irregular e um eixo centrado briga com ele.
+            Quem conduz é o peso, não uma razão de tamanhos: display e título
+            são os dois 700, e o que os separa é tamanho e medida. Títulos
+            sempre alinhados à esquerda, nunca centralizados.
+          </p>
+          <p class="why">
+            O lettering já é irregular, e um eixo centrado briga com ele.
           </p>
 
           <div class="note">
             <p>
-              <b>Duas divergências do manual de 2026.</b> Ele especificava Neue
-              Haas Grotesk, licença comercial cuja cobertura para este projeto
-              nunca foi confirmada — um bloqueio em todo ponto de contato. Libre
-              Franklin compõe a mesma cópia em menos linhas que as alternativas
-              testadas e cobre os diacríticos do português. O manual também
-              especificava Light para texto corrido; a 14,5 px isso afina no
-              impresso e em tela ruim, então Light fica restrito a 18 px e
-              acima.
+              <b>Duas divergências do manual de 2026.</b> Ele pedia Neue Haas
+              Grotesk, licença comercial que nunca foi confirmada para este
+              projeto — um bloqueio em todo ponto de contato. E pedia Light no
+              texto corrido; a 14,5 px isso afina no impresso e em tela ruim,
+              então Light só a partir de 18 px.
             </p>
           </div>
 
-          <p class="cap">
-            Onde Libre Franklin não puder ser instalada, substitua por uma
-            grotesca neutra de largura e altura-x parecidas, e registre a
-            substituição. Nem humanista nem geométrica: essas competem com o
-            lettering em vez de recuar atrás dele.
+          <p>
+            Onde Libre Franklin não puder ser instalada, use uma grotesca neutra
+            de largura e altura-x parecidas, e registre a substituição. Nem
+            humanista, nem geométrica.
+          </p>
+          <p class="why">
+            As duas competem com o lettering em vez de recuar atrás dele.
           </p>
         </div>
       </div>
@@ -1539,39 +1555,34 @@
           <h2>Linguagem que nomeia quem faz o trabalho</h2>
           <p>
             O sistema visual diz que o projeto é manual e plural. A linguagem
-            tem que dizer o mesmo, ou a marca se contradiz no instante em que
-            alguém escreve uma frase.
+            precisa dizer o mesmo.
           </p>
 
           <dl>
             <dt>Nomeie quem age</dt>
             <dd>
-              Escreva quem faz o quê — <i>as cozinhas alcançam</i>, não
-              <i>é alcançado</i>. A voz passiva esconde quem alimenta quem, e
-              quem faz o trabalho é o argumento inteiro desta marca.
+              Escreva quem faz o quê: <i>as cozinhas alcançam</i>, não
+              <i>é alcançado</i>. A passiva esconde quem alimenta quem.
             </dd>
 
             <dt>Número carrega o argumento; adjetivo não</dt>
             <dd>
               <i>1.348 cozinhas em operação</i>, não
-              <i>milhares de cozinhas</i>. Onde não há número, diga o que foi
-              observado em vez de buscar um intensificador.
+              <i>milhares de cozinhas</i>. Sem número, diga o que foi observado.
             </dd>
 
             <dt>Cozinhar, não assistir</dt>
             <dd>
-              Ninguém aqui é beneficiário. Escreva <i>quem cozinha</i>,
-              <i>as cozinhas</i>, <i>a rede</i>. Nunca <i>beneficiários</i>,
-              <i>carentes</i>, <i>doação</i>, <i>ajudar quem precisa</i>. É a
-              regra que mais separa este projeto das marcas de caridade ao lado
-              dele.
+              Escreva <i>quem cozinha</i>, <i>as cozinhas</i>, <i>a rede</i>.
+              Nunca <i>beneficiários</i>, <i>carentes</i>, <i>doação</i>,
+              <i>ajudar quem precisa</i>. É a regra que mais separa este projeto
+              das marcas de caridade.
             </dd>
 
             <dt>Afirme, depois tire a consequência</dt>
             <dd>
-              Uma frase curta com o fato, uma com o que ele implica. Não empilhe
-              orações subordinadas — é a falha padrão da escrita de política
-              pública, e faz a rede soar como ministério.
+              Uma frase curta com o fato, outra com o que ele implica. Não
+              empilhe orações subordinadas: faz a rede soar como ministério.
             </dd>
 
             <dt>Diga <i>ainda não</i> em voz alta</dt>
@@ -1589,10 +1600,7 @@
             </tr>
             <tr>
               <td>Institucional e política pública</td>
-              <td>
-                Preciso, numerado. Sem metáfora — a panela não aparece na
-                linguagem quando quem lê é um ministério.
-              </td>
+              <td>Preciso, numerado, sem metáfora.</td>
             </tr>
             <tr>
               <td>Território e cozinhas</td>
@@ -1614,12 +1622,10 @@
           <div class="note">
             <p>
               <b>Nunca.</b> O registro de caridade (<i>doação</i>,
-              <i>carente</i>, <i>beneficiário</i>). O autocompletar do setor de
-              desenvolvimento (<i>empoderar</i>, <i>impactar</i>,
-              <i>solução inovadora</i>, <i>juntos podemos</i>). Ponto de
-              exclamação. E qualquer frase que sobreviveria intacta com o nome
-              de uma ONG genérica no lugar desta — se sobrevive, não era sobre
-              este projeto.
+              <i>carente</i>, <i>beneficiário</i>). O jargão do setor
+              (<i>empoderar</i>, <i>impactar</i>, <i>solução inovadora</i>,
+              <i>juntos podemos</i>). Ponto de exclamação. E qualquer frase que
+              funcionaria igual com o nome de outra ONG no lugar desta.
             </p>
           </div>
         </div>
@@ -1636,13 +1642,14 @@
             <p class="ptstrip"><b>Realização</b>UNIFESP · USP · CEAGESP</p>
           </div>
           <p>
-            Uma linha no estilo de rótulo: a palavra <b>Realização</b> em
-            opacidade reduzida, depois os nomes das instituições separados por
-            ponto médio. Fica numa
-            <b>faixa reservada no pé da superfície onde nada mais entra</b> —
-            nem ilustração, nem imagem, nem texto. Essa faixa é o equivalente da
-            área de respiro do logo para os parceiros, e existe porque a
-            primeira montagem sem ela passou as cenouras pelo meio da UNIFESP.
+            Uma linha em estilo de rótulo: <b>Realização</b> em opacidade
+            reduzida, depois as instituições separadas por ponto médio. Ela
+            ocupa uma <b>faixa no pé da superfície onde nada mais entra</b> —
+            nem ilustração, nem imagem, nem texto.
+          </p>
+          <p class="why">
+            A faixa é a área de respiro dos parceiros. Sem ela, a primeira
+            montagem passou as cenouras por cima da UNIFESP.
           </p>
           <p>
             Logotipos de parceiros só onde as regras da própria instituição
@@ -1650,11 +1657,10 @@
             óptica igualada <b>entre eles</b>, nunca com a assinatura do
             projeto.
           </p>
-          <p class="cap">
-            Colocar os parceiros como texto por padrão mantém o projeto legível
-            como a rede, e não como produto de universidade, e impede uma
-            fileira de logos disputando espaço com a assinatura. A UNIFESP é
-            condição do briefing, não co-marca.
+          <p class="why">
+            Em texto, o projeto continua legível como rede e não como produto de
+            universidade, e nenhuma fileira de logos disputa espaço com a
+            assinatura. A UNIFESP é condição do briefing, não uma segunda marca.
           </p>
         </div>
       </div>
@@ -1666,10 +1672,10 @@
         <div class="col">
           <h2>Duas cores carregam sentido, e os papéis são fixos</h2>
           <p>
-            <b>Vermelho é a panela e a cozinha; verde é a rede</b> e compõe
-            <i>Em Rede</i>. Trocar esses papéis danifica o reconhecimento mais
-            rápido do que mudar os matizes. Os três tons de pele pertencem às
-            mãos — não são paleta decorativa.
+            <b>Vermelho é a panela e a cozinha; verde é a rede</b>, e compõe
+            <i>Em Rede</i>. Não troque os papéis: isso danifica o reconhecimento
+            mais rápido do que mudar os matizes. Os três tons de pele são das
+            mãos, não paleta decorativa.
           </p>
 
           <div class="swatches">
@@ -1723,24 +1729,21 @@
 
           <div class="note">
             <p>
-              <b>O vermelho diverge do manual.</b> Ele documenta
-              <code>#B21616</code>; todo master nativo desenha
-              <code>#AE1616</code>, e a amostra impressa do próprio manual
-              renderiza um terceiro valor. A arte é coerente consigo mesma e a
-              documentação não é, então <code>#AE1616</code> é o canônico.
+              <b>O vermelho diverge do manual.</b> O manual documenta
+              <code>#B21616</code>, todo master nativo desenha
+              <code>#AE1616</code>, e a amostra impressa traz um terceiro valor.
+              A arte é coerente consigo mesma e a documentação não, então vale
+              <code>#AE1616</code>.
             </p>
           </div>
 
           <div class="note">
             <p>
-              <b>Verde Cozinhas não vai no escuro.</b> Mede 2,57:1 no Preto e
-              1,99:1 no quase-preto que o próprio manual usa — o lettering
-              <i>Em Rede</i> no lockup escuro dele é praticamente invisível. As
-              variantes <code>color-on-dark</code> usam <b>Verde Claro</b>, um
-              verde que já existe na arte como disco do selo, a 6,11:1 no Preto.
-              Verde Claro é para lettering de display a 90 px e acima em escuro
-              neutro; <b>não</b> é para texto, e nunca para nada sobre Verde,
-              onde dá 2,38:1.
+              <b>Verde Cozinhas não vai em fundo escuro:</b> dá 2,57:1 no Preto.
+              As variantes <code>color-on-dark</code> usam <b>Verde Claro</b>,
+              que já existe na arte como disco do selo, a 6,11:1. Verde Claro
+              serve só para lettering de display a 90 px ou mais em escuro
+              neutro — nunca para texto, e nunca sobre Verde, onde dá 2,38:1.
             </p>
           </div>
 
@@ -1787,18 +1790,18 @@
               <td>6,1:1</td>
             </tr>
           </table>
-          <p class="cap">
+          <p>
             Sobre fundo saturado da marca, o texto é Branco Leitura. Vermelho
             sobre Preto dá 2,9:1 e não pode carregar texto.
           </p>
 
           <div class="note">
             <p>
-              <b>Para impresso, nada foi provado.</b> A PANTONE 327 C, como sai
-              impressa no manual de 2026, é um verde-azulado e não corresponde
-              ao verde ao lado dela — não repasse esses números para uma
-              gráfica. Imprima a partir dos arquivos CMYK, trate-os como não
-              verificados, e faça prova na máquina.
+              <b>Para impresso, nada foi provado.</b> A PANTONE 327 C do manual
+              de 2026 sai como um verde-azulado que não corresponde ao verde ao
+              lado dela. Não repasse esses números para uma gráfica: imprima a
+              partir dos CMYK, trate-os como não verificados e faça prova na
+              máquina.
             </p>
           </div>
         </div>
@@ -1811,10 +1814,10 @@
         <div class="col">
           <h2>Trinta e quatro comidas desenhadas, e um ladrilho</h2>
           <p>
-            Chapadas e orgânicas, feitas inteiramente de formas preenchidas: não
-            há um único <code>stroke</code> no conjunto, e onde uma peça parece
-            ter contorno é uma forma escura atrás de uma mais clara. Mantenha
-            essa construção ao estender o conjunto.
+            Chapadas e orgânicas, feitas só de formas preenchidas: não há um
+            <code>stroke</code> no conjunto. Onde parece haver contorno, é uma
+            forma escura atrás de uma mais clara. Estenda o conjunto do mesmo
+            jeito.
           </p>
 
           <div class="strip">
@@ -1843,45 +1846,35 @@
           <div class="two">
             <div>
               <p>
-                Elas mostram <b>comida brasileira de todo dia</b>, não
-                iconografia de alimentação saudável. Arroz e feijão, mamão, um
-                pote de conserva e um peixe inteiro dizem de quem é esta cozinha
-                de um jeito que uma tigela de salada de banco de imagem não diz.
+                É <b>comida brasileira de todo dia</b>, não iconografia de
+                alimentação saudável. Arroz e feijão, mamão, um pote de
+                conserva, um peixe inteiro — uma tigela de salada de banco de
+                imagem não diria de quem é esta cozinha.
               </p>
-              <div class="note">
-                <p>
-                  <b
-                    >O conjunto não usa a paleta da marca, e não deve ser
-                    corrigido para ela.</b
-                  >
-                  A coerência vem da mão que desenha e da construção em
-                  preenchimento chapado, não de matizes compartilhados. A
-                  divisão voz/mesa é o que reconcilia o conjunto com as cores da
-                  marca; recolorir não é.
-                </p>
-              </div>
             </div>
             <div>
               <p>
-                Vinte e três saíram do arquivo nativo do Illustrator. As outras
-                onze foram redesenhadas no Illustrator a partir dos PNGs
-                entregues: dez não tinham vetor nenhum na entrega, e
-                <code>rice-and-beans.svg</code> tinha um que nenhuma gráfica
-                conseguia resolver. Cada uma foi comparada com o raster de
-                origem sobre branco e sobre cinza médio, onde as formas quase
-                brancas que a página branca esconde ficam visíveis. São fiéis;
-                onde diferem é no detalhe interno mais fino, porque o raster de
-                onde vieram tem cerca de 250 px. Todas exportam para PDF.
+                Vinte e três vieram do arquivo nativo. As outras onze foram
+                redesenhadas a partir dos PNGs entregues, de cerca de 250 px: o
+                detalhe interno delas é mais grosso. Todas exportam para PDF.
               </p>
             </div>
+          </div>
+
+          <div class="note">
+            <p>
+              <b>O conjunto não usa a paleta da marca. Não corrija para ela.</b>
+              A coerência vem da mão que desenha e do preenchimento chapado, não
+              de matizes compartilhados. Quem reconcilia as ilustrações com as
+              cores da marca é a divisão voz/mesa.
+            </p>
           </div>
 
           <h3>A padronagem</h3>
           <div class="tile"></div>
           <p class="cap">
-            Um ladrilho 280×280 sem emenda, verificado por repetição em várias
-            escalas. É textura — atrás do conteúdo, fora da área de respiro do
-            logo, em opacidade baixa. Duas tintas:
+            Ladrilho 280×280 sem emenda. É textura: atrás do conteúdo, fora da
+            área de respiro do logo, em opacidade baixa. Duas tintas —
             <code
               ><a class="f" href="pattern/foods-tile.svg" download
                 >foods-tile.svg</a
@@ -1893,8 +1886,8 @@
                 >foods-tile-white.svg</a
               ></code
             >
-            para escuros, mostrada aqui sobre Vermelho em força total para o
-            desenho aparecer.
+            para escuros, aqui sobre Vermelho em força total só para o desenho
+            aparecer.
           </p>
         </div>
       </div>
@@ -1906,9 +1899,9 @@
         <div class="col">
           <h2>Tudo que está aqui, para baixar</h2>
           <p>
-            Todo arquivo deste manual é público e mora no endereço em que ele
-            aparece. Clique para baixar. Os logos e as ilustrações são SVG:
-            escalam sem perder nada e abrem em qualquer editor de vetor.
+            Todo arquivo mostrado aqui é público e mora no endereço em que
+            aparece. Clique para baixar. Logos, ilustrações e padronagem são
+            SVG: escalam sem perder nada e abrem em qualquer editor de vetor.
           </p>
           <div class="dl">
             <div class="row">
@@ -2140,30 +2133,27 @@
             src="logo/vertical-color-on-dark.svg"
             alt="Cozinha Solidária em Rede"
           />
-          <h2>Clareza também é dizer limite</h2>
-          <p>Duas coisas este manual não resolve.</p>
+          <h2>O que este manual não resolve</h2>
           <ol class="open">
             <li>
               <b>Não existe prova de impressão.</b> Toda referência de cor
               especial e CMYK está sem verificação, e os números PANTONE
-              herdados do manual não se sustentam. É a última coisa entre o
-              sistema e uma tiragem.
+              herdados do manual de 2026 não se sustentam. É a última coisa
+              entre o sistema e uma tiragem.
             </li>
             <li>
-              <b>O selo CSR aparece no manual sem explicação.</b> Descubra se
-              alguma coisa ainda depende dele, e aposente o selo se nada
-              depender.
+              <b>O selo CSR aparece no manual de 2026 sem explicação.</b>
+              Descubra se alguma coisa ainda depende dele; se nada depender,
+              aposente o selo.
             </li>
           </ol>
           <p class="colophon">
             Composto em Libre Franklin, SIL Open Font License 1.1, embutida
             neste arquivo. A marca, o lettering, as ilustrações e a padronagem
-            são da LM&amp;Co., 2026; a tipografia, a gramática de composição, a
-            voz e a assinatura dos parceiros foram desenhadas sobre aquela
-            entrega. Os masters e o contrato de máquina ficam ao lado deste
-            arquivo, em <code>public/marca/</code>. Esta faixa é Preto, e a
-            assinatura acima dela é a variante <code>color-on-dark</code> que a
-            regra pede em fundo escuro.
+            são da LM&amp;Co., 2026. A tipografia, a composição, a voz e a
+            assinatura dos parceiros foram desenhadas sobre aquela entrega. Os
+            arquivos originais ficam ao lado deste, em
+            <code>public/marca/</code>.
           </p>
         </div>
       </div>
