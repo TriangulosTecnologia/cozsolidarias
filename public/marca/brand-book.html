@@ -771,14 +771,13 @@
       li {
         margin-bottom: 8px;
       }
-      ol.open {
-        margin: 2px 0 0;
-        padding-left: 20px;
-        font-size: 15px;
+      .contact {
+        font-size: 19px;
+        line-height: 1.5;
+        margin: 0;
       }
-      ol.open li {
-        margin-bottom: 12px;
-        max-width: 70ch;
+      .contact a {
+        border-bottom-color: var(--voz-rule);
       }
       .colophon {
         font-size: 12.5px;
@@ -942,10 +941,10 @@
             <a href="#downloads"><span>11</span>Downloads</a>
           </li>
           <li>
-            <a href="#abertas"><span>12</span>Questões em aberto</a>
+            <a href="#contato"><span>12</span>Contato</a>
           </li>
         </ul>
-        <p class="cover-meta">Versão 3.1.0 · setembro de 2026</p>
+        <p class="cover-meta">Versão 4.0.0 · setembro de 2026</p>
       </div>
     </section>
 
@@ -1518,16 +1517,6 @@
             O nome é irregular de propósito, e um eixo centrado briga com ele.
           </p>
 
-          <div class="note">
-            <p>
-              <b>Duas divergências do manual de 2026.</b> Ele pedia Neue Haas
-              Grotesk, licença comercial que nunca foi confirmada para este
-              projeto — um bloqueio em todo ponto de contato. E pedia Light no
-              texto corrido; a 14,5 px isso afina no impresso e em tela ruim,
-              então Light só a partir de 18 px.
-            </p>
-          </div>
-
           <p>
             Onde Libre Franklin não puder ser instalada, use uma grotesca neutra
             de largura e altura-x parecidas, e registre a substituição. Nem
@@ -1640,8 +1629,8 @@
             ilustração, nem imagem, nem texto.
           </p>
           <p class="why">
-            A faixa é a área de respiro dos parceiros. Sem ela, a primeira
-            montagem passou as cenouras por cima da UNIFESP.
+            A faixa é a área de respiro dos parceiros: sem ela, uma ilustração
+            ancorada no pé da mesa atravessa os nomes.
           </p>
           <p>
             Logotipos de parceiros só onde as regras da própria instituição
@@ -1721,16 +1710,6 @@
 
           <div class="note">
             <p>
-              <b>O vermelho diverge do manual.</b> O manual documenta
-              <code>#B21616</code>, todo master nativo desenha
-              <code>#AE1616</code>, e a amostra impressa traz um terceiro valor.
-              A arte é coerente consigo mesma e a documentação não, então vale
-              <code>#AE1616</code>.
-            </p>
-          </div>
-
-          <div class="note">
-            <p>
               <b>Verde Rede não vai em fundo escuro:</b> dá 2,57:1 no Preto. As
               variantes <code>color-on-dark</code> usam <b>Verde Claro</b>, que
               já existe na arte como disco do selo, a 6,11:1. Verde Claro serve
@@ -1789,11 +1768,8 @@
 
           <div class="note">
             <p>
-              <b>Para impresso, nada foi provado.</b> A PANTONE 327 C do manual
-              de 2026 sai como um verde-azulado que não corresponde ao verde ao
-              lado dela. Não repasse esses números para uma gráfica: imprima a
-              partir dos CMYK, trate-os como não verificados e faça prova na
-              máquina.
+              <b>Impressão.</b> A marca não declara cor especial. Imprima a
+              partir dos CMYK e faça prova na máquina antes da tiragem.
             </p>
           </div>
         </div>
@@ -1835,24 +1811,12 @@
             /></a>
           </div>
 
-          <div class="two">
-            <div>
-              <p>
-                É <b>comida brasileira de todo dia</b>, não iconografia de
-                alimentação saudável. Arroz e feijão, mamão, um pote de
-                conserva, um peixe inteiro — uma tigela de salada de banco de
-                imagem não diria de quem é esta cozinha.
-              </p>
-            </div>
-            <div>
-              <p>
-                Vinte e três vieram do arquivo original da entrega. As outras
-                onze foram redesenhadas a partir dos PNGs entregues, de cerca de
-                250 px: o detalhe interno delas é mais grosso. Todas exportam
-                para PDF.
-              </p>
-            </div>
-          </div>
+          <p>
+            É <b>comida brasileira de todo dia</b>, não iconografia de
+            alimentação saudável. Arroz e feijão, mamão, um pote de conserva, um
+            peixe inteiro — uma tigela de salada de banco de imagem não diria de
+            quem é esta cozinha.
+          </p>
 
           <div class="note">
             <p>
@@ -2303,29 +2267,26 @@
       </div>
     </section>
 
-    <section class="band voz-black" id="abertas">
+    <section class="band voz-black" id="contato">
       <div class="in">
-        <p class="eyebrow rail"><b>12</b>Questões<br />em aberto</p>
+        <p class="eyebrow rail"><b>12</b>Contato</p>
         <div class="col">
           <img
             class="sign-off"
             src="logo/vertical-color-on-dark.svg"
             alt="Cozinha Solidária em Rede"
           />
-          <h2>O que este manual não resolve</h2>
-          <ol class="open">
-            <li>
-              <b>Não existe prova de impressão.</b> Toda referência de cor
-              especial e CMYK está sem verificação, e os números PANTONE
-              herdados do manual de 2026 não se sustentam. É a última coisa
-              entre o sistema e uma tiragem.
-            </li>
-            <li>
-              <b>O selo CSR aparece no manual de 2026 sem explicação.</b>
-              Descubra se alguma coisa ainda depende dele; se nada depender,
-              aposente o selo.
-            </li>
-          </ol>
+          <h2>Contato sobre este manual</h2>
+          <p>
+            Dúvidas, pedidos de arquivo ou qualquer uso que este manual não
+            cubra:
+          </p>
+          <p class="contact">
+            <b>Semíramis Domene</b><br />
+            <a class="f" href="mailto:semiramis.domene@unifesp.br"
+              >semiramis.domene@unifesp.br</a
+            >
+          </p>
           <p class="colophon">
             Projeto Cozinhas Solidárias em Rede — Vínculo institucional:
             Universidade Federal de São Paulo e INCT Combate à Fome. Agências de
