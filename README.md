@@ -2,15 +2,13 @@
 
 ## Brand
 
-Public assets live in `public/marca/`, served at `/marca`. The contract lives in `brand/`, which
-is not served.
+Everything lives in `public/marca/`, served at `/marca`.
 
 - [`brand-book.html`](public/marca/brand-book.html) — the manual: how the system works and how
   to make new pieces with it. Read it in a browser; printing gives an A4 PDF.
-- [`brand-spec.json`](brand/brand-spec.json) — the contract. Colour values, type, tokens
+- [`brand-spec.json`](public/marca/brand-spec.json) — the contract. Colour values, type, tokens
   and the decisions behind them. Single source of truth; do not copy values into a second file.
-  It carries positioning and audience exclusions, so it stays outside `public/` and is never
-  linked from the manual.
+  Served at `/marca/brand-spec.json` so apps and agents can read the brand from one stable URL.
 
 Asset filenames are English kebab-case: they are design artifacts handled by designers and
 vendors, not source modules, so the repository's camelCase rule does not apply to them.
