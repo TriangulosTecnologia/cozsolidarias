@@ -38,6 +38,7 @@
         --green-light: #559870;
         --mesa: #fafafa;
         --preto: #000;
+      --ink-secondary: #636b68;
         --ink-mute: rgba(0, 0, 0, 0.72);
         --rule: rgba(0, 0, 0, 0.14);
         --voz-mute: rgba(250, 250, 250, 0.84);
@@ -597,12 +598,13 @@
         margin: 16px 0 0;
         padding-top: 15px;
         font-size: 12px;
-        font-weight: 600;
+        font-weight: 700;
         letter-spacing: 0.11em;
         text-transform: uppercase;
+        color: var(--preto);
       }
       .ptstrip b {
-        opacity: 0.6;
+        color: var(--ink-secondary);
         font-weight: 600;
         margin-right: 10px;
       }
@@ -1137,7 +1139,12 @@
                     >badge-pot.svg</a
                   ></b
                 >Assinatura reduzida: avatar, favicon, carimbo e tudo abaixo da
-                largura mínima.
+                largura mínima. Sobre Vermelho Cozinhas ou Verde Rede, troque
+                para
+                <a class="f" href="logo/badge-pot-white.svg" download
+                  >badge-pot-white.svg</a
+                >, que leva o disco em Branco Leitura — o disco verde não se
+                separa desses dois fundos.
               </figcaption>
             </figure>
             <figure>
@@ -1211,8 +1218,8 @@
             <figure class="no">
               <div class="box">
                 <img
-                  src="logo/vertical-color-on-dark.svg"
-                  alt="Lockup colorido falhando sobre Vermelho Cozinhas"
+                  src="logo/vertical-color.svg"
+                  alt="Lockup colorido falhando sobre Vermelho Cozinhas: a panela some no fundo e o nome em preto perde contraste"
                 />
               </div>
               <figcaption>
@@ -1346,6 +1353,11 @@
               vão primeiro.
             </li>
             <li>Apresentar a marca da UNIFESP como marca deste projeto.</li>
+            <li>
+              Emprestar a linguagem visual do Programa Cozinha Solidária
+              federal. O nome já colide; parecer com ele também completaria a
+              confusão que <i>Em Rede</i> existe para desfazer.
+            </li>
           </ul>
         </div>
       </div>
@@ -1382,7 +1394,7 @@
             <b>único lugar onde uma ilustração pode ficar</b>.
           </p>
           <p class="why">
-            As ilustrações rodam na própria paleta naturalista: 81 cores
+            As ilustrações rodam na própria paleta naturalista: 206 cores
             escolhidas para que uma cenoura pareça uma cenoura. Sobre Verde Rede
             nada compartilha matiz, e recolorir custaria o realismo. Separar as
             duas partes resolve sem mexer nelas — a comida vai no prato, não na
@@ -1441,7 +1453,9 @@
             <li>
               A assinatura fica na voz, no alto à esquerda, dentro da área de
               respiro. Em peça toda mesa, no alto à esquerda da margem da
-              página.
+              página. A exceção é a peça cujo conteúdo inteiro é a assinatura e
+              no máximo um rótulo — placa, adesivo de vitrine, carimbo —, onde
+              ela fica centralizada, porque não há leitura para começar.
             </li>
             <li>
               As ilustrações ficam na mesa, <b>ancoradas na borda de baixo</b>,
@@ -1449,15 +1463,18 @@
               menores que isso viram ícone, e este não é um conjunto de ícones.
             </li>
             <li>
-              A padronagem é a única textura permitida na voz, em opacidade
-              baixa atrás de tudo, e nunca sob a área de respiro da assinatura.
+              A padronagem é a única textura do sistema e serve nas duas partes:
+              na voz em opacidade baixa atrás de tudo, na mesa como textura do
+              próprio fundo, clara o bastante para o texto corrido continuar
+              legível. Em nenhuma das duas ela entra na área de respiro da
+              assinatura — essa margem é sempre a cor chapada do campo.
             </li>
           </ul>
 
           <h3>O que é fixo e o que é livre</h3>
           <p>
-            <b>Fixo:</b> as duas partes, a linha reta, a assinatura no alto à
-            esquerda, comida só na mesa.
+            <b>Fixo:</b> as duas partes, a linha reta, a assinatura dentro da
+            área de respiro, comida só na mesa.
           </p>
           <p>
             <b>Livre:</b> que cor a voz assume, a proporção da divisão, qual
@@ -1624,8 +1641,12 @@
             <p class="ptstrip"><b>Realização</b>UNIFESP · USP · CEAGESP</p>
           </div>
           <p>
-            Uma linha em estilo de rótulo: <b>Realização</b> em opacidade
-            reduzida, depois as instituições separadas por ponto médio. Ela
+            Uma linha em estilo de rótulo: <b>Realização</b> em Cinza
+            Secundário, depois as instituições em Preto e peso 700, separadas
+            por ponto médio. Sobre fundo saturado ou escuro as duas metades são
+            Branco Leitura, e só o peso as separa. Nunca reduza a opacidade para
+            criar o contraste entre elas: foi assim que a linha caiu para 3,24:1
+            e 4,31:1 nas peças antigas. Ela
             ocupa uma <b>faixa no pé da peça onde nada mais entra</b> — nem
             ilustração, nem imagem, nem texto.
           </p>
@@ -1691,6 +1712,13 @@
               <div class="chip" style="background: #000000"></div>
               <b>Preto</b> <code>#000000</code>
               <figcaption>O nome no claro; o fundo escuro.</figcaption>
+            </figure>
+            <figure>
+              <div class="chip" style="background: #636b68"></div>
+              <b>Cinza Secundário</b> <code>#636B68</code>
+              <figcaption>
+                Texto secundário, só sobre Branco Leitura. 5,25:1.
+              </figcaption>
             </figure>
             <figure>
               <div class="chip" style="background: #e9bbaf"></div>
@@ -2224,6 +2252,11 @@
                   href="logo/badge-pot.svg"
                   download
                   >badge-pot</a
+                ><span class="sep">·</span>&#8203;<a
+                  class="f"
+                  href="logo/badge-pot-white.svg"
+                  download
+                  >badge-pot-white</a
                 >
               </div>
             </div>
@@ -2475,12 +2508,6 @@
                   download
                   >Rótulo</a
                 >
-              </div>
-            </div>
-            <div class="row">
-              <div class="k">Especificação</div>
-              <div class="v">
-                <a class="f" href="brand-spec.json" download>brand-spec.json</a>
               </div>
             </div>
           </div>

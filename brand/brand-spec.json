@@ -91,7 +91,13 @@
         "black": {
           "$value": "#000000",
           "$type": "color",
-          "$description": "Preto. Sets the name on light grounds; the brand's neutral dark ground."
+          "$description": "Preto. Sets the name on light grounds; the brand's neutral dark ground. It also sets body text; no second near-black is declared."
+        },
+        "ink-muted": {
+          "$value": "#636B68",
+          "$type": "color",
+          "$description": "Cinza Secundário. The only muted text ink: the 'Realização' label, table headers, captions. On Branco Leitura only (5.25:1). On a saturated or dark ground the muted role is carried by Branco Leitura at full strength, separated from the names by weight rather than by tone.",
+          "basis": "Setting secondary text by opacity instead of by value produced 4.31:1 and 3.24:1 in the reference pieces, below AA for the size it is used at."
         },
         "skin-light": {
           "$value": "#E9BBAF",
@@ -155,11 +161,16 @@
         "text": "{color.green-light}",
         "background": "{color.black}",
         "usage": "large"
+      },
+      {
+        "text": "{color.ink-muted}",
+        "background": "{color.white}",
+        "usage": "body"
       }
     ],
     "palette": {
       "roles": "Vermelho Cozinhas and Verde Rede are the only two colours that carry meaning: the red is the pot and the kitchen, the green is the network and sets 'Em Rede'. Swapping those roles breaks recognition faster than changing the hues would. The skin tones belong to the hands and are not a decorative palette. Branco Leitura is the reading surface, Preto the neutral dark ground.",
-      "excludes": "Verde Rede must not set text or lettering on a dark ground — 1.99:1. Verde Claro must not set text on Verde Rede — 2.38:1. Verde Claro is for display lettering at 90px and above only — at smaller sizes it carries too weak an APCA signal (Lc 39.9). On a saturated brand ground and for body text on dark, text is Branco Leitura.",
+      "excludes": "Verde Rede must not set text or lettering on a dark ground — 2.57:1 on Preto. Verde Claro must not set text on Verde Rede — 2.38:1. Verde Claro is for display lettering at 90px and above only — at smaller sizes it carries too weak an APCA signal (Lc 39.9). On a saturated brand ground and for body text on dark, text is Branco Leitura. Text at label size is never muted by lowering the opacity of a darker ink; it takes a declared value — Cinza Secundário on Branco Leitura, Branco Leitura at full strength on a saturated or dark ground.",
       "print": "No spot colour is specified for this brand. Print from the CMYK builds and proof on press before any run."
     },
     "typography": {
@@ -191,10 +202,10 @@
       "rules": [
         "The split is a straight horizontal edge across the full width. Do not feather, curve, angle or round it; the drawing in this system is done by the lettering and the illustrations, not by the layout.",
         "Proportion is free but never half and half — one field must clearly dominate, or the surface reads as two unrelated posters.",
-        "The signature sits in the voz field, top-left, inside the clear-space margin. When a surface is all mesa, it sits top-left of the page margin.",
+        "The signature sits in the voz field, top-left, inside the clear-space margin. When a surface is all mesa, it sits top-left of the page margin. The one exception is a surface whose entire content is the signature and at most one label — a plaque, a window decal, a stamp — where it is optically centred, because there is no reading order for it to start.",
         "Illustrations sit on mesa, anchored to its bottom edge, at large scale and overlapping each other — arriving, not arranged in a grid. Never scale one below 40% of the mesa's height, which turns it into an icon.",
         "The partner signature occupies a reserved strip at the foot of the surface that no illustration, image or text may enter.",
-        "The pattern is the only texture permitted on a voz field, at low opacity behind everything, and never under the signature's clear space."
+        "The pattern is the only texture in the system and works on either field: on voz at low opacity behind everything, on mesa as the ground's own texture, pale enough that body text sitting on it still reads. On neither field does it enter the signature's clear space — that margin is always the flat field colour."
       ],
       "free_to_vary": "Which colour the voz field takes, the split proportion and which field dominates, how many illustrations arrive and how they overlap, and whether a surface uses one field or both."
     },
@@ -204,13 +215,14 @@
         "horizontal": "Pot left, name right. For wide, short spaces — site headers, document footers, banners.",
         "stacked": "Pot above, name below. Alternative vertical for tall, narrow spaces.",
         "wordmark": "Lettering only, no pot. For contexts where the pot already appears nearby.",
-        "badge-pot": "Pot in a Verde Claro disc. The reduced signature for avatars, favicons and stamps — the only asset that stays readable below the lettered lockups' minimum widths.",
-        "badge-csr": "CSR monogram in a grey disc. Secondary; use only where the abbreviation is already understood."
+        "badge-pot": "Pot in a Verde Claro disc. The reduced signature for avatars, favicons and stamps — the only asset that stays readable below the lettered lockups' minimum widths. For pale and neutral-dark grounds.",
+        "badge-pot-white": "The same badge with the disc in Branco Leitura, for Vermelho Cozinhas and Verde Rede grounds, where the Verde Claro disc does not separate (2.09:1 and 2.38:1).",
+        "badge-csr": "CSR monogram knocked out of a Vermelho Cozinhas pot in a grey disc. Secondary; use only where the abbreviation is already understood."
       },
       "variant_by_ground": {
         "branco-leitura-or-pale": "color",
         "neutral-dark-preto": "color-on-dark",
-        "saturated-brand-ground-vermelho-or-verde": "white — the colour lockups fail here: on Vermelho Cozinhas the pot disappears into its own colour, and on Verde Rede the 'Em Rede' lettering drops to 2.38:1.",
+        "saturated-brand-ground-vermelho-or-verde": "white — the colour lockups fail here: on Vermelho Cozinhas the pot disappears into its own colour, and on Verde Rede the 'Em Rede' lettering drops to 2.38:1. The reduced signature takes badge-pot-white.",
         "single-ink-production": "black, red or green, whichever ink is available",
         "photography": "white, over a plain area of the image"
       },
@@ -223,6 +235,7 @@
           "stacked": "16%",
           "wordmark": "20%",
           "badge-pot": "20% of the diameter",
+          "badge-pot-white": "20% of the diameter",
           "badge-csr": "20% of the diameter"
         },
         "basis": "The lettering is drawn at a different size in each lockup, so one rule yields a different margin in each. The badges carry no lettering; a fifth of the diameter lands in the same range."
@@ -233,7 +246,9 @@
         "stacked": "70px wide",
         "wordmark": "70px wide",
         "badge-pot": "24px",
-        "basis": "Width of the mark itself, the files being trimmed to it."
+        "badge-pot-white": "24px",
+        "badge-csr": "40px",
+        "basis": "Width of the mark itself, the files being trimmed to it. The CSR badge needs more than the pot badge because its three letters are knocked out of the pot: below 40px the S and the R close up."
       },
       "misuse": [
         "Do not distort, stretch or rotate.",
@@ -254,7 +269,7 @@
   },
   "architecture": {
     "model": "endorsed",
-    "partner_signature": "The project signs its own work; the institutions that make it possible sign beneath. The partner line is a single row in the label style — 'Realização' at reduced opacity, then the institution names separated by middots — set in the reserved foot strip and never larger than the label size. Partner logotypes appear only where an institution's own rules require the mark rather than the name; they sit in the same strip, optically matched in height to each other, never to the project's signature.",
+    "partner_signature": "The project signs its own work; the institutions that make it possible sign beneath. The partner line is a single row in the label style — 'Realização' then the institution names separated by middots — set in the reserved foot strip and never larger than the label size. 'Realização' is the muted half and the names are the read half, and the difference is carried by value and weight, never by opacity: on Branco Leitura 'Realização' is Cinza Secundário and the names are Preto at 700; on a saturated or dark ground both are Branco Leitura, with the names at 700. Partner logotypes appear only where an institution's own rules require the mark rather than the name; they sit in the same strip, optically matched in height to each other, never to the project's signature.",
     "rationale": "UNIFESP is a pre-existing condition of the brief, not a co-brand. Setting partners as text by default keeps the project legible as the network rather than as a university output, and avoids a row of competing logos crowding the signature."
   }
 }
