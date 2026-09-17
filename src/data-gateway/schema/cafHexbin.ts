@@ -12,6 +12,31 @@
  * to ship whole and leaves the mode with no zoom hierarchy to maintain.
  */
 
+/**
+ * The H3 resolutions a snapshot exists for, coarse to fine.
+ *
+ * Each step is a factor of seven in cell area, so the grid — and the file the
+ * browser fetches — grows sevenfold per step down: r3 is 1.1k cells (0.2 MB),
+ * r4 6k (1.7 MB), r5 35k (6 MB). Generated offline by
+ * `scripts/generateCafHexbin.ts`, one run per entry.
+ */
+export const CAF_HEXBIN_RESOLUTIONS = [3, 4, 5] as const;
+
+/** One of {@link CAF_HEXBIN_RESOLUTIONS}. */
+export type CafHexbinResolution = (typeof CAF_HEXBIN_RESOLUTIONS)[number];
+
+/** The resolution the mode opens at: the ~45 km cell it was specified with. */
+export const DEFAULT_CAF_HEXBIN_RESOLUTION: CafHexbinResolution = 4;
+
+/** Whether `value` is a resolution a snapshot exists for. */
+export const isCafHexbinResolution = (
+  value: number
+): value is CafHexbinResolution => {
+  return CAF_HEXBIN_RESOLUTIONS.some((resolution) => {
+    return resolution === value;
+  });
+};
+
 /** One hexagon of the grid. */
 export type CafHexbinFeature = {
   type: 'Feature';

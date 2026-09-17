@@ -27,6 +27,13 @@ export const CAF_HEXBIN_MAP_DATA_ID = 'caf-hexbin-counts';
 export const CAF_HEXBIN_LEGEND_ID = 'legenda-cafs-hexbin';
 
 /**
+ * Fill opacity the mode opens at. High enough that the grid reads as the map's
+ * subject rather than as an overlay, low enough to keep the basemap's coastline
+ * legible under the palest cells.
+ */
+export const DEFAULT_CAF_HEXBIN_OPACITY = 0.85;
+
+/**
  * Feature property carrying the H3 index, promoted to the MapLibre feature id
  * by the join's `joinKey`.
  *
@@ -147,9 +154,11 @@ export const buildCafHexbinSource = (cells?: CafHexbinFeatureCollection) => {
  * @example
  * buildCafHexbinLayer().mapDataId; // 'caf-hexbin-counts'
  */
-export const buildCafHexbinLayer = (
-  hoverTooltipRender?: HoverTooltipConfig['render']
-): VisualizationLayer => {
+export const buildCafHexbinLayer = ({
+  hoverTooltipRender,
+}: {
+  hoverTooltipRender?: HoverTooltipConfig['render'];
+} = {}): VisualizationLayer => {
   return {
     id: CAF_HEXBIN_LAYER_ID,
     sourceId: CAF_HEXBIN_SOURCE_ID,
@@ -157,7 +166,10 @@ export const buildCafHexbinLayer = (
     mapDataId: CAF_HEXBIN_MAP_DATA_ID,
     activeLegendId: CAF_HEXBIN_LEGEND_ID,
     paint: {
-      fillOpacity: 0.85,
+      // Opaque on purpose: the settings zone's opacity rides in the legend's
+      // colours, which is what `fill-color` is built from. See
+      // `applyLegendOpacity`.
+      fillOpacity: 1,
       // Warm mid-grey, which reads against BOTH ends of what this layer paints:
       // the pale beige of an empty cell and the near-black blue of the top
       // class. It was the empty colour before, so empty cells had an outline

@@ -48,6 +48,7 @@ import {
   cozinhaStatusLabel,
 } from './geovisCozinhaStatusScales';
 import { buildLegends, legendIdForMode, type MapMode } from './geovisScales';
+import { applyLegendOpacity } from './legendOpacity';
 import { TOOLTIP_STYLE } from './mapaTooltipStyle';
 import { viewForMode } from './mapCamera';
 
@@ -91,6 +92,19 @@ type MapOverlays = {
   cafHexbin?: CafHexbinFeatureCollection;
   /** Hover tooltip renderer for the `cafs-hexbin` mode's cells. */
   cafHexbinHoverRender?: HoverTooltipConfig['render'];
+  /**
+   * How the mode's subject layer is painted, from the sidebar's settings zone.
+   * Absent means the mode's own defaults — these settings change how the data
+   * reads, never which data it is.
+   */
+  paintSettings?: {
+    /**
+     * Fill opacity, `0`..`1`. Applies to whichever layer the mode is read
+     * from: the hexagon grid in `cafs-hexbin`, the município fill everywhere
+     * else it is offered.
+     */
+    fillOpacity?: number;
+  };
   /** Hover tooltip renderer for the `cafs` mode's UF circles. */
   cafUfHoverRender?: HoverTooltipConfig['render'];
   /**
@@ -361,6 +375,9 @@ const buildFillLayer = (
     mapDataId: 'cozinhas-por-municipio',
     activeLegendId: legendIdForMode(mode),
     paint: {
+      // Opaque on purpose. The settings zone's opacity rides in the legend's
+      // colours (see `applyLegendOpacity`), which is what `fill-color` is built
+      // from — setting it here too would multiply the two.
       fillOpacity: 1,
       lineColor: '#FAF9F7',
     },
@@ -460,7 +477,11 @@ const buildOverlayLayers = ({
   // beneath it is not visible — it stays in the spec regardless, because every
   // mode shares that layer and dropping it here would reorder the style.
   if (mode === 'cafs-hexbin') {
-    layers.push(buildCafHexbinLayer(overlays.cafHexbinHoverRender));
+    layers.push(
+      buildCafHexbinLayer({
+        hoverTooltipRender: overlays.cafHexbinHoverRender,
+      })
+    );
   }
 
   // Proportional circles: always present so their stacking position *below* the
@@ -668,10 +689,13 @@ export const buildSpec = (
       showAssentamentos,
       overlays,
     }),
-    legends: [
-      ...buildLegends(mode, jenksBreaks),
-      buildCozinhaStatusLegend(mode === 'pontos'),
-    ],
+    legends: applyLegendOpacity({
+      legends: [
+        ...buildLegends(mode, jenksBreaks),
+        buildCozinhaStatusLegend(mode === 'pontos'),
+      ],
+      fillOpacity: overlays.paintSettings?.fillOpacity,
+    }),
     layers: buildOverlayLayers({
       mode,
       maxQuantidade,
