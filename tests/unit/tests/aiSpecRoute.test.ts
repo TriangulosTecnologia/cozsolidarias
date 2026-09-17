@@ -533,6 +533,29 @@ describe('POST /api/ai/spec', () => {
     expect(body.error).toMatch(/caf_areas/);
   }, 10000);
 
+  test('returns 422 when an API-backed source resolves to no features', async () => {
+    jest.spyOn(gateway, 'getCozinhas').mockResolvedValue({
+      type: 'FeatureCollection',
+      features: [],
+    });
+
+    const specWithEmptySource = {
+      title: 'Cozinhas comunitárias',
+      sources: [{ id: 'cozinhas', type: 'geojson', data: '/api/cozinhas' }],
+      legends: A_LEGEND,
+    };
+
+    mockAgentReply(JSON.stringify(specWithEmptySource));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de cozinhas comunitárias' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(422);
+    expect(body.error).toMatch(/cozinhas/);
+  }, 10000);
+
   test('resolves cozinhas_geolocalizadas via the default-year fetcher', async () => {
     jest.spyOn(gateway, 'getCozinhasPorMunicipio').mockResolvedValue([
       {
