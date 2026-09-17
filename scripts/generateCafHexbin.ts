@@ -50,9 +50,10 @@
  * Usage — the CSV is far too large to commit, so pass its path (defaults to the
  * repo's `caf-area.csv`, which holds only a sample):
  *
- *   node --max-old-space-size=4096 scripts/generateCafHexbin.ts "/path/to/03 - AREA.csv"
+ *   node --max-old-space-size=4096 scripts/generateCafHexbin.ts "/path/to/03 - AREA.csv" [resolution]
  *
- * Output: `src/data-source-static/data/caf-hexbin-r4.json`.
+ * Output: `src/data-source-static/data/caf-hexbin-r<resolution>.json` (r4 by
+ * default). Run it once per resolution the map offers.
  */
 import { createReadStream } from 'node:fs';
 import { readFile, writeFile } from 'node:fs/promises';
@@ -181,10 +182,22 @@ const pointFromRow = (
 };
 
 /**
- * The binning resolution. See the module header: the nearest H3 step to the
- * ~40 km cell this mode was specified with.
+ * The binning resolution, from the second argument. See the module header: r4
+ * is the nearest H3 step to the ~40 km cell this mode was specified with, and
+ * stays the default.
+ *
+ * Each step is a factor of seven in cell area, so the grid — and the file —
+ * grows sevenfold per step down. Run the script once per resolution the map
+ * offers; the output is named after it, so the runs do not overwrite each
+ * other.
  */
-const RESOLUTION = 4;
+const RESOLUTION = Number(process.argv[3] ?? 4);
+
+if (!Number.isInteger(RESOLUTION) || RESOLUTION < 0 || RESOLUTION > 15) {
+  throw new Error(
+    `[generateCafHexbin] resolution must be an integer in 0..15, got "${process.argv[3]}".`
+  );
+}
 
 /**
  * Decimal places kept per hexagon vertex. Four is ~11 m — three orders of

@@ -4,16 +4,19 @@ import { join } from 'node:path';
 import type { StaticCafHexbinSource } from './types';
 
 /**
- * The CAF hexbin snapshot: one H3 cell per hexagon covering Brazil, with the
- * CAFs counted inside it. Generated offline by `scripts/generateCafHexbin.ts`.
+ * The CAF hexbin snapshot for one H3 resolution: one cell per hexagon covering
+ * Brazil, with the CAFs counted inside it. Generated offline by
+ * `scripts/generateCafHexbin.ts`, one run per resolution.
  */
-const SNAPSHOT_PATH = join(
-  process.cwd(),
-  'src',
-  'data-source-static',
-  'data',
-  'caf-hexbin-r4.json'
-);
+const snapshotPath = (resolution: number) => {
+  return join(
+    process.cwd(),
+    'src',
+    'data-source-static',
+    'data',
+    `caf-hexbin-r${resolution}.json`
+  );
+};
 
 /** Whether a value is a `[longitude, latitude]` pair of finite numbers. */
 const isPosition = (value: unknown): value is [number, number] => {
@@ -98,30 +101,37 @@ export const parseCafHexbin = (text: string): StaticCafHexbinSource => {
   };
 };
 
-let cache: StaticCafHexbinSource | null = null;
+const cache = new Map<number, StaticCafHexbinSource>();
 
 /**
- * Reads, parses and validates the CAF hexbin snapshot.
+ * Reads, parses and validates the CAF hexbin snapshot for one resolution.
  *
  * Server-only: it reads from disk with `fs`, so it must be called from a Server
- * Component, route handler or other server context. The parsed result is
- * memoized for the lifetime of the process — at ~6k cells with their rings, the
- * validation is worth paying once rather than per request.
+ * Component, route handler or other server context. Each resolution is memoized
+ * separately for the lifetime of the process — at 6k cells with their rings (35k
+ * at r5) the validation is worth paying once rather than per request, and
+ * keeping them apart is what lets the map switch between them without re-reading
+ * the one it came from.
  *
- * @returns The snapshot from `data/caf-hexbin-r4.json`.
+ * @param resolution - The H3 resolution to read; defaults to r4.
+ * @returns The snapshot from `data/caf-hexbin-r<resolution>.json`.
  * @throws If the snapshot is missing or malformed.
  *
  * @example
- * const { cells } = await readStaticCafHexbin();
+ * const { cells } = await readStaticCafHexbin(5);
  * cells.filter((cell) => cell.count > 0).length;
  */
-export const readStaticCafHexbin = async (): Promise<StaticCafHexbinSource> => {
-  if (cache) {
-    return cache;
+export const readStaticCafHexbin = async (
+  resolution = 4
+): Promise<StaticCafHexbinSource> => {
+  const cached = cache.get(resolution);
+  if (cached) {
+    return cached;
   }
 
-  const raw = await readFile(SNAPSHOT_PATH, 'utf8');
-  cache = parseCafHexbin(raw);
+  const raw = await readFile(snapshotPath(resolution), 'utf8');
+  const parsed = parseCafHexbin(raw);
+  cache.set(resolution, parsed);
 
-  return cache;
+  return parsed;
 };

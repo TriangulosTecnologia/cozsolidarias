@@ -15,260 +15,33 @@ import * as React from 'react';
 import { ThemeUIProvider } from 'theme-ui';
 
 import type { CozinhasFeatureCollection } from '@/data-gateway/schema';
+import {
+  DEFAULT_CAF_HEXBIN_RESOLUTION,
+  isCafHexbinResolution,
+} from '@/data-gateway/schema';
 
 import CafMapPanel from './CafMapPanel';
+import { DEFAULT_CAF_HEXBIN_OPACITY } from './geovisCafHexbin';
 import { type MapMode } from './geovisSpec';
 import {
   buildCozinhaRightSidebar,
   modeShowsCozinhaDetail,
 } from './mapaDetailSidebars';
+import {
+  buildLeftSidebar,
+  DEFAULT_MODE,
+  DEFAULT_YEAR,
+  MESH_MENU_ID,
+  MODE_MENU_ID,
+  modeTakesOpacity,
+  OPACITY_MENU_ID,
+  YEAR_MENU_ID,
+} from './mapaLeftSidebar';
 import MapLoadingIndicator from './MapLoadingIndicator';
+import { useCafHexbin } from './useCafHexbin';
 import { useKitchensByYear } from './useKitchensByYear';
 import { useMapaDatasets } from './useMapaDatasets';
 import { useMapaSpec } from './useMapaSpec';
-
-/** Id of the left-sidebar menu group that drives the visualization mode. */
-const MODE_MENU_ID = 'visualizacao';
-
-/** Shared-selection key the time-lapse timeline writes the current year to. */
-const YEAR_MENU_ID = 'ano';
-
-/** Mode shown before the sidebar seeds `selection[MODE_MENU_ID]`. */
-const DEFAULT_MODE: MapMode = 'coropletico';
-
-/** Year shown before the timeline seeds `selection[YEAR_MENU_ID]` (latest snapshot). */
-const DEFAULT_YEAR = 2026;
-
-/**
- * Visualization modes whose data carries a year, so the timeline describes
- * something. Only the kitchen locations do: every choropleth here is a single
- * snapshot per município, and the assentamentos overlay has no time dimension
- * either.
- *
- * Typed as `MapMode[]` on purpose. The gate below matches these strings against
- * the shared selection, and the variations that produce that selection are
- * declared as plain strings further down — so the type is what keeps the two
- * from drifting: renaming a member of the `MapMode` union breaks this line at
- * compile time instead of quietly leaving the tab disabled forever.
- */
-const MODES_WITH_TIMELINE: MapMode[] = ['pontos'];
-
-/** Left sidebar drives the visualization mode. */
-/**
- * Left sidebar: the cozinhas visualizations as a card with two icon tabs —
- * "Variações" (a flat, icon-led list) and "Timeline". Drives the shared
- * `visualizacao` selection (same `menuId` + values), so switching a variation
- * recolors the map.
- *
- * Neither section declares `header.title`, so geovis-workspace 0.13 draws no
- * header band at all and the tab bar takes the top of the card, close button
- * included. Two consequences shape the config below. Each tab is named by its
- * section `id` (`header.title ?? section.id`), on hover and for assistive tech
- * alike, so those ids read as labels — declaring a title to name one tab would
- * bring the band back for both. And the `variations` body heads itself with its
- * own `title`/`icon`, since with no band its rows would otherwise start against
- * the tab bar with nothing naming them.
- *
- * The "Timeline" tab is gated on the variation: it is live only for
- * {@link MODES_WITH_TIMELINE} and dims everywhere else. Dimming rather than
- * dropping the section is deliberate — the tab bar would reflow on every
- * variation switch, and a dimmed tab reads as *unavailable* where a missing one
- * reads as *gone*.
- */
-const LEFT_SIDEBAR: NonNullable<GeovisWorkspaceConfig['leftSidebar']> = {
-  initialState: 'open',
-  sections: [
-    {
-      id: 'Variações',
-      header: {
-        icon: 'lucide:layout-list',
-      },
-      body: {
-        kind: 'variations',
-        title: 'Variações',
-        icon: 'lucide:layout-list',
-        menuId: MODE_MENU_ID,
-        defaultValue: 'coropletico',
-        groups: [
-          {
-            id: 'cozinhas',
-            label: 'Cozinhas',
-            variations: [
-              {
-                value: 'coropletico',
-                label: 'Cozinhas por município (coroplético)',
-                icon: 'lucide:map',
-              },
-              {
-                value: 'coropletico-taxa',
-                label: 'nº coz. no município / 100.000 hab.',
-                icon: 'lucide:users',
-              },
-              {
-                value: 'coropletico-percentual',
-                label: '% das cozinhas do Brasil no município',
-                icon: 'lucide:percent',
-              },
-              {
-                value: 'coropletico-cafs-percentual',
-                label: '% dos CAFs do Brasil no município',
-                icon: 'lucide:wheat',
-              },
-              {
-                value: 'coropletico-cadinsan-com-pbf',
-                label: 'Insegurança alimentar — cenário com o Bolsa Família',
-                icon: 'lucide:utensils-crossed',
-              },
-              {
-                value: 'coropletico-cadinsan-sem-pbf',
-                label: 'Insegurança alimentar — cenário sem o Bolsa Família',
-                icon: 'lucide:utensils',
-              },
-              {
-                value: 'coropletico-cadunico',
-                label: 'nº coz. / 10 mil pessoas no CadÚnico',
-                icon: 'lucide:clipboard-list',
-              },
-              {
-                value: 'coropletico-pessoas-cozinha',
-                label: 'pessoas no CadÚnico por cozinha',
-                icon: 'lucide:user-round',
-              },
-            ],
-          },
-          {
-            id: 'ivs',
-            label: 'IVS',
-            variations: [
-              {
-                value: 'coropletico-ivs',
-                label: 'Índice de vulnerabilidade social',
-                icon: 'lucide:shield-alert',
-              },
-              {
-                value: 'coropletico-ivs-infraestrutura',
-                label: 'IVS Infraestrutura Urbana',
-                icon: 'lucide:building-2',
-              },
-              {
-                value: 'coropletico-ivs-capital-humano',
-                label: 'IVS Capital Humano',
-                icon: 'lucide:graduation-cap',
-              },
-              {
-                value: 'coropletico-ivs-renda-trabalho',
-                label: 'IVS Renda e Trabalho',
-                icon: 'lucide:briefcase',
-              },
-            ],
-          },
-          {
-            id: 'idhm',
-            label: 'IDHM',
-            variations: [
-              {
-                value: 'coropletico-idhm',
-                label: 'Índice de Desenvolvimento Humano Municipal',
-                icon: 'lucide:trending-up',
-              },
-              {
-                value: 'coropletico-idhm-longevidade',
-                label: 'IDHM Longevidade',
-                icon: 'lucide:heart-pulse',
-              },
-              {
-                value: 'coropletico-idhm-educacao',
-                label: 'IDHM Educação',
-                icon: 'lucide:book-open',
-              },
-              {
-                value: 'coropletico-idhm-renda',
-                label: 'IDHM Renda',
-                icon: 'lucide:dollar-sign',
-              },
-              {
-                value: 'coropletico-idhm-educacao-escolaridade',
-                label: 'IDHM Educação — Escolaridade',
-                icon: 'lucide:pencil-ruler',
-              },
-              {
-                value: 'coropletico-idhm-educacao-frequencia',
-                label: 'IDHM Educação — Frequência Escolar',
-                icon: 'lucide:calendar-check',
-              },
-            ],
-          },
-          {
-            id: 'camadas',
-            label: 'Camadas',
-            variations: [
-              {
-                value: 'pontos',
-                label: 'Localização das cozinhas',
-                icon: 'lucide:map-pin',
-              },
-              {
-                value: 'circulos',
-                label: 'Cozinhas por município',
-                icon: 'lucide:circle-dot',
-              },
-              {
-                value: 'assentamentos',
-                label: 'Assentamentos e cozinhas',
-                icon: 'lucide:house',
-              },
-              {
-                value: 'cafs',
-                label: 'CAFs',
-                icon: 'lucide:tractor',
-              },
-              {
-                value: 'cafs-hexbin',
-                label: 'CAFs (hexbin)',
-                icon: 'lucide:hexagon',
-              },
-            ],
-          },
-        ],
-      },
-    },
-    {
-      id: 'Timeline',
-      header: {
-        icon: 'lucide:clock',
-      },
-      // Live only where the data has a year. While the gate is closed the tab
-      // dims, playback is suspended, and the year already published stays in the
-      // selection — a closed gate freezes the timeline, it does not reset it, so
-      // returning to a kitchen-locations view lands on the same year.
-      enabledWhen: { menuId: MODE_MENU_ID, values: MODES_WITH_TIMELINE },
-      body: {
-        kind: 'filters',
-        blocks: [
-          {
-            id: 'periodo',
-            title: 'Linha do tempo',
-            icon: 'lucide:calendar-clock',
-            // No `collapsible`: geovis-workspace 0.13 stopped collapsing filter
-            // blocks by default, and this is the only block in its tab — there
-            // is no neighbour for it to push off screen. A fixed header, so the
-            // timeline is always in reach. (`defaultOpen` lived here and is now
-            // read only when a block opts into collapsing.)
-            control: {
-              kind: 'timeline',
-              // Drives the shared selection so the map reacts to the year.
-              menuId: YEAR_MENU_ID,
-              min: 2025,
-              max: 2026,
-              step: 1,
-              defaultValue: DEFAULT_YEAR,
-            },
-          },
-        ],
-      },
-    },
-  ],
-};
 
 /**
  * Bruttal theme scoped for the GeovisWorkspace sidebars only.
@@ -296,7 +69,9 @@ const scopedSidebarTheme = {
 const MapaPlayground = () => {
   const [selection, setSelection] = React.useState<GeovisWorkspaceSelection>(
     () => {
-      return getInitialSelection({ config: { leftSidebar: LEFT_SIDEBAR } });
+      return getInitialSelection({
+        config: { leftSidebar: buildLeftSidebar(DEFAULT_MODE) },
+      });
     }
   );
 
@@ -349,6 +124,47 @@ const MapaPlayground = () => {
     ? yearFromSelection
     : DEFAULT_YEAR;
 
+  /*
+   * The grid's settings, read off the same selection the timeline writes to.
+   *
+   * The resolution is validated rather than cast: it indexes a snapshot that
+   * has to exist, and a stale permalink carrying `r=7` would otherwise 404 the
+   * grid and blank the mode.
+   */
+  const meshFromSelection = Number(selection[MESH_MENU_ID]);
+  const meshResolution = isCafHexbinResolution(meshFromSelection)
+    ? meshFromSelection
+    : DEFAULT_CAF_HEXBIN_RESOLUTION;
+
+  const opacityFromSelection = Number(selection[OPACITY_MENU_ID]);
+
+  // Memoized: `useMapaSpec` keys its spec on reference identity, and a fresh
+  // object per render would rebuild the whole spec on every keystroke elsewhere.
+  /*
+   * Undefined wherever the settings tab is dark, so the value the reader left
+   * behind in a choropleth does not go on tinting a mode that never offered
+   * the slider — `assentamentos` and the CAF hierarchy paint from layers this
+   * setting has no claim over.
+   */
+  const paintSettings = React.useMemo(() => {
+    if (!modeTakesOpacity(specMode)) {
+      return undefined;
+    }
+
+    return {
+      fillOpacity: Number.isFinite(opacityFromSelection)
+        ? opacityFromSelection / 100
+        : DEFAULT_CAF_HEXBIN_OPACITY,
+    };
+  }, [opacityFromSelection, specMode]);
+
+  // The grid for the selected resolution. Seeded with the one the mode already
+  // loaded, so opening `cafs-hexbin` costs no second request.
+  const { cells: cafHexbinCells } = useCafHexbin({
+    resolution: meshResolution,
+    seed: datasets.cafHexbin,
+  });
+
   // Kitchen points for the selected year, cached in memory and prefetched for
   // every year so scrubbing and the play animation swap without a round-trip.
   const { points: cozinhasPoints, collections } = useKitchensByYear(year);
@@ -391,7 +207,7 @@ const MapaPlayground = () => {
     return {
       // Full-bleed map: no card border/radius so it fills the container.
       appearance: 'bare',
-      leftSidebar: LEFT_SIDEBAR,
+      leftSidebar: buildLeftSidebar(specMode),
       rightSidebar,
       // geovis-workspace 0.6.x adds `legend`, `warnings` and `metadata` slots to
       // the right sidebar, and it stays open while *any* of them has content —
@@ -433,7 +249,8 @@ const MapaPlayground = () => {
     cafByCity: datasets.cafsByCity,
     cafPontosPorUf: datasets.cafPontosPorUf,
     cadinsanByCity: datasets.cadinsanByCity,
-    cafHexbin: datasets.cafHexbin,
+    cafHexbin: cafHexbinCells,
+    paintSettings,
     mode: specMode,
     cozinhasPoints,
   });

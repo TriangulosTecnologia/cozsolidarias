@@ -198,6 +198,10 @@ type UseMapaSpecParams = {
    * `undefined` until it loads, which leaves the source on its URL.
    */
   cafHexbin?: CafHexbinFeatureCollection;
+  /** How the mode's subject layer is painted, from the settings zone. */
+  paintSettings?: {
+    fillOpacity?: number;
+  };
   mode: MapMode;
   /**
    * Kitchen points for the selected time-lapse year, held in memory. When set,
@@ -234,6 +238,7 @@ export const useMapaSpec = ({
   cafPontosPorUf,
   cadinsanByCity,
   cafHexbin,
+  paintSettings,
   mode,
   cozinhasPoints,
 }: UseMapaSpecParams) => {
@@ -281,6 +286,7 @@ export const useMapaSpec = ({
         cafUfHoverRender: tooltips.cafUfTooltip,
         cadinsanByCity,
         cafHexbin,
+        paintSettings,
         cafHexbinHoverRender: tooltips.cafHexbinTooltip,
       }
     );
@@ -307,6 +313,7 @@ export const useMapaSpec = ({
     cafPontosPorUf,
     cadinsanByCity,
     cafHexbin,
+    paintSettings,
     cozinhasPoints,
     viewport,
   ]);

@@ -18,6 +18,7 @@ import type {
   cadinsanByCity,
   cafByCity,
   CafHexbinFeatureCollection,
+  CafHexbinResolution,
   CafUfFeatureCollection,
   CatalogueContract,
   CozinhaDetalhe,
@@ -26,6 +27,7 @@ import type {
   kitchenRateByCity,
   MunicipioIvs,
 } from './schema';
+import { DEFAULT_CAF_HEXBIN_RESOLUTION } from './schema';
 import { toAppCatalogue } from './transformers/toAppCatalogue';
 import { toCadinsanPorMunicipio } from './transformers/toCadinsanPorMunicipio';
 import { toCafHexbin } from './transformers/toCafHexbin';
@@ -66,7 +68,9 @@ export type DataGateway = {
    * total is below `getCafsPorMunicipio`'s, which counts from the município
    * code and needs no coordinate.
    */
-  getCafHexbin: () => Promise<CafHexbinFeatureCollection>;
+  getCafHexbin: (
+    resolution?: CafHexbinResolution
+  ) => Promise<CafHexbinFeatureCollection>;
   /**
    * Returns one row per município (all 5,570) with its CADINSAN 2025
    * food-insecurity headcounts (com/sem PBF), its CadÚnico total, and the
@@ -212,8 +216,8 @@ export const createDataGateway = (): DataGateway => {
       getCafPontosPorUf: async () => {
         return toCafUfPontos(await readCafAnchors());
       },
-      getCafHexbin: async () => {
-        return toCafHexbin(await readStaticCafHexbin());
+      getCafHexbin: async (resolution = DEFAULT_CAF_HEXBIN_RESOLUTION) => {
+        return toCafHexbin(await readStaticCafHexbin(resolution));
       },
       getCadinsanPorMunicipio: async () => {
         return toCadinsanPorMunicipio(await readStaticCadinsanMunicipal());

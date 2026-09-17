@@ -27,7 +27,12 @@ describe('buildCafHexbinSource', () => {
     expect(buildCafHexbinSource().data).toBe('/api/cafs/hexbin');
   });
 
-  test('serves the loaded grid instead of refetching it', () => {
+  /*
+   * By reference, deliberately: the adapter re-parses a geojson source whenever
+   * its `data` reference changes, so a builder that derived a new collection
+   * per call would re-parse 35k polygons on every spec build at r5.
+   */
+  test('serves the loaded grid itself, not a copy of it', () => {
     expect(buildCafHexbinSource(grid).data).toBe(grid);
   });
 });
@@ -45,7 +50,18 @@ describe('buildCafHexbinLayer', () => {
   test('attaches the hover card when a renderer is given', () => {
     const render = jest.fn();
 
-    expect(buildCafHexbinLayer(render).hoverTooltip?.render).toBe(render);
+    expect(
+      buildCafHexbinLayer({ hoverTooltipRender: render }).hoverTooltip?.render
+    ).toBe(render);
+  });
+
+  /*
+   * Opaque on purpose. The settings zone's opacity rides in the legend's
+   * colours, which is what `fill-color` is built from — setting it here too
+   * would multiply the two and land at the square of what was asked for.
+   */
+  test('stays opaque, leaving the opacity to the colours', () => {
+    expect(buildCafHexbinLayer().paint?.fillOpacity).toBe(1);
   });
 });
 
