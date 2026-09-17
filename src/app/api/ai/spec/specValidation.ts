@@ -1,3 +1,5 @@
+import { gateway } from '@/gateway';
+
 import {
   ABSOLUTE_TOTAL_DATASET_IDS,
   isRenderableDatasetId,
@@ -56,36 +58,54 @@ export const KNOWN_SOURCE_URLS = [
 ] as const;
 
 /**
- * Maps each KNOWN_SOURCE_URL to its physical location on disk or endpoint type.
- * Used to generate explicit instructions showing both served URL and source path.
+ * Maps each KNOWN_SOURCE_URL to its physical location on disk or endpoint
+ * type, and — for an API-backed URL — a `resolver` that fetches the real
+ * `data-gateway` value the same way {@link RENDERABLE_DATASET_FETCHERS} does
+ * for `mapData` (see {@link appendRealSourceData}). A static file under
+ * `public/geo/` has no `resolver`: the client fetches that URL itself, so its
+ * `sources[].data` string is left untouched. Used to generate explicit
+ * instructions showing both served URL and source path.
  * @example
  * SOURCE_METADATA['/geo/geojs-100-mun.json']
- * // => { filepath: 'public/geo/geojs-100-mun.json', description: '...' }
+ * // => { filepath: 'public/geo/geojs-100-mun.json', description: '...', resolver: null }
  */
 export const SOURCE_METADATA: Record<
   (typeof KNOWN_SOURCE_URLS)[number],
-  { filepath: string | null; description: string }
+  {
+    filepath: string | null;
+    description: string;
+    resolver: (() => Promise<UnknownRecord>) | null;
+  }
 > = {
   '/geo/geojs-100-mun.json': {
     filepath: 'public/geo/geojs-100-mun.json',
     description: 'Municípios do Brasil (IBGE, Código IBGE como geometryId)',
+    resolver: null,
   },
   '/geo/estados.json': {
     filepath: 'public/geo/estados.json',
     description:
       'Estados brasileiros (contexto/contorno, não pode pintar dados)',
+    resolver: null,
   },
   '/geo/assentamentos.json': {
     filepath: 'public/geo/assentamentos.json',
     description: 'Assentamentos de reforma agrária',
+    resolver: null,
   },
   '/api/cozinhas': {
     filepath: null,
     description: 'Pontos de cozinhas comunitárias (agregados por município)',
+    resolver: async () => {
+      return (await gateway.getCozinhas()) as unknown as UnknownRecord;
+    },
   },
   '/api/cozinhas/bolhas': {
     filepath: null,
     description: 'Clusters/bolhas de cozinhas (agregação espacial para zoom)',
+    resolver: async () => {
+      return (await gateway.getCozinhasBubbles()) as unknown as UnknownRecord;
+    },
   },
 };
 
@@ -101,7 +121,7 @@ export const SOURCE_METADATA: Record<
 export const buildSourcesTable = (): string => {
   const rows = KNOWN_SOURCE_URLS.map((url) => {
     const meta = SOURCE_METADATA[url];
-    const path = meta.filepath ?? '(API endpoint Node.js)';
+    const path = meta.resolver ? '(resolvido no servidor)' : meta.filepath;
     return `| \`${url}\` | \`${path}\` | ${meta.description} |`;
   }).join('\n');
 
@@ -379,4 +399,61 @@ export const appendRealMapData = async (
   }
 
   return { ...spec, mapData: resolvedMapData };
+};
+
+/**
+ * Sources Append: resolves each `sources[]` entry whose `data` URL carries a
+ * {@link SOURCE_METADATA} `resolver` (an API-backed source, e.g.
+ * `/api/cozinhas`) against its real `data-gateway` value, replacing the
+ * agent's URL string with the fetched GeoJSON — the same ADR-0001 pattern
+ * {@link appendRealMapData} applies to `mapData`. A source with no resolver
+ * (a static file under `public/geo/`) is left untouched; the client fetches
+ * that URL itself.
+ *
+ * Must run after {@link findInvalidGeojsonSource} — that check only knows
+ * the URL is one of {@link KNOWN_SOURCE_URLS}; only once the resolver's
+ * promise settles here can an unexpectedly empty real result (e.g. no
+ * cozinhas for the requested year) be told apart from the model's own
+ * placeholder empty `FeatureCollection`, which is why this returns a 422
+ * `Response` on that case instead of shipping an empty layer to the client.
+ */
+export const appendRealSourceData = async (
+  spec: UnknownRecord
+): Promise<UnknownRecord | Response> => {
+  const sources = spec['sources'];
+  if (!Array.isArray(sources)) {
+    return spec;
+  }
+
+  const resolvedSources: unknown[] = [];
+  for (const source of sources) {
+    if (!isRecord(source) || source['type'] !== 'geojson') {
+      resolvedSources.push(source);
+      continue;
+    }
+
+    const data = source['data'];
+    const resolver =
+      typeof data === 'string' &&
+      (KNOWN_SOURCE_URLS as readonly string[]).includes(data)
+        ? SOURCE_METADATA[data as (typeof KNOWN_SOURCE_URLS)[number]].resolver
+        : null;
+
+    if (!resolver) {
+      resolvedSources.push(source);
+      continue;
+    }
+
+    const resolved = await resolver();
+    if (isEmptyInlineFeatureCollection(resolved)) {
+      return invalidSpecResponse({
+        message: `A source "${typeof source['id'] === 'string' ? source['id'] : 'desconhecida'}" (${data}) não retornou nenhuma feição para este pedido. Tente reformular ou escolher outro recorte.`,
+        spec,
+      });
+    }
+
+    resolvedSources.push({ ...source, data: resolved });
+  }
+
+  return { ...spec, sources: resolvedSources };
 };

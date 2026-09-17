@@ -12,6 +12,7 @@ import {
 import { buildCatalogueContext } from './mapDataCatalogue';
 import {
   appendRealMapData,
+  appendRealSourceData,
   buildSourcesTable,
   findChoroplethOnAbsoluteTotal,
   findGeometryInMapData,
@@ -320,6 +321,39 @@ const getAgentResponse = async (params: {
 };
 
 /**
+ * Parses the agent's raw reply into a structurally valid spec, or the 422
+ * `Response` describing why it isn't one. Extracted out of {@link POST}
+ * purely to keep its own branching under the lint complexity budget.
+ *
+ * @returns The parsed `modelJson`, or a `Response` for a non-JSON reply, a
+ * non-object reply, or a structural violation (see
+ * {@link validateGeneratedSpecStructure}).
+ */
+const parseGeneratedSpec = (modelText: string): Response | UnknownRecord => {
+  let modelJson: unknown;
+  try {
+    modelJson = JSON.parse(stripCodeFence(modelText));
+  } catch (parseError) {
+    return invalidSpecResponse({
+      message: `A resposta do modelo não é um JSON válido: ${
+        parseError instanceof Error ? parseError.message : String(parseError)
+      }`,
+      spec: modelText,
+    });
+  }
+
+  if (!isRecord(modelJson)) {
+    return invalidSpecResponse({
+      message:
+        'A resposta do modelo deveria ser um objeto JSON representando o spec.',
+      spec: modelJson,
+    });
+  }
+
+  return validateGeneratedSpecStructure(modelJson) ?? modelJson;
+};
+
+/**
  * Turns a natural-language prompt into a `VisualizationSpec`, via a
  * single-use Anthropic Managed Agents session created fresh per request
  * (`POST /v1/sessions` with `initial_events`, then `GET /v1/sessions/{id}/events`)
@@ -330,8 +364,10 @@ const getAgentResponse = async (params: {
  * `after()`), so cleanup never adds latency to the client-facing request.
  *
  * The agent's raw reply is parsed as JSON, then its `mapData` is resolved
- * against real `data-gateway` values (see {@link appendRealMapData}) before
- * being returned — the agent's own `mapData[].data` is never sent to the
+ * against real `data-gateway` values (see {@link appendRealMapData}), and any
+ * API-backed `sources[].data` is resolved the same way (see
+ * {@link appendRealSourceData}), before being returned — the agent's own
+ * `mapData[].data` and API-backed `sources[].data` are never sent to the
  * client as-is.
  *
  * @returns `{ result }` with the spec (real `mapData`) on success; `{ error }`
@@ -364,32 +400,17 @@ export const POST = async (request: Request): Promise<Response> => {
     return modelTextOrError;
   }
 
-  let modelJson: unknown;
-  try {
-    modelJson = JSON.parse(stripCodeFence(modelTextOrError));
-  } catch (parseError) {
-    return invalidSpecResponse({
-      message: `A resposta do modelo não é um JSON válido: ${
-        parseError instanceof Error ? parseError.message : String(parseError)
-      }`,
-      spec: modelTextOrError,
-    });
+  const modelJsonOrError = parseGeneratedSpec(modelTextOrError);
+  if (modelJsonOrError instanceof Response) {
+    return modelJsonOrError;
   }
 
-  if (!isRecord(modelJson)) {
-    return invalidSpecResponse({
-      message:
-        'A resposta do modelo deveria ser um objeto JSON representando o spec.',
-      spec: modelJson,
-    });
+  const mapDataOrError = await appendRealMapData(modelJsonOrError);
+  if (mapDataOrError instanceof Response) {
+    return mapDataOrError;
   }
 
-  const structuralError = validateGeneratedSpecStructure(modelJson);
-  if (structuralError) {
-    return structuralError;
-  }
-
-  const specOrError = await appendRealMapData(modelJson);
+  const specOrError = await appendRealSourceData(mapDataOrError);
   if (specOrError instanceof Response) {
     return specOrError;
   }
