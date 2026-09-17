@@ -55,6 +55,69 @@ export const KNOWN_SOURCE_URLS = [
   '/api/cozinhas/bolhas',
 ] as const;
 
+/**
+ * Maps each KNOWN_SOURCE_URL to its physical location on disk or endpoint type.
+ * Used to generate explicit instructions showing both served URL and source path.
+ * @example
+ * SOURCE_METADATA['/geo/geojs-100-mun.json']
+ * // => { filepath: 'public/geo/geojs-100-mun.json', description: '...' }
+ */
+export const SOURCE_METADATA: Record<
+  (typeof KNOWN_SOURCE_URLS)[number],
+  { filepath: string | null; description: string }
+> = {
+  '/geo/geojs-100-mun.json': {
+    filepath: 'public/geo/geojs-100-mun.json',
+    description: 'Municípios do Brasil (IBGE, Código IBGE como geometryId)',
+  },
+  '/geo/estados.json': {
+    filepath: 'public/geo/estados.json',
+    description:
+      'Estados brasileiros (contexto/contorno, não pode pintar dados)',
+  },
+  '/geo/assentamentos.json': {
+    filepath: 'public/geo/assentamentos.json',
+    description: 'Assentamentos de reforma agrária',
+  },
+  '/api/cozinhas': {
+    filepath: null,
+    description: 'Pontos de cozinhas comunitárias (agregados por município)',
+  },
+  '/api/cozinhas/bolhas': {
+    filepath: null,
+    description: 'Clusters/bolhas de cozinhas (agregação espacial para zoom)',
+  },
+};
+
+/**
+ * Builds a markdown table listing all valid source URLs, their physical paths,
+ * and descriptions. Injected into INSTRUCTIONS so the model always sees
+ * current sources without manual duplication. If KNOWN_SOURCE_URLS changes,
+ * this table regenerates automatically.
+ * @example
+ * // Returns markdown table suitable for embedding in instructions
+ * const table = buildSourcesTable();
+ */
+export const buildSourcesTable = (): string => {
+  const rows = KNOWN_SOURCE_URLS.map((url) => {
+    const meta = SOURCE_METADATA[url];
+    const path = meta.filepath ?? '(API endpoint Node.js)';
+    return `| \`${url}\` | \`${path}\` | ${meta.description} |`;
+  }).join('\n');
+
+  return `## sources: URLs válidas e seus caminhos reais
+
+Cada \`sources[].data\` DEVE ser exatamente uma destas URLs.
+A coluna "Arquivo real" mostra onde o arquivo está no servidor ou identifica um endpoint dinâmico.
+
+| URL servida | Arquivo real | Descrição |
+|-------------|-------------|-----------|
+${rows}
+
+**Regra absoluta**: Nunca invente URLs. Se não está nesta tabela, a requisição retornará erro 422.
+**Nota**: URLs em \`public/geo/\` são estáticas (GeoJSON). URLs em \`/api/\` são endpoints dinâmicos (Node.js).`;
+};
+
 /** An inline, empty `FeatureCollection` — a placeholder the model sometimes emits instead of a real endpoint. */
 const isEmptyInlineFeatureCollection = (data: unknown): boolean => {
   return (
@@ -93,6 +156,46 @@ export const findInvalidGeojsonSource = (
     if (isEmptyInlineFeatureCollection(data) || isUnknownSourceUrl(data)) {
       return typeof source['id'] === 'string' ? source['id'] : 'desconhecida';
     }
+  }
+
+  return null;
+};
+
+/**
+ * The only MapLibre style URLs this app allows for `basemap.styleUrl` — a
+ * style JSON endpoint (tile *layer definitions*), never a raw raster tile
+ * template like `https://tile.openstreetmap.org/{z}/{x}/{y}.png`. MapLibre
+ * fetches `styleUrl` as a style document, so a tile template 404s/CORS-fails
+ * client-side instead of rendering a basemap.
+ */
+export const KNOWN_BASEMAP_STYLE_URLS = [
+  'https://tiles.openfreemap.org/styles/positron',
+] as const;
+
+/**
+ * Finds an invalid `basemap.styleUrl` — present but outside
+ * {@link KNOWN_BASEMAP_STYLE_URLS} (a hallucinated or raster-tile-template
+ * URL, see {@link KNOWN_BASEMAP_STYLE_URLS}'s docs). A spec with no
+ * `basemap.styleUrl` at all is fine — the app's own default style applies.
+ */
+export const findInvalidBasemapStyleUrl = (
+  spec: UnknownRecord
+): string | null => {
+  const basemap = spec['basemap'];
+  if (!isRecord(basemap)) {
+    return null;
+  }
+
+  const styleUrl = basemap['styleUrl'];
+  if (styleUrl === undefined) {
+    return null;
+  }
+
+  if (
+    typeof styleUrl !== 'string' ||
+    !(KNOWN_BASEMAP_STYLE_URLS as readonly string[]).includes(styleUrl)
+  ) {
+    return typeof styleUrl === 'string' ? styleUrl : 'desconhecido';
   }
 
   return null;

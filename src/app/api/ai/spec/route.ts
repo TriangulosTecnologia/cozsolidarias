@@ -12,12 +12,15 @@ import {
 import { buildCatalogueContext } from './mapDataCatalogue';
 import {
   appendRealMapData,
+  buildSourcesTable,
   findChoroplethOnAbsoluteTotal,
   findGeometryInMapData,
+  findInvalidBasemapStyleUrl,
   findInvalidGeojsonSource,
   findMissingLegend,
   invalidSpecResponse,
   isRecord,
+  KNOWN_BASEMAP_STYLE_URLS,
   KNOWN_SOURCE_URLS,
   type UnknownRecord,
 } from './specValidation';
@@ -87,6 +90,29 @@ Todo \`label\` de \`mapData\`/\`legends\` é uma frase legível em pt-BR que nom
 variável pedida pelo usuário (ex.: "Pessoas atendidas"), igual ao \`description\` do
 campo do catálogo usado para responder a instrução "variável" acima — nunca o id
 bruto do dataset/campo (ex.: \`pessoasAtendidas\`, \`cozinhas_pessoas_atendidas\`).
+
+## sources: tipo e URL nunca são inventados:
+
+Todo item de \`sources[]\` é sempre \`{ "id": "...", "type": "geojson", "data": "<uma das URLs abaixo>" }\`.
+Nunca use os outros tipos de source que o schema do geovis também aceita
+(\`vector-tiles\`, \`raster-tiles\`, \`raster-dem\`, \`video\`, \`image\`) — esta aplicação
+não serve tile server, DEM, vídeo ou imagem, só os endpoints GeoJSON abaixo.
+Isso vale para TODO mapType, inclusive pontos proporcionais/dot density/cluster:
+a geometria de pontos das cozinhas também é servida como \`geojson\`, nunca como
+tiles.
+
+${buildSourcesTable()}
+
+## basemap: nunca inventar um styleUrl:
+
+Não inclua o campo \`basemap\` na spec, a menos que o pedido exija explicitamente
+trocar o mapa-base — omitir \`basemap\` usa o estilo padrão do app
+(\`https://tiles.openfreemap.org/styles/positron\`), que já é o comportamento
+correto na imensa maioria dos pedidos. Se precisar mesmo assim, \`basemap.styleUrl\`
+só pode ser uma URL de *style* MapLibre (um JSON com definição de camadas), nunca
+um template de raster tiles como \`https://tile.openstreetmap.org/{z}/{x}/{y}.png\`
+— isso quebra o carregamento do mapa (CORS/404 no browser). A única URL de style
+aceita hoje é \`https://tiles.openfreemap.org/styles/positron\` (o próprio padrão).
 `;
 
 let cachedCatalogueText: Promise<string> | null = null;
@@ -107,7 +133,8 @@ const readCatalogueContext = (): Promise<string> => {
 /**
  * Runs the deterministic, code-enforced structural checks against the
  * agent's raw JSON reply, before any real data is fetched: an invalid
- * geometry source, geometry smuggled into `mapData` (see
+ * geometry source, an invalid `basemap.styleUrl` (see
+ * {@link findInvalidBasemapStyleUrl}), geometry smuggled into `mapData` (see
  * {@link findGeometryInMapData}), a painted variable with no `legends[]`
  * entry (see {@link findMissingLegend}), and an absolute-total dataset
  * painted as a choropleth (see {@link findChoroplethOnAbsoluteTotal}).
@@ -125,6 +152,14 @@ const validateGeneratedSpecStructure = (
   if (invalidSourceId) {
     return invalidSpecResponse({
       message: `A source "${invalidSourceId}" não referencia um endpoint real de geometria (URLs válidas: ${KNOWN_SOURCE_URLS.join(', ')}) ou veio com uma coleção de feições vazia inventada pelo modelo. Tente reformular o pedido.`,
+      spec: modelJson,
+    });
+  }
+
+  const invalidBasemapStyleUrl = findInvalidBasemapStyleUrl(modelJson);
+  if (invalidBasemapStyleUrl) {
+    return invalidSpecResponse({
+      message: `"basemap.styleUrl" traz "${invalidBasemapStyleUrl}", que não é um estilo MapLibre suportado (estilos válidos: ${KNOWN_BASEMAP_STYLE_URLS.join(', ')}). Nunca inclua "basemap.styleUrl" a menos que precise de um destes estilos — omitir o campo usa o estilo padrão do app. Tente reformular o pedido.`,
       spec: modelJson,
     });
   }

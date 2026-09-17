@@ -801,6 +801,92 @@ describe('POST /api/ai/spec', () => {
     expect(body.error).toMatch(/"desconhecida"/);
   }, 10000);
 
+  test('returns 422 when basemap.styleUrl is a raster tile template instead of a MapLibre style URL', async () => {
+    const spec = {
+      basemap: { styleUrl: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png' },
+      sources: [],
+      mapData: [],
+    };
+    mockAgentReply(JSON.stringify(spec));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa com tile raster como basemap' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(422);
+    expect(body.error).toMatch(
+      /https:\/\/tile\.openstreetmap\.org\/\{z\}\/\{x\}\/\{y\}\.png/
+    );
+  }, 10000);
+
+  test('accepts a spec with no basemap field at all', async () => {
+    const spec = {
+      sources: [
+        { id: 'municipios', type: 'geojson', data: '/geo/geojs-100-mun.json' },
+      ],
+      mapData: [],
+    };
+    mockAgentReply(JSON.stringify(spec));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa sem basemap customizado' })
+    );
+
+    expect(response.status).toBe(200);
+  }, 10000);
+
+  test('names the invalid basemap.styleUrl as "desconhecido" when it is not a string', async () => {
+    const spec = {
+      basemap: { styleUrl: 42 },
+      sources: [],
+      mapData: [],
+    };
+    mockAgentReply(JSON.stringify(spec));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa com styleUrl numérico inválido' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(422);
+    expect(body.error).toMatch(/"desconhecido"/);
+  }, 10000);
+
+  test('accepts a basemap object with no styleUrl field', async () => {
+    const spec = {
+      basemap: { visible: false },
+      sources: [
+        { id: 'municipios', type: 'geojson', data: '/geo/geojs-100-mun.json' },
+      ],
+      mapData: [],
+    };
+    mockAgentReply(JSON.stringify(spec));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa sem basemap visível e sem styleUrl' })
+    );
+
+    expect(response.status).toBe(200);
+  }, 10000);
+
+  test('accepts a basemap.styleUrl that matches the known default style', async () => {
+    const spec = {
+      basemap: { styleUrl: 'https://tiles.openfreemap.org/styles/positron' },
+      sources: [
+        { id: 'municipios', type: 'geojson', data: '/geo/geojs-100-mun.json' },
+      ],
+      mapData: [],
+    };
+    mockAgentReply(JSON.stringify(spec));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa com o estilo padrão explícito' })
+    );
+
+    expect(response.status).toBe(200);
+  }, 10000);
+
   test("returns 422 when a mapData entry's mapDataId doubles as a sources[].id", async () => {
     const spec = {
       sources: [
