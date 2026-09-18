@@ -4,10 +4,14 @@ import {
   RENDERABLE_DATASET_FETCHERS,
   RENDERABLE_DATASET_IDS,
 } from './mapDataCatalogue';
-import { SOURCE_METADATA } from './specValidation.sources';
+import { KNOWN_SOURCE_URLS, SOURCE_METADATA } from './specValidation.sources';
 
 export { buildSourcesTable } from './specValidation.helpers';
-export { findSourceGeometryMismatch } from './specValidation.sources';
+export {
+  findSourceGeometryMismatch,
+  KNOWN_SOURCE_URLS,
+  SOURCE_METADATA,
+} from './specValidation.sources';
 
 export type UnknownRecord = Record<string, unknown>;
 
@@ -44,20 +48,6 @@ const unsupportedDatasetResponse = (
     { status: 422 }
   );
 };
-
-/**
- * The only `geojson` source URLs this app actually serves. A source's `data`
- * is never rewritten after generation (unlike `mapData[].data`), so a URL
- * outside this list — or an inline placeholder — silently ships a map with no
- * real data (404, or a literal empty `FeatureCollection`).
- */
-export const KNOWN_SOURCE_URLS = [
-  '/geo/geojs-100-mun.json',
-  '/geo/estados.json',
-  '/geo/assentamentos.json',
-  '/api/cozinhas',
-  '/api/cozinhas/bolhas',
-] as const;
 
 /** An inline, empty `FeatureCollection` — a placeholder the model sometimes emits instead of a real endpoint. */
 const isEmptyInlineFeatureCollection = (data: unknown): boolean => {

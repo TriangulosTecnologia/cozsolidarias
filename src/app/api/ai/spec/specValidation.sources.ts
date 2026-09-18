@@ -1,8 +1,14 @@
 import { gateway } from '@/gateway';
 
-import type { KNOWN_SOURCE_URLS } from './specValidation';
-
 export type UnknownRecord = Record<string, unknown>;
+
+export const KNOWN_SOURCE_URLS = [
+  '/geo/geojs-100-mun.json',
+  '/geo/estados.json',
+  '/geo/assentamentos.json',
+  '/api/cozinhas',
+  '/api/cozinhas/bolhas',
+] as const;
 
 export const isRecord = (value: unknown): value is UnknownRecord => {
   return typeof value === 'object' && value !== null && !Array.isArray(value);

@@ -958,6 +958,28 @@ describe('POST /api/ai/spec', () => {
     expect(body.error).toMatch(/"desconhecido"/);
   }, 10000);
 
+  test('returns 422 when a point/symbol layer points at a polygon source', async () => {
+    const spec = {
+      sources: [
+        { id: 'municipios', type: 'geojson', data: '/geo/geojs-100-mun.json' },
+      ],
+      layers: [
+        { id: 'cozinhas-pts', sourceId: 'municipios', geometry: 'point' },
+      ],
+      legends: A_LEGEND,
+    };
+    mockAgentReply(JSON.stringify(spec));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'pontos de cozinhas sobre source de municípios' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(422);
+    expect(body.error).toMatch(/"cozinhas-pts"/);
+    expect(body.error).toMatch(/"municipios"/);
+  }, 10000);
+
   test('returns 422 when a painted variable has no legends[] entry', async () => {
     const spec = {
       mapData: [
