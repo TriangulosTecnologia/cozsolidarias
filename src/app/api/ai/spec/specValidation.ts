@@ -8,7 +8,24 @@ import { KNOWN_SOURCE_URLS, SOURCE_METADATA } from './specValidation.sources';
 
 export { buildSourcesTable } from './specValidation.helpers';
 export {
+  findLayerWithBothDataBindings,
+  findLegendValueTypeMismatch,
+  findMapTypeWithoutMapData,
+} from './specValidation.layers';
+export {
+  findDanglingActiveLegendId,
+  findDotDensityWithoutRatio,
+  findForeignNoDataColor,
+  findLegendPropertyMismatch,
+  findLegendScaleArityMismatch,
+  findReclassifiedOfficialIndex,
+  NO_DATA_COLOR,
+  OFFICIAL_CLASSIFICATIONS,
+} from './specValidation.legends';
+export {
+  findPaintedContextLayer,
   findSourceGeometryMismatch,
+  findUnsupportedSourceType,
   KNOWN_SOURCE_URLS,
   SOURCE_METADATA,
 } from './specValidation.sources';

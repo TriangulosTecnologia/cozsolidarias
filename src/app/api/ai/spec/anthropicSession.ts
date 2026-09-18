@@ -195,28 +195,3 @@ export const pollForReply = async (params: {
 
   throw new Error('Timed out waiting for the Anthropic session to reply');
 };
-
-/**
- * Deletes a single-use session so it doesn't linger as billed, listable
- * state. The caller schedules this via Next.js `after()` so it never adds
- * latency to the client-facing response — best-effort: a failure here
- * doesn't affect the response already sent, so it's swallowed rather than
- * surfaced.
- */
-export const deleteSession = async (params: {
-  apiKey: string;
-  sessionId: string;
-}): Promise<void> => {
-  try {
-    await fetch(sessionUrl(params.sessionId), {
-      method: 'DELETE',
-      headers: {
-        'x-api-key': params.apiKey,
-        'anthropic-version': ANTHROPIC_VERSION_HEADER,
-        'anthropic-beta': ANTHROPIC_BETA_HEADER,
-      },
-    });
-  } catch {
-    // Best-effort cleanup only.
-  }
-};

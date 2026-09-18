@@ -24,6 +24,21 @@ export const RENDERABLE_DATASET_IDS = [
 
 export type RenderableDatasetId = (typeof RENDERABLE_DATASET_IDS)[number];
 
+/**
+ * Catalogue datasets deliberately withheld from the agent's context. The
+ * settlement pair (`assentamentos` + its attribute sidecar) backs the app's
+ * own "Assentamentos e cozinhas" mode, which is authored by hand in
+ * `geovisAssentamentos.ts` — it is not a município-grain variable, its
+ * geometry covers a single state, and the agent has no endpoint it could
+ * legally reference for it (see `KNOWN_SOURCE_URLS`). Leaving it in the index
+ * only invited requests the route can never satisfy, so it is dropped before
+ * the projection instead of being rejected after generation.
+ */
+export const AI_EXCLUDED_DATASET_IDS = [
+  'assentamentos',
+  'assentamentos_atributos',
+] as const;
+
 export const isRenderableDatasetId = (
   value: string
 ): value is RenderableDatasetId => {
@@ -170,12 +185,24 @@ const toAiDatasetProjection = (
  * instructions read (see
  * {@link toAiDatasetProjection}). See ADR-0001 for why the split exists (token
  * cost vs. silent mismapping).
+ *
+ * `renderableDatasets` is emitted alongside the catalogue because `route.ts`'s
+ * instructions tell the agent to restrict `mapData[].mapDataId` to that list —
+ * a list it could not read anywhere else in its context.
+ * {@link AI_EXCLUDED_DATASET_IDS} is dropped entirely, index tier included.
  */
 export const buildCatalogueContext = (catalogue: CatalogueContract): string => {
+  const excluded: ReadonlySet<string> = new Set(AI_EXCLUDED_DATASET_IDS);
+
   return JSON.stringify({
+    renderableDatasets: RENDERABLE_DATASET_IDS,
     catalogue: {
       ...catalogue,
-      datasets: catalogue.datasets.map(toAiDatasetProjection),
+      datasets: catalogue.datasets
+        .filter((dataset) => {
+          return !excluded.has(dataset.id);
+        })
+        .map(toAiDatasetProjection),
     },
   });
 };

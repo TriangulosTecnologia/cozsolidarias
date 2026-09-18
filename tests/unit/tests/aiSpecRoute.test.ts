@@ -1,5 +1,5 @@
 import { validateSpec } from '@ttoss/geovis';
-import { after } from 'next/server';
+import { CANONICAL_SCALES } from 'src/app/api/ai/spec/canonicalScales';
 import { POST } from 'src/app/api/ai/spec/route';
 import { invalidSpecResponse } from 'src/app/api/ai/spec/specValidation';
 
@@ -11,22 +11,23 @@ jest.mock('@ttoss/geovis', () => {
   };
 });
 
-// `after()` requires a real Next.js request-scope (AsyncLocalStorage) that
-// doesn't exist under a plain unit test. It's only ever used here to defer
-// `deleteSession` past the response, so every test but the dedicated one
-// below just needs the callback recorded, never invoked — invoking it
-// synchronously would fire `deleteSession`'s own `fetch` call out of order,
-// stealing a response queued for `pollForReply`.
-jest.mock('next/server', () => {
-  return {
-    after: jest.fn(),
-  };
-});
-
 type ErrorBody = { error?: string };
 
 /** Minimal `legends[]` entry — enough to satisfy `findMissingLegend`. */
 const A_LEGEND = [{ id: 'legend-1', title: 'Valor' }];
+
+/**
+ * The municipality geometry every `mapData.mapId` below joins against. A
+ * `mapType` spec whose `mapId` matches no declared source resolves to an empty
+ * map client-side, so fixtures exercising a `mapType` must declare it.
+ */
+const MUNICIPIOS_SOURCE = [
+  {
+    id: 'municipios-boundary',
+    type: 'geojson',
+    data: '/geo/geojs-100-mun.json',
+  },
+];
 
 const ENV_KEYS = [
   'ANTHROPIC_API_KEY',
@@ -336,24 +337,6 @@ describe('POST /api/ai/spec', () => {
     expect(body.result).toEqual(spec);
   }, 10000);
 
-  test('schedules session deletion via after() once a session is created', async () => {
-    const fetchMock = mockAgentReply(JSON.stringify({ mapData: [] }));
-
-    await POST(jsonRequest({ prompt: 'mapa de cozinhas por município' }));
-
-    const scheduled = jest.mocked(after).mock.calls.at(-1)?.[0];
-    expect(scheduled).toBeDefined();
-
-    await scheduled?.();
-
-    const deleteCall = fetchMock.mock.calls.find(([, init]) => {
-      return (init as RequestInit | undefined)?.method === 'DELETE';
-    });
-    expect(deleteCall?.[0]).toBe(
-      'https://api.anthropic.com/v1/sessions/session_123'
-    );
-  }, 10000);
-
   test('strips a ```json code fence from the model reply before parsing', async () => {
     const spec = { title: 'Cozinhas por município', mapData: [] };
 
@@ -438,28 +421,160 @@ describe('POST /api/ai/spec', () => {
       .slice(1)
       .join('\n');
 
-    // buildCatalogueContext sends the raw CatalogueContract under `catalogue`.
+    // buildCatalogueContext sends the raw CatalogueContract under `catalogue`,
+    // plus the renderable id list the INSTRUCTIONS tell the agent to restrict to.
     const catalogueJson = JSON.parse(catalogueJsonString) as {
+      renderableDatasets: string[];
       catalogue: { datasets: Array<{ id: string }> };
     };
+    const hasDataset = (id: string): boolean => {
+      return catalogueJson.catalogue.datasets.some((d) => {
+        return d.id === id;
+      });
+    };
+
+    expect(catalogueJson.renderableDatasets).toContain('municipios_ivs');
 
     // Every dataset is included, renderable or not — the agent's own
     // instructions restrict which ids it may use for `mapData`.
-    expect(
-      catalogueJson.catalogue.datasets.some((d) => {
-        return d.id === 'caf_areas';
-      })
-    ).toBe(true);
-    expect(
-      catalogueJson.catalogue.datasets.some((d) => {
-        return d.id === 'assentamentos';
-      })
-    ).toBe(true);
-    expect(
-      catalogueJson.catalogue.datasets.some((d) => {
-        return d.id === 'municipios_ivs';
-      })
-    ).toBe(true);
+    expect(hasDataset('caf_areas')).toBe(true);
+    expect(hasDataset('municipios_ivs')).toBe(true);
+
+    // ...except the settlement pair, withheld from the agent entirely.
+    expect(hasDataset('assentamentos')).toBe(false);
+    expect(hasDataset('assentamentos_atributos')).toBe(false);
+  }, 10000);
+
+  test('returns 422 when the active legend scale contradicts the resolved values', async () => {
+    jest.spyOn(gateway, 'getCozinhasPorMunicipio').mockResolvedValue([
+      {
+        codigoIbge: '3550308',
+        municipio: 'São Paulo (SP)',
+        quantidade: 12,
+        pessoasAtendidas: 1000,
+        populacao: 12000000,
+        porCemMil: 0.14,
+        percentualDoBrasil: 0.05,
+        pessoasCadUnico: 5000,
+        porDezMilCadUnico: 0.9,
+        pessoasPorCozinha: 800,
+      },
+    ]);
+
+    const spec = {
+      sources: MUNICIPIOS_SOURCE,
+      layers: [
+        {
+          id: 'fill',
+          sourceId: 'municipios-boundary',
+          geometry: 'polygon',
+          // Outside CANONICAL_SCALES (an absolute total is never a choropleth),
+          // so `applyCanonicalScales` leaves the legend alone and the
+          // contradiction survives to be reported.
+          mapDataId: 'cozinhas_pessoas_atendidas',
+          activeLegendId: 'legend-1',
+        },
+      ],
+      // The values resolve to numbers, so a categorical scale is a
+      // contradiction the agent cannot see — it never observes a value.
+      legends: [
+        {
+          id: 'legend-1',
+          title: 'Pessoas atendidas',
+          colorBy: { type: 'categorical' },
+        },
+      ],
+      mapData: [
+        {
+          mapDataId: 'cozinhas_pessoas_atendidas',
+          mapId: 'municipios-boundary',
+          joinKey: 'codarea',
+          data: [],
+        },
+      ],
+    };
+    mockAgentReply(JSON.stringify(spec));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de pessoas atendidas por município' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(422);
+    expect(body.error).toMatch(/declara uma escala "categorical"/);
+    expect(body.error).toMatch(/valores reais do dataset são "quantitative"/);
+  }, 10000);
+
+  test('normalizes the painted scale of a canonical dataset instead of rejecting it', async () => {
+    jest.spyOn(gateway, 'getIvsPorMunicipio').mockResolvedValue([
+      {
+        codigoIbge: '3550308',
+        municipio: 'São Paulo (SP)',
+        ivs: 0.321,
+        ivsInfraestruturaUrbana: 0.1,
+        ivsCapitalHumano: 0.2,
+        ivsRendaETrabalho: 0.3,
+        idhm: 0.8,
+        idhmLongevidade: 0.85,
+        idhmEducacao: 0.75,
+        idhmRenda: 0.78,
+        idhmEducacaoEscolaridade: 0.7,
+        idhmEducacaoFrequencia: 0.9,
+      },
+    ]);
+
+    const spec = {
+      sources: MUNICIPIOS_SOURCE,
+      layers: [
+        {
+          id: 'fill',
+          sourceId: 'municipios-boundary',
+          geometry: 'polygon',
+          mapDataId: 'municipios_ivs',
+          activeLegendId: 'legend-1',
+        },
+      ],
+      // A categorical scale over a numeric index, with the model's own copy —
+      // the scale is replaced, the copy is kept.
+      legends: [
+        {
+          id: 'legend-1',
+          title: 'Vulnerabilidade social',
+          colorBy: { type: 'categorical' },
+        },
+      ],
+      mapData: [
+        {
+          mapDataId: 'municipios_ivs',
+          mapId: 'municipios-boundary',
+          joinKey: 'codarea',
+          data: [],
+        },
+      ],
+    };
+    mockAgentReply(JSON.stringify(spec));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de IVS por município' })
+    );
+    const body = (await response.json()) as {
+      result?: { legends?: Array<Record<string, unknown>> };
+    };
+
+    expect(response.status).toBe(200);
+
+    const legend = body.result?.legends?.[0];
+    expect(legend?.['colorBy']).toEqual(
+      CANONICAL_SCALES['municipios_ivs'] && {
+        type: 'quantitative',
+        property: 'value',
+        scale: 'threshold',
+        thresholds: CANONICAL_SCALES['municipios_ivs'].thresholds,
+        colors: CANONICAL_SCALES['municipios_ivs'].colors,
+        defaultColor: '#EEE6DA',
+      }
+    );
+    expect(legend?.['title']).toBe('Vulnerabilidade social');
   }, 10000);
 
   test('replaces placeholder mapData with real gateway data for a renderable dataset', async () => {
@@ -750,13 +865,12 @@ describe('POST /api/ai/spec', () => {
     ]);
   }, 10000);
 
-  test('accepts geojson sources that reference known geometry endpoints, skipping non-geojson entries', async () => {
+  test('accepts geojson sources that reference known geometry endpoints', async () => {
     const spec = {
       sources: [
-        // Not a record at all — must be skipped, not crash the loop.
+        // Not a record at all — must be skipped, not crash the loop. The
+        // schema-level gate downstream is what rejects it.
         'not-a-source',
-        // A record, but not a `geojson` source — must be skipped too.
-        { id: 'points', type: 'raster' },
         { id: 'municipios', type: 'geojson', data: '/geo/estados.json' },
       ],
       mapData: [],
@@ -768,6 +882,103 @@ describe('POST /api/ai/spec', () => {
     );
 
     expect(response.status).toBe(200);
+  }, 10000);
+
+  test('returns 422 when a source declares a type this route does not serve', async () => {
+    const spec = {
+      sources: [
+        { id: 'municipios', type: 'geojson', data: '/geo/estados.json' },
+        { id: 'points', type: 'raster' },
+      ],
+      mapData: [],
+    };
+    mockAgentReply(JSON.stringify(spec));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de estados do Brasil' })
+    );
+    const body = (await response.json()) as { error: string };
+
+    expect(response.status).toBe(422);
+    expect(body.error).toMatch(/points \(raster\)/);
+  }, 10000);
+
+  test('returns 422 when a mapType joins no declared source (would render blank)', async () => {
+    const spec = {
+      mapType: 'choropleth',
+      sources: MUNICIPIOS_SOURCE,
+      mapData: [
+        {
+          mapDataId: 'municipios_ivs',
+          mapId: 'fonte-inexistente',
+          joinKey: 'codarea',
+          data: [],
+        },
+      ],
+      legends: A_LEGEND,
+    };
+    mockAgentReply(JSON.stringify(spec));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa coroplético de IVS por município' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(422);
+    expect(body.error).toMatch(/o mapa renderiza vazio, sem erro/);
+  }, 10000);
+
+  test('returns 422 when a variable is painted onto the state context layer', async () => {
+    const spec = {
+      sources: [{ id: 'estados', type: 'geojson', data: '/geo/estados.json' }],
+      layers: [
+        {
+          id: 'estados-fill',
+          sourceId: 'estados',
+          geometry: 'polygon',
+          mapDataId: 'municipios_ivs',
+        },
+      ],
+      mapData: [{ mapDataId: 'municipios_ivs', mapId: 'estados', data: [] }],
+      legends: A_LEGEND,
+    };
+    mockAgentReply(JSON.stringify(spec));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de IVS por estado' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(422);
+    expect(body.error).toMatch(/é de contorno de estados/);
+  }, 10000);
+
+  test('returns 422 when a layer declares both mapDataId and propertyName', async () => {
+    const spec = {
+      sources: MUNICIPIOS_SOURCE,
+      layers: [
+        {
+          id: 'fill',
+          sourceId: 'municipios-boundary',
+          geometry: 'polygon',
+          mapDataId: 'municipios_ivs',
+          propertyName: 'ivs',
+        },
+      ],
+      mapData: [
+        { mapDataId: 'municipios_ivs', mapId: 'municipios-boundary', data: [] },
+      ],
+      legends: A_LEGEND,
+    };
+    mockAgentReply(JSON.stringify(spec));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de IVS por município' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(422);
+    expect(body.error).toMatch(/vínculos de valor mutuamente exclusivos/);
   }, 10000);
 
   test('returns 422 when a geojson source is an inline, empty FeatureCollection', async () => {
@@ -1027,6 +1238,281 @@ describe('POST /api/ai/spec', () => {
     expect(body.error).toMatch(/legend/);
   }, 10000);
 
+  test('returns 422 when a layer points at an activeLegendId no legend declares', async () => {
+    const spec = {
+      sources: MUNICIPIOS_SOURCE,
+      legends: [{ id: 'legenda-ivs', title: 'IVS' }],
+      layers: [
+        {
+          id: 'fill',
+          sourceId: 'municipios-boundary',
+          geometry: 'polygon',
+          mapDataId: 'cozinhas_geolocalizadas',
+          activeLegendId: 'legenda-cozinhas',
+        },
+      ],
+      mapData: [
+        {
+          mapDataId: 'cozinhas_geolocalizadas',
+          mapId: 'municipios-boundary',
+          joinKey: 'codarea',
+          data: [],
+        },
+      ],
+    };
+    mockAgentReply(JSON.stringify(spec));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de cozinhas com legenda solta' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(422);
+    expect(body.error).toMatch(/activeLegendId/);
+  }, 10000);
+
+  test('returns 422 when a legend declares fewer colours than its thresholds require', async () => {
+    const spec = {
+      sources: MUNICIPIOS_SOURCE,
+      legends: [
+        {
+          id: 'legenda-cozinhas',
+          colorBy: {
+            type: 'quantitative',
+            property: 'value',
+            scale: 'threshold',
+            thresholds: [1, 3, 6, 11, 26],
+            colors: ['#C6DBEF', '#86BCDC', '#58A0CE', '#2E7CBB', '#1761A8'],
+            defaultColor: '#EEE6DA',
+          },
+        },
+      ],
+      mapData: [
+        {
+          mapDataId: 'cozinhas_geolocalizadas',
+          mapId: 'municipios-boundary',
+          joinKey: 'codarea',
+          data: [],
+        },
+      ],
+    };
+    mockAgentReply(JSON.stringify(spec));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de cozinhas com legenda faltando uma cor' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(422);
+    expect(body.error).toMatch(/N\+1 cores/);
+  }, 10000);
+
+  test('returns 422 when the active legend colours by a property the join never writes', async () => {
+    const spec = {
+      sources: MUNICIPIOS_SOURCE,
+      legends: [
+        {
+          id: 'legenda-cozinhas',
+          colorBy: {
+            type: 'quantitative',
+            property: 'quantidade',
+            scale: 'threshold',
+            thresholds: [1, 3, 6, 11, 26],
+            colors: [
+              '#EEE6DA',
+              '#C6DBEF',
+              '#86BCDC',
+              '#58A0CE',
+              '#2E7CBB',
+              '#1761A8',
+            ],
+            defaultColor: '#EEE6DA',
+          },
+        },
+      ],
+      layers: [
+        {
+          id: 'fill',
+          sourceId: 'municipios-boundary',
+          geometry: 'polygon',
+          mapDataId: 'cozinhas_geolocalizadas',
+          activeLegendId: 'legenda-cozinhas',
+        },
+      ],
+      mapData: [
+        {
+          mapDataId: 'cozinhas_geolocalizadas',
+          mapId: 'municipios-boundary',
+          joinKey: 'codarea',
+          data: [],
+        },
+      ],
+    };
+    mockAgentReply(JSON.stringify(spec));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de cozinhas colorido por quantidade' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(422);
+    expect(body.error).toMatch(/"value"/);
+  }, 10000);
+
+  test('returns 422 when a quantitative legend picks its own "sem dado" colour', async () => {
+    const spec = {
+      sources: MUNICIPIOS_SOURCE,
+      legends: [
+        {
+          id: 'legenda-cozinhas',
+          colorBy: {
+            type: 'quantitative',
+            property: 'value',
+            scale: 'threshold',
+            thresholds: [1, 3, 6, 11, 26],
+            colors: [
+              '#FFFFFF',
+              '#C6DBEF',
+              '#86BCDC',
+              '#58A0CE',
+              '#2E7CBB',
+              '#1761A8',
+            ],
+            defaultColor: '#FFFFFF',
+          },
+        },
+      ],
+      mapData: [
+        {
+          mapDataId: 'cozinhas_geolocalizadas',
+          mapId: 'municipios-boundary',
+          joinKey: 'codarea',
+          data: [],
+        },
+      ],
+    };
+    mockAgentReply(JSON.stringify(spec));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de cozinhas com cinza próprio' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(422);
+    expect(body.error).toMatch(/#EEE6DA/);
+  }, 10000);
+
+  test('returns 422 when a quantitative legend omits defaultColor entirely', async () => {
+    const spec = {
+      sources: MUNICIPIOS_SOURCE,
+      legends: [
+        {
+          id: 'legenda-cozinhas',
+          colorBy: {
+            type: 'quantitative',
+            property: 'value',
+            scale: 'threshold',
+            thresholds: [1, 3, 6, 11, 26],
+          },
+        },
+      ],
+      mapData: [
+        {
+          mapDataId: 'cozinhas_geolocalizadas',
+          mapId: 'municipios-boundary',
+          joinKey: 'codarea',
+          data: [],
+        },
+      ],
+    };
+    mockAgentReply(JSON.stringify(spec));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de cozinhas sem cor de "sem dado"' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(422);
+    expect(body.error).toMatch(/não declara "colorBy.defaultColor"/);
+  }, 10000);
+
+  test('returns 422 when a published index is reclassified from the data', async () => {
+    const spec = {
+      sources: MUNICIPIOS_SOURCE,
+      legends: [
+        {
+          id: 'legenda-ivs',
+          colorBy: {
+            type: 'quantitative',
+            property: 'value',
+            scale: 'threshold',
+            thresholds: [0.001, 0.19, 0.28, 0.37, 0.46],
+            colors: [
+              '#EEE6DA',
+              '#FCBBA1',
+              '#FC7E5E',
+              '#EF3B2C',
+              '#B81419',
+              '#4F000A',
+            ],
+            defaultColor: '#EEE6DA',
+          },
+        },
+      ],
+      layers: [
+        {
+          id: 'fill',
+          sourceId: 'municipios-boundary',
+          geometry: 'polygon',
+          mapDataId: 'municipios_ivs',
+          activeLegendId: 'legenda-ivs',
+        },
+      ],
+      mapData: [
+        {
+          mapDataId: 'municipios_ivs',
+          mapId: 'municipios-boundary',
+          joinKey: 'codarea',
+          data: [],
+        },
+      ],
+    };
+    mockAgentReply(JSON.stringify(spec));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'coroplético de IVS com quebras naturais' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(422);
+    expect(body.error).toMatch(/IPEA/);
+  }, 10000);
+
+  test('returns 422 when a dotDensity spec never states its dot ratio', async () => {
+    const spec = {
+      mapType: 'dotDensity',
+      sources: MUNICIPIOS_SOURCE,
+      legends: [{ id: 'legenda-pessoas', title: 'Pessoas atendidas' }],
+      mapData: [
+        {
+          mapDataId: 'cozinhas_pessoas_atendidas',
+          mapId: 'municipios-boundary',
+          joinKey: 'codarea',
+          data: [],
+        },
+      ],
+    };
+    mockAgentReply(JSON.stringify(spec));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'dot density de pessoas atendidas' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(422);
+    expect(body.error).toMatch(/1 ponto = 1\.000 pessoas/);
+  }, 10000);
+
   test('accepts a legend declared at layers[].legends instead of the spec-level legends[]', async () => {
     const spec = {
       mapData: [
@@ -1083,6 +1569,7 @@ describe('POST /api/ai/spec', () => {
   test('returns 422 when an absolute-total dataset is painted as a choropleth', async () => {
     const spec = {
       mapType: 'choropleth',
+      sources: MUNICIPIOS_SOURCE,
       mapData: [
         {
           mapDataId: 'cozinhas_pessoas_atendidas',
@@ -1143,6 +1630,7 @@ describe('POST /api/ai/spec', () => {
   test('accepts a choropleth mapType whose mapData references no absolute-total dataset', async () => {
     const spec = {
       mapType: 'choropleth',
+      sources: MUNICIPIOS_SOURCE,
       mapData: [
         {
           mapDataId: 'cozinhas_geolocalizadas',
@@ -1165,6 +1653,7 @@ describe('POST /api/ai/spec', () => {
   test('accepts an absolute-total dataset painted with a non-choropleth mapType', async () => {
     const spec = {
       mapType: 'proportionalCircles',
+      sources: MUNICIPIOS_SOURCE,
       mapData: [
         {
           mapDataId: 'cozinhas_pessoas_atendidas',

@@ -6,8 +6,13 @@ import {
   findGeometryInMapData,
   findInvalidBasemapStyleUrl,
   findInvalidGeojsonSource,
+  findLayerWithBothDataBindings,
+  findLegendValueTypeMismatch,
+  findMapTypeWithoutMapData,
   findMissingLegend,
+  findPaintedContextLayer,
   findSourceGeometryMismatch,
+  findUnsupportedSourceType,
   invalidSpecResponse,
   isRecord,
   KNOWN_BASEMAP_STYLE_URLS,
@@ -89,7 +94,6 @@ describe('buildSourcesTable', () => {
 
     expect(table).toContain('public/geo/geojs-100-mun.json');
     expect(table).toContain('public/geo/estados.json');
-    expect(table).toContain('public/geo/assentamentos.json');
   });
 
   test('marks API-backed sources as "(resolvido no servidor)"', () => {
@@ -480,16 +484,10 @@ describe('findSourceGeometryMismatch', () => {
       sources: [
         { id: 'municipios', type: 'geojson', data: '/geo/geojs-100-mun.json' },
         { id: 'estados', type: 'geojson', data: '/geo/estados.json' },
-        {
-          id: 'assentamentos',
-          type: 'geojson',
-          data: '/geo/assentamentos.json',
-        },
       ],
       layers: [
         { id: 'mun-fill', sourceId: 'municipios', geometry: 'polygon' },
         { id: 'est-fill', sourceId: 'estados', geometry: 'polygon' },
-        { id: 'ast-fill', sourceId: 'assentamentos', geometry: 'polygon' },
       ],
     };
     expect(findSourceGeometryMismatch(spec)).toBeNull();
@@ -822,5 +820,402 @@ describe('KNOWN_BASEMAP_STYLE_URLS', () => {
     for (const url of KNOWN_BASEMAP_STYLE_URLS) {
       expect(typeof url).toBe('string');
     }
+  });
+});
+
+describe('findUnsupportedSourceType', () => {
+  test('returns null when every source is geojson', () => {
+    expect(
+      findUnsupportedSourceType({
+        sources: [{ id: 'municipios', type: 'geojson', data: '/geo/x.json' }],
+      })
+    ).toBeNull();
+  });
+
+  test('returns the id and type of a non-geojson source', () => {
+    expect(
+      findUnsupportedSourceType({
+        sources: [
+          { id: 'municipios', type: 'geojson', data: '/geo/x.json' },
+          { id: 'tiles', type: 'vector-tiles', tiles: ['/tiles/x/{z}.pbf'] },
+        ],
+      })
+    ).toBe('tiles (vector-tiles)');
+  });
+
+  test('labels a source with no declared type', () => {
+    expect(findUnsupportedSourceType({ sources: [{ id: 'sem' }] })).toBe(
+      'sem (sem tipo)'
+    );
+  });
+
+  test('returns null when sources is not an array', () => {
+    expect(findUnsupportedSourceType({ sources: 'nope' })).toBeNull();
+  });
+
+  test('skips entries that are not records', () => {
+    expect(
+      findUnsupportedSourceType({
+        sources: ['not-a-record', { id: 'mun', type: 'geojson' }],
+      })
+    ).toBeNull();
+  });
+
+  test('labels a source that has no id', () => {
+    expect(findUnsupportedSourceType({ sources: [{ type: 'raster' }] })).toBe(
+      'desconhecida (raster)'
+    );
+  });
+});
+
+describe('findMapTypeWithoutMapData', () => {
+  test('returns null when a mapData entry joins a declared source', () => {
+    expect(
+      findMapTypeWithoutMapData({
+        mapType: 'choropleth',
+        sources: [{ id: 'municipios', type: 'geojson' }],
+        mapData: [{ mapDataId: 'ivs', mapId: 'municipios' }],
+      })
+    ).toBeNull();
+  });
+
+  test('returns the mapType when no mapData joins a declared source', () => {
+    expect(
+      findMapTypeWithoutMapData({
+        mapType: 'choropleth',
+        sources: [{ id: 'municipios', type: 'geojson' }],
+        mapData: [{ mapDataId: 'ivs', mapId: 'inexistente' }],
+      })
+    ).toBe('choropleth');
+  });
+
+  test('returns the mapType when mapData is missing entirely', () => {
+    expect(
+      findMapTypeWithoutMapData({
+        mapType: 'dotDensity',
+        sources: [{ id: 'municipios', type: 'geojson' }],
+      })
+    ).toBe('dotDensity');
+  });
+
+  test('exempts proportionalCircles backed by a propertyName layer', () => {
+    expect(
+      findMapTypeWithoutMapData({
+        mapType: 'proportionalCircles',
+        sources: [{ id: 'cozinhas', type: 'geojson' }],
+        layers: [
+          { id: 'circulos', sourceId: 'cozinhas', propertyName: 'total' },
+        ],
+      })
+    ).toBeNull();
+  });
+
+  test('returns null for a spec with no mapType shorthand', () => {
+    expect(findMapTypeWithoutMapData({ sources: [], layers: [] })).toBeNull();
+  });
+
+  test('defers to the downstream shape check when mapData is not an array', () => {
+    expect(
+      findMapTypeWithoutMapData({ mapType: 'choropleth', mapData: 'nope' })
+    ).toBeNull();
+  });
+
+  test('defers to the downstream shape check when a mapData entry is not an object', () => {
+    expect(
+      findMapTypeWithoutMapData({ mapType: 'choropleth', mapData: ['nope'] })
+    ).toBeNull();
+  });
+
+  test('treats a spec with no sources as joining nothing', () => {
+    expect(
+      findMapTypeWithoutMapData({
+        mapType: 'choropleth',
+        mapData: [{ mapDataId: 'ivs', mapId: 'municipios' }],
+      })
+    ).toBe('choropleth');
+  });
+
+  test('skips malformed source entries while collecting ids', () => {
+    expect(
+      findMapTypeWithoutMapData({
+        mapType: 'choropleth',
+        sources: ['not-a-record', { type: 'geojson' }],
+        mapData: [{ mapDataId: 'ivs', mapId: 'municipios' }],
+      })
+    ).toBe('choropleth');
+  });
+
+  test('does not exempt proportionalCircles when layers is not an array', () => {
+    expect(
+      findMapTypeWithoutMapData({
+        mapType: 'proportionalCircles',
+        sources: [{ id: 'cozinhas', type: 'geojson' }],
+        layers: 'nope',
+      })
+    ).toBe('proportionalCircles');
+  });
+});
+
+describe('findLayerWithBothDataBindings', () => {
+  test('returns null when each layer binds values one way', () => {
+    expect(
+      findLayerWithBothDataBindings({
+        layers: [
+          { id: 'fill', mapDataId: 'ivs' },
+          { id: 'pts', propertyName: 'total' },
+        ],
+      })
+    ).toBeNull();
+  });
+
+  test('returns the layer id when both bindings are declared', () => {
+    expect(
+      findLayerWithBothDataBindings({
+        layers: [{ id: 'fill', mapDataId: 'ivs', propertyName: 'total' }],
+      })
+    ).toBe('fill');
+  });
+
+  test('falls back to a placeholder when the layer has no id', () => {
+    expect(
+      findLayerWithBothDataBindings({
+        layers: [{ mapDataId: 'ivs', propertyName: 'total' }],
+      })
+    ).toBe('desconhecida');
+  });
+
+  test('returns null when layers is not an array', () => {
+    expect(findLayerWithBothDataBindings({})).toBeNull();
+  });
+
+  test('skips layers that are not records', () => {
+    expect(
+      findLayerWithBothDataBindings({
+        layers: ['not-a-record', { id: 'fill', mapDataId: 'ivs' }],
+      })
+    ).toBeNull();
+  });
+});
+
+describe('findPaintedContextLayer', () => {
+  test('allows a state layer used purely as context', () => {
+    expect(
+      findPaintedContextLayer({
+        sources: [
+          { id: 'estados', type: 'geojson', data: '/geo/estados.json' },
+        ],
+        layers: [{ id: 'estados-line', sourceId: 'estados', geometry: 'line' }],
+      })
+    ).toBeNull();
+  });
+
+  test('flags a variable painted onto the state layer', () => {
+    expect(
+      findPaintedContextLayer({
+        sources: [
+          { id: 'estados', type: 'geojson', data: '/geo/estados.json' },
+        ],
+        layers: [{ id: 'estados-fill', sourceId: 'estados', mapDataId: 'ivs' }],
+      })
+    ).toEqual({ layerId: 'estados-fill', sourceId: 'estados' });
+  });
+
+  test('returns null when no context source is declared', () => {
+    expect(
+      findPaintedContextLayer({
+        sources: [
+          { id: 'mun', type: 'geojson', data: '/geo/geojs-100-mun.json' },
+        ],
+        layers: [{ id: 'fill', sourceId: 'mun', mapDataId: 'ivs' }],
+      })
+    ).toBeNull();
+  });
+
+  test('returns null when sources is not an array', () => {
+    expect(findPaintedContextLayer({ sources: 'nope' })).toBeNull();
+  });
+
+  test('returns null when layers is not an array', () => {
+    expect(
+      findPaintedContextLayer({
+        sources: [
+          { id: 'estados', type: 'geojson', data: '/geo/estados.json' },
+        ],
+      })
+    ).toBeNull();
+  });
+
+  test('skips malformed sources and layers while scanning', () => {
+    expect(
+      findPaintedContextLayer({
+        sources: [
+          'not-a-record',
+          { type: 'geojson', data: '/geo/estados.json' },
+          { id: 'estados', type: 'geojson', data: '/geo/estados.json' },
+        ],
+        layers: [
+          'not-a-record',
+          { sourceId: 'estados', mapDataId: 'ivs' },
+          { id: 'ctx', sourceId: 'estados' },
+        ],
+      })
+    ).toBeNull();
+  });
+});
+
+describe('findLegendValueTypeMismatch', () => {
+  const specWith = (legendType: string, value: string | number) => {
+    return {
+      sources: [{ id: 'mun', type: 'geojson' }],
+      layers: [
+        {
+          id: 'fill',
+          sourceId: 'mun',
+          mapDataId: 'ds',
+          activeLegendId: 'lg',
+        },
+      ],
+      legends: [{ id: 'lg', colorBy: { type: legendType } }],
+      mapData: [
+        { mapDataId: 'ds', mapId: 'mun', data: [{ geometryId: '1', value }] },
+      ],
+    };
+  };
+
+  test('returns null when the scale matches numeric values', () => {
+    expect(
+      findLegendValueTypeMismatch(specWith('quantitative', 0.5))
+    ).toBeNull();
+  });
+
+  test('returns null when the scale matches categorical values', () => {
+    expect(
+      findLegendValueTypeMismatch(specWith('categorical', 'alto'))
+    ).toBeNull();
+  });
+
+  test('flags a threshold scale over categorical values', () => {
+    expect(
+      findLegendValueTypeMismatch(specWith('quantitative', 'alto'))
+    ).toEqual({
+      legendId: 'lg',
+      expected: 'categorical',
+      declared: 'quantitative',
+    });
+  });
+
+  test('flags a categorical scale over numeric values', () => {
+    expect(findLegendValueTypeMismatch(specWith('categorical', 12))).toEqual({
+      legendId: 'lg',
+      expected: 'quantitative',
+      declared: 'categorical',
+    });
+  });
+
+  test('resolves a layer-scoped legend before the spec-level pool', () => {
+    expect(
+      findLegendValueTypeMismatch({
+        layers: [
+          {
+            id: 'fill',
+            mapDataId: 'ds',
+            activeLegendId: 'lg',
+            legends: [{ id: 'lg', colorBy: { type: 'categorical' } }],
+          },
+        ],
+        legends: [{ id: 'lg', colorBy: { type: 'quantitative' } }],
+        mapData: [{ mapDataId: 'ds', data: [{ geometryId: '1', value: 7 }] }],
+      })
+    ).toEqual({
+      legendId: 'lg',
+      expected: 'quantitative',
+      declared: 'categorical',
+    });
+  });
+
+  test('skips entries whose values are all null', () => {
+    expect(
+      findLegendValueTypeMismatch({
+        layers: [{ id: 'fill', mapDataId: 'ds', activeLegendId: 'lg' }],
+        legends: [{ id: 'lg', colorBy: { type: 'quantitative' } }],
+        mapData: [
+          { mapDataId: 'ds', data: [{ geometryId: '1', value: null }] },
+        ],
+      })
+    ).toBeNull();
+  });
+
+  test('returns null when the layer declares no active legend', () => {
+    expect(
+      findLegendValueTypeMismatch({
+        layers: [{ id: 'fill', mapDataId: 'ds' }],
+        legends: [{ id: 'lg', colorBy: { type: 'quantitative' } }],
+        mapData: [{ mapDataId: 'ds', data: [{ geometryId: '1', value: 'a' }] }],
+      })
+    ).toBeNull();
+  });
+
+  test('returns null when layers or mapData is not an array', () => {
+    expect(findLegendValueTypeMismatch({ layers: 'nope' })).toBeNull();
+    expect(
+      findLegendValueTypeMismatch({ layers: [], mapData: 'nope' })
+    ).toBeNull();
+  });
+
+  test('skips layers that are not records or bind no dataset', () => {
+    expect(
+      findLegendValueTypeMismatch({
+        layers: ['not-a-record', { id: 'ctx', activeLegendId: 'lg' }],
+        legends: [{ id: 'lg', colorBy: { type: 'quantitative' } }],
+        mapData: [{ mapDataId: 'ds', data: [{ geometryId: '1', value: 'a' }] }],
+      })
+    ).toBeNull();
+  });
+
+  test('returns null when the bound mapData entry is missing', () => {
+    expect(
+      findLegendValueTypeMismatch({
+        layers: [{ id: 'fill', mapDataId: 'ausente', activeLegendId: 'lg' }],
+        legends: [{ id: 'lg', colorBy: { type: 'quantitative' } }],
+        mapData: [{ mapDataId: 'ds', data: [{ geometryId: '1', value: 'a' }] }],
+      })
+    ).toBeNull();
+  });
+
+  test('returns null when the active legend id matches nothing', () => {
+    expect(
+      findLegendValueTypeMismatch({
+        layers: [{ id: 'fill', mapDataId: 'ds', activeLegendId: 'ausente' }],
+        legends: [{ id: 'lg', colorBy: { type: 'quantitative' } }],
+        mapData: [{ mapDataId: 'ds', data: [{ geometryId: '1', value: 'a' }] }],
+      })
+    ).toBeNull();
+  });
+
+  test('returns null when the legend declares no colorBy type', () => {
+    expect(
+      findLegendValueTypeMismatch({
+        layers: [{ id: 'fill', mapDataId: 'ds', activeLegendId: 'lg' }],
+        legends: [{ id: 'lg' }],
+        mapData: [{ mapDataId: 'ds', data: [{ geometryId: '1', value: 'a' }] }],
+      })
+    ).toBeNull();
+  });
+
+  test('skips mapData rows that are not records and non-array data', () => {
+    expect(
+      findLegendValueTypeMismatch({
+        layers: [{ id: 'fill', mapDataId: 'ds', activeLegendId: 'lg' }],
+        legends: [{ id: 'lg', colorBy: { type: 'quantitative' } }],
+        mapData: [{ mapDataId: 'ds', data: ['not-a-record'] }],
+      })
+    ).toBeNull();
+    expect(
+      findLegendValueTypeMismatch({
+        layers: [{ id: 'fill', mapDataId: 'ds', activeLegendId: 'lg' }],
+        legends: [{ id: 'lg', colorBy: { type: 'quantitative' } }],
+        mapData: [{ mapDataId: 'ds', data: 'nope' }],
+      })
+    ).toBeNull();
   });
 });
