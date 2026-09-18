@@ -1,9 +1,13 @@
 import {
+  appendRealMapData,
   appendRealSourceData,
   buildSourcesTable,
+  findChoroplethOnAbsoluteTotal,
   findGeometryInMapData,
   findInvalidBasemapStyleUrl,
   findInvalidGeojsonSource,
+  findMissingLegend,
+  findSourceGeometryMismatch,
   invalidSpecResponse,
   isRecord,
   KNOWN_BASEMAP_STYLE_URLS,
@@ -369,6 +373,334 @@ describe('findGeometryInMapData', () => {
       sources: ['not-a-record', { id: 'other-id', type: 'geojson' }],
     };
     expect(findGeometryInMapData(spec)).toBeNull();
+  });
+
+  test('returns "desconhecido" when the inline FeatureCollection entry has no string mapDataId', () => {
+    const spec = {
+      mapData: [
+        { mapDataId: 123, data: { type: 'FeatureCollection', features: [] } },
+      ],
+      sources: [],
+    };
+    expect(findGeometryInMapData(spec)).toBe('desconhecido');
+  });
+});
+
+describe('findSourceGeometryMismatch', () => {
+  test('returns null when spec has no sources', () => {
+    expect(findSourceGeometryMismatch({})).toBeNull();
+    expect(findSourceGeometryMismatch({ sources: null })).toBeNull();
+  });
+
+  test('returns null when sources is not an array', () => {
+    expect(findSourceGeometryMismatch({ sources: {} })).toBeNull();
+  });
+
+  test('returns null when all layers match their source geometry', () => {
+    const spec = {
+      sources: [
+        { id: 'municipios', type: 'geojson', data: '/geo/geojs-100-mun.json' },
+        { id: 'bolhas', type: 'geojson', data: '/api/cozinhas/bolhas' },
+      ],
+      layers: [
+        { id: 'fill', sourceId: 'municipios', geometry: 'polygon' },
+        { id: 'circles', sourceId: 'bolhas', geometry: 'point' },
+      ],
+    };
+    expect(findSourceGeometryMismatch(spec)).toBeNull();
+  });
+
+  test('detects point layer with polygon source', () => {
+    const spec = {
+      sources: [
+        { id: 'municipios', type: 'geojson', data: '/geo/geojs-100-mun.json' },
+      ],
+      layers: [
+        { id: 'bad-circles', sourceId: 'municipios', geometry: 'point' },
+      ],
+    };
+    const result = findSourceGeometryMismatch(spec);
+    expect(result).toEqual({ layerId: 'bad-circles', sourceId: 'municipios' });
+  });
+
+  test('detects symbol layer with polygon source', () => {
+    const spec = {
+      sources: [
+        { id: 'municipios', type: 'geojson', data: '/geo/geojs-100-mun.json' },
+      ],
+      layers: [{ id: 'labels', sourceId: 'municipios', geometry: 'symbol' }],
+    };
+    const result = findSourceGeometryMismatch(spec);
+    expect(result).toEqual({ layerId: 'labels', sourceId: 'municipios' });
+  });
+
+  test('detects polygon layer with point source', () => {
+    const spec = {
+      sources: [{ id: 'cozinhas', type: 'geojson', data: '/api/cozinhas' }],
+      layers: [{ id: 'bad-fill', sourceId: 'cozinhas', geometry: 'polygon' }],
+    };
+    const result = findSourceGeometryMismatch(spec);
+    expect(result).toEqual({ layerId: 'bad-fill', sourceId: 'cozinhas' });
+  });
+
+  test('ignores layers without sourceId', () => {
+    const spec = {
+      sources: [
+        { id: 'municipios', type: 'geojson', data: '/geo/geojs-100-mun.json' },
+      ],
+      layers: [{ id: 'layer-no-source', geometry: 'point' }],
+    };
+    expect(findSourceGeometryMismatch(spec)).toBeNull();
+  });
+
+  test('ignores sources that are not in KNOWN_SOURCE_URLS', () => {
+    const spec = {
+      sources: [{ id: 'unknown', type: 'geojson', data: '/geo/unknown.json' }],
+      layers: [{ id: 'layer', sourceId: 'unknown', geometry: 'point' }],
+    };
+    expect(findSourceGeometryMismatch(spec)).toBeNull();
+  });
+
+  test('returns first mismatch when multiple exist', () => {
+    const spec = {
+      sources: [
+        { id: 'municipios', type: 'geojson', data: '/geo/geojs-100-mun.json' },
+      ],
+      layers: [
+        { id: 'first-bad', sourceId: 'municipios', geometry: 'point' },
+        { id: 'second-bad', sourceId: 'municipios', geometry: 'symbol' },
+      ],
+    };
+    const result = findSourceGeometryMismatch(spec);
+    expect(result?.layerId).toBe('first-bad');
+  });
+
+  test('accepts all polygon sources for polygon layers', () => {
+    const spec = {
+      sources: [
+        { id: 'municipios', type: 'geojson', data: '/geo/geojs-100-mun.json' },
+        { id: 'estados', type: 'geojson', data: '/geo/estados.json' },
+        {
+          id: 'assentamentos',
+          type: 'geojson',
+          data: '/geo/assentamentos.json',
+        },
+      ],
+      layers: [
+        { id: 'mun-fill', sourceId: 'municipios', geometry: 'polygon' },
+        { id: 'est-fill', sourceId: 'estados', geometry: 'polygon' },
+        { id: 'ast-fill', sourceId: 'assentamentos', geometry: 'polygon' },
+      ],
+    };
+    expect(findSourceGeometryMismatch(spec)).toBeNull();
+  });
+
+  test('accepts all point sources for point layers', () => {
+    const spec = {
+      sources: [
+        { id: 'cozinhas', type: 'geojson', data: '/api/cozinhas' },
+        { id: 'bolhas', type: 'geojson', data: '/api/cozinhas/bolhas' },
+      ],
+      layers: [
+        { id: 'pts', sourceId: 'cozinhas', geometry: 'point' },
+        { id: 'circles', sourceId: 'bolhas', geometry: 'point' },
+      ],
+    };
+    expect(findSourceGeometryMismatch(spec)).toBeNull();
+  });
+
+  test('skips sources that are not records or have no string id', () => {
+    const spec = {
+      sources: [
+        'not-a-record',
+        { type: 'geojson', data: '/geo/geojs-100-mun.json' },
+        { id: 'municipios', type: 'geojson', data: '/geo/geojs-100-mun.json' },
+      ],
+      layers: [{ id: 'fill', sourceId: 'municipios', geometry: 'polygon' }],
+    };
+    expect(findSourceGeometryMismatch(spec)).toBeNull();
+  });
+
+  test('ignores sources with a string id but non-string data', () => {
+    const spec = {
+      sources: [{ id: 'municipios', type: 'geojson', data: null }],
+      layers: [{ id: 'layer', sourceId: 'municipios', geometry: 'point' }],
+    };
+    expect(findSourceGeometryMismatch(spec)).toBeNull();
+  });
+
+  test('returns null when layers is not an array', () => {
+    const spec = {
+      sources: [
+        { id: 'municipios', type: 'geojson', data: '/geo/geojs-100-mun.json' },
+      ],
+      layers: 'not-an-array',
+    };
+    expect(findSourceGeometryMismatch(spec)).toBeNull();
+  });
+
+  test('skips layers that are not records', () => {
+    const spec = {
+      sources: [
+        { id: 'municipios', type: 'geojson', data: '/geo/geojs-100-mun.json' },
+      ],
+      layers: ['not-a-record'],
+    };
+    expect(findSourceGeometryMismatch(spec)).toBeNull();
+  });
+});
+
+describe('findMissingLegend', () => {
+  test('returns false when mapData is absent', () => {
+    expect(findMissingLegend({})).toBe(false);
+  });
+
+  test('returns false when mapData is an empty array', () => {
+    expect(findMissingLegend({ mapData: [] })).toBe(false);
+  });
+
+  test('returns true when mapData paints a variable with no legend anywhere', () => {
+    const spec = { mapData: [{ mapDataId: 'municipios_ivs' }] };
+    expect(findMissingLegend(spec)).toBe(true);
+  });
+
+  test('returns false when spec has a top-level legends array', () => {
+    const spec = {
+      mapData: [{ mapDataId: 'municipios_ivs' }],
+      legends: [{ id: 'legend-1' }],
+    };
+    expect(findMissingLegend(spec)).toBe(false);
+  });
+
+  test('returns false when a layer declares its own legends array', () => {
+    const spec = {
+      mapData: [{ mapDataId: 'municipios_ivs' }],
+      layers: [{ id: 'fill', legends: [{ id: 'layer-legend' }] }],
+    };
+    expect(findMissingLegend(spec)).toBe(false);
+  });
+
+  test('returns true when layers exist but none declare legends', () => {
+    const spec = {
+      mapData: [{ mapDataId: 'municipios_ivs' }],
+      layers: [{ id: 'fill', legends: [] }, { id: 'other' }],
+    };
+    expect(findMissingLegend(spec)).toBe(true);
+  });
+
+  test('returns true when top-level legends is an empty array', () => {
+    const spec = {
+      mapData: [{ mapDataId: 'municipios_ivs' }],
+      legends: [],
+    };
+    expect(findMissingLegend(spec)).toBe(true);
+  });
+});
+
+describe('findChoroplethOnAbsoluteTotal', () => {
+  test('returns null when mapType is not choropleth', () => {
+    expect(
+      findChoroplethOnAbsoluteTotal({ mapType: 'proportionalCircles' })
+    ).toBeNull();
+    expect(findChoroplethOnAbsoluteTotal({})).toBeNull();
+  });
+
+  test('returns null when mapData is not an array', () => {
+    expect(
+      findChoroplethOnAbsoluteTotal({ mapType: 'choropleth', mapData: null })
+    ).toBeNull();
+  });
+
+  test('ignores mapData entries that are not records', () => {
+    const spec = {
+      mapType: 'choropleth',
+      mapData: ['not-a-record'],
+    };
+    expect(findChoroplethOnAbsoluteTotal(spec)).toBeNull();
+  });
+
+  test('returns null when no mapDataId is an absolute-total dataset', () => {
+    const spec = {
+      mapType: 'choropleth',
+      mapData: [{ mapDataId: 'municipios_ivs' }],
+    };
+    expect(findChoroplethOnAbsoluteTotal(spec)).toBeNull();
+  });
+
+  test('detects an absolute-total dataset painted as choropleth', () => {
+    const spec = {
+      mapType: 'choropleth',
+      mapData: [{ mapDataId: 'cozinhas_pessoas_atendidas' }],
+    };
+    expect(findChoroplethOnAbsoluteTotal(spec)).toBe(
+      'cozinhas_pessoas_atendidas'
+    );
+  });
+});
+
+describe('appendRealMapData', () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  test('returns spec unchanged when mapData is undefined', async () => {
+    const spec = { other: 'field' };
+    expect(await appendRealMapData(spec)).toEqual(spec);
+  });
+
+  test('returns invalidSpecResponse when mapData is not an array', async () => {
+    const spec = { mapData: 'not-an-array' };
+    const result = await appendRealMapData(spec);
+
+    expect(result).toBeInstanceOf(Response);
+    expect((result as Response).status).toBe(422);
+  });
+
+  test('returns invalidSpecResponse when a mapData entry is not a record', async () => {
+    const spec = { mapData: ['not-a-record'] };
+    const result = await appendRealMapData(spec);
+
+    expect(result).toBeInstanceOf(Response);
+    const body = await (result as Response).json();
+    expect(body.error).toContain('item 0');
+  });
+
+  test('returns invalidSpecResponse when mapDataId is not a string', async () => {
+    const spec = { mapData: [{ mapDataId: 123 }] };
+    const result = await appendRealMapData(spec);
+
+    expect(result).toBeInstanceOf(Response);
+    const body = await (result as Response).json();
+    expect(body.error).toContain('mapDataId');
+  });
+
+  test('returns a 422 response for an unsupported dataset id', async () => {
+    const spec = { mapData: [{ mapDataId: 'nao_existe' }] };
+    const result = await appendRealMapData(spec);
+
+    expect(result).toBeInstanceOf(Response);
+    expect((result as Response).status).toBe(422);
+    const body = await (result as Response).json();
+    expect(body.error).toContain('nao_existe');
+  });
+
+  test('resolves a renderable mapDataId via its fetcher', async () => {
+    jest
+      .spyOn(gateway, 'getIvsPorMunicipio')
+      .mockResolvedValue([{ codigoIbge: '123', ivs: 0.5 } as never]);
+
+    const spec = { mapData: [{ mapDataId: 'municipios_ivs' }] };
+    const result = await appendRealMapData(spec);
+
+    expect(gateway.getIvsPorMunicipio).toHaveBeenCalledWith();
+    expect(result).toEqual({
+      mapData: [
+        {
+          mapDataId: 'municipios_ivs',
+          data: [{ geometryId: '123', value: 0.5 }],
+        },
+      ],
+    });
   });
 });
 

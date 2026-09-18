@@ -18,7 +18,7 @@ import {
   findGeometryInMapData,
   findInvalidBasemapStyleUrl,
   findInvalidGeojsonSource,
-  findMissingLegend,
+  findSourceGeometryMismatch,
   invalidSpecResponse,
   isRecord,
   KNOWN_BASEMAP_STYLE_URLS,
@@ -173,10 +173,10 @@ const validateGeneratedSpecStructure = (
     });
   }
 
-  if (findMissingLegend(modelJson)) {
+  const sourceGeometryMismatch = findSourceGeometryMismatch(modelJson);
+  if (sourceGeometryMismatch) {
     return invalidSpecResponse({
-      message:
-        'Todo spec com uma variável pintada precisa de ao menos uma legend descrevendo-a, no spec ("legends[]") ou em alguma layer ("layers[].legends[]"). Tente reformular o pedido.',
+      message: `A layer "${sourceGeometryMismatch.layerId}" declara "geometry: point/symbol" mas aponta para a source "${sourceGeometryMismatch.sourceId}" (polígonos). Círculos e símbolos precisam de sources com pontos (ex.: "/api/cozinhas/bolhas"), não polígonos — o centroid do polígono não é o ponto representativo do dado. Tente reformular o pedido.`,
       spec: modelJson,
     });
   }

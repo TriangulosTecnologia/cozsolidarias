@@ -1,11 +1,13 @@
-import { gateway } from '@/gateway';
-
 import {
   ABSOLUTE_TOTAL_DATASET_IDS,
   isRenderableDatasetId,
   RENDERABLE_DATASET_FETCHERS,
   RENDERABLE_DATASET_IDS,
 } from './mapDataCatalogue';
+import { SOURCE_METADATA } from './specValidation.sources';
+
+export { buildSourcesTable } from './specValidation.helpers';
+export { findSourceGeometryMismatch } from './specValidation.sources';
 
 export type UnknownRecord = Record<string, unknown>;
 
@@ -56,87 +58,6 @@ export const KNOWN_SOURCE_URLS = [
   '/api/cozinhas',
   '/api/cozinhas/bolhas',
 ] as const;
-
-/**
- * Maps each KNOWN_SOURCE_URL to its physical location on disk or endpoint
- * type, and — for an API-backed URL — a `resolver` that fetches the real
- * `data-gateway` value the same way {@link RENDERABLE_DATASET_FETCHERS} does
- * for `mapData` (see {@link appendRealSourceData}). A static file under
- * `public/geo/` has no `resolver`: the client fetches that URL itself, so its
- * `sources[].data` string is left untouched. Used to generate explicit
- * instructions showing both served URL and source path.
- * @example
- * SOURCE_METADATA['/geo/geojs-100-mun.json']
- * // => { filepath: 'public/geo/geojs-100-mun.json', description: '...', resolver: null }
- */
-export const SOURCE_METADATA: Record<
-  (typeof KNOWN_SOURCE_URLS)[number],
-  {
-    filepath: string | null;
-    description: string;
-    resolver: (() => Promise<UnknownRecord>) | null;
-  }
-> = {
-  '/geo/geojs-100-mun.json': {
-    filepath: 'public/geo/geojs-100-mun.json',
-    description: 'Municípios do Brasil (IBGE, Código IBGE como geometryId)',
-    resolver: null,
-  },
-  '/geo/estados.json': {
-    filepath: 'public/geo/estados.json',
-    description:
-      'Estados brasileiros (contexto/contorno, não pode pintar dados)',
-    resolver: null,
-  },
-  '/geo/assentamentos.json': {
-    filepath: 'public/geo/assentamentos.json',
-    description: 'Assentamentos de reforma agrária',
-    resolver: null,
-  },
-  '/api/cozinhas': {
-    filepath: null,
-    description: 'Pontos de cozinhas comunitárias (agregados por município)',
-    resolver: async () => {
-      return (await gateway.getCozinhas()) as unknown as UnknownRecord;
-    },
-  },
-  '/api/cozinhas/bolhas': {
-    filepath: null,
-    description: 'Clusters/bolhas de cozinhas (agregação espacial para zoom)',
-    resolver: async () => {
-      return (await gateway.getCozinhasBubbles()) as unknown as UnknownRecord;
-    },
-  },
-};
-
-/**
- * Builds a markdown table listing all valid source URLs, their physical paths,
- * and descriptions. Injected into INSTRUCTIONS so the model always sees
- * current sources without manual duplication. If KNOWN_SOURCE_URLS changes,
- * this table regenerates automatically.
- * @example
- * // Returns markdown table suitable for embedding in instructions
- * const table = buildSourcesTable();
- */
-export const buildSourcesTable = (): string => {
-  const rows = KNOWN_SOURCE_URLS.map((url) => {
-    const meta = SOURCE_METADATA[url];
-    const path = meta.resolver ? '(resolvido no servidor)' : meta.filepath;
-    return `| \`${url}\` | \`${path}\` | ${meta.description} |`;
-  }).join('\n');
-
-  return `## sources: URLs válidas e seus caminhos reais
-
-Cada \`sources[].data\` DEVE ser exatamente uma destas URLs.
-A coluna "Arquivo real" mostra onde o arquivo está no servidor ou identifica um endpoint dinâmico.
-
-| URL servida | Arquivo real | Descrição |
-|-------------|-------------|-----------|
-${rows}
-
-**Regra absoluta**: Nunca invente URLs. Se não está nesta tabela, a requisição retornará erro 422.
-**Nota**: URLs em \`public/geo/\` são estáticas (GeoJSON). URLs em \`/api/\` são endpoints dinâmicos (Node.js).`;
-};
 
 /** An inline, empty `FeatureCollection` — a placeholder the model sometimes emits instead of a real endpoint. */
 const isEmptyInlineFeatureCollection = (data: unknown): boolean => {

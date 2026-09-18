@@ -34,39 +34,46 @@ const BRAZIL_VIEW = {
  * deliberately-public raw spec panel. Extracted from `AiPlayground` to keep
  * that component's cyclomatic complexity within the lint threshold.
  */
-const MapResultView = ({ result }: { result: VisualizationSpec }) => {
+const MapResultView = ({
+  result,
+  showJson,
+}: {
+  result: VisualizationSpec;
+  showJson: boolean;
+}) => {
+  const hasSpec = showJson && JSON.stringify(result, null, 2) !== '{}';
+
   return (
-    <Box
-      position="relative"
+    <Stack
+      gap={0}
       w="100%"
-      h="85vh"
+      h="calc(100vh - 240px)"
       minH="640px"
       borderRadius="md"
       overflow="hidden"
-      css={{
-        '& > *': {
-          height: '100%',
-          width: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-        },
-        '& > * > *': {
-          flex: '1',
-          minHeight: 0,
-        },
-      }}
     >
-      <I18nProvider locale="pt-BR">
-        <ThemeUIProvider theme={BruttalTheme}>
-          <GeovisWorkspace
-            config={{ appearance: 'bare' }}
-            visualizationSpec={{
-              ...result,
-              view: result.view ?? BRAZIL_VIEW,
-            }}
-          />
-        </ThemeUIProvider>
-      </I18nProvider>
+      <Box
+        flex="1"
+        minH={0}
+        css={{
+          '& > *': {
+            height: '100%',
+            width: '100%',
+          },
+        }}
+      >
+        <I18nProvider locale="pt-BR">
+          <ThemeUIProvider theme={BruttalTheme}>
+            <GeovisWorkspace
+              config={{ appearance: 'bare' }}
+              visualizationSpec={{
+                ...result,
+                view: result.view ?? BRAZIL_VIEW,
+              }}
+            />
+          </ThemeUIProvider>
+        </I18nProvider>
+      </Box>
 
       {/* Deliberately public: the `/ai` page is an experimental, transparent
           playground — showing the raw generated spec lets anyone verify what
@@ -75,12 +82,9 @@ const MapResultView = ({ result }: { result: VisualizationSpec }) => {
           payload (see route.ts's INSTRUCTIONS on municipal aggregation). Not
           gated behind a dev-only flag; revisit before treating `/ai` as a
           finished, non-experimental product surface. */}
-      {JSON.stringify(result, null, 2) !== '{}' ? (
+      {hasSpec ? (
         <Box
-          position="absolute"
-          bottom={0}
-          left={0}
-          right={0}
+          flex="0 0 auto"
           maxH="50%"
           overflowY="auto"
           bgColor="bg.surface"
@@ -94,7 +98,7 @@ const MapResultView = ({ result }: { result: VisualizationSpec }) => {
           <pre>{JSON.stringify(result, null, 2)}</pre>
         </Box>
       ) : null}
-    </Box>
+    </Stack>
   );
 };
 
@@ -183,7 +187,9 @@ const AiPlayground = () => {
         }}
       />
 
-      {status === 'success' && result && <MapResultView result={result} />}
+      {status === 'success' && result && (
+        <MapResultView result={result} showJson={showJson} />
+      )}
     </Stack>
   );
 };
