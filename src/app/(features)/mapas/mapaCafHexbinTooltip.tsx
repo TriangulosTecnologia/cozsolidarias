@@ -31,8 +31,11 @@ import { TooltipCard } from './mapaTooltipCard';
  */
 export const renderCafHexbinTooltip = ({
   quantidade,
+  rampId,
 }: {
   quantidade: number | null;
+  /** The ramp the grid is being read through, so the swatch names the same band. */
+  rampId?: string;
 }): React.ReactNode => {
   // `Sem CAF` rather than `0 CAFs`: the grid covers the whole territory, so an
   // empty cell is a statement about the land, and the legend already names that
@@ -45,7 +48,7 @@ export const renderCafHexbinTooltip = ({
   return (
     <TooltipCard
       name="Nº de CAFs"
-      swatchColor={cafHexbinBandColor(quantidade)}
+      swatchColor={cafHexbinBandColor(quantidade, rampId)}
       primary={primary}
     />
   );

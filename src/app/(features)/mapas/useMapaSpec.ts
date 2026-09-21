@@ -201,6 +201,7 @@ type UseMapaSpecParams = {
   /** How the mode's subject layer is painted, from the settings zone. */
   paintSettings?: {
     fillOpacity?: number;
+    colorRamp?: string;
   };
   mode: MapMode;
   /**
@@ -227,6 +228,29 @@ type UseMapaSpecParams = {
  * const spec = useMapaSpec({ kitchenByCity, ivsByCity, nomesPorCodigo, assentamentos, cozinhaNames, cozinhaStatus, cafByCity, cadinsanByCity, mode });
  * // <GeovisWorkspace visualizationSpec={spec} ... />
  */
+/**
+ * The spec with its camera framed for whatever container this screen gives us.
+ *
+ * `buildSpec` has no viewport, so the camera it returns is the unmeasured one.
+ * Zoom 4 frames Brazil on a large desktop and crops it everywhere else — a
+ * 360px phone needs about 2.4 — and the old `maxZoomOut: 4` meant the user
+ * could not even zoom out to recover it.
+ */
+const fitToViewport = ({
+  spec,
+  mode,
+  viewport,
+}: {
+  spec: VisualizationSpec;
+  mode: MapMode;
+  viewport: Parameters<typeof viewForMode>[0]['viewport'];
+}): VisualizationSpec => {
+  return {
+    ...spec,
+    view: { ...spec.view, ...viewForMode({ mode, viewport }) },
+  };
+};
+
 export const useMapaSpec = ({
   kitchenByCity,
   ivsByCity,
@@ -251,6 +275,7 @@ export const useMapaSpec = ({
     cafByCity,
     cadinsanByCity,
     mode,
+    colorRamp: paintSettings?.colorRamp,
   });
 
   /*
@@ -291,17 +316,10 @@ export const useMapaSpec = ({
       }
     );
 
-    // Frame the territory in whatever container this screen gives us:
-    // `buildSpec` has no viewport, so the camera it returned is the unmeasured
-    // one. Zoom 4 frames Brazil on a large desktop and crops it everywhere
-    // else — a 360px phone needs about 2.4 — and the old `maxZoomOut: 4` meant
-    // the user could not even zoom out to recover it.
-    const fitted = {
-      ...spec,
-      view: { ...spec.view, ...viewForMode({ mode, viewport }) },
-    };
-
-    return withYearPoints({ spec: fitted, cozinhasPoints });
+    return withYearPoints({
+      spec: fitToViewport({ spec, mode, viewport }),
+      cozinhasPoints,
+    });
   }, [
     kitchenByCity,
     mode,

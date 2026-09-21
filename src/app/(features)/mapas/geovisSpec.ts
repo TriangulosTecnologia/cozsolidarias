@@ -49,6 +49,7 @@ import {
 } from './geovisCozinhaStatusScales';
 import { buildLegends, legendIdForMode, type MapMode } from './geovisScales';
 import { applyLegendOpacity } from './legendOpacity';
+import { applyLegendRamp } from './mapaColorRamp';
 import { TOOLTIP_STYLE } from './mapaTooltipStyle';
 import { viewForMode } from './mapCamera';
 
@@ -104,6 +105,11 @@ type MapOverlays = {
      * else it is offered.
      */
     fillOpacity?: number;
+    /**
+     * Id of the ramp the graduated legends are redrawn through, or `undefined`
+     * to leave each variation with the palette it was designed around.
+     */
+    colorRamp?: string;
   };
   /** Hover tooltip renderer for the `cafs` mode's UF circles. */
   cafUfHoverRender?: HoverTooltipConfig['render'];
@@ -689,11 +695,16 @@ export const buildSpec = (
       showAssentamentos,
       overlays,
     }),
+    // Ramp first, opacity second: the alpha has to land on the colours the
+    // reader chose, and re-colouring afterwards would drop it.
     legends: applyLegendOpacity({
-      legends: [
-        ...buildLegends(mode, jenksBreaks),
-        buildCozinhaStatusLegend(mode === 'pontos'),
-      ],
+      legends: applyLegendRamp({
+        legends: [
+          ...buildLegends(mode, jenksBreaks),
+          buildCozinhaStatusLegend(mode === 'pontos'),
+        ],
+        rampId: overlays.paintSettings?.colorRamp,
+      }),
       fillOpacity: overlays.paintSettings?.fillOpacity,
     }),
     layers: buildOverlayLayers({

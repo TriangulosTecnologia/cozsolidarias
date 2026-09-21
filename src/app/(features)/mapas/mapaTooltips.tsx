@@ -13,7 +13,6 @@ import {
   cozinhaStatusShortLabel,
 } from './geovisCozinhaStatusScales';
 import {
-  colorForCadinsan,
   colorForCadUnico,
   colorForCafPercentual,
   colorForPercentual,
@@ -23,6 +22,7 @@ import {
   type MapMode,
 } from './geovisScales';
 import { renderAssentamentoTooltip } from './mapaAssentamentoTooltip';
+import { renderCadinsanTooltip } from './mapaCadinsanTooltips';
 import { renderScoreTooltip, SCORE_TOOLTIPS } from './mapaScoreTooltips';
 import { TooltipCard } from './mapaTooltipCard';
 
@@ -82,9 +82,11 @@ export const renderCozinhaTooltip = ({
 const renderRateTooltip = ({
   name,
   register,
+  rampId,
 }: {
   name: string;
   register?: kitchenRateByCity;
+  rampId?: string;
 }) => {
   const taxa = register?.porCemMil ?? null;
   const populacao = register?.populacao ?? null;
@@ -105,7 +107,7 @@ const renderRateTooltip = ({
   return (
     <TooltipCard
       name={name}
-      swatchColor={colorForTaxa(taxa)}
+      swatchColor={colorForTaxa(taxa, rampId)}
       primary={primary}
       secondary={secondary}
     />
@@ -122,15 +124,19 @@ const renderCountTooltip = ({
   name,
   quantity,
   showSwatch,
+  rampId,
 }: {
   name: string;
   quantity: number;
   showSwatch: boolean;
+  rampId?: string;
 }) => {
   return (
     <TooltipCard
       name={name}
-      swatchColor={showSwatch ? colorForQuantidade(quantity) : undefined}
+      swatchColor={
+        showSwatch ? colorForQuantidade(quantity, rampId) : undefined
+      }
       primary={
         quantity === 0 ? 'Sem cozinha registrada' : formatCozinhas(quantity)
       }
@@ -142,9 +148,11 @@ const renderCountTooltip = ({
 const renderPercentTooltip = ({
   name,
   register,
+  rampId,
 }: {
   name: string;
   register?: kitchenRateByCity;
+  rampId?: string;
 }) => {
   const percentual = register?.percentualDoBrasil ?? 0;
   const quantidade = register?.quantidade ?? 0;
@@ -161,7 +169,7 @@ const renderPercentTooltip = ({
   return (
     <TooltipCard
       name={name}
-      swatchColor={colorForPercentual(percentual)}
+      swatchColor={colorForPercentual(percentual, rampId)}
       primary={primary}
       secondary={secondary}
     />
@@ -177,9 +185,11 @@ const renderPercentTooltip = ({
 const renderCafPercentTooltip = ({
   name,
   register,
+  rampId,
 }: {
   name: string;
   register?: cafByCity;
+  rampId?: string;
 }) => {
   const percentual = register?.percentualDoBrasil ?? 0;
   const quantidade = register?.quantidade ?? 0;
@@ -201,103 +211,9 @@ const renderCafPercentTooltip = ({
   return (
     <TooltipCard
       name={name}
-      swatchColor={colorForCafPercentual(percentual)}
+      swatchColor={colorForCafPercentual(percentual, rampId)}
       primary={primary}
       secondary={secondary}
-    />
-  );
-};
-
-/** `"X,y%"` no formato pt-BR, com uma casa decimal. */
-const formatPercent = (value: number): string => {
-  return `${value.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%`;
-};
-
-/** Inteiro no formato pt-BR (separador de milhar). */
-const formatFamilias = (value: number): string => {
-  return value.toLocaleString('pt-BR');
-};
-
-/**
- * Frase do efeito do Bolsa Família na variação CADINSAN, comparando com o
- * cenário oposto: no modo `sem` mostra o alívio ("cai para"); no `com` mostra o
- * contrafactual ("seria"). Retorna `undefined` quando o cenário oposto não tem
- * proporção (sem denominador do CadÚnico).
- */
-const cadinsanEffectLine = ({
-  variant,
-  proporcao,
-  absoluto,
-}: {
-  variant: 'com' | 'sem';
-  proporcao: number | null;
-  absoluto: number;
-}): string | undefined => {
-  if (proporcao === null) {
-    return undefined;
-  }
-  const detalhe = `${formatPercent(proporcao)} (${formatFamilias(absoluto)} famílias)`;
-  return variant === 'sem'
-    ? `Com o Bolsa Família, cai para ${detalhe}`
-    : `Sem o Bolsa Família, seria ${detalhe}`;
-};
-
-/**
- * CADINSAN-mode tooltip. Destaca a proporção do cenário ativo (com/sem o efeito
- * do Bolsa Família) com a cor da faixa do mapa, a linha "N de M famílias do
- * CadÚnico neste cenário", e — como cada município carrega os dois cenários — uma
- * linha de efeito com a proporção do cenário oposto. Assim o leitor lê os dois
- * números como o mesmo indicador sob dois cenários, nunca como "quem recebe
- * Bolsa Família". Municípios sem denominador do CadÚnico (`proporcao === null`)
- * leem apenas "Sem dado do CadÚnico". `variant` escolhe a métrica ativa; as duas
- * dividem a mesma escala de cor.
- */
-const renderCadinsanTooltip = ({
-  name,
-  register,
-  variant,
-}: {
-  name: string;
-  register?: cadinsanByCity;
-  variant: 'com' | 'sem';
-}) => {
-  const semDado = (
-    <TooltipCard
-      name={name}
-      swatchColor={colorForCadinsan(null)}
-      primary="Sem dado do CadÚnico"
-    />
-  );
-  if (register === undefined) {
-    return semDado;
-  }
-
-  const isCom = variant === 'com';
-  const activeProporcao = isCom
-    ? register.proporcaoComPbf
-    : register.proporcaoSemPbf;
-  if (activeProporcao === null) {
-    return semDado;
-  }
-
-  const activeAbsoluto = isCom
-    ? register.absolutoComPbf
-    : register.absolutoSemPbf;
-  const qualifier = isCom ? 'com o Bolsa Família' : 'sem o Bolsa Família';
-
-  const effect = cadinsanEffectLine({
-    variant,
-    proporcao: isCom ? register.proporcaoSemPbf : register.proporcaoComPbf,
-    absoluto: isCom ? register.absolutoSemPbf : register.absolutoComPbf,
-  });
-
-  return (
-    <TooltipCard
-      name={name}
-      swatchColor={colorForCadinsan(activeProporcao)}
-      primary={`${formatPercent(activeProporcao)} em insegurança alimentar (${qualifier})`}
-      secondary={`${formatFamilias(activeAbsoluto)} de ${formatFamilias(register.cadastrosCadunico)} famílias do CadÚnico neste cenário`}
-      details={effect === undefined ? undefined : [effect]}
     />
   );
 };
@@ -306,9 +222,11 @@ const renderCadinsanTooltip = ({
 const renderCadUnicoTooltip = ({
   name,
   register,
+  rampId,
 }: {
   name: string;
   register?: kitchenRateByCity;
+  rampId?: string;
 }) => {
   const taxa = register?.porDezMilCadUnico ?? null;
   const pessoas = register?.pessoasCadUnico ?? null;
@@ -329,7 +247,7 @@ const renderCadUnicoTooltip = ({
   return (
     <TooltipCard
       name={name}
-      swatchColor={colorForCadUnico(taxa)}
+      swatchColor={colorForCadUnico(taxa, rampId)}
       primary={primary}
       secondary={secondary}
     />
@@ -340,9 +258,11 @@ const renderCadUnicoTooltip = ({
 const renderPessoasPorCozinhaTooltip = ({
   name,
   register,
+  rampId,
 }: {
   name: string;
   register?: kitchenRateByCity;
+  rampId?: string;
 }) => {
   const pessoasPorCozinha = register?.pessoasPorCozinha ?? null;
   const pessoas = register?.pessoasCadUnico ?? null;
@@ -361,7 +281,7 @@ const renderPessoasPorCozinhaTooltip = ({
   return (
     <TooltipCard
       name={name}
-      swatchColor={colorForPessoasPorCozinha(pessoasPorCozinha)}
+      swatchColor={colorForPessoasPorCozinha(pessoasPorCozinha, rampId)}
       primary={primary}
       secondary={secondary}
     />
@@ -376,7 +296,11 @@ const renderPessoasPorCozinhaTooltip = ({
 const RATE_TOOLTIPS: Partial<
   Record<
     MapMode,
-    (args: { name: string; register?: kitchenRateByCity }) => React.ReactNode
+    (args: {
+      name: string;
+      register?: kitchenRateByCity;
+      rampId?: string;
+    }) => React.ReactNode
   >
 > = {
   'coropletico-taxa': renderRateTooltip,
@@ -455,6 +379,7 @@ export const renderMunicipioTooltip = ({
   cafRegister,
   cadinsanRegister,
   value,
+  rampId,
 }: {
   mode: MapMode;
   name: string;
@@ -462,14 +387,21 @@ export const renderMunicipioTooltip = ({
   cafRegister?: cafByCity;
   cadinsanRegister?: cadinsanByCity;
   value: MapHoverInfo['value'];
+  /**
+   * The ramp the map is being read through, from the settings zone. The card's
+   * swatch has to come from the same one: it is there to tie the hovered
+   * município to its band on the map, and a swatch drawn from a palette the map
+   * is no longer using would point at the wrong band.
+   */
+  rampId?: string;
 }): React.ReactNode => {
   const rateTooltip = RATE_TOOLTIPS[mode];
   if (rateTooltip) {
-    return rateTooltip({ name, register });
+    return rateTooltip({ name, register, rampId });
   }
 
   if (mode === 'coropletico-cafs-percentual') {
-    return renderCafPercentTooltip({ name, register: cafRegister });
+    return renderCafPercentTooltip({ name, register: cafRegister, rampId });
   }
 
   if (mode === 'cafs') {
@@ -482,12 +414,13 @@ export const renderMunicipioTooltip = ({
       name,
       register: cadinsanRegister,
       variant: cadinsanVariant,
+      rampId,
     });
   }
 
   const score = SCORE_TOOLTIPS[mode];
   if (score) {
-    return renderScoreTooltip({ name, value, score });
+    return renderScoreTooltip({ name, value, score, rampId });
   }
 
   // Contagem bruta: vem do feature-state quando presente, senão dos dados
@@ -500,6 +433,7 @@ export const renderMunicipioTooltip = ({
     name,
     quantity,
     showSwatch: mode === 'coropletico',
+    rampId,
   });
 };
 

@@ -93,6 +93,17 @@ describe('renderMunicipioTooltip', () => {
     expect(screen.getByText('Sem cozinha registrada')).toBeInTheDocument();
   });
 
+  /*
+   * A município the join never reached: the paint has no feature-state value
+   * for it and the counts carry no row. Zero is the honest reading — the map
+   * has already drawn it in the "sem cozinha" colour.
+   */
+  test('count mode reads zero with neither a painted value nor a joined row', () => {
+    renderTooltip({ mode: 'coropletico', register: undefined, value: null });
+
+    expect(screen.getByText('Sem cozinha registrada')).toBeInTheDocument();
+  });
+
   test('choropleth count mode keeps the faixa colour swatch', () => {
     renderTooltip({ mode: 'coropletico', register: REGISTER, value: 5 });
 

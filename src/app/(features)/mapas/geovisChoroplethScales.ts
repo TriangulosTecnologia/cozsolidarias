@@ -9,6 +9,8 @@
 
 import { mapTokens } from '@/config/theme';
 
+import { rampPalette } from './mapaColorRamp';
+
 const sampleRamp = (ramp: readonly string[], count: number): string[] => {
   return Array.from({ length: count }, (_, index) => {
     const position = Math.round((index * (ramp.length - 1)) / (count - 1));
@@ -38,14 +40,18 @@ export const WITHOUT_KITCHEN_COLOR = mapTokens.dataviz.color.status.masked;
  * colorForQuantidade(0); // WITHOUT_KITCHEN_COLOR (grey "sem cozinha")
  * colorForQuantidade(4); // a mid blue band
  */
-export const colorForQuantidade = (quantidade: number): string => {
+export const colorForQuantidade = (
+  quantidade: number,
+  rampId?: string
+): string => {
   if (quantidade <= 0) {
     return WITHOUT_KITCHEN_COLOR;
   }
+  const colors = rampPalette({ rampId, count: COLORS.length }) ?? COLORS;
   const index = THRESHOLDS.findIndex((threshold) => {
     return quantidade < threshold;
   });
-  return index === -1 ? COLORS[COLORS.length - 1] : COLORS[index];
+  return index === -1 ? colors[colors.length - 1] : colors[index];
 };
 
 /**
@@ -166,8 +172,12 @@ export const RATE_COLORS = sampleRamp(
  * colorForTaxa(null); // WITHOUT_KITCHEN_COLOR
  * colorForTaxa(0.5); // the lightest painted band (Araraquara sits here)
  */
-export const colorForTaxa = (taxa: number | null): string => {
-  return colorForFlooredScale(taxa, RATE_THRESHOLDS, RATE_COLORS);
+export const colorForTaxa = (taxa: number | null, rampId?: string): string => {
+  return colorForFlooredScale(
+    taxa,
+    RATE_THRESHOLDS,
+    rampPalette({ rampId, count: RATE_COLORS.length }) ?? RATE_COLORS
+  );
 };
 
 /**
@@ -192,8 +202,15 @@ export const RATE_LEGEND_LABELS = flooredBinLabels('Sem dado', RATE_THRESHOLDS);
  * colorForPercentual(0); // WITHOUT_KITCHEN_COLOR
  * colorForPercentual(0.04); // a visible blue band
  */
-export const colorForPercentual = (percentual: number): string => {
-  return colorForFlooredScale(percentual, PERCENT_THRESHOLDS, PERCENT_COLORS);
+export const colorForPercentual = (
+  percentual: number,
+  rampId?: string
+): string => {
+  return colorForFlooredScale(
+    percentual,
+    PERCENT_THRESHOLDS,
+    rampPalette({ rampId, count: PERCENT_COLORS.length }) ?? PERCENT_COLORS
+  );
 };
 
 /**
@@ -239,11 +256,14 @@ export const CAF_PERCENT_THRESHOLDS = [0.00001, 0.005, 0.02, 0.05, 0.15, 0.3];
  * colorForCafPercentual(0); // WITHOUT_KITCHEN_COLOR ("sem CAF")
  * colorForCafPercentual(0.01); // a visible blue band
  */
-export const colorForCafPercentual = (percentual: number): string => {
+export const colorForCafPercentual = (
+  percentual: number,
+  rampId?: string
+): string => {
   return colorForFlooredScale(
     percentual,
     CAF_PERCENT_THRESHOLDS,
-    PERCENT_COLORS
+    rampPalette({ rampId, count: PERCENT_COLORS.length }) ?? PERCENT_COLORS
   );
 };
 
@@ -301,8 +321,15 @@ export const CADINSAN_COLORS = sampleRamp(
  * colorForCadinsan(0); // the lightest painted band
  * colorForCadinsan(35); // the "30 – 40%" band
  */
-export const colorForCadinsan = (proporcao: number | null): string => {
-  return colorForFlooredScale(proporcao, CADINSAN_THRESHOLDS, CADINSAN_COLORS);
+export const colorForCadinsan = (
+  proporcao: number | null,
+  rampId?: string
+): string => {
+  return colorForFlooredScale(
+    proporcao,
+    CADINSAN_THRESHOLDS,
+    rampPalette({ rampId, count: CADINSAN_COLORS.length }) ?? CADINSAN_COLORS
+  );
 };
 
 /**
@@ -354,8 +381,15 @@ export const CADUNICO_COLORS = sampleRamp(
  * colorForCadUnico(null); // WITHOUT_KITCHEN_COLOR
  * colorForCadUnico(1); // a mid blue band
  */
-export const colorForCadUnico = (taxa: number | null): string => {
-  return colorForFlooredScale(taxa, CADUNICO_THRESHOLDS, CADUNICO_COLORS);
+export const colorForCadUnico = (
+  taxa: number | null,
+  rampId?: string
+): string => {
+  return colorForFlooredScale(
+    taxa,
+    CADUNICO_THRESHOLDS,
+    rampPalette({ rampId, count: CADUNICO_COLORS.length }) ?? CADUNICO_COLORS
+  );
 };
 
 /**
@@ -405,11 +439,15 @@ export const PESSOAS_COZINHA_COLORS = sampleRamp(
  * colorForPessoasPorCozinha(null); // WITHOUT_KITCHEN_COLOR
  * colorForPessoasPorCozinha(15000); // a mid blue band
  */
-export const colorForPessoasPorCozinha = (valor: number | null): string => {
+export const colorForPessoasPorCozinha = (
+  valor: number | null,
+  rampId?: string
+): string => {
   return colorForFlooredScale(
     valor,
     PESSOAS_COZINHA_THRESHOLDS,
-    PESSOAS_COZINHA_COLORS
+    rampPalette({ rampId, count: PESSOAS_COZINHA_COLORS.length }) ??
+      PESSOAS_COZINHA_COLORS
   );
 };
 

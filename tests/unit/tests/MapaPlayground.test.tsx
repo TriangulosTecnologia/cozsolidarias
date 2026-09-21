@@ -1,6 +1,7 @@
 import '@testing-library/jest-dom';
 
 import { act, fireEvent, screen } from '@testing-library/react';
+import { toggleBoundaryGroup } from '@ttoss/geovis';
 import type * as React from 'react';
 import MapaPlayground from 'src/app/(features)/mapas/MapaPlayground';
 import type { kitchenRateByCity } from 'src/data-gateway/schema';
@@ -21,6 +22,12 @@ jest.mock('@ttoss/geovis', () => {
     useBoundaryToggle: (baseSpec: unknown) => {
       return { spec: baseSpec };
     },
+    // Recorded rather than simulated: the group it hides carries no layers in
+    // this stub, so only the call itself says which mode asked for the outline
+    // to go.
+    toggleBoundaryGroup: jest.fn((baseSpec: unknown) => {
+      return baseSpec;
+    }),
   };
 });
 
@@ -235,6 +242,13 @@ const bodyForUrl = (url: string) => {
 };
 
 beforeEach(() => {
+  jest.mocked(toggleBoundaryGroup).mockClear();
+
+  // The playground publishes the picked variation to the address, and jsdom
+  // keeps one `location` for the whole file: without this reset, a test that
+  // switches modes would seed the next test's mount from its query string.
+  window.history.replaceState(null, '', '/');
+
   // The component fetches the counts, catalogs and the assentamentos attribute
   // sidecar on mount; serve each shape.
   global.fetch = jest.fn((input: RequestInfo | URL) => {
@@ -360,6 +374,33 @@ describe('MapaPlayground — visualization toggle', () => {
     });
     expect(screen.getByTestId('hidden-slots')).not.toHaveTextContent(
       'inspector'
+    );
+  });
+
+  /*
+   * The grid covers the município fill but not its outline: `useBoundaryToggle`
+   * appends the boundary lines above every spec layer, so ~5.5k município lines
+   * would draw as a second mesh across the hexagons. Dropping the group instead
+   * of hiding it would strand the references `validateSpec` checks, and geovis
+   * refuses a spec that does not validate (ADR-0001).
+   */
+  test('hides the município outline under the hexagon grid', async () => {
+    renderWithChakra(<MapaPlayground />);
+    await screen.findByTestId('layer-ids');
+
+    // The choropleth draws its own outlines: nothing to hide.
+    expect(jest.mocked(toggleBoundaryGroup)).not.toHaveBeenCalled();
+
+    await act(async () => {
+      fireEvent.change(screen.getByLabelText('Variações'), {
+        target: { value: 'cafs-hexbin' },
+      });
+    });
+
+    expect(jest.mocked(toggleBoundaryGroup)).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      false
     );
   });
 
