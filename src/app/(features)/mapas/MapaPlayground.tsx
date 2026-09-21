@@ -438,6 +438,27 @@ const MapaPlayground = () => {
     cozinhasPoints,
   });
 
+  const dumpedSpecModes = React.useRef(new Set<MapMode>());
+
+  React.useEffect(() => {
+    if (
+      process.env.NODE_ENV !== 'development' ||
+      dumpedSpecModes.current.has(specMode)
+    ) {
+      return;
+    }
+
+    dumpedSpecModes.current.add(specMode);
+
+    fetch('/api/dev/mapa-spec-dump', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mode: specMode, spec }),
+    }).catch(() => {
+      dumpedSpecModes.current.delete(specMode);
+    });
+  }, [specMode, spec]);
+
   // `<GeovisWorkspace>` wraps its map in an outer `position:relative` Box; inside
   // it the map's Flex layout only sets `minHeight` (no `height`). We turn the
   // outer Box into a full-height flex column and let its in-flow child (the map

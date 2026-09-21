@@ -1,0 +1,17 @@
+{
+  "prompt": "Mapa dos assentamentos de reforma agrária.",
+  "httpStatus": 422,
+  "durationMs": 7301,
+  "response": {
+    "error": "O modelo retornou uma resposta inválida. Tente reformular o pedido.",
+    "issues": [
+      {
+        "code": "invalid-schema",
+        "message": "(root) must have required property 'engine'"
+      }
+    ],
+    "spec": {
+      "error": "Não há, no catálogo, nenhum dataset sobre assentamentos de reforma agrária. O dataset mais próximo em tema, 'caf_areas' (Cadastro Ambiental Rural), mede áreas rurais cadastradas no CAF — um instrumento de regularização ambiental de imóveis rurais, não o cadastro de assentamentos do INCRA/reforma agrária. Além disso, 'caf_areas' não está entre os datasets habilitados para visualização (renderableDatasets). Como não existe correspondência direta nem um proxy admissível para 'assentamentos de reforma agrária' dentro dos dados disponíveis, não é possível gerar esse mapa."
+    }
+  }
+}

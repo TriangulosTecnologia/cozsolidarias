@@ -1,0 +1,6665 @@
+{
+  "prompt": "Mapa do total de pessoas atendidas pelas cozinhas em cada município.",
+  "httpStatus": 200,
+  "durationMs": 64011,
+  "response": {
+    "result": {
+      "engine": "maplibre",
+      "mapType": "proportionalCircles",
+      "title": "Pessoas atendidas pelas cozinhas solidárias, por município",
+      "description": "Total de pessoas atendidas, declarado no cadastro das cozinhas solidárias (campo \"Público Total Atendido\"), somado por município. É o público declarado no cadastro, não uma medição de alcance real. Sem corte de data explícito — snapshot do cadastro atual. Municípios sem nenhuma cozinha com valor parseável ficam sem círculo, nunca aparecem como zero.",
+      "view": {
+        "center": [
+          -52.9,
+          -14.2
+        ],
+        "zoom": 3.5
+      },
+      "sources": [
+        {
+          "id": "cozinhas-bolhas",
+          "type": "geojson",
+          "data": {
+            "type": "FeatureCollection",
+            "features": [
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -43.356451988405794,
+                    -22.90091338985508
+                  ]
+                },
+                "properties": {
+                  "codarea": "3304557",
+                  "municipio": "RIO DE JANEIRO",
+                  "quantidade": 69
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -39.004478774999995,
+                    -11.662325925000001
+                  ]
+                },
+                "properties": {
+                  "codarea": "2930501",
+                  "municipio": "SERRINHA",
+                  "quantidade": 4
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -36.2464602,
+                    -9.3800589
+                  ]
+                },
+                "properties": {
+                  "codarea": "2709400",
+                  "municipio": "VIÇOSA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -46.6274854,
+                    -23.693702
+                  ]
+                },
+                "properties": {
+                  "codarea": "3513801",
+                  "municipio": "DIADEMA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -35.25488219666667,
+                    -5.765259893333335
+                  ]
+                },
+                "properties": {
+                  "codarea": "2408102",
+                  "municipio": "NATAL",
+                  "quantidade": 30
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -41.875947249999996,
+                    -21.20511905
+                  ]
+                },
+                "properties": {
+                  "codarea": "3302205",
+                  "municipio": "ITAPERUNA",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -36.8665692,
+                    -9.3082598
+                  ]
+                },
+                "properties": {
+                  "codarea": "2705309",
+                  "municipio": "MINADOR DO NEGRÃO",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -38.65165683928573,
+                    -3.735335914285715
+                  ]
+                },
+                "properties": {
+                  "codarea": "2303709",
+                  "municipio": "CAUCAIA",
+                  "quantidade": 28
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -48.95486292857144,
+                    -16.32191994285714
+                  ]
+                },
+                "properties": {
+                  "codarea": "5201108",
+                  "municipio": "ANÁPOLIS",
+                  "quantidade": 7
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -55.526829033333335,
+                    -30.887331466666666
+                  ]
+                },
+                "properties": {
+                  "codarea": "4317103",
+                  "municipio": "SANT'ANA DO LIVRAMENTO",
+                  "quantidade": 3
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -37.07590551333333,
+                    -10.940496486666666
+                  ]
+                },
+                "properties": {
+                  "codarea": "2800308",
+                  "municipio": "ARACAJU",
+                  "quantidade": 15
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -51.158925141481454,
+                    -30.06271912814816
+                  ]
+                },
+                "properties": {
+                  "codarea": "4314902",
+                  "municipio": "PORTO ALEGRE",
+                  "quantidade": 135
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -35.741408955,
+                    -9.580662475
+                  ]
+                },
+                "properties": {
+                  "codarea": "2704302",
+                  "municipio": "MACEIÓ",
+                  "quantidade": 20
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -38.4555175076923,
+                    -12.912953634615386
+                  ]
+                },
+                "properties": {
+                  "codarea": "2927408",
+                  "municipio": "SALVADOR",
+                  "quantidade": 26
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -43.5644666,
+                    -22.71058405
+                  ]
+                },
+                "properties": {
+                  "codarea": "3304144",
+                  "municipio": "QUEIMADOS",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -48.1510933,
+                    -21.1900189
+                  ]
+                },
+                "properties": {
+                  "codarea": "3505609",
+                  "municipio": "BARRINHA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -43.7878844,
+                    -22.8651724
+                  ]
+                },
+                "properties": {
+                  "codarea": "3302007",
+                  "municipio": "ITAGUAÍ",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -34.87649335454545,
+                    -7.158785436363636
+                  ]
+                },
+                "properties": {
+                  "codarea": "2507507",
+                  "municipio": "JOÃO PESSOA",
+                  "quantidade": 11
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -44.40842015,
+                    -3.36493655
+                  ]
+                },
+                "properties": {
+                  "codarea": "2105401",
+                  "municipio": "ITAPECURU MIRIM",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -38.7179416,
+                    -12.5454065
+                  ]
+                },
+                "properties": {
+                  "codarea": "2928604",
+                  "municipio": "SANTO AMARO",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -46.594841497902095,
+                    -23.594992669230773
+                  ]
+                },
+                "properties": {
+                  "codarea": "3550308",
+                  "municipio": "SÃO PAULO",
+                  "quantidade": 143
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -47.935479519047625,
+                    -15.81914787142857
+                  ]
+                },
+                "properties": {
+                  "codarea": "5300108",
+                  "municipio": "BRASÍLIA",
+                  "quantidade": 21
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -42.5320239,
+                    -22.2606016
+                  ]
+                },
+                "properties": {
+                  "codarea": "3303401",
+                  "municipio": "NOVA FRIBURGO",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -44.4508454,
+                    -18.7454865
+                  ]
+                },
+                "properties": {
+                  "codarea": "3120904",
+                  "municipio": "CURVELO",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -47.94759755,
+                    -18.1697089
+                  ]
+                },
+                "properties": {
+                  "codarea": "5205109",
+                  "municipio": "CATALÃO",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -46.905391,
+                    -1.5171167
+                  ]
+                },
+                "properties": {
+                  "codarea": "1506559",
+                  "municipio": "SANTA LUZIA DO PARÁ",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -48.379845090909086,
+                    -1.3528382545454547
+                  ]
+                },
+                "properties": {
+                  "codarea": "1500800",
+                  "municipio": "ANANINDEUA",
+                  "quantidade": 11
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -41.7717616,
+                    -22.3587618
+                  ]
+                },
+                "properties": {
+                  "codarea": "3302403",
+                  "municipio": "MACAÉ",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -38.95933981111111,
+                    -12.248938588888887
+                  ]
+                },
+                "properties": {
+                  "codarea": "2910800",
+                  "municipio": "FEIRA DE SANTANA",
+                  "quantidade": 9
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -41.2096279,
+                    -20.640742
+                  ]
+                },
+                "properties": {
+                  "codarea": "3201407",
+                  "municipio": "CASTELO",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -39.2579829,
+                    -14.7764658
+                  ]
+                },
+                "properties": {
+                  "codarea": "2914802",
+                  "municipio": "ITABUNA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -47.101557674999995,
+                    -22.953864375000002
+                  ]
+                },
+                "properties": {
+                  "codarea": "3509502",
+                  "municipio": "CAMPINAS",
+                  "quantidade": 4
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -48.7071492,
+                    -20.1346303
+                  ]
+                },
+                "properties": {
+                  "codarea": "3151602",
+                  "municipio": "PLANURA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -47.3496516,
+                    -2.9779156
+                  ]
+                },
+                "properties": {
+                  "codarea": "1505502",
+                  "municipio": "PARAGOMINAS",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -38.1410594,
+                    -4.1783299
+                  ]
+                },
+                "properties": {
+                  "codarea": "2302206",
+                  "municipio": "BEBERIBE",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -42.78254270499999,
+                    -5.072381654999999
+                  ]
+                },
+                "properties": {
+                  "codarea": "2211001",
+                  "municipio": "TERESINA",
+                  "quantidade": 20
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -44.9525673,
+                    -17.3399493
+                  ]
+                },
+                "properties": {
+                  "codarea": "3151206",
+                  "municipio": "PIRAPORA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -34.86554999333334,
+                    -7.99333062
+                  ]
+                },
+                "properties": {
+                  "codarea": "2609600",
+                  "municipio": "OLINDA",
+                  "quantidade": 15
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -47.61170345,
+                    -1.2122523
+                  ]
+                },
+                "properties": {
+                  "codarea": "1503200",
+                  "municipio": "IGARAPÉ-AÇU",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -40.383634,
+                    -20.3463778
+                  ]
+                },
+                "properties": {
+                  "codarea": "3201308",
+                  "municipio": "CARIACICA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -47.3491084,
+                    -0.628107
+                  ]
+                },
+                "properties": {
+                  "codarea": "1506203",
+                  "municipio": "SALINÓPOLIS",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -51.060972250000006,
+                    0.09270225
+                  ]
+                },
+                "properties": {
+                  "codarea": "1600303",
+                  "municipio": "MACAPÁ",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -52.2587299,
+                    -15.8937062
+                  ]
+                },
+                "properties": {
+                  "codarea": "5101803",
+                  "municipio": "BARRA DO GARÇAS",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -60.7173819,
+                    2.8132757249999996
+                  ]
+                },
+                "properties": {
+                  "codarea": "1400100",
+                  "municipio": "BOA VISTA",
+                  "quantidade": 4
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -38.5994881,
+                    -3.889877
+                  ]
+                },
+                "properties": {
+                  "codarea": "2309706",
+                  "municipio": "PACATUBA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -36.8392237,
+                    -10.2173105
+                  ]
+                },
+                "properties": {
+                  "codarea": "2805703",
+                  "municipio": "PROPRIÁ",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -54.8188304,
+                    -22.2340032
+                  ]
+                },
+                "properties": {
+                  "codarea": "5003702",
+                  "municipio": "DOURADOS",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -45.2283113,
+                    -22.8413777
+                  ]
+                },
+                "properties": {
+                  "codarea": "3502507",
+                  "municipio": "APARECIDA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -48.547598008333345,
+                    -27.593319349999998
+                  ]
+                },
+                "properties": {
+                  "codarea": "4205407",
+                  "municipio": "FLORIANÓPOLIS",
+                  "quantidade": 12
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -48.6469604,
+                    -27.00863
+                  ]
+                },
+                "properties": {
+                  "codarea": "4203204",
+                  "municipio": "BALNEÁRIO CAMBORIÚ",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -50.1474884,
+                    -30.0125007
+                  ]
+                },
+                "properties": {
+                  "codarea": "4321600",
+                  "municipio": "TRAMANDAÍ",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -49.0505815,
+                    -22.2995617
+                  ]
+                },
+                "properties": {
+                  "codarea": "3506003",
+                  "municipio": "BAURU",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -43.36302905,
+                    -22.773043375
+                  ]
+                },
+                "properties": {
+                  "codarea": "3305109",
+                  "municipio": "SÃO JOÃO DE MERITI",
+                  "quantidade": 4
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -39.18119195,
+                    -11.74653295
+                  ]
+                },
+                "properties": {
+                  "codarea": "2913309",
+                  "municipio": "ICHU",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -43.28090927,
+                    -22.71751299
+                  ]
+                },
+                "properties": {
+                  "codarea": "3301702",
+                  "municipio": "DUQUE DE CAXIAS",
+                  "quantidade": 10
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -34.936188566666665,
+                    -8.152882633333334
+                  ]
+                },
+                "properties": {
+                  "codarea": "2607901",
+                  "municipio": "JABOATÃO DOS GUARARAPES",
+                  "quantidade": 3
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -40.3742875,
+                    -7.0764839
+                  ]
+                },
+                "properties": {
+                  "codarea": "2302701",
+                  "municipio": "CAMPOS SALES",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -47.474755,
+                    -5.517984
+                  ]
+                },
+                "properties": {
+                  "codarea": "2105302",
+                  "municipio": "IMPERATRIZ",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -44.0991737,
+                    -2.5467245
+                  ]
+                },
+                "properties": {
+                  "codarea": "2107506",
+                  "municipio": "SÃO JOSÉ DE RIBAMAR",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -67.8401683,
+                    -9.9430081
+                  ]
+                },
+                "properties": {
+                  "codarea": "1200401",
+                  "municipio": "RIO BRANCO",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -34.90718345555557,
+                    -8.063829714814815
+                  ]
+                },
+                "properties": {
+                  "codarea": "2611606",
+                  "municipio": "RECIFE",
+                  "quantidade": 27
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -53.4386632,
+                    -24.9155321
+                  ]
+                },
+                "properties": {
+                  "codarea": "4104808",
+                  "municipio": "CASCAVEL",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -46.46708073333334,
+                    -23.448890755555553
+                  ]
+                },
+                "properties": {
+                  "codarea": "3518800",
+                  "municipio": "GUARULHOS",
+                  "quantidade": 9
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -35.2922289,
+                    -8.127641
+                  ]
+                },
+                "properties": {
+                  "codarea": "2616407",
+                  "municipio": "VITÓRIA DE SANTO ANTÃO",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -51.16799145,
+                    -23.313949049999998
+                  ]
+                },
+                "properties": {
+                  "codarea": "4113700",
+                  "municipio": "LONDRINA",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -37.1152708,
+                    -10.9433078
+                  ]
+                },
+                "properties": {
+                  "codarea": "2806701",
+                  "municipio": "SÃO CRISTÓVÃO",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -46.3439901,
+                    -23.5023096
+                  ]
+                },
+                "properties": {
+                  "codarea": "3523107",
+                  "municipio": "ITAQUAQUECETUBA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -36.3721294,
+                    -10.3781676
+                  ]
+                },
+                "properties": {
+                  "codarea": "2706802",
+                  "municipio": "PIAÇABUÇU",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -49.16857666,
+                    -25.49966746
+                  ]
+                },
+                "properties": {
+                  "codarea": "4125506",
+                  "municipio": "SÃO JOSÉ DOS PINHAIS",
+                  "quantidade": 5
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -51.44431,
+                    -23.4040614
+                  ]
+                },
+                "properties": {
+                  "codarea": "4101507",
+                  "municipio": "ARAPONGAS",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -43.427069724999996,
+                    -22.791214000000004
+                  ]
+                },
+                "properties": {
+                  "codarea": "3302858",
+                  "municipio": "MESQUITA",
+                  "quantidade": 4
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -42.008296,
+                    -22.6469474
+                  ]
+                },
+                "properties": {
+                  "codarea": "3300704",
+                  "municipio": "CABO FRIO",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -37.6570921,
+                    -11.3810347
+                  ]
+                },
+                "properties": {
+                  "codarea": "2807600",
+                  "municipio": "UMBAÚBA",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -38.774208200000004,
+                    -7.386732800000001
+                  ]
+                },
+                "properties": {
+                  "codarea": "2308104",
+                  "municipio": "MAURITI",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -46.244927,
+                    -23.9641999
+                  ]
+                },
+                "properties": {
+                  "codarea": "3518701",
+                  "municipio": "GUARUJÁ",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -45.4969665,
+                    -22.9478341
+                  ]
+                },
+                "properties": {
+                  "codarea": "3538006",
+                  "municipio": "PINDAMONHANGABA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -46.3235745,
+                    -23.9670123
+                  ]
+                },
+                "properties": {
+                  "codarea": "3548500",
+                  "municipio": "SANTOS",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -44.079058679999996,
+                    -19.8983997
+                  ]
+                },
+                "properties": {
+                  "codarea": "3118601",
+                  "municipio": "CONTAGEM",
+                  "quantidade": 5
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -44.8405233,
+                    -15.945416
+                  ]
+                },
+                "properties": {
+                  "codarea": "3161106",
+                  "municipio": "SÃO FRANCISCO",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -51.05485337647059,
+                    -30.00616745882353
+                  ]
+                },
+                "properties": {
+                  "codarea": "4300604",
+                  "municipio": "ALVORADA",
+                  "quantidade": 17
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -43.37478336666666,
+                    -22.750671433333334
+                  ]
+                },
+                "properties": {
+                  "codarea": "3300456",
+                  "municipio": "BELFORD ROXO",
+                  "quantidade": 6
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -43.84860044,
+                    -16.73016534
+                  ]
+                },
+                "properties": {
+                  "codarea": "3143302",
+                  "municipio": "MONTES CLAROS",
+                  "quantidade": 5
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -38.7672766,
+                    -12.3935419
+                  ]
+                },
+                "properties": {
+                  "codarea": "2901106",
+                  "municipio": "AMÉLIA RODRIGUES",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -46.800227199999995,
+                    -23.632167199999998
+                  ]
+                },
+                "properties": {
+                  "codarea": "3552809",
+                  "municipio": "TABOÃO DA SERRA",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -40.3767352,
+                    -3.6734521
+                  ]
+                },
+                "properties": {
+                  "codarea": "2312908",
+                  "municipio": "SOBRAL",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -49.454563,
+                    -21.9930264
+                  ]
+                },
+                "properties": {
+                  "codarea": "3538907",
+                  "municipio": "PIRAJUÍ",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -59.989625133333334,
+                    -3.0912208
+                  ]
+                },
+                "properties": {
+                  "codarea": "1302603",
+                  "municipio": "MANAUS",
+                  "quantidade": 3
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -45.1865669,
+                    -10.6503409
+                  ]
+                },
+                "properties": {
+                  "codarea": "2203008",
+                  "municipio": "CRISTALÂNDIA DO PIAUÍ",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -43.558055562499995,
+                    -22.7941182625
+                  ]
+                },
+                "properties": {
+                  "codarea": "3303500",
+                  "municipio": "NOVA IGUAÇU",
+                  "quantidade": 8
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -49.3896727,
+                    -20.7760466
+                  ]
+                },
+                "properties": {
+                  "codarea": "3549805",
+                  "municipio": "SÃO JOSÉ DO RIO PRETO",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -60.6010943,
+                    2.6101143
+                  ]
+                },
+                "properties": {
+                  "codarea": "1400175",
+                  "municipio": "CANTÁ",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -43.6224024,
+                    -18.2356358
+                  ]
+                },
+                "properties": {
+                  "codarea": "3121605",
+                  "municipio": "DIAMANTINA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -46.51766245,
+                    -23.719027699999998
+                  ]
+                },
+                "properties": {
+                  "codarea": "3547809",
+                  "municipio": "SANTO ANDRÉ",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -46.790902,
+                    -23.4905918
+                  ]
+                },
+                "properties": {
+                  "codarea": "3534401",
+                  "municipio": "OSASCO",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -46.801356,
+                    -23.6608154
+                  ]
+                },
+                "properties": {
+                  "codarea": "3515004",
+                  "municipio": "EMBU DAS ARTES",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -49.26451515652174,
+                    -25.46108969130435
+                  ]
+                },
+                "properties": {
+                  "codarea": "4106902",
+                  "municipio": "CURITIBA",
+                  "quantidade": 23
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -49.8391518,
+                    -5.9481079
+                  ]
+                },
+                "properties": {
+                  "codarea": "1505536",
+                  "municipio": "PARAUAPEBAS",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -39.208875199999994,
+                    -6.246949625
+                  ]
+                },
+                "properties": {
+                  "codarea": "2311355",
+                  "municipio": "QUIXELÔ",
+                  "quantidade": 4
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -37.6507664,
+                    -7.7361946
+                  ]
+                },
+                "properties": {
+                  "codarea": "2600104",
+                  "municipio": "AFOGADOS DA INGAZEIRA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -43.0661628,
+                    -22.895300274999997
+                  ]
+                },
+                "properties": {
+                  "codarea": "3303302",
+                  "municipio": "NITERÓI",
+                  "quantidade": 4
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -53.82339050000001,
+                    -29.69169803571428
+                  ]
+                },
+                "properties": {
+                  "codarea": "4316907",
+                  "municipio": "SANTA MARIA",
+                  "quantidade": 14
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -38.3585557,
+                    -12.84571375
+                  ]
+                },
+                "properties": {
+                  "codarea": "2919207",
+                  "municipio": "LAURO DE FREITAS",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -39.3979061,
+                    -3.68279625
+                  ]
+                },
+                "properties": {
+                  "codarea": "2313757",
+                  "municipio": "UMIRIM",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -38.9951254,
+                    -7.4902923
+                  ]
+                },
+                "properties": {
+                  "codarea": "2302503",
+                  "municipio": "BREJO SANTO",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -49.2701816,
+                    -16.81928535
+                  ]
+                },
+                "properties": {
+                  "codarea": "5201405",
+                  "municipio": "APARECIDA DE GOIÂNIA",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -39.2791011,
+                    -3.9531256
+                  ]
+                },
+                "properties": {
+                  "codarea": "2300903",
+                  "municipio": "APUIARÉS",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -51.3288467,
+                    -29.7735873
+                  ]
+                },
+                "properties": {
+                  "codarea": "4313375",
+                  "municipio": "NOVA SANTA RITA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -47.914526,
+                    -22.052124
+                  ]
+                },
+                "properties": {
+                  "codarea": "3548906",
+                  "municipio": "SÃO CARLOS",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -46.7151076,
+                    -24.1307331
+                  ]
+                },
+                "properties": {
+                  "codarea": "3531100",
+                  "municipio": "MONGAGUÁ",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -38.9194894,
+                    -4.5692351
+                  ]
+                },
+                "properties": {
+                  "codarea": "2306504",
+                  "municipio": "ITAPIÚNA",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -38.6948038,
+                    -6.8644363
+                  ]
+                },
+                "properties": {
+                  "codarea": "2305704",
+                  "municipio": "OCARA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -36.0832117,
+                    -9.52830355
+                  ]
+                },
+                "properties": {
+                  "codarea": "2700409",
+                  "municipio": "ATALAIA",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -38.9934794,
+                    -4.3023897
+                  ]
+                },
+                "properties": {
+                  "codarea": "2309102",
+                  "municipio": "MULUNGU",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -52.2866664,
+                    -27.64909325
+                  ]
+                },
+                "properties": {
+                  "codarea": "4307005",
+                  "municipio": "ERECHIM",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -38.873703883333334,
+                    -4.32472
+                  ]
+                },
+                "properties": {
+                  "codarea": "2302107",
+                  "municipio": "BATURITÉ",
+                  "quantidade": 6
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -35.2861023,
+                    -5.8413863
+                  ]
+                },
+                "properties": {
+                  "codarea": "2407104",
+                  "municipio": "MACAÍBA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -42.652835,
+                    -22.4600187
+                  ]
+                },
+                "properties": {
+                  "codarea": "3300803",
+                  "municipio": "CACHOEIRAS DE MACACU",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -36.6305904,
+                    -9.5376138
+                  ]
+                },
+                "properties": {
+                  "codarea": "2703106",
+                  "municipio": "IGACI",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -39.4122984,
+                    -7.2299572
+                  ]
+                },
+                "properties": {
+                  "codarea": "2304202",
+                  "municipio": "CRATO",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -39.3089485,
+                    -7.3161519
+                  ]
+                },
+                "properties": {
+                  "codarea": "2301901",
+                  "municipio": "BARBALHA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -39.2767307,
+                    -7.5871907
+                  ]
+                },
+                "properties": {
+                  "codarea": "2307106",
+                  "municipio": "JARDIM",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -38.9230803,
+                    -4.2263683
+                  ]
+                },
+                "properties": {
+                  "codarea": "2309805",
+                  "municipio": "PACOTI",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -43.940588983333335,
+                    -19.88756634166667
+                  ]
+                },
+                "properties": {
+                  "codarea": "3106200",
+                  "municipio": "BELO HORIZONTE",
+                  "quantidade": 12
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -39.5028511,
+                    -13.0720072
+                  ]
+                },
+                "properties": {
+                  "codarea": "2901007",
+                  "municipio": "AMARGOSA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -38.4594966,
+                    -4.1801126
+                  ]
+                },
+                "properties": {
+                  "codarea": "2309607",
+                  "municipio": "PACAJUS",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -38.56716493333334,
+                    -3.771523301333333
+                  ]
+                },
+                "properties": {
+                  "codarea": "2304400",
+                  "municipio": "FORTALEZA",
+                  "quantidade": 75
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -34.998430125,
+                    -7.995172675
+                  ]
+                },
+                "properties": {
+                  "codarea": "2603454",
+                  "municipio": "CAMARAGIBE",
+                  "quantidade": 4
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -52.345874179999996,
+                    -31.75528454
+                  ]
+                },
+                "properties": {
+                  "codarea": "4314407",
+                  "municipio": "PELOTAS",
+                  "quantidade": 10
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -39.5259047,
+                    -6.8473982499999995
+                  ]
+                },
+                "properties": {
+                  "codarea": "2304301",
+                  "municipio": "FARIAS BRITO",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -48.46402975,
+                    -1.3867417499999999
+                  ]
+                },
+                "properties": {
+                  "codarea": "1501402",
+                  "municipio": "BELÉM",
+                  "quantidade": 4
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -38.5934442,
+                    -3.83848144
+                  ]
+                },
+                "properties": {
+                  "codarea": "2307650",
+                  "municipio": "MARACANAÚ",
+                  "quantidade": 5
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -43.65539478000001,
+                    -22.798098860000003
+                  ]
+                },
+                "properties": {
+                  "codarea": "3305554",
+                  "municipio": "SEROPÉDICA",
+                  "quantidade": 5
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -41.9874993,
+                    -18.8226839
+                  ]
+                },
+                "properties": {
+                  "codarea": "3127701",
+                  "municipio": "GOVERNADOR VALADARES",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -42.95615706666666,
+                    -22.799844233333335
+                  ]
+                },
+                "properties": {
+                  "codarea": "3304904",
+                  "municipio": "SÃO GONÇALO",
+                  "quantidade": 3
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -46.4852212,
+                    -14.4732767
+                  ]
+                },
+                "properties": {
+                  "codarea": "5220686",
+                  "municipio": "SIMOLÂNDIA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -51.14334267407408,
+                    -29.756312496296292
+                  ]
+                },
+                "properties": {
+                  "codarea": "4318705",
+                  "municipio": "SÃO LEOPOLDO",
+                  "quantidade": 27
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -41.44738005,
+                    -7.0829134
+                  ]
+                },
+                "properties": {
+                  "codarea": "2208007",
+                  "municipio": "PICOS",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -37.1229444,
+                    -9.1181971
+                  ]
+                },
+                "properties": {
+                  "codarea": "2600500",
+                  "municipio": "ÁGUAS BELAS",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -47.2252491,
+                    -22.814753875
+                  ]
+                },
+                "properties": {
+                  "codarea": "3552403",
+                  "municipio": "SUMARÉ",
+                  "quantidade": 4
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -39.11458513333333,
+                    -16.4641804
+                  ]
+                },
+                "properties": {
+                  "codarea": "2925303",
+                  "municipio": "PORTO SEGURO",
+                  "quantidade": 3
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -39.74803335,
+                    -17.54533175
+                  ]
+                },
+                "properties": {
+                  "codarea": "2931350",
+                  "municipio": "TEIXEIRA DE FREITAS",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -37.3766441,
+                    -9.5548775
+                  ]
+                },
+                "properties": {
+                  "codarea": "2708402",
+                  "municipio": "SÃO JOSÉ DA TAPERA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -46.325318100000004,
+                    -23.548597049999998
+                  ]
+                },
+                "properties": {
+                  "codarea": "3552502",
+                  "municipio": "SUZANO",
+                  "quantidade": 4
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -49.5998237,
+                    -21.8044647
+                  ]
+                },
+                "properties": {
+                  "codarea": "3508801",
+                  "municipio": "CAFELÂNDIA",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -44.28859166666667,
+                    -2.5396677333333333
+                  ]
+                },
+                "properties": {
+                  "codarea": "2111300",
+                  "municipio": "SÃO LUÍS",
+                  "quantidade": 6
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -41.5076763,
+                    -17.8663896
+                  ]
+                },
+                "properties": {
+                  "codarea": "3168606",
+                  "municipio": "TEÓFILO OTONI",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -47.804202775,
+                    -21.150481525
+                  ]
+                },
+                "properties": {
+                  "codarea": "3543402",
+                  "municipio": "RIBEIRÃO PRETO",
+                  "quantidade": 4
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -38.3244427,
+                    -5.7934377
+                  ]
+                },
+                "properties": {
+                  "codarea": "2306009",
+                  "municipio": "IRACEMA",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -47.5712676,
+                    -1.3580856
+                  ]
+                },
+                "properties": {
+                  "codarea": "1506609",
+                  "municipio": "SANTA MARIA DO PARÁ",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -34.86399626666667,
+                    -7.9332202999999994
+                  ]
+                },
+                "properties": {
+                  "codarea": "2610707",
+                  "municipio": "PAULISTA",
+                  "quantidade": 6
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -49.9703424,
+                    -14.5453487
+                  ]
+                },
+                "properties": {
+                  "codarea": "5206404",
+                  "municipio": "CRIXÁS",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -38.656135925,
+                    -4.296958025
+                  ]
+                },
+                "properties": {
+                  "codarea": "2301950",
+                  "municipio": "BARREIRA",
+                  "quantidade": 4
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -47.4042441,
+                    -20.5270021
+                  ]
+                },
+                "properties": {
+                  "codarea": "3516200",
+                  "municipio": "FRANCA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -38.706244325,
+                    -4.46469755
+                  ]
+                },
+                "properties": {
+                  "codarea": "2301208",
+                  "municipio": "ARACOIABA",
+                  "quantidade": 4
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -38.9001277,
+                    -4.4676466
+                  ]
+                },
+                "properties": {
+                  "codarea": "2302909",
+                  "municipio": "CAPISTRANO",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -45.4396767,
+                    -20.4566176
+                  ]
+                },
+                "properties": {
+                  "codarea": "3126109",
+                  "municipio": "FORMIGA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -38.6146624,
+                    -4.5839604
+                  ]
+                },
+                "properties": {
+                  "codarea": "2309458",
+                  "municipio": "OCARA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -46.37787586666667,
+                    -23.546200799999998
+                  ]
+                },
+                "properties": {
+                  "codarea": "3515707",
+                  "municipio": "FERRAZ DE VASCONCELOS",
+                  "quantidade": 3
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -46.9789572,
+                    -22.9695223
+                  ]
+                },
+                "properties": {
+                  "codarea": "3556206",
+                  "municipio": "VALINHOS",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -42.1186688,
+                    -4.802687
+                  ]
+                },
+                "properties": {
+                  "codarea": "2202208",
+                  "municipio": "CAMPO MAIOR",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -42.89655436666666,
+                    -22.7353545
+                  ]
+                },
+                "properties": {
+                  "codarea": "3301900",
+                  "municipio": "ITABORAÍ",
+                  "quantidade": 3
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -38.7524408,
+                    -12.2467053
+                  ]
+                },
+                "properties": {
+                  "codarea": "2908903",
+                  "municipio": "CORAÇÃO DE MARIA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -48.6316329,
+                    -27.5586766
+                  ]
+                },
+                "properties": {
+                  "codarea": "4216602",
+                  "municipio": "SÃO JOSÉ",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -37.4765201,
+                    -11.0336038
+                  ]
+                },
+                "properties": {
+                  "codarea": "2806206",
+                  "municipio": "SALGADO",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -39.9500305,
+                    -6.3070511
+                  ]
+                },
+                "properties": {
+                  "codarea": "2303600",
+                  "municipio": "REDENÇÃO",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -38.4765808,
+                    -4.3346654
+                  ]
+                },
+                "properties": {
+                  "codarea": "2303956",
+                  "municipio": "CHOROZINHO",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -37.4392571,
+                    -11.2705796
+                  ]
+                },
+                "properties": {
+                  "codarea": "2802106",
+                  "municipio": "ESTÂNCIA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -37.7267642,
+                    -11.0705947
+                  ]
+                },
+                "properties": {
+                  "codarea": "2805802",
+                  "municipio": "RIACHÃO DO DANTAS",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -42.47624673333334,
+                    -5.035354399999999
+                  ]
+                },
+                "properties": {
+                  "codarea": "2200400",
+                  "municipio": "ALTOS",
+                  "quantidade": 6
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -37.4995113,
+                    -5.2168453
+                  ]
+                },
+                "properties": {
+                  "codarea": "2408003",
+                  "municipio": "MOSSORÓ",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -35.9067555,
+                    -9.7194548
+                  ]
+                },
+                "properties": {
+                  "codarea": "2704708",
+                  "municipio": "MARECHAL DEODORO",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -39.2816971,
+                    -6.7989805
+                  ]
+                },
+                "properties": {
+                  "codarea": "2314003",
+                  "municipio": "PALMÁCIA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -39.5016441,
+                    -4.81244445
+                  ]
+                },
+                "properties": {
+                  "codarea": "2307635",
+                  "municipio": "MADALENA",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -47.8342709,
+                    -24.5193596
+                  ]
+                },
+                "properties": {
+                  "codarea": "3542602",
+                  "municipio": "REGISTRO",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -38.88413285,
+                    -4.13397915
+                  ]
+                },
+                "properties": {
+                  "codarea": "2310100",
+                  "municipio": "PALMÁCIA",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -43.60152855,
+                    -22.6663546
+                  ]
+                },
+                "properties": {
+                  "codarea": "3302270",
+                  "municipio": "JAPERI",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -48.1352526,
+                    -1.1508589
+                  ]
+                },
+                "properties": {
+                  "codarea": "1507003",
+                  "municipio": "SANTO ANTÔNIO DO TAUÁ",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -54.60579833333333,
+                    -20.510621099999998
+                  ]
+                },
+                "properties": {
+                  "codarea": "5002704",
+                  "municipio": "CAMPO GRANDE",
+                  "quantidade": 3
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -42.7487541,
+                    -22.9558386
+                  ]
+                },
+                "properties": {
+                  "codarea": "3302700",
+                  "municipio": "MARICÁ",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -41.768747,
+                    -2.9131847
+                  ]
+                },
+                "properties": {
+                  "codarea": "2207702",
+                  "municipio": "PARNAÍBA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -51.1959486625,
+                    -29.178614156250003
+                  ]
+                },
+                "properties": {
+                  "codarea": "4305108",
+                  "municipio": "CAXIAS DO SUL",
+                  "quantidade": 16
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -39.3750274,
+                    -11.254491300000002
+                  ]
+                },
+                "properties": {
+                  "codarea": "2928000",
+                  "municipio": "SANTALUZ",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -35.3095827,
+                    -7.0591002
+                  ]
+                },
+                "properties": {
+                  "codarea": "2509107",
+                  "municipio": "MARI",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -46.2082972,
+                    -23.5553956
+                  ]
+                },
+                "properties": {
+                  "codarea": "3530607",
+                  "municipio": "MOGI DAS CRUZES",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -43.8901336,
+                    -19.8967997
+                  ]
+                },
+                "properties": {
+                  "codarea": "3156700",
+                  "municipio": "BELO HORIZONTE",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -39.02578705,
+                    -11.29325405
+                  ]
+                },
+                "properties": {
+                  "codarea": "2902104",
+                  "municipio": "ARACI",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -52.43789245000001,
+                    -29.735105949999998
+                  ]
+                },
+                "properties": {
+                  "codarea": "4316808",
+                  "municipio": "SANTA CRUZ DO SUL",
+                  "quantidade": 4
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -38.39974243333333,
+                    -12.787963133333335
+                  ]
+                },
+                "properties": {
+                  "codarea": "2930709",
+                  "municipio": "SIMÕES FILHO",
+                  "quantidade": 3
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -38.8066816,
+                    -11.622673
+                  ]
+                },
+                "properties": {
+                  "codarea": "2903607",
+                  "municipio": "BIRITINGA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -39.0778843,
+                    -10.7609031
+                  ]
+                },
+                "properties": {
+                  "codarea": "2925907",
+                  "municipio": "QUIJINGUE",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -43.9997106,
+                    -19.7795077
+                  ]
+                },
+                "properties": {
+                  "codarea": "3154606",
+                  "municipio": "RIBEIRÃO DAS NEVES",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -51.163160714285716,
+                    -29.9165473
+                  ]
+                },
+                "properties": {
+                  "codarea": "4304606",
+                  "municipio": "CANOAS",
+                  "quantidade": 7
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -42.6646683,
+                    -21.4033631
+                  ]
+                },
+                "properties": {
+                  "codarea": "3115300",
+                  "municipio": "CATAGUASES",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -36.9463707,
+                    -8.5013899
+                  ]
+                },
+                "properties": {
+                  "codarea": "2610806",
+                  "municipio": "PEDRA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -48.5104877,
+                    -16.7471477
+                  ]
+                },
+                "properties": {
+                  "codarea": "5222005",
+                  "municipio": "VIANÓPOLIS",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -48.351214,
+                    -24.0187602
+                  ]
+                },
+                "properties": {
+                  "codarea": "3510203",
+                  "municipio": "CAPÃO BONITO",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -35.25670908,
+                    -5.698229079999999
+                  ]
+                },
+                "properties": {
+                  "codarea": "2403608",
+                  "municipio": "EXTREMOZ",
+                  "quantidade": 5
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -45.0839941,
+                    -2.5157251
+                  ]
+                },
+                "properties": {
+                  "codarea": "2108603",
+                  "municipio": "PINHEIRO",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -43.1726915,
+                    -22.6284267
+                  ]
+                },
+                "properties": {
+                  "codarea": "3302502",
+                  "municipio": "MAGÉ",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -49.1876233,
+                    -25.4646987
+                  ]
+                },
+                "properties": {
+                  "codarea": "4119152",
+                  "municipio": "PINHAIS",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -49.331722379999995,
+                    -16.66063858
+                  ]
+                },
+                "properties": {
+                  "codarea": "5208707",
+                  "municipio": "GOIÂNIA",
+                  "quantidade": 5
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -35.8628241,
+                    -7.0260117
+                  ]
+                },
+                "properties": {
+                  "codarea": "2506004",
+                  "municipio": "ESPERANÇA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -35.6969984,
+                    -6.9432553
+                  ]
+                },
+                "properties": {
+                  "codarea": "2501104",
+                  "municipio": "AREIA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -62.476152,
+                    -10.4487179
+                  ]
+                },
+                "properties": {
+                  "codarea": "1100114",
+                  "municipio": "JARU",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -39.1214313,
+                    -8.0637007
+                  ]
+                },
+                "properties": {
+                  "codarea": "2612208",
+                  "municipio": "SALGUEIRO",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -48.8421304,
+                    -26.317853200000002
+                  ]
+                },
+                "properties": {
+                  "codarea": "4209102",
+                  "municipio": "JOINVILLE",
+                  "quantidade": 3
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -48.22390756666667,
+                    -18.929211133333332
+                  ]
+                },
+                "properties": {
+                  "codarea": "3170206",
+                  "municipio": "UBERLÂNDIA",
+                  "quantidade": 9
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -46.7684644,
+                    -23.3161745
+                  ]
+                },
+                "properties": {
+                  "codarea": "3516408",
+                  "municipio": "FRANCO DA ROCHA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -39.5290309,
+                    -17.0328512
+                  ]
+                },
+                "properties": {
+                  "codarea": "2915601",
+                  "municipio": "ITAMARAJU",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -35.9050071,
+                    -7.238879425
+                  ]
+                },
+                "properties": {
+                  "codarea": "2504009",
+                  "municipio": "CAMPINA GRANDE",
+                  "quantidade": 4
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -50.1668972,
+                    -25.149208
+                  ]
+                },
+                "properties": {
+                  "codarea": "4119905",
+                  "municipio": "PONTA GROSSA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -38.6137908,
+                    -12.7409688
+                  ]
+                },
+                "properties": {
+                  "codarea": "2919926",
+                  "municipio": "MADRE DE DEUS",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -46.3053089,
+                    -1.8003656
+                  ]
+                },
+                "properties": {
+                  "codarea": "2101970",
+                  "municipio": "BOA VISTA DO GURUPI",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -51.31438635,
+                    -29.9981213
+                  ]
+                },
+                "properties": {
+                  "codarea": "4306767",
+                  "municipio": "ELDORADO DO SUL",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -37.0866221,
+                    -10.856608999999999
+                  ]
+                },
+                "properties": {
+                  "codarea": "2804805",
+                  "municipio": "NOSSA SENHORA DO SOCORRO",
+                  "quantidade": 3
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -46.7522739,
+                    -23.3476029
+                  ]
+                },
+                "properties": {
+                  "codarea": "3509007",
+                  "municipio": "CAIEIRAS",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -46.732585,
+                    -23.2949868
+                  ]
+                },
+                "properties": {
+                  "codarea": "3516309",
+                  "municipio": "FRANCISCO MORATO",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -36.4762236,
+                    -9.8807822
+                  ]
+                },
+                "properties": {
+                  "codarea": "2704005",
+                  "municipio": "JUNQUEIRO",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -40.506852699999996,
+                    -9.377587575
+                  ]
+                },
+                "properties": {
+                  "codarea": "2611101",
+                  "municipio": "PETROLINA",
+                  "quantidade": 4
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -40.8582337,
+                    -2.9075481
+                  ]
+                },
+                "properties": {
+                  "codarea": "2302602",
+                  "municipio": "CAMOCIM",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -39.14870163333333,
+                    -3.4187919
+                  ]
+                },
+                "properties": {
+                  "codarea": "2310258",
+                  "municipio": "PARAIPABA",
+                  "quantidade": 3
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -40.3894419,
+                    -3.9176692
+                  ]
+                },
+                "properties": {
+                  "codarea": "2304905",
+                  "municipio": "GROAÍRAS",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -44.0952107,
+                    -15.2394541
+                  ]
+                },
+                "properties": {
+                  "codarea": "3132107",
+                  "municipio": "ITACARAMBI",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -36.8283128,
+                    -9.8831055
+                  ]
+                },
+                "properties": {
+                  "codarea": "2702900",
+                  "municipio": "GIRAU DO PONCIANO",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -35.98090046666667,
+                    -8.256845833333335
+                  ]
+                },
+                "properties": {
+                  "codarea": "2604106",
+                  "municipio": "CARUARU",
+                  "quantidade": 3
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -40.76775055,
+                    -4.8936265
+                  ]
+                },
+                "properties": {
+                  "codarea": "2305654",
+                  "municipio": "IPAPORANGA",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -43.34592690714286,
+                    -21.753498014285718
+                  ]
+                },
+                "properties": {
+                  "codarea": "3136702",
+                  "municipio": "JUIZ DE FORA",
+                  "quantidade": 14
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -39.293052,
+                    -3.3002713
+                  ]
+                },
+                "properties": {
+                  "codarea": "2313500",
+                  "municipio": "TRAIRI",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -46.8528911,
+                    -23.4962615
+                  ]
+                },
+                "properties": {
+                  "codarea": "3505708",
+                  "municipio": "BARUERI",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -41.6698099,
+                    -21.1311213
+                  ]
+                },
+                "properties": {
+                  "codarea": "3300605",
+                  "municipio": "BOM JESUS DO ITABAPOANA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -56.10569835,
+                    -15.6176206
+                  ]
+                },
+                "properties": {
+                  "codarea": "5103403",
+                  "municipio": "CUIABÁ",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -47.63816505,
+                    -22.717671250000002
+                  ]
+                },
+                "properties": {
+                  "codarea": "3538709",
+                  "municipio": "PIRACICABA",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -51.133944174999996,
+                    -29.69809925
+                  ]
+                },
+                "properties": {
+                  "codarea": "4313409",
+                  "municipio": "NOVO HAMBURGO",
+                  "quantidade": 4
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -55.7721101,
+                    -29.7892917
+                  ]
+                },
+                "properties": {
+                  "codarea": "4300406",
+                  "municipio": "ALEGRETE",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -51.07608640833334,
+                    -30.09128194166667
+                  ]
+                },
+                "properties": {
+                  "codarea": "4323002",
+                  "municipio": "VIAMÃO",
+                  "quantidade": 12
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -53.3046952,
+                    -27.90479555
+                  ]
+                },
+                "properties": {
+                  "codarea": "4313706",
+                  "municipio": "PALMEIRA DAS MISSÕES",
+                  "quantidade": 6
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -50.98343343333333,
+                    -29.920237033333333
+                  ]
+                },
+                "properties": {
+                  "codarea": "4309209",
+                  "municipio": "GRAVATAÍ",
+                  "quantidade": 9
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -45.8316586,
+                    -21.1054595
+                  ]
+                },
+                "properties": {
+                  "codarea": "3111309",
+                  "municipio": "CAMPO DO MEIO",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -35.4760913,
+                    -6.1211101
+                  ]
+                },
+                "properties": {
+                  "codarea": "2406601",
+                  "municipio": "LAGOA SALGADA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -52.5396144,
+                    -30.5504216
+                  ]
+                },
+                "properties": {
+                  "codarea": "4306908",
+                  "municipio": "ENCRUZILHADA DO SUL",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -46.4906084,
+                    -23.270883
+                  ]
+                },
+                "properties": {
+                  "codarea": "3528502",
+                  "municipio": "MAIRIPORÃ",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -36.6718226,
+                    -9.7494395
+                  ]
+                },
+                "properties": {
+                  "codarea": "2700300",
+                  "municipio": "ARAPIRACA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -53.8367486,
+                    -29.0811933
+                  ]
+                },
+                "properties": {
+                  "codarea": "4322202",
+                  "municipio": "TUPANCIRETÃ",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -46.55522215,
+                    -23.696476349999998
+                  ]
+                },
+                "properties": {
+                  "codarea": "3548708",
+                  "municipio": "SÃO BERNARDO DO CAMPO",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -37.0607834,
+                    -7.1205055
+                  ]
+                },
+                "properties": {
+                  "codarea": "2510709",
+                  "municipio": "PASSAGEM",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -38.6217705,
+                    -5.8885648
+                  ]
+                },
+                "properties": {
+                  "codarea": "2306900",
+                  "municipio": "JAGUARIBE",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -42.6318171,
+                    -3.8111128
+                  ]
+                },
+                "properties": {
+                  "codarea": "2202174",
+                  "municipio": "CAMPO LARGO DO PIAUÍ",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -47.5982631,
+                    -21.2162364
+                  ]
+                },
+                "properties": {
+                  "codarea": "3551504",
+                  "municipio": "SERRANA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -47.7498617,
+                    -2.0321612
+                  ]
+                },
+                "properties": {
+                  "codarea": "1500958",
+                  "municipio": "AURORA DO PARÁ",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -35.951635,
+                    -9.312282
+                  ]
+                },
+                "properties": {
+                  "codarea": "2705507",
+                  "municipio": "MURICI",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -46.8604722,
+                    -23.7069931
+                  ]
+                },
+                "properties": {
+                  "codarea": "3522208",
+                  "municipio": "ITAPECERICA DA SERRA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -48.54204615,
+                    -25.821202800000002
+                  ]
+                },
+                "properties": {
+                  "codarea": "4115705",
+                  "municipio": "MATINHOS",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -48.3252571,
+                    -15.7580113
+                  ]
+                },
+                "properties": {
+                  "codarea": "5200258",
+                  "municipio": "ÁGUAS LINDAS DE GOIÁS",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -38.9952408,
+                    -14.2848867
+                  ]
+                },
+                "properties": {
+                  "codarea": "2914901",
+                  "municipio": "ITACARÉ",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -51.6351764,
+                    -29.9795874
+                  ]
+                },
+                "properties": {
+                  "codarea": "4305355",
+                  "municipio": "CHARQUEADAS",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -51.33984555,
+                    -30.124583299999998
+                  ]
+                },
+                "properties": {
+                  "codarea": "4309308",
+                  "municipio": "GUAÍBA",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -48.8011311,
+                    -27.5231609
+                  ]
+                },
+                "properties": {
+                  "codarea": "4201208",
+                  "municipio": "ANTÔNIO CARLOS",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -41.6803339,
+                    -14.6882716
+                  ]
+                },
+                "properties": {
+                  "codarea": "2925709",
+                  "municipio": "PRESIDENTE JÂNIO QUADROS",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -45.0085291,
+                    -12.1529047
+                  ]
+                },
+                "properties": {
+                  "codarea": "2903201",
+                  "municipio": "BARREIRAS",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -39.0373241,
+                    -14.8285257
+                  ]
+                },
+                "properties": {
+                  "codarea": "2913606",
+                  "municipio": "ILHÉUS",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -42.7542568,
+                    -14.2324545
+                  ]
+                },
+                "properties": {
+                  "codarea": "2911709",
+                  "municipio": "GUANAMBI",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -42.1196564,
+                    -7.0103373
+                  ]
+                },
+                "properties": {
+                  "codarea": "2207009",
+                  "municipio": "OEIRAS",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -52.5240045,
+                    -29.714082
+                  ]
+                },
+                "properties": {
+                  "codarea": "4322707",
+                  "municipio": "VERA CRUZ",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -41.8122104,
+                    -7.7314102
+                  ]
+                },
+                "properties": {
+                  "codarea": "2202109",
+                  "municipio": "CAMPINAS DO PIAUÍ",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -42.8566132,
+                    -6.2336303
+                  ]
+                },
+                "properties": {
+                  "codarea": "2200509",
+                  "municipio": "AMARANTE",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -52.3966919,
+                    -28.26839746666667
+                  ]
+                },
+                "properties": {
+                  "codarea": "4314100",
+                  "municipio": "PASSO FUNDO",
+                  "quantidade": 3
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -48.256212600000005,
+                    -10.322692166666666
+                  ]
+                },
+                "properties": {
+                  "codarea": "1721000",
+                  "municipio": "PALMAS",
+                  "quantidade": 3
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -51.1320779,
+                    -29.8299091
+                  ]
+                },
+                "properties": {
+                  "codarea": "4320008",
+                  "municipio": "SAPUCAIA DO SUL",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -42.5781062,
+                    -19.4623799
+                  ]
+                },
+                "properties": {
+                  "codarea": "3131307",
+                  "municipio": "IPATINGA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -52.130907875,
+                    -32.110690025
+                  ]
+                },
+                "properties": {
+                  "codarea": "4315602",
+                  "municipio": "RIO GRANDE",
+                  "quantidade": 4
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -35.08863355,
+                    -8.112185
+                  ]
+                },
+                "properties": {
+                  "codarea": "2609402",
+                  "municipio": "MORENO",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -49.3710098,
+                    -17.2920839
+                  ]
+                },
+                "properties": {
+                  "codarea": "5206503",
+                  "municipio": "CROMÍNIA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -39.6302764,
+                    -11.6069982
+                  ]
+                },
+                "properties": {
+                  "codarea": "2922730",
+                  "municipio": "NOVA FÁTIMA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -49.3252339,
+                    -25.6680689
+                  ]
+                },
+                "properties": {
+                  "codarea": "4107652",
+                  "municipio": "FAZENDA RIO GRANDE",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -48.4064034,
+                    -9.5732079
+                  ]
+                },
+                "properties": {
+                  "codarea": "1713205",
+                  "municipio": "MIRACEMA DO TOCANTINS",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -39.4028869,
+                    -11.9260892
+                  ]
+                },
+                "properties": {
+                  "codarea": "2926301",
+                  "municipio": "RIACHÃO DO JACUÍPE",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -39.7220727,
+                    -14.1329483
+                  ]
+                },
+                "properties": {
+                  "codarea": "2913903",
+                  "municipio": "IPIAÚ",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -36.1051781,
+                    -9.7997695
+                  ]
+                },
+                "properties": {
+                  "codarea": "2708600",
+                  "municipio": "SÃO MIGUEL DOS CAMPOS",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -48.3071863,
+                    -21.2455586
+                  ]
+                },
+                "properties": {
+                  "codarea": "3524303",
+                  "municipio": "JABOTICABAL",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -51.3249002,
+                    -29.6996476
+                  ]
+                },
+                "properties": {
+                  "codarea": "4304689",
+                  "municipio": "CAPELA DE SANTANA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -35.1994716,
+                    -8.8120152
+                  ]
+                },
+                "properties": {
+                  "codarea": "2601409",
+                  "municipio": "BARREIROS",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -40.224048249999996,
+                    -20.1041768
+                  ]
+                },
+                "properties": {
+                  "codarea": "3205002",
+                  "municipio": "SERRA",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -54.7109703,
+                    -2.4651111
+                  ]
+                },
+                "properties": {
+                  "codarea": "1506807",
+                  "municipio": "SANTARÉM",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -46.9161791,
+                    -22.3537341
+                  ]
+                },
+                "properties": {
+                  "codarea": "3530706",
+                  "municipio": "MOGI GUAÇU",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -35.3846936,
+                    -8.5801126
+                  ]
+                },
+                "properties": {
+                  "codarea": "2605905",
+                  "municipio": "GAMELEIRA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -37.99629485,
+                    -9.38702595
+                  ]
+                },
+                "properties": {
+                  "codarea": "2702405",
+                  "municipio": "DELMIRO GOUVEIA",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -39.3470098,
+                    -7.2367641
+                  ]
+                },
+                "properties": {
+                  "codarea": "2307304",
+                  "municipio": "JUAZEIRO DO NORTE",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -54.587072,
+                    -25.5418224
+                  ]
+                },
+                "properties": {
+                  "codarea": "4108304",
+                  "municipio": "FOZ DO IGUAÇU",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -53.6815715,
+                    -29.2176085
+                  ]
+                },
+                "properties": {
+                  "codarea": "4311205",
+                  "municipio": "JÚLIO DE CASTILHOS",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -38.376921,
+                    -3.8967082
+                  ]
+                },
+                "properties": {
+                  "codarea": "2301000",
+                  "municipio": "AQUIRAZ",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -52.1716033,
+                    -16.2119146
+                  ]
+                },
+                "properties": {
+                  "codarea": "5203401",
+                  "municipio": "BOM JARDIM DE GOIÁS",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -35.8155232,
+                    -5.5385564
+                  ]
+                },
+                "properties": {
+                  "codarea": "2405801",
+                  "municipio": "JOÃO CÂMARA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -48.140036,
+                    -21.829444
+                  ]
+                },
+                "properties": {
+                  "codarea": "3503208",
+                  "municipio": "ARARAQUARA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -48.6982616,
+                    -26.911079
+                  ]
+                },
+                "properties": {
+                  "codarea": "4208203",
+                  "municipio": "ITAJAÍ",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -35.3221812,
+                    -7.6590791
+                  ]
+                },
+                "properties": {
+                  "codarea": "2616308",
+                  "municipio": "VICÊNCIA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -49.440453250000004,
+                    -16.6374426
+                  ]
+                },
+                "properties": {
+                  "codarea": "5221403",
+                  "municipio": "TRINDADE",
+                  "quantidade": 4
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -44.4320274,
+                    -16.2093574
+                  ]
+                },
+                "properties": {
+                  "codarea": "3108602",
+                  "municipio": "BRASÍLIA DE MINAS",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -53.37735636666667,
+                    -32.5614448
+                  ]
+                },
+                "properties": {
+                  "codarea": "4311007",
+                  "municipio": "JAGUARÃO",
+                  "quantidade": 3
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -38.8308064,
+                    -8.2775626
+                  ]
+                },
+                "properties": {
+                  "codarea": "2603926",
+                  "municipio": "CARNAUBEIRA DA PENHA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -48.2188298,
+                    -7.188682266666667
+                  ]
+                },
+                "properties": {
+                  "codarea": "1702109",
+                  "municipio": "ARAGUAÍNA",
+                  "quantidade": 3
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -38.6812176,
+                    -3.8861085
+                  ]
+                },
+                "properties": {
+                  "codarea": "2307700",
+                  "municipio": "MARANGUAPE",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -38.1493507,
+                    -7.3029065
+                  ]
+                },
+                "properties": {
+                  "codarea": "2507002",
+                  "municipio": "ITAPORANGA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -35.6930234,
+                    -6.1529874
+                  ]
+                },
+                "properties": {
+                  "codarea": "2410306",
+                  "municipio": "SERRA CAIADA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -49.1221414,
+                    -9.2560494
+                  ]
+                },
+                "properties": {
+                  "codarea": "1707207",
+                  "municipio": "DOIS IRMÃOS DO TOCANTINS",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -34.92641045,
+                    -7.13874505
+                  ]
+                },
+                "properties": {
+                  "codarea": "2501807",
+                  "municipio": "BAYEUX",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -49.0553309,
+                    -11.7230316
+                  ]
+                },
+                "properties": {
+                  "codarea": "1709500",
+                  "municipio": "GURUPI",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -48.8877783,
+                    -10.181461250000002
+                  ]
+                },
+                "properties": {
+                  "codarea": "1716109",
+                  "municipio": "PARAÍSO DO TOCANTINS",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -49.8789297,
+                    -22.9608606
+                  ]
+                },
+                "properties": {
+                  "codarea": "3534708",
+                  "municipio": "OURINHOS",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -44.9949909,
+                    -19.2357158
+                  ]
+                },
+                "properties": {
+                  "codarea": "3152006",
+                  "municipio": "POMPEU",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -40.2391203,
+                    -15.2558512
+                  ]
+                },
+                "properties": {
+                  "codarea": "2916401",
+                  "municipio": "ITAPETINGA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -40.9415441,
+                    -4.0333902
+                  ]
+                },
+                "properties": {
+                  "codarea": "2312304",
+                  "municipio": "SÃO BENEDITO",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -35.2540662,
+                    -5.891016
+                  ]
+                },
+                "properties": {
+                  "codarea": "2403251",
+                  "municipio": "PARNAMIRIM",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -40.86670155,
+                    -14.8688168
+                  ]
+                },
+                "properties": {
+                  "codarea": "2933307",
+                  "municipio": "VITÓRIA DA CONQUISTA",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -48.5137566,
+                    -0.7289295
+                  ]
+                },
+                "properties": {
+                  "codarea": "1507904",
+                  "municipio": "SOURE",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -37.3230931,
+                    -8.3347456
+                  ]
+                },
+                "properties": {
+                  "codarea": "2614105",
+                  "municipio": "VITÓRIA DE SANTO ANTÃO",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -44.2306611,
+                    -19.6621423
+                  ]
+                },
+                "properties": {
+                  "codarea": "3124104",
+                  "municipio": "ESMERALDAS",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -50.6432739,
+                    -23.1790234
+                  ]
+                },
+                "properties": {
+                  "codarea": "4106407",
+                  "municipio": "CORNÉLIO PROCÓPIO",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -39.25309565,
+                    -12.96703215
+                  ]
+                },
+                "properties": {
+                  "codarea": "2928703",
+                  "municipio": "SANTO ANTÔNIO DE JESUS",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -49.3753337,
+                    -25.6192264
+                  ]
+                },
+                "properties": {
+                  "codarea": "4101804",
+                  "municipio": "ARAUCÁRIA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -47.5552263,
+                    -22.4066409
+                  ]
+                },
+                "properties": {
+                  "codarea": "3543907",
+                  "municipio": "RIO CLARO",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -42.0735819,
+                    -4.0241518
+                  ]
+                },
+                "properties": {
+                  "codarea": "2201507",
+                  "municipio": "BATALHA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -48.399526,
+                    -10.6708952
+                  ]
+                },
+                "properties": {
+                  "codarea": "1718204",
+                  "municipio": "PORTO NACIONAL",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -39.1193565,
+                    -11.8078213
+                  ]
+                },
+                "properties": {
+                  "codarea": "2906402",
+                  "municipio": "CANDEAL",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -40.3402453,
+                    -20.3187677
+                  ]
+                },
+                "properties": {
+                  "codarea": "3205309",
+                  "municipio": "VITÓRIA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -40.085775,
+                    -13.8615199
+                  ]
+                },
+                "properties": {
+                  "codarea": "2918001",
+                  "municipio": "JEQUIÉ",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -49.5612859,
+                    -25.4435936
+                  ]
+                },
+                "properties": {
+                  "codarea": "4104204",
+                  "municipio": "CAMPO LARGO",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -35.2968935,
+                    -5.746255
+                  ]
+                },
+                "properties": {
+                  "codarea": "2412005",
+                  "municipio": "SAO GONÇALO DO AMARANTE",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -50.3457671,
+                    -21.3051387
+                  ]
+                },
+                "properties": {
+                  "codarea": "3506508",
+                  "municipio": "BIRIGUI",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -35.36842,
+                    -5.7148856
+                  ]
+                },
+                "properties": {
+                  "codarea": "2402600",
+                  "municipio": "CEARÁ-MIRIM",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -37.0648562,
+                    -8.4330106
+                  ]
+                },
+                "properties": {
+                  "codarea": "2601201",
+                  "municipio": "ARCOVERDE",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -46.4097344,
+                    -23.9736533
+                  ]
+                },
+                "properties": {
+                  "codarea": "3551009",
+                  "municipio": "SÃO VICENTE",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -65.3264853,
+                    -10.7624612
+                  ]
+                },
+                "properties": {
+                  "codarea": "1100106",
+                  "municipio": "GUAJARÁ-MIRIM",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -40.39204985000001,
+                    -9.3771931
+                  ]
+                },
+                "properties": {
+                  "codarea": "2918407",
+                  "municipio": "JUAZEIRO",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -37.6188051,
+                    -11.8014679
+                  ]
+                },
+                "properties": {
+                  "codarea": "2908606",
+                  "municipio": "CONDE",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -49.979509,
+                    -20.4308355
+                  ]
+                },
+                "properties": {
+                  "codarea": "3557105",
+                  "municipio": "VOTUPORANGA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -42.85789055,
+                    -5.0680408
+                  ]
+                },
+                "properties": {
+                  "codarea": "2112209",
+                  "municipio": "TIMON",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -55.51224085,
+                    -11.843523050000002
+                  ]
+                },
+                "properties": {
+                  "codarea": "5107909",
+                  "municipio": "SINOP",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -39.5251558,
+                    -14.2156116
+                  ]
+                },
+                "properties": {
+                  "codarea": "2932309",
+                  "municipio": "UBATÃ",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -35.7625241,
+                    -7.063447
+                  ]
+                },
+                "properties": {
+                  "codarea": "2500403",
+                  "municipio": "ALAGOA NOVA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -35.5894218,
+                    -7.1809958
+                  ]
+                },
+                "properties": {
+                  "codarea": "2507606",
+                  "municipio": "JUAREZ TÁVORA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -35.7895822,
+                    -6.9674177
+                  ]
+                },
+                "properties": {
+                  "codarea": "2512705",
+                  "municipio": "REMÍGIO",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -34.83726525,
+                    -7.000759199999999
+                  ]
+                },
+                "properties": {
+                  "codarea": "2503209",
+                  "municipio": "CABEDELO",
+                  "quantidade": 2
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -48.4601862,
+                    -14.4710658
+                  ]
+                },
+                "properties": {
+                  "codarea": "5214606",
+                  "municipio": "NIQUELÂNDIA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -39.467162,
+                    -14.32554
+                  ]
+                },
+                "properties": {
+                  "codarea": "2911501",
+                  "municipio": "GONGOGI",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -36.9251989,
+                    -6.8722475
+                  ]
+                },
+                "properties": {
+                  "codarea": "2513406",
+                  "municipio": "SANTA LUZIA",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -35.1121144,
+                    -7.4009815
+                  ]
+                },
+                "properties": {
+                  "codarea": "2511202",
+                  "municipio": "PEDRAS DE FOGO",
+                  "quantidade": 1
+                }
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -39.6203028,
+                    -11.4934678
+                  ]
+                },
+                "properties": {
+                  "codarea": "2928950",
+                  "municipio": "SÃO DOMINGOS",
+                  "quantidade": 1
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "layers": [
+        {
+          "id": "pessoas-atendidas-circles",
+          "sourceId": "cozinhas-bolhas",
+          "geometry": "point",
+          "title": "Pessoas atendidas (total)",
+          "mapDataId": "cozinhas_pessoas_atendidas",
+          "sizeBy": {
+            "range": [
+              6,
+              42
+            ],
+            "mode": "continuous",
+            "transform": "sqrt"
+          },
+          "activeLegendId": "pessoas-atendidas-legend"
+        }
+      ],
+      "mapData": [
+        {
+          "mapDataId": "cozinhas_pessoas_atendidas",
+          "mapId": "cozinhas-bolhas",
+          "title": "Pessoas atendidas (total)",
+          "description": "Soma do público total atendido declarado no cadastro das cozinhas solidárias, por município.",
+          "dimension": "size",
+          "data": [
+            {
+              "geometryId": "3304557",
+              "value": 26971
+            },
+            {
+              "geometryId": "2930501",
+              "value": 1247
+            },
+            {
+              "geometryId": "2709400",
+              "value": 475
+            },
+            {
+              "geometryId": "3513801",
+              "value": 80
+            },
+            {
+              "geometryId": "2408102",
+              "value": 7301
+            },
+            {
+              "geometryId": "3302205",
+              "value": 430
+            },
+            {
+              "geometryId": "2705309",
+              "value": 632
+            },
+            {
+              "geometryId": "2303709",
+              "value": 5546
+            },
+            {
+              "geometryId": "5201108",
+              "value": 3165
+            },
+            {
+              "geometryId": "4317103",
+              "value": 180
+            },
+            {
+              "geometryId": "2800308",
+              "value": 4413
+            },
+            {
+              "geometryId": "4314902",
+              "value": 54474
+            },
+            {
+              "geometryId": "2704302",
+              "value": 10303
+            },
+            {
+              "geometryId": "2927408",
+              "value": 45897
+            },
+            {
+              "geometryId": "3304144",
+              "value": 185
+            },
+            {
+              "geometryId": "3505609",
+              "value": 166
+            },
+            {
+              "geometryId": "3302007",
+              "value": 1533
+            },
+            {
+              "geometryId": "2507507",
+              "value": 6566
+            },
+            {
+              "geometryId": "2105401",
+              "value": 256
+            },
+            {
+              "geometryId": "2928604",
+              "value": 277
+            },
+            {
+              "geometryId": "3550308",
+              "value": 159454
+            },
+            {
+              "geometryId": "5300108",
+              "value": 10481
+            },
+            {
+              "geometryId": "3303401",
+              "value": 23
+            },
+            {
+              "geometryId": "3120904",
+              "value": 200
+            },
+            {
+              "geometryId": "5205109",
+              "value": 160
+            },
+            {
+              "geometryId": "1506559",
+              "value": 90
+            },
+            {
+              "geometryId": "1500800",
+              "value": 5322
+            },
+            {
+              "geometryId": "3302403",
+              "value": 65
+            },
+            {
+              "geometryId": "2910800",
+              "value": 8271
+            },
+            {
+              "geometryId": "3201407",
+              "value": 1800
+            },
+            {
+              "geometryId": "2914802",
+              "value": 350
+            },
+            {
+              "geometryId": "3509502",
+              "value": 1674
+            },
+            {
+              "geometryId": "3151602",
+              "value": 1007
+            },
+            {
+              "geometryId": "1505502",
+              "value": 150
+            },
+            {
+              "geometryId": "2302206",
+              "value": 273
+            },
+            {
+              "geometryId": "2211001",
+              "value": 12051
+            },
+            {
+              "geometryId": "3151206",
+              "value": 370
+            },
+            {
+              "geometryId": "2609600",
+              "value": 8196
+            },
+            {
+              "geometryId": "1503200",
+              "value": 392
+            },
+            {
+              "geometryId": "3201308",
+              "value": 73
+            },
+            {
+              "geometryId": "1506203",
+              "value": 140
+            },
+            {
+              "geometryId": "1600303",
+              "value": 1625
+            },
+            {
+              "geometryId": "5101803",
+              "value": 135
+            },
+            {
+              "geometryId": "1400100",
+              "value": 6993
+            },
+            {
+              "geometryId": "2309706",
+              "value": 100
+            },
+            {
+              "geometryId": "2805703",
+              "value": 1631
+            },
+            {
+              "geometryId": "5003702",
+              "value": 1050
+            },
+            {
+              "geometryId": "3502507",
+              "value": 150
+            },
+            {
+              "geometryId": "4205407",
+              "value": 4650
+            },
+            {
+              "geometryId": "4203204",
+              "value": 285
+            },
+            {
+              "geometryId": "4321600",
+              "value": 135
+            },
+            {
+              "geometryId": "3506003",
+              "value": 215
+            },
+            {
+              "geometryId": "3305109",
+              "value": 541
+            },
+            {
+              "geometryId": "2913309",
+              "value": 258
+            },
+            {
+              "geometryId": "3301702",
+              "value": 14717
+            },
+            {
+              "geometryId": "2607901",
+              "value": 1215
+            },
+            {
+              "geometryId": "2302701",
+              "value": 340
+            },
+            {
+              "geometryId": "2105302",
+              "value": 510
+            },
+            {
+              "geometryId": "2107506",
+              "value": 151
+            },
+            {
+              "geometryId": "1200401",
+              "value": 2220
+            },
+            {
+              "geometryId": "2611606",
+              "value": 13487
+            },
+            {
+              "geometryId": "4104808",
+              "value": 3010
+            },
+            {
+              "geometryId": "3518800",
+              "value": 2252
+            },
+            {
+              "geometryId": "2616407",
+              "value": 31
+            },
+            {
+              "geometryId": "4113700",
+              "value": 374
+            },
+            {
+              "geometryId": "2806701",
+              "value": 310
+            },
+            {
+              "geometryId": "3523107",
+              "value": 790
+            },
+            {
+              "geometryId": "2706802",
+              "value": 205
+            },
+            {
+              "geometryId": "4125506",
+              "value": 5140
+            },
+            {
+              "geometryId": "4101507",
+              "value": 670
+            },
+            {
+              "geometryId": "3302858",
+              "value": 2716
+            },
+            {
+              "geometryId": "3300704",
+              "value": 349
+            },
+            {
+              "geometryId": "2807600",
+              "value": 435
+            },
+            {
+              "geometryId": "2308104",
+              "value": 327
+            },
+            {
+              "geometryId": "3518701",
+              "value": 60
+            },
+            {
+              "geometryId": "3538006",
+              "value": 630
+            },
+            {
+              "geometryId": "3548500",
+              "value": 170
+            },
+            {
+              "geometryId": "3118601",
+              "value": 3508
+            },
+            {
+              "geometryId": "3161106",
+              "value": 610
+            },
+            {
+              "geometryId": "4300604",
+              "value": 12376
+            },
+            {
+              "geometryId": "3300456",
+              "value": 23731
+            },
+            {
+              "geometryId": "3143302",
+              "value": 1994
+            },
+            {
+              "geometryId": "2901106",
+              "value": 425
+            },
+            {
+              "geometryId": "3552809",
+              "value": 450
+            },
+            {
+              "geometryId": "2312908",
+              "value": 356
+            },
+            {
+              "geometryId": "3538907",
+              "value": 1840
+            },
+            {
+              "geometryId": "1302603",
+              "value": 2727
+            },
+            {
+              "geometryId": "2203008",
+              "value": 1030
+            },
+            {
+              "geometryId": "3303500",
+              "value": 4285
+            },
+            {
+              "geometryId": "3549805",
+              "value": 180
+            },
+            {
+              "geometryId": "1400175",
+              "value": 219
+            },
+            {
+              "geometryId": "3121605",
+              "value": 684
+            },
+            {
+              "geometryId": "3547809",
+              "value": 715
+            },
+            {
+              "geometryId": "3534401",
+              "value": 245
+            },
+            {
+              "geometryId": "3515004",
+              "value": 410
+            },
+            {
+              "geometryId": "4106902",
+              "value": 11971
+            },
+            {
+              "geometryId": "1505536",
+              "value": 910
+            },
+            {
+              "geometryId": "2311355",
+              "value": 1250
+            },
+            {
+              "geometryId": "2600104",
+              "value": 170
+            },
+            {
+              "geometryId": "3303302",
+              "value": 1190
+            },
+            {
+              "geometryId": "4316907",
+              "value": 3989
+            },
+            {
+              "geometryId": "2919207",
+              "value": 2050
+            },
+            {
+              "geometryId": "2313757",
+              "value": 300
+            },
+            {
+              "geometryId": "2302503",
+              "value": 393
+            },
+            {
+              "geometryId": "5201405",
+              "value": 200
+            },
+            {
+              "geometryId": "2300903",
+              "value": 120
+            },
+            {
+              "geometryId": "4313375",
+              "value": 5774
+            },
+            {
+              "geometryId": "3548906",
+              "value": 185
+            },
+            {
+              "geometryId": "3531100",
+              "value": 53
+            },
+            {
+              "geometryId": "2306504",
+              "value": 354
+            },
+            {
+              "geometryId": "2305704",
+              "value": 176
+            },
+            {
+              "geometryId": "2700409",
+              "value": 2420
+            },
+            {
+              "geometryId": "2309102",
+              "value": 176
+            },
+            {
+              "geometryId": "4307005",
+              "value": 645
+            },
+            {
+              "geometryId": "2302107",
+              "value": 950
+            },
+            {
+              "geometryId": "2407104",
+              "value": 135
+            },
+            {
+              "geometryId": "3300803",
+              "value": 370
+            },
+            {
+              "geometryId": "2703106",
+              "value": 100
+            },
+            {
+              "geometryId": "2304202",
+              "value": 200
+            },
+            {
+              "geometryId": "2301901",
+              "value": 180
+            },
+            {
+              "geometryId": "2307106",
+              "value": 450
+            },
+            {
+              "geometryId": "2309805",
+              "value": 176
+            },
+            {
+              "geometryId": "3106200",
+              "value": 2992
+            },
+            {
+              "geometryId": "2901007",
+              "value": 670
+            },
+            {
+              "geometryId": "2309607",
+              "value": 416
+            },
+            {
+              "geometryId": "2304400",
+              "value": 18296
+            },
+            {
+              "geometryId": "2603454",
+              "value": 1356
+            },
+            {
+              "geometryId": "4314407",
+              "value": 2697
+            },
+            {
+              "geometryId": "2304301",
+              "value": 428
+            },
+            {
+              "geometryId": "1501402",
+              "value": 830
+            },
+            {
+              "geometryId": "2307650",
+              "value": 942
+            },
+            {
+              "geometryId": "3305554",
+              "value": 1460
+            },
+            {
+              "geometryId": "3127701",
+              "value": 700
+            },
+            {
+              "geometryId": "3304904",
+              "value": 610
+            },
+            {
+              "geometryId": "5220686",
+              "value": 195
+            },
+            {
+              "geometryId": "4318705",
+              "value": 12938
+            },
+            {
+              "geometryId": "2208007",
+              "value": 650
+            },
+            {
+              "geometryId": "2600500",
+              "value": 450
+            },
+            {
+              "geometryId": "3552403",
+              "value": 1700
+            },
+            {
+              "geometryId": "2925303",
+              "value": 1090
+            },
+            {
+              "geometryId": "2931350",
+              "value": 530
+            },
+            {
+              "geometryId": "2708402",
+              "value": 1494
+            },
+            {
+              "geometryId": "3552502",
+              "value": 1057
+            },
+            {
+              "geometryId": "3508801",
+              "value": 311
+            },
+            {
+              "geometryId": "2111300",
+              "value": 4839
+            },
+            {
+              "geometryId": "3168606",
+              "value": 2050
+            },
+            {
+              "geometryId": "3543402",
+              "value": 1160
+            },
+            {
+              "geometryId": "2306009",
+              "value": 382
+            },
+            {
+              "geometryId": "1506609",
+              "value": 240
+            },
+            {
+              "geometryId": "2610707",
+              "value": 2980
+            },
+            {
+              "geometryId": "5206404",
+              "value": 100
+            },
+            {
+              "geometryId": "2301950",
+              "value": 628
+            },
+            {
+              "geometryId": "3516200",
+              "value": 570
+            },
+            {
+              "geometryId": "2301208",
+              "value": 704
+            },
+            {
+              "geometryId": "2302909",
+              "value": 176
+            },
+            {
+              "geometryId": "3126109",
+              "value": 258
+            },
+            {
+              "geometryId": "2309458",
+              "value": 176
+            },
+            {
+              "geometryId": "3515707",
+              "value": 630
+            },
+            {
+              "geometryId": "3556206",
+              "value": 485
+            },
+            {
+              "geometryId": "2202208",
+              "value": 700
+            },
+            {
+              "geometryId": "3301900",
+              "value": 244
+            },
+            {
+              "geometryId": "2908903",
+              "value": 450
+            },
+            {
+              "geometryId": "4216602",
+              "value": 365
+            },
+            {
+              "geometryId": "2806206",
+              "value": 300
+            },
+            {
+              "geometryId": "2303600",
+              "value": 176
+            },
+            {
+              "geometryId": "2303956",
+              "value": 875
+            },
+            {
+              "geometryId": "2802106",
+              "value": 210
+            },
+            {
+              "geometryId": "2805802",
+              "value": 400
+            },
+            {
+              "geometryId": "2200400",
+              "value": 80715
+            },
+            {
+              "geometryId": "2408003",
+              "value": 740
+            },
+            {
+              "geometryId": "2704708",
+              "value": 136
+            },
+            {
+              "geometryId": "2314003",
+              "value": 176
+            },
+            {
+              "geometryId": "2307635",
+              "value": 361
+            },
+            {
+              "geometryId": "3542602",
+              "value": 114
+            },
+            {
+              "geometryId": "2310100",
+              "value": 352
+            },
+            {
+              "geometryId": "3302270",
+              "value": 300
+            },
+            {
+              "geometryId": "1507003",
+              "value": 80
+            },
+            {
+              "geometryId": "5002704",
+              "value": 1048
+            },
+            {
+              "geometryId": "3302700",
+              "value": 237
+            },
+            {
+              "geometryId": "2207702",
+              "value": 519
+            },
+            {
+              "geometryId": "4305108",
+              "value": 3862
+            },
+            {
+              "geometryId": "2928000",
+              "value": 635
+            },
+            {
+              "geometryId": "2509107",
+              "value": 2310
+            },
+            {
+              "geometryId": "3530607",
+              "value": 225
+            },
+            {
+              "geometryId": "3156700",
+              "value": 200
+            },
+            {
+              "geometryId": "2902104",
+              "value": 982
+            },
+            {
+              "geometryId": "4316808",
+              "value": 1328
+            },
+            {
+              "geometryId": "2930709",
+              "value": 2045
+            },
+            {
+              "geometryId": "2903607",
+              "value": 1600
+            },
+            {
+              "geometryId": "2925907",
+              "value": 1600
+            },
+            {
+              "geometryId": "3154606",
+              "value": 154
+            },
+            {
+              "geometryId": "4304606",
+              "value": 2210
+            },
+            {
+              "geometryId": "3115300",
+              "value": 40
+            },
+            {
+              "geometryId": "2610806",
+              "value": 129
+            },
+            {
+              "geometryId": "5222005",
+              "value": 280
+            },
+            {
+              "geometryId": "3510203",
+              "value": 116
+            },
+            {
+              "geometryId": "2403608",
+              "value": 1487
+            },
+            {
+              "geometryId": "2108603",
+              "value": 220
+            },
+            {
+              "geometryId": "3302502",
+              "value": 850
+            },
+            {
+              "geometryId": "4119152",
+              "value": 7000
+            },
+            {
+              "geometryId": "5208707",
+              "value": 615
+            },
+            {
+              "geometryId": "2506004",
+              "value": 310
+            },
+            {
+              "geometryId": "2501104",
+              "value": 105
+            },
+            {
+              "geometryId": "1100114",
+              "value": 15
+            },
+            {
+              "geometryId": "2612208",
+              "value": 200
+            },
+            {
+              "geometryId": "4209102",
+              "value": 244
+            },
+            {
+              "geometryId": "3170206",
+              "value": 1123
+            },
+            {
+              "geometryId": "3516408",
+              "value": 930
+            },
+            {
+              "geometryId": "2915601",
+              "value": 100
+            },
+            {
+              "geometryId": "2504009",
+              "value": 845
+            },
+            {
+              "geometryId": "4119905",
+              "value": 238
+            },
+            {
+              "geometryId": "2919926",
+              "value": 344
+            },
+            {
+              "geometryId": "2101970",
+              "value": 112
+            },
+            {
+              "geometryId": "4306767",
+              "value": 391
+            },
+            {
+              "geometryId": "2804805",
+              "value": 712
+            },
+            {
+              "geometryId": "3509007",
+              "value": 235
+            },
+            {
+              "geometryId": "3516309",
+              "value": 80
+            },
+            {
+              "geometryId": "2704005",
+              "value": 130
+            },
+            {
+              "geometryId": "2611101",
+              "value": 1123
+            },
+            {
+              "geometryId": "2302602",
+              "value": 150
+            },
+            {
+              "geometryId": "2310258",
+              "value": 373
+            },
+            {
+              "geometryId": "2304905",
+              "value": 110
+            },
+            {
+              "geometryId": "3132107",
+              "value": 65
+            },
+            {
+              "geometryId": "2702900",
+              "value": 80
+            },
+            {
+              "geometryId": "2604106",
+              "value": 938
+            },
+            {
+              "geometryId": "2305654",
+              "value": 200
+            },
+            {
+              "geometryId": "3136702",
+              "value": 1939
+            },
+            {
+              "geometryId": "2313500",
+              "value": 400
+            },
+            {
+              "geometryId": "3505708",
+              "value": 669
+            },
+            {
+              "geometryId": "3300605",
+              "value": 220
+            },
+            {
+              "geometryId": "5103403",
+              "value": 287
+            },
+            {
+              "geometryId": "3538709",
+              "value": 404
+            },
+            {
+              "geometryId": "4313409",
+              "value": 538
+            },
+            {
+              "geometryId": "4300406",
+              "value": 485
+            },
+            {
+              "geometryId": "4323002",
+              "value": 4204
+            },
+            {
+              "geometryId": "4313706",
+              "value": 902
+            },
+            {
+              "geometryId": "4309209",
+              "value": 2805
+            },
+            {
+              "geometryId": "3111309",
+              "value": 129
+            },
+            {
+              "geometryId": "2406601",
+              "value": 6787
+            },
+            {
+              "geometryId": "4306908",
+              "value": 292
+            },
+            {
+              "geometryId": "3528502",
+              "value": 315
+            },
+            {
+              "geometryId": "2700300",
+              "value": 1230
+            },
+            {
+              "geometryId": "4322202",
+              "value": 1445
+            },
+            {
+              "geometryId": "3548708",
+              "value": 240
+            },
+            {
+              "geometryId": "2510709",
+              "value": 115
+            },
+            {
+              "geometryId": "2306900",
+              "value": 120
+            },
+            {
+              "geometryId": "2202174",
+              "value": 25
+            },
+            {
+              "geometryId": "3551504",
+              "value": 7
+            },
+            {
+              "geometryId": "1500958",
+              "value": 160
+            },
+            {
+              "geometryId": "2705507",
+              "value": 5970
+            },
+            {
+              "geometryId": "3522208",
+              "value": 180
+            },
+            {
+              "geometryId": "4115705",
+              "value": 316
+            },
+            {
+              "geometryId": "5200258",
+              "value": 50
+            },
+            {
+              "geometryId": "2914901",
+              "value": 0
+            },
+            {
+              "geometryId": "4305355",
+              "value": 145
+            },
+            {
+              "geometryId": "4309308",
+              "value": 475
+            },
+            {
+              "geometryId": "4201208",
+              "value": 120
+            },
+            {
+              "geometryId": "2925709",
+              "value": 260
+            },
+            {
+              "geometryId": "2903201",
+              "value": 350
+            },
+            {
+              "geometryId": "2913606",
+              "value": 261
+            },
+            {
+              "geometryId": "2911709",
+              "value": 40
+            },
+            {
+              "geometryId": "2207009",
+              "value": 540
+            },
+            {
+              "geometryId": "4322707",
+              "value": 40
+            },
+            {
+              "geometryId": "2202109",
+              "value": 75
+            },
+            {
+              "geometryId": "2200509",
+              "value": 60
+            },
+            {
+              "geometryId": "4314100",
+              "value": 595
+            },
+            {
+              "geometryId": "1721000",
+              "value": 125
+            },
+            {
+              "geometryId": "4320008",
+              "value": 37
+            },
+            {
+              "geometryId": "3131307",
+              "value": 150
+            },
+            {
+              "geometryId": "4315602",
+              "value": 1861
+            },
+            {
+              "geometryId": "2609402",
+              "value": 350
+            },
+            {
+              "geometryId": "5206503",
+              "value": 230
+            },
+            {
+              "geometryId": "2922730",
+              "value": 209
+            },
+            {
+              "geometryId": "4107652",
+              "value": 180
+            },
+            {
+              "geometryId": "1713205",
+              "value": 0
+            },
+            {
+              "geometryId": "2926301",
+              "value": 200
+            },
+            {
+              "geometryId": "2913903",
+              "value": 5
+            },
+            {
+              "geometryId": "2708600",
+              "value": 90
+            },
+            {
+              "geometryId": "3524303",
+              "value": 50
+            },
+            {
+              "geometryId": "4304689",
+              "value": 425
+            },
+            {
+              "geometryId": "2601409",
+              "value": 95
+            },
+            {
+              "geometryId": "3205002",
+              "value": 495
+            },
+            {
+              "geometryId": "1506807",
+              "value": 10
+            },
+            {
+              "geometryId": "3530706",
+              "value": 126
+            },
+            {
+              "geometryId": "2605905",
+              "value": 10
+            },
+            {
+              "geometryId": "2702405",
+              "value": 178
+            },
+            {
+              "geometryId": "2307304",
+              "value": 108
+            },
+            {
+              "geometryId": "4108304",
+              "value": 200
+            },
+            {
+              "geometryId": "4311205",
+              "value": 0
+            },
+            {
+              "geometryId": "2301000",
+              "value": 38
+            },
+            {
+              "geometryId": "5203401",
+              "value": 78
+            },
+            {
+              "geometryId": "2405801",
+              "value": 250
+            },
+            {
+              "geometryId": "3503208",
+              "value": 92
+            },
+            {
+              "geometryId": "4208203",
+              "value": 88
+            },
+            {
+              "geometryId": "2616308",
+              "value": 82
+            },
+            {
+              "geometryId": "5221403",
+              "value": 1515
+            },
+            {
+              "geometryId": "3108602",
+              "value": 153
+            },
+            {
+              "geometryId": "4311007",
+              "value": 500
+            },
+            {
+              "geometryId": "2603926",
+              "value": 12
+            },
+            {
+              "geometryId": "1702109",
+              "value": 295
+            },
+            {
+              "geometryId": "2307700",
+              "value": 110
+            },
+            {
+              "geometryId": "2507002",
+              "value": 0
+            },
+            {
+              "geometryId": "2410306",
+              "value": 710
+            },
+            {
+              "geometryId": "1707207",
+              "value": 70
+            },
+            {
+              "geometryId": "2501807",
+              "value": 367
+            },
+            {
+              "geometryId": "1709500",
+              "value": 18
+            },
+            {
+              "geometryId": "1716109",
+              "value": 285
+            },
+            {
+              "geometryId": "3534708",
+              "value": 130
+            },
+            {
+              "geometryId": "3152006",
+              "value": 110
+            },
+            {
+              "geometryId": "2916401",
+              "value": 707
+            },
+            {
+              "geometryId": "2312304",
+              "value": 200
+            },
+            {
+              "geometryId": "2403251",
+              "value": 150
+            },
+            {
+              "geometryId": "2933307",
+              "value": 1647
+            },
+            {
+              "geometryId": "1507904",
+              "value": 127
+            },
+            {
+              "geometryId": "2614105",
+              "value": 110
+            },
+            {
+              "geometryId": "3124104",
+              "value": 40
+            },
+            {
+              "geometryId": "4106407",
+              "value": 244
+            },
+            {
+              "geometryId": "2928703",
+              "value": 393
+            },
+            {
+              "geometryId": "4101804",
+              "value": 48
+            },
+            {
+              "geometryId": "3543907",
+              "value": 750
+            },
+            {
+              "geometryId": "2201507",
+              "value": 18
+            },
+            {
+              "geometryId": "1718204",
+              "value": 110
+            },
+            {
+              "geometryId": "2906402",
+              "value": 0
+            },
+            {
+              "geometryId": "3205309",
+              "value": 167
+            },
+            {
+              "geometryId": "2918001",
+              "value": 372
+            },
+            {
+              "geometryId": "4104204",
+              "value": 53
+            },
+            {
+              "geometryId": "2412005",
+              "value": 150
+            },
+            {
+              "geometryId": "3506508",
+              "value": 7
+            },
+            {
+              "geometryId": "2402600",
+              "value": 300
+            },
+            {
+              "geometryId": "2601201",
+              "value": 245
+            },
+            {
+              "geometryId": "3551009",
+              "value": 250
+            },
+            {
+              "geometryId": "1100106",
+              "value": 150
+            },
+            {
+              "geometryId": "2918407",
+              "value": 705
+            },
+            {
+              "geometryId": "2908606",
+              "value": 340
+            },
+            {
+              "geometryId": "3557105",
+              "value": 23
+            },
+            {
+              "geometryId": "2112209",
+              "value": 595
+            },
+            {
+              "geometryId": "5107909",
+              "value": 60
+            },
+            {
+              "geometryId": "2932309",
+              "value": 55
+            },
+            {
+              "geometryId": "2500403",
+              "value": 205
+            },
+            {
+              "geometryId": "2507606",
+              "value": 160
+            },
+            {
+              "geometryId": "2512705",
+              "value": 143
+            },
+            {
+              "geometryId": "2503209",
+              "value": 250
+            },
+            {
+              "geometryId": "5214606",
+              "value": 800
+            },
+            {
+              "geometryId": "2911501",
+              "value": 530
+            },
+            {
+              "geometryId": "2513406",
+              "value": 107
+            },
+            {
+              "geometryId": "2511202",
+              "value": 750
+            },
+            {
+              "geometryId": "2928950",
+              "value": 546
+            }
+          ]
+        }
+      ],
+      "legends": [
+        {
+          "id": "pessoas-atendidas-legend",
+          "title": "Pessoas atendidas (total)",
+          "subtitle": "Declarado no cadastro das cozinhas",
+          "labelFormat": {
+            "type": "count",
+            "abbreviate": true
+          },
+          "reference": "Total de pessoas atendidas por município (agregado) — Cozinhas Solidárias geolocalizadas"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,1478 @@
+{
+  "prompt": "Mapa coroplético das cozinhas solidárias por município.",
+  "httpStatus": 200,
+  "durationMs": 67034,
+  "response": {
+    "result": {
+      "title": "Cozinhas Solidárias cadastradas por município",
+      "description": "Mapa coroplético do número de cozinhas solidárias habilitadas por município (join pelo código IBGE / codarea). Dataset sem corte de data explícito — é um retrato do estado atual do cadastro (snapshot), não uma série temporal. Cobertura parcial: o recorte inclui apenas cozinhas habilitadas e parte dos registros não possui coordenadas geográficas, o que pode sub-representar municípios com cadastro incompleto.",
+      "engine": "maplibre",
+      "mapType": "choropleth",
+      "view": {
+        "center": [
+          -53.2,
+          -10.3
+        ],
+        "zoom": 4
+      },
+      "sources": [
+        {
+          "id": "municipios",
+          "type": "geojson",
+          "data": "/geo/geojs-100-mun.json"
+        }
+      ],
+      "layers": [
+        {
+          "id": "cozinhas-municipio-choropleth",
+          "sourceId": "municipios",
+          "geometry": "polygon",
+          "title": "Cozinhas Solidárias cadastradas por município",
+          "mapDataId": "cozinhas_geolocalizadas",
+          "activeLegendId": "legend-cozinhas-geolocalizadas"
+        }
+      ],
+      "mapData": [
+        {
+          "mapDataId": "cozinhas_geolocalizadas",
+          "mapId": "municipios",
+          "title": "Cozinhas Solidárias cadastradas",
+          "description": "Número de cozinhas solidárias habilitadas cadastradas em cada município.",
+          "joinKey": "codarea",
+          "stateKey": "value",
+          "dimension": "color",
+          "data": [
+            {
+              "geometryId": "3304557",
+              "value": 69
+            },
+            {
+              "geometryId": "2930501",
+              "value": 4
+            },
+            {
+              "geometryId": "2709400",
+              "value": 1
+            },
+            {
+              "geometryId": "3513801",
+              "value": 1
+            },
+            {
+              "geometryId": "2408102",
+              "value": 30
+            },
+            {
+              "geometryId": "3302205",
+              "value": 2
+            },
+            {
+              "geometryId": "2705309",
+              "value": 1
+            },
+            {
+              "geometryId": "2303709",
+              "value": 28
+            },
+            {
+              "geometryId": "5201108",
+              "value": 7
+            },
+            {
+              "geometryId": "4317103",
+              "value": 3
+            },
+            {
+              "geometryId": "2800308",
+              "value": 15
+            },
+            {
+              "geometryId": "4314902",
+              "value": 135
+            },
+            {
+              "geometryId": "2704302",
+              "value": 20
+            },
+            {
+              "geometryId": "2927408",
+              "value": 26
+            },
+            {
+              "geometryId": "3304144",
+              "value": 2
+            },
+            {
+              "geometryId": "3505609",
+              "value": 1
+            },
+            {
+              "geometryId": "3302007",
+              "value": 1
+            },
+            {
+              "geometryId": "2507507",
+              "value": 11
+            },
+            {
+              "geometryId": "2105401",
+              "value": 2
+            },
+            {
+              "geometryId": "2928604",
+              "value": 1
+            },
+            {
+              "geometryId": "3550308",
+              "value": 143
+            },
+            {
+              "geometryId": "5300108",
+              "value": 21
+            },
+            {
+              "geometryId": "3303401",
+              "value": 1
+            },
+            {
+              "geometryId": "3120904",
+              "value": 1
+            },
+            {
+              "geometryId": "5205109",
+              "value": 2
+            },
+            {
+              "geometryId": "1506559",
+              "value": 1
+            },
+            {
+              "geometryId": "1500800",
+              "value": 11
+            },
+            {
+              "geometryId": "3302403",
+              "value": 1
+            },
+            {
+              "geometryId": "2910800",
+              "value": 9
+            },
+            {
+              "geometryId": "3201407",
+              "value": 1
+            },
+            {
+              "geometryId": "2914802",
+              "value": 1
+            },
+            {
+              "geometryId": "3509502",
+              "value": 4
+            },
+            {
+              "geometryId": "3151602",
+              "value": 1
+            },
+            {
+              "geometryId": "1505502",
+              "value": 1
+            },
+            {
+              "geometryId": "2302206",
+              "value": 1
+            },
+            {
+              "geometryId": "2211001",
+              "value": 20
+            },
+            {
+              "geometryId": "3151206",
+              "value": 1
+            },
+            {
+              "geometryId": "2609600",
+              "value": 15
+            },
+            {
+              "geometryId": "1503200",
+              "value": 2
+            },
+            {
+              "geometryId": "3201308",
+              "value": 1
+            },
+            {
+              "geometryId": "1506203",
+              "value": 1
+            },
+            {
+              "geometryId": "1600303",
+              "value": 2
+            },
+            {
+              "geometryId": "5101803",
+              "value": 1
+            },
+            {
+              "geometryId": "1400100",
+              "value": 4
+            },
+            {
+              "geometryId": "2309706",
+              "value": 1
+            },
+            {
+              "geometryId": "2805703",
+              "value": 1
+            },
+            {
+              "geometryId": "5003702",
+              "value": 1
+            },
+            {
+              "geometryId": "3502507",
+              "value": 1
+            },
+            {
+              "geometryId": "4205407",
+              "value": 12
+            },
+            {
+              "geometryId": "4203204",
+              "value": 1
+            },
+            {
+              "geometryId": "4321600",
+              "value": 1
+            },
+            {
+              "geometryId": "3506003",
+              "value": 1
+            },
+            {
+              "geometryId": "3305109",
+              "value": 4
+            },
+            {
+              "geometryId": "2913309",
+              "value": 2
+            },
+            {
+              "geometryId": "3301702",
+              "value": 10
+            },
+            {
+              "geometryId": "2607901",
+              "value": 3
+            },
+            {
+              "geometryId": "2302701",
+              "value": 1
+            },
+            {
+              "geometryId": "2105302",
+              "value": 1
+            },
+            {
+              "geometryId": "2107506",
+              "value": 1
+            },
+            {
+              "geometryId": "1200401",
+              "value": 2
+            },
+            {
+              "geometryId": "2611606",
+              "value": 27
+            },
+            {
+              "geometryId": "4104808",
+              "value": 1
+            },
+            {
+              "geometryId": "3518800",
+              "value": 9
+            },
+            {
+              "geometryId": "2616407",
+              "value": 1
+            },
+            {
+              "geometryId": "4113700",
+              "value": 2
+            },
+            {
+              "geometryId": "2806701",
+              "value": 1
+            },
+            {
+              "geometryId": "3523107",
+              "value": 1
+            },
+            {
+              "geometryId": "2706802",
+              "value": 1
+            },
+            {
+              "geometryId": "4125506",
+              "value": 5
+            },
+            {
+              "geometryId": "4101507",
+              "value": 1
+            },
+            {
+              "geometryId": "3302858",
+              "value": 4
+            },
+            {
+              "geometryId": "3300704",
+              "value": 1
+            },
+            {
+              "geometryId": "2807600",
+              "value": 2
+            },
+            {
+              "geometryId": "2308104",
+              "value": 2
+            },
+            {
+              "geometryId": "3518701",
+              "value": 1
+            },
+            {
+              "geometryId": "3538006",
+              "value": 1
+            },
+            {
+              "geometryId": "3548500",
+              "value": 1
+            },
+            {
+              "geometryId": "3118601",
+              "value": 5
+            },
+            {
+              "geometryId": "3161106",
+              "value": 1
+            },
+            {
+              "geometryId": "4300604",
+              "value": 17
+            },
+            {
+              "geometryId": "3300456",
+              "value": 6
+            },
+            {
+              "geometryId": "3143302",
+              "value": 5
+            },
+            {
+              "geometryId": "2901106",
+              "value": 1
+            },
+            {
+              "geometryId": "3552809",
+              "value": 2
+            },
+            {
+              "geometryId": "2312908",
+              "value": 1
+            },
+            {
+              "geometryId": "3538907",
+              "value": 1
+            },
+            {
+              "geometryId": "1302603",
+              "value": 3
+            },
+            {
+              "geometryId": "2203008",
+              "value": 1
+            },
+            {
+              "geometryId": "3303500",
+              "value": 8
+            },
+            {
+              "geometryId": "3549805",
+              "value": 1
+            },
+            {
+              "geometryId": "1400175",
+              "value": 1
+            },
+            {
+              "geometryId": "3121605",
+              "value": 1
+            },
+            {
+              "geometryId": "3547809",
+              "value": 2
+            },
+            {
+              "geometryId": "3534401",
+              "value": 1
+            },
+            {
+              "geometryId": "3515004",
+              "value": 1
+            },
+            {
+              "geometryId": "4106902",
+              "value": 23
+            },
+            {
+              "geometryId": "1505536",
+              "value": 1
+            },
+            {
+              "geometryId": "2311355",
+              "value": 4
+            },
+            {
+              "geometryId": "2600104",
+              "value": 1
+            },
+            {
+              "geometryId": "3303302",
+              "value": 4
+            },
+            {
+              "geometryId": "4316907",
+              "value": 14
+            },
+            {
+              "geometryId": "2919207",
+              "value": 2
+            },
+            {
+              "geometryId": "2313757",
+              "value": 2
+            },
+            {
+              "geometryId": "2302503",
+              "value": 1
+            },
+            {
+              "geometryId": "5201405",
+              "value": 2
+            },
+            {
+              "geometryId": "2300903",
+              "value": 1
+            },
+            {
+              "geometryId": "4313375",
+              "value": 1
+            },
+            {
+              "geometryId": "3548906",
+              "value": 1
+            },
+            {
+              "geometryId": "3531100",
+              "value": 1
+            },
+            {
+              "geometryId": "2306504",
+              "value": 2
+            },
+            {
+              "geometryId": "2305704",
+              "value": 1
+            },
+            {
+              "geometryId": "2700409",
+              "value": 2
+            },
+            {
+              "geometryId": "2309102",
+              "value": 1
+            },
+            {
+              "geometryId": "4307005",
+              "value": 2
+            },
+            {
+              "geometryId": "2302107",
+              "value": 6
+            },
+            {
+              "geometryId": "2407104",
+              "value": 1
+            },
+            {
+              "geometryId": "3300803",
+              "value": 1
+            },
+            {
+              "geometryId": "2703106",
+              "value": 1
+            },
+            {
+              "geometryId": "2304202",
+              "value": 1
+            },
+            {
+              "geometryId": "2301901",
+              "value": 1
+            },
+            {
+              "geometryId": "2307106",
+              "value": 2
+            },
+            {
+              "geometryId": "2309805",
+              "value": 1
+            },
+            {
+              "geometryId": "3106200",
+              "value": 12
+            },
+            {
+              "geometryId": "2901007",
+              "value": 1
+            },
+            {
+              "geometryId": "2309607",
+              "value": 1
+            },
+            {
+              "geometryId": "2304400",
+              "value": 75
+            },
+            {
+              "geometryId": "2603454",
+              "value": 4
+            },
+            {
+              "geometryId": "4314407",
+              "value": 10
+            },
+            {
+              "geometryId": "2304301",
+              "value": 2
+            },
+            {
+              "geometryId": "1501402",
+              "value": 4
+            },
+            {
+              "geometryId": "2307650",
+              "value": 5
+            },
+            {
+              "geometryId": "3305554",
+              "value": 5
+            },
+            {
+              "geometryId": "3127701",
+              "value": 1
+            },
+            {
+              "geometryId": "3304904",
+              "value": 3
+            },
+            {
+              "geometryId": "5220686",
+              "value": 1
+            },
+            {
+              "geometryId": "4318705",
+              "value": 27
+            },
+            {
+              "geometryId": "2208007",
+              "value": 2
+            },
+            {
+              "geometryId": "2600500",
+              "value": 1
+            },
+            {
+              "geometryId": "3552403",
+              "value": 4
+            },
+            {
+              "geometryId": "2925303",
+              "value": 3
+            },
+            {
+              "geometryId": "2931350",
+              "value": 2
+            },
+            {
+              "geometryId": "2708402",
+              "value": 1
+            },
+            {
+              "geometryId": "3552502",
+              "value": 4
+            },
+            {
+              "geometryId": "3508801",
+              "value": 2
+            },
+            {
+              "geometryId": "2111300",
+              "value": 6
+            },
+            {
+              "geometryId": "3168606",
+              "value": 1
+            },
+            {
+              "geometryId": "3543402",
+              "value": 4
+            },
+            {
+              "geometryId": "2306009",
+              "value": 2
+            },
+            {
+              "geometryId": "1506609",
+              "value": 1
+            },
+            {
+              "geometryId": "2610707",
+              "value": 6
+            },
+            {
+              "geometryId": "5206404",
+              "value": 1
+            },
+            {
+              "geometryId": "2301950",
+              "value": 4
+            },
+            {
+              "geometryId": "3516200",
+              "value": 1
+            },
+            {
+              "geometryId": "2301208",
+              "value": 4
+            },
+            {
+              "geometryId": "2302909",
+              "value": 1
+            },
+            {
+              "geometryId": "3126109",
+              "value": 1
+            },
+            {
+              "geometryId": "2309458",
+              "value": 1
+            },
+            {
+              "geometryId": "3515707",
+              "value": 3
+            },
+            {
+              "geometryId": "3556206",
+              "value": 1
+            },
+            {
+              "geometryId": "2202208",
+              "value": 1
+            },
+            {
+              "geometryId": "3301900",
+              "value": 3
+            },
+            {
+              "geometryId": "2908903",
+              "value": 1
+            },
+            {
+              "geometryId": "4216602",
+              "value": 1
+            },
+            {
+              "geometryId": "2806206",
+              "value": 1
+            },
+            {
+              "geometryId": "2303600",
+              "value": 1
+            },
+            {
+              "geometryId": "2303956",
+              "value": 1
+            },
+            {
+              "geometryId": "2802106",
+              "value": 1
+            },
+            {
+              "geometryId": "2805802",
+              "value": 1
+            },
+            {
+              "geometryId": "2200400",
+              "value": 6
+            },
+            {
+              "geometryId": "2408003",
+              "value": 1
+            },
+            {
+              "geometryId": "2704708",
+              "value": 1
+            },
+            {
+              "geometryId": "2314003",
+              "value": 1
+            },
+            {
+              "geometryId": "2307635",
+              "value": 2
+            },
+            {
+              "geometryId": "3542602",
+              "value": 1
+            },
+            {
+              "geometryId": "2310100",
+              "value": 2
+            },
+            {
+              "geometryId": "3302270",
+              "value": 2
+            },
+            {
+              "geometryId": "1507003",
+              "value": 1
+            },
+            {
+              "geometryId": "5002704",
+              "value": 3
+            },
+            {
+              "geometryId": "3302700",
+              "value": 1
+            },
+            {
+              "geometryId": "2207702",
+              "value": 1
+            },
+            {
+              "geometryId": "4305108",
+              "value": 16
+            },
+            {
+              "geometryId": "2928000",
+              "value": 2
+            },
+            {
+              "geometryId": "2509107",
+              "value": 1
+            },
+            {
+              "geometryId": "3530607",
+              "value": 1
+            },
+            {
+              "geometryId": "3156700",
+              "value": 1
+            },
+            {
+              "geometryId": "2902104",
+              "value": 2
+            },
+            {
+              "geometryId": "4316808",
+              "value": 4
+            },
+            {
+              "geometryId": "2930709",
+              "value": 3
+            },
+            {
+              "geometryId": "2903607",
+              "value": 1
+            },
+            {
+              "geometryId": "2925907",
+              "value": 1
+            },
+            {
+              "geometryId": "3154606",
+              "value": 2
+            },
+            {
+              "geometryId": "4304606",
+              "value": 7
+            },
+            {
+              "geometryId": "3115300",
+              "value": 1
+            },
+            {
+              "geometryId": "2610806",
+              "value": 1
+            },
+            {
+              "geometryId": "5222005",
+              "value": 1
+            },
+            {
+              "geometryId": "3510203",
+              "value": 1
+            },
+            {
+              "geometryId": "2403608",
+              "value": 5
+            },
+            {
+              "geometryId": "2108603",
+              "value": 1
+            },
+            {
+              "geometryId": "3302502",
+              "value": 1
+            },
+            {
+              "geometryId": "4119152",
+              "value": 1
+            },
+            {
+              "geometryId": "5208707",
+              "value": 5
+            },
+            {
+              "geometryId": "2506004",
+              "value": 1
+            },
+            {
+              "geometryId": "2501104",
+              "value": 1
+            },
+            {
+              "geometryId": "1100114",
+              "value": 1
+            },
+            {
+              "geometryId": "2612208",
+              "value": 1
+            },
+            {
+              "geometryId": "4209102",
+              "value": 3
+            },
+            {
+              "geometryId": "3170206",
+              "value": 9
+            },
+            {
+              "geometryId": "3516408",
+              "value": 1
+            },
+            {
+              "geometryId": "2915601",
+              "value": 1
+            },
+            {
+              "geometryId": "2504009",
+              "value": 4
+            },
+            {
+              "geometryId": "4119905",
+              "value": 1
+            },
+            {
+              "geometryId": "2919926",
+              "value": 1
+            },
+            {
+              "geometryId": "2101970",
+              "value": 1
+            },
+            {
+              "geometryId": "4306767",
+              "value": 2
+            },
+            {
+              "geometryId": "2804805",
+              "value": 3
+            },
+            {
+              "geometryId": "3509007",
+              "value": 1
+            },
+            {
+              "geometryId": "3516309",
+              "value": 1
+            },
+            {
+              "geometryId": "2704005",
+              "value": 1
+            },
+            {
+              "geometryId": "2611101",
+              "value": 4
+            },
+            {
+              "geometryId": "2302602",
+              "value": 1
+            },
+            {
+              "geometryId": "2310258",
+              "value": 3
+            },
+            {
+              "geometryId": "2304905",
+              "value": 1
+            },
+            {
+              "geometryId": "3132107",
+              "value": 1
+            },
+            {
+              "geometryId": "2702900",
+              "value": 1
+            },
+            {
+              "geometryId": "2604106",
+              "value": 3
+            },
+            {
+              "geometryId": "2305654",
+              "value": 2
+            },
+            {
+              "geometryId": "3136702",
+              "value": 14
+            },
+            {
+              "geometryId": "2313500",
+              "value": 2
+            },
+            {
+              "geometryId": "3505708",
+              "value": 1
+            },
+            {
+              "geometryId": "3300605",
+              "value": 1
+            },
+            {
+              "geometryId": "5103403",
+              "value": 2
+            },
+            {
+              "geometryId": "3538709",
+              "value": 2
+            },
+            {
+              "geometryId": "4313409",
+              "value": 4
+            },
+            {
+              "geometryId": "4300406",
+              "value": 1
+            },
+            {
+              "geometryId": "4323002",
+              "value": 12
+            },
+            {
+              "geometryId": "4313706",
+              "value": 6
+            },
+            {
+              "geometryId": "4309209",
+              "value": 9
+            },
+            {
+              "geometryId": "3111309",
+              "value": 1
+            },
+            {
+              "geometryId": "2406601",
+              "value": 1
+            },
+            {
+              "geometryId": "4306908",
+              "value": 1
+            },
+            {
+              "geometryId": "3528502",
+              "value": 1
+            },
+            {
+              "geometryId": "2700300",
+              "value": 1
+            },
+            {
+              "geometryId": "4322202",
+              "value": 1
+            },
+            {
+              "geometryId": "3548708",
+              "value": 2
+            },
+            {
+              "geometryId": "2510709",
+              "value": 1
+            },
+            {
+              "geometryId": "2306900",
+              "value": 1
+            },
+            {
+              "geometryId": "2202174",
+              "value": 1
+            },
+            {
+              "geometryId": "3551504",
+              "value": 1
+            },
+            {
+              "geometryId": "1500958",
+              "value": 1
+            },
+            {
+              "geometryId": "2705507",
+              "value": 1
+            },
+            {
+              "geometryId": "3522208",
+              "value": 1
+            },
+            {
+              "geometryId": "4115705",
+              "value": 2
+            },
+            {
+              "geometryId": "5200258",
+              "value": 1
+            },
+            {
+              "geometryId": "2914901",
+              "value": 1
+            },
+            {
+              "geometryId": "4305355",
+              "value": 1
+            },
+            {
+              "geometryId": "4309308",
+              "value": 2
+            },
+            {
+              "geometryId": "4201208",
+              "value": 1
+            },
+            {
+              "geometryId": "2925709",
+              "value": 1
+            },
+            {
+              "geometryId": "2903201",
+              "value": 1
+            },
+            {
+              "geometryId": "2913606",
+              "value": 2
+            },
+            {
+              "geometryId": "2911709",
+              "value": 1
+            },
+            {
+              "geometryId": "2207009",
+              "value": 1
+            },
+            {
+              "geometryId": "4322707",
+              "value": 1
+            },
+            {
+              "geometryId": "2202109",
+              "value": 1
+            },
+            {
+              "geometryId": "2200509",
+              "value": 1
+            },
+            {
+              "geometryId": "4314100",
+              "value": 3
+            },
+            {
+              "geometryId": "1721000",
+              "value": 3
+            },
+            {
+              "geometryId": "4320008",
+              "value": 1
+            },
+            {
+              "geometryId": "3131307",
+              "value": 1
+            },
+            {
+              "geometryId": "4315602",
+              "value": 4
+            },
+            {
+              "geometryId": "2609402",
+              "value": 2
+            },
+            {
+              "geometryId": "5206503",
+              "value": 1
+            },
+            {
+              "geometryId": "2922730",
+              "value": 1
+            },
+            {
+              "geometryId": "4107652",
+              "value": 1
+            },
+            {
+              "geometryId": "1713205",
+              "value": 1
+            },
+            {
+              "geometryId": "2926301",
+              "value": 1
+            },
+            {
+              "geometryId": "2913903",
+              "value": 1
+            },
+            {
+              "geometryId": "2708600",
+              "value": 1
+            },
+            {
+              "geometryId": "3524303",
+              "value": 1
+            },
+            {
+              "geometryId": "4304689",
+              "value": 1
+            },
+            {
+              "geometryId": "2601409",
+              "value": 1
+            },
+            {
+              "geometryId": "3205002",
+              "value": 2
+            },
+            {
+              "geometryId": "1506807",
+              "value": 1
+            },
+            {
+              "geometryId": "3530706",
+              "value": 1
+            },
+            {
+              "geometryId": "2605905",
+              "value": 1
+            },
+            {
+              "geometryId": "2702405",
+              "value": 2
+            },
+            {
+              "geometryId": "2307304",
+              "value": 1
+            },
+            {
+              "geometryId": "4108304",
+              "value": 1
+            },
+            {
+              "geometryId": "4311205",
+              "value": 1
+            },
+            {
+              "geometryId": "2301000",
+              "value": 1
+            },
+            {
+              "geometryId": "5203401",
+              "value": 1
+            },
+            {
+              "geometryId": "2405801",
+              "value": 1
+            },
+            {
+              "geometryId": "3503208",
+              "value": 1
+            },
+            {
+              "geometryId": "4208203",
+              "value": 1
+            },
+            {
+              "geometryId": "2616308",
+              "value": 1
+            },
+            {
+              "geometryId": "5221403",
+              "value": 4
+            },
+            {
+              "geometryId": "3108602",
+              "value": 1
+            },
+            {
+              "geometryId": "4311007",
+              "value": 3
+            },
+            {
+              "geometryId": "2603926",
+              "value": 1
+            },
+            {
+              "geometryId": "1702109",
+              "value": 3
+            },
+            {
+              "geometryId": "2307700",
+              "value": 1
+            },
+            {
+              "geometryId": "2507002",
+              "value": 1
+            },
+            {
+              "geometryId": "2410306",
+              "value": 1
+            },
+            {
+              "geometryId": "1707207",
+              "value": 1
+            },
+            {
+              "geometryId": "2501807",
+              "value": 2
+            },
+            {
+              "geometryId": "1709500",
+              "value": 1
+            },
+            {
+              "geometryId": "1716109",
+              "value": 2
+            },
+            {
+              "geometryId": "3534708",
+              "value": 1
+            },
+            {
+              "geometryId": "3152006",
+              "value": 1
+            },
+            {
+              "geometryId": "2916401",
+              "value": 1
+            },
+            {
+              "geometryId": "2312304",
+              "value": 1
+            },
+            {
+              "geometryId": "2403251",
+              "value": 1
+            },
+            {
+              "geometryId": "2933307",
+              "value": 2
+            },
+            {
+              "geometryId": "1507904",
+              "value": 1
+            },
+            {
+              "geometryId": "2614105",
+              "value": 1
+            },
+            {
+              "geometryId": "3124104",
+              "value": 1
+            },
+            {
+              "geometryId": "4106407",
+              "value": 1
+            },
+            {
+              "geometryId": "2928703",
+              "value": 2
+            },
+            {
+              "geometryId": "4101804",
+              "value": 1
+            },
+            {
+              "geometryId": "3543907",
+              "value": 1
+            },
+            {
+              "geometryId": "2201507",
+              "value": 1
+            },
+            {
+              "geometryId": "1718204",
+              "value": 1
+            },
+            {
+              "geometryId": "2906402",
+              "value": 1
+            },
+            {
+              "geometryId": "3205309",
+              "value": 1
+            },
+            {
+              "geometryId": "2918001",
+              "value": 1
+            },
+            {
+              "geometryId": "4104204",
+              "value": 1
+            },
+            {
+              "geometryId": "2412005",
+              "value": 1
+            },
+            {
+              "geometryId": "3506508",
+              "value": 1
+            },
+            {
+              "geometryId": "2402600",
+              "value": 1
+            },
+            {
+              "geometryId": "2601201",
+              "value": 1
+            },
+            {
+              "geometryId": "3551009",
+              "value": 1
+            },
+            {
+              "geometryId": "1100106",
+              "value": 1
+            },
+            {
+              "geometryId": "2918407",
+              "value": 2
+            },
+            {
+              "geometryId": "2908606",
+              "value": 1
+            },
+            {
+              "geometryId": "3557105",
+              "value": 1
+            },
+            {
+              "geometryId": "2112209",
+              "value": 2
+            },
+            {
+              "geometryId": "5107909",
+              "value": 2
+            },
+            {
+              "geometryId": "2932309",
+              "value": 1
+            },
+            {
+              "geometryId": "2500403",
+              "value": 1
+            },
+            {
+              "geometryId": "2507606",
+              "value": 1
+            },
+            {
+              "geometryId": "2512705",
+              "value": 1
+            },
+            {
+              "geometryId": "2503209",
+              "value": 2
+            },
+            {
+              "geometryId": "5214606",
+              "value": 1
+            },
+            {
+              "geometryId": "2911501",
+              "value": 1
+            },
+            {
+              "geometryId": "2513406",
+              "value": 1
+            },
+            {
+              "geometryId": "2511202",
+              "value": 1
+            },
+            {
+              "geometryId": "2928950",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "legends": [
+        {
+          "id": "legend-cozinhas-geolocalizadas",
+          "title": "Cozinhas Solidárias cadastradas",
+          "subtitle": "Cadastro de cozinhas habilitadas por município",
+          "labelFormat": {
+            "type": "labels",
+            "labels": [
+              "Sem cozinha",
+              "1–2",
+              "3–5",
+              "6–10",
+              "11–25",
+              "26+"
+            ]
+          },
+          "colorBy": {
+            "type": "quantitative",
+            "property": "value",
+            "scale": "threshold",
+            "thresholds": [
+              1,
+              3,
+              6,
+              11,
+              26
+            ],
+            "colors": [
+              "#C6DBEF",
+              "#86BCDC",
+              "#58A0CE",
+              "#2E7CBB",
+              "#1761A8",
+              "#08306B"
+            ],
+            "defaultColor": "#EEE6DA"
+          },
+          "reference": "Fonte dos dados: © Cozinhas Solidárias"
+        }
+      ]
+    }
+  }
+}

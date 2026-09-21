@@ -1,0 +1,325 @@
+{
+  "datasetVersion": "1.0.0",
+  "skillVersion": "1.3.0",
+  "createdAt": "2026-09-18",
+  "goldenCorpus": "src/app/(features)/mapas/specs/full-evalued/",
+  "notes": [
+    "Prompts em pt-BR porque é assim que os usuários do app escrevem.",
+    "Só os 5 modos alcançáveis têm golden. Os 18 restantes dependem de ids que não existem em RENDERABLE_DATASET_FETCHERS — ver o README do corpus. Não adicione eval case para eles: falham por construção e contaminam o gate.",
+    "As armadilhas (trap-*) vêm de divergência real entre a description do catálogo e o que o fetcher entrega. São os casos de maior valor: a description promete mais do que a rota sabe servir, e o modelo não tem como descobrir isso sozinho."
+  ],
+  "implicitRules": {
+    "_comment": "Regras verificadas em TODA resposta, não por prompt dedicado. O gate de cobertura deve tratá-las como cobertas — não são esquecimento.",
+    "R-json-only": "A rota faz JSON.parse da resposta; qualquer prosa antes/depois vira 422 em todo caso do dataset.",
+    "R-dangling-refs": "validateSpec roda em todo caso; sourceId/mapDataId pendurado reprova qualquer um deles.",
+    "R-no-extra-props": "validateSpec roda em todo caso; propriedade fora do schema reprova qualquer um deles.",
+    "R-one-pass": "INVERIFICÁVEL server-side — a rota vê só a resposta final, não quantas vezes o modelo a revisou. Só medível por duration_ms e tokens no eixo (d) de eficiência."
+  },
+  "cases": [
+    {
+      "id": "golden-coropletico",
+      "kind": "golden",
+      "prompt": "Mapa coroplético das cozinhas solidárias por município.",
+      "golden": "coropletico.json",
+      "expect": {
+        "dataset": "cozinhas_geolocalizadas",
+        "geometry": "/geo/geojs-100-mun.json",
+        "form": "polygon",
+        "legendScale": "quantitative"
+      },
+      "coversRules": [
+        "R-active-legend-exists",
+        "R-label-ptbr",
+        "R-legend-arity",
+        "R-legend-property",
+        "R-legend-required",
+        "R-mapdataid-real",
+        "R-maptype-joins-source",
+        "R-no-geometry-in-mapdata",
+        "R-nodata-color"
+      ],
+      "rubric": "Pinta a contagem de cozinhas sobre polígonos de município, com legend quantitativa e rótulo legível em pt-BR."
+    },
+    {
+      "id": "golden-pontos",
+      "kind": "golden",
+      "prompt": "Quero ver cada cozinha solidária como um ponto no mapa do Brasil.",
+      "golden": "pontos.json",
+      "expect": {
+        "dataset": "cozinhas_geolocalizadas",
+        "geometry": "/api/cozinhas",
+        "form": "point",
+        "legendScale": "categorical"
+      },
+      "coversRules": [
+        "R-geometry-match",
+        "R-no-invent-url",
+        "R-label-ptbr"
+      ],
+      "rubric": "Usa a source de pontos (/api/cozinhas), não polígonos de município. Não tenta colocar geometry:'point' sobre /geo/geojs-100-mun.json."
+    },
+    {
+      "id": "golden-circulos",
+      "kind": "golden",
+      "prompt": "Mapa com um círculo por município, com o tamanho proporcional ao número de cozinhas solidárias.",
+      "golden": "circulos.json",
+      "expect": {
+        "dataset": "cozinhas_geolocalizadas",
+        "geometry": "/api/cozinhas/bolhas",
+        "form": "point+sizeBy",
+        "legendScale": "quantitative"
+      },
+      "coversRules": [
+        "R-sizeby-needs-points",
+        "R-geometry-match",
+        "R-dup-dimension",
+        "R-sqrt-continuous",
+        "R-sizeby-range",
+        "R-both-bindings",
+        "R-double-legend"
+      ],
+      "rubric": "Círculos proporcionais precisam de feições Point (/api/cozinhas/bolhas), nunca de polígonos — polígono + geometry:'point' desenha um círculo por vértice. Este é o único caso que exercita R-double-legend, a lacuna sem validador: uma legend auto-gerada pelo resolver mais uma escrita à mão para a mesma variável passa por toda a malha e pelo validateSpec."
+    },
+    {
+      "id": "golden-ivs",
+      "kind": "golden",
+      "prompt": "Mapa da vulnerabilidade social dos municípios brasileiros.",
+      "golden": "coropletico-ivs.json",
+      "expect": {
+        "dataset": "municipios_ivs",
+        "geometry": "/geo/geojs-100-mun.json",
+        "form": "polygon",
+        "legendScale": "quantitative"
+      },
+      "coversRules": [
+        "R-active-legend-exists",
+        "R-canonical-thresholds",
+        "R-legend-arity",
+        "R-legend-matches-values",
+        "R-legend-property",
+        "R-legend-required",
+        "R-mapdataid-real",
+        "R-nodata-color",
+        "R-official-faixas",
+        "R-threshold-order"
+      ],
+      "rubric": "Escolhe municipios_ivs. As faixas que o modelo emitir são irrelevantes: applyCanonicalScales as reescreve para as faixas oficiais do IPEA. Verifique que a rota de fato normalizou, e não que o modelo acertou os números. IVS é índice oficial: findReclassifiedOfficialIndex rejeita se o modelo rederivar as faixas por Jenks em vez de usar as publicadas pelo IPEA."
+    },
+    {
+      "id": "golden-cadinsan",
+      "kind": "golden",
+      "prompt": "Mapa da insegurança alimentar das famílias do CadÚnico por município.",
+      "golden": "coropletico-cadinsan-com-pbf.json",
+      "expect": {
+        "dataset": "municipios_cadinsan",
+        "geometry": "/geo/geojs-100-mun.json",
+        "form": "polygon",
+        "legendScale": "quantitative"
+      },
+      "coversRules": [
+        "R-active-legend-exists",
+        "R-canonical-thresholds",
+        "R-legend-arity",
+        "R-legend-matches-values",
+        "R-legend-property",
+        "R-mapdataid-real",
+        "R-nodata-color"
+      ],
+      "rubric": "Escolhe municipios_cadinsan. O fetcher serve o cenário COM Bolsa Família; um pedido neutro como este deve aceitá-lo sem inventar o outro cenário."
+    },
+    {
+      "id": "nogolden-cozinhas-2025",
+      "kind": "rubric-only",
+      "prompt": "Mapa das cozinhas solidárias cadastradas em 2025.",
+      "expect": {
+        "dataset": "cozinhas_geolocalizadas_2025"
+      },
+      "coversRules": [
+        "R-mapdataid-real",
+        "R-coverage-read"
+      ],
+      "rubric": "Sem golden — nenhum modo de produção usa este dataset. Deve escolher a variante 2025, não a de 2026, e não deve prometer cobertura total (spatial.coverage é 'partial')."
+    },
+    {
+      "id": "nogolden-pessoas-atendidas",
+      "kind": "rubric-only",
+      "prompt": "Mapa do total de pessoas atendidas pelas cozinhas em cada município.",
+      "expect": {
+        "dataset": "cozinhas_pessoas_atendidas"
+      },
+      "coversRules": [
+        "R-mapdataid-real",
+        "R-coverage-read",
+        "R-choropleth-not-absolute"
+      ],
+      "rubric": "Sem golden. Atenção ao conflito: é um total absoluto, e R-choropleth-not-absolute proíbe coroplético sobre total absoluto. A resposta certa é círculos proporcionais, ou coroplético de uma taxa — não coroplético do total."
+    },
+    {
+      "id": "trap-ivs-subindice",
+      "kind": "trap",
+      "prompt": "Mapa do IVS de infraestrutura urbana por município.",
+      "expect": {
+        "outcome": "error-or-clarify"
+      },
+      "coversRules": [
+        "R-variable-choice",
+        "R-error-when-impossible"
+      ],
+      "rubric": "ARMADILHA: a description de municipios_ivs diz que o dataset contém 'seus subíndices e os índices IDHM', mas RENDERABLE_DATASET_FETCHERS.municipios_ivs devolve só row.ivs. Falha grave = pintar o IVS geral e rotular como 'Infraestrutura Urbana' (mapa plausível respondendo outra pergunta). Aceitável = {\"error\"} ou pedir esclarecimento."
+    },
+    {
+      "id": "trap-idhm",
+      "kind": "trap",
+      "prompt": "Mapa do Índice de Desenvolvimento Humano Municipal.",
+      "expect": {
+        "outcome": "error-or-clarify"
+      },
+      "coversRules": [
+        "R-variable-choice",
+        "R-error-when-impossible"
+      ],
+      "rubric": "ARMADILHA, mesma raiz do trap-ivs-subindice: a description promete IDHM, o fetcher não serve. Falha grave = pintar IVS rotulado como IDHM — são escalas invertidas (IVS alto = ruim, IDHM alto = bom), então o mapa sairia com o significado trocado."
+    },
+    {
+      "id": "trap-cadinsan-sem-pbf",
+      "kind": "trap",
+      "prompt": "Mapa da insegurança alimentar desconsiderando o efeito do Bolsa Família.",
+      "expect": {
+        "outcome": "error-or-clarify"
+      },
+      "coversRules": [
+        "R-variable-choice",
+        "R-error-when-impossible"
+      ],
+      "rubric": "ARMADILHA: a description anuncia 'com e sem o efeito do PBF', o fetcher fixa proporcaoComPbf. Falha grave = servir o cenário com-PBF como se fosse o sem-PBF; as faixas diferem por 3x (18,74 vs 51,1 no topo)."
+    },
+    {
+      "id": "ambig-ano-cozinhas",
+      "kind": "ambiguity",
+      "prompt": "Faz um mapa das cozinhas solidárias.",
+      "expect": {
+        "outcome": "clarify-or-default-with-note"
+      },
+      "coversRules": [
+        "R-coverage-read",
+        "R-variable-choice"
+      ],
+      "rubric": "Dois datasets concorrem (cozinhas_geolocalizadas de 2026 e cozinhas_geolocalizadas_2025). Escolher em silêncio é a falha; perguntar o ano, ou escolher o corrente dizendo qual escolheu, é aceitável."
+    },
+    {
+      "id": "error-dataset-inexistente",
+      "kind": "error",
+      "prompt": "Mapa do saneamento básico por município.",
+      "expect": {
+        "outcome": "error"
+      },
+      "coversRules": [
+        "R-error-when-impossible",
+        "R-mapdataid-real"
+      ],
+      "rubric": "Nenhum dataset do catálogo cobre saneamento. Deve responder {\"error\"}, nunca inventar um mapDataId nem usar um proxy correlato em silêncio."
+    },
+    {
+      "id": "error-grain-estado",
+      "kind": "error",
+      "prompt": "Mapa da vulnerabilidade social por estado.",
+      "expect": {
+        "outcome": "error"
+      },
+      "coversRules": [
+        "R-grain-municipio",
+        "R-error-when-impossible"
+      ],
+      "rubric": "Todo dataset tem grain de município. Pintar sobre /geo/estados.json responde outra pergunta — findPaintedContextLayer rejeita, mas o ideal é o modelo nem tentar."
+    },
+    {
+      "id": "error-assentamentos",
+      "kind": "error",
+      "prompt": "Mapa dos assentamentos de reforma agrária.",
+      "expect": {
+        "outcome": "error"
+      },
+      "coversRules": [
+        "R-error-when-impossible",
+        "R-no-invent-url"
+      ],
+      "rubric": "assentamentos está em AI_EXCLUDED_DATASET_IDS — o agente nem vê o id. Não pode inventar uma URL de source para ele."
+    },
+    {
+      "id": "error-cafs",
+      "kind": "error",
+      "prompt": "Mapa dos CAFs (Cadastro Ambiental Rural) no Brasil.",
+      "expect": {
+        "outcome": "error"
+      },
+      "coversRules": [
+        "R-source-type-geojson",
+        "R-error-when-impossible",
+        "R-no-invent-url"
+      ],
+      "rubric": "O app serve os CAFs por vector tiles (/tiles/caf-h3-*), mas essas URLs não estão em KNOWN_SOURCE_URLS e o agente não as conhece. Falha = inventar uma source vector-tiles."
+    },
+    {
+      "id": "rule-choropleth-absolute",
+      "kind": "rule-gate",
+      "prompt": "Coroplético do número total de cozinhas em cada município.",
+      "expect": {
+        "outcome": "spec-with-rate-or-error"
+      },
+      "coversRules": [
+        "R-choropleth-not-absolute"
+      ],
+      "rubric": "Coroplético sobre total absoluto pinta população, não o fenômeno. Aceitável: converter para taxa, propor círculos proporcionais, ou recusar. findChoroplethOnAbsoluteTotal rejeita se insistir."
+    },
+    {
+      "id": "rule-coverage-partial",
+      "kind": "rule-gate",
+      "prompt": "Mapa completo de todas as cozinhas solidárias existentes no Brasil.",
+      "expect": {
+        "outcome": "spec-with-coverage-caveat"
+      },
+      "coversRules": [
+        "R-coverage-read"
+      ],
+      "rubric": "spatial.coverage é 'partial'. A palavra 'completo'/'todas' no pedido é a armadilha: o modelo não deve afirmar exaustividade no title/description da spec."
+    },
+    {
+      "id": "rule-basemap-inventado",
+      "kind": "rule-gate",
+      "prompt": "Mapa das cozinhas com imagem de satélite no fundo.",
+      "expect": {
+        "outcome": "error-or-default-basemap"
+      },
+      "coversRules": [
+        "R-basemap-styleurl"
+      ],
+      "rubric": "Só https://tiles.openfreemap.org/styles/positron é aceito. Falha = inventar uma styleUrl de satélite, ou pior, um template de tile raster ({z}/{x}/{y}.png) que o MapLibre não consegue carregar como style."
+    },
+    {
+      "id": "rule-source-inventada",
+      "kind": "rule-gate",
+      "prompt": "Mapa das cozinhas por bairro na cidade de São Paulo.",
+      "expect": {
+        "outcome": "error"
+      },
+      "coversRules": [
+        "R-no-invent-url",
+        "R-grain-municipio"
+      ],
+      "rubric": "Não existe geometria de bairro em KNOWN_SOURCE_URLS. Falha = inventar /geo/bairros-sp.json."
+    },
+    {
+      "id": "rule-dotdensity-absoluto",
+      "kind": "rule-gate",
+      "prompt": "Mapa de densidade de pontos do número de cozinhas solidárias em cada município.",
+      "expect": {
+        "outcome": "spec-with-rate-or-error"
+      },
+      "coversRules": [
+        "R-dotdensity-ratio",
+        "R-choropleth-not-absolute"
+      ],
+      "rubric": "dotDensity sobre total absoluto tem o mesmo defeito do coroplético sobre total: os pontos desenham população. findDotDensityWithoutRatio rejeita. Aceitável: converter para taxa, ou recusar explicando."
+    }
+  ]
+}

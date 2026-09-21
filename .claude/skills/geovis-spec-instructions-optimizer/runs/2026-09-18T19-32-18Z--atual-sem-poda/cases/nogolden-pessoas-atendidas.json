@@ -1,0 +1,49 @@
+{
+  "prompt": "Mapa do total de pessoas atendidas pelas cozinhas em cada município.",
+  "httpStatus": 422,
+  "durationMs": 74099,
+  "response": {
+    "error": "Todo spec com uma variável pintada precisa de ao menos uma legend descrevendo-a, no spec (\"legends[]\") ou em alguma layer (\"layers[].legends[]\"). Tente reformular o pedido.",
+    "spec": {
+      "engine": "maplibre",
+      "title": "Pessoas atendidas pelas cozinhas solidárias, por município",
+      "description": "Total de pessoas atendidas, declarado no cadastro das cozinhas solidárias (campo \"Público Total Atendido\"), agregado por município e representado por círculos proporcionais ao volume atendido — nunca em coroplético, pois é um valor absoluto e pintar a área do município introduziria viés de tamanho do polígono. Cobertura parcial: municípios sem nenhuma cozinha com valor parseável no cadastro ficam sem círculo, e nunca aparecem como zero.",
+      "mapType": "proportionalCircles",
+      "sources": [
+        {
+          "id": "cozinhas-bolhas",
+          "type": "geojson",
+          "data": "/api/cozinhas/bolhas"
+        }
+      ],
+      "layers": [
+        {
+          "id": "pessoas-atendidas-circles",
+          "sourceId": "cozinhas-bolhas",
+          "geometry": "point",
+          "title": "Total de pessoas atendidas pelas cozinhas (declarado no cadastro)",
+          "mapDataId": "cozinhas_pessoas_atendidas",
+          "sizeBy": {
+            "range": [
+              4,
+              50
+            ],
+            "mode": "continuous",
+            "transform": "sqrt"
+          }
+        }
+      ],
+      "mapData": [
+        {
+          "mapDataId": "cozinhas_pessoas_atendidas",
+          "mapId": "cozinhas-bolhas",
+          "title": "Total de pessoas atendidas pelas cozinhas (declarado no cadastro)",
+          "description": "Soma, por município, do campo de texto livre \"Público Total Atendido\" de cada cozinha solidária cadastrada, parseado com segurança (texto vazio, não numérico ou negativo é descartado, nunca lido como 0) e somado pela coluna Código IBGE.",
+          "joinKey": "codarea",
+          "stateKey": "value",
+          "dimension": "size"
+        }
+      ]
+    }
+  }
+}

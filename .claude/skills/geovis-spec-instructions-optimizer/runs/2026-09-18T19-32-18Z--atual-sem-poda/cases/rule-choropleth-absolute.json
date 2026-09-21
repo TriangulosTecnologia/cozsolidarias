@@ -1,0 +1,17 @@
+{
+  "prompt": "Coroplético do número total de cozinhas em cada município.",
+  "httpStatus": 422,
+  "durationMs": 9804,
+  "response": {
+    "error": "O modelo retornou uma resposta inválida. Tente reformular o pedido.",
+    "issues": [
+      {
+        "code": "invalid-schema",
+        "message": "(root) must have required property 'engine'"
+      }
+    ],
+    "spec": {
+      "error": "O pedido não especifica o ano do cadastro de cozinhas, e existem dois cortes temporais que respondem igualmente a 'número total de cozinhas por município': cozinhas_geolocalizadas (cadastro atual, 2026, recorte apenas das habilitadas) e cozinhas_geolocalizadas_2025 (cadastro completo do ano de 2025, todas as situações do fluxo). Antes de montar o mapa, por favor informe qual dos dois anos/recortes você quer visualizar."
+    }
+  }
+}
