@@ -1,3 +1,4 @@
+/* eslint-disable no-console, no-undef */
 /**
  * Gera uma variante podada do bloco `system:` de `~/geovis-spec-generator.md`
  * aplicando cortes nomeados, para o diff ser auditável em vez de redigitado.
@@ -24,12 +25,12 @@ if (!block) throw new Error('bloco `system:` não encontrado em ' + SOURCE);
 // indentação além da poda — mediria as duas coisas juntas.
 const system = block
   .split('\n')
-  .map((line) => (line.startsWith('  ') ? line.slice(2) : line))
+  .map((line) => { return line.startsWith('  ') ? line.slice(2) : line })
   .join('\n')
   .replace(/\n+$/, '');
 
 /** Reescreve o bloco `sizeBy`, cujo texto está quebrado no meio das palavras. */
-const fixSizeBy = (text) => {
+const fixSizeBy = text => {
   const start = text.indexOf('  sizeBy: object');
   if (start === -1) return { text, applied: false };
   const end = text.indexOf('  propertyName: string', start);
@@ -47,8 +48,6 @@ const fixSizeBy = (text) => {
 const cutBetween = (text, from, to) => {
   const a = text.indexOf(from);
   if (a === -1) return { text, applied: false };
-  // Fim do texto conta como delimitador: o trecho a cortar pode ser o último
-  // do prompt, e aí não há `to` depois dele.
   const b = text.indexOf(to, a + 1);
   const end = b === -1 ? text.length : b;
   return { text: text.slice(0, a) + text.slice(end), applied: true };
@@ -63,12 +62,12 @@ const CUTS = {
   'geojson-defs': {
     tiers: ['tier1', 'tier12'],
     reason: 'O agente nunca emite geometria inline: INSTRUCTIONS proíbe, findGeometryInMapData e findInvalidGeojsonSource rejeitam. Documentar como escrever um Polygon habilita só o que a rota recusa.',
-    apply: (t) => cutBetween(t, '## Position\n', 'Resolution instructions for the agent:'),
+    apply: (t) => { return cutBetween(t, '## Position\n', 'Resolution instructions for the agent:') },
   },
   'source-type-enum': {
     tiers: ['tier1', 'tier12'],
     reason: 'findUnsupportedSourceType rejeita todo tipo != geojson. Listar os cinco é ensinar cinco formas de tomar 422.',
-    apply: (t) => {
+    apply: t => {
       const before = 'sources (required): array<oneOf [geojson, vector-tiles, raster-tiles, image, raster-dem, video]>';
       const after = 'sources (required): array<geojson> — esta rota aceita apenas sources geojson; qualquer outro tipo é rejeitado antes de renderizar.';
       return t.includes(before)
@@ -79,7 +78,7 @@ const CUTS = {
   'everything-else': {
     tiers: ['tier12'],
     reason: 'Enumera a malha determinística e admite a própria inutilidade ("restating them to yourself does not"). Tier 2: é o único aviso de que a malha existe.',
-    apply: (t) => cutBetween(t, 'Everything else the consumer already rejects by name before rendering:', '\n'),
+    apply: (t) => { return cutBetween(t, 'Everything else the consumer already rejects by name before rendering:', '\n') },
   },
 };
 
@@ -98,7 +97,7 @@ for (const [name, cut] of Object.entries(CUTS)) {
   });
 }
 
-const tk = (s) => Math.round(s.length / 4);
+const tk = (s) => { return Math.round(s.length / 4) };
 console.error(`variante: ${variant}`);
 console.error(`  original: ${tk(system)} tokens aprox.`);
 console.error(`  podado:   ${tk(text)} tokens aprox.  (−${tk(system) - tk(text)})`);

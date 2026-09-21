@@ -1,3 +1,4 @@
+/* eslint-disable no-console, no-undef */
 /**
  * Regenerates the golden spec corpus from `buildSpec` — the same function the
  * production map calls — so the corpus is never a stale hand-copied dump.
@@ -41,17 +42,19 @@ const KEEP_FULL = process.argv.includes('--full');
 // Node strips types but still demands full specifiers and knows nothing about
 // tsconfig `paths`. These hooks supply both, so `buildSpec` loads untouched.
 const EXTS = ['', '.ts', '.tsx', '/index.ts', '/index.tsx'];
-const firstFile = (base) => {
+const firstFile = base => {
   for (const ext of EXTS) {
     try {
       if (statSync(base + ext).isFile()) return base + ext;
-    } catch {}
+    } catch {
+      // Continue searching
+    }
   }
   return null;
 };
 
 registerHooks({
-  resolve(spec, ctx, next) {
+  resolve: (spec, ctx, next) => {
     const base = spec.startsWith('@/')
       ? presolve(SRC, spec.slice(2))
       : spec.startsWith('.') && ctx.parentURL
@@ -69,13 +72,13 @@ const readModes = () => {
   const text = readFileSync(join(MAPAS, 'geovisMapMode.ts'), 'utf8');
   const union = text.split('export type MapMode')[1];
   if (!union) throw new Error('MapMode union not found in geovisMapMode.ts');
-  const modes = [...union.matchAll(/'([a-z0-9-]+)'/g)].map((m) => m[1]);
+  const modes = [...union.matchAll(/'([a-z0-9-]+)'/g)].map((m) => { return m[1] });
   if (modes.length === 0) throw new Error('MapMode union parsed to zero modes');
   return modes;
 };
 
 /** The colour scale a resolved row set supports — the only thing the legend check reads. */
-const valueKind = (rows) => {
+const valueKind = rows => {
   for (const row of rows) {
     if (typeof row?.value === 'string') return 'categorical';
     if (typeof row?.value === 'number') return 'quantitative';
@@ -84,11 +87,11 @@ const valueKind = (rows) => {
 };
 
 /** Replaces bulk payloads with a summary, leaving every structural field verbatim. */
-const slim = (spec) => {
+const slim = spec => {
   const out = { ...spec };
 
   if (Array.isArray(spec.mapData)) {
-    out.mapData = spec.mapData.map((entry) => {
+    out.mapData = spec.mapData.map(entry => {
       if (!Array.isArray(entry?.data)) return entry;
       return {
         ...entry,
@@ -103,7 +106,7 @@ const slim = (spec) => {
   }
 
   if (Array.isArray(spec.sources)) {
-    out.sources = spec.sources.map((source) => {
+    out.sources = spec.sources.map(source => {
       const data = source?.data;
       if (!data || typeof data !== 'object') return source;
       return {
@@ -126,11 +129,12 @@ const optional = async (label, fn, sink) => {
     sink[label] = Array.isArray(value) ? { rows: value.length } : { present: true };
     return value;
   } catch (error) {
-    sink[label] = { absent: String(error.message).slice(0, 120) };
+    sink[label] = { absent: String(error?.message ?? 'unknown error').slice(0, 120) };
     return undefined;
   }
 };
 
+// eslint-disable-next-line complexity
 const main = async () => {
   const { buildSpec } = await import(
     pathToFileURL(join(MAPAS, 'geovisSpec.ts')).href
@@ -139,14 +143,14 @@ const main = async () => {
 
   const provenance = {};
   const byCity =
-    (await optional('cozinhasPorMunicipio', () => gateway.getCozinhasPorMunicipio(), provenance)) ?? [];
+    (await optional('cozinhasPorMunicipio', () => { return gateway.getCozinhasPorMunicipio() }, provenance)) ?? [];
   const ivsByCity =
-    (await optional('ivsPorMunicipio', () => gateway.getIvsPorMunicipio(), provenance)) ?? [];
+    (await optional('ivsPorMunicipio', () => { return gateway.getIvsPorMunicipio() }, provenance)) ?? [];
   const overlays = {
-    cafByCity: await optional('cafsPorMunicipio', () => gateway.getCafsPorMunicipio(), provenance),
-    cadinsanByCity: await optional('cadinsanPorMunicipio', () => gateway.getCadinsanPorMunicipio(), provenance),
-    cafHexbin: await optional('cafHexbin', () => gateway.getCafHexbin(), provenance),
-    cafPontosPorUf: await optional('cafPontosPorUf', () => gateway.getCafPontosPorUf(), provenance),
+    cafByCity: await optional('cafsPorMunicipio', () => { return gateway.getCafsPorMunicipio() }, provenance),
+    cadinsanByCity: await optional('cadinsanPorMunicipio', () => { return gateway.getCadinsanPorMunicipio() }, provenance),
+    cafHexbin: await optional('cafHexbin', () => { return gateway.getCafHexbin() }, provenance),
+    cafPontosPorUf: await optional('cafPontosPorUf', () => { return gateway.getCafPontosPorUf() }, provenance),
   };
 
   mkdirSync(OUT, { recursive: true });

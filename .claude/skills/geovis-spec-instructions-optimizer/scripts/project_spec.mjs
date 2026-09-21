@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable no-console, no-undef */
 // Reduz um VisualizationSpec ao seu núcleo semântico — o que decide "é o mesmo mapa?" —
 // descartando o que é boilerplate compartilhado (view, basemap, control, legendas inativas).
 //
@@ -7,13 +8,13 @@
 //   project_spec.mjs project <spec.json>               # projeção de um spec
 //   project_spec.mjs compare <golden.json> <cand.json> # score do candidato contra o golden
 
-import { readFileSync, readdirSync } from 'node:fs';
+import { readdirSync,readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-const asRecord = (v) => (v && typeof v === 'object' && !Array.isArray(v) ? v : null);
+const asRecord = (v) => { return v && typeof v === 'object' && !Array.isArray(v) ? v : null };
 
 /** URL da source, ou "inline" — o que identifica a geometria, não o id escolhido pelo autor. */
-const sourceKey = (source) => {
+const sourceKey = source => {
   if (typeof source.data === 'string') return source.data;
   if (Array.isArray(source.tiles)) return source.tiles[0];
   return `inline:${source.type}`;
@@ -24,20 +25,21 @@ const sourceKey = (source) => {
  * É o que sobrevive à diferença entre um spec escrito à mão (layers explícitas) e um spec
  * gerado pelo agente (atalho `mapType`) — por isso a comparação nunca é um diff de JSON cru.
  */
-const projectSpec = (spec) => {
+// eslint-disable-next-line complexity
+const projectSpec = spec => {
   const sources = Array.isArray(spec.sources) ? spec.sources.filter(asRecord) : [];
   const layers = Array.isArray(spec.layers) ? spec.layers.filter(asRecord) : [];
   const mapData = Array.isArray(spec.mapData) ? spec.mapData.filter(asRecord) : [];
   const specLegends = Array.isArray(spec.legends) ? spec.legends.filter(asRecord) : [];
 
-  const byId = new Map(sources.map((s) => [s.id, s]));
-  const mdById = new Map(mapData.map((m) => [m.mapDataId, m]));
+  const byId = new Map(sources.map((s) => { return [s.id, s] }));
+  const mdById = new Map(mapData.map((m) => { return [m.mapDataId, m] }));
 
-  const findLegend = (layer) => {
+  const findLegend = layer => {
     const pools = [layer.legends, specLegends];
     for (const pool of pools) {
       if (!Array.isArray(pool)) continue;
-      const hit = pool.find((l) => asRecord(l) && l.id === layer.activeLegendId);
+      const hit = pool.find((l) => { return asRecord(l) && l.id === layer.activeLegendId });
       if (hit) return hit;
     }
     return null;
@@ -62,22 +64,23 @@ const projectSpec = (spec) => {
   return {
     mapType: spec.mapType ?? null,
     geometries: [...new Set(sources.map(sourceKey))].sort(),
-    bindings: bindings.sort((a, b) => `${a.dataset}`.localeCompare(`${b.dataset}`)),
+    bindings: bindings.sort((a, b) => { return `${a.dataset}`.localeCompare(`${b.dataset}`) }),
     legendCount: specLegends.length,
   };
 };
 
-const stable = (v) => JSON.stringify(v);
+const stable = (v) => { return JSON.stringify(v) };
 
-const runInvariant = (dir) => {
+// eslint-disable-next-line complexity
+const runInvariant = dir => {
   // `manifest.json` is the corpus's provenance record, not a spec — projecting
   // it would report a phantom map and poison the invariant (an invariant must
   // hold across every spec, and it holds across none of them once a non-spec
   // is in the set).
   const files = readdirSync(dir)
-    .filter((f) => f.endsWith('.json') && f !== 'manifest.json')
+    .filter((f) => { return f.endsWith('.json') && f !== 'manifest.json' })
     .sort();
-  const projections = files.map((f) => [f, projectSpec(JSON.parse(readFileSync(join(dir, f), 'utf8')))]);
+  const projections = files.map((f) => { return [f, projectSpec(JSON.parse(readFileSync(join(dir, f), 'utf8')))] });
 
   // Um binding é invariante quando aparece, idêntico, em TODOS os specs — é template,
   // não conteúdo. O que o prompt precisa dizer é exatamente o complemento disso.
@@ -89,8 +92,8 @@ const runInvariant = (dir) => {
     }
   }
   const invariant = [...counts.entries()]
-    .filter(([, n]) => n === projections.length)
-    .map(([k]) => JSON.parse(k));
+    .filter(([, n]) => { return n === projections.length })
+    .map(([k]) => { return JSON.parse(k) });
 
   console.log(`# ${projections.length} specs\n`);
   console.log(`## Invariante (presente nos ${projections.length}, = template)\n`);
@@ -99,7 +102,7 @@ const runInvariant = (dir) => {
   console.log(`\n## Delta por spec (= o que o prompt precisa transmitir)\n`);
   const seen = new Map();
   for (const [file, p] of projections) {
-    const delta = p.bindings.filter((b) => !counts.has(stable(b)) || counts.get(stable(b)) < projections.length);
+    const delta = p.bindings.filter((b) => { return !counts.has(stable(b)) || counts.get(stable(b)) < projections.length });
     const key = stable(delta);
     const dup = seen.get(key);
     if (dup) {
@@ -124,20 +127,19 @@ const runCompare = (goldenFile, candidateFile) => {
   const golden = projectSpec(JSON.parse(readFileSync(goldenFile, 'utf8')));
   const candidate = projectSpec(JSON.parse(readFileSync(candidateFile, 'utf8')));
 
-  const goldenSet = new Set(golden.bindings.map((b) => `${b.dataset}@${b.geometry}`));
-  const candSet = new Set(candidate.bindings.map((b) => `${b.dataset}@${b.geometry}`));
+  const goldenSet = new Set(golden.bindings.map((b) => { return `${b.dataset}@${b.geometry}` }));
+  const candSet = new Set(candidate.bindings.map((b) => { return `${b.dataset}@${b.geometry}` }));
 
   const axes = {
-    dataset: [...candSet].filter((k) => goldenSet.has(k)).length / Math.max(goldenSet.size, 1),
+    dataset: [...candSet].filter((k) => { return goldenSet.has(k) }).length / Math.max(goldenSet.size, 1),
     geometry:
-      candidate.geometries.filter((g) => golden.geometries.includes(g)).length /
+      candidate.geometries.filter((g) => { return golden.geometries.includes(g) }).length /
       Math.max(golden.geometries.length, 1),
     form:
-      candidate.bindings.filter((c) => golden.bindings.some((g) => g.dataset === c.dataset && g.form === c.form)).length /
+      candidate.bindings.filter((c) => { return golden.bindings.some((g) => { return g.dataset === c.dataset && g.form === c.form }) }).length /
       Math.max(golden.bindings.length, 1),
     legendScale:
-      candidate.bindings.filter((c) =>
-        golden.bindings.some((g) => g.dataset === c.dataset && g.legendScale === c.legendScale)
+      candidate.bindings.filter((c) => { return golden.bindings.some((g) => { return g.dataset === c.dataset && g.legendScale === c.legendScale }) }
       ).length / Math.max(golden.bindings.length, 1),
   };
 
