@@ -14,7 +14,11 @@ import { DEFAULT_CAF_HEXBIN_RESOLUTION } from '@/data-gateway/schema';
 
 import { DEFAULT_CAF_HEXBIN_OPACITY } from './geovisCafHexbin';
 import type { MapMode } from './geovisSpec';
-import { colorRampOptions, DEFAULT_COLOR_RAMP } from './mapaColorRamp';
+import {
+  colorRampOptions,
+  type CustomRamp,
+  DEFAULT_COLOR_RAMP,
+} from './mapaColorRamp';
 
 /** Id of the left-sidebar menu group that drives the visualization mode. */
 export const MODE_MENU_ID = 'visualizacao';
@@ -48,6 +52,36 @@ export const COLOR_RAMP_MENU_ID = 'cores';
  * proportional circles read by position and size over a flat backdrop, the
  * settlements colour categorically, and the CAF hierarchy is a tiled pyramid.
  */
+/**
+ * What the page hands in so the colour block can offer ramp building.
+ *
+ * Optional as a pair: without somewhere to report, the affordance would mint a
+ * ramp nothing keeps.
+ */
+export type RampHandlers = {
+  /** The ramps the reader has built so far, listed after the shipped ones. */
+  list: CustomRamp[];
+  /** The reader finished building one. */
+  onCreate: (params: { option: CustomRamp }) => void;
+  /** The reader dismissed one they had built. */
+  onRemove: (params: { id: string }) => void;
+};
+
+/**
+ * The colours the ramp editor opens on.
+ *
+ * The map's own sequential families, so a built ramp starts from the same
+ * vocabulary the shipped ones are drawn from rather than from a generic wheel.
+ */
+const RAMP_BASE_COLORS = [
+  { id: 'azul', name: 'Azul', color: '#2171B5' },
+  { id: 'verde', name: 'Verde', color: '#238B45' },
+  { id: 'laranja', name: 'Laranja', color: '#D94801' },
+  { id: 'vermelho', name: 'Vermelho', color: '#CB181D' },
+  { id: 'roxo', name: 'Roxo', color: '#6A51A3' },
+  { id: 'cinza', name: 'Cinza', color: '#636363' },
+];
+
 const TAKES_COLOR_RAMP: Record<MapMode, boolean> = {
   coropletico: true,
   'coropletico-taxa': true,
@@ -411,9 +445,13 @@ const TIMELINE_SECTION: NonNullable<
  * hexagon grid has a resolution to choose, and `enabledWhen` gates whole
  * sections rather than blocks.
  */
-const buildSettingsSection = (
-  mode: MapMode
-): NonNullable<GeovisWorkspaceConfig['leftSidebar']>['sections'][number] => {
+const buildSettingsSection = ({
+  mode,
+  ramps,
+}: {
+  mode: MapMode;
+  ramps?: RampHandlers;
+}): NonNullable<GeovisWorkspaceConfig['leftSidebar']>['sections'][number] => {
   return {
     id: 'Configurações',
     header: {
@@ -485,7 +523,20 @@ const buildSettingsSection = (
                   kind: 'colorRamp' as const,
                   menuId: COLOR_RAMP_MENU_ID,
                   defaultValue: DEFAULT_COLOR_RAMP,
-                  options: colorRampOptions(),
+                  options: colorRampOptions({ custom: ramps?.list }),
+                  // Offered only when the page hands in the handlers: the
+                  // ramps the reader builds are the page's to keep, and an
+                  // affordance with nowhere to report would mint a ramp that
+                  // vanishes on the next render.
+                  ...(ramps
+                    ? {
+                        create: {
+                          baseColors: RAMP_BASE_COLORS,
+                          onCreate: ramps.onCreate,
+                        },
+                        onRemove: ramps.onRemove,
+                      }
+                    : {}),
                 },
               },
             ]
@@ -505,17 +556,21 @@ const buildSettingsSection = (
  * @returns The `leftSidebar` config.
  *
  * @example
- * buildLeftSidebar('coropletico').sections.length; // 3
+ * buildLeftSidebar({ mode: 'coropletico' }).sections.length; // 3
  */
-export const buildLeftSidebar = (
-  mode: MapMode
-): NonNullable<GeovisWorkspaceConfig['leftSidebar']> => {
+export const buildLeftSidebar = ({
+  mode,
+  ramps,
+}: {
+  mode: MapMode;
+  ramps?: RampHandlers;
+}): NonNullable<GeovisWorkspaceConfig['leftSidebar']> => {
   return {
     initialState: 'open',
     sections: [
       VARIATIONS_SECTION,
       TIMELINE_SECTION,
-      buildSettingsSection(mode),
+      buildSettingsSection({ mode, ramps }),
     ],
   };
 };
