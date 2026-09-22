@@ -1,5 +1,7 @@
 import { mapTokens } from '@/config/theme';
 
+import { rampPalette } from './mapaColorRamp';
+
 /**
  * The IVS and IDHM choropleth scales. Both families live on the `[0, 1]` index
  * with a five-class official faixa classification, so each shares one
@@ -88,14 +90,16 @@ const IVS_COLORS = [
  * colorForIvs(0.15); // the "muito baixa" light-red band
  * colorForIvs(0.55); // the "muito alta" dark-red band
  */
-export const colorForIvs = (ivs: number | null): string => {
+export const colorForIvs = (ivs: number | null, rampId?: string): string => {
   if (ivs === null) {
     return SEM_DADO_COLOR;
   }
+  const colors =
+    rampPalette({ rampId, count: IVS_COLORS.length }) ?? IVS_COLORS;
   const index = IVS_THRESHOLDS.findIndex((threshold) => {
     return ivs < threshold;
   });
-  return index === -1 ? IVS_COLORS[IVS_COLORS.length - 1] : IVS_COLORS[index];
+  return index === -1 ? colors[colors.length - 1] : colors[index];
 };
 
 /**
@@ -199,16 +203,16 @@ const IDHM_COLORS = [
  * colorForIdhm(0.45); // the "muito baixo" light-green band
  * colorForIdhm(0.85); // the "muito alto" dark-green band
  */
-export const colorForIdhm = (idhm: number | null): string => {
+export const colorForIdhm = (idhm: number | null, rampId?: string): string => {
   if (idhm === null) {
     return SEM_DADO_COLOR;
   }
+  const colors =
+    rampPalette({ rampId, count: IDHM_COLORS.length }) ?? IDHM_COLORS;
   const index = IDHM_THRESHOLDS.findIndex((threshold) => {
     return idhm < threshold;
   });
-  return index === -1
-    ? IDHM_COLORS[IDHM_COLORS.length - 1]
-    : IDHM_COLORS[index];
+  return index === -1 ? colors[colors.length - 1] : colors[index];
 };
 
 /**

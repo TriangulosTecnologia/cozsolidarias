@@ -48,12 +48,6 @@ const cafUfTooltip = (info: MapHoverInfo) => {
   });
 };
 
-const cafHexbinTooltip = (info: MapHoverInfo) => {
-  return renderCafHexbinTooltip({
-    quantidade: typeof info.value === 'number' ? info.value : null,
-  });
-};
-
 /** The lookups and active mode each hover tooltip is derived from. */
 type UseMapaTooltipsParams = {
   kitchenByCity: kitchenRateByCity[];
@@ -67,6 +61,12 @@ type UseMapaTooltipsParams = {
   /** Per-município CADINSAN rows, so the food-insecurity hover shows the share + counts. */
   cadinsanByCity: cadinsanByCity[];
   mode: MapMode;
+  /**
+   * The ramp the map is being read through, from the settings zone. The hover
+   * card's swatch is drawn from it too — the swatch exists to tie the hovered
+   * município to its band on the map, so it has to be the same palette.
+   */
+  colorRamp?: string;
 };
 
 /**
@@ -90,23 +90,30 @@ export const useMapaTooltips = ({
   cafByCity,
   cadinsanByCity,
   mode,
+  colorRamp,
 }: UseMapaTooltipsParams) => {
-  // The three choropleth datasets are joined by `codigoIbge` for O(1) hover
-  // lookup; indexed together since they all arrive from the same mount fetch.
+  // Every hover lookup is indexed in one memo: the four datasets all arrive
+  // from the same mount fetch, so they are never stale relative to each other.
+  // The choropleths join on `codigoIbge`, the assentamentos on `codImovel`.
   const byCode = React.useMemo(() => {
     return {
       cities: indexByCodigoIbge(kitchenByCity),
       cafs: indexByCodigoIbge(cafByCity),
       cadinsan: indexByCodigoIbge(cadinsanByCity),
+      assentamentos: new Map(
+        assentamentos.map((atributo) => {
+          return [atributo.codImovel, atributo];
+        })
+      ),
     };
-  }, [kitchenByCity, cafByCity, cadinsanByCity]);
+  }, [kitchenByCity, cafByCity, cadinsanByCity, assentamentos]);
 
   const hoverTooltip = React.useCallback(
     (info: MapHoverInfo) => {
       const code = String(info.featureId);
       const register = byCode.cities.get(code);
-      // Nome vem do catálogo completo (todos os municípios do Brasil). Fallback
-      // só se o catálogo não tiver o código.
+      // The name comes from the full catalogue (every município in Brazil);
+      // the register is a fallback only for codes the catalogue is missing.
       const name =
         nomesPorCodigo[code] ?? register?.municipio ?? `Município ${code}`;
 
@@ -117,52 +124,54 @@ export const useMapaTooltips = ({
         cafRegister: byCode.cafs.get(code),
         cadinsanRegister: byCode.cadinsan.get(code),
         value: info.value,
+        rampId: colorRamp,
       });
     },
-    [byCode, nomesPorCodigo, mode]
+    [byCode, nomesPorCodigo, mode, colorRamp]
   );
 
-  const assentamentosByCode = React.useMemo(() => {
-    return new Map(
-      assentamentos.map((atributo) => {
-        return [atributo.codImovel, atributo];
-      })
-    );
-  }, [assentamentos]);
+  /*
+   * Inside the hook rather than at module scope, unlike its siblings: the grid
+   * is read through the same ramp the settings zone offers, so this card's
+   * swatch depends on the choice and the others' do not.
+   */
+  const cafHexbinTooltip = React.useCallback(
+    (info: MapHoverInfo) => {
+      return renderCafHexbinTooltip({
+        quantidade: typeof info.value === 'number' ? info.value : null,
+        rampId: colorRamp,
+      });
+    },
+    [colorRamp]
+  );
 
   const assentamentoTooltip = React.useCallback(
     (info: MapHoverInfo) => {
       return renderAssentamentoTooltip({
-        atributo: assentamentosByCode.get(String(info.featureId)),
+        atributo: byCode.assentamentos.get(String(info.featureId)),
         value: info.value,
       });
     },
-    [assentamentosByCode]
+    [byCode]
   );
 
-  const cozinhasByCodigo = React.useMemo(() => {
-    return new Map(Object.entries(cozinhaNames));
-  }, [cozinhaNames]);
-
-  const statusByCodigo = React.useMemo(() => {
-    return new Map(Object.entries(cozinhaStatus));
-  }, [cozinhaStatus]);
-
+  // Both lookups arrive already keyed by código, so they are read directly:
+  // wrapping a Record in a Map buys no lookup speed and only adds a rebuild.
   const cozinhaTooltip = React.useCallback(
     (info: MapHoverInfo) => {
       const codigo = String(info.featureId);
-      const nome = cozinhasByCodigo.get(codigo) ?? '';
-      const raw = statusByCodigo.get(codigo);
+      const nome = cozinhaNames[codigo] ?? '';
+      const raw = cozinhaStatus[codigo];
       const statusLabel = raw === undefined ? null : cozinhaStatusLabel(raw);
       return renderCozinhaTooltip({ nome, statusLabel });
     },
-    [cozinhasByCodigo, statusByCodigo]
+    [cozinhaNames, cozinhaStatus]
   );
 
   // Memoized as a whole, not just per renderer: `useMapaSpec` feeds these into
   // the spec's own `useMemo`, so a fresh object here would rebuild the spec on
-  // every render. The two CAF renderers are module constants and so are not
-  // dependencies.
+  // every render. `cafUfTooltip` is a module constant and so is not a
+  // dependency; `cafHexbinTooltip` is not, since it tracks the chosen ramp.
   return React.useMemo(() => {
     return {
       hoverTooltip,
@@ -171,5 +180,5 @@ export const useMapaTooltips = ({
       cafUfTooltip,
       cafHexbinTooltip,
     };
-  }, [hoverTooltip, assentamentoTooltip, cozinhaTooltip]);
+  }, [hoverTooltip, assentamentoTooltip, cozinhaTooltip, cafHexbinTooltip]);
 };

@@ -9,6 +9,7 @@ import type {
 import { mapTokens } from '@/config/theme';
 import type { CafHexbinFeatureCollection } from '@/data-gateway/schema';
 
+import { rampPalette } from './mapaColorRamp';
 import { TOOLTIP_STYLE } from './mapaTooltipStyle';
 
 /** Where the grid is served from; also the source's fallback before it loads. */
@@ -99,6 +100,9 @@ const CAF_HEXBIN_EMPTY_COLOR = mapTokens.dataviz.color.status.masked;
  *
  * @param count - CAFs in the cell; `null` for a cell outside the join, which is
  * an empty one.
+ * @param rampId - The ramp the grid is being read through, from the settings
+ * zone. The empty colour is never part of it — a cell that caught nothing is
+ * not a band of the scale.
  * @returns The band's colour.
  *
  * @example
@@ -106,16 +110,23 @@ const CAF_HEXBIN_EMPTY_COLOR = mapTokens.dataviz.color.status.masked;
  * cafHexbinBandColor(5);    // the first band
  * cafHexbinBandColor(25358); // the top band
  */
-export const cafHexbinBandColor = (count: number | null): string => {
+export const cafHexbinBandColor = (
+  count: number | null,
+  rampId?: string
+): string => {
   if (count === null || count < CAF_HEXBIN_THRESHOLDS[0]) {
     return CAF_HEXBIN_EMPTY_COLOR;
   }
+
+  const colors =
+    rampPalette({ rampId, count: CAF_HEXBIN_COLORS.length }) ??
+    CAF_HEXBIN_COLORS;
 
   const band = CAF_HEXBIN_THRESHOLDS.filter((threshold) => {
     return count >= threshold;
   }).length;
 
-  return CAF_HEXBIN_COLORS[band];
+  return colors[band];
 };
 
 /**

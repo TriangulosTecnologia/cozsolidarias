@@ -20,7 +20,7 @@ import { TooltipCard } from './mapaTooltipCard';
 /** A score family's tooltip copy + scale resolvers, shared by every member. */
 export type ScoreTooltip = {
   label: string;
-  colorFor: (value: number | null) => string;
+  colorFor: (value: number | null, rampId?: string) => string;
   faixaLabel: (value: number | null) => string | null;
 };
 
@@ -35,10 +35,13 @@ export const renderScoreTooltip = ({
   name,
   value,
   score,
+  rampId,
 }: {
   name: string;
   value: MapHoverInfo['value'];
   score: ScoreTooltip;
+  /** The ramp the map is being read through, so the swatch names the same band. */
+  rampId?: string;
 }) => {
   const numeric = typeof value === 'number' ? value : null;
   const faixa = score.faixaLabel(numeric);
@@ -54,7 +57,7 @@ export const renderScoreTooltip = ({
   return (
     <TooltipCard
       name={name}
-      swatchColor={score.colorFor(numeric)}
+      swatchColor={score.colorFor(numeric, rampId)}
       primary={primary}
     />
   );

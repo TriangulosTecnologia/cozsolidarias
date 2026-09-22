@@ -14,6 +14,7 @@ import { DEFAULT_CAF_HEXBIN_RESOLUTION } from '@/data-gateway/schema';
 
 import { DEFAULT_CAF_HEXBIN_OPACITY } from './geovisCafHexbin';
 import type { MapMode } from './geovisSpec';
+import { colorRampOptions, DEFAULT_COLOR_RAMP } from './mapaColorRamp';
 
 /** Id of the left-sidebar menu group that drives the visualization mode. */
 export const MODE_MENU_ID = 'visualizacao';
@@ -26,6 +27,57 @@ export const MESH_MENU_ID = 'malha';
 
 /** Id of the settings menu driving the grid's fill opacity, in percent. */
 export const OPACITY_MENU_ID = 'opacidade';
+
+/** Id of the settings menu driving which ramp the graduated fills are read through. */
+export const COLOR_RAMP_MENU_ID = 'cores';
+
+/**
+ * Whether each mode's subject is read through a graduated ramp the reader can
+ * re-colour.
+ *
+ * A `Record<MapMode, …>` for the same reason {@link TAKES_OPACITY} is one: the
+ * compiler is what keeps it complete, so a new mode has to answer the question
+ * instead of silently inheriting an answer.
+ *
+ * `true` wherever the fill *is* a ladder of colours: every choropleth —
+ * including the IVS and IDHM families, which have their own palettes and are
+ * re-coloured like any other — and the hexagon grid, whose cells are classified
+ * on a scale of their own but read through a ramp just the same.
+ *
+ * `false` where there is no ladder to redraw: the kitchen points and their
+ * proportional circles read by position and size over a flat backdrop, the
+ * settlements colour categorically, and the CAF hierarchy is a tiled pyramid.
+ */
+const TAKES_COLOR_RAMP: Record<MapMode, boolean> = {
+  coropletico: true,
+  'coropletico-taxa': true,
+  'coropletico-percentual': true,
+  'coropletico-cafs-percentual': true,
+  'coropletico-cadinsan-com-pbf': true,
+  'coropletico-cadinsan-sem-pbf': true,
+  'coropletico-cadunico': true,
+  'coropletico-pessoas-cozinha': true,
+  'coropletico-ivs': true,
+  'coropletico-ivs-infraestrutura': true,
+  'coropletico-ivs-capital-humano': true,
+  'coropletico-ivs-renda-trabalho': true,
+  'coropletico-idhm': true,
+  'coropletico-idhm-longevidade': true,
+  'coropletico-idhm-educacao': true,
+  'coropletico-idhm-renda': true,
+  'coropletico-idhm-educacao-escolaridade': true,
+  'coropletico-idhm-educacao-frequencia': true,
+  pontos: false,
+  circulos: false,
+  assentamentos: false,
+  cafs: false,
+  'cafs-hexbin': true,
+};
+
+/** Whether the colour-ramp block is offered for a mode. */
+export const modeTakesColorRamp = (mode: MapMode): boolean => {
+  return TAKES_COLOR_RAMP[mode];
+};
 
 /**
  * The resolution ladder, one rung per generated snapshot.
@@ -144,6 +196,160 @@ export const modeUsesHexbinOpacity = (mode: MapMode): boolean => {
  * reads as *gone*.
  */
 /** The variation menu: every mode the map can draw, grouped for ordering. */
+const VARIATION_GROUPS = [
+  {
+    id: 'cozinhas',
+    label: 'Cozinhas',
+    variations: [
+      {
+        value: 'coropletico',
+        label: 'Cozinhas por município (coroplético)',
+        icon: 'lucide:map',
+      },
+      {
+        value: 'coropletico-taxa',
+        label: 'nº coz. no município / 100.000 hab.',
+        icon: 'lucide:users',
+      },
+      {
+        value: 'coropletico-percentual',
+        label: '% das cozinhas do Brasil no município',
+        icon: 'lucide:percent',
+      },
+      {
+        value: 'coropletico-cafs-percentual',
+        label: '% dos CAFs do Brasil no município',
+        icon: 'lucide:wheat',
+      },
+      {
+        value: 'coropletico-cadinsan-com-pbf',
+        label: 'Insegurança alimentar — cenário com o Bolsa Família',
+        icon: 'lucide:utensils-crossed',
+      },
+      {
+        value: 'coropletico-cadinsan-sem-pbf',
+        label: 'Insegurança alimentar — cenário sem o Bolsa Família',
+        icon: 'lucide:utensils',
+      },
+      {
+        value: 'coropletico-cadunico',
+        label: 'nº coz. / 10 mil pessoas no CadÚnico',
+        icon: 'lucide:clipboard-list',
+      },
+      {
+        value: 'coropletico-pessoas-cozinha',
+        label: 'pessoas no CadÚnico por cozinha',
+        icon: 'lucide:user-round',
+      },
+    ],
+  },
+  {
+    id: 'ivs',
+    label: 'IVS',
+    variations: [
+      {
+        value: 'coropletico-ivs',
+        label: 'Índice de vulnerabilidade social',
+        icon: 'lucide:shield-alert',
+      },
+      {
+        value: 'coropletico-ivs-infraestrutura',
+        label: 'IVS Infraestrutura Urbana',
+        icon: 'lucide:building-2',
+      },
+      {
+        value: 'coropletico-ivs-capital-humano',
+        label: 'IVS Capital Humano',
+        icon: 'lucide:graduation-cap',
+      },
+      {
+        value: 'coropletico-ivs-renda-trabalho',
+        label: 'IVS Renda e Trabalho',
+        icon: 'lucide:briefcase',
+      },
+    ],
+  },
+  {
+    id: 'idhm',
+    label: 'IDHM',
+    variations: [
+      {
+        value: 'coropletico-idhm',
+        label: 'Índice de Desenvolvimento Humano Municipal',
+        icon: 'lucide:trending-up',
+      },
+      {
+        value: 'coropletico-idhm-longevidade',
+        label: 'IDHM Longevidade',
+        icon: 'lucide:heart-pulse',
+      },
+      {
+        value: 'coropletico-idhm-educacao',
+        label: 'IDHM Educação',
+        icon: 'lucide:book-open',
+      },
+      {
+        value: 'coropletico-idhm-renda',
+        label: 'IDHM Renda',
+        icon: 'lucide:dollar-sign',
+      },
+      {
+        value: 'coropletico-idhm-educacao-escolaridade',
+        label: 'IDHM Educação — Escolaridade',
+        icon: 'lucide:pencil-ruler',
+      },
+      {
+        value: 'coropletico-idhm-educacao-frequencia',
+        label: 'IDHM Educação — Frequência Escolar',
+        icon: 'lucide:calendar-check',
+      },
+    ],
+  },
+  {
+    id: 'camadas',
+    label: 'Camadas',
+    variations: [
+      {
+        value: 'pontos',
+        label: 'Localização das cozinhas',
+        icon: 'lucide:map-pin',
+      },
+      {
+        value: 'circulos',
+        label: 'Cozinhas por município',
+        icon: 'lucide:circle-dot',
+      },
+      {
+        value: 'assentamentos',
+        label: 'Assentamentos e cozinhas',
+        icon: 'lucide:house',
+      },
+      {
+        value: 'cafs',
+        label: 'CAFs (pf)',
+        icon: 'lucide:tractor',
+      },
+      {
+        value: 'cafs-hexbin',
+        label: 'CAFs (hexbin-pf)',
+        icon: 'lucide:hexagon',
+      },
+    ],
+  },
+];
+
+/**
+ * Every variation the menu offers, which is exactly what a shared link may
+ * name. Derived from the menu rather than written beside it: a value the
+ * sidebar does not draw is one no link should be able to ask for, and a list
+ * kept by hand would let the two drift the first time a variation is renamed.
+ */
+export const MAP_MODE_VALUES = VARIATION_GROUPS.flatMap((group) => {
+  return group.variations.map((variation) => {
+    return variation.value as MapMode;
+  });
+});
+
 const VARIATIONS_SECTION: NonNullable<
   GeovisWorkspaceConfig['leftSidebar']
 >['sections'][number] = {
@@ -157,147 +363,7 @@ const VARIATIONS_SECTION: NonNullable<
     icon: 'lucide:layout-list',
     menuId: MODE_MENU_ID,
     defaultValue: 'coropletico',
-    groups: [
-      {
-        id: 'cozinhas',
-        label: 'Cozinhas',
-        variations: [
-          {
-            value: 'coropletico',
-            label: 'Cozinhas por município (coroplético)',
-            icon: 'lucide:map',
-          },
-          {
-            value: 'coropletico-taxa',
-            label: 'nº coz. no município / 100.000 hab.',
-            icon: 'lucide:users',
-          },
-          {
-            value: 'coropletico-percentual',
-            label: '% das cozinhas do Brasil no município',
-            icon: 'lucide:percent',
-          },
-          {
-            value: 'coropletico-cafs-percentual',
-            label: '% dos CAFs do Brasil no município',
-            icon: 'lucide:wheat',
-          },
-          {
-            value: 'coropletico-cadinsan-com-pbf',
-            label: 'Insegurança alimentar — cenário com o Bolsa Família',
-            icon: 'lucide:utensils-crossed',
-          },
-          {
-            value: 'coropletico-cadinsan-sem-pbf',
-            label: 'Insegurança alimentar — cenário sem o Bolsa Família',
-            icon: 'lucide:utensils',
-          },
-          {
-            value: 'coropletico-cadunico',
-            label: 'nº coz. / 10 mil pessoas no CadÚnico',
-            icon: 'lucide:clipboard-list',
-          },
-          {
-            value: 'coropletico-pessoas-cozinha',
-            label: 'pessoas no CadÚnico por cozinha',
-            icon: 'lucide:user-round',
-          },
-        ],
-      },
-      {
-        id: 'ivs',
-        label: 'IVS',
-        variations: [
-          {
-            value: 'coropletico-ivs',
-            label: 'Índice de vulnerabilidade social',
-            icon: 'lucide:shield-alert',
-          },
-          {
-            value: 'coropletico-ivs-infraestrutura',
-            label: 'IVS Infraestrutura Urbana',
-            icon: 'lucide:building-2',
-          },
-          {
-            value: 'coropletico-ivs-capital-humano',
-            label: 'IVS Capital Humano',
-            icon: 'lucide:graduation-cap',
-          },
-          {
-            value: 'coropletico-ivs-renda-trabalho',
-            label: 'IVS Renda e Trabalho',
-            icon: 'lucide:briefcase',
-          },
-        ],
-      },
-      {
-        id: 'idhm',
-        label: 'IDHM',
-        variations: [
-          {
-            value: 'coropletico-idhm',
-            label: 'Índice de Desenvolvimento Humano Municipal',
-            icon: 'lucide:trending-up',
-          },
-          {
-            value: 'coropletico-idhm-longevidade',
-            label: 'IDHM Longevidade',
-            icon: 'lucide:heart-pulse',
-          },
-          {
-            value: 'coropletico-idhm-educacao',
-            label: 'IDHM Educação',
-            icon: 'lucide:book-open',
-          },
-          {
-            value: 'coropletico-idhm-renda',
-            label: 'IDHM Renda',
-            icon: 'lucide:dollar-sign',
-          },
-          {
-            value: 'coropletico-idhm-educacao-escolaridade',
-            label: 'IDHM Educação — Escolaridade',
-            icon: 'lucide:pencil-ruler',
-          },
-          {
-            value: 'coropletico-idhm-educacao-frequencia',
-            label: 'IDHM Educação — Frequência Escolar',
-            icon: 'lucide:calendar-check',
-          },
-        ],
-      },
-      {
-        id: 'camadas',
-        label: 'Camadas',
-        variations: [
-          {
-            value: 'pontos',
-            label: 'Localização das cozinhas',
-            icon: 'lucide:map-pin',
-          },
-          {
-            value: 'circulos',
-            label: 'Cozinhas por município',
-            icon: 'lucide:circle-dot',
-          },
-          {
-            value: 'assentamentos',
-            label: 'Assentamentos e cozinhas',
-            icon: 'lucide:house',
-          },
-          {
-            value: 'cafs',
-            label: 'CAFs (pf)',
-            icon: 'lucide:tractor',
-          },
-          {
-            value: 'cafs-hexbin',
-            label: 'CAFs (hexbin-pf)',
-            icon: 'lucide:hexagon',
-          },
-        ],
-      },
-    ],
+    groups: VARIATION_GROUPS,
   },
 };
 
@@ -406,6 +472,24 @@ const buildSettingsSection = (
             stepButtons: true,
           },
         },
+        // Offered wherever the fill is a ladder of colours — see
+        // `TAKES_COLOR_RAMP`. Omitted per mode for the same reason the mesh is:
+        // `enabledWhen` gates whole sections, not blocks.
+        ...(modeTakesColorRamp(mode)
+          ? [
+              {
+                id: 'cores',
+                title: 'Cores',
+                icon: 'lucide:palette',
+                control: {
+                  kind: 'colorRamp' as const,
+                  menuId: COLOR_RAMP_MENU_ID,
+                  defaultValue: DEFAULT_COLOR_RAMP,
+                  options: colorRampOptions(),
+                },
+              },
+            ]
+          : []),
       ],
     },
   };

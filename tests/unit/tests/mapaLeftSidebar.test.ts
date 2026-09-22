@@ -1,5 +1,7 @@
 import {
   buildLeftSidebar,
+  MAP_MODE_VALUES,
+  modeTakesColorRamp,
   modeTakesOpacity,
   modeUsesHexbinOpacity,
 } from 'src/app/(features)/mapas/mapaLeftSidebar';
@@ -39,6 +41,28 @@ describe('modeTakesOpacity', () => {
   });
 });
 
+describe('modeTakesColorRamp', () => {
+  test('covers every choropleth, including the IVS and IDHM families', () => {
+    expect(modeTakesColorRamp('coropletico')).toBe(true);
+    expect(modeTakesColorRamp('coropletico-cadunico')).toBe(true);
+    expect(modeTakesColorRamp('coropletico-ivs')).toBe(true);
+    expect(modeTakesColorRamp('coropletico-idhm-renda')).toBe(true);
+    expect(modeTakesColorRamp('cafs-hexbin')).toBe(true);
+  });
+
+  /*
+   * The kitchen points and their circles read by position and size over a flat
+   * backdrop, the settlements colour categorically, and the CAF hierarchy is a
+   * tiled pyramid. None of them has a ladder of colours to redraw.
+   */
+  test('leaves out the modes with no ladder to redraw', () => {
+    expect(modeTakesColorRamp('pontos')).toBe(false);
+    expect(modeTakesColorRamp('circulos')).toBe(false);
+    expect(modeTakesColorRamp('assentamentos')).toBe(false);
+    expect(modeTakesColorRamp('cafs')).toBe(false);
+  });
+});
+
 describe('modeUsesHexbinOpacity', () => {
   test('is the grid alone', () => {
     expect(modeUsesHexbinOpacity('cafs-hexbin')).toBe(true);
@@ -53,9 +77,16 @@ describe('buildLeftSidebar', () => {
    * rather than declared once.
    */
   test('offers the mesh only where there is a mesh', () => {
-    expect(blockIds('cafs-hexbin')).toEqual(['malha', 'opacidade']);
-    expect(blockIds('coropletico')).toEqual(['opacidade']);
+    expect(blockIds('cafs-hexbin')).toEqual(['malha', 'opacidade', 'cores']);
+    expect(blockIds('coropletico')).toEqual(['opacidade', 'cores']);
     expect(blockIds('pontos')).toEqual(['opacidade']);
+  });
+
+  test('offers the ramp only where the fill is a ladder of colours', () => {
+    expect(blockIds('coropletico-ivs')).toEqual(['opacidade', 'cores']);
+    expect(blockIds('coropletico-idhm')).toEqual(['opacidade', 'cores']);
+    expect(blockIds('circulos')).toEqual(['opacidade']);
+    expect(blockIds('pontos')).not.toContain('cores');
   });
 
   test('gates the tab on the modes that take opacity', () => {
@@ -99,5 +130,19 @@ describe('buildLeftSidebar', () => {
     expect(
       block?.control.kind === 'slider' ? block.control.endLabels : undefined
     ).toEqual(['Transparente', 'Opaca']);
+  });
+});
+
+describe('MAP_MODE_VALUES', () => {
+  /*
+   * The list a shared link is validated against. Derived from the menu rather
+   * than written beside it, so a variation renamed in one place cannot go on
+   * being linkable from the other.
+   */
+  test('is every variation the menu offers, and nothing else', () => {
+    expect(MAP_MODE_VALUES).toContain('coropletico');
+    expect(MAP_MODE_VALUES).toContain('cafs-hexbin');
+    expect(MAP_MODE_VALUES).toContain('coropletico-idhm-educacao-frequencia');
+    expect(new Set(MAP_MODE_VALUES).size).toBe(MAP_MODE_VALUES.length);
   });
 });

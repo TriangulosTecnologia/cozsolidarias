@@ -23,16 +23,19 @@ import {
 import CafMapPanel from './CafMapPanel';
 import { DEFAULT_CAF_HEXBIN_OPACITY } from './geovisCafHexbin';
 import { type MapMode } from './geovisSpec';
+import { DEFAULT_COLOR_RAMP } from './mapaColorRamp';
 import {
   buildCozinhaRightSidebar,
   modeShowsCozinhaDetail,
 } from './mapaDetailSidebars';
 import {
   buildLeftSidebar,
+  COLOR_RAMP_MENU_ID,
   DEFAULT_MODE,
   DEFAULT_YEAR,
   MESH_MENU_ID,
   MODE_MENU_ID,
+  modeTakesColorRamp,
   modeTakesOpacity,
   OPACITY_MENU_ID,
   YEAR_MENU_ID,
@@ -42,6 +45,7 @@ import { useCafHexbin } from './useCafHexbin';
 import { useKitchensByYear } from './useKitchensByYear';
 import { useMapaDatasets } from './useMapaDatasets';
 import { useMapaSpec } from './useMapaSpec';
+import { useMapaUrlState } from './useMapaUrlState';
 
 /**
  * Bruttal theme scoped for the GeovisWorkspace sidebars only.
@@ -66,12 +70,48 @@ const scopedSidebarTheme = {
   },
 };
 
+/**
+ * Stretches the map to fill the container: `<GeovisWorkspace>` wraps its map in
+ * an outer `position:relative` Box whose Flex layout only sets `minHeight` (no
+ * `height`), so the wrapper becomes a full-height flex column and the map
+ * layout — its in-flow child — grows into it. The legends and tooltips are
+ * `position: absolute` siblings, so this stretches only the map, not the
+ * overlays. The card border/radius is dropped by `appearance: 'bare'` in the
+ * config, not here. Applied only once the map is on screen (see the `css` prop).
+ */
+const mapLayoutCss = {
+  '& > *': {
+    height: '100%',
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  '& > * > *': {
+    flex: '1',
+    minHeight: 0,
+  },
+};
+
 const MapaPlayground = () => {
+  const { selecaoInicial, publicarSelecao } = useMapaUrlState();
+
+  /*
+   * Seeded from the address, so a shared link opens on what it names rather
+   * than on the defaults with a repaint a moment later. The address wins over
+   * the defaults where it speaks; every menu it says nothing about still opens
+   * on its own `defaultValue`.
+   */
   const [selection, setSelection] = React.useState<GeovisWorkspaceSelection>(
     () => {
-      return getInitialSelection({
-        config: { leftSidebar: buildLeftSidebar(DEFAULT_MODE) },
-      });
+      const variacao = (selecaoInicial[MODE_MENU_ID] ??
+        DEFAULT_MODE) as MapMode;
+
+      return {
+        ...getInitialSelection({
+          config: { leftSidebar: buildLeftSidebar(variacao) },
+        }),
+        ...selecaoInicial,
+      };
     }
   );
 
@@ -103,6 +143,21 @@ const MapaPlayground = () => {
       setSelection(next);
 
       const nextMode = (next[MODE_MENU_ID] ?? DEFAULT_MODE) as MapMode;
+      // Published on the pick rather than on the paint: the address says what
+      // is being read, and a link copied while a heavy variation is still
+      // loading has to name that variation, not the one being left behind.
+      //
+      // The defaults go with it so the address can leave out whatever the
+      // variation opens on — they are the mode's own, which is what makes an
+      // opacity of 85 worth saying on a choropleth and not on the grid.
+      publicarSelecao({
+        selection: next,
+        mode: nextMode,
+        defaults: getInitialSelection({
+          config: { leftSidebar: buildLeftSidebar(nextMode) },
+        }),
+      });
+
       const pending = ensure(nextMode);
 
       if (!pending) {
@@ -114,7 +169,7 @@ const MapaPlayground = () => {
         setSpecMode(nextMode);
       });
     },
-    [ensure]
+    [ensure, publicarSelecao]
   );
 
   // Time-lapse year, driven by the sidebar timeline (`selection[YEAR_MENU_ID]`).
@@ -138,6 +193,8 @@ const MapaPlayground = () => {
 
   const opacityFromSelection = Number(selection[OPACITY_MENU_ID]);
 
+  const colorRampFromSelection = selection[COLOR_RAMP_MENU_ID];
+
   // Memoized: `useMapaSpec` keys its spec on reference identity, and a fresh
   // object per render would rebuild the whole spec on every keystroke elsewhere.
   /*
@@ -155,8 +212,17 @@ const MapaPlayground = () => {
       fillOpacity: Number.isFinite(opacityFromSelection)
         ? opacityFromSelection / 100
         : DEFAULT_CAF_HEXBIN_OPACITY,
+      /*
+       * Gated on its own list rather than on the tab's: the kitchen points and
+       * the hexagon grid take the opacity but have no ladder of colours to
+       * redraw, so a ramp chosen in a choropleth must not follow the reader
+       * into them.
+       */
+      colorRamp: modeTakesColorRamp(specMode)
+        ? (colorRampFromSelection ?? DEFAULT_COLOR_RAMP)
+        : undefined,
     };
-  }, [opacityFromSelection, specMode]);
+  }, [colorRampFromSelection, opacityFromSelection, specMode]);
 
   // The grid for the selected resolution. Seeded with the one the mode already
   // loaded, so opening `cafs-hexbin` costs no second request.
@@ -254,30 +320,6 @@ const MapaPlayground = () => {
     mode: specMode,
     cozinhasPoints,
   });
-
-  // `<GeovisWorkspace>` wraps its map in an outer `position:relative` Box; inside
-  // it the map's Flex layout only sets `minHeight` (no `height`). We turn the
-  // outer Box into a full-height flex column and let its in-flow child (the map
-  // layout) grow with `flex: 1` so the map fills the viewport. The card
-  // border/radius is dropped via `appearance: 'bare'` in the config, not here.
-  // Applied only once the map is on screen (see the `css` prop below).
-  const mapLayoutCss = {
-    // Stretch the map to fill the container: make the workspace wrapper a
-    // full-height flex column and let the map layout (its in-flow child) grow.
-    // The card border/radius is dropped by `appearance: 'bare'` in the config,
-    // not here. The legends/tooltips are `position: absolute` siblings, so this
-    // stretches only the map, not the overlays.
-    '& > *': {
-      height: '100%',
-      width: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-    },
-    '& > * > *': {
-      flex: '1',
-      minHeight: 0,
-    },
-  };
 
   return (
     <Box
