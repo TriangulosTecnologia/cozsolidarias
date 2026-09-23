@@ -1,0 +1,9 @@
+{
+  "prompt": "Mapa do Índice de Desenvolvimento Humano Municipal.",
+  "httpStatus": 422,
+  "durationMs": 6000,
+  "response": {
+    "error": "A resposta do modelo não é um JSON válido: Expected ',' or '}' after property value in JSON at position 492 (line 1 column 493)",
+    "spec": "{\"error\": \"O mapa de IDHM (Índice de Desenvolvimento Humano Municipal) não está disponível para visualização. Embora o dataset 'municipios_ivs' (Atlas da Vulnerabilidade Social, IPEA, 2010) contenha colunas de IDHM e seus subíndices, o mapDataId 'municipios_ivs' resolve, no servidor, apenas para o valor de IVS geral — nenhuma outra coluna dessa fonte, incluindo IDHM e suas dimensões (longevidade, educação, renda), é acessível para pintar o mapa, mesmo aparecendo na descrição do dataset.\""
+  }
+}

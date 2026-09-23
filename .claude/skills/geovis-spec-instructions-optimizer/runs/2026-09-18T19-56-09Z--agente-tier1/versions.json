@@ -1,0 +1,38 @@
+{
+  "runId": "2026-09-18T19-56-09Z--agente-tier1",
+  "skillVersion": "1.4.0",
+  "variant": "agente-tier1",
+  "baselineRunId": "2026-09-18T19-32-18Z--atual-sem-poda",
+  "cuts": [
+    "fix-sizeby",
+    "geojson-defs",
+    "source-type-enum"
+  ],
+  "sources": {
+    "agentSystemPrompt": {
+      "path": "variants/agente-tier1.md (agent v2)",
+      "sha256": "a8c5a74a4cdef506db7e521866f9e9cbd5046046d8a0f47c9c3ba8f75c3cc0de"
+    },
+    "instructions": {
+      "path": "src/app/api/ai/spec/instructions.ts",
+      "gitSha": "b68d3147d8ca04134a03a95880870b1713883108",
+      "sha256": "3a3064d8602c8386d55ba0d1c3569e414a7ecb26a90c77f6a6bb7cf52bb55b20"
+    }
+  },
+  "spec": {
+    "schemaVersion": 2,
+    "libSchemaVersion": 1,
+    "geovisPackageVersion": "0.21.1"
+  },
+  "testAgent": {
+    "slug": "geovis-spec-generator-test",
+    "agentId": "agent_011ss4z7oRNABbicGgxwbvHX",
+    "agentVersion": 2,
+    "antVersion": "1.26.1"
+  },
+  "results": {
+    "resultsVersion": 1,
+    "datasetVersion": "1.0.0"
+  },
+  "knownDefect": "route.ts parseGeneratedSpec não checa a chave error — recusa correta do agente vira invalid-schema. Idêntico nos dois lados, não afeta a comparação."
+}

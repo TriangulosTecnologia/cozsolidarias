@@ -1,0 +1,8 @@
+{
+  "prompt": "Mapa de densidade de pontos do número de cozinhas solidárias em cada município.",
+  "httpStatus": 502,
+  "durationMs": 77491,
+  "response": {
+    "error": "O modelo de IA demorou demais para responder. Tente novamente em instantes."
+  }
+}

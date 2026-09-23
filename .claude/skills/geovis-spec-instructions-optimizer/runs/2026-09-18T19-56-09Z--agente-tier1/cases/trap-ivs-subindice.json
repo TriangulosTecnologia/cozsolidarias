@@ -1,0 +1,17 @@
+{
+  "prompt": "Mapa do IVS de infraestrutura urbana por município.",
+  "httpStatus": 422,
+  "durationMs": 7026,
+  "response": {
+    "error": "O modelo retornou uma resposta inválida. Tente reformular o pedido.",
+    "issues": [
+      {
+        "code": "invalid-schema",
+        "message": "(root) must have required property 'engine'"
+      }
+    ],
+    "spec": {
+      "error": "O subíndice IVS de Infraestrutura Urbana não está disponível para visualização. O dataset municipios_ivs só entrega, no mapa, o Índice de Vulnerabilidade Social (IVS) geral por município — os subíndices (infraestrutura urbana, capital humano, renda e trabalho) e as dimensões do IDHM aparecem na descrição do dataset, mas não são acessíveis individualmente através do servidor. Posso gerar o mapa do IVS geral, se for útil."
+    }
+  }
+}

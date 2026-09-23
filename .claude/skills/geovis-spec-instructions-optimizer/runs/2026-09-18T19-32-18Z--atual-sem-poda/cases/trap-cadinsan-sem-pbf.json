@@ -1,0 +1,17 @@
+{
+  "prompt": "Mapa da insegurança alimentar desconsiderando o efeito do Bolsa Família.",
+  "httpStatus": 422,
+  "durationMs": 6945,
+  "response": {
+    "error": "O modelo retornou uma resposta inválida. Tente reformular o pedido.",
+    "issues": [
+      {
+        "code": "invalid-schema",
+        "message": "(root) must have required property 'engine'"
+      }
+    ],
+    "spec": {
+      "error": "Não é possível gerar esse mapa. O dataset disponível para render (municipios_cadinsan) entrega apenas o cenário de insegurança alimentar COM o efeito do Programa Bolsa Família — o valor 'sem PBF' existe na planilha de origem, mas essa coluna não está entre as que a aplicação expõe para visualização (mapDataId). Não há proxy aceitável para o contrafactual 'sem PBF': usar o valor 'com PBF' para responder a esse pedido descreveria um cenário diferente do que foi solicitado, então não é uma substituição válida."
+    }
+  }
+}

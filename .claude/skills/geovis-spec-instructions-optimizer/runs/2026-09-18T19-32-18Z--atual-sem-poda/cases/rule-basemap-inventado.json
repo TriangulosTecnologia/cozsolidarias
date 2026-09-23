@@ -1,0 +1,17 @@
+{
+  "prompt": "Mapa das cozinhas com imagem de satélite no fundo.",
+  "httpStatus": 422,
+  "durationMs": 8397,
+  "response": {
+    "error": "O modelo retornou uma resposta inválida. Tente reformular o pedido.",
+    "issues": [
+      {
+        "code": "invalid-schema",
+        "message": "(root) must have required property 'engine'"
+      }
+    ],
+    "spec": {
+      "error": "Não é possível atender a este pedido: o mapa-base desta aplicação aceita apenas o style padrão MapLibre 'https://tiles.openfreemap.org/styles/positron'. Não há imagem de satélite disponível como basemap — nenhuma URL de tiles raster (como imagery de satélite) é suportada, apenas esse único style JSON vetorial. Não é possível gerar a visualização com o fundo solicitado."
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "prompt": "Mapa dos assentamentos de reforma agrária.",
+  "httpStatus": 422,
+  "durationMs": 8227,
+  "response": {
+    "error": "O modelo retornou uma resposta inválida. Tente reformular o pedido.",
+    "issues": [
+      {
+        "code": "invalid-schema",
+        "message": "(root) must have required property 'engine'"
+      }
+    ],
+    "spec": {
+      "error": "Não há, no catálogo de dados do projeto Cozinhas Solidárias, nenhum dataset sobre assentamentos de reforma agrária. O catálogo cobre cozinhas solidárias geolocalizadas, vulnerabilidade social (IVS), insegurança alimentar do CadÚnico (CADINSAN), áreas rurais do Cadastro Ambiental Rural (CAF) e contornos administrativos (municípios/estados) — nenhum desses mede ou identifica assentamentos de reforma agrária, e não há proxy declarado na lista fechada de proxies aceitos para esse conceito. Não é possível gerar o mapa solicitado."
+    }
+  }
+}

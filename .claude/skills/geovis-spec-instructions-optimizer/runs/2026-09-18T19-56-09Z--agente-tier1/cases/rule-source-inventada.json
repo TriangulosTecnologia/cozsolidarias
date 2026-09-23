@@ -1,0 +1,17 @@
+{
+  "prompt": "Mapa das cozinhas por bairro na cidade de São Paulo.",
+  "httpStatus": 422,
+  "durationMs": 17586,
+  "response": {
+    "error": "O modelo retornou uma resposta inválida. Tente reformular o pedido.",
+    "issues": [
+      {
+        "code": "invalid-schema",
+        "message": "(root) must have required property 'engine'"
+      }
+    ],
+    "spec": {
+      "error": "Não é possível gerar um mapa de cozinhas por bairro em São Paulo. Os dados de cozinhas guardam o campo \"Bairro da Cozinha\" apenas como atributo de texto, mas não existe nenhuma malha de polígonos de bairros no catálogo — a única geometria de área disponível é a malha municipal (`/geo/geojs-100-mun.json`, join por `codarea`/Código IBGE). Não há, portanto, como colorir ou agregar cozinhas por bairro, só por município (a cidade de São Paulo inteira apareceria como um único polígono). Se for útil, posso gerar um mapa de pontos individuais das cozinhas localizadas no município de São Paulo (sem agregação por bairro), ou um coroplético em nível municipal."
+    }
+  }
+}

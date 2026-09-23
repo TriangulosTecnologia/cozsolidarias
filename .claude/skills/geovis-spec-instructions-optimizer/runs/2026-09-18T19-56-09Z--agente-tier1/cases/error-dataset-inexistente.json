@@ -1,0 +1,17 @@
+{
+  "prompt": "Mapa do saneamento básico por município.",
+  "httpStatus": 422,
+  "durationMs": 9446,
+  "response": {
+    "error": "O modelo retornou uma resposta inválida. Tente reformular o pedido.",
+    "issues": [
+      {
+        "code": "invalid-schema",
+        "message": "(root) must have required property 'engine'"
+      }
+    ],
+    "spec": {
+      "error": "Não há no catálogo nenhum dataset sobre saneamento básico (rede de água, esgoto ou coleta de lixo) por município. O único dado próximo é o subíndice 'Infraestrutura Urbana' do IVS (municipios_ivs), mas subíndices do IVS não são alcançáveis para visualização — apenas o IVS geral pode ser pintado, e ele mede vulnerabilidade social combinada (não especificamente saneamento), então não serve como proxy válido para essa pergunta. Não é possível gerar o mapa solicitado."
+    }
+  }
+}

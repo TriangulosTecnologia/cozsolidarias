@@ -1,0 +1,17 @@
+{
+  "prompt": "Mapa das cozinhas por bairro na cidade de São Paulo.",
+  "httpStatus": 422,
+  "durationMs": 66958,
+  "response": {
+    "error": "O modelo retornou uma resposta inválida. Tente reformular o pedido.",
+    "issues": [
+      {
+        "code": "invalid-schema",
+        "message": "(root) must have required property 'engine'"
+      }
+    ],
+    "spec": {
+      "error": "Não é possível gerar esse mapa no grain de bairro. Todo dataset renderável do catálogo (cozinhas_geolocalizadas, cozinhas_geolocalizadas_2025, cozinhas_pessoas_atendidas, municipios_ivs, municipios_cadinsan) tem granularidade de município, com join pela coluna `Código IBGE`/`codarea` contra a malha `/geo/geojs-100-mun.json`. Não existe no catálogo nenhuma malha de bairros nem dataset agregado por bairro — o campo 'Bairro da Cozinha' existe como texto livre no cadastro de cozinhas, mas não há polígonos de bairro em `sources` nem uma agregação de contagem/proporção por bairro disponível para pintar um coroplético ou dimensionar círculos nesse recorte. Como São Paulo é um único município, também não há como expressar variação por bairro dentro dele usando as fontes de município disponíveis. Uma alternativa que o catálogo sustenta seria mostrar a localização individual das cozinhas cadastradas na cidade de São Paulo (sem agregação por bairro, com o bairro aparecendo apenas no tooltip de cada ponto) — se esse recorte servir, posso gerar esse mapa em vez do pedido original."
+    }
+  }
+}
