@@ -1,15 +1,9 @@
 import { validateSpec } from '@ttoss/geovis';
-import { after } from 'next/server';
 
 import { gateway } from '@/gateway';
 
-import {
-  createSession,
-  deleteSession,
-  pollForReply,
-  stripCodeFence,
-} from './anthropicSession';
 import { buildCatalogueContext } from './mapDataCatalogue';
+import { generateSpec } from './naturaliSession';
 import {
   appendRealMapData,
   appendRealSourceData,
@@ -120,9 +114,9 @@ let cachedCatalogueText: Promise<string> | null = null;
 
 /**
  * Builds the two-tier catalog context (see {@link buildCatalogueContext})
- * once and keeps it in memory for the process lifetime. Sent as
- * `initial_events` on every new session (see {@link createSession}), never
- * resent mid-turn.
+ * once and keeps it in memory for the process lifetime. Joined into the
+ * single `messages[0].content` sent on every call (see
+ * {@link getAgentResponse}), never resent mid-turn.
  */
 const readCatalogueContext = (): Promise<string> => {
   if (!cachedCatalogueText) {
@@ -229,19 +223,19 @@ const validatePrompt = (rawBody: unknown): string | Response => {
 const validateEnv = ():
   | {
       apiKey: string;
+      projectId: string;
       agentId: string;
-      environmentId: string;
     }
   | Response => {
-  const apiKey = process.env['ANTHROPIC_API_KEY'];
-  const agentId = process.env['ANTHROPIC_AGENT_ID'];
-  const environmentId = process.env['ANTHROPIC_ENVIRONMENT_ID'];
+  const apiKey = process.env['NATURALI_API_KEY'];
+  const projectId = process.env['NATURALI_PROJECT_ID'];
+  const agentId = process.env['NATURALI_AGENT_ID'];
 
-  if (!apiKey || !agentId || !environmentId) {
+  if (!apiKey || !projectId || !agentId) {
     const missing = [
-      !apiKey ? 'ANTHROPIC_API_KEY' : null,
-      !agentId ? 'ANTHROPIC_AGENT_ID' : null,
-      !environmentId ? 'ANTHROPIC_ENVIRONMENT_ID' : null,
+      !apiKey ? 'NATURALI_API_KEY' : null,
+      !projectId ? 'NATURALI_PROJECT_ID' : null,
+      !agentId ? 'NATURALI_AGENT_ID' : null,
     ].filter((name): name is string => {
       return name !== null;
     });
@@ -254,126 +248,112 @@ const validateEnv = ():
     );
   }
 
-  return { apiKey, agentId, environmentId };
+  return { apiKey, projectId, agentId };
 };
 
 /**
- * Turns one of {@link createSession}/{@link pollForReply}'s thrown errors
- * into a Portuguese, cause-specific message — so a 502 never collapses a
- * session-creation failure, a session-side error, an empty reply, and a
- * timeout into the same generic sentence. Matches on the fixed prefixes
- * those two functions throw; anything else (e.g. a network-level fetch
- * failure) falls back to the raw `error.message` so it's still legible.
+ * Turns one of {@link generateSpec}'s thrown errors into a Portuguese,
+ * cause-specific message — so a 502 never collapses a transport failure, a
+ * failed generation, and an unparseable reply into the same generic
+ * sentence. Matches on the fixed prefixes that function throws; anything
+ * else (e.g. a network-level fetch failure) falls back to the raw
+ * `error.message` so it's still legible.
  */
 const describeAgentFailure = (error: unknown): string => {
   const message = error instanceof Error ? error.message : String(error);
 
-  if (message.startsWith('Anthropic sessions POST responded with status')) {
-    return `Não foi possível iniciar a sessão com o modelo de IA (${message}). Tente novamente em instantes.`;
+  if (message.startsWith('Naturali generate POST responded with status')) {
+    return `Não foi possível iniciar a geração com o modelo de IA (${message}). Tente novamente em instantes.`;
   }
-  if (message === 'Anthropic sessions POST returned no session id') {
-    return 'O modelo de IA não retornou um identificador de sessão válido. Tente novamente.';
+  if (message.startsWith('Naturali generation ended with status')) {
+    return `O modelo de IA não concluiu a geração (${message}). Tente reformular o pedido ou tentar novamente.`;
   }
   if (
-    message.startsWith('Anthropic session events GET responded with status')
+    message ===
+    'Naturali generation completed with no structured status/spec/error reply'
   ) {
-    return `Não foi possível acompanhar o andamento da sessão com o modelo de IA (${message}). Tente novamente em instantes.`;
-  }
-  if (message === 'Anthropic session reported a session.error event') {
-    return 'O modelo de IA reportou um erro interno ao processar o pedido. Tente reformular o pedido ou tentar novamente.';
-  }
-  if (message === 'Anthropic session turn ended with no agent.message') {
-    return 'O modelo de IA encerrou a resposta sem gerar nenhum conteúdo. Tente reformular o pedido.';
-  }
-  if (message === 'Timed out waiting for the Anthropic session to reply') {
-    return 'O modelo de IA demorou demais para responder. Tente novamente em instantes.';
+    return 'O modelo de IA encerrou a resposta sem gerar nenhum conteúdo estruturado. Tente reformular o pedido.';
   }
 
   return `Falha de comunicação com o modelo de IA: ${message}`;
 };
 
+/**
+ * Runs one turn against the Naturali `geovis-spec-generator` agent and
+ * resolves its structured reply into either the raw spec object (`status:
+ * "ok"`) or the 422 `Response` describing why the agent declined (`status:
+ * "error"`, e.g. an ambiguous request or an unsupported/missing dataset).
+ * Extracted out of {@link POST} purely to keep its own branching under the
+ * lint complexity budget.
+ *
+ * @returns The parsed spec object, or a `Response` for a transport failure
+ * (502), or the agent's own declined-request message (422).
+ */
 const getAgentResponse = async (params: {
   apiKey: string;
+  projectId: string;
   agentId: string;
-  environmentId: string;
   prompt: string;
-}): Promise<string | Response> => {
+}): Promise<UnknownRecord | Response> => {
+  let reply: Awaited<ReturnType<typeof generateSpec>>;
   try {
     const catalogueText = await readCatalogueContext();
-    const sessionId = await createSession({
+    reply = await generateSpec({
       apiKey: params.apiKey,
+      projectId: params.projectId,
       agentId: params.agentId,
-      environmentId: params.environmentId,
-      catalogueText,
-      instructions: INSTRUCTIONS,
-      prompt: params.prompt,
+      message: [
+        `Catálogo de datasets:\n${catalogueText}`,
+        INSTRUCTIONS,
+        params.prompt,
+      ].join('\n\n'),
     });
-    after(() => {
-      return deleteSession({ apiKey: params.apiKey, sessionId });
-    });
-    return await pollForReply({ apiKey: params.apiKey, sessionId });
   } catch (error) {
     return Response.json(
       { error: describeAgentFailure(error) },
       { status: 502 }
     );
   }
-};
 
-/**
- * Parses the agent's raw reply into a structurally valid spec, or the 422
- * `Response` describing why it isn't one. Extracted out of {@link POST}
- * purely to keep its own branching under the lint complexity budget.
- *
- * @returns The parsed `modelJson`, or a `Response` for a non-JSON reply, a
- * non-object reply, or a structural violation (see
- * {@link validateGeneratedSpecStructure}).
- */
-const parseGeneratedSpec = (modelText: string): Response | UnknownRecord => {
-  let modelJson: unknown;
-  try {
-    modelJson = JSON.parse(stripCodeFence(modelText));
-  } catch (parseError) {
+  if (reply.status === 'error') {
     return invalidSpecResponse({
-      message: `A resposta do modelo não é um JSON válido: ${
-        parseError instanceof Error ? parseError.message : String(parseError)
-      }`,
-      spec: modelText,
+      message: reply.error.message,
+      issues: [{ code: reply.error.code, message: reply.error.message }],
     });
   }
 
-  if (!isRecord(modelJson)) {
+  if (!isRecord(reply.spec)) {
     return invalidSpecResponse({
       message:
         'A resposta do modelo deveria ser um objeto JSON representando o spec.',
-      spec: modelJson,
+      spec: reply.spec,
     });
   }
 
-  return validateGeneratedSpecStructure(modelJson) ?? modelJson;
+  return validateGeneratedSpecStructure(reply.spec) ?? reply.spec;
 };
 
 /**
- * Turns a natural-language prompt into a `VisualizationSpec`, via a
- * single-use Anthropic Managed Agents session created fresh per request
- * (`POST /v1/sessions` with `initial_events`, then `GET /v1/sessions/{id}/events`)
- * — the session is bound to the `geovis-spec-generator` agent (see
- * `geovis-spec-generator.en.agent.yaml`), provisioned once out of band (e.g.
- * via the `ant` CLI) and referenced here only by ID. The session is deleted
- * after the response is sent (see {@link deleteSession}, scheduled via
- * `after()`), so cleanup never adds latency to the client-facing request.
+ * Turns a natural-language prompt into a `VisualizationSpec`, via one call to
+ * a Naturali agent (`POST /agents/{agentId}/generate?wait=true`, see
+ * {@link generateSpec}) — the agent is declared by the `geovis-spec-generator`
+ * formation (`~/geovis-spec-generator.formation.json`, provisioned out of
+ * band via the Naturali API) and referenced here only by ID. Its
+ * `output_schema` returns a structured `{status: "ok", spec}` or
+ * `{status: "error", error}` reply, so there's no session to poll or delete —
+ * `wait=true` blocks for the finished generation inline.
  *
- * The agent's raw reply is parsed as JSON, then its `mapData` is resolved
- * against real `data-gateway` values (see {@link appendRealMapData}), and any
- * API-backed `sources[].data` is resolved the same way (see
+ * The agent's structured `spec` is then resolved against real
+ * `data-gateway` values (see {@link appendRealMapData}), and any API-backed
+ * `sources[].data` is resolved the same way (see
  * {@link appendRealSourceData}), before being returned — the agent's own
  * `mapData[].data` and API-backed `sources[].data` are never sent to the
  * client as-is.
  *
  * @returns `{ result }` with the spec (real `mapData`) on success; `{ error }`
  * with a Portuguese, dev-friendly message on any failure (missing config,
- * prompt validation, upstream API failure, non-JSON reply, or an unsupported
- * dataset reference).
+ * prompt validation, upstream API failure, a declined request, or an
+ * unsupported dataset reference).
  */
 export const POST = async (request: Request): Promise<Response> => {
   const rawBody: unknown = await request.json().catch(() => {
@@ -390,17 +370,12 @@ export const POST = async (request: Request): Promise<Response> => {
     return envOrError;
   }
 
-  const modelTextOrError = await getAgentResponse({
+  const modelJsonOrError = await getAgentResponse({
     apiKey: envOrError.apiKey,
+    projectId: envOrError.projectId,
     agentId: envOrError.agentId,
-    environmentId: envOrError.environmentId,
     prompt: promptOrError,
   });
-  if (modelTextOrError instanceof Response) {
-    return modelTextOrError;
-  }
-
-  const modelJsonOrError = parseGeneratedSpec(modelTextOrError);
   if (modelJsonOrError instanceof Response) {
     return modelJsonOrError;
   }
