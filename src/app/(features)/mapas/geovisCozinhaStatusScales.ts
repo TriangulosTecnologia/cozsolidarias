@@ -1,6 +1,6 @@
 import type { LegendSpec } from '@ttoss/geovis';
 
-import { mapTokens } from '@/config/theme';
+import { mapTokens } from '@/config/mapTokens';
 
 /**
  * Light traffic-light hues for the three status classes, sampled from the
