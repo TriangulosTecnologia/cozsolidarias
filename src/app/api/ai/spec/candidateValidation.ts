@@ -4,6 +4,7 @@ import {
   validateSpec,
 } from '@ttoss/geovis';
 
+import { isRenderableDatasetId } from './mapDataCatalogue';
 import {
   findChoroplethOnAbsoluteTotal,
   findGeometryInMapData,
@@ -16,7 +17,25 @@ import {
   KNOWN_SOURCE_URLS,
   type SpecIssue,
   type UnknownRecord,
+  unsupportedDatasetMessage,
 } from './specValidation';
+
+/** One `unsupported-dataset` issue per `mapData` entry outside the renderable list. */
+const unsupportedDatasetIssues = (spec: UnknownRecord): SpecIssue[] => {
+  const mapData = spec['mapData'];
+  return (Array.isArray(mapData) ? mapData : []).flatMap((entry) => {
+    const mapDataId = isRecord(entry) ? entry['mapDataId'] : undefined;
+    return typeof mapDataId === 'string' && !isRenderableDatasetId(mapDataId)
+      ? [
+          {
+            code: 'unsupported-dataset',
+            path: `mapData[${mapDataId}].mapDataId`,
+            message: unsupportedDatasetMessage(mapDataId),
+          },
+        ]
+      : [];
+  });
+};
 
 /**
  * Runs this route's own structural checks (everything `validateSpec` cannot
@@ -80,7 +99,7 @@ export const collectStructuralIssues = (spec: UnknownRecord): SpecIssue[] => {
     });
   }
 
-  return issues;
+  return [...issues, ...unsupportedDatasetIssues(spec)];
 };
 
 const REPAIR_PATH_SEGMENT = /^([^[\]]+)(?:\[([^\]]+)\])?$/;

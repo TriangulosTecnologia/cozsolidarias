@@ -2,7 +2,9 @@ import { gateway } from '@/gateway';
 
 import {
   ABSOLUTE_TOTAL_DATASET_IDS,
+  isRenderableDatasetId,
   RENDERABLE_DATASET_FETCHERS,
+  RENDERABLE_DATASET_IDS,
 } from './mapDataCatalogue';
 
 export type UnknownRecord = Record<string, unknown>;
@@ -90,7 +92,7 @@ export const invalidSpecResponse = (params?: {
  * unsupportedDatasetMessage('caf_areas');
  */
 export const unsupportedDatasetMessage = (mapDataId: string): string => {
-  return `Dataset "${mapDataId}" ainda não está disponível para visualização.`;
+  return `Dataset "${mapDataId}" ainda não está disponível para visualização. Datasets suportados: ${RENDERABLE_DATASET_IDS.join(', ')}.`;
 };
 
 const unsupportedDatasetResponse = (
@@ -496,17 +498,11 @@ export const appendRealMapData = async (
     }
 
     const mapDataId = entry['mapDataId'];
-    if (
-      typeof mapDataId !== 'string' ||
-      !(mapDataId in RENDERABLE_DATASET_FETCHERS)
-    ) {
+    if (!isRenderableDatasetId(mapDataId)) {
       return unsupportedDatasetResponse(mapDataId, spec);
     }
 
-    const data =
-      await RENDERABLE_DATASET_FETCHERS[
-        mapDataId as keyof typeof RENDERABLE_DATASET_FETCHERS
-      ]();
+    const data = await RENDERABLE_DATASET_FETCHERS[mapDataId]();
     resolvedMapData.push({ ...entry, data });
   }
 

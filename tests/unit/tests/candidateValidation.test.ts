@@ -37,6 +37,7 @@ describe('collectStructuralIssues', () => {
       ['geometry-in-map-data', 'mapData[mun]'],
       ['missing-legend', 'legends'],
       ['choropleth-on-absolute-total', 'mapType'],
+      ['unsupported-dataset', 'mapData[mun].mapDataId'],
     ]);
   });
 

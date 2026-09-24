@@ -9,7 +9,6 @@ import {
   buildCozinhasChoroplethSpec,
   isCozinhasChoroplethRequest,
 } from './canonicalChoropleth';
-import { logGeneration } from './generationLogger';
 import { buildCatalogueContext } from './mapDataCatalogue';
 import { generateSpec, type SpecReplyStopped } from './naturaliSession';
 import {
@@ -274,10 +273,6 @@ const getAgentResponse = async (params: {
         params.prompt,
       ].join('\n\n'),
       validateCandidate,
-    });
-    logGeneration({
-      prompt: params.prompt,
-      reply,
     });
   } catch (error) {
     return errorResponse({ status: 502, message: describeAgentFailure(error) });
