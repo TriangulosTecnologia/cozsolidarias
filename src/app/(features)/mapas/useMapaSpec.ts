@@ -1,5 +1,4 @@
 import {
-  createBoundaryGroup,
   toggleBoundaryGroup,
   useBoundaryToggle,
   type VisualizationSpec,
@@ -19,10 +18,14 @@ import type {
 import {
   type AssentamentoAtributo,
   buildSpec,
-  CAFS_LAYER_IDS,
   COZINHAS_SOURCE_ID,
   type MapMode,
 } from './geovisSpec';
+import {
+  ESTADOS_BOUNDARY_GROUP,
+  liftOverlaysAboveBoundaries,
+  MUNICIPIOS_BOUNDARY_GROUP,
+} from './mapaBoundaries';
 import { viewForMode } from './mapCamera';
 import {
   emptyViewportSnapshot,
@@ -65,64 +68,6 @@ const withYearPoints = ({
   };
 };
 
-const estadosGroup = createBoundaryGroup({
-  id: 'estados-boundary',
-  data: '/geo/estados.json',
-  paint: { lineColor: '#241F21', lineWidth: 0.8 },
-});
-
-const municipiosGroup = createBoundaryGroup({
-  id: 'municipios-boundary',
-  data: '/geo/geojs-100-mun.json',
-  paint: { lineColor: '#B2B2B2', lineWidth: 0.6 },
-});
-
-/**
- * Point/circle overlays that must always paint above the boundary outlines: the
- * kitchen points, the proportional circles and the CAF points. `useBoundaryToggle`
- * appends the município/estado boundary groups *after* every `buildSpec` layer, so
- * without lifting these back to the top the thin boundary lines would render over
- * them (e.g. município borders drawn over the kitchen points).
- *
- * Their relative order is the one `buildSpec` gave them, which is what keeps the
- * few thousand kitchen points above the millions of CAF dots.
- */
-const TOP_OVERLAY_LAYER_IDS = new Set([
-  'cozinhas-pts',
-  'cozinhas-bolhas',
-  ...CAFS_LAYER_IDS,
-]);
-
-/**
- * Re-orders a spec's layers so the {@link TOP_OVERLAY_LAYER_IDS} overlays sit
- * last (topmost), keeping every other layer's relative order and each layer's
- * config untouched. Returns the spec unchanged when it carries none of them.
- *
- * This runs *after* {@link useBoundaryToggle} has appended the boundary lines,
- * which is what makes the kitchen points win over the município/estado outlines.
- *
- * @param spec - The spec whose layers to re-order (boundary lines already appended).
- * @returns A spec with the overlay layers moved to the end (or the same spec).
- *
- * @example
- * liftOverlaysAboveBoundaries({ ...spec, layers: [fill, points, boundaryLine] });
- * // → layers: [fill, boundaryLine, points]
- */
-export const liftOverlaysAboveBoundaries = (
-  spec: VisualizationSpec
-): VisualizationSpec => {
-  const above = spec.layers.filter((layer) => {
-    return TOP_OVERLAY_LAYER_IDS.has(layer.id);
-  });
-  if (above.length === 0) {
-    return spec;
-  }
-  const below = spec.layers.filter((layer) => {
-    return !TOP_OVERLAY_LAYER_IDS.has(layer.id);
-  });
-  return { ...spec, layers: [...below, ...above] };
-};
-
 /**
  * Attaches the boundary outlines to a spec, per mode.
  *
@@ -161,15 +106,15 @@ const useMapaBoundaries = ({
 }): VisualizationSpec => {
   const groups = React.useMemo(() => {
     return mode === 'assentamentos'
-      ? [estadosGroup]
-      : [municipiosGroup, estadosGroup];
+      ? [ESTADOS_BOUNDARY_GROUP]
+      : [MUNICIPIOS_BOUNDARY_GROUP, ESTADOS_BOUNDARY_GROUP];
   }, [mode]);
 
   const { spec: withBoundaries } = useBoundaryToggle(spec, groups);
 
   return React.useMemo(() => {
     return mode === 'cafs-hexbin'
-      ? toggleBoundaryGroup(withBoundaries, municipiosGroup, false)
+      ? toggleBoundaryGroup(withBoundaries, MUNICIPIOS_BOUNDARY_GROUP, false)
       : withBoundaries;
   }, [mode, withBoundaries]);
 };

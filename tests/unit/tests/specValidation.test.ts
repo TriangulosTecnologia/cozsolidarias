@@ -1,9 +1,13 @@
 import {
+  appendRealMapData,
   appendRealSourceData,
   buildSourcesTable,
+  errorResponse,
   findGeometryInMapData,
   findInvalidBasemapStyleUrl,
   findInvalidGeojsonSource,
+  findMissingLegend,
+  hoistLayerLegends,
   invalidSpecResponse,
   isRecord,
   KNOWN_BASEMAP_STYLE_URLS,
@@ -43,7 +47,7 @@ describe('invalidSpecResponse', () => {
     const response = invalidSpecResponse({ message: 'Custom error' });
     const body = await response.json();
 
-    expect(body.error).toBe('Custom error');
+    expect(body).toEqual({ error: true, message: 'Custom error' });
     expect(response.status).toBe(422);
   });
 
@@ -420,7 +424,7 @@ describe('appendRealSourceData', () => {
 
     expect(result).toBeInstanceOf(Response);
     const body = await (result as Response).json();
-    expect(body.error).toContain('desconhecida');
+    expect(body.message).toContain('desconhecida');
   });
 
   test('resolves /api/cozinhas source data via the gateway', async () => {
@@ -477,7 +481,7 @@ describe('appendRealSourceData', () => {
     expect(result).toBeInstanceOf(Response);
     expect((result as Response).status).toBe(422);
     const body = await (result as Response).json();
-    expect(body.error).toContain('cozinhas');
+    expect(body.message).toContain('cozinhas');
   });
 });
 
@@ -490,5 +494,87 @@ describe('KNOWN_BASEMAP_STYLE_URLS', () => {
     for (const url of KNOWN_BASEMAP_STYLE_URLS) {
       expect(typeof url).toBe('string');
     }
+  });
+});
+
+describe('errorResponse', () => {
+  test('always flags the failure and carries the given status, issues and spec', async () => {
+    const response = errorResponse({
+      status: 502,
+      message: 'Falha',
+      issues: [{ code: 'x', message: 'y' }],
+      spec: { a: 1 },
+    });
+
+    expect(response.status).toBe(502);
+    expect(await response.json()).toEqual({
+      error: true,
+      message: 'Falha',
+      issues: [{ code: 'x', message: 'y' }],
+      spec: { a: 1 },
+    });
+  });
+});
+
+describe('hoistLayerLegends', () => {
+  test('moves layer-scoped legends to the top level, skipping ids already there', () => {
+    const spec = {
+      legends: [{ id: 'kept' }, 'not-a-legend'],
+      layers: [
+        { id: 'fill', legends: [{ id: 'kept' }, { id: 'moved' }] },
+        { id: 'line' },
+        'not-a-layer',
+      ],
+    };
+
+    expect(hoistLayerLegends(spec)).toEqual({
+      legends: [{ id: 'kept' }, 'not-a-legend', { id: 'moved' }],
+      layers: [{ id: 'fill' }, { id: 'line' }, 'not-a-layer'],
+    });
+  });
+
+  test('drops a non-array layer legends field and starts the top level when absent', () => {
+    expect(
+      hoistLayerLegends({ layers: [{ id: 'fill', legends: 'oops' }] })
+    ).toEqual({ legends: [], layers: [{ id: 'fill' }] });
+  });
+
+  test('returns the same reference when no layer carries legends', () => {
+    const spec = { layers: [{ id: 'fill' }] };
+    expect(hoistLayerLegends(spec)).toBe(spec);
+    const noLayers = { legends: [] };
+    expect(hoistLayerLegends(noLayers)).toBe(noLayers);
+  });
+});
+
+describe('findMissingLegend', () => {
+  test('only counts top-level legends', () => {
+    expect(
+      findMissingLegend({
+        mapData: [{ mapDataId: 'x' }],
+        layers: [{ id: 'a', legends: [{ id: 'l' }] }],
+      })
+    ).toBe(true);
+    expect(
+      findMissingLegend({
+        mapData: [{ mapDataId: 'x' }],
+        legends: [{ id: 'l' }],
+      })
+    ).toBe(false);
+    expect(findMissingLegend({ mapData: [] })).toBe(false);
+  });
+});
+
+describe('appendRealMapData', () => {
+  test('rejects a dataset outside the renderable list with a 422 naming it', async () => {
+    const result = await appendRealMapData({
+      mapData: [{ mapDataId: 'caf_areas' }],
+    });
+
+    if (!(result instanceof Response)) {
+      throw new Error('expected a 422 Response');
+    }
+    expect(result.status).toBe(422);
+    expect((await result.json()).message).toMatch(/"caf_areas"/);
   });
 });

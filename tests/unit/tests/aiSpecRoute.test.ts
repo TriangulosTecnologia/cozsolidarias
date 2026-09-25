@@ -1,37 +1,113 @@
 import { validateSpec } from '@ttoss/geovis';
-import { after } from 'next/server';
 import { POST } from 'src/app/api/ai/spec/route';
 import { invalidSpecResponse } from 'src/app/api/ai/spec/specValidation';
 
 import { gateway } from '@/gateway';
 
+import COROPLETICO_SPEC from '../fixtures/coropleticoSpec.json';
+
 jest.mock('@ttoss/geovis', () => {
   return {
     validateSpec: jest.fn().mockReturnValue({ status: 'resolved' }),
+    // Mirrors the documented contract: one GeoJSON source plus one
+    // `${id}-line` layer per group, appended after the existing entries.
+    createBoundaryGroup: (options: {
+      id: string;
+      data: string;
+      paint: Record<string, unknown>;
+    }) => {
+      return {
+        sources: [{ id: options.id, type: 'geojson', data: options.data }],
+        layers: [
+          {
+            id: `${options.id}-line`,
+            sourceId: options.id,
+            geometry: 'line',
+            paint: options.paint,
+          },
+        ],
+      };
+    },
+    appendBoundaryGroup: (
+      spec: { sources: unknown[]; layers: unknown[] },
+      group: { sources: unknown[]; layers: unknown[] }
+    ) => {
+      return {
+        ...spec,
+        sources: [...spec.sources, ...group.sources],
+        layers: [...spec.layers, ...group.layers],
+      };
+    },
   };
 });
 
-// `after()` requires a real Next.js request-scope (AsyncLocalStorage) that
-// doesn't exist under a plain unit test. It's only ever used here to defer
-// `deleteSession` past the response, so every test but the dedicated one
-// below just needs the callback recorded, never invoked — invoking it
-// synchronously would fire `deleteSession`'s own `fetch` call out of order,
-// stealing a response queued for `pollForReply`.
-jest.mock('next/server', () => {
+type ErrorBody = { error?: boolean; message?: string };
+
+type SpecRecord = Record<string, unknown>;
+
+const records = (value: unknown): SpecRecord[] => {
+  return Array.isArray(value)
+    ? value.filter((item): item is SpecRecord => {
+        return typeof item === 'object' && item !== null;
+      })
+    : [];
+};
+
+/**
+ * The structural comparison the reference fixture is stored in: static
+ * `/geo/*` URLs kept, API-backed data collapsed to `'<api>'`, `mapData[].data`
+ * dropped and `view` reduced to `maxZoomIn` (the rest is fitted to the
+ * browser's viewport).
+ */
+const normalizeSpec = (spec: SpecRecord): SpecRecord => {
+  const view = spec['view'];
   return {
-    after: jest.fn(),
+    ...spec,
+    sources: records(spec['sources']).map((source) => {
+      const data = source['data'];
+      return {
+        ...source,
+        data:
+          typeof data === 'string' && data.startsWith('/geo/') ? data : '<api>',
+      };
+    }),
+    mapData: records(spec['mapData']).map((entry) => {
+      return Object.fromEntries(
+        Object.entries(entry).filter(([key]) => {
+          return key !== 'data';
+        })
+      );
+    }),
+    view: {
+      maxZoomIn:
+        typeof view === 'object' && view !== null && 'maxZoomIn' in view
+          ? view.maxZoomIn
+          : undefined,
+    },
   };
-});
+};
 
-type ErrorBody = { error?: string };
+/**
+ * Blanks what the Jenks fit derives from the live values (legend breaks and
+ * their labels, the circle-size bounds) — the gateway is mocked here, so only
+ * the structure can match; the exact values were checked against the live
+ * data.
+ */
+const neutralizeDataDerived = (spec: SpecRecord): SpecRecord => {
+  return JSON.parse(
+    JSON.stringify(spec, (key, value: unknown) => {
+      return key === 'thresholds' || key === 'labels' ? '<data>' : value;
+    })
+  ) as SpecRecord;
+};
 
 /** Minimal `legends[]` entry — enough to satisfy `findMissingLegend`. */
 const A_LEGEND = [{ id: 'legend-1', title: 'Valor' }];
 
 const ENV_KEYS = [
-  'ANTHROPIC_API_KEY',
-  'ANTHROPIC_AGENT_ID',
-  'ANTHROPIC_ENVIRONMENT_ID',
+  'NATURALI_API_KEY',
+  'NATURALI_PROJECT_ID',
+  'NATURALI_AGENT_ID',
 ] as const;
 
 const jsonRequest = (body: unknown): Request => {
@@ -51,19 +127,42 @@ const jsonResponse = (body: unknown, ok = true): Response => {
   } as Response;
 };
 
-/** Mocks a full successful session turn whose agent reply is `text`. */
+/**
+ * Mocks a single, completed `generate?wait=true` call whose structured
+ * `output.object` is `{status: "ok", spec}` — `spec` is `JSON.parse(text)`,
+ * so every existing call site keeps passing a `JSON.stringify`'d spec, not a
+ * pre-wrapped `{status, spec}` envelope.
+ */
 const mockAgentReply = (text: string): jest.Mock => {
-  const fetchMock = jest
-    .fn()
-    .mockResolvedValueOnce(jsonResponse({ id: 'session_123' }))
-    .mockResolvedValueOnce(
-      jsonResponse({
-        data: [
-          { type: 'session.status_idle', stop_reason: { type: 'completed' } },
-          { type: 'agent.message', content: [{ type: 'text', text }] },
-        ],
-      })
-    );
+  const fetchMock = jest.fn().mockResolvedValueOnce(
+    jsonResponse({
+      id: 'gen_123',
+      status: 'completed',
+      output: {
+        object: { status: 'ok', spec: JSON.parse(text) },
+        content: text,
+      },
+    })
+  );
+  global.fetch = fetchMock;
+  return fetchMock;
+};
+
+/**
+ * Mocks a single, completed `generate?wait=true` call whose reply carries
+ * only raw `output.content` — no `object` — forcing {@link generateSpec}'s
+ * fallback parse path. Used only by tests exercising that fallback (a
+ * code-fenced reply, or a reply with no parseable structured content at
+ * all).
+ */
+const mockRawAgentReply = (content: string): jest.Mock => {
+  const fetchMock = jest.fn().mockResolvedValueOnce(
+    jsonResponse({
+      id: 'gen_123',
+      status: 'completed',
+      output: { content },
+    })
+  );
   global.fetch = fetchMock;
   return fetchMock;
 };
@@ -91,6 +190,10 @@ describe('POST /api/ai/spec', () => {
     jest.useRealTimers();
   });
 
+  // ---------------------------------------------------------------------------
+  // Input validation - JSON format, required fields, prompt length
+  // ---------------------------------------------------------------------------
+
   test('rejects a request whose body is not valid JSON', async () => {
     const request = new Request('http://localhost/api/ai/spec', {
       method: 'POST',
@@ -102,7 +205,7 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as ErrorBody;
 
     expect(response.status).toBe(400);
-    expect(body.error).toMatch(/Campo "prompt": envie um corpo JSON/);
+    expect(body.message).toMatch(/Campo "prompt": envie um corpo JSON/);
   });
 
   test('rejects a request with no prompt field', async () => {
@@ -110,7 +213,7 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as ErrorBody;
 
     expect(response.status).toBe(400);
-    expect(body.error).toMatch(/Campo "prompt": campo obrigatório ausente/);
+    expect(body.message).toMatch(/Campo "prompt": campo obrigatório ausente/);
   });
 
   test('rejects a blank prompt', async () => {
@@ -118,7 +221,7 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as ErrorBody;
 
     expect(response.status).toBe(400);
-    expect(body.error).toMatch(/Campo "prompt": não pode ser vazio/);
+    expect(body.message).toMatch(/Campo "prompt": não pode ser vazio/);
   });
 
   test('rejects a prompt field that is null', async () => {
@@ -126,7 +229,7 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as ErrorBody;
 
     expect(response.status).toBe(400);
-    expect(body.error).toMatch(/esperado texto, recebido null/);
+    expect(body.message).toMatch(/esperado texto, recebido null/);
   });
 
   test('rejects a prompt field that is neither a string nor null', async () => {
@@ -134,7 +237,7 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as ErrorBody;
 
     expect(response.status).toBe(400);
-    expect(body.error).toMatch(/esperado texto, recebido number/);
+    expect(body.message).toMatch(/esperado texto, recebido number/);
   });
 
   test('rejects a prompt longer than 500 characters', async () => {
@@ -142,11 +245,15 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as ErrorBody;
 
     expect(response.status).toBe(400);
-    expect(body.error).toMatch(/máximo de 500 caracteres \(recebido 501\)/);
+    expect(body.message).toMatch(/máximo de 500 caracteres \(recebido 501\)/);
   });
 
+  // ---------------------------------------------------------------------------
+  // Server configuration - API key, project ID, agent ID
+  // ---------------------------------------------------------------------------
+
   test('rejects the request when server config is missing', async () => {
-    delete process.env['ANTHROPIC_API_KEY'];
+    delete process.env['NATURALI_API_KEY'];
 
     const response = await POST(
       jsonRequest({ prompt: 'mapa de cozinhas por município' })
@@ -154,12 +261,12 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as ErrorBody;
 
     expect(response.status).toBe(400);
-    expect(body.error).toMatch(/Configuração ausente/);
+    expect(body.message).toMatch(/Configuração ausente/);
   });
 
   test('names every missing env var when more than one is absent', async () => {
-    delete process.env['ANTHROPIC_AGENT_ID'];
-    delete process.env['ANTHROPIC_ENVIRONMENT_ID'];
+    delete process.env['NATURALI_PROJECT_ID'];
+    delete process.env['NATURALI_AGENT_ID'];
 
     const response = await POST(
       jsonRequest({ prompt: 'mapa de cozinhas por município' })
@@ -167,10 +274,14 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as ErrorBody;
 
     expect(response.status).toBe(400);
-    expect(body.error).toMatch(/ANTHROPIC_AGENT_ID, ANTHROPIC_ENVIRONMENT_ID/);
+    expect(body.message).toMatch(/NATURALI_PROJECT_ID, NATURALI_AGENT_ID/);
   });
 
-  test('returns a gateway error when the upstream session creation fails', async () => {
+  // ---------------------------------------------------------------------------
+  // Gateway errors - upstream generate call, generation failure, fallback content
+  // ---------------------------------------------------------------------------
+
+  test('returns a gateway error when the upstream generate call fails', async () => {
     global.fetch = jest.fn().mockResolvedValue(jsonResponse({}, false));
 
     const response = await POST(
@@ -179,13 +290,19 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as ErrorBody;
 
     expect(response.status).toBe(502);
-    expect(body.error).toMatch(
-      /Não foi possível iniciar a sessão com o modelo de IA/
+    expect(body.message).toMatch(
+      /Não foi possível iniciar a geração com o modelo de IA/
     );
   });
 
-  test('returns a gateway error when session creation returns no id', async () => {
-    global.fetch = jest.fn().mockResolvedValue(jsonResponse({}));
+  test('returns a gateway error when the generation itself fails', async () => {
+    global.fetch = jest.fn().mockResolvedValue(
+      jsonResponse({
+        id: 'gen_123',
+        status: 'failed',
+        error: { message: 'provider boom' },
+      })
+    );
 
     const response = await POST(
       jsonRequest({ prompt: 'mapa de cozinhas por município' })
@@ -193,9 +310,49 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as ErrorBody;
 
     expect(response.status).toBe(502);
-    expect(body.error).toMatch(
-      /não retornou um identificador de sessão válido/
+    expect(body.message).toMatch(/O modelo de IA não concluiu a geração/);
+  });
+
+  test('returns a gateway error when the generation fails with no error message', async () => {
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue(jsonResponse({ id: 'gen_123', status: 'failed' }));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de cozinhas por município' })
     );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(502);
+    expect(body.message).toMatch(/O modelo de IA não concluiu a geração/);
+  });
+
+  test('returns a gateway error when the fallback content is valid JSON but not a spec reply', async () => {
+    mockRawAgentReply(JSON.stringify({ mapData: [] }));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de cozinhas por município' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(502);
+    expect(body.message).toMatch(/nenhum conteúdo estruturado/);
+  });
+
+  test('returns a gateway error when the generation completes with no structured reply', async () => {
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue(
+        jsonResponse({ id: 'gen_123', status: 'completed', output: {} })
+      );
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de cozinhas por município' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(502);
+    expect(body.message).toMatch(/nenhum conteúdo estruturado/);
   });
 
   test('falls back to a generic message when the agent failure matches no known cause', async () => {
@@ -207,7 +364,9 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as ErrorBody;
 
     expect(response.status).toBe(502);
-    expect(body.error).toMatch(/Falha de comunicação com o modelo de IA: boom/);
+    expect(body.message).toMatch(
+      /Falha de comunicação com o modelo de IA: boom/
+    );
   });
 
   test('stringifies a non-Error thrown value for the fallback agent-failure message', async () => {
@@ -219,224 +378,112 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as ErrorBody;
 
     expect(response.status).toBe(502);
-    expect(body.error).toMatch(
+    expect(body.message).toMatch(
       /Falha de comunicação com o modelo de IA: boom-string/
     );
   });
 
-  test('returns a gateway error when the session reports a session.error event', async () => {
-    global.fetch = jest
-      .fn()
-      // createSession
-      .mockResolvedValueOnce(jsonResponse({ id: 'session_123' }))
-      // pollForReply
-      .mockResolvedValueOnce(
-        jsonResponse({ data: [{ type: 'session.error' }] })
-      );
-
-    const response = await POST(
-      jsonRequest({ prompt: 'mapa de cozinhas por município' })
-    );
-
-    expect(response.status).toBe(502);
-  }, 10000);
-
-  test('returns a gateway error when the session goes idle with no agent message', async () => {
-    global.fetch = jest
-      .fn()
-      .mockResolvedValueOnce(jsonResponse({ id: 'session_123' }))
-      .mockResolvedValueOnce(
-        jsonResponse({
-          data: [
-            {
-              type: 'session.status_idle',
-              stop_reason: { type: 'completed' },
-            },
-            // An agent.message with no `content` at all contributes nothing.
-            { type: 'agent.message' },
-          ],
-        })
-      )
-      .mockResolvedValueOnce(jsonResponse({}));
-
-    const response = await POST(
-      jsonRequest({ prompt: 'mapa de cozinhas por município' })
-    );
-
-    expect(response.status).toBe(502);
-  }, 10000);
-
-  test('returns a gateway error when polling for session events fails', async () => {
-    global.fetch = jest
-      .fn()
-      .mockResolvedValueOnce(jsonResponse({ id: 'session_123' }))
-      .mockResolvedValueOnce(jsonResponse({}, false))
-      .mockResolvedValueOnce(jsonResponse({}));
-
-    const response = await POST(
-      jsonRequest({ prompt: 'mapa de cozinhas por município' })
-    );
-
-    expect(response.status).toBe(502);
-  }, 10000);
-
-  test('returns a gateway error when the session never reaches a terminal idle state', async () => {
-    jest.useFakeTimers();
-    global.fetch = jest
-      .fn()
-      .mockResolvedValueOnce(jsonResponse({ id: 'session_123' }))
-      // Every poll comes back with no events at all, so the loop runs out
-      // its full budget without ever seeing a terminal state.
-      .mockResolvedValue(jsonResponse({}));
-
-    const responsePromise = POST(
-      jsonRequest({ prompt: 'mapa de cozinhas por município' })
-    );
-
-    // POLL_INTERVAL_MS (1000) * MAX_POLL_ATTEMPTS (60), route.ts's own budget.
-    await jest.advanceTimersByTimeAsync(60_000);
-    const response = await responsePromise;
-
-    expect(response.status).toBe(502);
-  }, 15000);
+  // ---------------------------------------------------------------------------
+  // Response parsing
+  // ---------------------------------------------------------------------------
 
   test('returns the parsed spec JSON on a full successful turn', async () => {
     const spec = { title: 'Cozinhas por município', mapData: [] };
-
-    global.fetch = jest
-      .fn()
-      .mockResolvedValueOnce(jsonResponse({ id: 'session_123' }))
-      .mockResolvedValueOnce(
-        jsonResponse({
-          data: [
-            {
-              type: 'session.status_idle',
-              stop_reason: { type: 'completed' },
-            },
-            {
-              type: 'agent.message',
-              // A non-text block (e.g. a tool_use echo) must be filtered out,
-              // not concatenated into the reply.
-              content: [
-                { type: 'tool_use' },
-                { type: 'text', text: JSON.stringify(spec) },
-              ],
-            },
-          ],
-        })
-      )
-      .mockResolvedValueOnce(jsonResponse({}));
+    mockAgentReply(JSON.stringify(spec));
 
     const response = await POST(
       jsonRequest({ prompt: 'mapa de cozinhas por município' })
     );
-    const body = (await response.json()) as { result?: unknown };
+    const body = (await response.json()) as { spec?: unknown };
 
     expect(response.status).toBe(200);
-    expect(body.result).toEqual(spec);
+    expect(body.spec).toEqual(spec);
   }, 10000);
 
-  test('schedules session deletion via after() once a session is created', async () => {
-    const fetchMock = mockAgentReply(JSON.stringify({ mapData: [] }));
+  // ---------------------------------------------------------------------------
+  // Agent rejection handling
+  // ---------------------------------------------------------------------------
 
-    await POST(jsonRequest({ prompt: 'mapa de cozinhas por município' }));
-
-    const scheduled = jest.mocked(after).mock.calls.at(-1)?.[0];
-    expect(scheduled).toBeDefined();
-
-    await scheduled?.();
-
-    const deleteCall = fetchMock.mock.calls.find(([, init]) => {
-      return (init as RequestInit | undefined)?.method === 'DELETE';
-    });
-    expect(deleteCall?.[0]).toBe(
-      'https://api.anthropic.com/v1/sessions/session_123'
+  test("returns 422 with the agent's own message when it declines the request", async () => {
+    global.fetch = jest.fn().mockResolvedValue(
+      jsonResponse({
+        id: 'gen_123',
+        status: 'completed',
+        output: {
+          object: {
+            status: 'error',
+            error: { code: 'missing_data', message: 'dado não fornecido' },
+          },
+        },
+      })
     );
-  }, 10000);
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de cozinhas por município' })
+    );
+    const body = (await response.json()) as {
+      error?: string;
+      issues?: Array<{ code: string; message: string }>;
+    };
+
+    expect(response.status).toBe(422);
+    expect(body.message).toBe('dado não fornecido');
+    expect(body.issues).toEqual([
+      { code: 'missing_data', message: 'dado não fornecido' },
+    ]);
+  });
+
+  // ---------------------------------------------------------------------------
+  // Fallback parsing
+  // ---------------------------------------------------------------------------
 
   test('strips a ```json code fence from the model reply before parsing', async () => {
     const spec = { title: 'Cozinhas por município', mapData: [] };
-
-    global.fetch = jest
-      .fn()
-      .mockResolvedValueOnce(jsonResponse({ id: 'session_123' }))
-      .mockResolvedValueOnce(
-        jsonResponse({
-          data: [
-            {
-              type: 'session.status_idle',
-              stop_reason: { type: 'completed' },
-            },
-            {
-              type: 'agent.message',
-              content: [
-                {
-                  type: 'text',
-                  text: '```json\n' + JSON.stringify(spec) + '\n```',
-                },
-              ],
-            },
-          ],
-        })
-      )
-      .mockResolvedValueOnce(jsonResponse({}));
+    // Exercises `generateSpec`'s fallback path (`output.content`, no
+    // `output.object`), which is the only path that ever sees a code fence —
+    // a provider-parsed `object` never carries markdown around it.
+    mockRawAgentReply(
+      '```json\n' + JSON.stringify({ status: 'ok', spec }) + '\n```'
+    );
 
     const response = await POST(
       jsonRequest({ prompt: 'mapa de cozinhas por município' })
     );
-    const body = (await response.json()) as { result?: unknown };
+    const body = (await response.json()) as { spec?: unknown };
 
     expect(response.status).toBe(200);
-    expect(body.result).toEqual(spec);
+    expect(body.spec).toEqual(spec);
   }, 10000);
 
-  test('returns 422 when the model reply is not valid JSON', async () => {
-    global.fetch = jest
-      .fn()
-      // createSession
-      .mockResolvedValueOnce(jsonResponse({ id: 'session_123' }))
-      // pollForReply
-      .mockResolvedValueOnce(
-        jsonResponse({
-          data: [
-            {
-              type: 'session.status_idle',
-              stop_reason: { type: 'completed' },
-            },
-            {
-              type: 'agent.message',
-              content: [{ type: 'text', text: 'not a json reply' }],
-            },
-          ],
-        })
-      );
+  test('returns a gateway error when the model reply is not valid JSON', async () => {
+    mockRawAgentReply('not a json reply');
 
     const response = await POST(
       jsonRequest({ prompt: 'mapa de cozinhas por município' })
     );
     const body = (await response.json()) as ErrorBody;
 
-    expect(response.status).toBe(422);
-    expect(body.error).toMatch(/não é um JSON válido/);
+    expect(response.status).toBe(502);
+    expect(body.message).toMatch(/nenhum conteúdo estruturado/);
   }, 10000);
+
+  // ---------------------------------------------------------------------------
+  // Dataset catalogue context - It should always send the full catalogue, not just renderable datasets
+  // ---------------------------------------------------------------------------
 
   test('sends the full dataset catalogue as context, renderable and non-renderable datasets alike', async () => {
     const fetchMock = mockAgentReply(JSON.stringify({ mapData: [] }));
 
     await POST(jsonRequest({ prompt: 'mapa de cozinhas por município' }));
 
-    const createSessionCall = fetchMock.mock.calls[0] as [
-      string,
-      { body: string },
-    ];
-    const sentBody = JSON.parse(createSessionCall[1].body) as {
-      initial_events: Array<{ content: Array<{ text: string }> }>;
+    const generateCall = fetchMock.mock.calls[0] as [string, { body: string }];
+    const sentBody = JSON.parse(generateCall[1].body) as {
+      messages: Array<{ content: string }>;
     };
-    const catalogueTextWithPrefix = sentBody.initial_events[0].content[0].text;
-    const catalogueJsonString = catalogueTextWithPrefix
-      .split('\n')
-      .slice(1)
-      .join('\n');
+    const message = sentBody.messages[0].content;
+    const catalogueJsonString = message
+      .split('Catálogo de datasets:\n')[1]
+      .split('\n\n## O que é')[0];
 
     // buildCatalogueContext sends the raw CatalogueContract under `catalogue`.
     const catalogueJson = JSON.parse(catalogueJsonString) as {
@@ -461,6 +508,10 @@ describe('POST /api/ai/spec', () => {
       })
     ).toBe(true);
   }, 10000);
+
+  // ---------------------------------------------------------------------------
+  // MapData resolution - data field is replaced with real gateway data for renderable datasets
+  // ---------------------------------------------------------------------------
 
   test('replaces placeholder mapData with real gateway data for a renderable dataset', async () => {
     jest.spyOn(gateway, 'getIvsPorMunicipio').mockResolvedValue([
@@ -499,14 +550,18 @@ describe('POST /api/ai/spec', () => {
       jsonRequest({ prompt: 'mapa de IVS por município' })
     );
     const body = (await response.json()) as {
-      result?: { mapData?: Array<{ data: Array<{ geometryId: string }> }> };
+      spec?: { mapData?: Array<{ data: Array<{ geometryId: string }> }> };
     };
 
     expect(response.status).toBe(200);
-    expect(body.result?.mapData?.[0].data).toEqual([
+    expect(body.spec?.mapData?.[0].data).toEqual([
       { geometryId: '3550308', value: 0.321 },
     ]);
   }, 10000);
+
+  // ---------------------------------------------------------------------------
+  // MapData validation
+  // ---------------------------------------------------------------------------
 
   test('returns 422 when the spec references a dataset outside the renderable list', async () => {
     const unsupportedSpec = {
@@ -530,7 +585,7 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as ErrorBody;
 
     expect(response.status).toBe(422);
-    expect(body.error).toMatch(/caf_areas/);
+    expect(body.message).toMatch(/caf_areas/);
   }, 10000);
 
   test('returns 422 when an API-backed source resolves to no features', async () => {
@@ -553,7 +608,7 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as ErrorBody;
 
     expect(response.status).toBe(422);
-    expect(body.error).toMatch(/cozinhas/);
+    expect(body.message).toMatch(/cozinhas/);
   }, 10000);
 
   test('resolves cozinhas_geolocalizadas via the default-year fetcher', async () => {
@@ -589,12 +644,12 @@ describe('POST /api/ai/spec', () => {
       jsonRequest({ prompt: 'mapa de cozinhas por município' })
     );
     const body = (await response.json()) as {
-      result?: { mapData?: Array<{ data: Array<{ value: number }> }> };
+      spec?: { mapData?: Array<{ data: Array<{ value: number }> }> };
     };
 
     expect(response.status).toBe(200);
     expect(gateway.getCozinhasPorMunicipio).toHaveBeenCalledWith();
-    expect(body.result?.mapData?.[0].data).toEqual([
+    expect(body.spec?.mapData?.[0].data).toEqual([
       { geometryId: '3550308', value: 12 },
     ]);
   }, 10000);
@@ -634,12 +689,12 @@ describe('POST /api/ai/spec', () => {
       jsonRequest({ prompt: 'mapa de cozinhas 2025 por município' })
     );
     const body = (await response.json()) as {
-      result?: { mapData?: Array<{ data: Array<{ value: number }> }> };
+      spec?: { mapData?: Array<{ data: Array<{ value: number }> }> };
     };
 
     expect(response.status).toBe(200);
     expect(getCozinhasSpy).toHaveBeenCalledWith(2025);
-    expect(body.result?.mapData?.[0].data).toEqual([
+    expect(body.spec?.mapData?.[0].data).toEqual([
       { geometryId: '3550308', value: 20 },
     ]);
   }, 10000);
@@ -681,7 +736,7 @@ describe('POST /api/ai/spec', () => {
       jsonRequest({ prompt: 'mapa de pessoas atendidas por município' })
     );
     const body = (await response.json()) as {
-      result?: {
+      spec?: {
         mapData?: Array<{ label?: string; data: Array<{ value: number }> }>;
         legends?: unknown[];
       };
@@ -689,11 +744,11 @@ describe('POST /api/ai/spec', () => {
 
     expect(response.status).toBe(200);
     expect(gateway.getCozinhasPorMunicipio).toHaveBeenCalledWith();
-    expect(body.result?.mapData?.[0].data).toEqual([
+    expect(body.spec?.mapData?.[0].data).toEqual([
       { geometryId: '3550308', value: 1000 },
     ]);
-    expect(body.result?.mapData?.[0].label).toBe('Pessoas atendidas');
-    expect(body.result?.legends).toEqual(spec.legends);
+    expect(body.spec?.mapData?.[0].label).toBe('Pessoas atendidas');
+    expect(body.spec?.legends).toEqual(spec.legends);
   }, 10000);
 
   test('resolves municipios_cadinsan via the com-PBF share fetcher, dropping municípios with no share', async () => {
@@ -741,14 +796,18 @@ describe('POST /api/ai/spec', () => {
       jsonRequest({ prompt: 'mapa de insegurança alimentar por município' })
     );
     const body = (await response.json()) as {
-      result?: { mapData?: Array<{ data: Array<{ value: number }> }> };
+      spec?: { mapData?: Array<{ data: Array<{ value: number }> }> };
     };
 
     expect(response.status).toBe(200);
-    expect(body.result?.mapData?.[0].data).toEqual([
+    expect(body.spec?.mapData?.[0].data).toEqual([
       { geometryId: '3550308', value: 0.1 },
     ]);
   }, 10000);
+
+  // ---------------------------------------------------------------------------
+  // Source validation - geojson sources must be either inline FeatureCollections or known geometry endpoints
+  // ---------------------------------------------------------------------------
 
   test('accepts geojson sources that reference known geometry endpoints, skipping non-geojson entries', async () => {
     const spec = {
@@ -787,7 +846,7 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as ErrorBody;
 
     expect(response.status).toBe(422);
-    expect(body.error).toMatch(/"municipios-fictício"/);
+    expect(body.message).toMatch(/"municipios-fictício"/);
   }, 10000);
 
   test('returns 422 when a geojson source references a URL outside the known geometry endpoints', async () => {
@@ -805,7 +864,7 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as ErrorBody;
 
     expect(response.status).toBe(422);
-    expect(body.error).toMatch(/"inventada"/);
+    expect(body.message).toMatch(/"inventada"/);
   }, 10000);
 
   test('names the invalid source as "desconhecida" when it has no id', async () => {
@@ -821,8 +880,14 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as ErrorBody;
 
     expect(response.status).toBe(422);
-    expect(body.error).toMatch(/"desconhecida"/);
+    expect(body.message).toMatch(/"desconhecida"/);
   }, 10000);
+
+  // ---------------------------------------------------------------------------
+  // Basemap validation - basemap.styleUrl must be a valid MapLibre style URL,
+  // not a raster tile template, because MapLibre cannot use raster tile templates as a style.
+  // Not providing a basemap at all is acceptable, as is providing a basemap with no styleUrl field.
+  // ---------------------------------------------------------------------------
 
   test('returns 422 when basemap.styleUrl is a raster tile template instead of a MapLibre style URL', async () => {
     const spec = {
@@ -838,7 +903,7 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as ErrorBody;
 
     expect(response.status).toBe(422);
-    expect(body.error).toMatch(
+    expect(body.message).toMatch(
       /https:\/\/tile\.openstreetmap\.org\/\{z\}\/\{x\}\/\{y\}\.png/
     );
   }, 10000);
@@ -873,7 +938,7 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as ErrorBody;
 
     expect(response.status).toBe(422);
-    expect(body.error).toMatch(/"desconhecido"/);
+    expect(body.message).toMatch(/"desconhecido"/);
   }, 10000);
 
   test('accepts a basemap object with no styleUrl field', async () => {
@@ -910,6 +975,10 @@ describe('POST /api/ai/spec', () => {
     expect(response.status).toBe(200);
   }, 10000);
 
+  // ---------------------------------------------------------------------------
+  // MapData-source conflicts
+  // ---------------------------------------------------------------------------
+
   test("returns 422 when a mapData entry's mapDataId doubles as a sources[].id", async () => {
     const spec = {
       sources: [
@@ -933,7 +1002,7 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as ErrorBody;
 
     expect(response.status).toBe(422);
-    expect(body.error).toMatch(/"municipios"/);
+    expect(body.message).toMatch(/"municipios"/);
   }, 10000);
 
   test('returns 422 when a mapData entry carries an inline FeatureCollection instead of a join value, naming it "desconhecido" without a mapDataId', async () => {
@@ -955,8 +1024,12 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as ErrorBody;
 
     expect(response.status).toBe(422);
-    expect(body.error).toMatch(/"desconhecido"/);
+    expect(body.message).toMatch(/"desconhecido"/);
   }, 10000);
+
+  // ---------------------------------------------------------------------------
+  // Legend validation
+  // ---------------------------------------------------------------------------
 
   test('returns 422 when a painted variable has no legends[] entry', async () => {
     const spec = {
@@ -977,7 +1050,7 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as ErrorBody;
 
     expect(response.status).toBe(422);
-    expect(body.error).toMatch(/legend/);
+    expect(body.message).toMatch(/legend/);
   }, 10000);
 
   test('returns 422 when legends is present but empty', async () => {
@@ -1002,7 +1075,7 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as ErrorBody;
 
     expect(response.status).toBe(422);
-    expect(body.error).toMatch(/legend/);
+    expect(body.message).toMatch(/legend/);
   }, 10000);
 
   test('accepts a legend declared at layers[].legends instead of the spec-level legends[]', async () => {
@@ -1055,8 +1128,12 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as ErrorBody;
 
     expect(response.status).toBe(422);
-    expect(body.error).toMatch(/legend/);
+    expect(body.message).toMatch(/legend/);
   }, 10000);
+
+  // ---------------------------------------------------------------------------
+  // MapType constraints
+  // ---------------------------------------------------------------------------
 
   test('returns 422 when an absolute-total dataset is painted as a choropleth', async () => {
     const spec = {
@@ -1081,7 +1158,7 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as ErrorBody;
 
     expect(response.status).toBe(422);
-    expect(body.error).toMatch(/nunca uma variável relativa/);
+    expect(body.message).toMatch(/nunca uma variável relativa/);
   }, 10000);
 
   test('accepts a choropleth mapType whose mapData is not an array (rejected downstream instead)', async () => {
@@ -1098,7 +1175,7 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as ErrorBody;
 
     expect(response.status).toBe(422);
-    expect(body.error).toMatch(/campo "mapData" deveria ser uma lista/);
+    expect(body.message).toMatch(/campo "mapData" deveria ser uma lista/);
   }, 10000);
 
   test('skips a non-object mapData entry while scanning for a choropleth-painted absolute total', async () => {
@@ -1115,7 +1192,7 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as ErrorBody;
 
     expect(response.status).toBe(422);
-    expect(body.error).toMatch(/O item 0 de "mapData" precisa ser um objeto/);
+    expect(body.message).toMatch(/O item 0 de "mapData" precisa ser um objeto/);
   }, 10000);
 
   test('accepts a choropleth mapType whose mapData references no absolute-total dataset', async () => {
@@ -1165,6 +1242,10 @@ describe('POST /api/ai/spec', () => {
     expect(response.status).toBe(200);
   }, 10000);
 
+  // ---------------------------------------------------------------------------
+  // Spec structure validation
+  // ---------------------------------------------------------------------------
+
   test('returns 422 with the geovis issues, defaulting the message, when validateSpec rejects the resolved spec', async () => {
     jest.mocked(validateSpec).mockReturnValueOnce({
       status: 'invalid',
@@ -1187,10 +1268,12 @@ describe('POST /api/ai/spec', () => {
     };
 
     expect(response.status).toBe(422);
-    expect(body.error).toMatch(/resposta inválida/);
+    expect(body.message).toMatch(/resposta inválida/);
+    expect(body.error).toBe(true);
     expect(body.issues).toEqual([
       {
         code: 'invalid-schema',
+        path: 'mapData[0].joinKey',
         message: 'mapData[0].joinKey is required',
       },
     ]);
@@ -1201,10 +1284,10 @@ describe('POST /api/ai/spec', () => {
     mockAgentReply(JSON.stringify(spec));
 
     const response = await POST(jsonRequest({ prompt: 'mapa base do Brasil' }));
-    const body = (await response.json()) as { result?: unknown };
+    const body = (await response.json()) as { spec?: unknown };
 
     expect(response.status).toBe(200);
-    expect(body.result).toEqual(spec);
+    expect(body.spec).toEqual(spec);
   }, 10000);
 
   test('returns 422 when mapData is not an array', async () => {
@@ -1216,7 +1299,7 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as ErrorBody;
 
     expect(response.status).toBe(422);
-    expect(body.error).toMatch(/campo "mapData" deveria ser uma lista/);
+    expect(body.message).toMatch(/campo "mapData" deveria ser uma lista/);
   }, 10000);
 
   test('returns 422 when a mapData entry has no mapDataId', async () => {
@@ -1230,7 +1313,7 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as ErrorBody;
 
     expect(response.status).toBe(422);
-    expect(body.error).toMatch(/precisa ter "mapDataId" em formato de texto/);
+    expect(body.message).toMatch(/precisa ter "mapDataId" em formato de texto/);
   }, 10000);
 
   test('returns 422 when a mapData entry is not an object', async () => {
@@ -1244,7 +1327,7 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as ErrorBody;
 
     expect(response.status).toBe(422);
-    expect(body.error).toMatch(/O item 0 de "mapData" precisa ser um objeto/);
+    expect(body.message).toMatch(/O item 0 de "mapData" precisa ser um objeto/);
   }, 10000);
 
   test('returns 422 when the model reply is valid JSON but not an object', async () => {
@@ -1256,43 +1339,188 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as ErrorBody;
 
     expect(response.status).toBe(422);
-    expect(body.error).toMatch(
+    expect(body.message).toMatch(
       /deveria ser um objeto JSON representando o spec/
     );
   }, 10000);
 
-  test('falls back to String() for the parse-error detail when JSON.parse throws a non-Error value', async () => {
-    const realParse = JSON.parse.bind(JSON);
-    jest.spyOn(JSON, 'parse').mockImplementation((text: string) => {
-      if (text === 'not a json reply') {
-        throw 'boom';
-      }
-      return realParse(text) as unknown;
-    });
+  // ---------------------------------------------------------------------------
+  // validate_spec loop and the canonical cozinhas choropleth
+  // ---------------------------------------------------------------------------
 
-    mockAgentReply('not a json reply');
+  test('returns the last candidate and its issues when the validation loop gives up', async () => {
+    jest.mocked(validateSpec).mockReturnValue({
+      status: 'invalid',
+      issues: [
+        {
+          code: 'invalid-schema',
+          subject: { path: 'layers' },
+          message: 'layers is required',
+        },
+      ],
+    });
+    const paused = (callId: string) => {
+      return jsonResponse({
+        id: 'gen_1',
+        status: 'requires_action',
+        required_action: {
+          type: 'submit_tool_outputs',
+          tool_calls: [
+            {
+              id: callId,
+              tool_name: 'validate_spec',
+              args: { spec: { legends: A_LEGEND } },
+            },
+          ],
+        },
+      });
+    };
+    global.fetch = jest
+      .fn()
+      .mockResolvedValueOnce(paused('call_1'))
+      .mockResolvedValueOnce(paused('call_2'));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de cozinhas por município' })
+    );
+    const body = (await response.json()) as ErrorBody & {
+      issues?: unknown[];
+      spec?: unknown;
+    };
+
+    expect(response.status).toBe(422);
+    expect(body.error).toBe(true);
+    expect(body.message).toMatch(/parou de reduzir os problemas/);
+    expect(body.spec).toEqual({ legends: A_LEGEND });
+    expect(body.issues).toHaveLength(1);
+    jest
+      .mocked(validateSpec)
+      .mockReturnValue({ status: 'resolved', warnings: [] });
+  }, 10000);
+
+  test('explains a request that ran past the generation deadline', async () => {
+    const timeout = new Error('The operation was aborted due to timeout');
+    timeout.name = 'TimeoutError';
+    global.fetch = jest.fn().mockRejectedValueOnce(timeout);
 
     const response = await POST(
       jsonRequest({ prompt: 'mapa de cozinhas por município' })
     );
     const body = (await response.json()) as ErrorBody;
 
-    expect(response.status).toBe(422);
-    expect(body.error).toMatch(/não é um JSON válido: boom/);
+    expect(response.status).toBe(502);
+    expect(body.message).toMatch(/tempo limite/);
+  }, 10000);
+
+  test('serves the /mapas cozinhas choropleth for the target prompt, matching the reference spec', async () => {
+    jest.spyOn(gateway, 'getCozinhasPorMunicipio').mockResolvedValue([
+      {
+        codigoIbge: '3304557',
+        municipio: 'Rio de Janeiro (RJ)',
+        quantidade: 69,
+        pessoasAtendidas: 1000,
+        populacao: 6000000,
+        porCemMil: 1.1,
+        percentualDoBrasil: 2,
+        pessoasCadUnico: 5000,
+        porDezMilCadUnico: 1,
+        pessoasPorCozinha: 90000,
+      },
+    ]);
+    const points = {
+      type: 'FeatureCollection' as const,
+      features: [
+        {
+          type: 'Feature' as const,
+          geometry: {
+            type: 'Point' as const,
+            coordinates: [-43.7, -22.9] as [number, number],
+          },
+          properties: {
+            codigo: 'CS016282',
+            nome: 'Cozinha',
+            emFuncionamento: 'Sim, está funcionando normalmente',
+          },
+        },
+      ],
+    };
+    jest.spyOn(gateway, 'getCozinhas').mockResolvedValue(points);
+    jest.spyOn(gateway, 'getCozinhasBubbles').mockResolvedValue({
+      type: 'FeatureCollection',
+      features: [
+        {
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: [-43.2, -22.9] as [number, number],
+          },
+          properties: {
+            codarea: '3304557',
+            municipio: 'Rio de Janeiro (RJ)',
+            quantidade: 69,
+          },
+        },
+      ],
+    });
+    mockAgentReply(
+      JSON.stringify({
+        engine: 'maplibre',
+        mapType: 'choropleth',
+        sources: [
+          {
+            id: 'municipios',
+            type: 'geojson',
+            data: '/geo/geojs-100-mun.json',
+          },
+        ],
+        mapData: [
+          {
+            mapDataId: 'cozinhas_geolocalizadas',
+            mapId: 'municipios',
+            joinKey: 'codarea',
+            data: [],
+          },
+        ],
+        legends: A_LEGEND,
+        layers: [],
+      })
+    );
+
+    const response = await POST(
+      jsonRequest({
+        prompt: 'Quero ver o mapa coroplético de cozinhas por município',
+      })
+    );
+    const body = (await response.json()) as {
+      spec: Record<string, unknown>;
+      error: boolean;
+    };
+
+    expect(response.status).toBe(200);
+    expect(body.error).toBe(false);
+    expect(neutralizeDataDerived(normalizeSpec(body.spec))).toEqual(
+      neutralizeDataDerived(COROPLETICO_SPEC)
+    );
   }, 10000);
 });
+
+// ---------------------------------------------------------------------------
+// invalidSpecResponse function
+// ---------------------------------------------------------------------------
 
 describe('invalidSpecResponse', () => {
   test('defaults the message and omits issues/spec when called with no params', async () => {
     const response = invalidSpecResponse();
     const body = (await response.json()) as {
-      error?: string;
+      error?: boolean;
+      message?: string;
       issues?: unknown;
       spec?: unknown;
     };
 
     expect(response.status).toBe(422);
-    expect(body.error).toMatch(/resposta inválida/);
+    expect(body.error).toBe(true);
+    expect(body.message).toMatch(/resposta inválida/);
     expect(body.issues).toBeUndefined();
     expect(body.spec).toBeUndefined();
   });

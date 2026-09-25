@@ -1,28 +1,24 @@
-import { validateSpec } from '@ttoss/geovis';
-import { after } from 'next/server';
-
 import { gateway } from '@/gateway';
 
 import {
-  createSession,
-  deleteSession,
-  pollForReply,
-  stripCodeFence,
-} from './anthropicSession';
+  collectStructuralIssues,
+  validateCandidate,
+  validateWithLocalRepairs,
+} from './candidateValidation';
+import {
+  buildCozinhasChoroplethSpec,
+  isCozinhasChoroplethRequest,
+} from './canonicalChoropleth';
 import { buildCatalogueContext } from './mapDataCatalogue';
+import { generateSpec, type SpecReplyStopped } from './naturaliSession';
 import {
   appendRealMapData,
   appendRealSourceData,
   buildSourcesTable,
-  findChoroplethOnAbsoluteTotal,
-  findGeometryInMapData,
-  findInvalidBasemapStyleUrl,
-  findInvalidGeojsonSource,
-  findMissingLegend,
+  errorResponse,
+  hoistLayerLegends,
   invalidSpecResponse,
   isRecord,
-  KNOWN_BASEMAP_STYLE_URLS,
-  KNOWN_SOURCE_URLS,
   type UnknownRecord,
 } from './specValidation';
 
@@ -47,7 +43,7 @@ Se o pedido do usuário só corresponder a um dataset do catálogo que NÃO est�
 ## Para resolver os campos da spec, siga as instruções abaixo:
 
 tipo de mapa (mapType):
-"Dado pergunta '[pergunta usuário]', qual tipo cartográfico melhor representa? Considerar: coroplético (área agregada) - válido somente para variáveis relativas (razões, taxas e percentuais), não utilizar para contagens absolutas, pontos proporcionais (unidade individual) - para constagens, dot density - escolha quando uma unidade representar uma quantidade fixa (ex: 1 ponto = 1.000 habitantes, 1 ponto = 1 cozinha. Sempre adicione esta informação na legenda), cluster. Justificar pela granularidade real do dado — se maioria município tem só 1-2 pontos, coroplético mascara variação, pontos melhor. Listar tipo recomendado + 1 alternativa com trade-off."                                                                                            Variável:
+"Dado pergunta '[pergunta usuário]', qual tipo cartográfico melhor representa? Considerar: coroplético (área agregada) - válido somente para variáveis relativas (razões, taxas e percentuais), não utilizar para contagens absolutas (exceção única: quando o usuário pede explicitamente o mapa coroplético da quantidade de cozinhas por município — ex.: 'Quero ver o mapa coroplético de cozinhas por município' —, use \`mapType: "choropleth"\` com \`mapDataId: "cozinhas_geolocalizadas"\`; o servidor aplica a escala e as camadas canônicas do /mapas), pontos proporcionais (unidade individual) - para constagens, dot density - escolha quando uma unidade representar uma quantidade fixa (ex: 1 ponto = 1.000 habitantes, 1 ponto = 1 cozinha. Sempre adicione esta informação na legenda), cluster. Justificar pela granularidade real do dado — se maioria município tem só 1-2 pontos, coroplético mascara variação, pontos melhor. Listar tipo recomendado + 1 alternativa com trade-off."                                                                                            Variável:
 "Varrer dataset_catalogue.json (campo schema.fields[].name/description/unit) e achar campo cujo description bata literal com conceito pedido — não sinônimo, não correlato. Se não existir pronto, apontar campo-base + operação necessária (soma/agregação/join) pra derivar. Retornar: dataset_id, campo, grain (spatial.grain.code), se precisa agregação e por qual chave (Código IBGE/codarea)."
 
 Prompt ampliado — proxy seguro:
@@ -67,13 +63,13 @@ intervalo temporal (temporal.extent + temporal.grain + temporal.frequency + temp
 
 ## legenda (legends):
 
-Todo spec gerado DEVE incluir ao menos uma legend cobrindo a variável pintada —
-tanto no nível do spec (\`legends[]\`) quanto no nível da layer (\`layers[].legends[]\`)
-conta para essa exigência. Coroplético: legend quantitativa com os mesmos breaks
-usados no colorBy (nunca inventar breaks novos). Pontos proporcionais/dot density:
-legend com valor de referência explícito (ex: '1 ponto = 1.000 pessoas'). Nunca
-retornar spec cujo mapa pintado não tenha nenhuma legend, nem no spec nem em
-nenhuma layer.
+Todo spec gerado DEVE incluir ao menos uma legend cobrindo a variável pintada,
+sempre no \`legends[]\` de primeiro nível do spec — nunca em \`layers[].legends\`
+(a layer só aponta para a legend via \`activeLegendId\`). Coroplético: legend
+quantitativa com os mesmos breaks usados no colorBy (nunca inventar breaks novos).
+Pontos proporcionais/dot density: legend com valor de referência explícito (ex:
+'1 ponto = 1.000 pessoas'). Nunca retornar spec cujo mapa pintado não tenha
+nenhuma legend.
 
 ## mapData nunca é geometria:
 
@@ -104,6 +100,18 @@ tiles.
 
 ${buildSourcesTable()}
 
+\`sources[].data\` é sempre a URL da tabela, como texto — nunca dados embutidos:
+URLs estáticas (\`/geo/*\`, arquivos de \`public/geo\`) chegam ao navegador como
+URL, e URLs de API (\`/api/*\`) são resolvidas no servidor e trocadas pelos dados
+reais antes da resposta.
+
+## validação (tool validate_spec):
+
+Antes da resposta final, valide a spec candidata com o tool \`validate_spec\`.
+Ele devolve a spec já reparada pelo servidor e as issues restantes; corrija só
+essas issues, partindo da spec devolvida. \`mapData[].data\` vai sempre como \`[]\`:
+os valores reais são preenchidos pelo servidor.
+
 ## basemap: nunca inventar um styleUrl:
 
 Não inclua o campo \`basemap\` na spec, a menos que o pedido exija explicitamente
@@ -120,9 +128,9 @@ let cachedCatalogueText: Promise<string> | null = null;
 
 /**
  * Builds the two-tier catalog context (see {@link buildCatalogueContext})
- * once and keeps it in memory for the process lifetime. Sent as
- * `initial_events` on every new session (see {@link createSession}), never
- * resent mid-turn.
+ * once and keeps it in memory for the process lifetime. Joined into the
+ * single `messages[0].content` sent on every call (see
+ * {@link getAgentResponse}), never resent mid-turn.
  */
 const readCatalogueContext = (): Promise<string> => {
   if (!cachedCatalogueText) {
@@ -131,72 +139,8 @@ const readCatalogueContext = (): Promise<string> => {
   return cachedCatalogueText;
 };
 
-/**
- * Runs the deterministic, code-enforced structural checks against the
- * agent's raw JSON reply, before any real data is fetched: an invalid
- * geometry source, an invalid `basemap.styleUrl` (see
- * {@link findInvalidBasemapStyleUrl}), geometry smuggled into `mapData` (see
- * {@link findGeometryInMapData}), a painted variable with no `legends[]`
- * entry (see {@link findMissingLegend}), and an absolute-total dataset
- * painted as a choropleth (see {@link findChoroplethOnAbsoluteTotal}).
- * Extracted out of {@link POST} purely to keep its own branching under the
- * lint complexity budget — each check already carries its own docs at its
- * definition.
- *
- * @returns The 422 `Response` for the first violation found, or `null` when
- * `modelJson` passes every structural check.
- */
-const validateGeneratedSpecStructure = (
-  modelJson: UnknownRecord
-): Response | null => {
-  const invalidSourceId = findInvalidGeojsonSource(modelJson);
-  if (invalidSourceId) {
-    return invalidSpecResponse({
-      message: `A source "${invalidSourceId}" não referencia um endpoint real de geometria (URLs válidas: ${KNOWN_SOURCE_URLS.join(', ')}) ou veio com uma coleção de feições vazia inventada pelo modelo. Tente reformular o pedido.`,
-      spec: modelJson,
-    });
-  }
-
-  const invalidBasemapStyleUrl = findInvalidBasemapStyleUrl(modelJson);
-  if (invalidBasemapStyleUrl) {
-    return invalidSpecResponse({
-      message: `"basemap.styleUrl" traz "${invalidBasemapStyleUrl}", que não é um estilo MapLibre suportado (estilos válidos: ${KNOWN_BASEMAP_STYLE_URLS.join(', ')}). Nunca inclua "basemap.styleUrl" a menos que precise de um destes estilos — omitir o campo usa o estilo padrão do app. Tente reformular o pedido.`,
-      spec: modelJson,
-    });
-  }
-
-  const geometryMapDataId = findGeometryInMapData(modelJson);
-  if (geometryMapDataId) {
-    return invalidSpecResponse({
-      message: `O item "${geometryMapDataId}" de "mapData" carrega geometria (repete o id de uma source, ou traz uma FeatureCollection embutida) em vez de um valor de join por "geometryId". Tente reformular o pedido.`,
-      spec: modelJson,
-    });
-  }
-
-  if (findMissingLegend(modelJson)) {
-    return invalidSpecResponse({
-      message:
-        'Todo spec com uma variável pintada precisa de ao menos uma legend descrevendo-a, no spec ("legends[]") ou em alguma layer ("layers[].legends[]"). Tente reformular o pedido.',
-      spec: modelJson,
-    });
-  }
-
-  const choroplethMapDataId = findChoroplethOnAbsoluteTotal(modelJson);
-  if (choroplethMapDataId) {
-    return invalidSpecResponse({
-      message: `O dataset "${choroplethMapDataId}" é um total absoluto, nunca uma variável relativa — pintá-lo como coroplético (mapType "choropleth") introduz viés de tamanho do polígono. Use pontos proporcionais ou dot density. Tente reformular o pedido.`,
-      spec: modelJson,
-    });
-  }
-
-  return null;
-};
-
 const promptError = (message: string): Response => {
-  return Response.json(
-    { error: `Campo "prompt": ${message}` },
-    { status: 400 }
-  );
+  return errorResponse({ status: 400, message: `Campo "prompt": ${message}` });
 };
 
 const validatePrompt = (rawBody: unknown): string | Response => {
@@ -229,151 +173,183 @@ const validatePrompt = (rawBody: unknown): string | Response => {
 const validateEnv = ():
   | {
       apiKey: string;
+      projectId: string;
       agentId: string;
-      environmentId: string;
     }
   | Response => {
-  const apiKey = process.env['ANTHROPIC_API_KEY'];
-  const agentId = process.env['ANTHROPIC_AGENT_ID'];
-  const environmentId = process.env['ANTHROPIC_ENVIRONMENT_ID'];
+  const apiKey = process.env['NATURALI_API_KEY'];
+  const projectId = process.env['NATURALI_PROJECT_ID'];
+  const agentId = process.env['NATURALI_AGENT_ID'];
 
-  if (!apiKey || !agentId || !environmentId) {
+  if (!apiKey || !projectId || !agentId) {
     const missing = [
-      !apiKey ? 'ANTHROPIC_API_KEY' : null,
-      !agentId ? 'ANTHROPIC_AGENT_ID' : null,
-      !environmentId ? 'ANTHROPIC_ENVIRONMENT_ID' : null,
+      !apiKey ? 'NATURALI_API_KEY' : null,
+      !projectId ? 'NATURALI_PROJECT_ID' : null,
+      !agentId ? 'NATURALI_AGENT_ID' : null,
     ].filter((name): name is string => {
       return name !== null;
     });
 
-    return Response.json(
-      {
-        error: `Configuração ausente no ambiente do servidor: ${missing.join(', ')}.`,
-      },
-      { status: 400 }
-    );
+    return errorResponse({
+      status: 400,
+      message: `Configuração ausente no ambiente do servidor: ${missing.join(', ')}.`,
+    });
   }
 
-  return { apiKey, agentId, environmentId };
+  return { apiKey, projectId, agentId };
 };
 
 /**
- * Turns one of {@link createSession}/{@link pollForReply}'s thrown errors
- * into a Portuguese, cause-specific message — so a 502 never collapses a
- * session-creation failure, a session-side error, an empty reply, and a
- * timeout into the same generic sentence. Matches on the fixed prefixes
- * those two functions throw; anything else (e.g. a network-level fetch
- * failure) falls back to the raw `error.message` so it's still legible.
+ * Turns one of {@link generateSpec}'s thrown errors into a Portuguese,
+ * cause-specific message — so a 502 never collapses a transport failure, a
+ * failed generation, and an unparseable reply into the same generic
+ * sentence. Matches on the fixed prefixes that function throws; anything
+ * else (e.g. a network-level fetch failure) falls back to the raw
+ * `error.message` so it's still legible.
  */
 const describeAgentFailure = (error: unknown): string => {
   const message = error instanceof Error ? error.message : String(error);
 
-  if (message.startsWith('Anthropic sessions POST responded with status')) {
-    return `Não foi possível iniciar a sessão com o modelo de IA (${message}). Tente novamente em instantes.`;
+  if (message.startsWith('Naturali generate POST responded with status')) {
+    return `Não foi possível iniciar a geração com o modelo de IA (${message}). Tente novamente em instantes.`;
   }
-  if (message === 'Anthropic sessions POST returned no session id') {
-    return 'O modelo de IA não retornou um identificador de sessão válido. Tente novamente.';
+  if (message.startsWith('Naturali generation ended with status')) {
+    return `O modelo de IA não concluiu a geração (${message}). Tente reformular o pedido ou tentar novamente.`;
   }
   if (
-    message.startsWith('Anthropic session events GET responded with status')
+    message ===
+    'Naturali generation completed with no structured status/spec/error reply'
   ) {
-    return `Não foi possível acompanhar o andamento da sessão com o modelo de IA (${message}). Tente novamente em instantes.`;
+    return 'O modelo de IA encerrou a resposta sem gerar nenhum conteúdo estruturado. Tente reformular o pedido.';
   }
-  if (message === 'Anthropic session reported a session.error event') {
-    return 'O modelo de IA reportou um erro interno ao processar o pedido. Tente reformular o pedido ou tentar novamente.';
-  }
-  if (message === 'Anthropic session turn ended with no agent.message') {
-    return 'O modelo de IA encerrou a resposta sem gerar nenhum conteúdo. Tente reformular o pedido.';
-  }
-  if (message === 'Timed out waiting for the Anthropic session to reply') {
-    return 'O modelo de IA demorou demais para responder. Tente novamente em instantes.';
+  if (error instanceof Error && error.name === 'TimeoutError') {
+    return 'O modelo de IA não respondeu dentro do tempo limite. Tente novamente ou simplifique o pedido.';
   }
 
   return `Falha de comunicação com o modelo de IA: ${message}`;
 };
 
-const getAgentResponse = async (params: {
-  apiKey: string;
-  agentId: string;
-  environmentId: string;
-  prompt: string;
-}): Promise<string | Response> => {
-  try {
-    const catalogueText = await readCatalogueContext();
-    const sessionId = await createSession({
-      apiKey: params.apiKey,
-      agentId: params.agentId,
-      environmentId: params.environmentId,
-      catalogueText,
-      instructions: INSTRUCTIONS,
-      prompt: params.prompt,
-    });
-    after(() => {
-      return deleteSession({ apiKey: params.apiKey, sessionId });
-    });
-    return await pollForReply({ apiKey: params.apiKey, sessionId });
-  } catch (error) {
-    return Response.json(
-      { error: describeAgentFailure(error) },
-      { status: 502 }
-    );
-  }
+const STOP_REASON_MESSAGE: Record<SpecReplyStopped['reason'], string> = {
+  'max-attempts': 'esgotou as tentativas de validação',
+  'no-shrinkage': 'parou de reduzir os problemas entre tentativas',
+};
+
+/** The 422 for a validation loop that gave up, carrying its last candidate. */
+const stoppedResponse = (reply: SpecReplyStopped): Response => {
+  return invalidSpecResponse({
+    message: `A spec gerada não passou na validação: o modelo ${STOP_REASON_MESSAGE[reply.reason]} (${reply.attempts} de até 5). Tente reformular o pedido.`,
+    issues: reply.issues,
+    spec: reply.spec,
+  });
 };
 
 /**
- * Parses the agent's raw reply into a structurally valid spec, or the 422
- * `Response` describing why it isn't one. Extracted out of {@link POST}
- * purely to keep its own branching under the lint complexity budget.
+ * Runs one turn against the Naturali agent — serving its `validate_spec`
+ * tool with {@link validateCandidate} — and resolves the reply into the raw
+ * spec object (`status: "ok"`), or the 422 `Response` for a declined request
+ * (`status: "error"`) or a validation loop that gave up (`status: "stopped"`).
+ * Extracted out of {@link POST} purely to keep its own branching under the
+ * lint complexity budget.
  *
- * @returns The parsed `modelJson`, or a `Response` for a non-JSON reply, a
- * non-object reply, or a structural violation (see
- * {@link validateGeneratedSpecStructure}).
+ * @returns The parsed spec object with layer legends hoisted, or a
+ * `Response` for a transport failure (502) or a rejected spec (422).
  */
-const parseGeneratedSpec = (modelText: string): Response | UnknownRecord => {
-  let modelJson: unknown;
+const getAgentResponse = async (params: {
+  apiKey: string;
+  projectId: string;
+  agentId: string;
+  prompt: string;
+}): Promise<UnknownRecord | Response> => {
+  let reply: Awaited<ReturnType<typeof generateSpec>>;
   try {
-    modelJson = JSON.parse(stripCodeFence(modelText));
-  } catch (parseError) {
+    const catalogueText = await readCatalogueContext();
+    reply = await generateSpec({
+      apiKey: params.apiKey,
+      projectId: params.projectId,
+      agentId: params.agentId,
+      message: [
+        `Catálogo de datasets:\n${catalogueText}`,
+        INSTRUCTIONS,
+        params.prompt,
+      ].join('\n\n'),
+      validateCandidate,
+    });
+  } catch (error) {
+    return errorResponse({ status: 502, message: describeAgentFailure(error) });
+  }
+
+  if (reply.status === 'stopped') {
+    return stoppedResponse(reply);
+  }
+
+  if (reply.status === 'error') {
     return invalidSpecResponse({
-      message: `A resposta do modelo não é um JSON válido: ${
-        parseError instanceof Error ? parseError.message : String(parseError)
-      }`,
-      spec: modelText,
+      message: reply.error.message,
+      issues: [{ code: reply.error.code, message: reply.error.message }],
     });
   }
 
-  if (!isRecord(modelJson)) {
+  if (!isRecord(reply.spec)) {
     return invalidSpecResponse({
       message:
         'A resposta do modelo deveria ser um objeto JSON representando o spec.',
-      spec: modelJson,
+      spec: reply.spec,
     });
   }
 
-  return validateGeneratedSpecStructure(modelJson) ?? modelJson;
+  const spec = hoistLayerLegends(reply.spec);
+  const structuralIssues = collectStructuralIssues(spec);
+  if (structuralIssues.length > 0) {
+    return invalidSpecResponse({
+      message: `${structuralIssues[0].message} Tente reformular o pedido.`,
+      issues: structuralIssues,
+      spec,
+    });
+  }
+
+  return spec;
 };
 
 /**
- * Turns a natural-language prompt into a `VisualizationSpec`, via a
- * single-use Anthropic Managed Agents session created fresh per request
- * (`POST /v1/sessions` with `initial_events`, then `GET /v1/sessions/{id}/events`)
- * — the session is bound to the `geovis-spec-generator` agent (see
- * `geovis-spec-generator.en.agent.yaml`), provisioned once out of band (e.g.
- * via the `ant` CLI) and referenced here only by ID. The session is deleted
- * after the response is sent (see {@link deleteSession}, scheduled via
- * `after()`), so cleanup never adds latency to the client-facing request.
+ * Resolves the agent's spec into the one served to the client: the
+ * cozinhas-per-município choropleth is rebuilt from `/mapas`'s own builder
+ * (see {@link buildCozinhasChoroplethSpec}); every other spec gets its real
+ * `mapData` values (see {@link appendRealMapData}). Either way, API-backed
+ * `sources[].data` is then fetched server-side (see
+ * {@link appendRealSourceData}) while static `/geo/*` URLs are kept for the
+ * browser.
+ */
+const resolveServedSpec = async (
+  spec: UnknownRecord
+): Promise<UnknownRecord | Response> => {
+  const withMapData = isCozinhasChoroplethRequest(spec)
+    ? await buildCozinhasChoroplethSpec()
+    : await appendRealMapData(spec);
+  if (withMapData instanceof Response) {
+    return withMapData;
+  }
+  return appendRealSourceData(withMapData);
+};
+
+/**
+ * Turns a natural-language prompt into a `VisualizationSpec`, via a Naturali
+ * agent (`POST /agents/{agentId}/generate?wait=true`, see
+ * {@link generateSpec}) declared by the `geovis-spec-generator-loop`
+ * formation (`~/geovis-spec-generator-loop.formation.json`, provisioned out of
+ * band) and referenced here only by ID. The agent validates its candidate
+ * with the client-side `validate_spec` tool — repaired locally first, at most
+ * 5 calls, stopping when issues stop shrinking or the 55s deadline passes —
+ * and returns a structured `{status: "ok", spec}` or `{status: "error",
+ * error}` reply.
  *
- * The agent's raw reply is parsed as JSON, then its `mapData` is resolved
- * against real `data-gateway` values (see {@link appendRealMapData}), and any
- * API-backed `sources[].data` is resolved the same way (see
- * {@link appendRealSourceData}), before being returned — the agent's own
- * `mapData[].data` and API-backed `sources[].data` are never sent to the
- * client as-is.
+ * The reply is then resolved into real data (see {@link resolveServedSpec})
+ * and validated once more, with the same local repairs.
  *
- * @returns `{ result }` with the spec (real `mapData`) on success; `{ error }`
- * with a Portuguese, dev-friendly message on any failure (missing config,
- * prompt validation, upstream API failure, non-JSON reply, or an unsupported
- * dataset reference).
+ * @returns `{ spec, error: false }` on success; `{ error: true, message,
+ * issues?, spec? }` on any failure (missing config, prompt validation,
+ * upstream API failure, a declined request, a validation loop that gave up,
+ * or an unsupported dataset reference) — `spec` is the last generated
+ * candidate whenever one exists.
  */
 export const POST = async (request: Request): Promise<Response> => {
   const rawBody: unknown = await request.json().catch(() => {
@@ -390,40 +366,25 @@ export const POST = async (request: Request): Promise<Response> => {
     return envOrError;
   }
 
-  const modelTextOrError = await getAgentResponse({
+  const modelJsonOrError = await getAgentResponse({
     apiKey: envOrError.apiKey,
+    projectId: envOrError.projectId,
     agentId: envOrError.agentId,
-    environmentId: envOrError.environmentId,
     prompt: promptOrError,
   });
-  if (modelTextOrError instanceof Response) {
-    return modelTextOrError;
-  }
-
-  const modelJsonOrError = parseGeneratedSpec(modelTextOrError);
   if (modelJsonOrError instanceof Response) {
     return modelJsonOrError;
   }
 
-  const mapDataOrError = await appendRealMapData(modelJsonOrError);
-  if (mapDataOrError instanceof Response) {
-    return mapDataOrError;
+  const servedOrError = await resolveServedSpec(modelJsonOrError);
+  if (servedOrError instanceof Response) {
+    return servedOrError;
   }
 
-  const specOrError = await appendRealSourceData(mapDataOrError);
-  if (specOrError instanceof Response) {
-    return specOrError;
+  const { spec, issues } = validateWithLocalRepairs(servedOrError);
+  if (issues.length > 0) {
+    return invalidSpecResponse({ issues, spec });
   }
 
-  const validation = validateSpec(specOrError);
-  if (validation.status !== 'resolved') {
-    return invalidSpecResponse({
-      issues: validation.issues.map((issue) => {
-        return { code: issue.code, message: issue.message };
-      }),
-      spec: specOrError,
-    });
-  }
-
-  return Response.json({ result: specOrError });
+  return Response.json({ spec, error: false });
 };

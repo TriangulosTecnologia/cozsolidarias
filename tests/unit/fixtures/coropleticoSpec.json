@@ -1,0 +1,213 @@
+{
+  "engine": "maplibre",
+  "view": {
+    "maxZoomIn": 9
+  },
+  "basemap": {
+    "labels": false
+  },
+  "attributionControlEnabled": false,
+  "sources": [
+    {
+      "id": "cozinhas",
+      "type": "geojson",
+      "data": "<api>",
+      "attribution": "© Cozinhas Solidárias"
+    },
+    {
+      "id": "cozinhas-bubbles",
+      "type": "geojson",
+      "data": "<api>",
+      "attribution": "© Cozinhas Solidárias"
+    },
+    {
+      "id": "municipios-boundary",
+      "type": "geojson",
+      "data": "/geo/geojs-100-mun.json"
+    },
+    {
+      "id": "estados-boundary",
+      "type": "geojson",
+      "data": "/geo/estados.json"
+    }
+  ],
+  "mapData": [
+    {
+      "mapDataId": "cozinhas-bolhas-data",
+      "mapId": "cozinhas-bubbles",
+      "joinKey": "codarea",
+      "title": "Cozinhas por município"
+    },
+    {
+      "mapDataId": "cozinhas-pts-promote",
+      "mapId": "cozinhas",
+      "joinKey": "codigo"
+    },
+    {
+      "mapDataId": "cozinhas-por-municipio",
+      "mapId": "municipios-boundary",
+      "joinKey": "codarea",
+      "title": "Cozinhas por município"
+    }
+  ],
+  "legends": [
+    {
+      "id": "legenda-cozinhas",
+      "title": "Cozinhas por município",
+      "subtitle": "Quanto mais escuro o município, mais cozinhas cadastradas ali.",
+      "position": "bottom-right",
+      "offset": 12,
+      "colorBy": {
+        "type": "quantitative",
+        "property": "value",
+        "scale": "threshold",
+        "thresholds": [1, 7, 20, 69, 135],
+        "colors": [
+          "rgba(198, 219, 239, 0.85)",
+          "rgba(134, 188, 220, 0.85)",
+          "rgba(88, 160, 206, 0.85)",
+          "rgba(46, 124, 187, 0.85)",
+          "rgba(23, 97, 168, 0.85)",
+          "rgba(8, 48, 107, 0.85)"
+        ],
+        "defaultColor": "rgba(238, 230, 218, 0.85)"
+      },
+      "labelFormat": {
+        "type": "labels",
+        "labels": ["Sem cozinha", "1–6", "7–19", "20–68", "69–134", "135+"]
+      },
+      "reference": "Fonte dos dados: © Cozinhas Solidárias"
+    },
+    {
+      "id": "legenda-cozinhas-status",
+      "title": "Situação das cozinhas",
+      "subtitle": "Cor pela situação de funcionamento informada pela cozinha.",
+      "colorBy": {
+        "type": "categorical",
+        "property": "value",
+        "mapping": {
+          "Em funcionamento": "#41AB5D",
+          "Funcionamento reduzido": "#EEA227",
+          "Paralisada": "#EF3B2C",
+          "Não informado": "#8A7E74"
+        },
+        "defaultColor": "rgba(138, 126, 116, 0.85)"
+      }
+    }
+  ],
+  "layers": [
+    {
+      "id": "municipios-br-fill",
+      "sourceId": "municipios-boundary",
+      "geometry": "polygon",
+      "mapDataId": "cozinhas-por-municipio",
+      "activeLegendId": "legenda-cozinhas",
+      "paint": {
+        "fillOpacity": 1,
+        "lineColor": "#FAF9F7"
+      },
+      "hoverTooltip": {
+        "style": {
+          "background": "var(--chakra-colors-ivory-50)",
+          "color": "var(--chakra-colors-charcoal-900)",
+          "border": "1px solid var(--chakra-colors-ivory-300)",
+          "borderRadius": "var(--chakra-radii-lg)",
+          "boxShadow": "0 4px 16px rgba(36, 31, 33, 0.12)",
+          "padding": "var(--chakra-spacing-2) var(--chakra-spacing-3)",
+          "zIndex": 50
+        }
+      }
+    },
+    {
+      "id": "municipios-boundary-line",
+      "sourceId": "municipios-boundary",
+      "geometry": "line",
+      "paint": {
+        "lineColor": "#B2B2B2",
+        "lineWidth": 0.6
+      }
+    },
+    {
+      "id": "estados-boundary-line",
+      "sourceId": "estados-boundary",
+      "geometry": "line",
+      "paint": {
+        "lineColor": "#241F21",
+        "lineWidth": 0.8
+      }
+    },
+    {
+      "id": "cozinhas-bolhas",
+      "sourceId": "cozinhas-bubbles",
+      "geometry": "point",
+      "mapDataId": "cozinhas-bolhas-data",
+      "paint": {
+        "circleColor": "#E4572E",
+        "circleOpacity": 0.75,
+        "circleStrokeColor": "#FAF9F7",
+        "circleStrokeWidth": 0.6
+      },
+      "sizeBy": {
+        "range": [4, 38],
+        "transform": "sqrt",
+        "thresholds": [1, 143]
+      },
+      "visible": false
+    },
+    {
+      "id": "cozinhas-pts",
+      "sourceId": "cozinhas",
+      "geometry": "point",
+      "mapDataId": "cozinhas-pts-promote",
+      "activeLegendId": "legenda-cozinhas-status",
+      "transition": {
+        "kind": "crossfade",
+        "durationMs": 500,
+        "easing": "ease-in-out"
+      },
+      "paint": {
+        "circleRadius": 4,
+        "circleOpacity": 0.9,
+        "circleStrokeColor": "#FAF9F7",
+        "circleStrokeWidth": 1.2
+      },
+      "click": {},
+      "clickAnchor": {
+        "color": "#EA4335"
+      },
+      "hoverTooltip": {
+        "style": {
+          "background": "var(--chakra-colors-ivory-50)",
+          "color": "var(--chakra-colors-charcoal-900)",
+          "border": "1px solid var(--chakra-colors-ivory-300)",
+          "borderRadius": "var(--chakra-radii-lg)",
+          "boxShadow": "0 4px 16px rgba(36, 31, 33, 0.12)",
+          "padding": "var(--chakra-spacing-2) var(--chakra-spacing-3)",
+          "zIndex": 50
+        }
+      },
+      "visible": false
+    }
+  ],
+  "control": {
+    "id": "camadas",
+    "label": "Camadas",
+    "icon": "lucide:layers",
+    "position": "bottom-left",
+    "offset": 12,
+    "trigger": "hover",
+    "items": [
+      {
+        "id": "cozinhas",
+        "label": "Localização das cozinhas",
+        "layers": ["cozinhas-pts"],
+        "defaultActive": false
+      },
+      {
+        "id": "estados",
+        "label": "Linhas dos estados",
+        "layers": ["estados-boundary-line"]
+      }
+    ]
+  }
+}
