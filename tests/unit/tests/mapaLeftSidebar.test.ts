@@ -1,3 +1,4 @@
+import type { MapMode } from 'src/app/(features)/mapas/geovisSpec';
 import {
   buildLeftSidebar,
   MAP_MODE_VALUES,
@@ -6,13 +7,13 @@ import {
   modeUsesHexbinOpacity,
 } from 'src/app/(features)/mapas/mapaLeftSidebar';
 
-const settingsSection = (mode: Parameters<typeof buildLeftSidebar>[0]) => {
-  return buildLeftSidebar(mode).sections.find((section) => {
+const settingsSection = (mode: MapMode) => {
+  return buildLeftSidebar({ mode }).sections.find((section) => {
     return section.id === 'Configurações';
   });
 };
 
-const blockIds = (mode: Parameters<typeof buildLeftSidebar>[0]) => {
+const blockIds = (mode: MapMode) => {
   const body = settingsSection(mode)?.body;
   return body?.kind === 'settings'
     ? body.blocks.map((block) => {
@@ -144,5 +145,51 @@ describe('MAP_MODE_VALUES', () => {
     expect(MAP_MODE_VALUES).toContain('cafs-hexbin');
     expect(MAP_MODE_VALUES).toContain('coropletico-idhm-educacao-frequencia');
     expect(new Set(MAP_MODE_VALUES).size).toBe(MAP_MODE_VALUES.length);
+  });
+});
+
+describe('the colour block offer to build a ramp', () => {
+  const colourControl = (
+    ramps?: Parameters<typeof buildLeftSidebar>[0]['ramps']
+  ) => {
+    const body = buildLeftSidebar({ mode: 'coropletico', ramps }).sections.find(
+      (section) => {
+        return section.id === 'Configurações';
+      }
+    )?.body;
+
+    if (body?.kind !== 'settings') return undefined;
+
+    const block = body.blocks.find((candidate) => {
+      return candidate.id === 'cores';
+    });
+
+    return block?.control.kind === 'colorRamp' ? block.control : undefined;
+  };
+
+  /*
+   * Offered only when the page hands in the handlers: an affordance with
+   * nowhere to report would mint a ramp that vanishes on the next render.
+   */
+  test('is absent when the page passes no handlers', () => {
+    const control = colourControl();
+
+    expect(control?.options.length).toBeGreaterThan(0);
+    expect(control?.create).toBeUndefined();
+    expect(control?.onRemove).toBeUndefined();
+  });
+
+  test('carries the handlers and the map own base colours', () => {
+    const handlers = { onCreate: jest.fn(), onRemove: jest.fn() };
+    const control = colourControl(handlers);
+
+    expect(control?.create?.onCreate).toBe(handlers.onCreate);
+    expect(control?.onRemove).toBe(handlers.onRemove);
+    expect(control?.create?.baseColors.length).toBeGreaterThan(0);
+    expect(control?.create?.baseColors[0]).toEqual(
+      expect.objectContaining({
+        color: expect.stringMatching(/^#[0-9A-Fa-f]{6}$/),
+      })
+    );
   });
 });
