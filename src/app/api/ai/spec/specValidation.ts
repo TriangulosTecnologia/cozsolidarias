@@ -13,34 +13,96 @@ export const isRecord = (value: unknown): value is UnknownRecord => {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 };
 
-export const invalidSpecResponse = (params?: {
-  message?: string;
-  issues?: Array<{ code: string; message: string }>;
+/**
+ * One problem found in a generated spec — either a geovis `validateSpec`
+ * issue or one of this route's own structural checks. `path` locates the
+ * offending field when known, so the model can fix exactly that field.
+ *
+ * @example
+ * const issue: SpecIssue = { code: 'missing-legend', path: 'legends', message: '...' };
+ */
+export type SpecIssue = { code: string; message: string; path?: string };
+
+/**
+ * Builds every failure body of `POST /api/ai/spec`: `{ error: true, message }`
+ * plus the `issues` and the last generated `spec`, when known, so the client
+ * can always inspect what the model produced.
+ *
+ * @param params.status - HTTP status of the failure.
+ * @param params.message - pt-BR explanation shown to the user.
+ * @param params.issues - Validation issues behind the failure, if any.
+ * @param params.spec - The spec the failure refers to, if any.
+ * @returns The JSON `Response`.
+ *
+ * @example
+ * errorResponse({ status: 502, message: 'Falha de comunicação com o modelo de IA.' });
+ */
+export const errorResponse = (params: {
+  status: number;
+  message: string;
+  issues?: SpecIssue[];
   spec?: unknown;
 }): Response => {
   return Response.json(
     {
-      error:
-        params?.message ??
-        'O modelo retornou uma resposta inválida. Tente reformular o pedido.',
-      ...(params?.issues ? { issues: params.issues } : {}),
-      ...(params?.spec !== undefined ? { spec: params.spec } : {}),
+      error: true,
+      message: params.message,
+      ...(params.issues ? { issues: params.issues } : {}),
+      ...(params.spec !== undefined ? { spec: params.spec } : {}),
     },
-    { status: 422 }
+    { status: params.status }
   );
+};
+
+/**
+ * The 422 flavour of {@link errorResponse}, for a spec the model produced but
+ * that cannot be rendered.
+ *
+ * @param params.message - pt-BR explanation. @default a generic "invalid reply" message
+ * @param params.issues - Validation issues behind the failure, if any.
+ * @param params.spec - The rejected spec, if any.
+ * @returns The 422 JSON `Response`.
+ *
+ * @example
+ * invalidSpecResponse({ message: 'Spec inválida.', spec });
+ */
+export const invalidSpecResponse = (params?: {
+  message?: string;
+  issues?: SpecIssue[];
+  spec?: unknown;
+}): Response => {
+  return errorResponse({
+    status: 422,
+    message:
+      params?.message ??
+      'O modelo retornou uma resposta inválida. Tente reformular o pedido.',
+    issues: params?.issues,
+    spec: params?.spec,
+  });
+};
+
+/**
+ * The pt-BR explanation for a `mapDataId` outside the renderable datasets,
+ * listing the ones that are available.
+ *
+ * @param mapDataId - The rejected dataset id.
+ * @returns The message.
+ *
+ * @example
+ * unsupportedDatasetMessage('caf_areas');
+ */
+export const unsupportedDatasetMessage = (mapDataId: string): string => {
+  return `Dataset "${mapDataId}" ainda não está disponível para visualização. Datasets suportados: ${RENDERABLE_DATASET_IDS.join(', ')}.`;
 };
 
 const unsupportedDatasetResponse = (
   mapDataId: string,
   spec: unknown
 ): Response => {
-  return Response.json(
-    {
-      error: `Dataset "${mapDataId}" ainda não está disponível para visualização. Datasets suportados: ${RENDERABLE_DATASET_IDS.join(', ')}.`,
-      spec,
-    },
-    { status: 422 }
-  );
+  return invalidSpecResponse({
+    message: unsupportedDatasetMessage(mapDataId),
+    spec,
+  });
 };
 
 /**
@@ -278,28 +340,15 @@ const hasLegendEntries = (legends: unknown): boolean => {
 };
 
 /**
- * Whether any `layers[]` entry declares its own non-empty `legends[]` — a
- * legend scoped to one layer, as valid per `@ttoss/geovis` as the spec-level
- * `legends[]` (see `GeoVisLegend.utils.tsx`'s `layer.legends?.find(...) ??
- * specLegends?.find(...)` resolution order).
- */
-const hasLayerLegend = (spec: UnknownRecord): boolean => {
-  const layers = spec['layers'];
-  if (!Array.isArray(layers)) {
-    return false;
-  }
-
-  return layers.some((layer) => {
-    return isRecord(layer) && hasLegendEntries(layer['legends']);
-  });
-};
-
-/**
- * Whether the spec paints a variable (a non-empty `mapData[]`) without
- * declaring at least one legend to describe it — either at the top level
- * (`spec.legends[]`) or scoped to a layer (`layers[].legends[]`, see
- * {@link hasLayerLegend}). A spec with no `mapData` at all (a bare base map)
- * needs no legend — there is nothing painted to explain.
+ * Whether the spec paints a variable (a non-empty `mapData[]`) without a
+ * top-level `spec.legends[]` entry to describe it. Only the top-level list
+ * counts: `layers[].legends` is folded into it beforehand by
+ * {@link hoistLayerLegends}, so the rendered spec always carries its legends
+ * in one place. A spec with no `mapData` at all (a bare base map) needs no
+ * legend — there is nothing painted to explain.
+ *
+ * @example
+ * findMissingLegend({ mapData: [{ mapDataId: 'x' }], legends: [] }); // true
  */
 export const findMissingLegend = (spec: UnknownRecord): boolean => {
   const mapData = spec['mapData'];
@@ -308,7 +357,66 @@ export const findMissingLegend = (spec: UnknownRecord): boolean => {
     return false;
   }
 
-  return !hasLegendEntries(spec['legends']) && !hasLayerLegend(spec);
+  return !hasLegendEntries(spec['legends']);
+};
+
+/**
+ * Moves every `layers[].legends` entry into the top-level `spec.legends[]`
+ * (skipping ids already present there) and drops the field from the layer —
+ * a deterministic local repair, so a model that scoped a legend to its layer
+ * never spends a validation round on it.
+ *
+ * @param spec - The spec to normalize.
+ * @returns The same reference when no layer carries legends; otherwise a new
+ * spec with the legends hoisted.
+ *
+ * @example
+ * hoistLayerLegends({ layers: [{ id: 'a', legends: [{ id: 'l' }] }] });
+ * // → { layers: [{ id: 'a' }], legends: [{ id: 'l' }] }
+ */
+export const hoistLayerLegends = (spec: UnknownRecord): UnknownRecord => {
+  const layers = spec['layers'];
+  if (!Array.isArray(layers)) {
+    return spec;
+  }
+
+  const scoped = layers.flatMap((layer) => {
+    return isRecord(layer) && Array.isArray(layer['legends'])
+      ? layer['legends']
+      : [];
+  });
+  if (
+    !layers.some((layer) => {
+      return isRecord(layer) && 'legends' in layer;
+    })
+  ) {
+    return spec;
+  }
+
+  const topLevel = Array.isArray(spec['legends']) ? spec['legends'] : [];
+  const knownIds = new Set(
+    topLevel.flatMap((legend) => {
+      return isRecord(legend) ? [legend['id']] : [];
+    })
+  );
+  const hoisted = scoped.filter((legend) => {
+    return !(isRecord(legend) && knownIds.has(legend['id']));
+  });
+
+  return {
+    ...spec,
+    legends: [...topLevel, ...hoisted],
+    layers: layers.map((layer) => {
+      if (!isRecord(layer) || !('legends' in layer)) {
+        return layer;
+      }
+      return Object.fromEntries(
+        Object.entries(layer).filter(([key]) => {
+          return key !== 'legends';
+        })
+      );
+    }),
+  };
 };
 
 /**

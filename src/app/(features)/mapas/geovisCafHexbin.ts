@@ -6,7 +6,7 @@ import type {
   VisualizationLayer,
 } from '@ttoss/geovis';
 
-import { mapTokens } from '@/config/theme';
+import { mapTokens } from '@/config/mapTokens';
 import type { CafHexbinFeatureCollection } from '@/data-gateway/schema';
 
 import { rampPalette } from './mapaColorRamp';

@@ -1,10 +1,17 @@
+import type { SpecIssue } from './specValidation';
+
 const GENERATE_TIMEOUT_MS = 55_000;
 
-const generateUrl = (params: {
-  projectId: string;
-  agentId: string;
-}): string => {
-  return `https://api.naturali.ai/v1/projects/${params.projectId}/agents/${params.agentId}/generate?wait=true`;
+/**
+ * Upper bound on `validate_spec` tool calls per generation. The 5th call's
+ * issues end the loop even when they shrank — see {@link generateSpec}.
+ */
+export const MAX_VALIDATION_ATTEMPTS = 5;
+
+const VALIDATE_SPEC_TOOL = 'validate_spec';
+
+const agentUrl = (params: { projectId: string; agentId: string }): string => {
+  return `https://api.naturali.ai/v1/projects/${params.projectId}/agents/${params.agentId}`;
 };
 
 /** The `status: "ok"` branch of the agent's structured `output_schema`. */
@@ -14,6 +21,25 @@ export type SpecReplyOk = { status: 'ok'; spec: unknown };
 export type SpecReplyError = {
   status: 'error';
   error: { code: string; message: string };
+};
+
+/**
+ * The loop gave up before the agent answered: the `validate_spec` budget ran
+ * out, or a round left as many issues as the previous one (no shrinkage).
+ * Carries the last candidate (already locally repaired) and its issues.
+ */
+export type SpecReplyStopped = {
+  status: 'stopped';
+  reason: 'max-attempts' | 'no-shrinkage';
+  attempts: number;
+  spec: unknown;
+  issues: SpecIssue[];
+};
+
+/** What the `validate_spec` tool computes for one candidate (see `validateCandidate`). */
+export type ValidateCandidate = (spec: unknown) => {
+  spec: unknown;
+  issues: SpecIssue[];
 };
 
 /** Strips a leading/trailing ` ```json ` fence, if the model added one. */
@@ -40,9 +66,13 @@ const isSpecReply = (value: unknown): value is SpecReplyOk | SpecReplyError => {
  * which removes the session-creation/poll/delete dance the previous
  * Anthropic Managed Agents transport needed.
  */
+type ToolCall = { id: string; tool_name: string; args?: unknown };
+
 type GenerationResult = {
+  id?: string;
   status: string;
   error?: { message?: string } | null;
+  required_action?: { type: string; tool_calls?: ToolCall[] } | null;
   output?: {
     content?: string;
     object?: unknown;
@@ -89,45 +119,22 @@ const parseSpecReply = (
   );
 };
 
-/**
- * Runs one turn against the `geovis-spec-generator` Naturali agent and
- * returns its structured reply — the catalogue, the cozsolidarias-domain
- * `INSTRUCTIONS`, and the user's prompt are joined into a single
- * `messages[0].content` string, since Naturali's `generate` endpoint has no
- * equivalent of Anthropic Managed Agents' multi-block `initial_events`
- * (see `route.ts`'s {@link import('./route').POST} for how the three parts
- * are composed).
- *
- * Uses `?wait=true` so the call blocks for the finished generation inline —
- * the agent's `max_steps` is `1` and it calls no tools, so a single bounded
- * wait replaces the previous transport's manual event-polling loop.
- *
- * @returns The agent's structured `{status: "ok", spec}` or
- * `{status: "error", error}` reply.
- * @throws If the HTTP call fails, times out, the generation itself reports
- * `status: "failed"` (e.g. a provider-side error), or the reply carries no
- * parseable structured content.
- */
-export const generateSpec = async (params: {
+/** POSTs `body` to a Naturali agent endpoint and returns the settled generation. */
+const postGeneration = async (params: {
+  url: string;
   apiKey: string;
-  projectId: string;
-  agentId: string;
-  message: string;
-}): Promise<SpecReplyOk | SpecReplyError> => {
-  const response = await fetch(
-    generateUrl({ projectId: params.projectId, agentId: params.agentId }),
-    {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        authorization: `Bearer ${params.apiKey}`,
-      },
-      body: JSON.stringify({
-        messages: [{ role: 'user', content: params.message }],
-      }),
-      signal: AbortSignal.timeout(GENERATE_TIMEOUT_MS),
-    }
-  );
+  body: unknown;
+  signal: AbortSignal;
+}): Promise<GenerationResult> => {
+  const response = await fetch(params.url, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      authorization: `Bearer ${params.apiKey}`,
+    },
+    body: JSON.stringify(params.body),
+    signal: params.signal,
+  });
 
   if (!response.ok) {
     throw new Error(
@@ -135,15 +142,184 @@ export const generateSpec = async (params: {
     );
   }
 
-  const result = (await response.json()) as GenerationResult;
+  return (await response.json()) as GenerationResult;
+};
 
-  if (result.status !== 'completed') {
-    throw new Error(
-      `Naturali generation ended with status "${result.status}"${
-        result.error?.message ? `: ${result.error.message}` : ''
-      }`
-    );
+/** Tool output for a call to a tool this route does not implement. */
+const unknownToolOutput = (toolName: string): unknown => {
+  return {
+    ok: false,
+    issues: [
+      {
+        code: 'unknown-tool',
+        message: `O tool "${toolName}" não existe; use apenas "${VALIDATE_SPEC_TOOL}".`,
+      },
+    ],
+  };
+};
+
+const candidateFromArgs = (args: unknown): unknown => {
+  return typeof args === 'object' && args !== null && 'spec' in args
+    ? args.spec
+    : args;
+};
+
+/** How far the loop got: `validate_spec` calls served and the last call's issue count. */
+type LoopProgress = { attempts: number; previousIssueCount: number };
+
+/** Why a validated candidate ends the loop, or `null` to keep going. */
+const stopReason = (params: {
+  issueCount: number;
+  progress: LoopProgress;
+}): SpecReplyStopped['reason'] | null => {
+  if (params.issueCount === 0) {
+    return null;
+  }
+  if (params.progress.attempts >= MAX_VALIDATION_ATTEMPTS) {
+    return 'max-attempts';
+  }
+  return params.issueCount >= params.progress.previousIssueCount
+    ? 'no-shrinkage'
+    : null;
+};
+
+type ToolOutput = { tool_call_id: string; output: unknown };
+
+/**
+ * Answers one batch of pending tool calls, or stops the loop on the first
+ * `validate_spec` call {@link stopReason} rejects.
+ */
+const answerToolCalls = (params: {
+  calls: ToolCall[];
+  validateCandidate: ValidateCandidate;
+  progress: LoopProgress;
+}):
+  | { stopped: SpecReplyStopped }
+  | { outputs: ToolOutput[]; progress: LoopProgress } => {
+  let progress = params.progress;
+  const outputs: ToolOutput[] = [];
+
+  for (const call of params.calls) {
+    if (call.tool_name !== VALIDATE_SPEC_TOOL) {
+      outputs.push({
+        tool_call_id: call.id,
+        output: unknownToolOutput(call.tool_name),
+      });
+      continue;
+    }
+
+    const checked = params.validateCandidate(candidateFromArgs(call.args));
+    const issueCount = checked.issues.length;
+    const attempted = { ...progress, attempts: progress.attempts + 1 };
+    const reason = stopReason({ issueCount, progress: attempted });
+    if (reason) {
+      return {
+        stopped: {
+          status: 'stopped',
+          reason,
+          attempts: attempted.attempts,
+          ...checked,
+        },
+      };
+    }
+
+    progress = { attempts: attempted.attempts, previousIssueCount: issueCount };
+    outputs.push({
+      tool_call_id: call.id,
+      output: { ok: issueCount === 0, ...checked },
+    });
   }
 
+  return { outputs, progress };
+};
+
+/** The structured reply of a generation that is no longer paused. */
+const settledReply = (
+  result: GenerationResult
+): SpecReplyOk | SpecReplyError => {
+  if (result.status !== 'completed') {
+    const detail = result.error?.message ? `: ${result.error.message}` : '';
+    throw new Error(
+      `Naturali generation ended with status "${result.status}"${detail}`
+    );
+  }
   return parseSpecReply(result);
+};
+
+/**
+ * Runs one turn against the `geovis-spec-generator-loop` Naturali agent,
+ * serving its client-side `validate_spec` tool calls in between.
+ *
+ * `generate?wait=true` either settles (`completed`/`failed`) or pauses with
+ * `status: "requires_action"` and the pending `required_action.tool_calls`;
+ * each `validate_spec` call is answered with `validateCandidate`'s repaired
+ * spec and remaining issues via `.../generate/{id}/tool-outputs`, which
+ * blocks and returns the next state in the same shape.
+ *
+ * Stops, without answering the pending call, when:
+ * - the call is the {@link MAX_VALIDATION_ATTEMPTS}th and still has issues;
+ * - a call leaves at least as many issues as the previous call (no shrinkage);
+ * - the shared {@link GENERATE_TIMEOUT_MS} deadline aborts any request (thrown).
+ *
+ * @returns The agent's structured `{status: "ok", spec}` or
+ * `{status: "error", error}` reply, or `{status: "stopped", ...}` when the
+ * loop gave up.
+ * @throws If an HTTP call fails, the deadline passes, the generation reports
+ * a status other than `completed`/`requires_action`, or the reply carries no
+ * parseable structured content.
+ *
+ * @example
+ * const reply = await generateSpec({ apiKey, projectId, agentId, message, validateCandidate });
+ */
+export const generateSpec = async (params: {
+  apiKey: string;
+  projectId: string;
+  agentId: string;
+  message: string;
+  validateCandidate: ValidateCandidate;
+}): Promise<SpecReplyOk | SpecReplyError | SpecReplyStopped> => {
+  const signal = AbortSignal.timeout(GENERATE_TIMEOUT_MS);
+  const baseUrl = agentUrl({
+    projectId: params.projectId,
+    agentId: params.agentId,
+  });
+
+  let result = await postGeneration({
+    url: `${baseUrl}/generate?wait=true`,
+    apiKey: params.apiKey,
+    body: { messages: [{ role: 'user', content: params.message }] },
+    signal,
+  });
+
+  let progress: LoopProgress = {
+    attempts: 0,
+    previousIssueCount: Number.POSITIVE_INFINITY,
+  };
+
+  while (result.status === 'requires_action') {
+    const answered = answerToolCalls({
+      calls: result.required_action?.tool_calls ?? [],
+      validateCandidate: params.validateCandidate,
+      progress,
+    });
+    if ('stopped' in answered) {
+      return answered.stopped;
+    }
+    progress = answered.progress;
+
+    if (!result.id) {
+      throw new Error(
+        'Naturali generation ended with status "requires_action" but no generation id to resume'
+      );
+    }
+
+    result = await postGeneration({
+      url: `${baseUrl}/generate/${result.id}/tool-outputs`,
+      apiKey: params.apiKey,
+      body: { tool_outputs: answered.outputs },
+      signal,
+    });
+  }
+
+  return settledReply(result);
 };
