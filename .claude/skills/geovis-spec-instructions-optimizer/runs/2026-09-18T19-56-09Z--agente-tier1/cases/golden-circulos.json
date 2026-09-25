@@ -1,0 +1,17 @@
+{
+  "prompt": "Mapa com um círculo por município, com o tamanho proporcional ao número de cozinhas solidárias.",
+  "httpStatus": 422,
+  "durationMs": 9593,
+  "response": {
+    "error": "O modelo retornou uma resposta inválida. Tente reformular o pedido.",
+    "issues": [
+      {
+        "code": "invalid-schema",
+        "message": "(root) must have required property 'engine'"
+      }
+    ],
+    "spec": {
+      "error": "Existem dois cadastros de cozinhas solidárias geolocalizadas que podem responder a este pedido: 'cozinhas_geolocalizadas' (cadastro atual, 2026, apenas cozinhas habilitadas) e 'cozinhas_geolocalizadas_2025' (snapshot de 2025, cobrindo todas as situações do fluxo). Por favor, informe qual ano/corte você quer visualizar antes que eu monte o mapa de círculos proporcionais por número de cozinhas."
+    }
+  }
+}

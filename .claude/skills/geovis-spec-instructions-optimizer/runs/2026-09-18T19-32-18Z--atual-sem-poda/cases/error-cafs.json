@@ -1,0 +1,17 @@
+{
+  "prompt": "Mapa dos CAFs (Cadastro Ambiental Rural) no Brasil.",
+  "httpStatus": 422,
+  "durationMs": 5833,
+  "response": {
+    "error": "O modelo retornou uma resposta inválida. Tente reformular o pedido.",
+    "issues": [
+      {
+        "code": "invalid-schema",
+        "message": "(root) must have required property 'engine'"
+      }
+    ],
+    "spec": {
+      "error": "O dataset de Áreas CAF (Cadastro Ambiental Rural) existe no catálogo, mas não está entre os datasets habilitados para visualização no mapa (renderableDatasets) hoje. Não é possível gerar essa spec — não há proxy aceitável para essa variável, pois nenhum dos datasets renderáveis (cozinhas geolocalizadas, pessoas atendidas, IVS ou CADINSAN) mede áreas ou cadastros do CAF."
+    }
+  }
+}

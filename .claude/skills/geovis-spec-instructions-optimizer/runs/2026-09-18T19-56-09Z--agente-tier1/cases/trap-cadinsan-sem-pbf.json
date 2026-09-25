@@ -1,0 +1,17 @@
+{
+  "prompt": "Mapa da insegurança alimentar desconsiderando o efeito do Bolsa Família.",
+  "httpStatus": 422,
+  "durationMs": 5675,
+  "response": {
+    "error": "O modelo retornou uma resposta inválida. Tente reformular o pedido.",
+    "issues": [
+      {
+        "code": "invalid-schema",
+        "message": "(root) must have required property 'engine'"
+      }
+    ],
+    "spec": {
+      "error": "O mapa de insegurança alimentar sem o efeito do Bolsa Família não está disponível. O único dado renderizável é `municipios_cadinsan`, que traz exclusivamente o indicador de famílias do CadÚnico em insegurança alimentar CONSIDERANDO o efeito do Programa Bolsa Família (Cadinsan_absoluto_com_PBF). O cenário contrafactual sem PBF (Cadinsan_absoluto_sem_PBF), embora exista como campo descrito no catálogo, não está entre os valores que o servidor expõe para visualização — não há mapDataId alternativo que entregue esse recorte."
+    }
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "prompt": "Mapa da vulnerabilidade social dos municípios brasileiros.",
+  "httpStatus": 422,
+  "durationMs": 32815,
+  "response": {
+    "error": "O spec declara \"mapType\": \"choropleth\" mas nenhum item de \"mapData\" tem \"mapId\" apontando para uma source declarada — nesse estado o mapa renderiza vazio, sem erro. Inclua o \"mapData\" correspondente ou remova o \"mapType\". Tente reformular o pedido.",
+    "spec": {
+      "title": "Vulnerabilidade Social dos Municípios Brasileiros",
+      "description": "Índice de Vulnerabilidade Social (IVS) geral por município, segundo as faixas oficiais do Atlas da Vulnerabilidade Social (IPEA, dados de 2010).",
+      "engine": "maplibre",
+      "mapType": "choropleth",
+      "view": {
+        "center": [
+          -51.9253,
+          -14.235
+        ],
+        "zoom": 3.2,
+        "maxZoomOut": 3,
+        "maxZoomIn": 12
+      },
+      "sources": [
+        {
+          "id": "municipios",
+          "type": "geojson",
+          "data": "/geo/geojs-100-mun.json"
+        }
+      ],
+      "layers": [
+        {
+          "id": "municipios-ivs-fill",
+          "sourceId": "municipios",
+          "geometry": "polygon",
+          "title": "Vulnerabilidade Social (IVS)",
+          "mapDataId": "municipios_ivs",
+          "activeLegendId": "ivs-legend",
+          "paint": {
+            "fillOutlineColor": "#FAF9F7"
+          },
+          "hoverPaint": {
+            "lineColor": "#4F000A",
+            "lineWidth": 2
+          },
+          "hoverTooltip": {
+            "enabled": true
+          }
+        }
+      ],
+      "legends": [
+        {
+          "id": "ivs-legend",
+          "title": "Índice de Vulnerabilidade Social (IVS)",
+          "subtitle": "Situação em 2010 — Censo/Atlas da Vulnerabilidade Social",
+          "footerValue": "2010",
+          "reference": "IPEA — Atlas da Vulnerabilidade Social. Índice de Vulnerabilidade Social (IVS) geral, faixas oficiais, dados do Censo 2010.",
+          "labelFormat": {
+            "type": "labels",
+            "labels": [
+              "Sem dado",
+              "Muito baixa (≤ 0,200)",
+              "Baixa (0,201–0,300)",
+              "Média (0,301–0,400)",
+              "Alta (0,401–0,500)",
+              "Muito alta (≥ 0,501)"
+            ]
+          },
+          "colorBy": {
+            "type": "quantitative",
+            "property": "value",
+            "scale": "threshold",
+            "thresholds": [
+              0.001,
+              0.2,
+              0.3,
+              0.4,
+              0.5
+            ],
+            "colors": [
+              "#EEE6DA",
+              "#FCBBA1",
+              "#FC7E5E",
+              "#EF3B2C",
+              "#B81419",
+              "#4F000A"
+            ],
+            "defaultColor": "#EEE6DA"
+          }
+        }
+      ]
+    }
+  }
+}
