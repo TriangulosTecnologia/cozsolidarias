@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components */
 import type { GeovisWorkspaceConfig } from '@ttoss/geovis-workspace';
 
 import type { CozinhaDetalhe } from '@/data-gateway/schema';
