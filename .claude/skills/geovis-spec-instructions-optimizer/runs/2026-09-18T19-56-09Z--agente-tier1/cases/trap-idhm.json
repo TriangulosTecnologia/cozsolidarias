@@ -1,0 +1,17 @@
+{
+  "prompt": "Mapa do Índice de Desenvolvimento Humano Municipal.",
+  "httpStatus": 422,
+  "durationMs": 7034,
+  "response": {
+    "error": "O modelo retornou uma resposta inválida. Tente reformular o pedido.",
+    "issues": [
+      {
+        "code": "invalid-schema",
+        "message": "(root) must have required property 'engine'"
+      }
+    ],
+    "spec": {
+      "error": "O Índice de Desenvolvimento Humano Municipal (IDHM) não está disponível para visualização. Embora o campo `idhm` exista na descrição do dataset `municipios_ivs`, o `mapDataId` correspondente entrega apenas o valor do IVS geral — o IDHM e suas dimensões (longevidade, educação, renda) não são acessíveis por essa via nem por nenhum outro dataset renderável do catálogo hoje."
+    }
+  }
+}

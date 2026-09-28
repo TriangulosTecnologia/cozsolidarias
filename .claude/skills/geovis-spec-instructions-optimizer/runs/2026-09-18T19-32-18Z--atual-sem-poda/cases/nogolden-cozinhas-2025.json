@@ -1,0 +1,8 @@
+{
+  "prompt": "Mapa das cozinhas solidárias cadastradas em 2025.",
+  "httpStatus": 502,
+  "durationMs": 76999,
+  "response": {
+    "error": "O modelo de IA demorou demais para responder. Tente novamente em instantes."
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "prompt": "Mapa da vulnerabilidade social por estado.",
+  "httpStatus": 422,
+  "durationMs": 12126,
+  "response": {
+    "error": "O modelo retornou uma resposta inválida. Tente reformular o pedido.",
+    "issues": [
+      {
+        "code": "invalid-schema",
+        "message": "(root) must have required property 'engine'"
+      }
+    ],
+    "spec": {
+      "error": "Não é possível gerar esse mapa. O único dataset de vulnerabilidade social disponível (municipios_ivs) tem granularidade de município (join por codarea/Código IBGE) — não existe um dataset de IVS agregado por estado no catálogo. A camada /geo/estados.json serve apenas como contorno de contexto, não pode ser usada como source de um mapData pintado. Como o pedido só faz sentido em grain de estado e nenhuma leitura por município resolve isso, esta visualização não está disponível. Alternativa possível: um coroplético de IVS por município (municipios_ivs), usando /geo/estados.json apenas como camada de contorno estadual sobreposta para referência visual — se isso atender, posso gerar esse mapa em vez do agregado por estado."
+    }
+  }
+}

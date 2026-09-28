@@ -1,0 +1,30 @@
+{
+  "runId": "2026-09-18T19-32-18Z--atual-sem-poda",
+  "skillVersion": "1.4.0",
+  "variant": "atual-sem-poda (controle)",
+  "sources": {
+    "agentSystemPrompt": {
+      "path": "agent:agent_011ss4z7oRNABbicGgxwbvHX v1 (= produção v41)",
+      "sha256": "8116c3885a6ea47b57c07b4000d3547d54a0523ed69649c0a776d0471f12607a"
+    },
+    "instructions": {
+      "path": "src/app/api/ai/spec/instructions.ts",
+      "gitSha": "b68d3147d8ca04134a03a95880870b1713883108",
+      "sha256": "3a3064d8602c8386d55ba0d1c3569e414a7ecb26a90c77f6a6bb7cf52bb55b20"
+    }
+  },
+  "spec": {
+    "schemaVersion": 2,
+    "libSchemaVersion": 1,
+    "geovisPackageVersion": "0.21.1"
+  },
+  "testAgent": {
+    "slug": "geovis-spec-generator-test",
+    "agentId": "agent_011ss4z7oRNABbicGgxwbvHX",
+    "antVersion": "1.26.1"
+  },
+  "results": {
+    "resultsVersion": 1,
+    "datasetVersion": "1.0.0"
+  }
+}

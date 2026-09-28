@@ -1,0 +1,8 @@
+{
+  "prompt": "Mapa com um círculo por município, com o tamanho proporcional ao número de cozinhas solidárias.",
+  "httpStatus": 502,
+  "durationMs": 76264,
+  "response": {
+    "error": "O modelo de IA demorou demais para responder. Tente novamente em instantes."
+  }
+}

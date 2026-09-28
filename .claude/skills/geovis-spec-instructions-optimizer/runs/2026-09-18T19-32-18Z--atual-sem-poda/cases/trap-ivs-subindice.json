@@ -1,0 +1,17 @@
+{
+  "prompt": "Mapa do IVS de infraestrutura urbana por município.",
+  "httpStatus": 422,
+  "durationMs": 7108,
+  "response": {
+    "error": "O modelo retornou uma resposta inválida. Tente reformular o pedido.",
+    "issues": [
+      {
+        "code": "invalid-schema",
+        "message": "(root) must have required property 'engine'"
+      }
+    ],
+    "spec": {
+      "error": "Não é possível gerar esse mapa. O dataset municipios_ivs tem, na descrição, o subíndice de Infraestrutura Urbana entre seus campos (ivs_infraestrutura_urbana), mas o mapDataId municipios_ivs resolve, no servidor, para um único valor por município: o IVS geral. Os subíndices do IVS (infraestrutura urbana, capital humano, renda e trabalho), assim como o IDHM e suas dimensões, não são alcançáveis via mapData hoje, mesmo constando nos campos do catálogo. Não há dataset renderável alternativo que entregue esse subíndice."
+    }
+  }
+}
