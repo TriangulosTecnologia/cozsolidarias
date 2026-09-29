@@ -1,0 +1,191 @@
+{
+  "generatedAt": "2026-09-20T16:48:10.909Z",
+  "generator": "geovis-spec-instructions-optimizer/scripts/dump_golden_specs.mjs",
+  "source": "src/app/(features)/mapas/geovisSpec.ts#buildSpec",
+  "gitSha": "b68d3147d8ca04134a03a95880870b1713883108",
+  "geovisVersion": "0.21.1",
+  "dataRowsElided": false,
+  "datasets": {
+    "cozinhasPorMunicipio": {
+      "rows": 347
+    },
+    "ivsPorMunicipio": {
+      "rows": 5565
+    },
+    "cafsPorMunicipio": {
+      "rows": 5524
+    },
+    "cadinsanPorMunicipio": {
+      "rows": 5570
+    },
+    "cafHexbin": {
+      "present": true
+    },
+    "cafPontosPorUf": {
+      "present": true
+    }
+  },
+  "modes": [
+    {
+      "mode": "coropletico",
+      "sources": 2,
+      "layers": 3,
+      "legends": 22,
+      "mapData": 3
+    },
+    {
+      "mode": "coropletico-taxa",
+      "sources": 2,
+      "layers": 3,
+      "legends": 22,
+      "mapData": 3
+    },
+    {
+      "mode": "coropletico-percentual",
+      "sources": 2,
+      "layers": 3,
+      "legends": 22,
+      "mapData": 3
+    },
+    {
+      "mode": "coropletico-cafs-percentual",
+      "sources": 2,
+      "layers": 3,
+      "legends": 22,
+      "mapData": 3
+    },
+    {
+      "mode": "coropletico-cadinsan-com-pbf",
+      "sources": 2,
+      "layers": 3,
+      "legends": 22,
+      "mapData": 3
+    },
+    {
+      "mode": "coropletico-cadinsan-sem-pbf",
+      "sources": 2,
+      "layers": 3,
+      "legends": 22,
+      "mapData": 3
+    },
+    {
+      "mode": "coropletico-cadunico",
+      "sources": 2,
+      "layers": 3,
+      "legends": 22,
+      "mapData": 3
+    },
+    {
+      "mode": "coropletico-pessoas-cozinha",
+      "sources": 2,
+      "layers": 3,
+      "legends": 22,
+      "mapData": 3
+    },
+    {
+      "mode": "coropletico-ivs",
+      "sources": 2,
+      "layers": 3,
+      "legends": 22,
+      "mapData": 3
+    },
+    {
+      "mode": "coropletico-ivs-infraestrutura",
+      "sources": 2,
+      "layers": 3,
+      "legends": 22,
+      "mapData": 3
+    },
+    {
+      "mode": "coropletico-ivs-capital-humano",
+      "sources": 2,
+      "layers": 3,
+      "legends": 22,
+      "mapData": 3
+    },
+    {
+      "mode": "coropletico-ivs-renda-trabalho",
+      "sources": 2,
+      "layers": 3,
+      "legends": 22,
+      "mapData": 3
+    },
+    {
+      "mode": "coropletico-idhm",
+      "sources": 2,
+      "layers": 3,
+      "legends": 22,
+      "mapData": 3
+    },
+    {
+      "mode": "coropletico-idhm-longevidade",
+      "sources": 2,
+      "layers": 3,
+      "legends": 22,
+      "mapData": 3
+    },
+    {
+      "mode": "coropletico-idhm-educacao",
+      "sources": 2,
+      "layers": 3,
+      "legends": 22,
+      "mapData": 3
+    },
+    {
+      "mode": "coropletico-idhm-renda",
+      "sources": 2,
+      "layers": 3,
+      "legends": 22,
+      "mapData": 3
+    },
+    {
+      "mode": "coropletico-idhm-educacao-escolaridade",
+      "sources": 2,
+      "layers": 3,
+      "legends": 22,
+      "mapData": 3
+    },
+    {
+      "mode": "coropletico-idhm-educacao-frequencia",
+      "sources": 2,
+      "layers": 3,
+      "legends": 22,
+      "mapData": 3
+    },
+    {
+      "mode": "pontos",
+      "sources": 2,
+      "layers": 3,
+      "legends": 22,
+      "mapData": 3
+    },
+    {
+      "mode": "circulos",
+      "sources": 2,
+      "layers": 3,
+      "legends": 22,
+      "mapData": 3
+    },
+    {
+      "mode": "assentamentos",
+      "sources": 4,
+      "layers": 5,
+      "legends": 22,
+      "mapData": 3
+    },
+    {
+      "mode": "cafs",
+      "sources": 8,
+      "layers": 30,
+      "legends": 22,
+      "mapData": 4
+    },
+    {
+      "mode": "cafs-hexbin",
+      "sources": 3,
+      "layers": 4,
+      "legends": 22,
+      "mapData": 4
+    }
+  ]
+}

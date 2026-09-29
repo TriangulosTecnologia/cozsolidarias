@@ -1,0 +1,17 @@
+{
+  "prompt": "Mapa das cozinhas com imagem de satélite no fundo.",
+  "httpStatus": 422,
+  "durationMs": 8390,
+  "response": {
+    "error": "O modelo retornou uma resposta inválida. Tente reformular o pedido.",
+    "issues": [
+      {
+        "code": "invalid-schema",
+        "message": "(root) must have required property 'engine'"
+      }
+    ],
+    "spec": {
+      "error": "Não é possível atender a esse pedido: a aplicação não tem um mapa-base de imagem de satélite disponível. O único `basemap.styleUrl` aceito hoje é `https://tiles.openfreemap.org/styles/positron` (o estilo padrão do app), pois é a única URL de *style* MapLibre válida conhecida — inventar uma URL de satélite (ou usar um template de raster tiles) quebraria o carregamento do mapa (CORS/404). Posso gerar o mapa das cozinhas normalmente com o mapa-base padrão, se for útil."
+    }
+  }
+}

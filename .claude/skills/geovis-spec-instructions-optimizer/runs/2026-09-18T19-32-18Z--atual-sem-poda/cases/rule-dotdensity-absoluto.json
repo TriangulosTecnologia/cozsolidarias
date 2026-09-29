@@ -1,0 +1,17 @@
+{
+  "prompt": "Mapa de densidade de pontos do número de cozinhas solidárias em cada município.",
+  "httpStatus": 422,
+  "durationMs": 13549,
+  "response": {
+    "error": "O modelo retornou uma resposta inválida. Tente reformular o pedido.",
+    "issues": [
+      {
+        "code": "invalid-schema",
+        "message": "(root) must have required property 'engine'"
+      }
+    ],
+    "spec": {
+      "error": "O pedido não especifica o ano/corte temporal das cozinhas, e existem dois datasets renderáveis que respondem igualmente bem: `cozinhas_geolocalizadas` (cadastro atual, 2026, recorte apenas das cozinhas habilitadas) e `cozinhas_geolocalizadas_2025` (cadastro completo de 2025, cobrindo todas as situações do fluxo). Por instrução de resolução, quando mais de um corte temporal do mesmo conceito responde ao pedido e o usuário não indica qual, é preciso perguntar antes de escolher — não presumir. Qual dos dois anos/recortes você quer no mapa de densidade de pontos: o cadastro atual (apenas habilitadas) ou o snapshot completo de 2025 (todas as situações)?"
+    }
+  }
+}

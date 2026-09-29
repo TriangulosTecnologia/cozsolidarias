@@ -38,10 +38,12 @@ import {
   modeTakesColorRamp,
   modeTakesOpacity,
   OPACITY_MENU_ID,
+  type RampHandlers,
   YEAR_MENU_ID,
 } from './mapaLeftSidebar';
 import MapLoadingIndicator from './MapLoadingIndicator';
 import { useCafHexbin } from './useCafHexbin';
+import { useCustomRamps } from './useCustomRamps';
 import { useKitchensByYear } from './useKitchensByYear';
 import { useMapaDatasets } from './useMapaDatasets';
 import { useMapaSpec } from './useMapaSpec';
@@ -92,6 +94,94 @@ const mapLayoutCss = {
   },
 };
 
+/**
+ * What covers the map while a variation is being served.
+ *
+ * The same mark that covers the first mount, now over the wait a variation
+ * costs: the workspace centers it on whatever map an open sidebar leaves
+ * visible, and takes the pointer while it shows.
+ *
+ * The label names what is actually happening. The map is on screen and being
+ * repainted, which is not the blank-canvas wait that "Carregando mapa"
+ * describes.
+ *
+ * Declared here rather than inline so its identity survives a render — the
+ * config it goes into is memoized.
+ *
+ * @returns The indicator.
+ *
+ * @example
+ * config.renderLoading = renderLoading;
+ */
+const renderLoading = () => {
+  return <MapLoadingIndicator variant="overlay" label="Atualizando o mapa" />;
+};
+
+/**
+ * The workspace config for a mode.
+ *
+ * A function at module scope rather than a body inside the memo: what it
+ * assembles is a declaration, and reading the component should not mean
+ * scrolling past it to reach the wiring that follows.
+ *
+ * @param params.specMode - The mode the map is drawing.
+ * @param params.year - Time-lapse year the kitchen detail resolves against.
+ * @param params.rampHandlers - Where the colour block reads and reports ramps.
+ * @returns The config.
+ *
+ * @example
+ * buildMapConfig({ specMode: 'coropletico', year: 2026, rampHandlers });
+ */
+const buildMapConfig = ({
+  specMode,
+  year,
+  rampHandlers,
+}: {
+  specMode: MapMode;
+  year: number;
+  rampHandlers: RampHandlers;
+}): GeovisWorkspaceConfig => {
+  // The kitchen detail, in the modes where kitchen points are clickable.
+  // The CAF mode has no detail to open: a point stands for one registration,
+  // and this app publishes nothing per registration.
+  const rightSidebar = modeShowsCozinhaDetail(specMode)
+    ? buildCozinhaRightSidebar(year)
+    : undefined;
+
+  return {
+    // Full-bleed map: no card border/radius so it fills the container.
+    appearance: 'bare',
+    leftSidebar: buildLeftSidebar({ mode: specMode, ramps: rampHandlers }),
+    rightSidebar,
+    renderLoading,
+    // geovis-workspace 0.6.x adds `legend`, `warnings` and `metadata` slots to
+    // the right sidebar, and it stays open while *any* of them has content —
+    // `metadata` always does (`spec.sources.length > 0`), so it never
+    // auto-closed. Hide all three so the right sidebar hosts only the
+    // `inspector` (the clicked feature's detail): it then shows on a point
+    // click and closes on a click outside a point (empty inspector → no
+    // content → sidebar hides), like the previous version.
+    //
+    // The `inspector` goes with them wherever no `rightSidebar` is
+    // configured. Omitting the sidebar config is NOT enough to keep it shut:
+    // the workspace's built-in inspector panel treats any registered click as
+    // content of its own (`hasInspectorDefaultContent` returns `true` when no
+    // `onFeatureSelect`/`renderDetails` is set), so the sidebar would open on
+    // a clicked feature to report a layer id and a raw value. `hidden` wins
+    // over content, which is what actually closes that door.
+    slots: {
+      // Overridden in every mode, not just `cafs`: the drill-down listens on
+      // layer ids no other mode's spec declares, so it is inert elsewhere
+      // without this having to branch on the mode.
+      map: { component: CafMapPanel },
+      legend: { hidden: true },
+      warnings: { hidden: true },
+      metadata: { hidden: true },
+      inspector: { hidden: rightSidebar === undefined },
+    },
+  };
+};
+
 const MapaPlayground = () => {
   const { selecaoInicial, publicarSelecao } = useMapaUrlState();
 
@@ -108,12 +198,31 @@ const MapaPlayground = () => {
 
       return {
         ...getInitialSelection({
-          config: { leftSidebar: buildLeftSidebar(variacao) },
+          config: { leftSidebar: buildLeftSidebar({ mode: variacao }) },
         }),
         ...selecaoInicial,
       };
     }
   );
+
+  /*
+   * Dropping the ramp being read leaves the map painted from an id no list
+   * answers to: the sidebar falls back to its first option on its own, but the
+   * selection still names the ramp that is gone, and the paint is memoized on
+   * that value. Moving the selection is what repaints — and what keeps the
+   * panel and the map saying the same thing.
+   */
+  const handleRampRemoved = React.useCallback(({ id }: { id: string }) => {
+    setSelection((current) => {
+      return current[COLOR_RAMP_MENU_ID] === id
+        ? { ...current, [COLOR_RAMP_MENU_ID]: DEFAULT_COLOR_RAMP }
+        : current;
+    });
+  }, []);
+
+  const { handlers: rampHandlers } = useCustomRamps({
+    onRemoved: handleRampRemoved,
+  });
 
   const mode = (selection[MODE_MENU_ID] ?? DEFAULT_MODE) as MapMode;
 
@@ -154,7 +263,7 @@ const MapaPlayground = () => {
         selection: next,
         mode: nextMode,
         defaults: getInitialSelection({
-          config: { leftSidebar: buildLeftSidebar(nextMode) },
+          config: { leftSidebar: buildLeftSidebar({ mode: nextMode }) },
         }),
       });
 
@@ -262,48 +371,13 @@ const MapaPlayground = () => {
     return { cozinhaNames: names, cozinhaStatus: status };
   }, [collections, year]);
 
-  const config = React.useMemo((): GeovisWorkspaceConfig => {
-    // The kitchen detail, in the modes where kitchen points are clickable.
-    // The CAF mode has no detail to open: a point stands for one registration,
-    // and this app publishes nothing per registration.
-    const rightSidebar = modeShowsCozinhaDetail(specMode)
-      ? buildCozinhaRightSidebar(year)
-      : undefined;
-
-    return {
-      // Full-bleed map: no card border/radius so it fills the container.
-      appearance: 'bare',
-      leftSidebar: buildLeftSidebar(specMode),
-      rightSidebar,
-      // geovis-workspace 0.6.x adds `legend`, `warnings` and `metadata` slots to
-      // the right sidebar, and it stays open while *any* of them has content —
-      // `metadata` always does (`spec.sources.length > 0`), so it never
-      // auto-closed. Hide all three so the right sidebar hosts only the
-      // `inspector` (the clicked feature's detail): it then shows on a point
-      // click and closes on a click outside a point (empty inspector → no
-      // content → sidebar hides), like the previous version.
-      //
-      // The `inspector` goes with them wherever no `rightSidebar` is
-      // configured. Omitting the sidebar config is NOT enough to keep it shut:
-      // the workspace's built-in inspector panel treats any registered click as
-      // content of its own (`hasInspectorDefaultContent` returns `true` when no
-      // `onFeatureSelect`/`renderDetails` is set), so the sidebar would open on
-      // a clicked feature to report a layer id and a raw value. `hidden` wins
-      // over content, which is what actually closes that door.
-      slots: {
-        // Overridden in every mode, not just `cafs`: the drill-down listens on
-        // layer ids no other mode's spec declares, so it is inert elsewhere
-        // without this having to branch on the mode.
-        map: { component: CafMapPanel },
-        legend: { hidden: true },
-        warnings: { hidden: true },
-        metadata: { hidden: true },
-        inspector: { hidden: rightSidebar === undefined },
-      },
-    };
+  const config = React.useMemo(() => {
+    return buildMapConfig({ specMode, year, rampHandlers });
     // `year` is a dependency because the kitchen detail sidebar resolves the
-    // clicked código inside that year's snapshot.
-  }, [specMode, year]);
+    // clicked código inside that year's snapshot. `rampHandlers` is one because
+    // it carries the ramps the reader has built: its identity changes when that
+    // list does, which is what rebuilds the colour block's options.
+  }, [specMode, year, rampHandlers]);
 
   const spec = useMapaSpec({
     kitchenByCity: datasets.data,

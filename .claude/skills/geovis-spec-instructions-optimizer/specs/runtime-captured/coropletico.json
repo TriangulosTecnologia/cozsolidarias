@@ -1,0 +1,984 @@
+{
+  "engine": "maplibre",
+  "view": {
+    "center": [
+      -53.199149999999996,
+      -14.236049999999999
+    ],
+    "zoom": 3.414008885561458,
+    "maxZoomIn": 9,
+    "maxZoomOut": 3.414008885561458
+  },
+  "basemap": {
+    "labels": false
+  },
+  "attributionControlEnabled": false,
+  "sources": [
+    {
+      "id": "cozinhas",
+      "type": "geojson",
+      "data": "/api/cozinhas",
+      "attribution": "© Cozinhas Solidárias"
+    },
+    {
+      "id": "cozinhas-bubbles",
+      "type": "geojson",
+      "data": "/api/cozinhas/bolhas",
+      "attribution": "© Cozinhas Solidárias"
+    },
+    {
+      "id": "municipios-boundary",
+      "type": "geojson",
+      "data": "/geo/geojs-100-mun.json"
+    },
+    {
+      "id": "estados-boundary",
+      "type": "geojson",
+      "data": "/geo/estados.json"
+    }
+  ],
+  "mapData": [
+    {
+      "mapDataId": "cozinhas-bolhas-data",
+      "mapId": "cozinhas-bubbles",
+      "joinKey": "codarea",
+      "title": "Cozinhas por município",
+      "data": []
+    },
+    {
+      "mapDataId": "cozinhas-pts-promote",
+      "mapId": "cozinhas",
+      "joinKey": "codigo",
+      "data": []
+    },
+    {
+      "mapDataId": "cozinhas-por-municipio",
+      "mapId": "municipios-boundary",
+      "joinKey": "codarea",
+      "title": "Cozinhas por município",
+      "data": []
+    }
+  ],
+  "legends": [
+    {
+      "id": "legenda-cozinhas",
+      "title": "Cozinhas por município",
+      "subtitle": "Quanto mais escuro o município, mais cozinhas cadastradas ali.",
+      "position": "bottom-right",
+      "offset": 12,
+      "colorBy": {
+        "type": "quantitative",
+        "property": "value",
+        "scale": "threshold",
+        "thresholds": [
+          1,
+          3,
+          6,
+          11,
+          26
+        ],
+        "colors": [
+          "#C6DBEF",
+          "#86BCDC",
+          "#58A0CE",
+          "#2E7CBB",
+          "#1761A8",
+          "#08306B"
+        ],
+        "defaultColor": "#EEE6DA"
+      },
+      "labelFormat": {
+        "type": "labels",
+        "labels": [
+          "Sem cozinha",
+          "1–2",
+          "3–5",
+          "6–10",
+          "11–25",
+          "26+"
+        ]
+      },
+      "reference": "Fonte dos dados: © Cozinhas Solidárias"
+    },
+    {
+      "id": "legenda-taxa",
+      "title": "nº coz. no município / 100.000 hab.",
+      "subtitle": "Quanto mais escuro o município, mais cozinhas por 100 mil habitantes.",
+      "colorBy": {
+        "type": "quantitative",
+        "property": "value",
+        "scale": "threshold",
+        "thresholds": [
+          0.001,
+          1,
+          3,
+          6,
+          12,
+          24
+        ],
+        "colors": [
+          "#C6DBEF",
+          "#9ECAE1",
+          "#6BAED6",
+          "#3987C0",
+          "#2171B5",
+          "#08519C",
+          "#08306B"
+        ],
+        "defaultColor": "#EEE6DA"
+      },
+      "labelFormat": {
+        "type": "labels",
+        "labels": [
+          "Sem dado",
+          "< 1",
+          "1 – 3",
+          "3 – 6",
+          "6 – 12",
+          "12 – 24",
+          "24+"
+        ]
+      },
+      "reference": "Fontes: © Cozinhas Solidárias · IBGE (Censo 2022)"
+    },
+    {
+      "id": "legenda-percentual",
+      "title": "% das cozinhas do Brasil no município",
+      "subtitle": "Quanto mais escuro o município, maior a fatia das cozinhas do Brasil ali.",
+      "colorBy": {
+        "type": "quantitative",
+        "property": "value",
+        "scale": "threshold",
+        "thresholds": [
+          0.01,
+          0.05,
+          0.1,
+          0.3,
+          1,
+          3
+        ],
+        "colors": [
+          "#C6DBEF",
+          "#9ECAE1",
+          "#6BAED6",
+          "#3987C0",
+          "#2171B5",
+          "#08519C",
+          "#08306B"
+        ],
+        "defaultColor": "#EEE6DA"
+      },
+      "labelFormat": {
+        "type": "labels",
+        "labels": [
+          "Sem cozinha",
+          "< 0,05%",
+          "0,05 – 0,1%",
+          "0,1 – 0,3%",
+          "0,3 – 1%",
+          "1 – 3%",
+          "3%+"
+        ]
+      },
+      "reference": "Fonte dos dados: © Cozinhas Solidárias"
+    },
+    {
+      "id": "legenda-cafs-percentual",
+      "title": "% dos CAFs do Brasil no município",
+      "subtitle": "Quanto mais escuro o município, maior a fatia dos CAFs do Brasil ali.",
+      "colorBy": {
+        "type": "quantitative",
+        "property": "value",
+        "scale": "threshold",
+        "thresholds": [
+          0.00001,
+          0.005,
+          0.02,
+          0.05,
+          0.15,
+          0.3
+        ],
+        "colors": [
+          "#C6DBEF",
+          "#9ECAE1",
+          "#6BAED6",
+          "#3987C0",
+          "#2171B5",
+          "#08519C",
+          "#08306B"
+        ],
+        "defaultColor": "#EEE6DA"
+      },
+      "labelFormat": {
+        "type": "labels",
+        "labels": [
+          "Sem CAF",
+          "< 0,005%",
+          "0,005 – 0,02%",
+          "0,02 – 0,05%",
+          "0,05 – 0,15%",
+          "0,15 – 0,3%",
+          "0,3%+"
+        ]
+      },
+      "reference": "Fonte dos dados: Cadastro Nacional da Agricultura Familiar (CAF)"
+    },
+    {
+      "id": "legenda-cadinsan-com-pbf",
+      "title": "Insegurança alimentar no CadÚnico — cenário com o Bolsa Família",
+      "subtitle": "Parcela das famílias do CadÚnico em insegurança alimentar já considerando o alívio do Bolsa Família. Compare com o cenário sem para ver o efeito do programa.",
+      "colorBy": {
+        "type": "quantitative",
+        "property": "value",
+        "scale": "threshold",
+        "thresholds": [
+          0,
+          10,
+          20,
+          30,
+          40
+        ],
+        "colors": [
+          "#C6DBEF",
+          "#86BCDC",
+          "#58A0CE",
+          "#2E7CBB",
+          "#1761A8",
+          "#08306B"
+        ],
+        "defaultColor": "#EEE6DA"
+      },
+      "labelFormat": {
+        "type": "labels",
+        "labels": [
+          "Sem dado",
+          "< 10%",
+          "10 – 20%",
+          "20 – 30%",
+          "30 – 40%",
+          "40%+"
+        ]
+      },
+      "reference": "Fonte dos dados: MDS — CADINSAN 2025 (base do CadÚnico)"
+    },
+    {
+      "id": "legenda-cadinsan-sem-pbf",
+      "title": "Insegurança alimentar no CadÚnico — cenário sem o Bolsa Família",
+      "subtitle": "Parcela das famílias do CadÚnico que estariam em insegurança alimentar se não houvesse o Bolsa Família. Quanto mais escuro, maior a parcela.",
+      "colorBy": {
+        "type": "quantitative",
+        "property": "value",
+        "scale": "threshold",
+        "thresholds": [
+          0,
+          10,
+          20,
+          30,
+          40
+        ],
+        "colors": [
+          "#C6DBEF",
+          "#86BCDC",
+          "#58A0CE",
+          "#2E7CBB",
+          "#1761A8",
+          "#08306B"
+        ],
+        "defaultColor": "#EEE6DA"
+      },
+      "labelFormat": {
+        "type": "labels",
+        "labels": [
+          "Sem dado",
+          "< 10%",
+          "10 – 20%",
+          "20 – 30%",
+          "30 – 40%",
+          "40%+"
+        ]
+      },
+      "reference": "Fonte dos dados: MDS — CADINSAN 2025 (base do CadÚnico)"
+    },
+    {
+      "id": "legenda-cadunico",
+      "title": "nº coz. / 10 mil pessoas no CadÚnico",
+      "subtitle": "Quanto mais escuro o município, mais cozinhas por 10 mil pessoas no CadÚnico.",
+      "colorBy": {
+        "type": "quantitative",
+        "property": "value",
+        "scale": "threshold",
+        "thresholds": [
+          0.01,
+          0.2,
+          0.5,
+          1,
+          2,
+          4
+        ],
+        "colors": [
+          "#C6DBEF",
+          "#9ECAE1",
+          "#6BAED6",
+          "#3987C0",
+          "#2171B5",
+          "#08519C",
+          "#08306B"
+        ],
+        "defaultColor": "#EEE6DA"
+      },
+      "labelFormat": {
+        "type": "labels",
+        "labels": [
+          "Sem cozinha",
+          "< 0,2",
+          "0,2 – 0,5",
+          "0,5 – 1",
+          "1 – 2",
+          "2 – 4",
+          "4+"
+        ]
+      },
+      "reference": "Fontes: © Cozinhas Solidárias · MDS/SAGI (CadÚnico, jun/2026)"
+    },
+    {
+      "id": "legenda-pessoas-cozinha",
+      "title": "pessoas no CadÚnico por cozinha",
+      "subtitle": "Quanto mais escuro o município, mais pessoas do CadÚnico para cada cozinha.",
+      "colorBy": {
+        "type": "quantitative",
+        "property": "value",
+        "scale": "threshold",
+        "thresholds": [
+          1,
+          5000,
+          10000,
+          20000,
+          40000,
+          80000
+        ],
+        "colors": [
+          "#C6DBEF",
+          "#9ECAE1",
+          "#6BAED6",
+          "#3987C0",
+          "#2171B5",
+          "#08519C",
+          "#08306B"
+        ],
+        "defaultColor": "#EEE6DA"
+      },
+      "labelFormat": {
+        "type": "labels",
+        "labels": [
+          "Sem cozinha",
+          "< 5.000",
+          "5.000 – 10.000",
+          "10.000 – 20.000",
+          "20.000 – 40.000",
+          "40.000 – 80.000",
+          "80.000+"
+        ]
+      },
+      "reference": "Fontes: © Cozinhas Solidárias · MDS/SAGI (CadÚnico, jun/2026)"
+    },
+    {
+      "id": "legenda-ivs",
+      "title": "Índice de vulnerabilidade social",
+      "subtitle": "Quanto mais avermelhado o município, maior a vulnerabilidade social (IVS).",
+      "colorBy": {
+        "type": "quantitative",
+        "property": "value",
+        "scale": "threshold",
+        "thresholds": [
+          0.001,
+          0.2,
+          0.3,
+          0.4,
+          0.5
+        ],
+        "colors": [
+          "#EEE6DA",
+          "#FCBBA1",
+          "#FC7E5E",
+          "#EF3B2C",
+          "#B81419",
+          "#4F000A"
+        ],
+        "defaultColor": "#EEE6DA"
+      },
+      "labelFormat": {
+        "type": "labels",
+        "labels": [
+          "Sem dado",
+          "Muito baixa (≤ 0,200)",
+          "Baixa (0,201–0,300)",
+          "Média (0,301–0,400)",
+          "Alta (0,401–0,500)",
+          "Muito alta (≥ 0,501)"
+        ]
+      },
+      "reference": "Fonte dos dados: Atlas da Vulnerabilidade Social — IPEA (2010). Faixas de classificação conforme IPEA, Atlas da Vulnerabilidade Social nos Municípios Brasileiros (2015), seção “Como ler o IVS”."
+    },
+    {
+      "id": "legenda-ivs-infraestrutura",
+      "title": "IVS Infraestrutura Urbana",
+      "subtitle": "Quanto mais avermelhado o município, maior a vulnerabilidade de infraestrutura urbana.",
+      "colorBy": {
+        "type": "quantitative",
+        "property": "value",
+        "scale": "threshold",
+        "thresholds": [
+          0.001,
+          0.2,
+          0.3,
+          0.4,
+          0.5
+        ],
+        "colors": [
+          "#EEE6DA",
+          "#FCBBA1",
+          "#FC7E5E",
+          "#EF3B2C",
+          "#B81419",
+          "#4F000A"
+        ],
+        "defaultColor": "#EEE6DA"
+      },
+      "labelFormat": {
+        "type": "labels",
+        "labels": [
+          "Sem dado",
+          "Muito baixa (≤ 0,200)",
+          "Baixa (0,201–0,300)",
+          "Média (0,301–0,400)",
+          "Alta (0,401–0,500)",
+          "Muito alta (≥ 0,501)"
+        ]
+      },
+      "reference": "Fonte dos dados: Atlas da Vulnerabilidade Social — IPEA (2010). Faixas de classificação conforme IPEA, Atlas da Vulnerabilidade Social nos Municípios Brasileiros (2015), seção “Como ler o IVS”."
+    },
+    {
+      "id": "legenda-ivs-capital-humano",
+      "title": "IVS Capital Humano",
+      "subtitle": "Quanto mais avermelhado o município, maior a vulnerabilidade de capital humano.",
+      "colorBy": {
+        "type": "quantitative",
+        "property": "value",
+        "scale": "threshold",
+        "thresholds": [
+          0.001,
+          0.2,
+          0.3,
+          0.4,
+          0.5
+        ],
+        "colors": [
+          "#EEE6DA",
+          "#FCBBA1",
+          "#FC7E5E",
+          "#EF3B2C",
+          "#B81419",
+          "#4F000A"
+        ],
+        "defaultColor": "#EEE6DA"
+      },
+      "labelFormat": {
+        "type": "labels",
+        "labels": [
+          "Sem dado",
+          "Muito baixa (≤ 0,200)",
+          "Baixa (0,201–0,300)",
+          "Média (0,301–0,400)",
+          "Alta (0,401–0,500)",
+          "Muito alta (≥ 0,501)"
+        ]
+      },
+      "reference": "Fonte dos dados: Atlas da Vulnerabilidade Social — IPEA (2010). Faixas de classificação conforme IPEA, Atlas da Vulnerabilidade Social nos Municípios Brasileiros (2015), seção “Como ler o IVS”."
+    },
+    {
+      "id": "legenda-ivs-renda-trabalho",
+      "title": "IVS Renda e Trabalho",
+      "subtitle": "Quanto mais avermelhado o município, maior a vulnerabilidade de renda e trabalho.",
+      "colorBy": {
+        "type": "quantitative",
+        "property": "value",
+        "scale": "threshold",
+        "thresholds": [
+          0.001,
+          0.2,
+          0.3,
+          0.4,
+          0.5
+        ],
+        "colors": [
+          "#EEE6DA",
+          "#FCBBA1",
+          "#FC7E5E",
+          "#EF3B2C",
+          "#B81419",
+          "#4F000A"
+        ],
+        "defaultColor": "#EEE6DA"
+      },
+      "labelFormat": {
+        "type": "labels",
+        "labels": [
+          "Sem dado",
+          "Muito baixa (≤ 0,200)",
+          "Baixa (0,201–0,300)",
+          "Média (0,301–0,400)",
+          "Alta (0,401–0,500)",
+          "Muito alta (≥ 0,501)"
+        ]
+      },
+      "reference": "Fonte dos dados: Atlas da Vulnerabilidade Social — IPEA (2010). Faixas de classificação conforme IPEA, Atlas da Vulnerabilidade Social nos Municípios Brasileiros (2015), seção “Como ler o IVS”."
+    },
+    {
+      "id": "legenda-idhm",
+      "title": "Índice de Desenvolvimento Humano Municipal",
+      "subtitle": "Quanto mais escuro (verde) o município, maior o desenvolvimento humano (IDHM).",
+      "colorBy": {
+        "type": "quantitative",
+        "property": "value",
+        "scale": "threshold",
+        "thresholds": [
+          0.001,
+          0.5,
+          0.6,
+          0.7,
+          0.8
+        ],
+        "colors": [
+          "#EEE6DA",
+          "#B4E1AE",
+          "#74C476",
+          "#37A055",
+          "#006D2C",
+          "#00441B"
+        ],
+        "defaultColor": "#EEE6DA"
+      },
+      "labelFormat": {
+        "type": "labels",
+        "labels": [
+          "Sem dado",
+          "Muito baixo (≤ 0,499)",
+          "Baixo (0,500–0,599)",
+          "Médio (0,600–0,699)",
+          "Alto (0,700–0,799)",
+          "Muito alto (≥ 0,800)"
+        ]
+      },
+      "reference": "Fonte dos dados: Atlas da Vulnerabilidade Social — IPEA (2010). Faixas de desenvolvimento humano conforme PNUD, Ipea e Fundação João Pinheiro, Atlas do Desenvolvimento Humano no Brasil."
+    },
+    {
+      "id": "legenda-idhm-longevidade",
+      "title": "IDHM Longevidade",
+      "subtitle": "Quanto mais escuro (verde) o município, maior o desenvolvimento em longevidade.",
+      "colorBy": {
+        "type": "quantitative",
+        "property": "value",
+        "scale": "threshold",
+        "thresholds": [
+          0.001,
+          0.5,
+          0.6,
+          0.7,
+          0.8
+        ],
+        "colors": [
+          "#EEE6DA",
+          "#B4E1AE",
+          "#74C476",
+          "#37A055",
+          "#006D2C",
+          "#00441B"
+        ],
+        "defaultColor": "#EEE6DA"
+      },
+      "labelFormat": {
+        "type": "labels",
+        "labels": [
+          "Sem dado",
+          "Muito baixo (≤ 0,499)",
+          "Baixo (0,500–0,599)",
+          "Médio (0,600–0,699)",
+          "Alto (0,700–0,799)",
+          "Muito alto (≥ 0,800)"
+        ]
+      },
+      "reference": "Fonte dos dados: Atlas da Vulnerabilidade Social — IPEA (2010). Faixas de desenvolvimento humano conforme PNUD, Ipea e Fundação João Pinheiro, Atlas do Desenvolvimento Humano no Brasil."
+    },
+    {
+      "id": "legenda-idhm-educacao",
+      "title": "IDHM Educação",
+      "subtitle": "Quanto mais escuro (verde) o município, maior o desenvolvimento em educação.",
+      "colorBy": {
+        "type": "quantitative",
+        "property": "value",
+        "scale": "threshold",
+        "thresholds": [
+          0.001,
+          0.5,
+          0.6,
+          0.7,
+          0.8
+        ],
+        "colors": [
+          "#EEE6DA",
+          "#B4E1AE",
+          "#74C476",
+          "#37A055",
+          "#006D2C",
+          "#00441B"
+        ],
+        "defaultColor": "#EEE6DA"
+      },
+      "labelFormat": {
+        "type": "labels",
+        "labels": [
+          "Sem dado",
+          "Muito baixo (≤ 0,499)",
+          "Baixo (0,500–0,599)",
+          "Médio (0,600–0,699)",
+          "Alto (0,700–0,799)",
+          "Muito alto (≥ 0,800)"
+        ]
+      },
+      "reference": "Fonte dos dados: Atlas da Vulnerabilidade Social — IPEA (2010). Faixas de desenvolvimento humano conforme PNUD, Ipea e Fundação João Pinheiro, Atlas do Desenvolvimento Humano no Brasil."
+    },
+    {
+      "id": "legenda-idhm-renda",
+      "title": "IDHM Renda",
+      "subtitle": "Quanto mais escuro (verde) o município, maior o desenvolvimento em renda.",
+      "colorBy": {
+        "type": "quantitative",
+        "property": "value",
+        "scale": "threshold",
+        "thresholds": [
+          0.001,
+          0.5,
+          0.6,
+          0.7,
+          0.8
+        ],
+        "colors": [
+          "#EEE6DA",
+          "#B4E1AE",
+          "#74C476",
+          "#37A055",
+          "#006D2C",
+          "#00441B"
+        ],
+        "defaultColor": "#EEE6DA"
+      },
+      "labelFormat": {
+        "type": "labels",
+        "labels": [
+          "Sem dado",
+          "Muito baixo (≤ 0,499)",
+          "Baixo (0,500–0,599)",
+          "Médio (0,600–0,699)",
+          "Alto (0,700–0,799)",
+          "Muito alto (≥ 0,800)"
+        ]
+      },
+      "reference": "Fonte dos dados: Atlas da Vulnerabilidade Social — IPEA (2010). Faixas de desenvolvimento humano conforme PNUD, Ipea e Fundação João Pinheiro, Atlas do Desenvolvimento Humano no Brasil."
+    },
+    {
+      "id": "legenda-idhm-educacao-escolaridade",
+      "title": "IDHM Educação — Escolaridade",
+      "subtitle": "Quanto mais escuro (verde) o município, maior o subíndice de escolaridade da educação.",
+      "colorBy": {
+        "type": "quantitative",
+        "property": "value",
+        "scale": "threshold",
+        "thresholds": [
+          0.001,
+          0.5,
+          0.6,
+          0.7,
+          0.8
+        ],
+        "colors": [
+          "#EEE6DA",
+          "#B4E1AE",
+          "#74C476",
+          "#37A055",
+          "#006D2C",
+          "#00441B"
+        ],
+        "defaultColor": "#EEE6DA"
+      },
+      "labelFormat": {
+        "type": "labels",
+        "labels": [
+          "Sem dado",
+          "Muito baixo (≤ 0,499)",
+          "Baixo (0,500–0,599)",
+          "Médio (0,600–0,699)",
+          "Alto (0,700–0,799)",
+          "Muito alto (≥ 0,800)"
+        ]
+      },
+      "reference": "Fonte dos dados: Atlas da Vulnerabilidade Social — IPEA (2010). Faixas de desenvolvimento humano conforme PNUD, Ipea e Fundação João Pinheiro, Atlas do Desenvolvimento Humano no Brasil."
+    },
+    {
+      "id": "legenda-idhm-educacao-frequencia",
+      "title": "IDHM Educação — Frequência Escolar",
+      "subtitle": "Quanto mais escuro (verde) o município, maior o subíndice de frequência escolar da educação.",
+      "colorBy": {
+        "type": "quantitative",
+        "property": "value",
+        "scale": "threshold",
+        "thresholds": [
+          0.001,
+          0.5,
+          0.6,
+          0.7,
+          0.8
+        ],
+        "colors": [
+          "#EEE6DA",
+          "#B4E1AE",
+          "#74C476",
+          "#37A055",
+          "#006D2C",
+          "#00441B"
+        ],
+        "defaultColor": "#EEE6DA"
+      },
+      "labelFormat": {
+        "type": "labels",
+        "labels": [
+          "Sem dado",
+          "Muito baixo (≤ 0,499)",
+          "Baixo (0,500–0,599)",
+          "Médio (0,600–0,699)",
+          "Alto (0,700–0,799)",
+          "Muito alto (≥ 0,800)"
+        ]
+      },
+      "reference": "Fonte dos dados: Atlas da Vulnerabilidade Social — IPEA (2010). Faixas de desenvolvimento humano conforme PNUD, Ipea e Fundação João Pinheiro, Atlas do Desenvolvimento Humano no Brasil."
+    },
+    {
+      "id": "legenda-assentamentos",
+      "title": "Assentamentos rurais",
+      "subtitle": "Cor pela situação do cadastro do assentamento no CAR.",
+      "colorBy": {
+        "type": "categorical",
+        "property": "value",
+        "mapping": {
+          "Ativo": "#4A7A5C",
+          "Cancelado": "#A84D45",
+          "Pendente": "#A07828"
+        },
+        "defaultColor": "#EEE6DA"
+      },
+      "reference": "Fonte dos dados: SICAR / Serviço Florestal Brasileiro — {link:consulta.car.gov.br|https://consulta.car.gov.br/geoservices}"
+    },
+    {
+      "id": "legenda-cafs",
+      "title": "Agricultura familiar (CAF)",
+      "subtitle": "Cada círculo reúne os CAFs de uma célula da grade e traz o total: o tamanho cresce com a quantidade, e a cor, com a concentração. As faixas de cor acompanham o tamanho da célula, que diminui conforme você aproxima; de perto, cada ponto é um CAF.",
+      "icon": "lucide:tractor",
+      "iconColor": "#2F6F4E",
+      "colorBy": {
+        "type": "categorical",
+        "property": "value",
+        "mapping": {
+          "Baixa": "#9CC7B0",
+          "Média": "#5FA37F",
+          "Alta": "#2F6F4E",
+          "Muito alta": "#1B4632"
+        },
+        "defaultColor": "#2F6F4E"
+      },
+      "reference": "Fonte dos dados: Cadastro Nacional da Agricultura Familiar (CAF)"
+    },
+    {
+      "id": "legenda-cafs-hexbin",
+      "title": "CAFs por célula da grade",
+      "subtitle": "Cada hexágono cobre cerca de 1.770 km² — todos do mesmo tamanho, então a cor compara densidade sem o viés de área dos municípios. Mostra os CAFs com coordenada utilizável.",
+      "icon": "lucide:hexagon",
+      "colorBy": {
+        "type": "quantitative",
+        "property": "value",
+        "scale": "threshold",
+        "thresholds": [
+          1,
+          10,
+          100,
+          500,
+          2000,
+          8000
+        ],
+        "colors": [
+          "#C6DBEF",
+          "#9ECAE1",
+          "#6BAED6",
+          "#3987C0",
+          "#2171B5",
+          "#08519C",
+          "#08306B"
+        ],
+        "defaultColor": "#EEE6DA"
+      },
+      "labelFormat": {
+        "type": "labels",
+        "labels": [
+          "Sem CAF",
+          "1–9",
+          "10–99",
+          "100–499",
+          "500–1.999",
+          "2.000–7.999",
+          "8.000+"
+        ]
+      },
+      "noDataLabel": "Sem CAF",
+      "reference": "Fonte dos dados: Cadastro Nacional da Agricultura Familiar (CAF)"
+    },
+    {
+      "id": "legenda-cozinhas-status",
+      "title": "Situação das cozinhas",
+      "subtitle": "Cor pela situação de funcionamento informada pela cozinha.",
+      "colorBy": {
+        "type": "categorical",
+        "property": "value",
+        "mapping": {
+          "Em funcionamento": "#41AB5D",
+          "Funcionamento reduzido": "#EEA227",
+          "Paralisada": "#EF3B2C",
+          "Não informado": "#8A7E74"
+        },
+        "defaultColor": "#8A7E74"
+      }
+    }
+  ],
+  "layers": [
+    {
+      "id": "municipios-br-fill",
+      "sourceId": "municipios-boundary",
+      "geometry": "polygon",
+      "mapDataId": "cozinhas-por-municipio",
+      "activeLegendId": "legenda-cozinhas",
+      "paint": {
+        "fillOpacity": 1,
+        "lineColor": "#FAF9F7"
+      },
+      "hoverTooltip": {
+        "style": {
+          "background": "var(--chakra-colors-ivory-50)",
+          "color": "var(--chakra-colors-charcoal-900)",
+          "border": "1px solid var(--chakra-colors-ivory-300)",
+          "borderRadius": "var(--chakra-radii-lg)",
+          "boxShadow": "0 4px 16px rgba(36, 31, 33, 0.12)",
+          "padding": "var(--chakra-spacing-2) var(--chakra-spacing-3)",
+          "zIndex": 50
+        }
+      }
+    },
+    {
+      "id": "municipios-boundary-line",
+      "sourceId": "municipios-boundary",
+      "geometry": "line",
+      "paint": {
+        "lineColor": "#B2B2B2",
+        "lineWidth": 0.6
+      }
+    },
+    {
+      "id": "estados-boundary-line",
+      "sourceId": "estados-boundary",
+      "geometry": "line",
+      "paint": {
+        "lineColor": "#241F21",
+        "lineWidth": 0.8
+      }
+    },
+    {
+      "id": "cozinhas-bolhas",
+      "sourceId": "cozinhas-bubbles",
+      "geometry": "point",
+      "mapDataId": "cozinhas-bolhas-data",
+      "paint": {
+        "circleColor": "#E4572E",
+        "circleOpacity": 0.75,
+        "circleStrokeColor": "#FAF9F7",
+        "circleStrokeWidth": 0.6
+      },
+      "sizeBy": {
+        "range": [
+          4,
+          38
+        ],
+        "transform": "sqrt",
+        "thresholds": [
+          1,
+          2
+        ]
+      },
+      "visible": false
+    },
+    {
+      "id": "cozinhas-pts",
+      "sourceId": "cozinhas",
+      "geometry": "point",
+      "mapDataId": "cozinhas-pts-promote",
+      "activeLegendId": "legenda-cozinhas-status",
+      "transition": {
+        "kind": "crossfade",
+        "durationMs": 500,
+        "easing": "ease-in-out"
+      },
+      "paint": {
+        "circleRadius": 4,
+        "circleOpacity": 0.9,
+        "circleStrokeColor": "#FAF9F7",
+        "circleStrokeWidth": 1.2
+      },
+      "click": {},
+      "clickAnchor": {
+        "color": "#EA4335"
+      },
+      "hoverTooltip": {
+        "style": {
+          "background": "var(--chakra-colors-ivory-50)",
+          "color": "var(--chakra-colors-charcoal-900)",
+          "border": "1px solid var(--chakra-colors-ivory-300)",
+          "borderRadius": "var(--chakra-radii-lg)",
+          "boxShadow": "0 4px 16px rgba(36, 31, 33, 0.12)",
+          "padding": "var(--chakra-spacing-2) var(--chakra-spacing-3)",
+          "zIndex": 50
+        }
+      },
+      "visible": false
+    }
+  ],
+  "control": {
+    "id": "camadas",
+    "label": "Camadas",
+    "icon": "lucide:layers",
+    "position": "bottom-left",
+    "offset": 12,
+    "trigger": "hover",
+    "items": [
+      {
+        "id": "cozinhas",
+        "label": "Localização das cozinhas",
+        "layers": [
+          "cozinhas-pts"
+        ],
+        "defaultActive": false
+      },
+      {
+        "id": "estados",
+        "label": "Linhas dos estados",
+        "layers": [
+          "estados-boundary-line"
+        ]
+      }
+    ]
+  }
+}

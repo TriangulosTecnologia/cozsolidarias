@@ -1,0 +1,98 @@
+{
+  "prompt": "Mapa da vulnerabilidade social por estado.",
+  "httpStatus": 422,
+  "durationMs": 76711,
+  "response": {
+    "error": "O spec declara \"mapType\": \"choropleth\" mas nenhum item de \"mapData\" tem \"mapId\" apontando para uma source declarada — nesse estado o mapa renderiza vazio, sem erro. Inclua o \"mapData\" correspondente ou remova o \"mapType\". Tente reformular o pedido.",
+    "spec": {
+      "engine": "maplibre",
+      "title": "Índice de Vulnerabilidade Social (IVS) por município, com contornos estaduais",
+      "description": "Não existe dataset de Vulnerabilidade Social agregado por estado no catálogo. O único indicador disponível (municipios_ivs) tem grão de município — pintado aqui nesse grão, com os contornos estaduais sobrepostos apenas como camada de contexto/orientação visual.",
+      "mapType": "choropleth",
+      "view": {
+        "center": [
+          -52,
+          -14
+        ],
+        "zoom": 4
+      },
+      "sources": [
+        {
+          "id": "municipios",
+          "type": "geojson",
+          "data": "/geo/geojs-100-mun.json"
+        },
+        {
+          "id": "estados",
+          "type": "geojson",
+          "data": "/geo/estados.json"
+        }
+      ],
+      "layers": [
+        {
+          "id": "municipios-ivs",
+          "sourceId": "municipios",
+          "geometry": "polygon",
+          "mapDataId": "municipios_ivs",
+          "title": "Índice de Vulnerabilidade Social (IVS)",
+          "activeLegendId": "ivs-legend",
+          "paint": {
+            "fillOutlineColor": "#FAF9F7"
+          }
+        },
+        {
+          "id": "estados-contorno",
+          "sourceId": "estados",
+          "geometry": "polygon",
+          "title": "Contorno dos estados (camada de contexto)",
+          "paint": {
+            "fillOpacity": 0,
+            "lineColor": "#4A4A4A",
+            "lineWidth": 1.5
+          }
+        }
+      ],
+      "legends": [
+        {
+          "id": "ivs-legend",
+          "title": "Índice de Vulnerabilidade Social (IVS)",
+          "subtitle": "Situação de 2010 — não reflete o cenário atual",
+          "footerValue": "2010",
+          "reference": "IPEA — Atlas da Vulnerabilidade Social (Censo 2010)",
+          "labelFormat": {
+            "type": "labels",
+            "labels": [
+              "Sem dado",
+              "Muito baixa (≤ 0,200)",
+              "Baixa (0,201–0,300)",
+              "Média (0,301–0,400)",
+              "Alta (0,401–0,500)",
+              "Muito alta (≥ 0,501)"
+            ]
+          },
+          "colorBy": {
+            "type": "quantitative",
+            "property": "value",
+            "scale": "threshold",
+            "thresholds": [
+              0.001,
+              0.2,
+              0.3,
+              0.4,
+              0.5
+            ],
+            "colors": [
+              "#EEE6DA",
+              "#FCBBA1",
+              "#FC7E5E",
+              "#EF3B2C",
+              "#B81419",
+              "#4F000A"
+            ],
+            "defaultColor": "#EEE6DA"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -69,6 +69,36 @@ const sampleRamp = (ramp: readonly string[], count: number): string[] => {
   });
 };
 
+/** A ramp the reader built, as the sidebar reports it. */
+export type CustomRamp = { id: string; label: string; colors: string[] };
+
+/**
+ * The ramps the reader has built, held by the module that owns what a ramp is.
+ *
+ * Module state rather than a parameter because of where it has to be read: the
+ * chosen ramp travels as one string — the shared selection holds nothing else —
+ * and {@link rampPalette} is called from nine scale functions that receive that
+ * string and nothing more. Threading a list through all nine to serve a lookup
+ * this module already performs would spread the question "what is this id"
+ * across the scales instead of keeping it here.
+ *
+ * `MapaPlayground` is the only writer, and it writes before it builds the spec,
+ * so the list a repaint reads is the list the sidebar is showing.
+ */
+let customRamps: CustomRamp[] = [];
+
+/**
+ * Replaces the reader's ramps.
+ *
+ * @param ramps - The ramps, in listing order.
+ *
+ * @example
+ * setCustomRamps([{ id: 'custom-1', label: 'Minha', colors: ['#eee', '#333'] }]);
+ */
+export const setCustomRamps = (ramps: CustomRamp[]): void => {
+  customRamps = ramps;
+};
+
 /**
  * The block's options: every ramp, each showing the colours it stands for.
  *
@@ -77,14 +107,28 @@ const sampleRamp = (ramp: readonly string[], count: number): string[] => {
  * @example
  * colorRampOptions()[0]; // { id: 'azul', label: 'Azul', colors: [...] }
  */
-export const colorRampOptions = () => {
-  return RAMPS.map((entry) => {
-    return {
-      id: entry.id,
-      label: entry.label,
-      colors: sampleRamp(entry.ramp, SWATCHES),
-    };
-  });
+export const colorRampOptions = ({
+  custom = [],
+}: { custom?: CustomRamp[] } = {}) => {
+  return [
+    ...RAMPS.map((entry) => {
+      return {
+        id: entry.id,
+        label: entry.label,
+        colors: sampleRamp(entry.ramp, SWATCHES),
+      };
+    }),
+    // Taken as an argument rather than read from the module store: the sidebar
+    // is built inside a memo, and a list it read invisibly would leave the
+    // options frozen at whatever they were when the memo last ran — which is
+    // exactly the bug that a ramp could be built and never appear.
+    //
+    // Only the reader's own carry `removable`: the ones the app ships are not
+    // theirs to throw away.
+    ...custom.map((ramp) => {
+      return { ...ramp, removable: true };
+    }),
+  ];
 };
 
 /**
@@ -110,7 +154,15 @@ export const rampPalette = ({
     return candidate.id === rampId;
   });
 
-  return entry ? sampleRamp(entry.ramp, count) : undefined;
+  if (entry) return sampleRamp(entry.ramp, count);
+
+  // A ramp the reader built is re-sampled from the classes it was created with,
+  // the same way a shipped one is re-sampled from its tokens.
+  const built = customRamps.find((candidate) => {
+    return candidate.id === rampId;
+  });
+
+  return built ? sampleRamp(built.colors, count) : undefined;
 };
 
 /**

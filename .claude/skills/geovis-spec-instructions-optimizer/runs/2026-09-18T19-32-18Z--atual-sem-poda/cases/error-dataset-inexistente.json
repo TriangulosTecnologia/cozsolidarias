@@ -1,0 +1,17 @@
+{
+  "prompt": "Mapa do saneamento básico por município.",
+  "httpStatus": 422,
+  "durationMs": 9469,
+  "response": {
+    "error": "O modelo retornou uma resposta inválida. Tente reformular o pedido.",
+    "issues": [
+      {
+        "code": "invalid-schema",
+        "message": "(root) must have required property 'engine'"
+      }
+    ],
+    "spec": {
+      "error": "Não há no catálogo nenhum dataset que meça saneamento básico por município. O único indicador que tangencia o tema é o subíndice 'ivs_infraestrutura_urbana' do Atlas da Vulnerabilidade Social (municipios_ivs), mas o mapDataId renderável 'municipios_ivs' entrega apenas o IVS geral — seus subíndices, incluindo o de infraestrutura urbana, não são acessíveis para visualização, mesmo aparecendo na descrição do dataset. Saneamento básico também não consta na lista fechada de proxies aceitos (fome, pessoas atendidas, presença de rede de cozinhas, vulnerabilidade social geral), então não posso usar outro dado como substituto. Não é possível gerar este mapa com os dados disponíveis hoje."
+    }
+  }
+}
