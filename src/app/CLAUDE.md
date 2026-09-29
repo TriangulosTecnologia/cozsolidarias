@@ -30,6 +30,7 @@ Do not use a dark theme. Single theme: light.
 May import from `src/data-gateway`.
 May use Next.js, React, Chakra UI, and the selected map library.
 May expose `/api/*` Route Handlers backed by `data-gateway`.
+An `/api/*` Route Handler may import a pure (non-`'use client'`) spec-builder module from `(features)/*` as a canonical source of truth (e.g. reusing a map's spec builder instead of re-deriving it) — never the reverse.
 
 ## Runtime
 

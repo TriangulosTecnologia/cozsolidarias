@@ -1,8 +1,8 @@
 /**
  * Geovis design tokens — cartographic color scales and map semantic colors.
  *
- * The semantic slice of this object is re-exported as `mapTokens` from `theme.ts`.
- * Consumer code must import `mapTokens` from `theme.ts`, never from this file directly.
+ * The semantic slice of this object is re-exported as `mapTokens` from `mapTokens.ts`.
+ * Consumer code must import `mapTokens` from `mapTokens.ts`, never from this file directly.
  */
 
 const ref = <T extends string>(path: T) => {

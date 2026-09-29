@@ -30,9 +30,10 @@ const BRAZIL_VIEW = {
 };
 
 /**
- * Renders the map workspace for a successful submission, plus the
- * deliberately-public raw spec panel. Extracted from `AiPlayground` to keep
- * that component's cyclomatic complexity within the lint threshold.
+ * Renders the map workspace for a successful submission. The raw spec is
+ * shown only through the page's JSON toggle, never over the map. Extracted
+ * from `AiPlayground` to keep that component's cyclomatic complexity within
+ * the lint threshold.
  */
 const MapResultView = ({ result }: { result: VisualizationSpec }) => {
   return (
@@ -67,33 +68,6 @@ const MapResultView = ({ result }: { result: VisualizationSpec }) => {
           />
         </ThemeUIProvider>
       </I18nProvider>
-
-      {/* Deliberately public: the `/ai` page is an experimental, transparent
-          playground — showing the raw generated spec lets anyone verify what
-          the model actually produced (including the real `mapData` values
-          after MapData Append). No secrets or personal data ever reach this
-          payload (see route.ts's INSTRUCTIONS on municipal aggregation). Not
-          gated behind a dev-only flag; revisit before treating `/ai` as a
-          finished, non-experimental product surface. */}
-      {JSON.stringify(result, null, 2) !== '{}' ? (
-        <Box
-          position="absolute"
-          bottom={0}
-          left={0}
-          right={0}
-          maxH="50%"
-          overflowY="auto"
-          bgColor="bg.surface"
-          borderTopWidth={1}
-          borderTopColor="border.default"
-          p={4}
-        >
-          <Heading as="h2" size="sm" mb={2}>
-            Especificação do mapa
-          </Heading>
-          <pre>{JSON.stringify(result, null, 2)}</pre>
-        </Box>
-      ) : null}
     </Box>
   );
 };
@@ -108,15 +82,9 @@ const AiPlayground = () => {
     showJson,
     setShowJson,
     errorDetails,
+    spec,
     handleSubmit,
   } = useAiPlaygroundLogic();
-
-  const jsonPayload =
-    status === 'success' && result
-      ? result
-      : status === 'error' && errorDetails
-        ? errorDetails
-        : null;
 
   return (
     <Stack gap={6} p={{ base: 4, md: 8 }} maxW="container.lg" mx="auto">
@@ -168,13 +136,24 @@ const AiPlayground = () => {
           <Alert.Indicator />
           <Alert.Content>
             <Alert.Title>Não foi possível gerar o mapa</Alert.Title>
-            <Alert.Description>{errorMessage}</Alert.Description>
+            <Alert.Description>
+              {errorMessage}
+              {errorDetails?.issues && errorDetails.issues.length > 0 && (
+                <Box as="ul" pl={5} mt={2}>
+                  {errorDetails.issues.map((issue, index) => {
+                    return (
+                      <li key={`${issue.code}-${index}`}>{issue.message}</li>
+                    );
+                  })}
+                </Box>
+              )}
+            </Alert.Description>
           </Alert.Content>
         </Alert.Root>
       )}
 
       <JsonPanel
-        jsonPayload={jsonPayload}
+        jsonPayload={status === 'loading' ? null : spec}
         showJson={showJson}
         onToggle={() => {
           return setShowJson((prev) => {

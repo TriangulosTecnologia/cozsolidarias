@@ -1,4 +1,4 @@
-import { mapTokens } from '@/config/theme';
+import { mapTokens } from '@/config/mapTokens';
 
 import { rampPalette } from './mapaColorRamp';
 

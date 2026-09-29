@@ -7,7 +7,7 @@
  * adds the copy, the id and the mode that positions it.
  */
 
-import { mapTokens } from '@/config/theme';
+import { mapTokens } from '@/config/mapTokens';
 
 import { rampPalette } from './mapaColorRamp';
 

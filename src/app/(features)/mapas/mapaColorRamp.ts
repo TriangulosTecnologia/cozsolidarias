@@ -10,7 +10,7 @@
 
 import type { LegendSpec } from '@ttoss/geovis';
 
-import { mapTokens } from '@/config/theme';
+import { mapTokens } from '@/config/mapTokens';
 
 /**
  * The ramp every graduated fill opens on.

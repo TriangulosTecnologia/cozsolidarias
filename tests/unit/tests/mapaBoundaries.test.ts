@@ -1,16 +1,13 @@
 import type { VisualizationLayer, VisualizationSpec } from '@ttoss/geovis';
-import { liftOverlaysAboveBoundaries } from 'src/app/(features)/mapas/useMapaSpec';
+import { liftOverlaysAboveBoundaries } from 'src/app/(features)/mapas/mapaBoundaries';
 
-// `useMapaSpec` calls geovis runtime helpers at module load; stub them so the
-// module imports in the test env. `liftOverlaysAboveBoundaries` itself is pure.
+// `mapaBoundaries` builds its boundary groups at module load; stub the geovis
+// helper so the module imports in the test env. The lift itself is pure.
 jest.mock('@ttoss/geovis', () => {
   return {
     __esModule: true,
     createBoundaryGroup: () => {
       return { sources: [], layers: [] };
-    },
-    useBoundaryToggle: (baseSpec: unknown) => {
-      return { spec: baseSpec };
     },
   };
 });

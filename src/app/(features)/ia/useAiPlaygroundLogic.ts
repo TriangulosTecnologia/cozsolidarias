@@ -4,24 +4,40 @@ import * as React from 'react';
 /** Submission lifecycle for the prompt-to-map form. */
 type Status = 'idle' | 'loading' | 'error' | 'success';
 
-/** Error diagnostic details from API (raw spec + validation issues). */
+/** One validation issue reported by `POST /api/ai/spec`. */
+type Issue = { code: string; message: string; path?: string };
+
+/** Error diagnostic details from API (validation issues behind the failure). */
 type ErrorDetails = {
-  issues?: Array<{ code: string; message: string }>;
-  spec?: unknown;
+  issues?: Issue[];
 };
 
-/** Outcome of one `POST /api/ai/spec` submission. */
+/** Body of every `POST /api/ai/spec` response (see the route's `POST`). */
+type SpecResponseBody = {
+  spec?: unknown;
+  error?: boolean;
+  message?: string;
+  issues?: Issue[];
+};
+
+/**
+ * Outcome of one `POST /api/ai/spec` submission. `spec` is carried on failure
+ * too, whenever the server generated one, so it can always be inspected.
+ */
 type SubmitOutcome =
   | { ok: true; result: VisualizationSpec }
-  | { ok: false; message: string; details?: ErrorDetails };
+  | { ok: false; message: string; details?: ErrorDetails; spec?: unknown };
+
+const isVisualizationSpec = (value: unknown): value is VisualizationSpec => {
+  return typeof value === 'object' && value !== null && 'layers' in value;
+};
 
 /**
  * Calls `POST /api/ai/spec` with `prompt` and reduces every failure mode
- * (network failure, non-JSON body, non-2xx status, a 2xx with no `result`)
+ * (network failure, non-JSON body, `error: true`, a success with no `spec`)
  * to a single pt-BR message — {@link useAiPlaygroundLogic.handleSubmit} only
- * has to branch on {@link SubmitOutcome.ok}. When the server attaches `spec`
- * and/or `issues` to an error body, they are carried in `details` so the
- * caller can offer them for inspection.
+ * has to branch on {@link SubmitOutcome.ok}. The server's `spec` and `issues`
+ * are carried on failure so the caller can offer them for inspection.
  */
 const submitPrompt = async (prompt: string): Promise<SubmitOutcome> => {
   let response: Response;
@@ -38,19 +54,9 @@ const submitPrompt = async (prompt: string): Promise<SubmitOutcome> => {
     };
   }
 
-  let body: {
-    result?: VisualizationSpec;
-    error?: string;
-    issues?: Array<{ code: string; message: string }>;
-    spec?: unknown;
-  };
+  let body: SpecResponseBody;
   try {
-    body = (await response.json()) as {
-      result?: VisualizationSpec;
-      error?: string;
-      issues?: Array<{ code: string; message: string }>;
-      spec?: unknown;
-    };
+    body = (await response.json()) as SpecResponseBody;
   } catch {
     return {
       ok: false,
@@ -58,32 +64,30 @@ const submitPrompt = async (prompt: string): Promise<SubmitOutcome> => {
     };
   }
 
-  const details =
-    body.issues || body.spec
-      ? { issues: body.issues, spec: body.spec }
-      : undefined;
+  const details = body.issues ? { issues: body.issues } : undefined;
 
-  if (!response.ok) {
+  if (!response.ok || body.error !== false) {
     return {
       ok: false,
       message:
-        body.error ??
+        body.message ??
         `O servidor recusou o pedido (status ${response.status}), sem detalhar o motivo.`,
       details,
+      spec: body.spec,
     };
   }
 
-  if (!body.result) {
+  if (!isVisualizationSpec(body.spec)) {
     return {
       ok: false,
       message:
-        body.error ??
-        'O servidor respondeu com sucesso, mas sem a especificação do mapa ("result" ausente).',
+        'O servidor respondeu com sucesso, mas sem a especificação do mapa ("spec" ausente).',
       details,
+      spec: body.spec,
     };
   }
 
-  return { ok: true, result: body.result };
+  return { ok: true, result: body.spec };
 };
 
 export const useAiPlaygroundLogic = () => {
@@ -95,6 +99,7 @@ export const useAiPlaygroundLogic = () => {
   const [errorDetails, setErrorDetails] = React.useState<ErrorDetails | null>(
     null
   );
+  const [spec, setSpec] = React.useState<unknown>(null);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -112,11 +117,13 @@ export const useAiPlaygroundLogic = () => {
     if (!outcome.ok) {
       setErrorMessage(outcome.message);
       setErrorDetails(outcome.details ?? null);
+      setSpec(outcome.spec ?? null);
       setStatus('error');
       return;
     }
 
     setResult(outcome.result);
+    setSpec(outcome.result);
     setErrorDetails(null);
     setStatus('success');
   };
@@ -130,6 +137,7 @@ export const useAiPlaygroundLogic = () => {
     showJson,
     setShowJson,
     errorDetails,
+    spec,
     handleSubmit,
   };
 };

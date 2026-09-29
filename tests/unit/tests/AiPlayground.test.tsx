@@ -75,7 +75,8 @@ describe('AiPlayground', () => {
     global.fetch = jest.fn().mockResolvedValue(
       jsonResponse(
         {
-          error: 'Prompt inválido: envie um texto entre 1 e 500 caracteres.',
+          error: true,
+          message: 'Prompt inválido: envie um texto entre 1 e 500 caracteres.',
         },
         false
       )
@@ -150,8 +151,8 @@ describe('AiPlayground', () => {
     ).toBeInTheDocument();
   });
 
-  test('falls back to a default message when a successful response carries no result', async () => {
-    global.fetch = jest.fn().mockResolvedValue(jsonResponse({}));
+  test('falls back to a default message when a successful response carries no spec', async () => {
+    global.fetch = jest.fn().mockResolvedValue(jsonResponse({ error: false }));
 
     renderWithChakra(<AiPlayground />);
 
@@ -162,57 +163,18 @@ describe('AiPlayground', () => {
 
     expect(
       await screen.findByText(
-        'O servidor respondeu com sucesso, mas sem a especificação do mapa ("result" ausente).'
-      )
-    ).toBeInTheDocument();
-  });
-
-  test('shows an unexpected-content message when the response body is not JSON', async () => {
-    global.fetch = jest.fn().mockResolvedValue({
-      ok: true,
-      status: 200,
-      json: () => {
-        return Promise.reject(new Error('not json'));
-      },
-    } as unknown as Response);
-
-    renderWithChakra(<AiPlayground />);
-
-    fireEvent.change(screen.getByLabelText('O que você quer ver?'), {
-      target: { value: 'pessoas atendidas por município' },
-    });
-    fireEvent.click(screen.getByRole('button', { name: 'Gerar mapa' }));
-
-    expect(
-      await screen.findByText(
-        'O servidor respondeu com um conteúdo inesperado (status 200). Tente novamente.'
-      )
-    ).toBeInTheDocument();
-  });
-
-  test('falls back to a default message when a successful response carries no result', async () => {
-    global.fetch = jest.fn().mockResolvedValue(jsonResponse({}));
-
-    renderWithChakra(<AiPlayground />);
-
-    fireEvent.change(screen.getByLabelText('O que você quer ver?'), {
-      target: { value: 'pessoas atendidas por município' },
-    });
-    fireEvent.click(screen.getByRole('button', { name: 'Gerar mapa' }));
-
-    expect(
-      await screen.findByText(
-        'O servidor respondeu com sucesso, mas sem a especificação do mapa ("result" ausente).'
+        'O servidor respondeu com sucesso, mas sem a especificação do mapa ("spec" ausente).'
       )
     ).toBeInTheDocument();
   });
 
   test('renders the spec JSON on a successful submission after clicking "Ver JSON"', async () => {
-    global.fetch = jest
-      .fn()
-      .mockResolvedValue(
-        jsonResponse({ result: { title: 'Mapa de IVS por município' } })
-      );
+    global.fetch = jest.fn().mockResolvedValue(
+      jsonResponse({
+        spec: { title: 'Mapa de IVS por município', layers: [] },
+        error: false,
+      })
+    );
 
     const { container } = renderWithChakra(<AiPlayground />);
 
@@ -234,12 +196,13 @@ describe('AiPlayground', () => {
     });
   });
 
-  test('displays error spec and issues in JSON panel when validation fails', async () => {
+  test('lists the issues and still offers the rejected spec behind the JSON toggle', async () => {
     global.fetch = jest.fn().mockResolvedValue(
       jsonResponse(
         {
-          error: 'Especificação inválida',
-          spec: { type: 'choropleth', data: {} },
+          error: true,
+          message: 'Especificação inválida',
+          spec: { title: 'Spec rejeitada', layers: [] },
           issues: [
             { code: 'INVALID_DATA_TYPE', message: 'Data type mismatch' },
           ],
@@ -255,18 +218,35 @@ describe('AiPlayground', () => {
     });
     fireEvent.click(screen.getByRole('button', { name: 'Gerar mapa' }));
 
-    await waitFor(() => {
-      expect(
-        screen.getByRole('button', { name: 'Ver JSON' })
-      ).toBeInTheDocument();
-    });
+    expect(await screen.findByText('Data type mismatch')).toBeInTheDocument();
+    expect(container.textContent).not.toContain('Spec rejeitada');
 
     fireEvent.click(screen.getByRole('button', { name: 'Ver JSON' }));
 
     await waitFor(() => {
-      expect(container.textContent).toContain('INVALID_DATA_TYPE');
-      expect(container.textContent).toContain('Data type mismatch');
+      expect(container.textContent).toContain('Spec rejeitada');
     });
+    expect(screen.queryByTestId('geovis-workspace')).not.toBeInTheDocument();
+  });
+
+  test('offers no JSON toggle when a failure carries no spec', async () => {
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue(
+        jsonResponse({ error: true, message: 'Dataset indisponível' }, false)
+      );
+
+    renderWithChakra(<AiPlayground />);
+
+    fireEvent.change(screen.getByLabelText('O que você quer ver?'), {
+      target: { value: 'áreas CAF' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Gerar mapa' }));
+
+    expect(await screen.findByText('Dataset indisponível')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Ver JSON' })
+    ).not.toBeInTheDocument();
   });
 
   test('does nothing when the form is submitted with a blank prompt', () => {
@@ -305,7 +285,7 @@ describe('AiPlayground', () => {
 
     expect(global.fetch).toHaveBeenCalledTimes(1);
 
-    resolveFetch(jsonResponse({ result: {} }));
+    resolveFetch(jsonResponse({ spec: { layers: [] }, error: false }));
     await screen.findByRole('button', { name: 'Gerar mapa' });
   });
 });

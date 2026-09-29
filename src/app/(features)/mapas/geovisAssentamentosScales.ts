@@ -1,6 +1,6 @@
 import type { LegendSpec } from '@ttoss/geovis';
 
-import { mapTokens } from '@/config/theme';
+import { mapTokens } from '@/config/mapTokens';
 
 /**
  * Registration-status classes of a SICAR settlement (`ind_status`), with the
