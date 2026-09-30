@@ -1,0 +1,109 @@
+[
+  {
+    "id": "r-cadinsan-sem-pbf",
+    "http": 502,
+    "pass": true,
+    "ms": 8163
+  },
+  {
+    "id": "r-idhm",
+    "http": 502,
+    "pass": true,
+    "ms": 8917
+  },
+  {
+    "id": "r-taxa",
+    "http": 502,
+    "pass": true,
+    "ms": 7083
+  },
+  {
+    "id": "v-assentamentos",
+    "http": 200,
+    "renderEquivalent": false,
+    "minimal": true,
+    "recall": 0.5,
+    "missing": [
+      "point @ /api/cozinhas | legend=categorical/4",
+      "polygon @ /geo/estados.json | legend=none"
+    ],
+    "extra": [
+      "line @ /geo/estados.json | legend=none",
+      "point @ inline:geojson | legend=categorical/1"
+    ],
+    "orphans": {
+      "sources": [],
+      "mapData": [],
+      "legends": [],
+      "hiddenLayers": []
+    },
+    "ms": 12482
+  },
+  {
+    "id": "v-cadinsan-com-pbf",
+    "http": 502,
+    "renderEquivalent": false,
+    "minimal": false,
+    "recall": 0,
+    "missing": [],
+    "extra": [],
+    "orphans": null,
+    "ms": 8099
+  },
+  {
+    "id": "v-circulos",
+    "http": 502,
+    "renderEquivalent": false,
+    "minimal": false,
+    "recall": 0,
+    "missing": [],
+    "extra": [],
+    "orphans": null,
+    "ms": 10753
+  },
+  {
+    "id": "v-coropletico",
+    "http": 502,
+    "renderEquivalent": false,
+    "minimal": false,
+    "recall": 0,
+    "missing": [],
+    "extra": [],
+    "orphans": null,
+    "ms": 12152
+  },
+  {
+    "id": "v-ivs",
+    "http": 502,
+    "renderEquivalent": false,
+    "minimal": false,
+    "recall": 0,
+    "missing": [],
+    "extra": [],
+    "orphans": null,
+    "ms": 7764
+  },
+  {
+    "id": "v-pontos",
+    "http": 200,
+    "renderEquivalent": false,
+    "minimal": false,
+    "recall": 0,
+    "missing": [
+      "point @ /api/cozinhas | legend=categorical/4"
+    ],
+    "extra": [
+      "line @ /geo/estados.json | legend=none",
+      "point @ inline:geojson | legend=none"
+    ],
+    "orphans": {
+      "sources": [],
+      "mapData": [],
+      "legends": [
+        "legenda-cozinhas"
+      ],
+      "hiddenLayers": []
+    },
+    "ms": 10322
+  }
+]

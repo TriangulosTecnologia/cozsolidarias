@@ -1,4 +1,3 @@
-/* eslint-disable no-console, no-undef */
 /**
  * Probes which agent-prompt invariants `@ttoss/geovis`'s own `validateSpec`
  * still rejects. Re-run on every geovis bump: a rule that is `coberta-lib` in
@@ -7,20 +6,20 @@
  *
  *   node scripts/probe_validate_spec.mjs [repoRoot]
  */
-import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { join } from 'node:path';
 
 const REPO = process.argv[2] ?? process.cwd();
 const { validateSpec } = await import(
   pathToFileURL(join(REPO, 'node_modules/@ttoss/geovis/dist/index.mjs')).href
 );
 
-const base = (over) => { return {
+const base = (over) => ({
   engine: 'maplibre',
   sources: [{ id: 'mun', type: 'geojson', data: '/geo/geojs-100-mun.json' }],
   layers: [{ id: 'fill', sourceId: 'mun', geometry: 'polygon' }],
   ...over,
-} };
+});
 
 const CASES = {
   'R-dup-dimension': base({

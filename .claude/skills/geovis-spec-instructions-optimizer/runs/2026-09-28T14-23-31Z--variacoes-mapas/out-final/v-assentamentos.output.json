@@ -1,15 +1,16 @@
 {
+  "prompt": "Mostre os assentamentos rurais junto com as cozinhas solidárias e o contorno dos estados",
+  "httpStatus": 200,
+  "durationMs": 12482,
+  "response": {
+    "spec": {
       "engine": "maplibre",
-      "title": "Cozinhas Solidárias cadastradas no Brasil",
-      "description": "Localização individual de todas as cozinhas solidárias cadastradas no Brasil, com endereço, situação de funcionamento e público atendido. Cobertura parcial: o cadastro reúne apenas as cozinhas habilitadas, e parte dos registros não possui coordenadas geográficas — esses casos não aparecem no mapa. Sem corte de data definido: é um retrato do estado atual do cadastro (dado-núcleo do mapa), não de um ano específico.",
-      "view": {
-        "center": [
-          -52,
-          -14
-        ],
-        "zoom": 3.6
-      },
       "sources": [
+        {
+          "id": "assentamentos",
+          "type": "geojson",
+          "data": "/geo/assentamentos.json"
+        },
         {
           "id": "cozinhas",
           "type": "geojson",
@@ -20958,31 +20959,89 @@
               }
             ]
           }
+        },
+        {
+          "id": "estados",
+          "type": "geojson",
+          "data": "/geo/estados.json"
         }
       ],
       "layers": [
         {
+          "id": "assentamentos-fill",
+          "sourceId": "assentamentos",
+          "geometry": "polygon",
+          "paint": {
+            "fill-color": "#a16207",
+            "fill-opacity": 0.5
+          },
+          "activeLegendId": "legend-assentamentos"
+        },
+        {
+          "id": "assentamentos-outline",
+          "sourceId": "assentamentos",
+          "geometry": "line",
+          "paint": {
+            "line-color": "#78350f",
+            "line-width": 1
+          }
+        },
+        {
           "id": "cozinhas-pontos",
           "sourceId": "cozinhas",
           "geometry": "point",
-          "title": "Cozinhas Solidárias cadastradas",
           "paint": {
-            "circle-color": "#1761A8",
+            "circle-color": "#dc2626",
             "circle-radius": 5,
-            "circle-stroke-color": "#FAF9F7",
-            "circle-stroke-width": 1,
-            "circle-opacity": 0.85
+            "circle-stroke-color": "#fff",
+            "circle-stroke-width": 1
           },
-          "activeLegendId": "cozinhas-legend"
+          "activeLegendId": "legend-cozinhas"
+        },
+        {
+          "id": "estados-contorno",
+          "sourceId": "estados",
+          "geometry": "line",
+          "paint": {
+            "line-color": "#374151",
+            "line-width": 1.2,
+            "line-opacity": 0.7
+          }
         }
       ],
       "legends": [
         {
-          "id": "cozinhas-legend",
-          "title": "Cozinhas Solidárias cadastradas",
-          "subtitle": "Recorte apenas de cozinhas habilitadas; registros sem coordenadas não aparecem no mapa",
-          "reference": "Cozinhas Solidárias geolocalizadas — cadastro com endereço, situação de funcionamento, público atendido e coordenadas geográficas. Snapshot do estado atual do cadastro, sem corte de data definido."
+          "id": "legend-assentamentos",
+          "title": "Assentamentos rurais",
+          "colorBy": {
+            "type": "categorical",
+            "property": "ind_status",
+            "mapping": {
+              "AT": "#a16207",
+              "PE": "#d97706",
+              "CA": "#9ca3af"
+            },
+            "colors": [
+              "#a16207",
+              "#d97706",
+              "#9ca3af"
+            ]
+          }
+        },
+        {
+          "id": "legend-cozinhas",
+          "title": "Cozinhas Solidárias",
+          "colorBy": {
+            "type": "categorical",
+            "property": "Situação",
+            "mapping": {
+              "Habilitada": "#dc2626"
+            },
+            "defaultColor": "#dc2626"
+          }
         }
       ]
-
+    },
+    "error": false
+  }
 }

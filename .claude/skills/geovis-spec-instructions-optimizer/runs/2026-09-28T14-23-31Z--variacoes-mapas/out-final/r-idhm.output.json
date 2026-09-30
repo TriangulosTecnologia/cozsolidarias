@@ -1,0 +1,9 @@
+{
+  "prompt": "Mapa do IDHM por município",
+  "httpStatus": 502,
+  "durationMs": 8917,
+  "response": {
+    "error": true,
+    "message": "Falha de comunicação com o modelo de IA: (0 , _mapDataCatalogue__WEBPACK_IMPORTED_MODULE_1__.isRenderableDatasetId) is not a function"
+  }
+}

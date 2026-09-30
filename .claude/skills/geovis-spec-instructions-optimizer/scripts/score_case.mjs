@@ -1,4 +1,3 @@
-/* eslint-disable no-console, no-undef */
 /**
  * Eixo (a) do eval: pass/fail programático, reaproveitando os validadores REAIS
  * do repo cozsolidarias — nunca reimplementa as regras.
@@ -22,9 +21,9 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const args = process.argv.slice(2);
 const flags = Object.fromEntries(
-  args.filter((a) => { return a.startsWith('--') }).map((a) => { return a.replace(/^--/, '').split('=') })
+  args.filter((a) => a.startsWith('--')).map((a) => a.replace(/^--/, '').split('='))
 );
-const [outputFile, repoPath] = args.filter((a) => { return !a.startsWith('--') });
+const [outputFile, repoPath] = args.filter((a) => !a.startsWith('--'));
 
 if (!outputFile || !repoPath) {
   console.error('uso: score_case.mjs <output.json> <repoPath> [--expect=spec|error]');
@@ -33,19 +32,17 @@ if (!outputFile || !repoPath) {
 
 const SRC = join(repoPath, 'src');
 const EXTS = ['', '.ts', '.tsx', '/index.ts'];
-const firstFile = base => {
+const firstFile = (base) => {
   for (const ext of EXTS) {
     try {
       if (statSync(base + ext).isFile()) return base + ext;
-    } catch {
-      // Continue searching
-    }
+    } catch {}
   }
   return null;
 };
 
 registerHooks({
-  resolve: (spec, ctx, next) => {
+  resolve(spec, ctx, next) {
     const base = spec.startsWith('@/')
       ? pres(SRC, spec.slice(2))
       : spec.startsWith('.') && ctx.parentURL
@@ -137,10 +134,10 @@ const result = {
   durationMs: run.durationMs,
   expect,
   checks,
-  passRate: checks.length ? checks.filter((c) => { return c.passed }).length / checks.length : 0,
+  passRate: checks.length ? checks.filter((c) => c.passed).length / checks.length : 0,
 };
 
 const scoreFile = outputFile.replace(/\.json$/, '.score.json');
 writeFileSync(scoreFile, JSON.stringify(result, null, 2));
 console.log(`Score gravado em ${scoreFile} (passRate=${result.passRate})`);
-for (const c of checks.filter((c) => { return !c.passed })) console.log(`  FALHOU ${c.id}: ${c.note}`);
+for (const c of checks.filter((c) => !c.passed)) console.log(`  FALHOU ${c.id}: ${c.note}`);
