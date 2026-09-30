@@ -30,6 +30,7 @@ import { execFileSync } from 'node:child_process';
 import { mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { registerHooks } from 'node:module';
 import { dirname, join, resolve as presolve } from 'node:path';
+import process from 'node:process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const REPO = process.cwd();
@@ -45,13 +46,15 @@ const firstFile = (base) => {
   for (const ext of EXTS) {
     try {
       if (statSync(base + ext).isFile()) return base + ext;
-    } catch {}
+    } catch {
+      // not a file with this extension; try the next one
+    }
   }
   return null;
 };
 
 registerHooks({
-  resolve(spec, ctx, next) {
+  resolve: (spec, ctx, next) => {
     const base = spec.startsWith('@/')
       ? presolve(SRC, spec.slice(2))
       : spec.startsWith('.') && ctx.parentURL
@@ -69,7 +72,7 @@ const readModes = () => {
   const text = readFileSync(join(MAPAS, 'geovisMapMode.ts'), 'utf8');
   const union = text.split('export type MapMode')[1];
   if (!union) throw new Error('MapMode union not found in geovisMapMode.ts');
-  const modes = [...union.matchAll(/'([a-z0-9-]+)'/g)].map((m) => m[1]);
+  const modes = [...union.matchAll(/'([a-z0-9-]+)'/g)].map((m) => { return m[1] });
   if (modes.length === 0) throw new Error('MapMode union parsed to zero modes');
   return modes;
 };
@@ -131,40 +134,18 @@ const optional = async (label, fn, sink) => {
   }
 };
 
-const main = async () => {
-  const { buildSpec } = await import(
-    pathToFileURL(join(MAPAS, 'geovisSpec.ts')).href
-  );
-  const { gateway } = await import(pathToFileURL(join(SRC, 'gateway.ts')).href);
+const print = (line) => { process.stdout.write(`${line}\n`) };
 
-  const provenance = {};
-  const byCity =
-    (await optional('cozinhasPorMunicipio', () => gateway.getCozinhasPorMunicipio(), provenance)) ?? [];
-  const ivsByCity =
-    (await optional('ivsPorMunicipio', () => gateway.getIvsPorMunicipio(), provenance)) ?? [];
-  const overlays = {
-    cafByCity: await optional('cafsPorMunicipio', () => gateway.getCafsPorMunicipio(), provenance),
-    cadinsanByCity: await optional('cadinsanPorMunicipio', () => gateway.getCadinsanPorMunicipio(), provenance),
-    cafHexbin: await optional('cafHexbin', () => gateway.getCafHexbin(), provenance),
-    cafPontosPorUf: await optional('cafPontosPorUf', () => gateway.getCafPontosPorUf(), provenance),
+const countsOf = (raw) => {
+  return {
+    sources: (raw.sources ?? []).length,
+    layers: (raw.layers ?? []).length,
+    legends: (raw.legends ?? []).length,
+    mapData: (raw.mapData ?? []).length,
   };
+};
 
-  mkdirSync(OUT, { recursive: true });
-  const written = [];
-
-  for (const mode of readModes()) {
-    const raw = buildSpec(byCity, mode, undefined, ivsByCity, overlays);
-    const spec = KEEP_FULL ? raw : slim(raw);
-    writeFileSync(join(OUT, `${mode}.json`), JSON.stringify(spec, null, 2) + '\n');
-    written.push({
-      mode,
-      sources: (raw.sources ?? []).length,
-      layers: (raw.layers ?? []).length,
-      legends: (raw.legends ?? []).length,
-      mapData: (raw.mapData ?? []).length,
-    });
-  }
-
+const writeManifest = ({ provenance, written }) => {
   writeFileSync(
     join(OUT, 'manifest.json'),
     JSON.stringify(
@@ -184,10 +165,46 @@ const main = async () => {
       2
     ) + '\n'
   );
+};
 
-  console.log(`${written.length} specs → ${OUT}${KEEP_FULL ? ' (completo)' : ' (dados elididos)'}`);
+const loadDatasets = async ({ gateway, provenance }) => {
+  const byCity =
+    (await optional('cozinhasPorMunicipio', () => { return gateway.getCozinhasPorMunicipio() }, provenance)) ?? [];
+  const ivsByCity =
+    (await optional('ivsPorMunicipio', () => { return gateway.getIvsPorMunicipio() }, provenance)) ?? [];
+  const overlays = {
+    cafByCity: await optional('cafsPorMunicipio', () => { return gateway.getCafsPorMunicipio() }, provenance),
+    cadinsanByCity: await optional('cadinsanPorMunicipio', () => { return gateway.getCadinsanPorMunicipio() }, provenance),
+    cafHexbin: await optional('cafHexbin', () => { return gateway.getCafHexbin() }, provenance),
+    cafPontosPorUf: await optional('cafPontosPorUf', () => { return gateway.getCafPontosPorUf() }, provenance),
+  };
+  return { byCity, ivsByCity, overlays };
+};
+
+const main = async () => {
+  const { buildSpec } = await import(
+    pathToFileURL(join(MAPAS, 'geovisSpec.ts')).href
+  );
+  const { gateway } = await import(pathToFileURL(join(SRC, 'gateway.ts')).href);
+
+  const provenance = {};
+  const { byCity, ivsByCity, overlays } = await loadDatasets({ gateway, provenance });
+
+  mkdirSync(OUT, { recursive: true });
+  const written = [];
+
+  for (const mode of readModes()) {
+    const raw = buildSpec(byCity, mode, undefined, ivsByCity, overlays);
+    const spec = KEEP_FULL ? raw : slim(raw);
+    writeFileSync(join(OUT, `${mode}.json`), JSON.stringify(spec, null, 2) + '\n');
+    written.push({ mode, ...countsOf(raw) });
+  }
+
+  writeManifest({ provenance, written });
+
+  print(`${written.length} specs → ${OUT}${KEEP_FULL ? ' (completo)' : ' (dados elididos)'}`);
   for (const [label, info] of Object.entries(provenance)) {
-    if (info.absent) console.log(`  overlay ausente: ${label} — ${info.absent}`);
+    if (info.absent) print(`  overlay ausente: ${label} — ${info.absent}`);
   }
 };
 

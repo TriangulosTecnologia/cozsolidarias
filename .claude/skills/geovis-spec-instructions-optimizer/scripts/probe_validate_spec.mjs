@@ -6,20 +6,23 @@
  *
  *   node scripts/probe_validate_spec.mjs [repoRoot]
  */
-import { pathToFileURL } from 'node:url';
 import { join } from 'node:path';
+import process from 'node:process';
+import { pathToFileURL } from 'node:url';
+
+const print = (line) => { process.stdout.write(`${line}\n`) };
 
 const REPO = process.argv[2] ?? process.cwd();
 const { validateSpec } = await import(
   pathToFileURL(join(REPO, 'node_modules/@ttoss/geovis/dist/index.mjs')).href
 );
 
-const base = (over) => ({
+const base = (over) => { return {
   engine: 'maplibre',
   sources: [{ id: 'mun', type: 'geojson', data: '/geo/geojs-100-mun.json' }],
   layers: [{ id: 'fill', sourceId: 'mun', geometry: 'polygon' }],
   ...over,
-});
+} };
 
 const CASES = {
   'R-dup-dimension': base({
@@ -61,9 +64,9 @@ for (const [id, spec] of Object.entries(CASES)) {
   const rejects = out?.status !== 'resolved';
   const control = id.startsWith('CONTROLE');
   if (!rejects && !control) gaps += 1;
-  console.log(
+  print(
     `${rejects ? 'REJEITA' : 'ACEITA '} | ${id.padEnd(26)} | status=${out?.status}` +
       (issues.length ? ` | ${issues[0].code}` : '')
   );
 }
-console.log(`\nlacunas (regra que a lib não rejeita mais): ${gaps}`);
+print(`\nlacunas (regra que a lib não rejeita mais): ${gaps}`);

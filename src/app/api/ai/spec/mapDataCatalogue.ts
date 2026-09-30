@@ -71,6 +71,20 @@ export const RENDERABLE_DATASET_FETCHERS = {
       return row.proporcaoComPbf;
     });
   },
+} as const;
+
+export type RenderableDatasetId = keyof typeof RENDERABLE_DATASET_FETCHERS;
+
+/** List of dataset IDs that the agent may reference in `mapData`. */
+export const RENDERABLE_DATASET_IDS = Object.keys(
+  RENDERABLE_DATASET_FETCHERS
+) as RenderableDatasetId[];
+
+/** Type guard: check if a dataset ID is renderable. */
+export const isRenderableDatasetId = (
+  id: unknown
+): id is RenderableDatasetId => {
+  return typeof id === 'string' && id in RENDERABLE_DATASET_FETCHERS;
 };
 
 /** The index-only shape a non-renderable dataset is reduced to — enough for

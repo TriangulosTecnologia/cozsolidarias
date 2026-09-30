@@ -10,36 +10,39 @@
 // `--drop-flat-fill`: nos modos `pontos`/`circulos` o fill municipal é fundo liso, não variável.
 
 import { readFileSync } from 'node:fs';
+import process from 'node:process';
+
+const print = (line) => { process.stdout.write(`${line}\n`) };
 
 const INJECTED_SOURCES = { 'municipios-boundary': '/geo/geojs-100-mun.json' };
 const STRUCTURAL_KEYS = new Set(['engine', 'schemaVersion', 'mapType', 'sources', 'layers', 'mapData', 'legends']);
 
-const arr = (v) => (Array.isArray(v) ? v.filter((x) => x && typeof x === 'object') : []);
-const read = (p) => JSON.parse(readFileSync(p, 'utf8'));
+const arr = (v) => { return Array.isArray(v) ? v.filter((x) => { return x && typeof x === 'object' }) : [] };
+const read = (p) => { return JSON.parse(readFileSync(p, 'utf8')) };
 
-const legendsOf = (spec) => [
+const legendsOf = (spec) => { return [
   ...arr(spec.legends),
-  ...arr(spec.layers).flatMap((l) => arr(l.legends)),
-];
+  ...arr(spec.layers).flatMap((l) => { return arr(l.legends) }),
+] };
 
 const sourceUrl = (spec, sourceId) => {
-  const src = arr(spec.sources).find((s) => s.id === sourceId);
+  const src = arr(spec.sources).find((s) => { return s.id === sourceId });
   if (src) return typeof src.data === 'string' ? src.data : `inline:${src.type}`;
   return INJECTED_SOURCES[sourceId] ?? `?${sourceId}`;
 };
 
 const derive = (golden, { dropFlatFill }) => {
   const layers = arr(golden.layers).filter(
-    (l) => l.visible !== false && !(dropFlatFill && l.id === 'municipios-br-fill')
+    (l) => { return l.visible !== false && !(dropFlatFill && l.id === 'municipios-br-fill') }
   );
-  const sourceIds = new Set(layers.map((l) => l.sourceId));
-  const mapDataIds = new Set(layers.map((l) => l.mapDataId).filter(Boolean));
-  const legendIds = new Set(layers.map((l) => l.activeLegendId).filter(Boolean));
-  const legends = legendsOf(golden).filter((l) => legendIds.has(l.id));
+  const sourceIds = new Set(layers.map((l) => { return l.sourceId }));
+  const mapDataIds = new Set(layers.map((l) => { return l.mapDataId }).filter(Boolean));
+  const legendIds = new Set(layers.map((l) => { return l.activeLegendId }).filter(Boolean));
+  const legends = legendsOf(golden).filter((l) => { return legendIds.has(l.id) });
   return {
     engine: golden.engine,
-    sources: arr(golden.sources).filter((s) => sourceIds.has(s.id)),
-    ...(mapDataIds.size ? { mapData: arr(golden.mapData).filter((m) => mapDataIds.has(m.mapDataId)) } : {}),
+    sources: arr(golden.sources).filter((s) => { return sourceIds.has(s.id) }),
+    ...(mapDataIds.size ? { mapData: arr(golden.mapData).filter((m) => { return mapDataIds.has(m.mapDataId) }) } : {}),
     ...(legends.length ? { legends } : {}),
     layers,
   };
@@ -56,10 +59,10 @@ const legendSig = (legend) => {
 const bindings = (spec) => {
   const legends = legendsOf(spec);
   return arr(spec.layers)
-    .filter((l) => l.visible !== false)
+    .filter((l) => { return l.visible !== false })
     .map((l) => {
       const form = l.sizeBy ? `${l.geometry}+sizeBy` : l.geometry;
-      const legend = legends.find((x) => x.id === l.activeLegendId);
+      const legend = legends.find((x) => { return x.id === l.activeLegendId });
       return `${form} @ ${sourceUrl(spec, l.sourceId)} | legend=${legendSig(legend)}`;
     })
     .sort();
@@ -67,14 +70,14 @@ const bindings = (spec) => {
 
 const orphans = (spec) => {
   const layers = arr(spec.layers);
-  const usedSources = new Set(layers.map((l) => l.sourceId));
-  const usedMapData = new Set(layers.map((l) => l.mapDataId).filter(Boolean));
-  const usedLegends = new Set(layers.map((l) => l.activeLegendId).filter(Boolean));
+  const usedSources = new Set(layers.map((l) => { return l.sourceId }));
+  const usedMapData = new Set(layers.map((l) => { return l.mapDataId }).filter(Boolean));
+  const usedLegends = new Set(layers.map((l) => { return l.activeLegendId }).filter(Boolean));
   return {
-    sources: arr(spec.sources).filter((s) => !usedSources.has(s.id)).map((s) => s.id),
-    mapData: arr(spec.mapData).filter((m) => !usedMapData.has(m.mapDataId)).map((m) => m.mapDataId),
-    legends: legendsOf(spec).filter((l) => !usedLegends.has(l.id)).map((l) => l.id),
-    hiddenLayers: layers.filter((l) => l.visible === false).map((l) => l.id),
+    sources: arr(spec.sources).filter((s) => { return !usedSources.has(s.id) }).map((s) => { return s.id }),
+    mapData: arr(spec.mapData).filter((m) => { return !usedMapData.has(m.mapDataId) }).map((m) => { return m.mapDataId }),
+    legends: legendsOf(spec).filter((l) => { return !usedLegends.has(l.id) }).map((l) => { return l.id }),
+    hiddenLayers: layers.filter((l) => { return l.visible === false }).map((l) => { return l.id }),
   };
 };
 
@@ -88,19 +91,21 @@ const multisetDiff = (a, b) => {
   });
 };
 
+const noSpecResult = (output) => {
+  return { ok: false, reason: 'no-spec', httpStatus: output?.httpStatus ?? null, error: output?.response?.message ?? null };
+};
+
 const score = (golden, output, opts) => {
   const candidate = output?.response?.spec;
-  if (!candidate || typeof candidate !== 'object') {
-    return { ok: false, reason: 'no-spec', httpStatus: output?.httpStatus ?? null, error: output?.response?.message ?? null };
-  }
+  if (!candidate || typeof candidate !== 'object') return noSpecResult(output);
   const minimal = derive(golden, opts);
   const expected = bindings(minimal);
   const got = bindings(candidate);
   const missing = multisetDiff(expected, got);
   const extra = multisetDiff(got, expected);
   const orphan = orphans(candidate);
-  const extraKeys = Object.keys(candidate).filter((k) => !STRUCTURAL_KEYS.has(k));
-  const orphanCount = Object.values(orphan).reduce((n, list) => n + list.length, 0);
+  const extraKeys = Object.keys(candidate).filter((k) => { return !STRUCTURAL_KEYS.has(k) });
+  const orphanCount = Object.values(orphan).reduce((n, list) => { return n + list.length }, 0);
   return {
     ok: true,
     renderEquivalent: missing.length === 0 && extra.length === 0,
@@ -118,10 +123,10 @@ const score = (golden, output, opts) => {
 const [cmd, a, b] = process.argv.slice(2);
 const opts = { dropFlatFill: process.argv.includes('--drop-flat-fill') };
 if (cmd === 'derive') {
-  console.log(JSON.stringify(derive(read(a), opts), null, 2));
+  print(JSON.stringify(derive(read(a), opts), null, 2));
 } else if (cmd === 'score') {
-  console.log(JSON.stringify(score(read(a), read(b), opts), null, 2));
+  print(JSON.stringify(score(read(a), read(b), opts), null, 2));
 } else {
-  console.error('uso: minimal_spec.mjs <derive|score> <golden.json> [output.json] [--drop-flat-fill]');
+  process.stderr.write('uso: minimal_spec.mjs <derive|score> <golden.json> [output.json] [--drop-flat-fill]\n');
   process.exit(1);
 }

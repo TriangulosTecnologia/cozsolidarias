@@ -11,6 +11,9 @@
 import { readFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
+import process from 'node:process';
+
+const warn = (line) => { process.stderr.write(`${line}\n`) };
 
 const SOURCE = join(homedir(), 'geovis-spec-generator.md');
 const variant = process.argv[2] ?? 'tier1';
@@ -24,7 +27,7 @@ if (!block) throw new Error('bloco `system:` não encontrado em ' + SOURCE);
 // indentação além da poda — mediria as duas coisas juntas.
 const system = block
   .split('\n')
-  .map((line) => (line.startsWith('  ') ? line.slice(2) : line))
+  .map((line) => { return line.startsWith('  ') ? line.slice(2) : line })
   .join('\n')
   .replace(/\n+$/, '');
 
@@ -63,7 +66,7 @@ const CUTS = {
   'geojson-defs': {
     tiers: ['tier1', 'tier12'],
     reason: 'O agente nunca emite geometria inline: INSTRUCTIONS proíbe, findGeometryInMapData e findInvalidGeojsonSource rejeitam. Documentar como escrever um Polygon habilita só o que a rota recusa.',
-    apply: (t) => cutBetween(t, '## Position\n', 'Resolution instructions for the agent:'),
+    apply: (t) => { return cutBetween(t, '## Position\n', 'Resolution instructions for the agent:') },
   },
   'source-type-enum': {
     tiers: ['tier1', 'tier12'],
@@ -79,7 +82,7 @@ const CUTS = {
   'everything-else': {
     tiers: ['tier12'],
     reason: 'Enumera a malha determinística e admite a própria inutilidade ("restating them to yourself does not"). Tier 2: é o único aviso de que a malha existe.',
-    apply: (t) => cutBetween(t, 'Everything else the consumer already rejects by name before rendering:', '\n'),
+    apply: (t) => { return cutBetween(t, 'Everything else the consumer already rejects by name before rendering:', '\n') },
   },
 };
 
@@ -98,13 +101,13 @@ for (const [name, cut] of Object.entries(CUTS)) {
   });
 }
 
-const tk = (s) => Math.round(s.length / 4);
-console.error(`variante: ${variant}`);
-console.error(`  original: ${tk(system)} tokens aprox.`);
-console.error(`  podado:   ${tk(text)} tokens aprox.  (−${tk(system) - tk(text)})`);
+const tk = (s) => { return Math.round(s.length / 4) };
+warn(`variante: ${variant}`);
+warn(`  original: ${tk(system)} tokens aprox.`);
+warn(`  podado:   ${tk(text)} tokens aprox.  (−${tk(system) - tk(text)})`);
 for (const l of log) {
-  console.error(`  ${l.applied ? '✓' : '✗ NÃO APLICOU'} ${l.name} (−${Math.round(l.saved / 4)} tokens)`);
-  if (!l.applied) console.error(`      marcador não encontrado — o prompt mudou, revise o corte`);
+  warn(`  ${l.applied ? '✓' : '✗ NÃO APLICOU'} ${l.name} (−${Math.round(l.saved / 4)} tokens)`);
+  if (!l.applied) warn(`      marcador não encontrado — o prompt mudou, revise o corte`);
 }
 
 process.stdout.write(text);

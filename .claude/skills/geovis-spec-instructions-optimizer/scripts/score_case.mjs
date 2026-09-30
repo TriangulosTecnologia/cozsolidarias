@@ -17,16 +17,19 @@
 import { readFileSync, statSync, writeFileSync } from 'node:fs';
 import { registerHooks } from 'node:module';
 import { dirname, join, resolve as pres } from 'node:path';
+import process from 'node:process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+
+const print = (line) => { process.stdout.write(`${line}\n`) };
 
 const args = process.argv.slice(2);
 const flags = Object.fromEntries(
-  args.filter((a) => a.startsWith('--')).map((a) => a.replace(/^--/, '').split('='))
+  args.filter((a) => { return a.startsWith('--') }).map((a) => { return a.replace(/^--/, '').split('=') })
 );
-const [outputFile, repoPath] = args.filter((a) => !a.startsWith('--'));
+const [outputFile, repoPath] = args.filter((a) => { return !a.startsWith('--') });
 
 if (!outputFile || !repoPath) {
-  console.error('uso: score_case.mjs <output.json> <repoPath> [--expect=spec|error]');
+  process.stderr.write('uso: score_case.mjs <output.json> <repoPath> [--expect=spec|error]\n');
   process.exit(1);
 }
 
@@ -36,13 +39,15 @@ const firstFile = (base) => {
   for (const ext of EXTS) {
     try {
       if (statSync(base + ext).isFile()) return base + ext;
-    } catch {}
+    } catch {
+      // not a file with this extension; try the next one
+    }
   }
   return null;
 };
 
 registerHooks({
-  resolve(spec, ctx, next) {
+  resolve: (spec, ctx, next) => {
     const base = spec.startsWith('@/')
       ? pres(SRC, spec.slice(2))
       : spec.startsWith('.') && ctx.parentURL
@@ -134,10 +139,10 @@ const result = {
   durationMs: run.durationMs,
   expect,
   checks,
-  passRate: checks.length ? checks.filter((c) => c.passed).length / checks.length : 0,
+  passRate: checks.length ? checks.filter((c) => { return c.passed }).length / checks.length : 0,
 };
 
 const scoreFile = outputFile.replace(/\.json$/, '.score.json');
 writeFileSync(scoreFile, JSON.stringify(result, null, 2));
-console.log(`Score gravado em ${scoreFile} (passRate=${result.passRate})`);
-for (const c of checks.filter((c) => !c.passed)) console.log(`  FALHOU ${c.id}: ${c.note}`);
+print(`Score gravado em ${scoreFile} (passRate=${result.passRate})`);
+for (const c of checks.filter((c) => { return !c.passed })) print(`  FALHOU ${c.id}: ${c.note}`);
