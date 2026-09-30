@@ -17,6 +17,8 @@
  * - `pontos`: flat background so the individual kitchen points stand out;
  * - `circulos`: flat background with one proportional circle per município
  *   (radius encodes the kitchen count);
+ * - `circulos-pessoas`: same circles, but the area encodes the total people
+ *   served (`pessoasAtendidas`); municípios without a parseable total get none;
  * - `assentamentos`: SICAR rural-settlement (AST) polygons of SP, filled and
  *   colored by registration status, with the kitchen points overlaid on top;
  * - `cafs`: the ~3.9M CAFs as a zoom hierarchy — one circle per UF, then one
@@ -49,6 +51,7 @@ export type MapMode =
   | 'coropletico-idhm-educacao-frequencia'
   | 'pontos'
   | 'circulos'
+  | 'circulos-pessoas'
   | 'assentamentos'
   | 'cafs'
   | 'cafs-hexbin';

@@ -1327,6 +1327,32 @@ describe('buildSpec', () => {
     );
   });
 
+  test('circulos-pessoas sizes the bubble join by people served, with an automatic legend', () => {
+    const spec = buildSpec(BY_CITY, 'circulos-pessoas');
+
+    const join = spec.mapData?.find((entry) => {
+      return entry.mapDataId === 'cozinhas-bolhas-data';
+    });
+    expect(join?.mapId).toBe('cozinhas-bubbles');
+    // Beta has no parseable total, so it gets no circle rather than a zero.
+    expect(join?.data).toEqual([{ geometryId: '111', value: 1_000 }]);
+
+    const bubbles = spec.layers.find((layer) => {
+      return layer.id === 'cozinhas-bolhas';
+    });
+    expect(bubbles?.visible).toBe(true);
+    expect(bubbles?.sizeBy).toMatchObject({
+      transform: 'sqrt',
+      thresholds: [0, 1_000],
+    });
+    expect(spec.scaleMaxValue).toBe(1_000);
+
+    const legend = spec.legends?.find((entry) => {
+      return entry.id === 'legenda-pessoas-atendidas';
+    });
+    expect(legend?.position).toBe('bottom-right');
+  });
+
   test('choropleths render the kitchen points as a hidden opt-in overlay', () => {
     const modes = [
       'coropletico',
