@@ -288,6 +288,30 @@ const renderPessoasPorCozinhaTooltip = ({
   );
 };
 
+/** Município tooltip for the `circulos-pessoas` mode: people served plus the kitchen count. */
+const renderPessoasAtendidasTooltip = ({
+  name,
+  register,
+}: {
+  name: string;
+  register?: kitchenRateByCity;
+}) => {
+  const pessoas = register?.pessoasAtendidas ?? null;
+  const cozinhas = register?.quantidade ?? 0;
+
+  return (
+    <TooltipCard
+      name={name}
+      primary={
+        pessoas === null
+          ? 'Sem total de pessoas informado'
+          : `${pessoas.toLocaleString('pt-BR')} pessoas atendidas`
+      }
+      secondary={cozinhas > 0 ? formatCozinhas(cozinhas) : undefined}
+    />
+  );
+};
+
 /**
  * Choropleth modes whose tooltip reads only `{ name, register }` from the
  * canonical cozinha rate rows. Keyed by {@link MapMode} so the dispatcher
@@ -307,6 +331,7 @@ const RATE_TOOLTIPS: Partial<
   'coropletico-percentual': renderPercentTooltip,
   'coropletico-cadunico': renderCadUnicoTooltip,
   'coropletico-pessoas-cozinha': renderPessoasPorCozinhaTooltip,
+  'circulos-pessoas': renderPessoasAtendidasTooltip,
 };
 
 /**
