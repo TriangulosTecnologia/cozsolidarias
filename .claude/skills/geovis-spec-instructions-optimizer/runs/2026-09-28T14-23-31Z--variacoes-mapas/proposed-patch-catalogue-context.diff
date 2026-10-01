@@ -1,0 +1,28 @@
+--- a/src/app/api/ai/spec/mapDataCatalogue.ts
++++ b/src/app/api/ai/spec/mapDataCatalogue.ts
+@@ type CatalogueDatasetIndexEntry = Pick<
+   CatalogueDatasetContract,
+   'id' | 'title' | 'description'
+->;
++> & { collection: Pick<CatalogueDatasetContract['source'], 'title' | 'description'> };
+@@ type CatalogueDatasetDetailEntry = Pick<
+   CatalogueDatasetContract,
+   'id' | 'title' | 'description' | 'spatial' | 'temporal'
+ > & {
++  collection: Pick<CatalogueDatasetContract['source'], 'title' | 'description'>;
+   access: { notes: string | null };
+@@ const toAiDatasetProjection = (
++  const collection = {
++    title: dataset.source.title,
++    description: dataset.source.description,
++  };
+   // index-only branch
+-  return { id: dataset.id, title: dataset.title, description: dataset.description };
++  return { id: dataset.id, title: dataset.title, description: dataset.description, collection };
+   // detail branch
+   return {
+     id: dataset.id,
+     title: dataset.title,
+     description: dataset.description,
++    collection,
+     spatial: dataset.spatial,

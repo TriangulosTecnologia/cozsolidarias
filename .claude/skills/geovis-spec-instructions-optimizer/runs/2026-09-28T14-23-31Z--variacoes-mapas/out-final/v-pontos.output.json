@@ -1,14 +1,10 @@
 {
+  "prompt": "Onde estão localizadas as cozinhas solidárias?",
+  "httpStatus": 200,
+  "durationMs": 10322,
+  "response": {
+    "spec": {
       "engine": "maplibre",
-      "title": "Cozinhas Solidárias cadastradas no Brasil",
-      "description": "Localização individual de todas as cozinhas solidárias cadastradas no Brasil, com endereço, situação de funcionamento e público atendido. Cobertura parcial: o cadastro reúne apenas as cozinhas habilitadas, e parte dos registros não possui coordenadas geográficas — esses casos não aparecem no mapa. Sem corte de data definido: é um retrato do estado atual do cadastro (dado-núcleo do mapa), não de um ano específico.",
-      "view": {
-        "center": [
-          -52,
-          -14
-        ],
-        "zoom": 3.6
-      },
       "sources": [
         {
           "id": "cozinhas",
@@ -20958,31 +20954,49 @@
               }
             ]
           }
+        },
+        {
+          "id": "estados",
+          "type": "geojson",
+          "data": "/geo/estados.json"
         }
       ],
       "layers": [
         {
+          "id": "estados-contorno",
+          "sourceId": "estados",
+          "geometry": "line",
+          "paint": {
+            "line-color": "#aaaaaa",
+            "line-width": 1
+          }
+        },
+        {
           "id": "cozinhas-pontos",
           "sourceId": "cozinhas",
           "geometry": "point",
-          "title": "Cozinhas Solidárias cadastradas",
           "paint": {
-            "circle-color": "#1761A8",
+            "circle-color": "#e05c1a",
             "circle-radius": 5,
-            "circle-stroke-color": "#FAF9F7",
-            "circle-stroke-width": 1,
             "circle-opacity": 0.85
-          },
-          "activeLegendId": "cozinhas-legend"
+          }
         }
       ],
       "legends": [
         {
-          "id": "cozinhas-legend",
-          "title": "Cozinhas Solidárias cadastradas",
-          "subtitle": "Recorte apenas de cozinhas habilitadas; registros sem coordenadas não aparecem no mapa",
-          "reference": "Cozinhas Solidárias geolocalizadas — cadastro com endereço, situação de funcionamento, público atendido e coordenadas geográficas. Snapshot do estado atual do cadastro, sem corte de data definido."
+          "id": "legenda-cozinhas",
+          "title": "Cozinhas Solidárias",
+          "colorBy": {
+            "type": "categorical",
+            "property": "Situação",
+            "mapping": {
+              "Habilitada": "#e05c1a"
+            },
+            "defaultColor": "#e05c1a"
+          }
         }
       ]
-
+    },
+    "error": false
+  }
 }

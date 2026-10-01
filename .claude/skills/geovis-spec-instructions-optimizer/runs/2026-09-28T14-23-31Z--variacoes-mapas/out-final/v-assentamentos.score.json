@@ -1,0 +1,38 @@
+{
+  "id": "v-assentamentos",
+  "mapMode": "assentamentos",
+  "durationMs": 12482,
+  "kind": "variation",
+  "httpStatus": 200,
+  "ok": true,
+  "renderEquivalent": false,
+  "minimal": true,
+  "bindingRecall": 0.5,
+  "expected": [
+    "line @ /geo/assentamentos.json | legend=none",
+    "point @ /api/cozinhas | legend=categorical/4",
+    "polygon @ /geo/assentamentos.json | legend=categorical/3",
+    "polygon @ /geo/estados.json | legend=none"
+  ],
+  "got": [
+    "line @ /geo/assentamentos.json | legend=none",
+    "line @ /geo/estados.json | legend=none",
+    "point @ inline:geojson | legend=categorical/1",
+    "polygon @ /geo/assentamentos.json | legend=categorical/3"
+  ],
+  "missing": [
+    "point @ /api/cozinhas | legend=categorical/4",
+    "polygon @ /geo/estados.json | legend=none"
+  ],
+  "extra": [
+    "line @ /geo/estados.json | legend=none",
+    "point @ inline:geojson | legend=categorical/1"
+  ],
+  "orphans": {
+    "sources": [],
+    "mapData": [],
+    "legends": [],
+    "hiddenLayers": []
+  },
+  "presentationKeys": []
+}

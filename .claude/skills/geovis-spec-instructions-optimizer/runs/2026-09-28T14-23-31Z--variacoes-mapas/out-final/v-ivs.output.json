@@ -1,0 +1,9 @@
+{
+  "prompt": "Mapa do índice de vulnerabilidade social dos municípios",
+  "httpStatus": 502,
+  "durationMs": 7764,
+  "response": {
+    "error": true,
+    "message": "Falha de comunicação com o modelo de IA: (0 , _mapDataCatalogue__WEBPACK_IMPORTED_MODULE_1__.isRenderableDatasetId) is not a function"
+  }
+}

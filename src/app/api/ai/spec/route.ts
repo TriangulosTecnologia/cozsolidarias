@@ -386,5 +386,8 @@ export const POST = async (request: Request): Promise<Response> => {
     return invalidSpecResponse({ issues, spec });
   }
 
-  return Response.json({ spec, error: false });
+  return Response.json({
+    spec,
+    error: false,
+  });
 };

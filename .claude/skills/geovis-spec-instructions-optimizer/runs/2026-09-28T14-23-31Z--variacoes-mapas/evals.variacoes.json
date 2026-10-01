@@ -1,0 +1,17 @@
+{
+  "datasetVersion": "2026-09-28-variacoes-1",
+  "skillVersion": "2.0.0",
+  "goldenCorpus": "src/app/(features)/mapas/specs/full-evalued",
+  "notes": "Reachable = the value the mode paints is returned by a RENDERABLE_DATASET_FETCHERS entry. municipios_ivs returns only `ivs` and municipios_cadinsan only `proporcaoComPbf`, so IDHM and 'sem PBF' are refusals even though the fields exist in the catalogue.",
+  "cases": [
+    { "id": "v-coropletico", "mapMode": "coropletico", "kind": "variation", "golden": "coropletico.json", "prompt": "Quero ver o mapa coroplético da quantidade de cozinhas por município" },
+    { "id": "v-ivs", "mapMode": "coropletico-ivs", "kind": "variation", "golden": "coropletico-ivs.json", "prompt": "Mapa do índice de vulnerabilidade social dos municípios" },
+    { "id": "v-cadinsan-com-pbf", "mapMode": "coropletico-cadinsan-com-pbf", "kind": "variation", "golden": "coropletico-cadinsan-com-pbf.json", "prompt": "Mapa da proporção de famílias do CadÚnico em insegurança alimentar, considerando o Bolsa Família, por município" },
+    { "id": "v-pontos", "mapMode": "pontos", "kind": "variation", "golden": "pontos.json", "dropFlatFill": true, "prompt": "Onde estão localizadas as cozinhas solidárias?" },
+    { "id": "v-circulos", "mapMode": "circulos", "kind": "variation", "golden": "circulos.json", "dropFlatFill": true, "prompt": "Quantas cozinhas solidárias existem em cada município? Mostre em círculos proporcionais" },
+    { "id": "v-assentamentos", "mapMode": "assentamentos", "kind": "variation", "golden": "assentamentos.json", "prompt": "Mostre os assentamentos rurais junto com as cozinhas solidárias e o contorno dos estados" },
+    { "id": "r-idhm", "mapMode": "coropletico-idhm", "kind": "refusal", "expect": "error", "prompt": "Mapa do IDHM por município" },
+    { "id": "r-taxa", "mapMode": "coropletico-taxa", "kind": "refusal", "expect": "error", "prompt": "Mapa de cozinhas por 100 mil habitantes em cada município" },
+    { "id": "r-cadinsan-sem-pbf", "mapMode": "coropletico-cadinsan-sem-pbf", "kind": "refusal", "expect": "error", "prompt": "Mapa da proporção de famílias em insegurança alimentar sem o efeito do Bolsa Família, por município" }
+  ]
+}

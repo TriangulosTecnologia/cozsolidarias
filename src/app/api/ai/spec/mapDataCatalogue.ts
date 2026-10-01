@@ -9,28 +9,6 @@ import type {
 import { gateway } from '@/gateway';
 
 /**
- * The catalog datasets with a real, end-to-end path to `data-gateway` data —
- * the only ids the agent may reference in `mapData[].mapDataId` (see
- * `RENDERABLE_DATASET_FETCHERS`). Every other catalog entry stays
- * index-only context (see {@link buildCatalogueContext}).
- */
-export const RENDERABLE_DATASET_IDS = [
-  'cozinhas_geolocalizadas',
-  'cozinhas_geolocalizadas_2025',
-  'cozinhas_pessoas_atendidas',
-  'municipios_ivs',
-  'municipios_cadinsan',
-] as const;
-
-export type RenderableDatasetId = (typeof RENDERABLE_DATASET_IDS)[number];
-
-export const isRenderableDatasetId = (
-  value: string
-): value is RenderableDatasetId => {
-  return (RENDERABLE_DATASET_IDS as readonly string[]).includes(value);
-};
-
-/**
  * Renderable datasets whose value is an absolute total (a raw sum), never a
  * relative variable (rate/ratio/percentage) — per Bertin's graphic semiology
  * (*Sémiologie Graphique*, 1967) and IBGE's technical cartography manuals,
@@ -61,10 +39,7 @@ const toMapDataRows = <T extends { codigoIbge: string }>(
  * `data-gateway` — the registry `appendRealMapData` looks up to replace the
  * agent's placeholder `data` (see ADR-0001).
  */
-export const RENDERABLE_DATASET_FETCHERS: Record<
-  RenderableDatasetId,
-  () => Promise<Array<{ geometryId: string; value: number }>>
-> = {
+export const RENDERABLE_DATASET_FETCHERS = {
   cozinhas_geolocalizadas: async () => {
     const rows: kitchenRateByCity[] = await gateway.getCozinhasPorMunicipio();
     return toMapDataRows(rows, (row) => {
@@ -96,6 +71,20 @@ export const RENDERABLE_DATASET_FETCHERS: Record<
       return row.proporcaoComPbf;
     });
   },
+} as const;
+
+export type RenderableDatasetId = keyof typeof RENDERABLE_DATASET_FETCHERS;
+
+/** List of dataset IDs that the agent may reference in `mapData`. */
+export const RENDERABLE_DATASET_IDS = Object.keys(
+  RENDERABLE_DATASET_FETCHERS
+) as RenderableDatasetId[];
+
+/** Type guard: check if a dataset ID is renderable. */
+export const isRenderableDatasetId = (
+  id: unknown
+): id is RenderableDatasetId => {
+  return typeof id === 'string' && id in RENDERABLE_DATASET_FETCHERS;
 };
 
 /** The index-only shape a non-renderable dataset is reduced to — enough for
@@ -133,14 +122,6 @@ type CatalogueDatasetDetailEntry = Pick<
 const toAiDatasetProjection = (
   dataset: CatalogueDatasetContract
 ): CatalogueDatasetIndexEntry | CatalogueDatasetDetailEntry => {
-  if (!isRenderableDatasetId(dataset.id)) {
-    return {
-      id: dataset.id,
-      title: dataset.title,
-      description: dataset.description,
-    };
-  }
-
   return {
     id: dataset.id,
     title: dataset.title,

@@ -1,0 +1,9 @@
+{
+  "prompt": "Quantas cozinhas solidárias existem em cada município? Mostre em círculos proporcionais",
+  "httpStatus": 502,
+  "durationMs": 10753,
+  "response": {
+    "error": true,
+    "message": "Falha de comunicação com o modelo de IA: (0 , _mapDataCatalogue__WEBPACK_IMPORTED_MODULE_1__.isRenderableDatasetId) is not a function"
+  }
+}
