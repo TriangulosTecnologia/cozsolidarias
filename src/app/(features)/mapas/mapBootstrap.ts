@@ -1,9 +1,9 @@
 import type {
-  cadinsanByCity,
-  cafByCity,
+  CadinsanByCity,
+  CafByCity,
   CafHexbinFeatureCollection,
   CafUfFeatureCollection,
-  kitchenRateByCity,
+  KitchenRateByCity,
   MunicipioIvs,
 } from '@/data-gateway/schema';
 
@@ -17,7 +17,7 @@ import type { NomesPorCodigo } from './useMapaSpec';
  */
 export type MapDatasets = {
   /** Per-município cozinha counts and derived rates; the map's base dataset. */
-  data: kitchenRateByCity[];
+  data: KitchenRateByCity[];
   /** Per-município IVS/IDHM scores, behind the `coropletico-ivs*`/`-idhm*` modes. */
   ivs: MunicipioIvs[];
   /** `codigoIbge → nome` for every município, read by the hover tooltips. */
@@ -25,7 +25,7 @@ export type MapDatasets = {
   /** The assentamentos attribute sidecar (~550 KB); the multi-MB geometry is the map source's. */
   settlements: AssentamentoAtributo[];
   /** Per-município CAF shares for the "% dos CAFs do Brasil" choropleth. */
-  cafsByCity: cafByCity[];
+  cafsByCity: CafByCity[];
   /**
    * The 27 UF anchors with their CAF totals (~2 KB). Held here rather than left
    * to the map source so the `cafs` mode's hover join reads exactly the numbers
@@ -33,7 +33,7 @@ export type MapDatasets = {
    */
   cafPontosPorUf?: CafUfFeatureCollection;
   /** Per-município CADINSAN food-insecurity shares for the food-insecurity choropleths. */
-  cadinsanByCity: cadinsanByCity[];
+  cadinsanByCity: CadinsanByCity[];
   /**
    * The H3 hexagon grid with its CAF counts, behind the `cafs-hexbin` mode.
    * Held here rather than left to the map source so the join reads exactly the
@@ -63,7 +63,7 @@ const fetchJson = async <T>(url: string): Promise<T> => {
 /** Where each snapshot comes from. One request per key, never batched. */
 const FETCHERS: { [K in MapDatasetKey]: () => Promise<MapDatasets[K]> } = {
   data: () => {
-    return fetchJson<kitchenRateByCity[]>('/api/cozinhas/por-municipio');
+    return fetchJson<KitchenRateByCity[]>('/api/cozinhas/por-municipio');
   },
   ivs: () => {
     return fetchJson<MunicipioIvs[]>('/api/municipios/ivs');
@@ -77,13 +77,13 @@ const FETCHERS: { [K in MapDatasetKey]: () => Promise<MapDatasets[K]> } = {
     );
   },
   cafsByCity: () => {
-    return fetchJson<cafByCity[]>('/api/cafs/por-municipio');
+    return fetchJson<CafByCity[]>('/api/cafs/por-municipio');
   },
   cafPontosPorUf: () => {
     return fetchJson<CafUfFeatureCollection>('/api/cafs/pontos-por-uf');
   },
   cadinsanByCity: () => {
-    return fetchJson<cadinsanByCity[]>('/api/cadinsan/por-municipio');
+    return fetchJson<CadinsanByCity[]>('/api/cadinsan/por-municipio');
   },
   cafHexbin: () => {
     return fetchJson<CafHexbinFeatureCollection>(CAF_HEXBIN_URL);

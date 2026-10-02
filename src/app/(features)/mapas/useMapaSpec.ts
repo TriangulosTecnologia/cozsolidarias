@@ -6,12 +6,12 @@ import {
 import * as React from 'react';
 
 import type {
-  cadinsanByCity,
-  cafByCity,
+  CadinsanByCity,
+  CafByCity,
   CafHexbinFeatureCollection,
   CafUfFeatureCollection,
   CozinhasFeatureCollection,
-  kitchenRateByCity,
+  KitchenRateByCity,
   MunicipioIvs,
 } from '@/data-gateway/schema';
 
@@ -121,7 +121,7 @@ const useMapaBoundaries = ({
 
 /** The map data the spec is derived from, plus the active visualization mode. */
 type UseMapaSpecParams = {
-  kitchenByCity: kitchenRateByCity[];
+  kitchenByCity: KitchenRateByCity[];
   ivsByCity: MunicipioIvs[];
   nomesPorCodigo: NomesPorCodigo;
   assentamentos: AssentamentoAtributo[];
@@ -129,7 +129,7 @@ type UseMapaSpecParams = {
   /** `codigo → emFuncionamento` for every kitchen point; colors the points by status. */
   cozinhaStatus: Record<string, string>;
   /** Per-município CAF shares for the "% dos CAFs do Brasil" choropleth. */
-  cafByCity: cafByCity[];
+  cafByCity: CafByCity[];
   /**
    * The 27 UF anchors with their CAF totals. Feeds the `cafs` mode's country
    * level and the join behind its hover card; `undefined` until it loads, which
@@ -137,7 +137,7 @@ type UseMapaSpecParams = {
    */
   cafPontosPorUf?: CafUfFeatureCollection;
   /** Per-município CADINSAN food-insecurity shares for the food-insecurity choropleths. */
-  cadinsanByCity: cadinsanByCity[];
+  cadinsanByCity: CadinsanByCity[];
   /**
    * The H3 hexagon grid with its CAF counts, behind the `cafs-hexbin` mode.
    * `undefined` until it loads, which leaves the source on its URL.

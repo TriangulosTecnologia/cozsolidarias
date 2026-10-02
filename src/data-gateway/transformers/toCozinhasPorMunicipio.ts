@@ -5,7 +5,7 @@ import type {
 } from '@ttoss/geovis';
 
 import type { StaticCozinhaSource } from '../../data-source-static/types';
-import type { kitchenByCity, kitchenRateByCity } from '../schema';
+import type { KitchenByCity, KitchenRateByCity } from '../schema';
 
 /** Axis-aligned bounding box: `[minLng, minLat, maxLng, maxLat]`. */
 type BBox = [number, number, number, number];
@@ -188,7 +188,7 @@ const mostVotedName = (nameVotes: Map<string, number>): string => {
 };
 
 /** A município with its cozinha count plus a representative anchor point. */
-export type MunicipioAggregate = kitchenByCity & {
+export type MunicipioAggregate = KitchenByCity & {
   /**
    * Representative point for the município, as the mean of its member cozinha
    * coordinates (`[lng, lat]`). Always lands among the actual cozinhas, so it's
@@ -309,12 +309,12 @@ export const aggregateCozinhasPorMunicipio = (
  * Thin projection of {@link aggregateCozinhasPorMunicipio} that drops the
  * geometry anchor, for consumers (the choropleth) that only need the counts.
  *
- * @returns One {@link kitchenByCity} per município that has ≥1 cozinha.
+ * @returns One {@link KitchenByCity} per município that has ≥1 cozinha.
  */
 export const toCozinhasPorMunicipio = (
   cozinhas: StaticCozinhaSource[],
   municipios: GeoJSONFeatureCollection
-): kitchenByCity[] => {
+): KitchenByCity[] => {
   return aggregateCozinhasPorMunicipio(cozinhas, municipios).map(
     ({ codigoIbge, municipio, quantidade, pessoasAtendidas }) => {
       return { codigoIbge, municipio, quantidade, pessoasAtendidas };
@@ -450,7 +450,7 @@ export const cozinhasPercentualDoBrasil = ({
  * {@link aggregateCozinhasPorMunicipio}.
  * @param params.populacao - Flat `{ codigoIbge: habitantes }` snapshot.
  * @param params.cadunico - Flat `{ codigoIbge: pessoasCadastradas }` snapshot.
- * @returns One {@link kitchenRateByCity} per município in the aggregate.
+ * @returns One {@link KitchenRateByCity} per município in the aggregate.
  *
  * @example
  * projectComTaxa({ aggregate, populacao, cadunico });
@@ -464,7 +464,7 @@ export const projectComTaxa = ({
   aggregate: MunicipioAggregate[];
   populacao: Record<string, number>;
   cadunico: Record<string, number>;
-}): kitchenRateByCity[] => {
+}): KitchenRateByCity[] => {
   const total = aggregate.reduce((sum, { quantidade }) => {
     return sum + quantidade;
   }, 0);

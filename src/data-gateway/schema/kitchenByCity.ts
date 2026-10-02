@@ -8,7 +8,7 @@
  */
 
 /** A single município with its cozinha count. */
-export type kitchenByCity = {
+export type KitchenByCity = {
   /** 7-digit IBGE code; joins to `feature.properties.codarea` on the map. */
   codigoIbge: string;
   /** Município name (for display); taken from the source records. */
@@ -28,14 +28,14 @@ export type kitchenByCity = {
  * A município row enriched with its IBGE Census 2022 population, its Cadastro
  * Único registration count, and three derived choropleth metrics — the shape
  * served by `/api/cozinhas/por-municipio` and consumed by every choropleth
- * variant. The count variant colors the fill by {@link kitchenByCity.quantidade},
- * the rate variant by {@link kitchenRateByCity.porCemMil}, the share variant by
- * {@link kitchenRateByCity.percentualDoBrasil}, the CadÚnico variant by
- * {@link kitchenRateByCity.porDezMilCadUnico}, and the coverage variant by
- * {@link kitchenRateByCity.pessoasPorCozinha}; each variant ignores the fields it
+ * variant. The count variant colors the fill by {@link KitchenByCity.quantidade},
+ * the rate variant by {@link KitchenRateByCity.porCemMil}, the share variant by
+ * {@link KitchenRateByCity.percentualDoBrasil}, the CadÚnico variant by
+ * {@link KitchenRateByCity.porDezMilCadUnico}, and the coverage variant by
+ * {@link KitchenRateByCity.pessoasPorCozinha}; each variant ignores the fields it
  * doesn't use.
  */
-export type kitchenRateByCity = kitchenByCity & {
+export type KitchenRateByCity = KitchenByCity & {
   /**
    * Município resident population (IBGE Census 2022). `null` when the município
    * has no entry in the population snapshot (no valid rate denominator).

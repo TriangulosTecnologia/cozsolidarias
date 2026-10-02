@@ -64,6 +64,10 @@ export default [
         'error',
         { max: 249, skipBlankLines: true, skipComments: true },
       ],
+      '@typescript-eslint/naming-convention': [
+        'error',
+        { selector: 'typeLike', format: ['PascalCase'] },
+      ],
     },
   },
   // Layer boundaries: src/app → src/data-gateway → src/data-source-*.

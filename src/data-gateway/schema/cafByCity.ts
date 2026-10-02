@@ -12,9 +12,9 @@
 /**
  * A single município row with its CAF count and its share (%) of Brazil's CAFs
  * — the shape served by `/api/cafs/por-municipio` and consumed by the CAF share
- * choropleth. The share variant colors the fill by {@link cafByCity.percentualDoBrasil}.
+ * choropleth. The share variant colors the fill by {@link CafByCity.percentualDoBrasil}.
  */
-export type cafByCity = {
+export type CafByCity = {
   /** 7-digit IBGE code; joins to `feature.properties.codarea` on the map. */
   codigoIbge: string;
   /** Município name (for display); taken from the CAF source records. */

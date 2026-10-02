@@ -14,10 +14,10 @@
 /**
  * A single município row with its food-insecurity headcounts (with/without
  * Programa Bolsa Família), the CadÚnico total, and the derived shares (%). The
- * "com PBF" choropleth paints {@link cadinsanByCity.proporcaoComPbf}; the "sem
- * PBF" one paints {@link cadinsanByCity.proporcaoSemPbf}.
+ * "com PBF" choropleth paints {@link CadinsanByCity.proporcaoComPbf}; the "sem
+ * PBF" one paints {@link CadinsanByCity.proporcaoSemPbf}.
  */
-export type cadinsanByCity = {
+export type CadinsanByCity = {
   /** 7-digit IBGE code; joins to `feature.properties.codarea` on the map. */
   codigoIbge: string;
   /** Município name (for display), from the CADINSAN source. */

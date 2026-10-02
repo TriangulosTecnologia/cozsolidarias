@@ -1,5 +1,5 @@
 import type { StaticCadinsanMunicipioSource } from '../../data-source-static/types';
-import type { cadinsanByCity } from '../schema';
+import type { CadinsanByCity } from '../schema';
 
 /**
  * Share (%) of a município's CadÚnico families in food insecurity:
@@ -41,7 +41,7 @@ export const cadinsanProporcao = ({
  *
  * @param sources - Per-município CADINSAN rows from
  * {@link StaticCadinsanMunicipioSource} (`readStaticCadinsanMunicipal`).
- * @returns One {@link cadinsanByCity} per município in the snapshot.
+ * @returns One {@link CadinsanByCity} per município in the snapshot.
  *
  * @example
  * toCadinsanPorMunicipio([{
@@ -53,7 +53,7 @@ export const cadinsanProporcao = ({
  */
 export const toCadinsanPorMunicipio = (
   sources: StaticCadinsanMunicipioSource[]
-): cadinsanByCity[] => {
+): CadinsanByCity[] => {
   return sources.map((source) => {
     return {
       codigoIbge: source.codigoIbge,

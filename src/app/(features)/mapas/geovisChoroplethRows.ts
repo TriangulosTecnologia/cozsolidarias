@@ -1,10 +1,10 @@
 import type { MapDataRow } from '@ttoss/geovis';
 
 import type {
-  cadinsanByCity,
-  cafByCity,
-  kitchenByCity,
-  kitchenRateByCity,
+  CadinsanByCity,
+  CafByCity,
+  KitchenByCity,
+  KitchenRateByCity,
   MunicipioIvs,
 } from '@/data-gateway/schema';
 
@@ -20,7 +20,7 @@ import { jenksBreaksForMode, type MapMode } from './geovisScales';
  * toValueRows([{ codigoIbge: '3550308', quantidade: 5 }]);
  * // [{ geometryId: '3550308', value: 5 }]
  */
-export const toValueRows = (byCity: kitchenByCity[]): MapDataRow[] => {
+export const toValueRows = (byCity: KitchenByCity[]): MapDataRow[] => {
   return byCity.map((register) => {
     return { geometryId: register.codigoIbge, value: register.quantidade };
   });
@@ -31,7 +31,7 @@ export const toValueRows = (byCity: kitchenByCity[]): MapDataRow[] => {
  * with an unknown rate (`porCemMil === null`) so they fall back to the legend's
  * `defaultColor` ("sem dado") instead of being colored as a low rate.
  */
-const toRateRows = (byCity: kitchenRateByCity[]): MapDataRow[] => {
+const toRateRows = (byCity: KitchenRateByCity[]): MapDataRow[] => {
   return byCity.flatMap((register) => {
     return register.porCemMil === null
       ? []
@@ -45,7 +45,7 @@ const toRateRows = (byCity: kitchenRateByCity[]): MapDataRow[] => {
  * data (no cozinha) are the only ones that fall back to the legend's
  * `defaultColor` ("sem cozinha").
  */
-const toPercentRows = (byCity: kitchenRateByCity[]): MapDataRow[] => {
+const toPercentRows = (byCity: KitchenRateByCity[]): MapDataRow[] => {
   return byCity.map((register) => {
     return {
       geometryId: register.codigoIbge,
@@ -60,7 +60,7 @@ const toPercentRows = (byCity: kitchenRateByCity[]): MapDataRow[] => {
  * CAF snapshot (no CAF) are the only ones that fall back to the legend's
  * `defaultColor` ("sem CAF").
  */
-const toCafPercentRows = (byCity: cafByCity[]): MapDataRow[] => {
+const toCafPercentRows = (byCity: CafByCity[]): MapDataRow[] => {
   return byCity.map((register) => {
     return {
       geometryId: register.codigoIbge,
@@ -77,8 +77,8 @@ const toCafPercentRows = (byCity: cafByCity[]): MapDataRow[] => {
  * lightest band.
  */
 const toCadinsanRows = (
-  cadinsanByCity: cadinsanByCity[],
-  pick: (register: cadinsanByCity) => number | null
+  cadinsanByCity: CadinsanByCity[],
+  pick: (register: CadinsanByCity) => number | null
 ): MapDataRow[] => {
   return cadinsanByCity.flatMap((register) => {
     const value = pick(register);
@@ -91,7 +91,7 @@ const toCadinsanRows = (
  * municípios with an unknown rate (`porDezMilCadUnico === null`) so they fall
  * back to the legend's `defaultColor` ("sem dado") instead of a low rate.
  */
-const toCadUnicoRows = (byCity: kitchenRateByCity[]): MapDataRow[] => {
+const toCadUnicoRows = (byCity: KitchenRateByCity[]): MapDataRow[] => {
   return byCity.flatMap((register) => {
     return register.porDezMilCadUnico === null
       ? []
@@ -109,7 +109,7 @@ const toCadUnicoRows = (byCity: kitchenRateByCity[]): MapDataRow[] => {
  * dropping municípios with an unknown value (`pessoasPorCozinha === null`) so
  * they fall back to the legend's `defaultColor` ("sem dado").
  */
-const toPessoasPorCozinhaRows = (byCity: kitchenRateByCity[]): MapDataRow[] => {
+const toPessoasPorCozinhaRows = (byCity: KitchenRateByCity[]): MapDataRow[] => {
   return byCity.flatMap((register) => {
     return register.pessoasPorCozinha === null
       ? []
@@ -185,7 +185,7 @@ const SCORE_PICKERS: Partial<
  * score families are handled separately via {@link SCORE_PICKERS}.
  */
 const CHOROPLETH_ROW_BUILDERS: Partial<
-  Record<MapMode, (byCity: kitchenRateByCity[]) => MapDataRow[]>
+  Record<MapMode, (byCity: KitchenRateByCity[]) => MapDataRow[]>
 > = {
   coropletico: toValueRows,
   'coropletico-taxa': toRateRows,
@@ -213,10 +213,10 @@ const CHOROPLETH_ROW_BUILDERS: Partial<
  */
 export const resolveChoroplethRows = (
   mode: MapMode,
-  byCity: kitchenRateByCity[],
+  byCity: KitchenRateByCity[],
   ivsByCity: MunicipioIvs[],
-  cafByCity: cafByCity[],
-  cadinsanByCity: cadinsanByCity[]
+  cafByCity: CafByCity[],
+  cadinsanByCity: CadinsanByCity[]
 ): MapDataRow[] => {
   if (mode === 'coropletico-cafs-percentual') {
     return toCafPercentRows(cafByCity);
@@ -241,10 +241,10 @@ export const resolveChoroplethRows = (
 
 /** The snapshots a mode's choropleth is derived from; the memo's identity key. */
 export type ChoroplethSources = {
-  byCity: kitchenRateByCity[];
+  byCity: KitchenRateByCity[];
   ivsByCity: MunicipioIvs[];
-  cafByCity: cafByCity[];
-  cadinsanByCity: cadinsanByCity[];
+  cafByCity: CafByCity[];
+  cadinsanByCity: CadinsanByCity[];
 };
 
 /** What a mode paints: its value rows and the Jenks breaks fitted to them. */

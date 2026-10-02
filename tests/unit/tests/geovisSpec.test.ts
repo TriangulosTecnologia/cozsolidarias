@@ -23,15 +23,15 @@ import {
   buildSpec,
 } from 'src/app/(features)/mapas/geovisSpec';
 import type {
-  cadinsanByCity,
-  cafByCity,
+  CadinsanByCity,
+  CafByCity,
   CafHexbinFeatureCollection,
   CafUfFeatureCollection,
-  kitchenRateByCity,
+  KitchenRateByCity,
   MunicipioIvs,
 } from 'src/data-gateway/schema';
 
-const BY_CITY: kitchenRateByCity[] = [
+const BY_CITY: KitchenRateByCity[] = [
   {
     codigoIbge: '111',
     municipio: 'Alpha',
@@ -58,7 +58,7 @@ const BY_CITY: kitchenRateByCity[] = [
   },
 ];
 
-const CAF_BY_CITY: cafByCity[] = [
+const CAF_BY_CITY: CafByCity[] = [
   {
     codigoIbge: '111',
     municipio: 'Alpha',
@@ -73,7 +73,7 @@ const CAF_BY_CITY: cafByCity[] = [
   },
 ];
 
-const CADINSAN_BY_CITY: cadinsanByCity[] = [
+const CADINSAN_BY_CITY: CadinsanByCity[] = [
   {
     codigoIbge: '111',
     municipio: 'Alpha',

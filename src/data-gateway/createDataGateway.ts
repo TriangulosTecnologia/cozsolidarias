@@ -15,8 +15,8 @@ import { readStaticIvs } from '../data-source-static/readStaticIvs';
 import { readStaticMunicipios } from '../data-source-static/readStaticMunicipios';
 import { readStaticPopulacao } from '../data-source-static/readStaticPopulacao';
 import type {
-  cadinsanByCity,
-  cafByCity,
+  CadinsanByCity,
+  CafByCity,
   CafHexbinFeatureCollection,
   CafHexbinResolution,
   CafUfFeatureCollection,
@@ -24,7 +24,7 @@ import type {
   CozinhaDetalhe,
   CozinhasBubblesFeatureCollection,
   CozinhasFeatureCollection,
-  kitchenRateByCity,
+  KitchenRateByCity,
   MunicipioIvs,
 } from './schema';
 import { DEFAULT_CAF_HEXBIN_RESOLUTION } from './schema';
@@ -51,7 +51,7 @@ export type DataGateway = {
    * pre-aggregated `caf-por-municipio.json` snapshot (the raw `caf-area.csv` is
    * too large to aggregate at request time).
    */
-  getCafsPorMunicipio: () => Promise<cafByCity[]>;
+  getCafsPorMunicipio: () => Promise<CafByCity[]>;
   /**
    * Returns one GeoJSON Point per UF, positioned at the CAF-weighted centroid of
    * its municípios and carrying the UF's CAF total — the country level of the
@@ -77,7 +77,7 @@ export type DataGateway = {
    * derived shares (%), for the food-insecurity choropleths. The source is
    * already per-município, so this is a cheap projection (no aggregation).
    */
-  getCadinsanPorMunicipio: () => Promise<cadinsanByCity[]>;
+  getCadinsanPorMunicipio: () => Promise<CadinsanByCity[]>;
   /**
    * Returns the data catalogue — every dataset's origin, coverage, access,
    * volume and field-level dictionary — as rendered by `/dados`.
@@ -115,7 +115,7 @@ export type DataGateway = {
    * rate, share of Brazil, per-100k-CadÚnico rate) for the choropleth variants,
    * for the given snapshot year (see {@link getCozinhasYears}).
    */
-  getCozinhasPorMunicipio: (year?: number) => Promise<kitchenRateByCity[]>;
+  getCozinhasPorMunicipio: (year?: number) => Promise<KitchenRateByCity[]>;
   /**
    * Returns one anchor Point per município with its cozinha count (for the
    * proportional-circle map), for the given snapshot year.

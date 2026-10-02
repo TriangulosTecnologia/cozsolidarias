@@ -4,7 +4,7 @@ import {
   jenksBreaksForMode,
   type MapMode,
 } from 'src/app/(features)/mapas/geovisScales';
-import type { kitchenRateByCity } from 'src/data-gateway/schema';
+import type { KitchenRateByCity } from 'src/data-gateway/schema';
 
 /** A wide, all-distinct sample that clears every ad-hoc mode's floor and band count. */
 const SAMPLE = Array.from({ length: 50 }, (_, index) => {
@@ -139,7 +139,7 @@ describe('buildLegends with Jenks breaks', () => {
 
 describe('resolveChoropleth', () => {
   /** Eight municípios with distinct counts — enough to clear every ad-hoc floor. */
-  const buildByCity = (): kitchenRateByCity[] => {
+  const buildByCity = (): KitchenRateByCity[] => {
     return Array.from({ length: 8 }, (_, index) => {
       return {
         codigoIbge: String(100 + index),
@@ -155,7 +155,7 @@ describe('resolveChoropleth', () => {
     });
   };
 
-  const sources = (byCity: kitchenRateByCity[]) => {
+  const sources = (byCity: KitchenRateByCity[]) => {
     return { byCity, ivsByCity: [], cafByCity: [], cadinsanByCity: [] };
   };
 

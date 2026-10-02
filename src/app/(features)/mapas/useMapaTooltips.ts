@@ -2,9 +2,9 @@ import { type MapHoverInfo } from '@ttoss/geovis';
 import * as React from 'react';
 
 import type {
-  cadinsanByCity,
-  cafByCity,
-  kitchenRateByCity,
+  CadinsanByCity,
+  CafByCity,
+  KitchenRateByCity,
 } from '@/data-gateway/schema';
 
 import { cozinhaStatusLabel } from './geovisCozinhaStatusScales';
@@ -50,16 +50,16 @@ const cafUfTooltip = (info: MapHoverInfo) => {
 
 /** The lookups and active mode each hover tooltip is derived from. */
 type UseMapaTooltipsParams = {
-  kitchenByCity: kitchenRateByCity[];
+  kitchenByCity: KitchenRateByCity[];
   nomesPorCodigo: NomesPorCodigo;
   assentamentos: AssentamentoAtributo[];
   cozinhaNames: Record<string, string>;
   /** `codigo → emFuncionamento`, so the kitchen hover shows the operating status. */
   cozinhaStatus: Record<string, string>;
   /** Per-município CAF rows, so the CAF choropleth hover shows the share + count. */
-  cafByCity: cafByCity[];
+  cafByCity: CafByCity[];
   /** Per-município CADINSAN rows, so the food-insecurity hover shows the share + counts. */
-  cadinsanByCity: cadinsanByCity[];
+  cadinsanByCity: CadinsanByCity[];
   mode: MapMode;
   /**
    * The ramp the map is being read through, from the settings zone. The hover

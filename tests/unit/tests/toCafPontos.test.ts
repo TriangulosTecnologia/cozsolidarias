@@ -1,4 +1,4 @@
-import type { cafByCity } from 'src/data-gateway/schema';
+import type { CafByCity } from 'src/data-gateway/schema';
 import { toCafUfPontos } from 'src/data-gateway/transformers/toCafPontos';
 import type { StaticCafPontosSource } from 'src/data-source-static/types';
 
@@ -21,7 +21,7 @@ const ANCHORS: StaticCafPontosSource = {
   ],
 };
 
-const row = (codigoIbge: string, quantidade: number): cafByCity => {
+const row = (codigoIbge: string, quantidade: number): CafByCity => {
   return {
     codigoIbge,
     municipio: `Município ${codigoIbge}`,
