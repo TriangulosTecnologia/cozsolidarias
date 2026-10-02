@@ -136,6 +136,41 @@ describe('createDataGateway', () => {
     expect(totalShare).toBeLessThan(103);
   });
 
+  /*
+   * The município join counts a cozinha only when it has coordinates and its
+   * point lies inside a município polygon; every other cozinha is dropped
+   * without an error. The pins below are the drops measured on the latest
+   * snapshot (2026, 1396 records), so a data or geometry change that drops
+   * more cozinhas fails here instead of silently shrinking the choropleth.
+   * The 8 outside points all declare municípios the geometry contains and sit
+   * on municipal borders or coastlines (São Paulo ×2, Teresina, Salvador,
+   * Acarape, Fortaleza, Vitória, Alvorada) that the polygons do not cover.
+   */
+  test('accounts for every cozinha of the latest snapshot the município join drops', async () => {
+    const WITHOUT_COORDINATES = 0;
+    const WITHIN_POLYGONS = 1388;
+    const OUTSIDE_POLYGONS = 8;
+    const gateway = createDataGateway();
+
+    const [sources, byCity] = await Promise.all([
+      readStaticCozinhas({ year: LATEST_COZINHA_YEAR }),
+      gateway.getCozinhasPorMunicipio(LATEST_COZINHA_YEAR),
+    ]);
+
+    const withoutCoordinates = sources.filter((source) => {
+      return source.latitude === null || source.longitude === null;
+    }).length;
+    const withinPolygons = byCity.reduce((sum, entry) => {
+      return sum + entry.quantidade;
+    }, 0);
+
+    expect(withoutCoordinates).toBe(WITHOUT_COORDINATES);
+    expect(withinPolygons).toBe(WITHIN_POLYGONS);
+    expect(sources.length).toBe(
+      withoutCoordinates + withinPolygons + OUTSIDE_POLYGONS
+    );
+  });
+
   test('returns the same canonical rows across repeated calls (snapshots are memoized)', async () => {
     const gateway = createDataGateway();
 
