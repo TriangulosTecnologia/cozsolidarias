@@ -7,6 +7,24 @@
  * its administrative columns (`Código IBGE`, refeições/dia) are intentionally
  * left out of the contract. An empty string means "não informado" — the source
  * already normalizes blank cells to `''`.
+ *
+ * @example
+ * const detalhe: CozinhaDetalhe = {
+ *   codigo: 'CS016282',
+ *   nome: 'AÇÃO CRISTÃ ESPÍRITA JESUS DE NAZARÉ',
+ *   endereco: 'Rua Itamogi, 14',
+ *   bairro: 'Sepetiba',
+ *   cep: '23545-120',
+ *   municipio: 'RIO DE JANEIRO',
+ *   uf: 'RJ',
+ *   emFuncionamento: 'Sim, está funcionando normalmente',
+ *   diasFuncionamento: '3 vezes por semana',
+ *   situacao: 'Habilitada',
+ *   publicoAtendido: 'Mulheres, Jovens, Crianças, Idosos, …',
+ *   publicoTotalAtendido: '348',
+ *   latitude: -22.9632323,
+ *   longitude: -43.7075766,
+ * };
  */
 export type CozinhaDetalhe = {
   /** Registration code (`Código da Cozinha`), e.g. `CS016282`. The lookup key. */

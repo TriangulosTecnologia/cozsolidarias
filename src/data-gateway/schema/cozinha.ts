@@ -9,7 +9,20 @@
  * MapLibre feature ids must be numeric unless promoted from a property.
  */
 
-/** A single cozinha location as a GeoJSON Point feature. */
+/**
+ * A single cozinha location as a GeoJSON Point feature.
+ *
+ * @example
+ * const cozinha: CozinhaLocationFeature = {
+ *   type: 'Feature',
+ *   geometry: { type: 'Point', coordinates: [-43.7075766, -22.9632323] },
+ *   properties: {
+ *     codigo: 'CS016282',
+ *     nome: 'AÇÃO CRISTÃ ESPÍRITA JESUS DE NAZARÉ',
+ *     emFuncionamento: 'Sim, está funcionando normalmente',
+ *   },
+ * };
+ */
 export type CozinhaLocationFeature = {
   type: 'Feature';
   geometry: {
@@ -34,7 +47,13 @@ export type CozinhaLocationFeature = {
   };
 };
 
-/** Collection of cozinha locations, ready to feed a GeoJSON map source. */
+/**
+ * Collection of cozinha locations, ready to feed a GeoJSON map source.
+ *
+ * @example
+ * const cozinhas: CozinhasFeatureCollection = await gateway.getCozinhas(); // latest snapshot
+ * cozinhas.features[0].properties.codigo; // e.g. 'CS016282'
+ */
 export type CozinhasFeatureCollection = {
   type: 'FeatureCollection';
   features: CozinhaLocationFeature[];
@@ -44,6 +63,13 @@ export type CozinhasFeatureCollection = {
  * One município anchor point for the proportional-circle (bubble) map. The
  * `codarea` property is the join key the map uses to attach the `quantidade`
  * value (which drives the circle size) to the feature.
+ *
+ * @example
+ * const salvador: CozinhaBubbleFeature = {
+ *   type: 'Feature',
+ *   geometry: { type: 'Point', coordinates: [-38.4555175076923, -12.912953634615386] },
+ *   properties: { codarea: '2927408', municipio: 'SALVADOR', quantidade: 26 },
+ * };
  */
 export type CozinhaBubbleFeature = {
   type: 'Feature';
@@ -62,7 +88,13 @@ export type CozinhaBubbleFeature = {
   };
 };
 
-/** Collection of bubble anchors, ready to feed the circle map's GeoJSON source. */
+/**
+ * Collection of bubble anchors, ready to feed the circle map's GeoJSON source.
+ *
+ * @example
+ * const bubbles: CozinhasBubblesFeatureCollection = await gateway.getCozinhasBubbles();
+ * bubbles.features.every((feature) => feature.properties.quantidade >= 1); // true
+ */
 export type CozinhasBubblesFeatureCollection = {
   type: 'FeatureCollection';
   features: CozinhaBubbleFeature[];

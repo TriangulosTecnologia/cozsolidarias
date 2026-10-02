@@ -7,7 +7,17 @@
  * to a polygon. `municipio` carries the human-readable name for tooltips/labels.
  */
 
-/** A single município with its cozinha count. */
+/**
+ * A single município with its cozinha count.
+ *
+ * @example
+ * const salvador: KitchenByCity = {
+ *   codigoIbge: '2927408',
+ *   municipio: 'SALVADOR',
+ *   quantidade: 26,
+ *   pessoasAtendidas: 45897,
+ * };
+ */
 export type KitchenByCity = {
   /** 7-digit IBGE code; joins to `feature.properties.codarea` on the map. */
   codigoIbge: string;
@@ -34,6 +44,20 @@ export type KitchenByCity = {
  * {@link KitchenRateByCity.porDezMilCadUnico}, and the coverage variant by
  * {@link KitchenRateByCity.pessoasPorCozinha}; each variant ignores the fields it
  * doesn't use.
+ *
+ * @example
+ * const salvador: KitchenRateByCity = {
+ *   codigoIbge: '2927408',
+ *   municipio: 'SALVADOR',
+ *   quantidade: 26,
+ *   pessoasAtendidas: 45897,
+ *   populacao: 2417678,
+ *   porCemMil: 1.08, // 26 / 2417678 * 100_000
+ *   percentualDoBrasil: 1.87,
+ *   pessoasCadUnico: 1157799,
+ *   porDezMilCadUnico: 0.22, // 26 / 1157799 * 10_000
+ *   pessoasPorCozinha: 44531, // 1157799 / 26
+ * };
  */
 export type KitchenRateByCity = KitchenByCity & {
   /**

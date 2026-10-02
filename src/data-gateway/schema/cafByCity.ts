@@ -13,6 +13,14 @@
  * A single município row with its CAF count and its share (%) of Brazil's CAFs
  * — the shape served by `/api/cafs/por-municipio` and consumed by the CAF share
  * choropleth. The share variant colors the fill by {@link CafByCity.percentualDoBrasil}.
+ *
+ * @example
+ * const cameta: CafByCity = {
+ *   codigoIbge: '1502103',
+ *   municipio: 'Cametá',
+ *   quantidade: 14386,
+ *   percentualDoBrasil: 0.367943, // 14386 / 3909842 * 100
+ * };
  */
 export type CafByCity = {
   /** 7-digit IBGE code; joins to `feature.properties.codarea` on the map. */
@@ -23,7 +31,8 @@ export type CafByCity = {
   quantidade: number;
   /**
    * Share of all Brazilian CAFs counted in this município:
-   * `(quantidade / totalBrasil) * 100`, rounded to two decimals, where
+   * `(quantidade / totalBrasil) * 100`, rounded to six decimals (CAF shares
+   * are tiny; see `cafsPercentualDoBrasil` in `toCafsPorMunicipio.ts`), where
    * `totalBrasil` is the sum of `quantidade` across every município (the
    * national total the choropleth paints). Always a number (never `null`)
    * because every row has `quantidade >= 1`; `0` only in the degenerate case of
