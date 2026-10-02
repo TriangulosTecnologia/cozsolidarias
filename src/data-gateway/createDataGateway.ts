@@ -43,7 +43,15 @@ import {
 } from './transformers/toCozinhasPorMunicipio';
 import { toMunicipioIvs } from './transformers/toMunicipioIvs';
 
-/** Gateway interface exposing canonical read functions. */
+/**
+ * Gateway interface exposing canonical read functions. The app reads data only
+ * through this contract; which source backs it stays internal.
+ *
+ * @example
+ * const gateway: DataGateway = createDataGateway();
+ * const rows = await gateway.getCozinhasPorMunicipio(2025);
+ * // [{ codigoIbge: '3550308', municipio: 'São Paulo', quantidade: 573, ... }]
+ */
 export type DataGateway = {
   /**
    * Returns one row per município with its distinct-CAF count and the derived
@@ -196,7 +204,7 @@ export const createDataGateway = (): DataGateway => {
         readStaticCozinhas({ year }),
         readStaticMunicipios(),
       ]).then(([cozinhas, municipios]) => {
-        return aggregateCozinhasPorMunicipio(cozinhas, municipios);
+        return aggregateCozinhasPorMunicipio({ cozinhas, municipios });
       });
       aggregates.set(year, promise);
       return promise;

@@ -114,9 +114,6 @@
   },
   "src/data-gateway/transformers/toCozinhasPorMunicipio.ts": {
     "complexity": {
-      "count": 3
-    },
-    "max-lines": {
       "count": 1
     }
   },
