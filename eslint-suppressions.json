@@ -1,0 +1,158 @@
+{
+  "src/app/(features)/dados/_components/catalogueLabels.ts": {
+    "complexity": {
+      "count": 1
+    }
+  },
+  "src/app/(features)/ia/AiPlayground.tsx": {
+    "complexity": {
+      "count": 1
+    }
+  },
+  "src/app/(features)/ia/useAiPlaygroundLogic.ts": {
+    "complexity": {
+      "count": 1
+    }
+  },
+  "src/app/(features)/mapas/classifyValues.ts": {
+    "complexity": {
+      "count": 1
+    }
+  },
+  "src/app/(features)/mapas/geovisCafLayers.ts": {
+    "max-lines": {
+      "count": 1
+    }
+  },
+  "src/app/(features)/mapas/geovisScales.ts": {
+    "complexity": {
+      "count": 1
+    },
+    "max-lines": {
+      "count": 1
+    }
+  },
+  "src/app/(features)/mapas/geovisSpec.ts": {
+    "complexity": {
+      "count": 3
+    },
+    "max-lines": {
+      "count": 1
+    }
+  },
+  "src/app/(features)/mapas/mapBootstrap.ts": {
+    "complexity": {
+      "count": 1
+    }
+  },
+  "src/app/(features)/mapas/mapaAssentamentoTooltip.tsx": {
+    "complexity": {
+      "count": 1
+    }
+  },
+  "src/app/(features)/mapas/mapaCadinsanTooltips.tsx": {
+    "complexity": {
+      "count": 1
+    }
+  },
+  "src/app/(features)/mapas/mapaDetailSidebars.tsx": {
+    "complexity": {
+      "count": 1
+    }
+  },
+  "src/app/(features)/mapas/mapaLeftSidebar.ts": {
+    "max-lines": {
+      "count": 1
+    }
+  },
+  "src/app/(features)/mapas/mapaTooltips.tsx": {
+    "complexity": {
+      "count": 6
+    },
+    "max-lines": {
+      "count": 1
+    }
+  },
+  "src/app/api/ai/spec/naturaliSession.ts": {
+    "complexity": {
+      "count": 1
+    }
+  },
+  "src/app/api/ai/spec/route.ts": {
+    "complexity": {
+      "count": 3
+    },
+    "max-lines": {
+      "count": 1
+    }
+  },
+  "src/app/api/ai/spec/specValidation.ts": {
+    "complexity": {
+      "count": 5
+    },
+    "max-lines": {
+      "count": 1
+    }
+  },
+  "src/components/site/Header/MobileMenu.tsx": {
+    "complexity": {
+      "count": 1
+    },
+    "max-lines": {
+      "count": 1
+    }
+  },
+  "src/components/ui/CtaLink.tsx": {
+    "complexity": {
+      "count": 1
+    }
+  },
+  "src/config/theme.ts": {
+    "max-lines": {
+      "count": 1
+    }
+  },
+  "src/data-gateway/transformers/toCozinhasPorMunicipio.ts": {
+    "complexity": {
+      "count": 3
+    },
+    "max-lines": {
+      "count": 1
+    }
+  },
+  "src/data-source-static/readStaticCadinsanMunicipal.ts": {
+    "complexity": {
+      "count": 1
+    }
+  },
+  "src/data-source-static/readStaticCafHexbin.ts": {
+    "complexity": {
+      "count": 1
+    }
+  },
+  "src/data-source-static/readStaticCafPontos.ts": {
+    "complexity": {
+      "count": 1
+    }
+  },
+  "src/data-source-static/readStaticCafsPorMunicipio.ts": {
+    "complexity": {
+      "count": 1
+    }
+  },
+  "src/data-source-static/readStaticCozinhas.ts": {
+    "complexity": {
+      "count": 2
+    }
+  },
+  "src/data-source-static/readStaticDataCatalogue.ts": {
+    "max-lines": {
+      "count": 1
+    }
+  },
+  "src/data-source-static/readStaticIvs.ts": {
+    "complexity": {
+      "count": 1
+    }
+  }
+}
