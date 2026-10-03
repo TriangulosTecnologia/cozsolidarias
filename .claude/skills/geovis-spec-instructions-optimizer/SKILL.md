@@ -1,6 +1,6 @@
 ---
 name: geovis-spec-instructions-optimizer
-version: 2.0.1
+version: 2.0.2
 description: |
   Consolida e mede as duas fontes de instrução do gerador de spec do cozsolidarias — as
   `instructions` do agente Naturali `geovis-spec-generator-loop` (formation versionada em
