@@ -1,10 +1,10 @@
 ---
 name: geovis-spec-instructions-optimizer
-version: 2.0.2
+version: 2.0.0
 description: |
   Consolida e mede as duas fontes de instrução do gerador de spec do cozsolidarias — as
-  `instructions` do agente Naturali `geovis-spec-generator-loop` (formation versionada em
-  `agents/geovis-spec-generator/formation.json`) e a const `INSTRUCTIONS` inline em
+  `instructions` do agente Naturali `geovis-spec-generator-loop` (formation local
+  `~/geovis-spec-generator-loop.formation.json`) e a const `INSTRUCTIONS` inline em
   `src/app/api/ai/spec/route.ts` — ao essencial robusto, e mede quão perto cada variação da rota
   `/mapas` fica da spec mínima que renderiza igual (mesma UI, mesmas legendas), rodando eval real
   contra `POST /api/ai/spec`. Use quando o usuário pedir para podar/otimizar/consolidar essas
@@ -56,19 +56,17 @@ formation). Overlap zero.
 ## As duas fontes — nunca fundir
 
 1. **`instructions` do agente Naturali** — declaradas em
-   `agents/geovis-spec-generator/formation.json` (versionado; deploy pelos scripts da pasta),
-   referenciadas pela rota só por `NATURALI_AGENT_ID`. Deveriam ser genéricas ao schema
-   `@ttoss/geovis`.
+   `~/geovis-spec-generator-loop.formation.json` (fora do repo, sem CI/review), referenciadas só
+   por `NATURALI_AGENT_ID`. Deveriam ser genéricas ao schema `@ttoss/geovis`.
 2. **`INSTRUCTIONS`** (const inline em `src/app/api/ai/spec/route.ts`; `instructions.ts` não
    existe mais) — enviada em `messages[0].content` junto com o catálogo e o prompt do usuário.
    Domínio cozsolidarias: `mapType`/variável/`mapDataId`, grain, cobertura, legendas, sources,
    basemap, e o bloco do tool `validate_spec`.
 
-Fundir as duas acopla deploy de regra de negócio (`route.ts`, deploy do app) a deploy do agente
-(scripts de `agents/geovis-spec-generator/`, separado do app). **Estado atual viola isso**: as
-`instructions` do agente loop embutem uma cópia congelada do catálogo e de uma versão antiga da
-`INSTRUCTIONS` (legend em `layers[]` aceita, sem a exceção do coroplético de cozinhas), que
-diverge da que `route.ts` envia na mesma request.
+Fundir as duas acopla deploy de regra de negócio (`route.ts`, sob CI) a reprovisionamento de
+agente (fora de banda). **Estado atual viola isso**: as `instructions` do agente loop embutem uma
+cópia congelada do catálogo e de uma versão antiga da `INSTRUCTIONS` (legend em `layers[]` aceita,
+sem a exceção do coroplético de cozinhas), que diverge da que `route.ts` envia na mesma request.
 O Passo 1 sempre começa diffando essa cópia contra a `route.ts` — a duplicata é a primeira poda
 candidata e a divergência entre elas é bug, não estilo.
 
@@ -85,7 +83,7 @@ execução, nunca reutilizado, nunca editado depois). Na raiz, `versions.json` o
   "runId": "2026-09-28T14-03-11Z--poda-duplicata",
   "skillVersion": "2.0.0",
   "sources": {
-    "agentInstructions": { "formationFile": "agents/geovis-spec-generator/formation.json", "sha256": "…" },
+    "agentInstructions": { "formationFile": "~/geovis-spec-generator-loop.formation.json", "sha256": "…" },
     "instructions": { "path": "src/app/api/ai/spec/route.ts", "gitSha": "…", "sha256": "…" },
     "catalogue": { "path": "public/dataset_catalogue.json", "sha256": "…" }
   },
@@ -94,7 +92,7 @@ execução, nunca reutilizado, nunca editado depois). Na raiz, `versions.json` o
     "formationId": "form_…",
     "agentId": "agent_…",
     "agentVersion": 1,
-    "naturaliCliVersion": "0.170.3"
+    "naturaliCliVersion": "0.136.0"
   },
   "golden": { "manifestSha256": "…", "gitSha": "…" },
   "results": { "resultsVersion": 2, "datasetVersion": "…" }
@@ -161,35 +159,32 @@ Produza, por fonte, a versão podada candidata lado a lado com a atual, com just
 
 ## Passo 2 — Provisionar o agente de teste dedicado (pede confirmação antes de gastar API real)
 
-Provisionamento é **a partir de `agents/geovis-spec-generator/formation.json`** (fonte de verdade
-do agente de produção), via CLI `naturali` fixada nos scripts da pasta (preferir CLI a MCP;
-`naturali <comando> --help`). Env vars em `.env` (gitignored): `NATURALI_API_KEY`,
-`NATURALI_PROJECT_ID`, `NATURALI_AGENT_ID`, `NATURALI_FORMATION_ID`. Passo a passo em
-`references/sources.md`.
+Provisionamento é **a partir de arquivo local de formation**, via CLI `naturali` (preferir CLI a
+MCP; `naturali <comando> --help`). Env vars já configuradas: `NATURALI_API_KEY`,
+`NATURALI_PROJECT_ID`, `NATURALI_AGENT_ID`, `NATURALI_FORMATION_ID` (em `.env`, gitignored).
+Passo a passo em `references/sources.md`.
 
-Estado de referência:
+Estado de referência (verificado 2026-09-28, vivo ≡ arquivo local):
 
-| Papel | Formation | Agente | Template |
+| Papel | Formation | Agente | Arquivo local |
 |---|---|---|---|
-| Produção da branch (loop, `validate_spec`) | `form_u4byEDCIaWR9w132` | `agent_FdJNYpl3XbBgLJfQ` v3 (verificado 2026-10-03) | `agents/geovis-spec-generator/formation.json` |
-| Compartilhado antigo (sem tool) — nunca tocar | `form_22U2jykONy2zvOcv` | `agent_aBWkhUlqZObSry0x` v5 (verificado 2026-09-28) | `~/geovis-spec-generator.formation.json` |
+| Produção da branch (loop, `validate_spec`) | `form_u4byEDCIaWR9w132` | `agent_FdJNYpl3XbBgLJfQ` v1 | `~/geovis-spec-generator-loop.formation.json` |
+| Compartilhado antigo (sem tool) — nunca tocar | `form_22U2jykONy2zvOcv` | `agent_aBWkhUlqZObSry0x` v5 | `~/geovis-spec-generator.formation.json` |
 
 Sempre reconfirme com `naturali list-formations`/`get-agent` e compare `instructions` +
-`output_schema` vivos com `agents/geovis-spec-generator/formation.json` antes de derivar a
-formation de teste; divergência → pare e reporte.
+`output_schema` vivos com o arquivo local antes de derivar a formation de teste; divergência →
+pare e reporte.
 
 Regras inegociáveis:
 
 - **Use sempre a formation existente do loop** (`NATURALI_FORMATION_ID`), a menos que o usuário
   peça uma nova (decisão do usuário, 2026-09-28). A compartilhada antiga continua intocável.
 - Fluxo por configuração: backup do vivo (`get-formation`/`get-agent`) em `runs/<runId>/` →
-  copiar `agents/geovis-spec-generator/formation.json` para `runs/<runId>/formation.<config>.json`
-  e editar só a cópia → `naturali validate-formation` → `update-formation` com a cópia →
-  registrar `agentVersion` em `versions.json`. Ao fim, restaurar o vivo com
-  `pnpm --dir agents/geovis-spec-generator deploy`. A skill nunca edita o arquivo do repo: a
-  variante aprovada entra nele por PR e só é deployada depois do merge.
-- Formation nova (só quando pedida): derivada de `agents/geovis-spec-generator/formation.json` —
-  mesma `validate_spec`,
+  editar o arquivo local `~/geovis-spec-generator-loop.formation.json` → copiar para
+  `runs/<runId>/formation.<config>.json` → `naturali validate-formation` → `update-formation` →
+  registrar `agentVersion` em `versions.json`. Ao fim, restaurar o arquivo local e o vivo à
+  variante aprovada (ou ao backup).
+- Formation nova (só quando pedida): derivada do arquivo local do loop — mesma `validate_spec`,
   `output_schema`, `max_steps`, `temperature`, provider; muda só `name` e `instructions`.
 - `trace_content_mode: "full"` no agente de eval (decisão do usuário, 2026-09-28; o projeto já é
   `full`), para `get-generation-transcript` mostrar as rodadas de `validate_spec`. Com `none` a
@@ -266,9 +261,9 @@ Em `runs/<runId>/` (nunca commitado automaticamente, nunca sobrescrevendo rodada
 
 - `versions.json` — manifesto, escrito antes dos evals.
 - `formation.test.json` — formation exata do agente de teste na variante final.
-- `proposed-patch-agent-instructions.md` — diff das `instructions` do agente loop; aplicação é um
-  PR em `agents/geovis-spec-generator/formation.json`, seguido de `plan` → `deploy` da pasta,
-  nunca direto pela skill.
+- `proposed-patch-agent-instructions.md` — diff das `instructions` do agente loop; aplicação
+  segue o fluxo de provisionamento (backup do vivo → `validate-formation` → formation), nunca
+  direto pela skill.
 - `proposed-patch-instructions.diff` — diff literal da const `INSTRUCTIONS` em `route.ts`.
 - `proposed-geovis-validations.md` — checkers genéricos candidatos ao `@ttoss/geovis`: regra,
   implementação proposta, testes, instrução que sai do agente.
