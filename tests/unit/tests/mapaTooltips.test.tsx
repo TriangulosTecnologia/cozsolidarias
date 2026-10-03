@@ -12,14 +12,14 @@ import {
   renderMunicipioTooltip,
 } from 'src/app/(features)/mapas/mapaTooltips';
 import type {
-  cadinsanByCity,
-  cafByCity,
-  kitchenRateByCity,
+  CadinsanByCity,
+  CafByCity,
+  KitchenRateByCity,
 } from 'src/data-gateway/schema';
 
 import { renderWithChakra } from './renderWithChakra';
 
-const REGISTER: kitchenRateByCity = {
+const REGISTER: KitchenRateByCity = {
   codigoIbge: '3550308',
   municipio: 'São Paulo',
   quantidade: 5,
@@ -33,7 +33,7 @@ const REGISTER: kitchenRateByCity = {
 };
 
 /** Altamira/PA — a município where the Bolsa Família effect is large. */
-const CADINSAN_REGISTER: cadinsanByCity = {
+const CADINSAN_REGISTER: CadinsanByCity = {
   codigoIbge: '1500602',
   municipio: 'Altamira',
   uf: 'Pará',
@@ -48,9 +48,9 @@ const CADINSAN_REGISTER: cadinsanByCity = {
 /** Renders a tooltip for the given mode/register into the DOM under Chakra. */
 const renderTooltip = (args: {
   mode: MapMode;
-  register?: kitchenRateByCity;
-  cafRegister?: cafByCity;
-  cadinsanRegister?: cadinsanByCity;
+  register?: KitchenRateByCity;
+  cafRegister?: CafByCity;
+  cadinsanRegister?: CadinsanByCity;
   value?: number | null;
 }) => {
   return renderWithChakra(

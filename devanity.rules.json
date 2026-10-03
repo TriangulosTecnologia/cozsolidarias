@@ -1,0 +1,73 @@
+{
+  "version": 1,
+  "paths": {
+    "src/data-gateway/**": {
+      "core": true,
+      "check": "pnpm typecheck && pnpm test",
+      "purpose": "Canonical data boundary: contracts, validation, source selection, transformation and read APIs",
+      "invariants": [
+        "Every DataGateway member returns canonical types declared in schema/ (or primitives); source-specific shapes terminate inside a transformer",
+        "Never imports from src/app, src/components or src/config",
+        "Unknown or unparsable data becomes null, never 0 or a guess; structurally invalid data throws",
+        "The catalogue contract carries no origin URLs, repository paths or file checksums"
+      ]
+    },
+    "src/data-source-static/**": {
+      "check": "pnpm typecheck && pnpm test",
+      "purpose": "Static versioned source: local JSON/GEOJSON snapshots exposed as source-native records to data-gateway",
+      "invariants": [
+        "Never imports from src/app or src/data-gateway",
+        "Fails loudly when required files are missing or malformed"
+      ]
+    },
+    "src/app/api/**": {
+      "tier": "high-risk",
+      "check": "pnpm typecheck && pnpm test",
+      "purpose": "Public /api/* Route Handlers: request parsing, gateway call, response formatting",
+      "invariants": [
+        "No module importing src/data-gateway declares runtime = 'edge'",
+        "No source-specific mapping logic inside a route handler"
+      ]
+    },
+    "src/app/api/ai/spec/**": {
+      "tier": "high-risk",
+      "check": "pnpm typecheck && pnpm test",
+      "purpose": "POST /api/ai/spec: calls the Naturali agent, validates its spec and appends real mapData before any client sees it",
+      "invariants": [
+        "NATURALI_* credentials are read only server-side and never serialized to the browser",
+        "MapData Append runs server-side before the spec reaches any client"
+      ]
+    },
+    "next.config.ts": { "tier": "high-risk", "check": "pnpm typecheck" },
+    "package.json": {
+      "tier": "high-risk",
+      "check": "pnpm typecheck && pnpm lint && pnpm test"
+    },
+    "pnpm-lock.yaml": {
+      "tier": "high-risk",
+      "check": "pnpm typecheck && pnpm lint && pnpm test"
+    },
+    "pnpm-workspace.yaml": {
+      "tier": "high-risk",
+      "check": "pnpm typecheck && pnpm lint && pnpm test"
+    },
+    ".github/workflows/**": { "tier": "high-risk" },
+    ".claude/settings.json": { "tier": "high-risk" },
+    "README.md": { "tier": "trivial" },
+    "public/llms.txt": { "tier": "trivial" },
+    "public/llms-full.txt": { "tier": "trivial" },
+    ".vscode/**": { "tier": "trivial" },
+    ".claude/skills/geovis-spec-instructions-optimizer/runs/**": {
+      "tier": "trivial"
+    }
+  },
+  "verifiers": [
+    "package.json",
+    "tsconfig.json",
+    "eslint.config.mjs",
+    "eslint-suppressions.json",
+    "tests/unit/jest.config.ts",
+    "tests/unit/babel.config.cjs",
+    "tests/unit/jsdomEnvironment.js"
+  ]
+}

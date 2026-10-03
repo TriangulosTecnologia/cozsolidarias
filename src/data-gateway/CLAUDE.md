@@ -1,59 +1,43 @@
 # Package: `src/data-gateway`
 
-This package is the canonical data boundary. It transforms concrete data sources into the exact shape consumed by the app. It owns contracts, validation, source selection, transformation, and read APIs.
+The canonical data boundary between `src/data-source-*` and the app. It selects the source, transforms source-native records into the shapes the app consumes, and exposes them through `createDataGateway()`.
 
-## Principles
+## Pipeline
 
-- The app contract is sovereign. Sources adapt to it; the app never adapts to sources.
-- Every public function must return canonical types.
-- Every source-specific shape must terminate inside a transformer.
-- Validation must happen before data crosses into the app contract.
-- Transformations must be deterministic, explicit, and testable.
-- Prefer small pure functions over hidden framework behaviour.
-- Do not silently coerce invalid data; fail with typed errors.
-
-## Required Pattern
-
+```text
+data-source validates the source shape → transform → typed canonical value
 ```
-source record → validate source → transform → validate contract → return canonical value
-```
+
+Source-shape validation belongs to the data source ([`data-source-static`](../data-source-static/CLAUDE.md)). There is no runtime contract-validation step: TypeScript strict types on transformer returns and `DataGateway` signatures are the contract check.
+
+## Rules
+
+- The app contract is sovereign: sources adapt to it, never the reverse.
+- Every `DataGateway` member returns canonical types declared in `schema/` (or primitives), never source-native records.
+- Every source-specific shape terminates inside a transformer in `transformers/`.
+- Transformers are small, deterministic pure functions.
+- Never silently coerce data: unknown or unparsable values become `null`, never `0` or a guess; structurally invalid data throws. Request parameters may fall back only when the `DataGateway` member documents it (e.g. `getCozinhas`: unknown or omitted year → latest snapshot).
+- Heavy ETL, geocoding and joins over raw files run offline into snapshots. The one request-time spatial step, cozinha → município point-in-polygon, is memoized per year for the process lifetime.
+- No UI, no direct file reads (go through a data source), no Next.js runtime unless behind an adapter.
+- Layer imports are enforced by ESLint `no-restricted-imports` in [`eslint.config.mjs`](../../eslint.config.mjs).
 
 ## Naming
 
-| Prefix / Suffix | Use |
-|---|---|
-| `get*` | read functions |
-| `toApp*` | transformer functions |
-| `*Contract` | canonical app-facing types |
-| `*Source` | source-native types |
+| Pattern         | Use                                                       | Example                                     |
+| --------------- | --------------------------------------------------------- | ------------------------------------------- |
+| `get*`          | `DataGateway` read functions                              | `getCozinhas`                               |
+| `to<Shape>`     | transformer modules and their source → canonical function | `toCozinhasFeatureCollection`               |
+| verb + noun     | steps of a multi-step transform                           | `aggregateCozinhasPorMunicipio`             |
+| PascalCase noun | canonical types, named for the shape                      | `CozinhasFeatureCollection`, `MunicipioIvs` |
 
-## Boundaries
+The catalogue family adds a `Contract` suffix (`CatalogueContract`) to tell it apart from the source's `Catalogue*` types; no other family needs it. Source-native types live in the data source and follow [its naming](../data-source-static/CLAUDE.md#naming).
 
-Do not import from app.
-Do not render UI.
-Do not depend on Next.js runtime unless placed behind an adapter.
-Do not read static files except through `data-source-static`.
-Do not expose source-native records to app.
-Do not perform heavy ETL, geocoding, joins, or spatial analysis at request time.
+## Sources
 
-## Allowed Dependencies
-
-May import from `data-source-static`.
-May later import from `data-source-api` or equivalent source packages.
-May use schema validation libraries.
-May expose factory functions for local, api, mock, or test sources.
-
-## Multiple Sources
-
-Each source is its own module under `src/data-source-<name>/`. The gateway selects by `DATA_SOURCE` env var; the app calls `createDataGateway()` with no arguments and never names a source. The set of accepted values lives in `KNOWN_SOURCES` in `createDataGateway.ts`.
-
-Currently registered: `static` (default). Planned: `cdn`, `api`.
-
-App-facing contract (`*Contract` types and `get*` signatures) must not change when a source is added. Credentials (e.g. `DATA_API_TOKEN`) are read inside the source package — never passed through gateway arguments.
+`createDataGateway()` takes no arguments: it reads `DATA_SOURCE` (default `static`) and throws on any value outside `KNOWN_SOURCES`. Each source is its own `src/data-source-<name>/` package. Adding one must not change any `DataGateway` signature or canonical type. Credentials (e.g. `DATA_API_TOKEN`) are read inside the source package, never passed through the gateway.
 
 ## Review Checklist
 
-- A new source must not change app-facing types.
-- A new transformer must be covered by fixtures.
-- A new contract field must include meaning, unit, nullability, and migration impact.
-- A gateway function must remain independent of deployment target.
+- A new transformer is tested against typed source-shaped fixtures.
+- A new canonical field documents meaning, unit, nullability and migration impact.
+- A gateway function stays independent of the deployment target.

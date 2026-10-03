@@ -54,4 +54,86 @@ export default [
       ],
     },
   },
+  // Ratchets over the base limits (complexity 10, max-lines 400): thresholds
+  // calibrated on src/, legacy outliers frozen in eslint-suppressions.json.
+  {
+    files: ['src/**/*.{ts,tsx}'],
+    rules: {
+      complexity: ['error', { max: 6 }],
+      'max-lines': [
+        'error',
+        { max: 249, skipBlankLines: true, skipComments: true },
+      ],
+      '@typescript-eslint/naming-convention': [
+        'error',
+        { selector: 'typeLike', format: ['PascalCase'] },
+      ],
+    },
+  },
+  // Layer boundaries: src/app → src/data-gateway → src/data-source-*.
+  {
+    files: ['src/app/**', 'src/components/**', 'src/config/**'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['@/data-source-*', '**/data-source-*'],
+              message: 'The app reads data only through src/data-gateway.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/data-gateway/**'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: [
+                '@/app/*',
+                '@/components/*',
+                '@/config/*',
+                '**/app/*',
+                '**/components/*',
+                '**/config/*',
+              ],
+              message: 'data-gateway never imports from the app layer.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/data-source-*/**'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: [
+                '@/app/*',
+                '@/components/*',
+                '@/config/*',
+                '@/data-gateway*',
+                '**/app/*',
+                '**/components/*',
+                '**/config/*',
+                '**/data-gateway*',
+              ],
+              message:
+                'A data source never imports from the app or data-gateway.',
+            },
+          ],
+        },
+      ],
+    },
+  },
 ];

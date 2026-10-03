@@ -21,8 +21,8 @@ Data flows through one boundary: `src/app → src/data-gateway → src/data-sour
 ## Data Gateway
 
 - [src/data-gateway/createDataGateway.ts](src/data-gateway/createDataGateway.ts): gateway factory, source selection via `DATA_SOURCE`, `KNOWN_SOURCES`.
-- [src/data-gateway/schema](src/data-gateway/schema): canonical `*Contract` types (catalogue, CAF points/by-city, CADINSAN, IVS, kitchens).
-- [src/data-gateway/transformers](src/data-gateway/transformers): `toApp*` functions that convert source-native records into canonical contracts.
+- [src/data-gateway/schema](src/data-gateway/schema): canonical PascalCase types (catalogue, CAF points/by-city, CADINSAN, IVS, kitchens); only the catalogue family adds a `Contract` suffix.
+- [src/data-gateway/transformers](src/data-gateway/transformers): `to<Shape>` transformers that convert source-native records into canonical contracts.
 - [src/data-source-static](src/data-source-static): `readStatic*` functions and `data/` snapshots (CAF, CADINSAN, IVS, kitchens, população) backing the default source.
 
 ## App & Config

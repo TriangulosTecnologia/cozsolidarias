@@ -15,6 +15,22 @@
 /**
  * A single município with its overall IVS score, the three IVS sub-indices and
  * the IDHM family (overall, dimensions and education sub-components).
+ *
+ * @example
+ * const salvador: MunicipioIvs = {
+ *   codigoIbge: '2927408',
+ *   municipio: 'Salvador (BA)',
+ *   ivs: 0.35,
+ *   ivsInfraestruturaUrbana: 0.426,
+ *   ivsCapitalHumano: 0.3,
+ *   ivsRendaETrabalho: 0.324,
+ *   idhm: 0.759,
+ *   idhmLongevidade: 0.835,
+ *   idhmEducacao: 0.679,
+ *   idhmRenda: 0.772,
+ *   idhmEducacaoEscolaridade: 0.697,
+ *   idhmEducacaoFrequencia: 0.67,
+ * };
  */
 export type MunicipioIvs = {
   /** 7-digit IBGE code; joins to `feature.properties.codarea` on the map. */

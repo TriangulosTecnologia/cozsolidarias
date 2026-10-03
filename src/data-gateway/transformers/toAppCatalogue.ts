@@ -210,14 +210,16 @@ const toDataset = ({
 };
 
 /**
- * Transforms the source catalogue into the canonical app contract: redacts the
- * fields the app must never receive, normalizes vocabularies to camelCase,
+ * Transforms the source catalogue into the canonical app contract: drops the
+ * fields `/dados` does not render, normalizes vocabularies to camelCase,
  * resolves each dataset's publisher, denormalizes its source onto it and derives
  * the gaps it carries.
  *
- * The redaction is structural — origin URLs, repository paths and file
- * checksums have no field in {@link CatalogueContract}, so they cannot reach a
- * component. See the note on that type for the full list.
+ * The omission is structural — origin URLs, repository paths and file
+ * checksums have no field in {@link CatalogueContract}, so they never reach a
+ * component through the gateway. It narrows the contract rather than hiding
+ * anything: the source catalogue is public. See the module note in
+ * `schema/catalogue.ts` for the full list.
  *
  * Deterministic: datasets are sorted by title with pt-BR collation, so the
  * rendered page is stable across reads.

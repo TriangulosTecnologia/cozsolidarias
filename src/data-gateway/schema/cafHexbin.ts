@@ -19,16 +19,42 @@
  * browser fetches — grows sevenfold per step down: r3 is 1.1k cells (0.2 MB),
  * r4 6k (1.7 MB), r5 35k (6 MB). Generated offline by
  * `scripts/generateCafHexbin.ts`, one run per entry.
+ *
+ * @example
+ * CAF_HEXBIN_RESOLUTIONS.map((resolution) => `/api/cafs/hexbin?r=${resolution}`);
+ * // ['/api/cafs/hexbin?r=3', '/api/cafs/hexbin?r=4', '/api/cafs/hexbin?r=5']
  */
 export const CAF_HEXBIN_RESOLUTIONS = [3, 4, 5] as const;
 
-/** One of {@link CAF_HEXBIN_RESOLUTIONS}. */
+/**
+ * One of {@link CAF_HEXBIN_RESOLUTIONS}.
+ *
+ * @example
+ * const resolution: CafHexbinResolution = 5;
+ */
 export type CafHexbinResolution = (typeof CAF_HEXBIN_RESOLUTIONS)[number];
 
-/** The resolution the mode opens at: the ~45 km cell it was specified with. */
+/**
+ * The resolution the mode opens at: the ~45 km cell it was specified with.
+ *
+ * @example
+ * const resolution = isCafHexbinResolution(requested)
+ *   ? requested
+ *   : DEFAULT_CAF_HEXBIN_RESOLUTION; // 4
+ */
 export const DEFAULT_CAF_HEXBIN_RESOLUTION: CafHexbinResolution = 4;
 
-/** Whether `value` is a resolution a snapshot exists for. */
+/**
+ * Whether `value` is a resolution a snapshot exists for. Narrows `value` to
+ * {@link CafHexbinResolution} when `true`.
+ *
+ * @param value - Any number, e.g. a parsed `?r=` query parameter.
+ * @returns `true` only for a member of {@link CAF_HEXBIN_RESOLUTIONS}.
+ *
+ * @example
+ * isCafHexbinResolution(4); // true
+ * isCafHexbinResolution(6); // false
+ */
 export const isCafHexbinResolution = (
   value: number
 ): value is CafHexbinResolution => {
@@ -37,7 +63,24 @@ export const isCafHexbinResolution = (
   });
 };
 
-/** One hexagon of the grid. */
+/**
+ * One hexagon of the grid.
+ *
+ * @example
+ * const cell: CafHexbinFeature = {
+ *   type: 'Feature',
+ *   geometry: {
+ *     type: 'Polygon',
+ *     coordinates: [
+ *       [
+ *         [-36.4423, 5.8542], [-36.2496, 6.011], [-36.2945, 6.2556], [-36.532, 6.3437],
+ *         [-36.7249, 6.1871], [-36.6801, 5.9423], [-36.4423, 5.8542],
+ *       ],
+ *     ],
+ *   },
+ *   properties: { h3: '8456d13ffffffff', count: 1 },
+ * };
+ */
 export type CafHexbinFeature = {
   type: 'Feature';
   geometry: {
@@ -66,7 +109,13 @@ export type CafHexbinFeature = {
   };
 };
 
-/** Collection of hexagons, ready to feed the map's GeoJSON source. */
+/**
+ * Collection of hexagons, ready to feed the map's GeoJSON source.
+ *
+ * @example
+ * const grid: CafHexbinFeatureCollection = await gateway.getCafHexbin(4);
+ * grid.features.length; // ~6k cells at r4
+ */
 export type CafHexbinFeatureCollection = {
   type: 'FeatureCollection';
   features: CafHexbinFeature[];

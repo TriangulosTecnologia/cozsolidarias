@@ -15,7 +15,16 @@
  * so they cannot disagree.
  */
 
-/** One federative unit's CAF anchor, drawn at the country zooms. */
+/**
+ * One federative unit's CAF anchor, drawn at the country zooms.
+ *
+ * @example
+ * const bahia: CafUfFeature = {
+ *   type: 'Feature',
+ *   geometry: { type: 'Point', coordinates: [-40.76652, -12.34337] },
+ *   properties: { nome: 'Bahia', quantidade: 704034 },
+ * };
+ */
 export type CafUfFeature = {
   type: 'Feature';
   geometry: {
@@ -37,7 +46,13 @@ export type CafUfFeature = {
   };
 };
 
-/** Collection of UF anchors, ready to feed the map's GeoJSON source. */
+/**
+ * Collection of UF anchors, ready to feed the map's GeoJSON source.
+ *
+ * @example
+ * const anchors: CafUfFeatureCollection = await gateway.getCafPontosPorUf();
+ * anchors.features.map((feature) => feature.properties.nome); // one per UF
+ */
 export type CafUfFeatureCollection = {
   type: 'FeatureCollection';
   features: CafUfFeature[];

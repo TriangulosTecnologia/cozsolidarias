@@ -1,9 +1,9 @@
 import type {
-  cadinsanByCity,
+  CadinsanByCity,
   CatalogueContract,
   CatalogueDatasetContract,
   CatalogueFieldContract,
-  kitchenRateByCity,
+  KitchenRateByCity,
   MunicipioIvs,
 } from '@/data-gateway/schema';
 import { gateway } from '@/gateway';
@@ -41,20 +41,20 @@ const toMapDataRows = <T extends { codigoIbge: string }>(
  */
 export const RENDERABLE_DATASET_FETCHERS = {
   cozinhas_geolocalizadas: async () => {
-    const rows: kitchenRateByCity[] = await gateway.getCozinhasPorMunicipio();
+    const rows: KitchenRateByCity[] = await gateway.getCozinhasPorMunicipio();
     return toMapDataRows(rows, (row) => {
       return row.quantidade;
     });
   },
   cozinhas_geolocalizadas_2025: async () => {
-    const rows: kitchenRateByCity[] =
+    const rows: KitchenRateByCity[] =
       await gateway.getCozinhasPorMunicipio(2025);
     return toMapDataRows(rows, (row) => {
       return row.quantidade;
     });
   },
   cozinhas_pessoas_atendidas: async () => {
-    const rows: kitchenRateByCity[] = await gateway.getCozinhasPorMunicipio();
+    const rows: KitchenRateByCity[] = await gateway.getCozinhasPorMunicipio();
     return toMapDataRows(rows, (row) => {
       return row.pessoasAtendidas;
     });
@@ -66,7 +66,7 @@ export const RENDERABLE_DATASET_FETCHERS = {
     });
   },
   municipios_cadinsan: async () => {
-    const rows: cadinsanByCity[] = await gateway.getCadinsanPorMunicipio();
+    const rows: CadinsanByCity[] = await gateway.getCadinsanPorMunicipio();
     return toMapDataRows(rows, (row) => {
       return row.proporcaoComPbf;
     });

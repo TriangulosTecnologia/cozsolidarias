@@ -1,5 +1,5 @@
-export type { cadinsanByCity } from './cadinsanByCity';
-export type { cafByCity } from './cafByCity';
+export type { CadinsanByCity } from './cadinsanByCity';
+export type { CafByCity } from './cafByCity';
 export type {
   CafHexbinFeature,
   CafHexbinFeatureCollection,
@@ -35,5 +35,5 @@ export type {
   CozinhasFeatureCollection,
 } from './cozinha';
 export type { CozinhaDetalhe } from './cozinhaDetalhe';
-export type { kitchenByCity, kitchenRateByCity } from './kitchenByCity';
+export type { KitchenByCity, KitchenRateByCity } from './kitchenByCity';
 export type { MunicipioIvs } from './municipioIvs';

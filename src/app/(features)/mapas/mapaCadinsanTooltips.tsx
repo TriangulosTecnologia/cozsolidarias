@@ -7,7 +7,7 @@
  * only has to know which family a mode belongs to.
  */
 
-import type { cadinsanByCity } from '@/data-gateway/schema';
+import type { CadinsanByCity } from '@/data-gateway/schema';
 
 import { colorForCadinsan } from './geovisChoroplethScales';
 import { TooltipCard } from './mapaTooltipCard';
@@ -63,7 +63,7 @@ export const renderCadinsanTooltip = ({
   rampId,
 }: {
   name: string;
-  register?: cadinsanByCity;
+  register?: CadinsanByCity;
   variant: 'com' | 'sem';
   rampId?: string;
 }) => {

@@ -13,7 +13,27 @@ import type { MunicipioAggregate } from './toCozinhasPorMunicipio';
  * aggregation never emits empty buckets).
  *
  * @param aggregate - Per-município counts + anchor points.
- * @returns Canonical {@link CozinhasBubblesFeatureCollection}.
+ * @returns Canonical {@link CozinhasBubblesFeatureCollection}: one feature per
+ * aggregate entry, in the same order, anchored at its `centroid`.
+ *
+ * @example
+ * toCozinhasBubbles([
+ *   {
+ *     codigoIbge: '2927408',
+ *     municipio: 'SALVADOR',
+ *     quantidade: 26,
+ *     pessoasAtendidas: 45897,
+ *     centroid: [-38.4555, -12.913],
+ *   },
+ * ]);
+ * // {
+ * //   type: 'FeatureCollection',
+ * //   features: [{
+ * //     type: 'Feature',
+ * //     geometry: { type: 'Point', coordinates: [-38.4555, -12.913] },
+ * //     properties: { codarea: '2927408', municipio: 'SALVADOR', quantidade: 26 },
+ * //   }],
+ * // }
  */
 export const toCozinhasBubbles = (
   aggregate: MunicipioAggregate[]

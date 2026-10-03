@@ -1,5 +1,5 @@
 import type { StaticCafPontosSource } from '../../data-source-static/types';
-import type { cafByCity, CafUfFeatureCollection } from '../schema';
+import type { CafByCity, CafUfFeatureCollection } from '../schema';
 
 /**
  * Totals the CAF counts by federative unit, keyed by the two-digit prefix every
@@ -10,7 +10,7 @@ import type { cafByCity, CafUfFeatureCollection } from '../schema';
  * polygon, so they cannot pull a UF's anchor position, but their CAFs are as
  * real as any other's.
  */
-const totalsByCodigoUf = (porMunicipio: cafByCity[]): Map<string, number> => {
+const totalsByCodigoUf = (porMunicipio: CafByCity[]): Map<string, number> => {
   const totals = new Map<string, number>();
 
   for (const { codigoIbge, quantidade } of porMunicipio) {
@@ -47,7 +47,7 @@ export const toCafUfPontos = ({
   porMunicipio,
 }: {
   anchors: StaticCafPontosSource;
-  porMunicipio: cafByCity[];
+  porMunicipio: CafByCity[];
 }): CafUfFeatureCollection => {
   const totals = totalsByCodigoUf(porMunicipio);
 

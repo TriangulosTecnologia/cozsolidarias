@@ -1,5 +1,5 @@
 import type { StaticCafPorMunicipioSource } from '../../data-source-static/types';
-import type { cafByCity } from '../schema';
+import type { CafByCity } from '../schema';
 
 /**
  * Share (%) of all Brazilian CAFs counted in a single município:
@@ -47,7 +47,7 @@ export const cafsPercentualDoBrasil = ({
  *
  * @param sources - Per-município CAF counts from
  * {@link StaticCafPorMunicipioSource} (`readStaticCafsPorMunicipio`).
- * @returns One {@link cafByCity} per município in the snapshot.
+ * @returns One {@link CafByCity} per município in the snapshot.
  *
  * @example
  * toCafsPorMunicipio([{ cdMunicipio: '3550308', nmMunicipio: 'São Paulo', quantidade: 42 }]);
@@ -55,7 +55,7 @@ export const cafsPercentualDoBrasil = ({
  */
 export const toCafsPorMunicipio = (
   sources: StaticCafPorMunicipioSource[]
-): cafByCity[] => {
+): CafByCity[] => {
   const total = sources.reduce((sum, { quantidade }) => {
     return sum + quantidade;
   }, 0);
