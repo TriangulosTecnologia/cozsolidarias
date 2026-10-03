@@ -28,6 +28,16 @@ describe('toCafHexbin', () => {
     ]);
   });
 
+  test('keeps an already-closed ring as is, as every committed snapshot stores it', () => {
+    const closed: [number, number][] = [...ring, [-46, -23]];
+
+    const { features } = toCafHexbin(
+      source([{ h3: '84a', count: 2, ring: closed }])
+    );
+
+    expect(features[0]?.geometry.coordinates).toEqual([closed]);
+  });
+
   test('carries h3 and count onto the feature properties', () => {
     const { features } = toCafHexbin(
       source([{ h3: '8456d13ffffffff', count: 17, ring }])

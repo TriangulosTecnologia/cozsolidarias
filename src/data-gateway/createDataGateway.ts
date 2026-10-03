@@ -178,7 +178,6 @@ const isKnownSource = (value: string): value is KnownSource => {
  * const cozinhas = await gateway.getCozinhas();
  * // { type: 'FeatureCollection', features: [...] }
  */
-
 export const createDataGateway = (): DataGateway => {
   const raw = process.env['DATA_SOURCE'] ?? 'static';
 
