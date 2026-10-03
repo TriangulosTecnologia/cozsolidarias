@@ -1,0 +1,10 @@
+{
+  "name": "@cozsolidarias/geovis-spec-generator-agent",
+  "private": true,
+  "description": "Naturali formation for the agent behind POST /api/ai/spec, and the commands that deploy it",
+  "scripts": {
+    "deploy": "pnpm dlx @naturali/cli@0.170.3 update-formation --formation-id ${NATURALI_FORMATION_ID:?set NATURALI_FORMATION_ID} --template @formation.json",
+    "plan": "pnpm dlx @naturali/cli@0.170.3 plan-formation --formation-id ${NATURALI_FORMATION_ID:?set NATURALI_FORMATION_ID} --template @formation.json",
+    "validate": "pnpm dlx @naturali/cli@0.170.3 validate-formation --template @formation.json"
+  }
+}
