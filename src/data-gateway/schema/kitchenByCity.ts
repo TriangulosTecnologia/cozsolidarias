@@ -23,7 +23,11 @@ export type KitchenByCity = {
   codigoIbge: string;
   /** Município name (for display); taken from the source records. */
   municipio: string;
-  /** Number of cozinhas located inside this município's polygon. */
+  /**
+   * Number of cozinhas located inside this município's polygon, plus those
+   * whose point falls outside every polygon and that declare this município's
+   * IBGE code (a polygon match always wins over the declared code).
+   */
   quantidade: number;
   /**
    * Total people served, summed from each cozinha's free-text

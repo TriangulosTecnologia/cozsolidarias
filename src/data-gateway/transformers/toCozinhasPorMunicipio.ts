@@ -2,6 +2,7 @@ import type { GeoJSONFeatureCollection } from '@ttoss/geovis';
 
 import type { StaticCozinhaSource } from '../../data-source-static/types';
 import type { KitchenByCity, KitchenRateByCity } from '../schema';
+import type { IndexedMunicipio } from './municipioIndex';
 import { findMunicipio, indexMunicipios } from './municipioIndex';
 
 /**
@@ -45,6 +46,40 @@ const mostVotedName = (nameVotes: Map<string, number>): string => {
   return best;
 };
 
+/** Running tallies of one município while cozinhas are being aggregated. */
+type MunicipioBucket = {
+  quantidade: number;
+  nameVotes: Map<string, number>;
+  sumLng: number;
+  sumLat: number;
+  pessoasAtendidas: number;
+  pessoasAtendidasKnown: boolean;
+};
+
+/**
+ * The IBGE code a located point counts toward: the polygon containing it, else
+ * the declared code when the index knows it, else `undefined` (dropped).
+ */
+const locateCodigoIbge = ({
+  index,
+  indexedCodes,
+  point,
+  declared,
+}: {
+  index: IndexedMunicipio[];
+  indexedCodes: Set<string>;
+  point: [number, number];
+  declared: string;
+}): string | undefined => {
+  const match = findMunicipio({ index, point });
+
+  if (match) {
+    return match.codigoIbge;
+  }
+
+  return indexedCodes.has(declared) ? declared : undefined;
+};
+
 /**
  * A município with its cozinha count plus a representative anchor point.
  *
@@ -72,14 +107,18 @@ export type MunicipioAggregate = KitchenByCity & {
  * Each cozinha with coordinates is located inside one município polygon
  * (matched by `codarea`); counts are tallied per code and the member
  * coordinates are summed so a representative `centroid` (their mean) can be
- * derived. Cozinhas without coordinates, or whose point falls outside every
- * município polygon, are dropped.
+ * derived. A point outside every polygon (coastline or border points against
+ * the simplified geometry) falls back to the cozinha's declared `codigoIbge`
+ * when that code is in the index, and then counts exactly like a polygon match
+ * (count, name vote, people served, centroid). Cozinhas without coordinates, or
+ * outside every polygon with an empty or unindexed declared code, are dropped.
  *
- * The join key (`codigoIbge`) comes from the geometry and is authoritative. The
- * display `municipio` name comes from the source records, which can be dirty
- * (a record's typed município may disagree with where its coordinates land), so
- * we pick the *most frequent* name among the cozinhas in each polygon rather
- * than the first one.
+ * A polygon match always wins over the declared code, so the join key comes
+ * from the geometry whenever the geometry can answer. The display `municipio`
+ * name comes from the source records, which can be dirty (a record's typed
+ * município may disagree with where its coordinates land), so we pick the
+ * *most frequent* name among the cozinhas in each município rather than the
+ * first one.
  *
  * @param params.cozinhas - Raw cozinha records from data-source-static.
  * @param params.municipios - Brazilian municipalities GeoJSON
@@ -100,32 +139,30 @@ export const aggregateCozinhasPorMunicipio = ({
   municipios: GeoJSONFeatureCollection;
 }): MunicipioAggregate[] => {
   const index = indexMunicipios(municipios);
-  const counts = new Map<
-    string,
-    {
-      quantidade: number;
-      nameVotes: Map<string, number>;
-      sumLng: number;
-      sumLat: number;
-      pessoasAtendidas: number;
-      pessoasAtendidasKnown: boolean;
-    }
-  >();
+  const indexedCodes = new Set(
+    index.map(({ codigoIbge }) => {
+      return codigoIbge;
+    })
+  );
+  const counts = new Map<string, MunicipioBucket>();
 
   for (const cozinha of cozinhas) {
     if (cozinha.latitude === null || cozinha.longitude === null) {
       continue;
     }
 
-    const point: [number, number] = [cozinha.longitude, cozinha.latitude];
+    const codigoIbge = locateCodigoIbge({
+      index,
+      indexedCodes,
+      point: [cozinha.longitude, cozinha.latitude],
+      declared: cozinha.codigoIbge,
+    });
 
-    const match = findMunicipio({ index, point });
-
-    if (!match) {
+    if (!codigoIbge) {
       continue;
     }
 
-    let current = counts.get(match.codigoIbge);
+    let current = counts.get(codigoIbge);
     if (!current) {
       current = {
         quantidade: 0,
@@ -135,7 +172,7 @@ export const aggregateCozinhasPorMunicipio = ({
         pessoasAtendidas: 0,
         pessoasAtendidasKnown: false,
       };
-      counts.set(match.codigoIbge, current);
+      counts.set(codigoIbge, current);
     }
 
     current.quantidade += 1;

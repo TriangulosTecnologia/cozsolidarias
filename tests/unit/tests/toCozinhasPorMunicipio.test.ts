@@ -103,11 +103,61 @@ describe('aggregateCozinhasPorMunicipio', () => {
     });
   });
 
-  test('drops kitchens that fall outside every polygon', () => {
+  test('counts an off-polygon kitchen in the indexed município it declares', () => {
     const municipios = collection([square('111', 0, 0, 10)]);
 
     const result = aggregateCozinhasPorMunicipio({
-      cozinhas: [coz(5, 5, 'Alpha'), coz(100, 100, 'Far away')],
+      cozinhas: [
+        coz(5, 5, 'Alpha', '100'),
+        { ...coz(12, 5, 'Beta', '20'), codigoIbge: '111' },
+        { ...coz(13, 5, 'Beta', '30'), codigoIbge: '111' },
+      ],
+      municipios,
+    });
+
+    expect(result).toEqual([
+      {
+        codigoIbge: '111',
+        municipio: 'Beta',
+        quantidade: 3,
+        pessoasAtendidas: 150,
+        centroid: [10, 5],
+      },
+    ]);
+  });
+
+  test('drops off-polygon kitchens whose declared code is empty or not indexed', () => {
+    const municipios = collection([square('111', 0, 0, 10)]);
+
+    const result = aggregateCozinhasPorMunicipio({
+      cozinhas: [
+        coz(5, 5, 'Alpha'),
+        coz(100, 100, 'Far away'),
+        { ...coz(100, 100, 'Blank code'), codigoIbge: '' },
+        { ...coz(100, 100, 'Unknown code'), codigoIbge: '999' },
+      ],
+      municipios,
+    });
+
+    expect(result).toEqual([
+      {
+        codigoIbge: '111',
+        municipio: 'Alpha',
+        quantidade: 1,
+        pessoasAtendidas: null,
+        centroid: [5, 5],
+      },
+    ]);
+  });
+
+  test('counts a kitchen in the polygon containing it over the município it declares', () => {
+    const municipios = collection([
+      square('111', 0, 0, 10),
+      square('222', 20, 20, 10),
+    ]);
+
+    const result = aggregateCozinhasPorMunicipio({
+      cozinhas: [{ ...coz(5, 5, 'Alpha'), codigoIbge: '222' }],
       municipios,
     });
 
