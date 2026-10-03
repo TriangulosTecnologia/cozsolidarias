@@ -6,9 +6,10 @@
       "check": "pnpm typecheck && pnpm test",
       "purpose": "Canonical data boundary: contracts, validation, source selection, transformation and read APIs",
       "invariants": [
-        "Every public function returns canonical *Contract types; source-specific shapes terminate inside a transformer",
+        "Every DataGateway member returns canonical types declared in schema/ (or primitives); source-specific shapes terminate inside a transformer",
         "Never imports from src/app, src/components or src/config",
-        "Invalid data fails with typed errors, never silently coerced"
+        "Unknown or unparsable data becomes null, never 0 or a guess; structurally invalid data throws",
+        "The catalogue contract carries no origin URLs, repository paths or file checksums"
       ]
     },
     "src/data-source-static/**": {
