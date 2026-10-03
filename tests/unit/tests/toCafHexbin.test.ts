@@ -36,6 +36,7 @@ describe('toCafHexbin', () => {
     );
 
     expect(features[0]?.geometry.coordinates).toEqual([closed]);
+    expect(features[0]?.geometry.coordinates[0]).not.toBe(closed);
   });
 
   test('carries h3 and count onto the feature properties', () => {

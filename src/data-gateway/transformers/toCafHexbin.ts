@@ -5,6 +5,14 @@ import type {
   CafHexbinFeatureCollection,
 } from '../schema/cafHexbin';
 
+/** The ring with its first vertex repeated last, unless it already is. */
+const closeRing = (ring: [number, number][]): [number, number][] => {
+  const first = ring[0];
+  const last = ring[ring.length - 1];
+  const closed = first[0] === last[0] && first[1] === last[1];
+  return closed ? [...ring] : [...ring, first];
+};
+
 /**
  * Assembles the hexbin grid's GeoJSON from the offline snapshot.
  *
@@ -25,14 +33,6 @@ import type {
  * toCafHexbin({ resolution: 4, cells: [{ h3: '84a', count: 2, ring: [[-46, -23], [-45, -23], [-45, -22]] }] });
  * // { type: 'FeatureCollection', features: [{ ..., geometry: { coordinates: [[[-46,-23],[-45,-23],[-45,-22],[-46,-23]]] } }] }
  */
-/** The ring with its first vertex repeated last, unless it already is. */
-const closeRing = (ring: [number, number][]): [number, number][] => {
-  const first = ring[0];
-  const last = ring[ring.length - 1];
-  const closed = first[0] === last[0] && first[1] === last[1];
-  return closed ? [...ring] : [...ring, first];
-};
-
 export const toCafHexbin = (
   source: StaticCafHexbinSource
 ): CafHexbinFeatureCollection => {
