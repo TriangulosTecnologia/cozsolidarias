@@ -4,17 +4,20 @@
  * rendered by `/dados`.
  *
  * This contract is deliberately **narrower** than the source catalogue. Three
- * families of source fields are absent by design, so no component can leak
- * them:
+ * families of source fields are omitted because `/dados` does not render them,
+ * which keeps the app contract to what the page uses:
  *
  * - **Origin URLs** — `source.url`, `collection.source_url` and
- *   `public_reference_url`. Some point at internal artifacts (a spreadsheet
- *   holding personal data), so none are carried. `organization` and
- *   `originNotes` preserve the provenance that matters, and
+ *   `public_reference_url`. `organization` and `originNotes` carry the
+ *   provenance the page shows, and
  *   {@link CatalogueDatasetContract.hasDocumentedOrigin} still records whether
  *   an origin was documented at all.
  * - **Repository paths** — `file`, `generated_by`, `catalog.typing_reference`.
- * - **File fingerprints** — `stats.checkSum`.
+ * - **File checksums** — `stats.checkSum`.
+ *
+ * The omission is scope, not secrecy: the source catalogue is itself public
+ * (served verbatim at `/dataset_catalogue.json`), so this contract is not a
+ * boundary that keeps those fields from anyone.
  *
  * Vocabularies are normalized to the repository's camelCase convention
  * (`not_applicable` → `notApplicable`, `one_time` → `oneTime`,
@@ -22,10 +25,20 @@
  * pt-BR wording belongs to the app layer.
  */
 
-/** Whether a dataset may be published openly. */
+/**
+ * Whether a dataset may be published openly.
+ *
+ * @example
+ * const level: CatalogueAccessLevelContract = 'public';
+ */
 export type CatalogueAccessLevelContract = 'public' | 'restricted';
 
-/** How often the source series is (re)published. */
+/**
+ * How often the source series is (re)published.
+ *
+ * @example
+ * const frequency: CatalogueFrequencyContract = 'oneTime'; // source `one_time`
+ */
 export type CatalogueFrequencyContract =
   | 'daily'
   | 'monthly'
@@ -33,21 +46,36 @@ export type CatalogueFrequencyContract =
   | 'irregular'
   | 'oneTime';
 
-/** How the source series treats its past records over time. */
+/**
+ * How the source series treats its past records over time.
+ *
+ * @example
+ * const history: CatalogueHistoryContract = 'appendOnly'; // source `append_only`
+ */
 export type CatalogueHistoryContract =
   | 'appendOnly'
   | 'overwrite'
   | 'revised'
   | 'snapshot';
 
-/** How completely a dataset fills its declared spatial extent. */
+/**
+ * How completely a dataset fills its declared spatial extent.
+ *
+ * @example
+ * const coverage: CatalogueCoverageContract = 'exhaustive';
+ */
 export type CatalogueCoverageContract =
   | 'exhaustive'
   | 'partial'
   | 'sample'
   | 'unknown';
 
-/** Geometry family actually stored. */
+/**
+ * Geometry family actually stored.
+ *
+ * @example
+ * const geometry: CatalogueGeometryContract = 'multipolygon';
+ */
 export type CatalogueGeometryContract =
   | 'none'
   | 'point'
@@ -57,7 +85,12 @@ export type CatalogueGeometryContract =
   | 'multipolygon'
   | 'geometrycollection';
 
-/** Locational precision of point geometries. */
+/**
+ * Locational precision of point geometries.
+ *
+ * @example
+ * const precision: CataloguePrecisionContract = 'notApplicable'; // source `not_applicable`
+ */
 export type CataloguePrecisionContract =
   | 'exact'
   | 'approximate'
@@ -73,6 +106,9 @@ export type CataloguePrecisionContract =
  * - `spatialUnknown` — the dataset has a spatial dimension that is not documented.
  * - `precisionUnknown` — point coordinates whose locational precision is unknown.
  * - `originUndocumented` — no origin URL was recorded for the dataset.
+ *
+ * @example
+ * const gaps: CatalogueGapKind[] = ['spatialUnknown', 'originUndocumented'];
  */
 export type CatalogueGapKind =
   | 'temporalUnknown'
@@ -80,7 +116,18 @@ export type CatalogueGapKind =
   | 'precisionUnknown'
   | 'originUndocumented';
 
-/** Metadata about the catalogue itself. */
+/**
+ * Metadata about the catalogue itself.
+ *
+ * @example
+ * const meta: CatalogueMetaContract = {
+ *   title: 'Catálogo de Dados — Cozinhas Solidárias',
+ *   description: 'Catálogo único com os metadados de todos os datasets…',
+ *   status: 'draft',
+ *   updatedAt: '2026-08-14',
+ *   schemaVersion: '2.0.0',
+ * };
+ */
 export type CatalogueMetaContract = {
   title: string;
   description: string;
@@ -96,6 +143,13 @@ export type CatalogueMetaContract = {
  * The institutional source a dataset belongs to, denormalized onto the dataset.
  * The catalogue holds a dozen datasets across six sources, so repeating the
  * source beats making every consumer join on an id.
+ *
+ * @example
+ * const source: CatalogueSourceContract = {
+ *   title: 'IPEA',
+ *   description: 'Datasets socioeconômicos do Instituto de Pesquisa Econômica Aplicada…',
+ *   tags: ['ipea', 'ivs', 'municipios'],
+ * };
  */
 export type CatalogueSourceContract = {
   /** Short name of the source (e.g. `IBGE`, `SICAR`, `Dados Primários`). */
@@ -104,7 +158,18 @@ export type CatalogueSourceContract = {
   tags: string[];
 };
 
-/** One field (column/property/map value) of a dataset's data dictionary. */
+/**
+ * One field (column/property/map value) of a dataset's data dictionary.
+ *
+ * @example
+ * const field: CatalogueFieldContract = {
+ *   name: 'municipio',
+ *   description: 'Código IBGE do município (7 dígitos), chave de join com o mapa',
+ *   role: 'identifier',
+ *   unit: null,
+ *   sensitive: false,
+ * };
+ */
 export type CatalogueFieldContract = {
   /** Field name exactly as it appears in the source. */
   name: string;
@@ -117,7 +182,19 @@ export type CatalogueFieldContract = {
   sensitive: boolean;
 };
 
-/** Time dimension of a dataset, discriminated on `status`. */
+/**
+ * Time dimension of a dataset, discriminated on `status`.
+ *
+ * @example
+ * const unknown: CatalogueTemporalContract = { status: 'unknown' };
+ * const described: CatalogueTemporalContract = {
+ *   status: 'described',
+ *   extent: [{ start: '2010-01-01', end: '2010-12-31' }],
+ *   grain: 'P1Y',
+ *   frequency: 'oneTime',
+ *   history: 'snapshot',
+ * };
+ */
 export type CatalogueTemporalContract =
   | { status: 'notApplicable' | 'unknown' }
   | {
@@ -130,7 +207,21 @@ export type CatalogueTemporalContract =
       history: CatalogueHistoryContract;
     };
 
-/** Spatial dimension of a dataset, discriminated on `status`. */
+/**
+ * Spatial dimension of a dataset, discriminated on `status`.
+ *
+ * @example
+ * const notApplicable: CatalogueSpatialContract = { status: 'notApplicable' };
+ * const described: CatalogueSpatialContract = {
+ *   status: 'described',
+ *   extent: [{ scheme: 'iso3166-1', code: 'BR' }],
+ *   coverage: 'exhaustive',
+ *   grain: { code: 'municipality', label: 'município' },
+ *   geometry: 'none',
+ *   precision: 'notApplicable',
+ *   srid: null,
+ * };
+ */
 export type CatalogueSpatialContract =
   | { status: 'notApplicable' | 'unknown' }
   | {
@@ -146,14 +237,55 @@ export type CatalogueSpatialContract =
       srid: number | null;
     };
 
-/** Volume of a dataset, in the unit its format counts in. */
+/**
+ * Volume of a dataset, in the unit its format counts in.
+ *
+ * @example
+ * const volume: CatalogueVolumeContract = { kind: 'rows', count: 5565 };
+ */
 export type CatalogueVolumeContract = {
   /** Which unit the count is in: CSV rows, JSON entries or GeoJSON features. */
   kind: 'rows' | 'entries' | 'features';
   count: number;
 };
 
-/** A single dataset entry, with its metadata and data dictionary. */
+/**
+ * A single dataset entry, with its metadata and data dictionary.
+ *
+ * @example
+ * const dataset: CatalogueDatasetContract = {
+ *   id: 'municipios_ivs',
+ *   slug: 'municipios-ivs',
+ *   title: 'Índice de Vulnerabilidade Social por município (Atlas IVS, 2010)',
+ *   description: 'Todos os 5.565 municípios do Brasil com o IVS…',
+ *   format: 'CSV',
+ *   source: { title: 'IPEA', description: 'Datasets socioeconômicos…', tags: ['ipea'] },
+ *   organization: 'Instituto de Pesquisa Econômica Aplicada (IPEA)',
+ *   originNotes: 'Extraído de `atlasivs_dadosbrutos_pt_v2.xlsx`…',
+ *   hasDocumentedOrigin: true,
+ *   temporal: {
+ *     status: 'described',
+ *     extent: [{ start: '2010-01-01', end: '2010-12-31' }],
+ *     grain: 'P1Y',
+ *     frequency: 'oneTime',
+ *     history: 'snapshot',
+ *   },
+ *   spatial: {
+ *     status: 'described',
+ *     extent: [{ scheme: 'iso3166-1', code: 'BR' }],
+ *     coverage: 'exhaustive',
+ *     grain: { code: 'municipality', label: 'município' },
+ *     geometry: 'none',
+ *     precision: 'notApplicable',
+ *     srid: null,
+ *   },
+ *   access: { level: 'public', containsPersonalData: false, notes: null },
+ *   volume: { kind: 'rows', count: 5565 },
+ *   sizeBytes: 693907,
+ *   fields: [], // one CatalogueFieldContract per source column (12 here)
+ *   gaps: [], // both dimensions described and an origin URL recorded
+ * };
+ */
 export type CatalogueDatasetContract = {
   id: string;
   slug: string;
@@ -197,6 +329,11 @@ export type CatalogueDatasetContract = {
  * The whole app-facing catalogue: metadata about the catalogue itself plus one
  * flat list of datasets, each carrying its source. Flat because `/dados` renders
  * a single grid — there is no grouping level left for a nested shape to serve.
+ *
+ * @example
+ * const catalogue: CatalogueContract = await gateway.getCatalogue();
+ * catalogue.meta.schemaVersion; // '2.0.0'
+ * catalogue.datasets.map((dataset) => dataset.title); // sorted, pt-BR collation
  */
 export type CatalogueContract = {
   meta: CatalogueMetaContract;

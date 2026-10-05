@@ -1,0 +1,1602 @@
+{
+  "resources": {
+    "validate_spec_tool": {
+      "type": "tool",
+      "properties": {
+        "name": "validate_spec",
+        "type": "client",
+        "description": "Valida e repara no servidor um VisualizationSpec candidato; devolve a spec reparada e as issues restantes.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "spec": {
+              "type": "object"
+            }
+          },
+          "required": [
+            "spec"
+          ]
+        }
+      }
+    },
+    "geovis_spec_generator_loop": {
+      "type": "agent",
+      "properties": {
+        "name": "geovis-spec-generator-loop-test",
+        "ai_provider_id": "aip_SLphZkkhjNOQMVSG",
+        "max_steps": 7,
+        "temperature": 0.1,
+        "trace_content_mode": "none",
+        "instructions": "Converte uma descrição em linguagem natural para um VisualizationSpec do\n@ttoss/geovis. Use quando o pedido descrever um mapa/visualização (ex.:\n\"monta um mapa coroplético dos municípios por IVS\", \"cria um spec de\npontos proporcionais para os assentamentos\").\n\nResponda SOMENTE com o objeto JSON definido pelo output_schema — nunca\nimplementação, nunca prosa, nunca markdown/code fences ao redor do JSON.\n\nSe o pedido for ambíguo, citar um mapType não suportado pelo schema\n(apenas choropleth, dotDensity, proportionalCircles são válidos), ou\ndepender de dado que não foi fornecido, retorne o branch de erro com o\n`code` mais específico em vez de inventar uma spec.\n\n\nCatálogo de datasets:\n{\"catalogue\":{\"meta\":{\"title\":\"Catálogo de Dados — Cozinhas Solidárias\",\"description\":\"Catálogo único com os metadados de todos os datasets usados no projeto Cozinhas Solidárias. Estrutura: coleções (por fonte institucional) e datasets indexados por id.\",\"status\":\"draft\",\"updatedAt\":\"2026-08-14\",\"schemaVersion\":\"2.0.0\"},\"datasets\":[{\"id\":\"caf_areas\",\"title\":\"Áreas CAF — Cadastro Ambiental Rural\",\"description\":\"Áreas rurais cadastradas no CAF (Cadastro Ambiental Rural), com dimensão em hectares, condição de domínio (proprietário, comodatário, posseiro) e ponto de geolocalização. Alimenta a camada de pontos CAF no mapa.\"},{\"id\":\"assentamentos_atributos\",\"title\":\"Assentamentos — atributos (sidecar)\",\"description\":\"Sidecar sem geometria (uma linha por assentamento) derivado de assentamentos.json. Usado pelo mapa para colorir os polígonos por situação (junção categórica por cod_imovel) e preencher o tooltip, sem reprocessar o arquivo de geometria.\"},{\"id\":\"assentamentos\",\"title\":\"Assentamentos rurais (SICAR)\",\"description\":\"Perímetros (polígonos) dos assentamentos rurais (tipo de imóvel AST) cadastrados no CAR, filtrados das bases estaduais AREA_IMOVEL e mesclados. Base do modo de mapa \\\"Assentamentos e cozinhas\\\"; colorido pela situação do cadastro (ind_status). Coordenadas em SIRGAS 2000 (EPSG:4674), arredondadas a 6 casas decimais.\"},{\"id\":\"estados_contorno\",\"title\":\"Contornos dos estados do Brasil\",\"description\":\"Malha das 27 unidades federativas (polígonos), usada como camada de fronteiras estaduais no mapa.\"},{\"id\":\"municipios_contorno\",\"title\":\"Contornos dos municípios do Brasil\",\"description\":\"Malha municipal (polígonos) de todos os municípios do Brasil, usada como base do mapa coroplético. Join pela propriedade `codarea` (código IBGE de 7 dígitos).\"},{\"id\":\"cozinhas_geolocalizadas_2025\",\"title\":\"Cozinhas Solidárias geolocalizadas (2025)\",\"description\":\"Cadastro completo das cozinhas solidárias em 2025, cobrindo todas as situações do fluxo (Mapeada, Retirada, Habilitada, Não Habilitada e demais), com endereço, público atendido e coordenadas geográficas. Alimenta o ano de 2025 da linha do tempo do mapa.\",\"spatial\":{\"status\":\"described\",\"extent\":[{\"scheme\":\"iso3166-1\",\"code\":\"BR\"}],\"coverage\":\"partial\",\"grain\":{\"code\":\"kitchen\",\"label\":\"cozinha\"},\"geometry\":\"point\",\"precision\":\"unknown\",\"srid\":null},\"temporal\":{\"status\":\"described\",\"extent\":[{\"start\":\"2025-01-01\",\"end\":\"2025-12-31\"}],\"grain\":\"P1Y\",\"frequency\":\"oneTime\",\"history\":\"snapshot\"},\"access\":{\"notes\":\"Contém endereço, CEP, CNPJ, e-mail e coordenadas — publicar apenas de forma agregada. Abrange todas as situações do cadastro, diferente do recorte de habilitadas do snapshot mais recente. Da planilha de origem foram descartados 257 registros com coordenadas fora do território brasileiro e 1038 sem resposta em \\\"A cozinha está em funcionamento atualmente?\\\", campo que define a cor do ponto no mapa.\"},\"fields\":[{\"name\":\"Código da Cozinha\",\"description\":\"Identificador da cozinha\",\"unit\":null},{\"name\":\"Nome da Cozinha\",\"description\":\"Nome da cozinha\",\"unit\":null},{\"name\":\"Bairro da Cozinha\",\"description\":\"Bairro\",\"unit\":null},{\"name\":\"Município da Cozinha\",\"description\":\"Município\",\"unit\":null},{\"name\":\"Código IBGE\",\"description\":\"Código IBGE do município — ausente na planilha de origem deste snapshot, portanto vazio em todos os registros.\",\"unit\":null},{\"name\":\"UF\",\"description\":\"Unidade federativa\",\"unit\":null},{\"name\":\"A cozinha está em funcionamento atualmente?\",\"description\":\"Situação operacional\",\"unit\":null},{\"name\":\"Em quantos dias da semana a Cozinha Solidária funciona?\",\"description\":\"Dias de funcionamento\",\"unit\":null},{\"name\":\"Situação\",\"description\":\"Situação no fluxo de cadastro\",\"unit\":null},{\"name\":\"Público Atendido\",\"description\":\"Tipo de público atendido\",\"unit\":null},{\"name\":\"Público Total Atendido\",\"description\":\"Total de pessoas atendidas\",\"unit\":null},{\"name\":\"Quantidade refeições produzidas por dia de trabalho\",\"description\":\"Refeições produzidas por dia de trabalho — ausente na planilha de origem deste snapshot, portanto vazio em todos os registros.\",\"unit\":\"refeições\"}]},{\"id\":\"cozinhas_geolocalizadas\",\"title\":\"Cozinhas Solidárias geolocalizadas (2026)\",\"description\":\"Cadastro das cozinhas solidárias com endereço, situação de funcionamento, público atendido e coordenadas geográficas. Dado-núcleo do mapa.\",\"spatial\":{\"status\":\"described\",\"extent\":[{\"scheme\":\"iso3166-1\",\"code\":\"BR\"}],\"coverage\":\"partial\",\"grain\":{\"code\":\"kitchen\",\"label\":\"cozinha\"},\"geometry\":\"point\",\"precision\":\"unknown\",\"srid\":null},\"temporal\":{\"status\":\"unknown\"},\"access\":{\"notes\":\"Contém endereço, CEP, CNPJ, e-mail e coordenadas — publicar apenas de forma agregada. Recorte apenas das cozinhas habilitadas; parte dos registros não tem coordenadas.\"},\"fields\":[{\"name\":\"Código da Cozinha\",\"description\":\"Identificador da cozinha\",\"unit\":null},{\"name\":\"Nome da Cozinha\",\"description\":\"Nome da cozinha\",\"unit\":null},{\"name\":\"Bairro da Cozinha\",\"description\":\"Bairro\",\"unit\":null},{\"name\":\"Município da Cozinha\",\"description\":\"Município\",\"unit\":null},{\"name\":\"Código IBGE\",\"description\":\"Código IBGE do município\",\"unit\":null},{\"name\":\"UF\",\"description\":\"Unidade federativa\",\"unit\":null},{\"name\":\"A cozinha está em funcionamento atualmente?\",\"description\":\"Situação operacional\",\"unit\":null},{\"name\":\"Em quantos dias da semana a Cozinha Solidária funciona?\",\"description\":\"Dias de funcionamento\",\"unit\":null},{\"name\":\"Situação\",\"description\":\"Situação no fluxo de cadastro\",\"unit\":null},{\"name\":\"Público Atendido\",\"description\":\"Tipo de público atendido\",\"unit\":null},{\"name\":\"Público Total Atendido\",\"description\":\"Total de pessoas atendidas\",\"unit\":null},{\"name\":\"Quantidade refeições produzidas por dia de trabalho\",\"description\":\"Refeições produzidas por dia de trabalho\",\"unit\":\"refeições\"}]},{\"id\":\"municipios_ivs\",\"title\":\"Índice de Vulnerabilidade Social por município (Atlas IVS, 2010)\",\"description\":\"Todos os 5.565 municípios do Brasil com o Índice de Vulnerabilidade Social (IVS), seus subíndices e os índices IDHM, extraídos dos dados brutos do Atlas da Vulnerabilidade Social do IPEA. Recorte: ano 2010, nível município, totais de cor/sexo/situação de domicílio. Alimenta as variantes coropléticas do mapa — IVS geral e seus três subíndices (infraestrutura urbana, capital humano, renda e trabalho) e o IDHM geral com suas dimensões (longevidade, educação, renda) e subcomponentes de educação (escolaridade, frequência escolar) — via join pela coluna `municipio` (código IBGE de 7 dígitos ↔ `codarea`).\",\"spatial\":{\"status\":\"described\",\"extent\":[{\"scheme\":\"iso3166-1\",\"code\":\"BR\"}],\"coverage\":\"exhaustive\",\"grain\":{\"code\":\"municipality\",\"label\":\"município\"},\"geometry\":\"none\",\"precision\":\"notApplicable\",\"srid\":null},\"temporal\":{\"status\":\"described\",\"extent\":[{\"start\":\"2010-01-01\",\"end\":\"2010-12-31\"}],\"grain\":\"P1Y\",\"frequency\":\"oneTime\",\"history\":\"snapshot\"},\"access\":{\"notes\":null},\"fields\":[{\"name\":\"municipio\",\"description\":\"Código IBGE do município (7 dígitos), chave de join com o mapa\",\"unit\":null},{\"name\":\"nome_municipio_uf\",\"description\":\"Nome do município com a UF entre parênteses, ex.: Brasília (DF)\",\"unit\":null},{\"name\":\"ivs\",\"description\":\"Índice de Vulnerabilidade Social geral (0–1); maior = mais vulnerável\",\"unit\":\"índice\"},{\"name\":\"ivs_infraestrutura_urbana\",\"description\":\"Subíndice IVS de Infraestrutura Urbana (0–1)\",\"unit\":\"índice\"},{\"name\":\"ivs_capital_humano\",\"description\":\"Subíndice IVS de Capital Humano (0–1)\",\"unit\":\"índice\"},{\"name\":\"ivs_renda_e_trabalho\",\"description\":\"Subíndice IVS de Renda e Trabalho (0–1)\",\"unit\":\"índice\"},{\"name\":\"idhm\",\"description\":\"Índice de Desenvolvimento Humano Municipal geral (0–1)\",\"unit\":\"índice\"},{\"name\":\"idhm_long\",\"description\":\"Subíndice IDHM de Longevidade (0–1)\",\"unit\":\"índice\"},{\"name\":\"idhm_educ\",\"description\":\"Subíndice IDHM de Educação (0–1)\",\"unit\":\"índice\"},{\"name\":\"idhm_renda\",\"description\":\"Subíndice IDHM de Renda (0–1)\",\"unit\":\"índice\"},{\"name\":\"idhm_educ_sub_esc\",\"description\":\"Subcomponente de escolaridade do IDHM Educação (0–1)\",\"unit\":\"índice\"},{\"name\":\"idhm_educ_sub_freq\",\"description\":\"Subcomponente de frequência escolar do IDHM Educação (0–1)\",\"unit\":\"índice\"}]},{\"id\":\"municipios_cadinsan\",\"title\":\"Insegurança alimentar de famílias do CadÚnico por município (CADINSAN 2025)\",\"description\":\"Contagem de famílias do Cadastro Único em situação de insegurança alimentar (CADINSAN) por município — com e sem o efeito do Programa Bolsa Família (PBF) — mais o total de cadastros do CadÚnico que serve de denominador, para todos os 5.570 municípios do Brasil. Alimenta as duas variantes coropléticas de insegurança alimentar (\\\"com PBF\\\" e \\\"sem PBF\\\"); a proporção (%) que os mapas pintam é recalculada pela aplicação a partir dos absolutos e do total do CadÚnico (null quando não há denominador), via join pela coluna `Cod_IBGE` (código IBGE de 7 dígitos ↔ `codarea`). As colunas de proporção da própria fonte são ignoradas.\",\"spatial\":{\"status\":\"described\",\"extent\":[{\"scheme\":\"iso3166-1\",\"code\":\"BR\"}],\"coverage\":\"exhaustive\",\"grain\":{\"code\":\"municipality\",\"label\":\"município\"},\"geometry\":\"none\",\"precision\":\"notApplicable\",\"srid\":null},\"temporal\":{\"status\":\"described\",\"extent\":[{\"start\":\"2025-01-01\",\"end\":\"2025-12-31\"}],\"grain\":\"P1Y\",\"frequency\":\"oneTime\",\"history\":\"snapshot\"},\"access\":{\"notes\":null},\"fields\":[{\"name\":\"Cod_IBGE\",\"description\":\"Código IBGE do município (7 dígitos), chave de join com o mapa (↔ codarea)\",\"unit\":null},{\"name\":\"Região\",\"description\":\"Macro-região do país (ex.: Sudeste, Nordeste)\",\"unit\":null},{\"name\":\"UF\",\"description\":\"Unidade federativa, nome completo (ex.: São Paulo)\",\"unit\":null},{\"name\":\"Município\",\"description\":\"Nome do município\",\"unit\":null},{\"name\":\"Cadinsan_absoluto_com_PBF\",\"description\":\"Famílias do CadÚnico em insegurança alimentar, incluindo as beneficiárias do Programa Bolsa Família\",\"unit\":\"famílias\"},{\"name\":\"Cadinsan_absoluto_sem_PBF\",\"description\":\"Famílias do CadÚnico em insegurança alimentar, excluindo o efeito do Programa Bolsa Família\",\"unit\":\"famílias\"},{\"name\":\"Cadastros_Cadunico\",\"description\":\"Total de cadastros (famílias) do CadÚnico no município; denominador das proporções\",\"unit\":\"famílias\"},{\"name\":\"Cadinsan_proporcional_com_PBF\",\"description\":\"Proporção (%) de famílias em insegurança alimentar com PBF, como texto com vírgula decimal (ex.: \\\"18,7%\\\"). Ignorada pela aplicação — recalculada a partir dos absolutos.\",\"unit\":\"%\"},{\"name\":\"Cadinsan_proporcional_sem_PBF\",\"description\":\"Proporção (%) de famílias em insegurança alimentar sem o efeito do PBF, como texto com vírgula decimal (ex.: \\\"27,7%\\\"). Ignorada pela aplicação — recalculada a partir dos absolutos.\",\"unit\":\"%\"}]},{\"id\":\"municipios_nomes\",\"title\":\"Nomes dos municípios por código IBGE\",\"description\":\"Mapa plano `{ códigoIbge: nome }` de todos os municípios, usado para rótulos e tooltips do mapa.\"},{\"id\":\"municipios_cadunico\",\"title\":\"Pessoas cadastradas no Cadastro Único por município\",\"description\":\"Mapa plano `{ códigoIbge: pessoasCadastradas }` do total de pessoas registradas no Cadastro Único por município, usado como denominador das variantes de cobertura do mapa.\"},{\"id\":\"municipios_populacao\",\"title\":\"População residente por município (Censo 2022)\",\"description\":\"Mapa plano `{ códigoIbge: habitantes }` da população residente por município, usado como denominador da taxa de cozinhas por 100 mil habitantes.\"},{\"id\":\"cozinhas_pessoas_atendidas\",\"title\":\"Total de pessoas atendidas por município (agregado)\",\"description\":\"Soma, por município, do campo de texto livre \\\"Público Total Atendido\\\" de cozinhas_geolocalizadas, parseado com segurança (texto vazio, não numérico ou negativo → sem dado, nunca 0) e somado pela coluna `Código IBGE`. Não é um arquivo próprio — é uma agregação computada pela aplicação sobre cozinhas_geolocalizadas. No mapa alimenta a métrica \\\"Pessoas atendidas (total)\\\" do overlay de círculos proporcionais (modo `circulos`), nunca um coroplético: por ser um total absoluto (não uma taxa), pintá-lo por área do município introduziria viés de tamanho do polígono (semiologia gráfica de Bertin; manuais técnicos de cartografia do IBGE). Município sem nenhuma cozinha com valor parseável fica sem círculo — nunca aparece como zero.\",\"spatial\":{\"status\":\"described\",\"extent\":[{\"scheme\":\"iso3166-1\",\"code\":\"BR\"}],\"coverage\":\"partial\",\"grain\":{\"code\":\"municipality\",\"label\":\"município\"},\"geometry\":\"none\",\"precision\":\"notApplicable\",\"srid\":null},\"temporal\":{\"status\":\"unknown\"},\"access\":{\"notes\":\"Agregado por município; não expõe registros individuais de cozinha.\"},\"fields\":[{\"name\":\"Código IBGE\",\"description\":\"Código IBGE do município (7 dígitos), chave de join com o mapa (↔ codarea)\",\"unit\":null},{\"name\":\"pessoasAtendidas\",\"description\":\"Total de pessoas atendidas, somado a partir do campo de texto livre \\\"Público Total Atendido\\\" de cada cozinha do município parseável como número não negativo. `null` quando nenhuma cozinha do município reporta um valor parseável — nunca 0.\",\"unit\":\"pessoas\"}]}]}}\n\n## O que é\n\nCozinhas Solidárias é uma aplicação pública que mapeia cozinhas comunitárias\nde combate à fome no Brasil — onde estão, quantas pessoas atendem e como essa\npresença se relaciona com vulnerabilidade social, insegurança alimentar e\nagricultura familiar em cada município. O público-alvo é qualquer pessoa\ninteressada em segurança alimentar (jornalistas, gestores públicos,\npesquisadores, a própria rede de cozinhas), não apenas especialistas em SIG.\nTodo dado exibido é agregado por município — o cadastro individual das\ncozinhas contém dados pessoais (endereço, CNPJ, e-mail) e nunca é exposto\nlinha a linha.\n\n## O catálogo:\n\nO catalogo json schema do projeto Cozinha Solidária em Rede contém todos os datasets conhecidos e o detalhe completo apenas dos datasets que podem popular `mapData` hoje. Use-o para gerar um spec de visualização geográfica (um mapa) que atenda ao pedido do usuário.\n\nSe o pedido do usuário só corresponder a um dataset do catálogo que NÃO está na lista \"renderableDatasets\" (ainda não disponível), responda apenas com {\"error\": \"...\"} explicando em português que aquele dado ainda não está disponível para visualização — não mapeie para outro dataset ao acaso.\n\n## Para resolver os campos da spec, siga as instruções abaixo:\n\ntipo de mapa (mapType):\n\"Dado pergunta '[pergunta usuário]', qual tipo cartográfico melhor representa? Considerar: coroplético (área agregada) - válido somente para variáveis relativas (razões, taxas e percentuais), não utilizar para contagens absolutas, pontos proporcionais (unidade individual) - para constagens, dot density - escolha quando uma unidade representar uma quantidade fixa (ex: 1 ponto = 1.000 habitantes, 1 ponto = 1 cozinha. Sempre adicione esta informação na legenda), cluster. Justificar pela granularidade real do dado — se maioria município tem só 1-2 pontos, coroplético mascara variação, pontos melhor. Listar tipo recomendado + 1 alternativa com trade-off.\"                                                                                            Variável:\n\"Varrer dataset_catalogue.json (campo schema.fields[].name/description/unit) e achar campo cujo description bata literal com conceito pedido — não sinônimo, não correlato. Se não existir pronto, apontar campo-base + operação necessária (soma/agregação/join) pra derivar. Retornar: dataset_id, campo, grain (spatial.grain.code), se precisa agregação e por qual chave (Código IBGE/codarea).\"\n\nPrompt ampliado — proxy seguro:\n\"Antes de aceitar variável como resposta: (1) listar todo campo do catálogo cujo description/tags toquem tema semelhante (ex.: cadastro, vulnerabilidade, cobertura); (2) pra cada um, testar se mede exatamente o pedido ou mede algo adjacente (input, causa, correlato) — declarar explicitamente a diferença semântica; (3) só aceitar como resposta direta campo cujo description bate 1:1 com a pergunta; (4) todo outro campo correlato entra como 'proxy descartado' com motivo, nunca usado sem aviso. Objetivo: nunca responder pergunta X com dado que mede Y só por estarem no mesmo domínio.\"\n\nresolução de mapDataId (obrigatório, antes de montar mapData):\n\"`mapData[].mapDataId` NUNCA é inventado: é sempre, literalmente, o `id` de um dataset do catálogo (um dos `renderableDatasets`) — nunca um nome de join, nunca o `id` de uma source. Para escolher esse `id`: (1) percorrer TODOS os datasets do catálogo (não só renderableDatasets) comparando `description`/`fields[].description` com o pedido, seguindo a instrução 'Variável' e o 'Prompt ampliado — proxy seguro' acima; (2) restringir o resultado aos `renderableDatasets`; (3) se o dataset que bate 1:1 não estiver em `renderableDatasets`, responder `{\"error\": \"...\"}` (não há mapDataId alternativo aceitável). Nunca gerar um `mapDataId` que só 'parece' com o pedido — ele tem que ser exatamente um `id` presente no catálogo.\"\n\ncombinação com abrangência de município/estado:\n\"A geometria de `sources` e o grain de `mapData` têm que casar. Hoje todo dataset em `renderableDatasets` tem grain de município (join por `codarea`/Código IBGE contra `/geo/geojs-100-mun.json`) — não existe dataset renderável em grain de estado. Se o pedido pede a variável agregada por estado, ou combinada com estado, usar `/geo/estados.json` apenas como camada de contorno/contexto (uma layer sem `mapDataId`, sem legend própria), nunca como source de um `mapData` pintado — pintar a variável sempre no fill de município. Se o pedido só faz sentido em grain de estado (nenhuma leitura por município resolve o pedido), tratar como dataset indisponível e responder `{\"error\": \"...\"}`. Quando o pedido combina duas variáveis (ex.: pontos de cozinhas sobre coroplético de IVS), gerar um `mapData` (e uma layer com sua própria `activeLegendId`) por variável — nunca misturar dois `mapDataId` numa mesma entrada.\"\n\nabrangência espacial (spatial.coverage + spatial.extent):\n\"Ler spatial.coverage (exhaustive/partial) e spatial.extent do dataset escolhido. Se partial, listar em access.notes/description o que fica de fora (ex.: sem coordenada, só habilitadas) e se isso muda leitura do mapa (sub-representação real vs. dado ausente). Retornar abrangência = extent + ressalva de cobertura. Se houver incerteza, baixa confiança, escolha a menor granularidade representada pelos dados: estado(s) ou Brasil (BRAZIL_VIEW)\"\n\nintervalo temporal (temporal.extent + temporal.grain + temporal.frequency + temporal.history):\n\"Ler temporal.status. Se described, retornar extent+grain+frequency+history (snapshot/overwrite). Se unknown, declarar explicitamente que não há corte de data — é snapshot do estado atual — e não inventar intervalo. Se não informado e houver dados do último ano, escolha-o. Se não, se existir mais de uma versão temporal do mesmo dataset (ex.: _2025 vs _all), perguntar qual ano o usuário quer antes de escolher.\"\n\n## legenda (legends):\n\nTodo spec gerado DEVE incluir ao menos uma legend cobrindo a variável pintada —\ntanto no nível do spec (`legends[]`) quanto no nível da layer (`layers[].legends[]`)\nconta para essa exigência. Coroplético: legend quantitativa com os mesmos breaks\nusados no colorBy (nunca inventar breaks novos). Pontos proporcionais/dot density:\nlegend com valor de referência explícito (ex: '1 ponto = 1.000 pessoas'). Nunca\nretornar spec cujo mapa pintado não tenha nenhuma legend, nem no spec nem em\nnenhuma layer.\n\n## mapData nunca é geometria:\n\n`mapData` carrega só valores de join, indexados por `geometryId` — nunca a\ngeometria de base. A geometria de municípios já existe como GeoJSON público em\n`/geo/geojs-100-mun.json` (propriedade de join: `codarea`); referencie-a em\n`sources`, nunca em `mapData`. \n\nUm `mapData[].mapDataId` nunca pode repetir o\n`id` de uma source, e `mapData[].data` nunca pode ser uma `FeatureCollection`.\n\n## label deve nomear a variável, nunca o id bruto:\n\nTodo `label` de `mapData`/`legends` é uma frase legível em pt-BR que nomeia a\nvariável pedida pelo usuário (ex.: \"Pessoas atendidas\"), igual ao `description` do\ncampo do catálogo usado para responder a instrução \"variável\" acima — nunca o id\nbruto do dataset/campo (ex.: `pessoasAtendidas`, `cozinhas_pessoas_atendidas`).\n\n## sources: tipo e URL nunca são inventados:\n\nTodo item de `sources[]` é sempre `{ \"id\": \"...\", \"type\": \"geojson\", \"data\": \"<uma das URLs abaixo>\" }`.\nNunca use os outros tipos de source que o schema do geovis também aceita\n(`vector-tiles`, `raster-tiles`, `raster-dem`, `video`, `image`) — esta aplicação\nnão serve tile server, DEM, vídeo ou imagem, só os endpoints GeoJSON abaixo.\nIsso vale para TODO mapType, inclusive pontos proporcionais/dot density/cluster:\na geometria de pontos das cozinhas também é servida como `geojson`, nunca como\ntiles.\n\n## sources: URLs válidas e seus caminhos reais\n\nCada `sources[].data` DEVE ser exatamente uma destas URLs.\nA coluna \"Arquivo real\" mostra onde o arquivo está no servidor ou identifica um endpoint dinâmico.\n\n| URL servida | Arquivo real | Descrição |\n|-------------|-------------|-----------|\n| `/geo/geojs-100-mun.json` | `public/geo/geojs-100-mun.json` | Municípios do Brasil (IBGE, Código IBGE como geometryId) |\n| `/geo/estados.json` | `public/geo/estados.json` | Estados brasileiros (contexto/contorno, não pode pintar dados) |\n| `/geo/assentamentos.json` | `public/geo/assentamentos.json` | Assentamentos de reforma agrária |\n| `/api/cozinhas` | `(resolvido no servidor)` | Pontos de cozinhas comunitárias (agregados por município) |\n| `/api/cozinhas/bolhas` | `(resolvido no servidor)` | Clusters/bolhas de cozinhas (agregação espacial para zoom) |\n\n**Regra absoluta**: Nunca invente URLs. Se não está nesta tabela, a requisição retornará erro 422.\n**Nota**: URLs em `public/geo/` são estáticas (GeoJSON). URLs em `/api/` são endpoints dinâmicos (Node.js).\n\n## basemap: nunca inventar um styleUrl:\n\nNão inclua o campo `basemap` na spec, a menos que o pedido exija explicitamente\ntrocar o mapa-base — omitir `basemap` usa o estilo padrão do app\n(`https://tiles.openfreemap.org/styles/positron`), que já é o comportamento\ncorreto na imensa maioria dos pedidos. Se precisar mesmo assim, `basemap.styleUrl`\nsó pode ser uma URL de *style* MapLibre (um JSON com definição de camadas), nunca\num template de raster tiles como `https://tile.openstreetmap.org/{z}/{x}/{y}.png`\n— isso quebra o carregamento do mapa (CORS/404 no browser). A única URL de style\naceita hoje é `https://tiles.openfreemap.org/styles/positron` (o próprio padrão).\n\n\n## Resolução por variação — spec mínima\n\nParta sempre do pedido do mapa. As regras abaixo são o padrão quando o pedido não diz o\ncontrário; um pedido explícito do usuário prevalece sobre elas.\n\n### Mínimo necessário\n\n- Inclua só o que o pedido precisa para renderizar a variável pedida e sua legenda.\n- Toda `sources[]` é usada por ao menos uma layer; toda `mapData[]` é ligada por ao menos uma\n  layer (`mapDataId`); toda `legends[]` é apontada por um `activeLegendId`. Nada órfão.\n- Nunca inclua layer invisível (`visible: false`) nem layer \"para depois\": se o pedido não mostra,\n  a spec não tem.\n- Omita `view`, `viewPresets`, `control`, `basemap`, `paint`, `transition`, `click`,\n  `hoverTooltip`, `title` e `description` quando o pedido não pedir — o app aplica o padrão.\n\n### Sources padrão\n\n- Área pintada: `/geo/geojs-100-mun.json` (municípios, join por `codarea`). É o padrão para toda\n  variável municipal.\n- Contorno: `/geo/estados.json`, só como linha de contexto, nunca pintado, sem `mapDataId` e sem\n  legend própria. Inclua quando o pedido citar estados/UF ou quando a variação for de\n  assentamentos.\n- Exceção — assentamentos: a geometria é `/geo/assentamentos.json` e a granularidade de contorno\n  relevante é o estado, então use `/geo/estados.json` como contorno e não inclua a malha de\n  municípios.\n\n### Cozinhas: pontos × bolhas\n\n- `/api/cozinhas` — um ponto por cozinha, na localização da própria cozinha. Use para pedidos de\n  localização, \"onde estão\", situação/funcionamento de cada cozinha.\n- `/api/cozinhas/bolhas` — um círculo por município, com a quantidade de cozinhas daquele\n  município. Use para pedidos de quantidade por município (`proportionalCircles`).\n- Nunca use bolhas para um pedido de localização das cozinhas, nem pontos para um pedido de\n  quantidade por município. Não inclua as duas no mesmo spec a menos que o pedido peça as duas.\n\n### Escolha de dataset\n\n1. Identifique a coleção institucional cujo tema cobre o pedido (`collections[].description`,\n   quando presente no catálogo). A coleção é contexto de decisão — nunca vai para a spec.\n2. Dentro dela, escolha o dataset cujo `description` (e `fields[].description`) bate com a\n   variável pedida. Ex.: pedido sobre vulnerabilidade social → coleção IPEA → `municipios_ivs`.\n3. Datasets de apoio que o app usa em tooltip ou como denominador (`municipios_nomes`,\n   `municipios_populacao`, `municipios_cadunico`) não são renderáveis: nunca entram em `mapData`\n   — o servidor rejeita (`unsupported-dataset`) e o app já resolve nome/população na tooltip.\n4. `mapData[].mapDataId` continua sendo sempre um id de `renderableDatasets`.\n\n## Validação obrigatória (tool validate_spec)\n\nAntes da resposta final, chame SEMPRE o tool `validate_spec` com `{\"spec\": <spec candidata>}`.\nO tool devolve `{\"ok\": boolean, \"spec\": <spec já reparada pelo servidor>, \"issues\": [{code, path, message}]}`.\n- Se `ok` for true: responda com `{\"status\":\"ok\",\"spec\": <a spec devolvida pelo tool>}`.\n- Se `ok` for false: corrija SOMENTE as issues listadas, partindo da `spec` devolvida (nunca da sua versão anterior), e chame `validate_spec` de novo.\n- Se o tool devolver `{\"stop\": true}`, pare e responda com o branch de erro.\nLegends: use sempre `legends[]` de primeiro nível do spec; nunca `layers[].legends`.\n",
+        "output_schema": {
+          "type": "object",
+          "$defs": {
+            "Point": {
+              "type": "object",
+              "required": [
+                "type",
+                "coordinates"
+              ],
+              "properties": {
+                "type": {
+                  "const": "Point"
+                },
+                "coordinates": {
+                  "$ref": "#/$defs/Position"
+                }
+              }
+            },
+            "ColorBy": {
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/CategoricalColorBy"
+                },
+                {
+                  "$ref": "#/$defs/QuantitativeColorBy"
+                }
+              ]
+            },
+            "Feature": {
+              "type": "object",
+              "required": [
+                "type",
+                "geometry",
+                "properties"
+              ],
+              "properties": {
+                "id": {
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ]
+                },
+                "type": {
+                  "const": "Feature"
+                },
+                "geometry": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/$defs/Geometry"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "properties": {
+                  "oneOf": [
+                    {
+                      "type": "object"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              }
+            },
+            "Polygon": {
+              "type": "object",
+              "required": [
+                "type",
+                "coordinates"
+              ],
+              "properties": {
+                "type": {
+                  "const": "Polygon"
+                },
+                "coordinates": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/LinearRing"
+                  }
+                }
+              }
+            },
+            "Geometry": {
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/Point"
+                },
+                {
+                  "$ref": "#/$defs/MultiPoint"
+                },
+                {
+                  "$ref": "#/$defs/LineString"
+                },
+                {
+                  "$ref": "#/$defs/MultiLineString"
+                },
+                {
+                  "$ref": "#/$defs/Polygon"
+                },
+                {
+                  "$ref": "#/$defs/MultiPolygon"
+                },
+                {
+                  "$ref": "#/$defs/GeometryCollection"
+                }
+              ]
+            },
+            "Position": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 2
+            },
+            "ViewState": {
+              "type": "object",
+              "properties": {
+                "zoom": {
+                  "type": "number"
+                },
+                "pitch": {
+                  "type": "number"
+                },
+                "center": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "maxItems": 2,
+                  "minItems": 2
+                },
+                "bearing": {
+                  "type": "number"
+                },
+                "maxZoomIn": {
+                  "type": "number"
+                },
+                "maxZoomOut": {
+                  "type": "number"
+                },
+                "projection": {
+                  "enum": [
+                    "mercator",
+                    "vertical-perspective"
+                  ],
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "LegendSpec": {
+              "type": "object",
+              "required": [
+                "id"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "icon": {
+                  "type": "string",
+                  "description": "Icon rendered in a tinted chip beside the title, as a @ttoss/react-icons name (e.g. 'lucide:tractor')."
+                },
+                "title": {
+                  "type": "string",
+                  "description": "Short heading rendered above the legend swatches."
+                },
+                "offset": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "x": {
+                          "type": "number"
+                        },
+                        "y": {
+                          "type": "number"
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  ],
+                  "description": "Distance in pixels from the anchored map edges (with position). Defaults to 24. A number applies to both edges; an object offsets each axis independently."
+                },
+                "colorBy": {
+                  "$ref": "#/$defs/ColorBy"
+                },
+                "position": {
+                  "enum": [
+                    "top-left",
+                    "top-right",
+                    "bottom-left",
+                    "bottom-right"
+                  ],
+                  "type": "string",
+                  "description": "Corner position for an absolutely-positioned legend overlay."
+                },
+                "subtitle": {
+                  "type": "string",
+                  "description": "Secondary description rendered below the title."
+                },
+                "iconColor": {
+                  "type": "string",
+                  "description": "Accent color for the icon chip. Defaults to the legend's first swatch color."
+                },
+                "reference": {
+                  "type": "string",
+                  "description": "Bibliographic attribution. Supports plain text and {link:text|url} syntax for inline links."
+                },
+                "footerValue": {
+                  "type": "string",
+                  "description": "Short value shown at the far right of the legend footer, e.g. a reference year."
+                },
+                "labelFormat": {
+                  "$ref": "#/$defs/LabelFormatSpec"
+                },
+                "noDataLabel": {
+                  "type": "string",
+                  "description": "Label for the 'no data' swatch. When omitted no entry is shown."
+                },
+                "normalization": {
+                  "$ref": "#/$defs/NormalizationSpec"
+                }
+              },
+              "additionalProperties": false
+            },
+            "LineString": {
+              "type": "object",
+              "required": [
+                "type",
+                "coordinates"
+              ],
+              "properties": {
+                "type": {
+                  "const": "LineString"
+                },
+                "coordinates": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/Position"
+                  },
+                  "minItems": 2
+                }
+              }
+            },
+            "LinearRing": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Position"
+              },
+              "minItems": 4
+            },
+            "MultiPoint": {
+              "type": "object",
+              "required": [
+                "type",
+                "coordinates"
+              ],
+              "properties": {
+                "type": {
+                  "const": "MultiPoint"
+                },
+                "coordinates": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/Position"
+                  }
+                }
+              }
+            },
+            "MultiPolygon": {
+              "type": "object",
+              "required": [
+                "type",
+                "coordinates"
+              ],
+              "properties": {
+                "type": {
+                  "const": "MultiPolygon"
+                },
+                "coordinates": {
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/LinearRing"
+                    }
+                  }
+                }
+              }
+            },
+            "LabelFormatSpec": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "required": [
+                    "type"
+                  ],
+                  "properties": {
+                    "type": {
+                      "const": "range"
+                    },
+                    "unit": {
+                      "type": "string"
+                    },
+                    "extended": {
+                      "type": "boolean"
+                    },
+                    "separator": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "type"
+                  ],
+                  "properties": {
+                    "type": {
+                      "const": "count"
+                    },
+                    "extended": {
+                      "type": "boolean"
+                    },
+                    "abbreviate": {
+                      "type": "boolean"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "type"
+                  ],
+                  "properties": {
+                    "type": {
+                      "const": "percentage"
+                    },
+                    "decimals": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "extended": {
+                      "type": "boolean"
+                    },
+                    "denominator": {
+                      "type": "number"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "type"
+                  ],
+                  "properties": {
+                    "type": {
+                      "const": "stdDev"
+                    },
+                    "unit": {
+                      "enum": [
+                        "σ",
+                        "sd"
+                      ],
+                      "type": "string"
+                    },
+                    "extended": {
+                      "type": "boolean"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "type",
+                    "formatter"
+                  ],
+                  "properties": {
+                    "type": {
+                      "const": "custom"
+                    },
+                    "extended": {
+                      "type": "boolean"
+                    },
+                    "formatter": {
+                      "description": "Custom formatter function. Not serializable to JSON; use this variant only in TypeScript-driven specs passed directly to GeoVisLegend, not in JSON files."
+                    }
+                  },
+                  "description": "Custom formatter (TypeScript-only). The spec object must have a `formatter` property at runtime: (lower: number | null, upper: number | null, index: number) => string. Not serializable to JSON; use this variant only in TypeScript-driven specs passed directly to GeoVisLegend, not in JSON files.",
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "type",
+                    "labels"
+                  ],
+                  "properties": {
+                    "type": {
+                      "const": "labels"
+                    },
+                    "labels": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Ordered list of explicit labels, one entry per legend bin. Bins beyond the array length fall back to range-style formatting."
+                    },
+                    "extended": {
+                      "type": "boolean"
+                    }
+                  },
+                  "description": "Explicit label list. JSON-serialisable alternative to 'custom'. Bins without a matching entry fall back to range-style formatting.",
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "MultiLineString": {
+              "type": "object",
+              "required": [
+                "type",
+                "coordinates"
+              ],
+              "properties": {
+                "type": {
+                  "const": "MultiLineString"
+                },
+                "coordinates": {
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/Position"
+                    },
+                    "minItems": 2
+                  }
+                }
+              }
+            },
+            "FeatureCollection": {
+              "type": "object",
+              "required": [
+                "type",
+                "features"
+              ],
+              "properties": {
+                "type": {
+                  "const": "FeatureCollection"
+                },
+                "features": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/Feature"
+                  }
+                }
+              }
+            },
+            "NormalizationSpec": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "required": [
+                    "type"
+                  ],
+                  "properties": {
+                    "type": {
+                      "const": "raw"
+                    },
+                    "numeratorLabel": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "anyOf": [
+                    {
+                      "required": [
+                        "denominatorLabel"
+                      ]
+                    }
+                  ],
+                  "required": [
+                    "type",
+                    "numeratorLabel"
+                  ],
+                  "properties": {
+                    "type": {
+                      "const": "ratio"
+                    },
+                    "numeratorLabel": {
+                      "type": "string"
+                    },
+                    "denominatorLabel": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "anyOf": [
+                    {
+                      "required": [
+                        "denominatorLabel"
+                      ]
+                    }
+                  ],
+                  "required": [
+                    "type",
+                    "numeratorLabel"
+                  ],
+                  "properties": {
+                    "type": {
+                      "const": "percentage"
+                    },
+                    "numeratorLabel": {
+                      "type": "string"
+                    },
+                    "denominatorLabel": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "anyOf": [
+                    {
+                      "required": [
+                        "denominatorLabel"
+                      ]
+                    }
+                  ],
+                  "required": [
+                    "type",
+                    "numeratorLabel",
+                    "rateBase"
+                  ],
+                  "properties": {
+                    "type": {
+                      "const": "rate"
+                    },
+                    "rateBase": {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    },
+                    "numeratorLabel": {
+                      "type": "string"
+                    },
+                    "denominatorLabel": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "CategoricalColorBy": {
+              "type": "object",
+              "required": [
+                "type",
+                "property"
+              ],
+              "properties": {
+                "type": {
+                  "const": "categorical"
+                },
+                "colors": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "mapping": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                },
+                "palette": {
+                  "type": "string"
+                },
+                "property": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "defaultColor": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "GeometryCollection": {
+              "type": "object",
+              "required": [
+                "type",
+                "geometries"
+              ],
+              "properties": {
+                "type": {
+                  "const": "GeometryCollection"
+                },
+                "geometries": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/Geometry"
+                  }
+                }
+              }
+            },
+            "QuantitativeColorBy": {
+              "type": "object",
+              "required": [
+                "type",
+                "property",
+                "scale"
+              ],
+              "properties": {
+                "type": {
+                  "const": "quantitative"
+                },
+                "scale": {
+                  "const": "threshold"
+                },
+                "colors": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "palette": {
+                  "type": "string"
+                },
+                "property": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "thresholds": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  }
+                },
+                "defaultColor": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "status"
+          ],
+          "properties": {
+            "spec": {
+              "type": "object",
+              "required": [
+                "engine",
+                "sources",
+                "layers"
+              ],
+              "properties": {
+                "view": {
+                  "$ref": "#/$defs/ViewState"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "engine": {
+                  "enum": [
+                    "maplibre"
+                  ],
+                  "type": "string"
+                },
+                "layers": {
+                  "type": "array",
+                  "items": {
+                    "allOf": [
+                      {
+                        "type": "object",
+                        "required": [
+                          "id",
+                          "sourceId",
+                          "geometry"
+                        ],
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "click": {
+                            "type": "object",
+                            "additionalProperties": true
+                          },
+                          "paint": {
+                            "type": "object",
+                            "additionalProperties": true
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "filter": {
+                            "type": "object",
+                            "required": [
+                              "property",
+                              "operator",
+                              "value"
+                            ],
+                            "properties": {
+                              "value": {
+                                "oneOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "number"
+                                  },
+                                  {
+                                    "type": "array",
+                                    "items": {
+                                      "oneOf": [
+                                        {
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "number"
+                                        }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              },
+                              "operator": {
+                                "enum": [
+                                  "eq",
+                                  "neq",
+                                  "gt",
+                                  "gte",
+                                  "lt",
+                                  "lte",
+                                  "in",
+                                  "not-in"
+                                ],
+                                "type": "string"
+                              },
+                              "property": {
+                                "type": "string",
+                                "minLength": 1
+                              }
+                            },
+                            "additionalProperties": false
+                          },
+                          "sizeBy": {
+                            "allOf": [
+                              {
+                                "type": "object",
+                                "required": [
+                                  "range"
+                                ],
+                                "properties": {
+                                  "mode": {
+                                    "enum": [
+                                      "continuous",
+                                      "stepped"
+                                    ],
+                                    "type": "string"
+                                  },
+                                  "range": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "number"
+                                    },
+                                    "maxItems": 2,
+                                    "minItems": 2
+                                  },
+                                  "transform": {
+                                    "enum": [
+                                      "linear",
+                                      "sqrt"
+                                    ],
+                                    "type": "string"
+                                  },
+                                  "thresholds": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "number"
+                                    }
+                                  }
+                                },
+                                "additionalProperties": false
+                              },
+                              {
+                                "not": {
+                                  "allOf": [
+                                    {
+                                      "required": [
+                                        "mode"
+                                      ],
+                                      "properties": {
+                                        "mode": {
+                                          "const": "stepped"
+                                        }
+                                      }
+                                    },
+                                    {
+                                      "required": [
+                                        "transform"
+                                      ],
+                                      "properties": {
+                                        "transform": {
+                                          "const": "sqrt"
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          },
+                          "legends": {
+                            "type": "array",
+                            "items": {
+                              "$ref": "#/$defs/LegendSpec"
+                            }
+                          },
+                          "maxzoom": {
+                            "type": "number"
+                          },
+                          "minzoom": {
+                            "type": "number"
+                          },
+                          "visible": {
+                            "type": "boolean"
+                          },
+                          "geometry": {
+                            "enum": [
+                              "point",
+                              "line",
+                              "polygon",
+                              "raster",
+                              "symbol",
+                              "heatmap"
+                            ],
+                            "type": "string"
+                          },
+                          "sourceId": {
+                            "type": "string"
+                          },
+                          "mapDataId": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "hoverPaint": {
+                            "type": "object",
+                            "properties": {
+                              "lineColor": {
+                                "type": "string"
+                              },
+                              "lineWidth": {
+                                "type": "number"
+                              }
+                            },
+                            "additionalProperties": false
+                          },
+                          "transition": {
+                            "type": "object",
+                            "required": [
+                              "kind"
+                            ],
+                            "properties": {
+                              "kind": {
+                                "enum": [
+                                  "crossfade"
+                                ],
+                                "type": "string"
+                              },
+                              "easing": {
+                                "enum": [
+                                  "linear",
+                                  "ease-out",
+                                  "ease-in-out"
+                                ],
+                                "type": "string"
+                              },
+                              "durationMs": {
+                                "type": "number"
+                              }
+                            },
+                            "additionalProperties": false
+                          },
+                          "clickAnchor": {
+                            "type": "object",
+                            "properties": {
+                              "color": {
+                                "type": "string"
+                              },
+                              "latKey": {
+                                "type": "string"
+                              },
+                              "lngKey": {
+                                "type": "string"
+                              },
+                              "offset": {
+                                "type": "array",
+                                "items": {
+                                  "type": "number"
+                                },
+                                "maxItems": 2,
+                                "minItems": 2
+                              },
+                              "iconSize": {
+                                "type": "number"
+                              },
+                              "iconImage": {
+                                "type": "string"
+                              }
+                            },
+                            "additionalProperties": false
+                          },
+                          "sourceLayer": {
+                            "type": "string"
+                          },
+                          "hoverTooltip": {
+                            "type": "object",
+                            "additionalProperties": true
+                          },
+                          "propertyName": {
+                            "type": "string",
+                            "description": "GeoJSON feature property name for direct data access. When set (and mapDataId is absent), the expression reads from feature.properties[propertyName] via ['get', ...]."
+                          },
+                          "selectedPaint": {
+                            "type": "object",
+                            "properties": {
+                              "lineColor": {
+                                "type": "string"
+                              },
+                              "lineWidth": {
+                                "type": "number"
+                              }
+                            },
+                            "additionalProperties": false
+                          },
+                          "activeLegendId": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "additionalProperties": false
+                      },
+                      {
+                        "not": {
+                          "allOf": [
+                            {
+                              "required": [
+                                "mapDataId"
+                              ]
+                            },
+                            {
+                              "required": [
+                                "propertyName"
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                },
+                "basemap": {
+                  "type": "object",
+                  "properties": {
+                    "labels": {
+                      "type": "boolean",
+                      "description": "When false, every basemap symbol layer (place names, road names, POI icons) is hidden. Defaults to true."
+                    },
+                    "visible": {
+                      "type": "boolean",
+                      "description": "When false, basemap tiles are hidden. GeoJSON layers remain interactive."
+                    },
+                    "styleUrl": {
+                      "type": "string"
+                    },
+                    "attribution": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "control": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "items"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "icon": {
+                      "type": "string",
+                      "description": "Icon for the collapsed trigger button, as a @ttoss/react-icons name (e.g. 'lucide:layers'). When omitted a built-in glyph is used."
+                    },
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "id",
+                          "label",
+                          "layers"
+                        ],
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "label": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "layers": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "minLength": 1
+                            }
+                          },
+                          "thumbnail": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "defaultActive": {
+                            "type": "boolean"
+                          }
+                        },
+                        "additionalProperties": false
+                      }
+                    },
+                    "label": {
+                      "type": "string"
+                    },
+                    "offset": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "x": {
+                              "type": "number"
+                            },
+                            "y": {
+                              "type": "number"
+                            }
+                          },
+                          "additionalProperties": false
+                        }
+                      ],
+                      "description": "Distance in pixels from the anchored map edges. Defaults to 40. A number applies to both edges; an object offsets each axis independently."
+                    },
+                    "trigger": {
+                      "enum": [
+                        "hover",
+                        "click"
+                      ],
+                      "type": "string"
+                    },
+                    "position": {
+                      "enum": [
+                        "top-left",
+                        "top-right",
+                        "bottom-left",
+                        "bottom-right"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "legends": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/LegendSpec"
+                  }
+                },
+                "mapData": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "mapDataId",
+                      "mapId",
+                      "data"
+                    ],
+                    "properties": {
+                      "data": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "required": [
+                            "geometryId",
+                            "value"
+                          ],
+                          "properties": {
+                            "value": {
+                              "oneOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "geometryId": {
+                              "oneOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            }
+                          },
+                          "additionalProperties": false
+                        }
+                      },
+                      "mapId": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "title": {
+                        "type": "string"
+                      },
+                      "joinKey": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "stateKey": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Feature-state key name. Defaults to 'value'."
+                      },
+                      "dimension": {
+                        "enum": [
+                          "color",
+                          "size"
+                        ],
+                        "type": "string",
+                        "description": "Visual dimension this dataset drives. Enables auto-discovery of color/size without layer-level references."
+                      },
+                      "mapDataId": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "description": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "mapType": {
+                  "enum": [
+                    "choropleth",
+                    "dotDensity",
+                    "proportionalCircles"
+                  ],
+                  "type": "string"
+                },
+                "sources": {
+                  "type": "array",
+                  "items": {
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "required": [
+                          "id",
+                          "type",
+                          "data"
+                        ],
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "data": {
+                            "oneOf": [
+                              {
+                                "type": "string",
+                                "description": "URL pointing to a GeoJSON resource (RFC 7946)"
+                              },
+                              {
+                                "$ref": "#/$defs/FeatureCollection"
+                              },
+                              {
+                                "$ref": "#/$defs/Feature"
+                              },
+                              {
+                                "$ref": "#/$defs/Geometry"
+                              }
+                            ]
+                          },
+                          "type": {
+                            "const": "geojson"
+                          },
+                          "attribution": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "required": [
+                          "id",
+                          "type",
+                          "tiles"
+                        ],
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "const": "vector-tiles"
+                          },
+                          "tiles": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            },
+                            "minItems": 1
+                          },
+                          "maxzoom": {
+                            "type": "number"
+                          },
+                          "minzoom": {
+                            "type": "number"
+                          },
+                          "attribution": {
+                            "type": "string"
+                          },
+                          "sourceLayer": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "required": [
+                          "id",
+                          "type",
+                          "tiles"
+                        ],
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "const": "raster-tiles"
+                          },
+                          "tiles": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            },
+                            "minItems": 1
+                          },
+                          "maxzoom": {
+                            "type": "number"
+                          },
+                          "minzoom": {
+                            "type": "number"
+                          },
+                          "tileSize": {
+                            "enum": [
+                              256,
+                              512
+                            ],
+                            "type": "integer"
+                          },
+                          "attribution": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "required": [
+                          "id",
+                          "type",
+                          "url",
+                          "coordinates"
+                        ],
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "url": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "const": "image"
+                          },
+                          "attribution": {
+                            "type": "string"
+                          },
+                          "coordinates": {
+                            "type": "array",
+                            "items": {
+                              "type": "array",
+                              "items": {
+                                "type": "number"
+                              },
+                              "maxItems": 2,
+                              "minItems": 2
+                            },
+                            "maxItems": 4,
+                            "minItems": 4
+                          }
+                        },
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "anyOf": [
+                          {
+                            "required": [
+                              "tiles"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "url"
+                            ]
+                          }
+                        ],
+                        "required": [
+                          "id",
+                          "type"
+                        ],
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "url": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "const": "raster-dem"
+                          },
+                          "tiles": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            },
+                            "minItems": 1
+                          },
+                          "maxzoom": {
+                            "type": "number"
+                          },
+                          "minzoom": {
+                            "type": "number"
+                          },
+                          "encoding": {
+                            "enum": [
+                              "mapbox",
+                              "terrarium",
+                              "custom"
+                            ],
+                            "type": "string"
+                          },
+                          "tileSize": {
+                            "type": "number"
+                          },
+                          "attribution": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "required": [
+                          "id",
+                          "type",
+                          "urls",
+                          "coordinates"
+                        ],
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "const": "video"
+                          },
+                          "urls": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            },
+                            "minItems": 1
+                          },
+                          "coordinates": {
+                            "type": "array",
+                            "items": {
+                              "type": "array",
+                              "items": {
+                                "type": "number"
+                              },
+                              "maxItems": 2,
+                              "minItems": 2
+                            },
+                            "maxItems": 4,
+                            "minItems": 4
+                          }
+                        },
+                        "additionalProperties": false
+                      }
+                    ]
+                  }
+                },
+                "metadata": {
+                  "type": "object",
+                  "additionalProperties": true
+                },
+                "__resolved": {
+                  "type": "boolean",
+                  "description": "Internal marker set by resolveSpecFromMapType to prevent double-resolution. Consumers should not set this field directly."
+                },
+                "description": {
+                  "type": "string"
+                },
+                "viewPresets": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "view"
+                    ],
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "view": {
+                        "$ref": "#/$defs/ViewState"
+                      },
+                      "label": {
+                        "type": "string"
+                      },
+                      "animation": {
+                        "type": "object",
+                        "properties": {
+                          "curve": {
+                            "type": "number",
+                            "exclusiveMinimum": 0
+                          },
+                          "speed": {
+                            "type": "number",
+                            "exclusiveMinimum": 0
+                          },
+                          "animate": {
+                            "type": "boolean"
+                          },
+                          "duration": {
+                            "type": "number",
+                            "minimum": 0
+                          },
+                          "essential": {
+                            "type": "boolean"
+                          }
+                        },
+                        "description": "How the camera travels to this preset. Omitted, the engine's own flight applies — which a viewer's reduced-motion setting turns into a jump unless `essential` is set.",
+                        "additionalProperties": false
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "adapterHints": {},
+                "legendEnabled": {
+                  "type": "boolean",
+                  "description": "Controls whether auto-generated legends are produced for the resolved mapType. Defaults to true."
+                },
+                "scaleMaxValue": {
+                  "type": "number",
+                  "description": "Visual scale ceiling for proportional symbol rendering. Values above scaleMaxValue render at the maximum symbol size. When omitted, the adapter computes it from the dataset."
+                },
+                "schemaVersion": {
+                  "type": "number"
+                },
+                "attributionControlEnabled": {
+                  "type": "boolean",
+                  "description": "Controls whether MapLibre's attribution control (the round button in the map's bottom-right corner) is mounted. Defaults to true. Disable it only when the application renders the basemap credits elsewhere — attribution is generally a licensing requirement."
+                }
+              },
+              "additionalProperties": false
+            },
+            "error": {
+              "type": "object",
+              "required": [
+                "code",
+                "message"
+              ],
+              "properties": {
+                "code": {
+                  "enum": [
+                    "ambiguous_request",
+                    "unsupported_map_type",
+                    "missing_data"
+                  ]
+                },
+                "message": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "status": {
+              "enum": [
+                "ok",
+                "error"
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "tool_bindings": [
+          {
+            "tool_id": {
+              "ref": "validate_spec_tool"
+            }
+          }
+        ]
+      },
+      "depends_on": [
+        "validate_spec_tool"
+      ]
+    }
+  },
+  "outputs": {
+    "agentId": {
+      "ref": "geovis_spec_generator_loop"
+    }
+  }
+}

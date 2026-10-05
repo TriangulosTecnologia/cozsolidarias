@@ -4,7 +4,7 @@ import { act, fireEvent, screen } from '@testing-library/react';
 import { toggleBoundaryGroup } from '@ttoss/geovis';
 import type * as React from 'react';
 import MapaPlayground from 'src/app/(features)/mapas/MapaPlayground';
-import type { kitchenRateByCity } from 'src/data-gateway/schema';
+import type { KitchenRateByCity } from 'src/data-gateway/schema';
 
 import { renderWithChakra } from './renderWithChakra';
 
@@ -173,7 +173,7 @@ jest.mock('theme-ui', () => {
   };
 });
 
-const BY_CITY: kitchenRateByCity[] = [
+const BY_CITY: KitchenRateByCity[] = [
   {
     codigoIbge: '3550308',
     municipio: 'São Paulo',

@@ -1,0 +1,11 @@
+{
+  "id": "r-idhm",
+  "mapMode": "coropletico-idhm",
+  "durationMs": 8917,
+  "kind": "refusal",
+  "pass": true,
+  "refusedCleanly": false,
+  "httpStatus": 502,
+  "message": "Falha de comunicação com o modelo de IA: (0 , _mapDataCatalogue__WEBPACK_IMPORTED_MODULE_1__.isRenderableDatasetId) is not a function",
+  "gotSpec": false
+}

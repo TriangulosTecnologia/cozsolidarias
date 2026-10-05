@@ -3,9 +3,9 @@ import type { MapHoverInfo } from '@ttoss/geovis';
 import type * as React from 'react';
 
 import type {
-  cadinsanByCity,
-  cafByCity,
-  kitchenRateByCity,
+  CadinsanByCity,
+  CafByCity,
+  KitchenRateByCity,
 } from '@/data-gateway/schema';
 
 import {
@@ -85,7 +85,7 @@ const renderRateTooltip = ({
   rampId,
 }: {
   name: string;
-  register?: kitchenRateByCity;
+  register?: KitchenRateByCity;
   rampId?: string;
 }) => {
   const taxa = register?.porCemMil ?? null;
@@ -151,7 +151,7 @@ const renderPercentTooltip = ({
   rampId,
 }: {
   name: string;
-  register?: kitchenRateByCity;
+  register?: KitchenRateByCity;
   rampId?: string;
 }) => {
   const percentual = register?.percentualDoBrasil ?? 0;
@@ -188,7 +188,7 @@ const renderCafPercentTooltip = ({
   rampId,
 }: {
   name: string;
-  register?: cafByCity;
+  register?: CafByCity;
   rampId?: string;
 }) => {
   const percentual = register?.percentualDoBrasil ?? 0;
@@ -225,7 +225,7 @@ const renderCadUnicoTooltip = ({
   rampId,
 }: {
   name: string;
-  register?: kitchenRateByCity;
+  register?: KitchenRateByCity;
   rampId?: string;
 }) => {
   const taxa = register?.porDezMilCadUnico ?? null;
@@ -261,7 +261,7 @@ const renderPessoasPorCozinhaTooltip = ({
   rampId,
 }: {
   name: string;
-  register?: kitchenRateByCity;
+  register?: KitchenRateByCity;
   rampId?: string;
 }) => {
   const pessoasPorCozinha = register?.pessoasPorCozinha ?? null;
@@ -322,7 +322,7 @@ const RATE_TOOLTIPS: Partial<
     MapMode,
     (args: {
       name: string;
-      register?: kitchenRateByCity;
+      register?: KitchenRateByCity;
       rampId?: string;
     }) => React.ReactNode
   >
@@ -347,7 +347,7 @@ const renderCafCountTooltip = ({
   register,
 }: {
   name: string;
-  register?: cafByCity;
+  register?: CafByCity;
 }) => {
   const quantidade = register?.quantidade ?? 0;
 
@@ -408,9 +408,9 @@ export const renderMunicipioTooltip = ({
 }: {
   mode: MapMode;
   name: string;
-  register?: kitchenRateByCity;
-  cafRegister?: cafByCity;
-  cadinsanRegister?: cadinsanByCity;
+  register?: KitchenRateByCity;
+  cafRegister?: CafByCity;
+  cadinsanRegister?: CadinsanByCity;
   value: MapHoverInfo['value'];
   /**
    * The ramp the map is being read through, from the settings zone. The card's

@@ -8,5 +8,16 @@
       "command": "npx",
       "args": ["@playwright/mcp@latest"]
     }
+  },
+  "extraKnownMarketplaces": {
+    "devanity": {
+      "source": {
+        "source": "github",
+        "repo": "usedevanity/skills"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "devanity@devanity": true
   }
 }

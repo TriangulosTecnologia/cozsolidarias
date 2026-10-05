@@ -14,10 +14,23 @@
 /**
  * A single município row with its food-insecurity headcounts (with/without
  * Programa Bolsa Família), the CadÚnico total, and the derived shares (%). The
- * "com PBF" choropleth paints {@link cadinsanByCity.proporcaoComPbf}; the "sem
- * PBF" one paints {@link cadinsanByCity.proporcaoSemPbf}.
+ * "com PBF" choropleth paints {@link CadinsanByCity.proporcaoComPbf}; the "sem
+ * PBF" one paints {@link CadinsanByCity.proporcaoSemPbf}.
+ *
+ * @example
+ * const salvador: CadinsanByCity = {
+ *   codigoIbge: '2927408',
+ *   municipio: 'Salvador',
+ *   uf: 'Bahia',
+ *   regiao: 'Nordeste',
+ *   absolutoComPbf: 57160,
+ *   absolutoSemPbf: 76754,
+ *   cadastrosCadunico: 292251,
+ *   proporcaoComPbf: 19.56, // 57160 / 292251 * 100
+ *   proporcaoSemPbf: 26.26, // 76754 / 292251 * 100
+ * };
  */
-export type cadinsanByCity = {
+export type CadinsanByCity = {
   /** 7-digit IBGE code; joins to `feature.properties.codarea` on the map. */
   codigoIbge: string;
   /** Município name (for display), from the CADINSAN source. */

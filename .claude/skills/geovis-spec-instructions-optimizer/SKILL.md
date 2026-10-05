@@ -1,234 +1,288 @@
 ---
 name: geovis-spec-instructions-optimizer
-version: 1.4.0
+version: 2.0.0
 description: |
-  Consolida e mede as duas fontes de instrução do gerador de spec do cozsolidarias — o system
-  prompt do agente Managed Agents `geovis-spec-generator` (`~/geovis-spec-generator.md`) e a
-  const `INSTRUCTIONS` em `src/app/api/ai/spec/instructions.ts` — ao essencial robusto, usando o eval
-  framework do skill-creator contra o endpoint real `POST /api/ai/spec`. Use quando o usuário
-  pedir para podar/otimizar/consolidar essas instruções, reduzir tokens de prompt sem perder
-  robustez de spec, ou medir se uma regra do prompt é redundante com a malha determinística de
-  `specValidation.ts`. Não use para gerar um spec pontual (isso é o agente
-  `geovis-spec-generator`) nem para ressincronizar o agente com um novo `schema.json` (isso é a
-  skill `geovis-spec-agent-creator`).
+  Consolida e mede as duas fontes de instrução do gerador de spec do cozsolidarias — as
+  `instructions` do agente Naturali `geovis-spec-generator-loop` (formation local
+  `~/geovis-spec-generator-loop.formation.json`) e a const `INSTRUCTIONS` inline em
+  `src/app/api/ai/spec/route.ts` — ao essencial robusto, e mede quão perto cada variação da rota
+  `/mapas` fica da spec mínima que renderiza igual (mesma UI, mesmas legendas), rodando eval real
+  contra `POST /api/ai/spec`. Use quando o usuário pedir para podar/otimizar/consolidar essas
+  instruções, reduzir tokens sem perder robustez, medir se uma regra do prompt é redundante com a
+  malha determinística (`candidateValidation.ts`/`specValidation.ts`), ou medir a distância das
+  specs geradas até a spec mínima de cada modo do `/mapas`.
 ---
 
 # Otimizador de instruções do geovis-spec-generator
 
 Consolida duas fontes de prompt que nunca foram medidas juntas, e usa eval real (não simulação)
-pra decidir o que podar. Produz propostas de diff — nunca edita `instructions.ts`/`route.ts` ou o agente sozinha.
+pra decidir o que podar. Produz propostas de diff — nunca edita `route.ts` ou o agente de produção
+sozinha.
 
-Toda rodada é versionada e imutável — ver **Regra permanente — versionar resultados, skill e
-schema** antes de rodar qualquer eval.
+Toda rodada é versionada e imutável — ver **Regra permanente** antes de rodar qualquer eval.
 
-Ver `references/spec-generation-pipeline.md` (arquitetura de full-evalued vs runtime-captured),
-`references/sources.md` (onde vivem as fontes, limites de cada uma, passo a passo da CLI `ant`),
-`references/determinism-map.md` (tabela regra-do-prompt → validador que já a cobre) e
+Referências: `references/sources.md` (onde vivem as fontes, CLI `naturali`),
+`references/determinism-map.md` (regra-do-prompt → validador que a cobre),
 `references/golden-specs.md` (avaliação contra os mapas de produção).
+
+## Objetivo (issue #72 / PR #73)
+
+Executada contra as variações da rota `/mapas`, a skill deve provar que o agente devolve, por
+variação, a spec **filtrada aos campos que aquela variação usa**, que renderiza a **mesma UI com
+as mesmas legendas** do `/mapas`. "Mínima" e "renderiza igual" são medidos por código (Passo 4,
+eixo e), nunca afirmados por leitura.
+
+## Entradas esperadas
+
+Além das instruções do agente e da `INSTRUCTIONS` da aplicação, toda rodada consome e registra
+(hash em `versions.json`):
+
+| Entrada | Onde | Papel |
+|---|---|---|
+| Catálogo projetado | `buildCatalogueContext()` (`mapDataCatalogue.ts`) sobre `gateway.getCatalogue()` | Dado enviado por request, não instrução podável |
+| Catálogo completo | `public/dataset_catalogue.json` (`collections[].description`, `datasets[].description`, `collection_id`) | Contexto de escolha de dataset (Passo 3, instruções de variação) |
+| Datasets renderáveis | `RENDERABLE_DATASET_IDS` / `RENDERABLE_DATASET_FETCHERS` (`mapDataCatalogue.ts`) | Define quais modos são alcançáveis |
+| Sources servidas | `KNOWN_SOURCE_URLS` / `SOURCE_METADATA` / `buildSourcesTable()` (`specValidation.ts`) | Única lista de URLs válidas |
+| Variações do `/mapas` | `MapMode` (`geovisMapMode.ts`, 23 modos) + `buildSpec` (`geovisSpec.ts`) | Corpus golden (spec mínima esperada) |
+| Contrato de saída | `output_schema` da formation (`status` ok/error, `spec`, `error.code`) | Forma da resposta do agente |
 
 ## Por que separada de geovis-spec-agent-creator
 
-`geovis-spec-agent-creator` resincroniza `~/.claude/agents/geovis-spec-generator.md` contra o
-`schema.json` do `@ttoss/geovis` — schema, não robustez de prompt. Esta skill nunca escreve esse
-arquivo diretamente: se uma poda no lado genérico for aprovada, delega a aplicação a
-`geovis-spec-agent-creator`. Overlap zero.
+`geovis-spec-agent-creator` resincroniza o agente contra o `schema.json` do `@ttoss/geovis` —
+schema, não robustez de prompt. Esta skill nunca aplica uma poda no agente de produção: entrega a
+proposta e, se aprovada, a aplicação segue o fluxo de provisionamento (backup → validate →
+formation). Overlap zero.
 
 ## As duas fontes — nunca fundir
 
-1. **`~/geovis-spec-generator.md`** — system prompt fixo do agente Managed Agents, provisionado
-   fora de banda via `ant` CLI, referenciado só por ID (`ANTHROPIC_AGENT_ID`). Genérico ao schema
-   `@ttoss/geovis`, sem noção de cozsolidarias.
-2. **`INSTRUCTIONS`** (`src/app/api/ai/spec/instructions.ts`, extraída de `route.ts` em
-   2026-09-18 quando passou do limite de 400 linhas do lint) — enviada por request via
-   `createSession`/`initial_events`, junto com catálogo dinâmico e prompt do usuário. Domínio
-   cozsolidarias: resolução de `mapType`/variável/`mapDataId`, grain município-vs-estado,
-   cobertura, legendas, sources, basemap.
+1. **`instructions` do agente Naturali** — declaradas em
+   `~/geovis-spec-generator-loop.formation.json` (fora do repo, sem CI/review), referenciadas só
+   por `NATURALI_AGENT_ID`. Deveriam ser genéricas ao schema `@ttoss/geovis`.
+2. **`INSTRUCTIONS`** (const inline em `src/app/api/ai/spec/route.ts`; `instructions.ts` não
+   existe mais) — enviada em `messages[0].content` junto com o catálogo e o prompt do usuário.
+   Domínio cozsolidarias: `mapType`/variável/`mapDataId`, grain, cobertura, legendas, sources,
+   basemap, e o bloco do tool `validate_spec`.
 
-Fundir as duas acopla deploy de regra de negócio (route.ts, sob CI) a reprovisionamento de agente
-(`ant`, fora de banda). Mantenha separadas — cada uma podada ao essencial dela.
+Fundir as duas acopla deploy de regra de negócio (`route.ts`, sob CI) a reprovisionamento de
+agente (fora de banda). **Estado atual viola isso**: as `instructions` do agente loop embutem uma
+cópia congelada do catálogo e de uma versão antiga da `INSTRUCTIONS` (legend em `layers[]` aceita,
+sem a exceção do coroplético de cozinhas), que diverge da que `route.ts` envia na mesma request.
+O Passo 1 sempre começa diffando essa cópia contra a `route.ts` — a duplicata é a primeira poda
+candidata e a divergência entre elas é bug, não estilo.
 
 ## Regra permanente — versionar resultados, skill e schema
 
-Restrição inegociável, vale em toda invocação: **nada é sobrescrito, tudo carrega versão**.
+Restrição inegociável: **nada é sobrescrito, tudo carrega versão**.
 
 Cada campanha grava em `runs/<YYYY-MM-DD>T<HH-mm-ss>Z--<slug-da-variante>/` (diretório novo por
-execução, nunca reutilizado, nunca editado depois de escrito). Na raiz desse diretório,
-`versions.json` obrigatório, escrito **antes** do primeiro POST de eval:
+execução, nunca reutilizado, nunca editado depois). Na raiz, `versions.json` obrigatório, escrito
+**antes** do primeiro POST de eval:
 
 ```json
 {
-  "runId": "2026-09-18T14-03-11Z--poda-legend",
-  "skillVersion": "1.1.0",
+  "runId": "2026-09-28T14-03-11Z--poda-duplicata",
+  "skillVersion": "2.0.0",
   "sources": {
-    "agentSystemPrompt": { "path": "~/geovis-spec-generator.md", "sha256": "…" },
-    "instructions": { "path": "src/app/api/ai/spec/instructions.ts", "gitSha": "…", "sha256": "…" }
+    "agentInstructions": { "formationFile": "~/geovis-spec-generator-loop.formation.json", "sha256": "…" },
+    "instructions": { "path": "src/app/api/ai/spec/route.ts", "gitSha": "…", "sha256": "…" },
+    "catalogue": { "path": "public/dataset_catalogue.json", "sha256": "…" }
   },
-  "spec": { "schemaVersion": 2, "libSchemaVersion": 1, "geovisPackageVersion": "0.21.1" },
-  "testAgent": { "slug": "geovis-spec-generator-test", "antVersion": "…" },
-  "results": { "resultsVersion": 1, "datasetVersion": "…" }
+  "spec": { "schemaVersion": 2, "libSchemaVersion": 1, "geovisPackageVersion": "…" },
+  "testAgent": {
+    "formationId": "form_…",
+    "agentId": "agent_…",
+    "agentVersion": 1,
+    "naturaliCliVersion": "0.136.0"
+  },
+  "golden": { "manifestSha256": "…", "gitSha": "…" },
+  "results": { "resultsVersion": 2, "datasetVersion": "…" }
 }
 ```
 
 Regras de preenchimento:
 
-- **`skillVersion`** — o campo `version` do frontmatter desta skill. Toda mudança de passo,
-  gate ou script bump aqui (semver: patch = texto, minor = novo gate/eixo, major = formato de
-  `runs/` ou de `versions.json` muda). Resultado gravado com `skillVersion` diferente nunca é
-  comparado direto com outro sem declarar isso no `benchmark.md`.
-- **`spec.schemaVersion`** — versão do schema do `VisualizationSpec` que os specs gerados devem
-  declarar. **Hoje: 2.** Registre sempre junto o `geovisPackageVersion` do `package.json`
-  instalado e o `SPEC_SCHEMA_VERSION` lido de `@ttoss/geovis` (`src/spec/types.ts`) em
-  `spec.libSchemaVersion` — na 0.21.1 ele ainda é `1`, defasagem conhecida e esperada. Se
-  `libSchemaVersion` passar de `2`, **pare e reporte**: schema novo invalida comparação com
-  rodadas antigas e exige ressincronizar o agente via `geovis-spec-agent-creator`.
-- **`sources`** — hash sha256 do texto exato de cada fonte enviado nessa rodada, mais o git SHA do
-  repo cozsolidarias para o lado `INSTRUCTIONS`. É o que torna a rodada reproduzível.
-- **`results.resultsVersion`** — formato dos artefatos de saída (`output.json`, `benchmark.json`,
-  `coverage-gate.json`). Bump quando o formato muda, pra nunca agregar formatos incompatíveis.
+- **`skillVersion`** — o `version` do frontmatter. Semver: patch = texto, minor = novo gate/eixo,
+  major = formato de `runs/`/`versions.json` ou transporte do agente muda. Rodadas com
+  `skillVersion` major diferente (ex.: 1.x Managed Agents × 2.x Naturali) nunca são comparadas.
+- **`spec.schemaVersion`** — hoje **2**. Registre `geovisPackageVersion` do `package.json` e o
+  `SPEC_SCHEMA_VERSION` de `@ttoss/geovis` em `libSchemaVersion`. Se `libSchemaVersion` passar de
+  `2`, **pare e reporte**: exige ressincronizar o agente via `geovis-spec-agent-creator`.
+- **`sources`** — sha256 do texto exato enviado nessa rodada + git SHA do repo.
+- **`testAgent.agentVersion`** — `version` devolvido por `naturali get-agent` depois do último
+  `update-formation`; é o que liga um resultado à config exata (`get-agent-version`).
+- **`results.resultsVersion`** — formato de `output.json`/`benchmark.json`/`coverage-gate.json`/
+  `minimality.json`. Bump quando o formato muda.
 
-`runs/latest` é só um symlink de conveniência pro diretório mais recente — jamais o lugar onde os
-dados vivem. Comparação A/B sempre cita os dois `runId` completos.
+`runs/latest` é só symlink de conveniência. Comparação A/B sempre cita os dois `runId`.
+Rodadas `runs/2026-09-18*` são do transporte Anthropic (skill 1.x) — histórico, não baseline.
 
 ## Passo 1 — Mapear redundância com a malha determinística
 
-Depois da resposta do agente, `route.ts` roda validação de código sobre o JSON e, no fim,
-**normaliza** — `applyCanonicalScales` (`canonicalScales.ts`) reescreve a escala pintada de toda
-legend ligada a um dataset conhecido. Meça isso antes de concluir que uma poda "não regrediu": três
-regras do `determinism-map.md` passam a ser resolvidas pela rota, não pelo modelo. A malha de
-rejeição vive em quatro módulos — `specValidation.ts` (raiz + reexports), `.sources.ts`, `.layers.ts` e
-`.legends.ts`: `findInvalidGeojsonSource`, `findInvalidBasemapStyleUrl`, `findGeometryInMapData`,
-`findSourceGeometryMismatch`, `findPaintedContextLayer`, `findUnsupportedSourceType`,
-`findMapTypeWithoutMapData`, `findLayerWithBothDataBindings`, `findMissingLegend`,
-`findChoroplethOnAbsoluteTotal`, `findDanglingActiveLegendId`, `findLegendScaleArityMismatch`,
-`findLegendPropertyMismatch`, `findForeignNoDataColor`, `findReclassifiedOfficialIndex`,
-`findDotDensityWithoutRatio`, depois `findLegendValueTypeMismatch` sobre os dados já resolvidos, e
-por fim `validateSpec` do próprio `@ttoss/geovis`.
+Depois da resposta do agente, a rota valida em três camadas. Meça isso antes de concluir que uma
+poda "não regrediu":
 
-Leia as duas fontes e liste cada regra/instrução como item atômico em
-`references/determinism-map.md`:
+1. **Dentro do loop do agente** — o tool cliente `validate_spec` roda `validateCandidate`
+   (`candidateValidation.ts`): `validateSpec` do `@ttoss/geovis` com reparos locais
+   (`applyLocalRepairs` sobre as `RepairOption` das issues) + `collectStructuralIssues`. No máximo
+   `MAX_VALIDATION_ATTEMPTS = 5` chamadas; para em `no-shrinkage` ou no deadline de 55s
+   (`naturaliSession.ts`), e a rota responde 422 `stopped` com o último candidato.
+2. **Estrutural pós-resposta** — `hoistLayerLegends` + `collectStructuralIssues`, que agrega
+   `findInvalidGeojsonSource`, `findInvalidBasemapStyleUrl`, `findGeometryInMapData`,
+   `findMissingLegend`, `findChoroplethOnAbsoluteTotal` e `unsupported-dataset`
+   (`isRenderableDatasetId`) — todos em `specValidation.ts`/`candidateValidation.ts`.
+3. **Normalização server-side** — `isCozinhasChoroplethRequest` → `buildCozinhasChoroplethSpec`
+   (`canonicalChoropleth.ts`) substitui a spec inteira pelo `buildSpec` do `/mapas`; senão
+   `appendRealMapData` + `appendRealSourceData`; por fim `validateWithLocalRepairs`.
 
-- Regra 100% coberta por um `findX` → **poda candidata** (não poda automática — manter a
-  instrução ainda pode reduzir taxa de 422 e round-trips; a decisão é medida no Passo 4, não
-  assumida aqui).
-- Regra sem validador equivalente (escolha semântica de `mapDataId`/variável contra o catálogo,
-  grain município-vs-estado, leitura de `spatial.coverage`/`temporal.status`, rótulo legível em
-  pt-BR) → **essencial, não podável**. Nunca proponha remover isso.
+Regras que a camada 3 reescreve nunca são atribuídas ao modelo. `canonicalScales.ts` e os módulos
+`.sources/.layers/.legends` **não existem nesta branch** — qualquer `R-*` do `determinism-map.md`
+que cite um `findX` ausente fica marcado `validador-ausente` e volta a ser **essencial** até existir
+validador.
 
-Dê a cada regra um ID estável (`R-legend-required`, `R-basemap-styleurl`, `R-mapdataid-real`,
-etc.) em `determinism-map.md`. Esse ID é o que o **gate de cobertura** (Passo 3/4) referencia —
-toda regra da instrução atual, podável ou não, precisa de pelo menos um eval case desenhado pra
-exercitá-la especificamente.
+Liste cada regra das duas fontes como item atômico em `references/determinism-map.md`:
 
-Produza, por fonte, uma versão podada candidata lado a lado com a atual, com justificativa por
-item.
+- Regra 100% coberta por validador existente → **poda candidata** (decisão medida no Passo 4).
+- Regra sem validador (escolha semântica de `mapDataId`/variável, grain, cobertura/tempo, rótulo
+  pt-BR, escolha de source/layer por variação) → **essencial, não podável**.
+
+**Texto → validação.** Toda regra essencial cuja verificação é descrita em texto e é decidível
+por código ganha um checker em `scripts/score_case.mjs` (ou em `scripts/project_spec.mjs` para as
+de fidelidade/mínimo), com o mesmo `R-*` id. Checker que reimplementa um `findX` existente é
+proibido — importe a função. Checkers genéricos ao schema (não ao cozsolidarias) são listados em
+`proposed-geovis-validations.md` (Passo 5) como candidatos a subir pro `@ttoss/geovis`, com
+implementação, testes e a instrução correspondente a remover do agente.
+
+Cada regra tem ID estável (`R-legend-required`, `R-mapdataid-real`, …). O gate de cobertura
+referencia esses IDs — toda regra atual precisa de ≥ 1 eval case desenhado pra ela.
+
+Produza, por fonte, a versão podada candidata lado a lado com a atual, com justificativa por item.
 
 ## Passo 2 — Provisionar o agente de teste dedicado (pede confirmação antes de gastar API real)
 
-Use `scripts/provision_test_agent.sh` (wrapper sobre `ant beta:agents create/update/archive` —
-ver `references/sources.md` pro passo a passo completo). Regras inegociáveis:
+Provisionamento é **a partir de arquivo local de formation**, via CLI `naturali` (preferir CLI a
+MCP; `naturali <comando> --help`). Env vars já configuradas: `NATURALI_API_KEY`,
+`NATURALI_PROJECT_ID`, `NATURALI_AGENT_ID`, `NATURALI_FORMATION_ID` (em `.env`, gitignored).
+Passo a passo em `references/sources.md`.
 
-- Nunca reusar `ANTHROPIC_AGENT_ID` de produção.
-- **Um único agente de teste dedicado por campanha** (`geovis-spec-generator-test`, criado uma
-  vez via `create`), mesmas tools do `agent.yaml` de produção (read/glob/grep habilitados,
-  bash/write/edit não). Cada variante reescreve o `system` desse mesmo agente via
-  `provision_test_agent.sh update <slug> ...` (usa `--version` pra evitar overwrite concorrente).
-- Só as variantes do **lado agente** (`~/geovis-spec-generator.md`) passam por esse ciclo de
-  `update`. Variantes do lado `INSTRUCTIONS` (`instructions.ts`) não exigem chamada `ant` nenhuma — são
-  só edição local da constante antes de rodar `pnpm dev`, já que essa fonte é enviada por request.
-- Como o `system` é sobrescrito no mesmo agente, **os evals de variantes diferentes não rodam em
-  paralelo** — sempre serialize: `update` → rodar todos os eval cases da variante → só então o
-  próximo `update`.
-- **Pare e peça confirmação explícita do usuário antes do primeiro `ant beta:agents create` de
-  cada campanha** — custo real de API/infra fora do repo.
-- Ao fim da campanha, pergunte ao usuário se arquiva (`ant beta:agents archive`) ou mantém o
-  agente de teste pra próxima campanha (reuso é aceitável — é um agente único e rastreável).
+Estado de referência (verificado 2026-09-28, vivo ≡ arquivo local):
+
+| Papel | Formation | Agente | Arquivo local |
+|---|---|---|---|
+| Produção da branch (loop, `validate_spec`) | `form_u4byEDCIaWR9w132` | `agent_FdJNYpl3XbBgLJfQ` v1 | `~/geovis-spec-generator-loop.formation.json` |
+| Compartilhado antigo (sem tool) — nunca tocar | `form_22U2jykONy2zvOcv` | `agent_aBWkhUlqZObSry0x` v5 | `~/geovis-spec-generator.formation.json` |
+
+Sempre reconfirme com `naturali list-formations`/`get-agent` e compare `instructions` +
+`output_schema` vivos com o arquivo local antes de derivar a formation de teste; divergência →
+pare e reporte.
+
+Regras inegociáveis:
+
+- **Use sempre a formation existente do loop** (`NATURALI_FORMATION_ID`), a menos que o usuário
+  peça uma nova (decisão do usuário, 2026-09-28). A compartilhada antiga continua intocável.
+- Fluxo por configuração: backup do vivo (`get-formation`/`get-agent`) em `runs/<runId>/` →
+  editar o arquivo local `~/geovis-spec-generator-loop.formation.json` → copiar para
+  `runs/<runId>/formation.<config>.json` → `naturali validate-formation` → `update-formation` →
+  registrar `agentVersion` em `versions.json`. Ao fim, restaurar o arquivo local e o vivo à
+  variante aprovada (ou ao backup).
+- Formation nova (só quando pedida): derivada do arquivo local do loop — mesma `validate_spec`,
+  `output_schema`, `max_steps`, `temperature`, provider; muda só `name` e `instructions`.
+- `trace_content_mode: "full"` no agente de eval (decisão do usuário, 2026-09-28; o projeto já é
+  `full`), para `get-generation-transcript` mostrar as rodadas de `validate_spec`. Com `none` a
+  evidência fica só na resposta do endpoint e em `/tmp/cozsolidarias-generations`.
+- Eixo (e): `scripts/run_variations.sh <evals.variacoes.json> <out-dir>` roda os casos e pontua
+  com `scripts/minimal_spec.mjs` (`derive` = só layers visíveis + o que elas referenciam).
+- Variantes do lado `INSTRUCTIONS` não tocam o Naturali: são edição local da const em `route.ts`
+  antes de `pnpm dev`.
+- Variantes do lado agente **não rodam em paralelo**: `update-formation` → todos os casos → só
+  então o próximo update.
+- **Pare e peça confirmação explícita antes do primeiro `create-formation`** — custo real.
+- Ao fim, pergunte se deleta (`delete-formation`) ou mantém a formation de teste.
+- Os evals nativos do Naturali (`create-eval`/`start-eval-run`) não servem o tool cliente
+  `validate_spec` — o eval passa sempre pelo endpoint da rota.
 
 ## Passo 3 — Montar o dataset de eval
 
 Formato `evals/evals.json` do skill-creator. Seed a partir dos prompts reais de
-`tests/unit/tests/aiSpecRoute.test.ts` (cozinhas, IVS, pessoas atendidas, insegurança alimentar,
-por município), mais:
+`tests/unit/tests/aiSpecRoute.test.ts`, mais:
 
 - um caso por `mapType` (choropleth/proportionalCircles/dotDensity);
-- dataset fora de `renderableDatasets` → deve responder `{"error"}`, nunca inventar `mapDataId`;
-- pedido só resolvível em grain de estado → `{"error"}`;
-- ambiguidade entre duas versões temporais do mesmo dataset → deve perguntar o ano, não escolher;
-- pedido sem campo 1:1 no catálogo → não deve usar proxy correlato sem avisar;
-- **um eval case por `R-*` id do `determinism-map.md`** (gate de cobertura, obrigatório) — cada
-  regra hoje presente nas instruções atuais precisa de um prompt desenhado pra exercitá-la
-  especificamente, não só coberta de passagem por um prompt genérico;
-- **um eval case por mapa de produção alcançável** — prompts fixos contra o corpus golden em
-  `src/app/(features)/mapas/specs/full-evalued/`. Regenere o corpus com
-  `scripts/dump_golden_specs.mjs` (roda `buildSpec` de verdade, então nunca envelhece) e leia o
-  `README.md` que ele acompanha **antes** de escrever os prompts. Dois fatos mandam no desenho:
-  os 23 modos compartilham um template de 3 layers e diferem só em legend/thresholds, então a
-  comparação é sempre contra o *delta*; e **só 5 dos 23 são alcançáveis pelo agente** — os outros
-  18 dependem de ids que não existem em `RENDERABLE_DATASET_FETCHERS`, e nenhuma poda de prompt
-  os alcança. Não escreva eval case para modo inalcançável: ele falha sempre, por construção, e
-  contamina o gate. Eixos de pontuação em `references/golden-specs.md`; a identidade do dataset
-  nunca é pontuada por igualdade de string.
+- dataset fora de `RENDERABLE_DATASET_IDS` → `status: "error"` (`missing_data`), nunca
+  `mapDataId` inventado;
+- pedido só resolvível em grain de estado → `status: "error"`;
+- ambiguidade entre versões temporais (`cozinhas_geolocalizadas` × `_2025`) → `ambiguous_request`;
+- pedido sem campo 1:1 no catálogo → não usar proxy sem avisar;
+- loop: caso que força ≥ 1 rodada de `validate_spec` e caso que termina em `stopped`;
+- **um eval case por `R-*` id** (gate de cobertura, obrigatório);
+- **um eval case por variação alcançável do `/mapas`** — regenere o corpus com
+  `scripts/dump_golden_specs.mjs` (roda `buildSpec` de verdade; grava
+  `src/app/(features)/mapas/specs/full-evalued/` + `manifest.json`, hoje ausente — regenerar é
+  pré-requisito) e leia o `README.md` gerado antes de escrever os prompts. Recalcule o conjunto
+  alcançável a cada rodada contra `RENDERABLE_DATASET_IDS` e `KNOWN_SOURCE_URLS` atuais — hoje
+  incluem `municipios_cadinsan`, `cozinhas_geolocalizadas_2025` e `/geo/assentamentos.json`, o que
+  invalida a contagem "5 de 23" antiga. Modo inalcançável vira caso de recusa, nunca golden.
+
+Todo caso de variação carrega `mapMode`, `golden` (arquivo) e `minimalFields` — o conjunto de
+caminhos da spec que aquele modo usa, derivado do delta do golden (nunca escrito à mão).
 
 ## Passo 4 — Rodar eval contra o endpoint real (sequencial, com gate de cobertura)
 
-Para cada variante: `provision_test_agent.sh update <slug> ...` no agente de teste único, suba/
-mantenha `pnpm dev` local com env vars do agente de teste (`.env.local` temporário, nunca o `.env`
-de produção), rode `scripts/run_eval_case.sh` (POST real em `http://localhost:3000/api/ai/spec`)
-pra cada caso do dataset, salve `output.json` + `duration_ms`. Só depois de rodar todo o dataset
-dessa variante, faça o próximo `update`.
+Por variante: `update-formation` na formation de teste, `pnpm dev` local com
+`NATURALI_AGENT_ID` do agente de teste num `.env.local` temporário (só essa chave; apagar no fim),
+`scripts/run_eval_case.sh` (POST real em `http://localhost:3000/api/ai/spec`) por caso, salvando
+`output.json` + `duration_ms` + nº de chamadas `validate_spec`. Só depois do dataset inteiro, o
+próximo update.
 
-**Gate de cobertura (pré-requisito binário, não um score)**: rode `scripts/score_case.mjs` sobre
-todo eval case marcado como cobrindo um `R-*`. A variante só segue pra comparação de eficiência se
-100% desses casos continuarem passando — regressão em qualquer um descarta a variante antes de
-qualquer outro eixo. Isso é o mecanismo real que garante "a poda cobre no mínimo o que a instrução
-atual cobre" — decidido por resultado de eval, nunca por leitura.
+**Gate de cobertura (binário)**: `scripts/score_case.mjs` sobre todo caso marcado com `R-*`. A
+variante só segue se 100% continuarem passando.
 
-Passado o gate, nota em três eixos, nunca misturados num score único:
+Passado o gate, eixos reportados separados, nunca somados:
 
-- **(a) Pass/fail programático geral** — `scripts/score_case.mjs` sobre o resto do dataset,
-  reaproveitando as mesmas funções exportadas de `specValidation.ts`/`.sources.ts`. Nunca
-  reimplemente essas regras.
-- **(b) Rubrica qualitativa** — `agents/grader.md` do skill-creator, pro que código não pega:
-  variável certa escolhida, label legível, leitura correta de cobertura/tempo, `{"error"}` correto
-  quando esperado.
-- **(c) Fidelidade aos mapas de produção** — `node scripts/project_spec.mjs compare <golden>
-  <candidato>` nos casos golden, pontuando `geometry`/`form`/`legendScale` por código e deixando
-  `dataset` pro grader. Sempre contra o *delta* do golden, nunca contra a spec inteira.
-- **(d) Eficiência** — tokens do texto em `initial_events` (catálogo + `INSTRUCTIONS` + prompt) +
-  `duration_ms` real. `agents/comparator.md` pra comparação cega A/B (variante podada vs.
-  controle `atual-sem-poda`).
+- **(a) Pass/fail programático** — `score_case.mjs`, importando as funções de
+  `candidateValidation.ts`/`specValidation.ts`. Nunca reimplemente.
+- **(b) Rubrica qualitativa** — `agents/grader.md` do skill-creator: variável certa, label pt-BR,
+  cobertura/tempo, `status: "error"` com `code` correto.
+- **(c) Fidelidade aos mapas de produção** — `project_spec.mjs compare <golden> <candidato>`:
+  `geometry`/`form`/`legendScale` por código, `dataset` pro grader. Sempre contra o delta.
+- **(d) Eficiência** — tokens de `messages[0].content` (catálogo + `INSTRUCTIONS` + prompt) +
+  tokens das `instructions` do agente + `duration_ms` + chamadas `validate_spec`.
+  `agents/comparator.md` pra A/B cego contra o controle `atual-sem-poda`.
+- **(e) Mínimo e equivalência de render** (por caso de variação) — `minimality.json`:
+  `extraFields` (caminhos presentes fora de `minimalFields`), `missingFields`, e equivalência de
+  render: mesmo conjunto de layers visíveis (geometria × source × forma), mesmas legends
+  (`id`, tipo de `colorBy`, `property`, aridade de `thresholds`/`colors`) que o golden. Screenshot
+  via `pr-playwright-verify` só quando os campos batem e o usuário pedir confirmação visual.
 
-Reuse `aggregate_benchmark.py` do skill-creator pra consolidar `benchmark.json`/`.md` — cada
-"configuração" é uma variante de instrução, controle sempre incluso, execuções sequenciais (não
-paralelas, por causa do agente único).
+`aggregate_benchmark.py` do skill-creator consolida `benchmark.json`/`.md`, uma configuração por
+variante, controle sempre incluso, execução sequencial.
 
 ## Passo 5 — Entregar propostas, nunca aplicar sozinha
 
-Ao fim da rodada, dentro de `runs/<runId>/` (nunca commitado automaticamente, nunca sobrescrevendo
-rodada anterior):
+Em `runs/<runId>/` (nunca commitado automaticamente, nunca sobrescrevendo rodada anterior):
 
-- `versions.json` — manifesto de versões da Regra permanente, já escrito antes dos evals.
-- `proposed-patch-generic-agent.md` — diff sugerido pro system prompt do agente, a aplicar via
-  `geovis-spec-agent-creator` se aprovado.
-- `proposed-patch-instructions.diff` — diff literal pra const `INSTRUCTIONS` em `instructions.ts`.
-- `coverage-gate.json` — por `R-*` id, se a variante final manteve a verificação (evidência: qual
-  eval case, qual resultado).
-- `benchmark.md`/`benchmark.json` — os três eixos por variante.
-- Resumo recomendando aceitar/rejeitar cada mudança, citando qual `findX` cobre a regra podada
-  (se algum), sempre referenciando `runId`, `skillVersion` e `spec.schemaVersion` da rodada.
+- `versions.json` — manifesto, escrito antes dos evals.
+- `formation.test.json` — formation exata do agente de teste na variante final.
+- `proposed-patch-agent-instructions.md` — diff das `instructions` do agente loop; aplicação
+  segue o fluxo de provisionamento (backup do vivo → `validate-formation` → formation), nunca
+  direto pela skill.
+- `proposed-patch-instructions.diff` — diff literal da const `INSTRUCTIONS` em `route.ts`.
+- `proposed-geovis-validations.md` — checkers genéricos candidatos ao `@ttoss/geovis`: regra,
+  implementação proposta, testes, instrução que sai do agente.
+- `coverage-gate.json`, `minimality.json`, `benchmark.md`/`benchmark.json`.
+- Resumo recomendando aceitar/rejeitar cada mudança, citando o validador que cobre a regra podada,
+  sempre com `runId`, `skillVersion`, `spec.schemaVersion`, `testAgent.agentVersion`.
 
-Nunca edite `instructions.ts`/`route.ts` sozinha — é código de produção sob os quality gates do `CLAUDE.md` do
-projeto (`pnpm typecheck && pnpm eslint --fix && pnpm test`). Entregue o diff, peça revisão
-humana.
+Nunca edite `route.ts` sozinha — é código de produção sob os quality gates do `CLAUDE.md`
+(`pnpm typecheck && pnpm eslint --fix && pnpm test`). Entregue o diff, peça revisão humana.
 
-Parada: usuário aprova, ou rodada de revisão retorna feedback vazio (convenção skill-creator), ou
-não há mais progresso mensurável nos três eixos.
+Parada: usuário aprova, rodada de revisão sem feedback, ou sem progresso mensurável nos eixos.
 
 ## Fora de escopo
 
-- Resolvido em 2026-09-18: `deleteSession` foi removido de vez (`anthropicSession.ts`, o `after()`
-  de `route.ts` e o teste correspondente). A sessão fica para o lado Anthropic expirar.
-- Não modifique `specValidation.ts`/`.sources.ts`/`.layers.ts`/`.legends.ts` além de importar/chamar
-  suas funções exportadas.
+- Não modifique `candidateValidation.ts`/`specValidation.ts`/`canonicalChoropleth.ts` além de
+  importar suas funções exportadas.
+- Não altere env da Vercel — ação do usuário.
+- Credenciais: nunca gravar `NATURALI_API_KEY` em arquivo versionado (inclui
+  `.claude/settings.json`); só `.env`.
 
 ## Quando não usar
 

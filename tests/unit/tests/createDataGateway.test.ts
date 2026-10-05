@@ -136,6 +136,41 @@ describe('createDataGateway', () => {
     expect(totalShare).toBeLessThan(103);
   });
 
+  /*
+   * The município join counts a cozinha in the polygon containing its point;
+   * a point outside every polygon falls back to the cozinha's declared IBGE
+   * code when the index knows it. Cozinhas without coordinates, or outside
+   * every polygon with an unknown declared code, are dropped without an error.
+   * The pins below are measured on the latest snapshot (2026, 1396 records), so
+   * a data or geometry change that drops cozinhas fails here instead of
+   * silently shrinking the choropleth. The 8 points outside every polygon sit
+   * on municipal borders or coastlines (São Paulo ×2, Teresina, Salvador,
+   * Acarape, Fortaleza, Vitória, Alvorada) and all declare indexed municípios,
+   * so the fallback counts every one of them.
+   */
+  test('accounts for every cozinha of the latest snapshot the município join drops', async () => {
+    const WITHOUT_COORDINATES = 0;
+    const COUNTED = 1396;
+    const UNMATCHED = 0;
+    const gateway = createDataGateway();
+
+    const [sources, byCity] = await Promise.all([
+      readStaticCozinhas({ year: LATEST_COZINHA_YEAR }),
+      gateway.getCozinhasPorMunicipio(LATEST_COZINHA_YEAR),
+    ]);
+
+    const withoutCoordinates = sources.filter((source) => {
+      return source.latitude === null || source.longitude === null;
+    }).length;
+    const counted = byCity.reduce((sum, entry) => {
+      return sum + entry.quantidade;
+    }, 0);
+
+    expect(withoutCoordinates).toBe(WITHOUT_COORDINATES);
+    expect(counted).toBe(COUNTED);
+    expect(sources.length).toBe(withoutCoordinates + counted + UNMATCHED);
+  });
+
   test('returns the same canonical rows across repeated calls (snapshots are memoized)', async () => {
     const gateway = createDataGateway();
 

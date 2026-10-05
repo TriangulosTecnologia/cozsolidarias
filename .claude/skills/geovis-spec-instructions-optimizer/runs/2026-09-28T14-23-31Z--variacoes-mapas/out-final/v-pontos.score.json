@@ -1,0 +1,34 @@
+{
+  "id": "v-pontos",
+  "mapMode": "pontos",
+  "durationMs": 10322,
+  "kind": "variation",
+  "httpStatus": 200,
+  "ok": true,
+  "renderEquivalent": false,
+  "minimal": false,
+  "bindingRecall": 0,
+  "expected": [
+    "point @ /api/cozinhas | legend=categorical/4"
+  ],
+  "got": [
+    "line @ /geo/estados.json | legend=none",
+    "point @ inline:geojson | legend=none"
+  ],
+  "missing": [
+    "point @ /api/cozinhas | legend=categorical/4"
+  ],
+  "extra": [
+    "line @ /geo/estados.json | legend=none",
+    "point @ inline:geojson | legend=none"
+  ],
+  "orphans": {
+    "sources": [],
+    "mapData": [],
+    "legends": [
+      "legenda-cozinhas"
+    ],
+    "hiddenLayers": []
+  },
+  "presentationKeys": []
+}

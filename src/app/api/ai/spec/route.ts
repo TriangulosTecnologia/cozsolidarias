@@ -335,8 +335,8 @@ const resolveServedSpec = async (
  * Turns a natural-language prompt into a `VisualizationSpec`, via a Naturali
  * agent (`POST /agents/{agentId}/generate?wait=true`, see
  * {@link generateSpec}) declared by the `geovis-spec-generator-loop`
- * formation (`~/geovis-spec-generator-loop.formation.json`, provisioned out of
- * band) and referenced here only by ID. The agent validates its candidate
+ * formation (`agents/geovis-spec-generator/formation.json`, deployed by that
+ * folder's scripts) and referenced here only by ID. The agent validates its candidate
  * with the client-side `validate_spec` tool — repaired locally first, at most
  * 5 calls, stopping when issues stop shrinking or the 55s deadline passes —
  * and returns a structured `{status: "ok", spec}` or `{status: "error",
@@ -386,5 +386,8 @@ export const POST = async (request: Request): Promise<Response> => {
     return invalidSpecResponse({ issues, spec });
   }
 
-  return Response.json({ spec, error: false });
+  return Response.json({
+    spec,
+    error: false,
+  });
 };

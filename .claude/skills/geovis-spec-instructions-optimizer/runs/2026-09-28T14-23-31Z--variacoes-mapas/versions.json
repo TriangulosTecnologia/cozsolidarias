@@ -1,0 +1,42 @@
+{
+  "runId": "2026-09-28T14-23-31Z--variacoes-mapas",
+  "skillVersion": "2.0.0",
+  "sources": {
+    "agentInstructions": {
+      "formationFile": "~/geovis-spec-generator-loop.formation.json",
+      "sha256": "ee07a7486b865d873059d11545047eafa843821ffe5477265f9ff99f563ceee7",
+      "testFormationFile": "formation.test.json",
+      "testSha256": "d287481ed29697ca9a04e501aafa2c3638151f9c8d1f8dfb7466527ae7d38982"
+    },
+    "instructions": {
+      "path": "src/app/api/ai/spec/route.ts",
+      "gitSha": "147628787b7f83382a47d7569ce180b8dfbed65d",
+      "sha256": "872bb853f7ad974b9cd73563e423b2e4620c0fffad5c83176e710fc898d98a34",
+      "dirty": true
+    },
+    "catalogue": {
+      "path": "public/dataset_catalogue.json",
+      "sha256": "8cf18324e483f5923160aabd4d94adfdcb9bdbfaed4d49c3e223feaf368c14cc"
+    }
+  },
+  "spec": {
+    "schemaVersion": 2,
+    "libSchemaVersion": null,
+    "geovisPackageVersion": "0.22.0"
+  },
+  "testAgent": {
+    "formationId": null,
+    "agentId": null,
+    "agentVersion": null,
+    "naturaliCliVersion": "0.136.0"
+  },
+  "golden": {
+    "manifestSha256": null,
+    "gitSha": null
+  },
+  "results": {
+    "resultsVersion": 2,
+    "datasetVersion": null
+  },
+  "status": "formation validated, not created — awaiting user confirmation"
+}

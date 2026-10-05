@@ -1,4 +1,3 @@
-/* eslint-disable no-console, no-undef */
 /**
  * Regenerates the golden spec corpus from `buildSpec` — the same function the
  * production map calls — so the corpus is never a stale hand-copied dump.
@@ -31,6 +30,7 @@ import { execFileSync } from 'node:child_process';
 import { mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { registerHooks } from 'node:module';
 import { dirname, join, resolve as presolve } from 'node:path';
+import process from 'node:process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const REPO = process.cwd();
@@ -42,12 +42,12 @@ const KEEP_FULL = process.argv.includes('--full');
 // Node strips types but still demands full specifiers and knows nothing about
 // tsconfig `paths`. These hooks supply both, so `buildSpec` loads untouched.
 const EXTS = ['', '.ts', '.tsx', '/index.ts', '/index.tsx'];
-const firstFile = base => {
+const firstFile = (base) => {
   for (const ext of EXTS) {
     try {
       if (statSync(base + ext).isFile()) return base + ext;
     } catch {
-      // Continue searching
+      // not a file with this extension; try the next one
     }
   }
   return null;
@@ -78,7 +78,7 @@ const readModes = () => {
 };
 
 /** The colour scale a resolved row set supports — the only thing the legend check reads. */
-const valueKind = rows => {
+const valueKind = (rows) => {
   for (const row of rows) {
     if (typeof row?.value === 'string') return 'categorical';
     if (typeof row?.value === 'number') return 'quantitative';
@@ -87,11 +87,11 @@ const valueKind = rows => {
 };
 
 /** Replaces bulk payloads with a summary, leaving every structural field verbatim. */
-const slim = spec => {
+const slim = (spec) => {
   const out = { ...spec };
 
   if (Array.isArray(spec.mapData)) {
-    out.mapData = spec.mapData.map(entry => {
+    out.mapData = spec.mapData.map((entry) => {
       if (!Array.isArray(entry?.data)) return entry;
       return {
         ...entry,
@@ -106,7 +106,7 @@ const slim = spec => {
   }
 
   if (Array.isArray(spec.sources)) {
-    out.sources = spec.sources.map(source => {
+    out.sources = spec.sources.map((source) => {
       const data = source?.data;
       if (!data || typeof data !== 'object') return source;
       return {
@@ -129,46 +129,23 @@ const optional = async (label, fn, sink) => {
     sink[label] = Array.isArray(value) ? { rows: value.length } : { present: true };
     return value;
   } catch (error) {
-    sink[label] = { absent: String(error?.message ?? 'unknown error').slice(0, 120) };
+    sink[label] = { absent: String(error.message).slice(0, 120) };
     return undefined;
   }
 };
 
-// eslint-disable-next-line complexity
-const main = async () => {
-  const { buildSpec } = await import(
-    pathToFileURL(join(MAPAS, 'geovisSpec.ts')).href
-  );
-  const { gateway } = await import(pathToFileURL(join(SRC, 'gateway.ts')).href);
+const print = (line) => { process.stdout.write(`${line}\n`) };
 
-  const provenance = {};
-  const byCity =
-    (await optional('cozinhasPorMunicipio', () => { return gateway.getCozinhasPorMunicipio() }, provenance)) ?? [];
-  const ivsByCity =
-    (await optional('ivsPorMunicipio', () => { return gateway.getIvsPorMunicipio() }, provenance)) ?? [];
-  const overlays = {
-    cafByCity: await optional('cafsPorMunicipio', () => { return gateway.getCafsPorMunicipio() }, provenance),
-    cadinsanByCity: await optional('cadinsanPorMunicipio', () => { return gateway.getCadinsanPorMunicipio() }, provenance),
-    cafHexbin: await optional('cafHexbin', () => { return gateway.getCafHexbin() }, provenance),
-    cafPontosPorUf: await optional('cafPontosPorUf', () => { return gateway.getCafPontosPorUf() }, provenance),
+const countsOf = (raw) => {
+  return {
+    sources: (raw.sources ?? []).length,
+    layers: (raw.layers ?? []).length,
+    legends: (raw.legends ?? []).length,
+    mapData: (raw.mapData ?? []).length,
   };
+};
 
-  mkdirSync(OUT, { recursive: true });
-  const written = [];
-
-  for (const mode of readModes()) {
-    const raw = buildSpec(byCity, mode, undefined, ivsByCity, overlays);
-    const spec = KEEP_FULL ? raw : slim(raw);
-    writeFileSync(join(OUT, `${mode}.json`), JSON.stringify(spec, null, 2) + '\n');
-    written.push({
-      mode,
-      sources: (raw.sources ?? []).length,
-      layers: (raw.layers ?? []).length,
-      legends: (raw.legends ?? []).length,
-      mapData: (raw.mapData ?? []).length,
-    });
-  }
-
+const writeManifest = ({ provenance, written }) => {
   writeFileSync(
     join(OUT, 'manifest.json'),
     JSON.stringify(
@@ -188,10 +165,46 @@ const main = async () => {
       2
     ) + '\n'
   );
+};
 
-  console.log(`${written.length} specs → ${OUT}${KEEP_FULL ? ' (completo)' : ' (dados elididos)'}`);
+const loadDatasets = async ({ gateway, provenance }) => {
+  const byCity =
+    (await optional('cozinhasPorMunicipio', () => { return gateway.getCozinhasPorMunicipio() }, provenance)) ?? [];
+  const ivsByCity =
+    (await optional('ivsPorMunicipio', () => { return gateway.getIvsPorMunicipio() }, provenance)) ?? [];
+  const overlays = {
+    cafByCity: await optional('cafsPorMunicipio', () => { return gateway.getCafsPorMunicipio() }, provenance),
+    cadinsanByCity: await optional('cadinsanPorMunicipio', () => { return gateway.getCadinsanPorMunicipio() }, provenance),
+    cafHexbin: await optional('cafHexbin', () => { return gateway.getCafHexbin() }, provenance),
+    cafPontosPorUf: await optional('cafPontosPorUf', () => { return gateway.getCafPontosPorUf() }, provenance),
+  };
+  return { byCity, ivsByCity, overlays };
+};
+
+const main = async () => {
+  const { buildSpec } = await import(
+    pathToFileURL(join(MAPAS, 'geovisSpec.ts')).href
+  );
+  const { gateway } = await import(pathToFileURL(join(SRC, 'gateway.ts')).href);
+
+  const provenance = {};
+  const { byCity, ivsByCity, overlays } = await loadDatasets({ gateway, provenance });
+
+  mkdirSync(OUT, { recursive: true });
+  const written = [];
+
+  for (const mode of readModes()) {
+    const raw = buildSpec(byCity, mode, undefined, ivsByCity, overlays);
+    const spec = KEEP_FULL ? raw : slim(raw);
+    writeFileSync(join(OUT, `${mode}.json`), JSON.stringify(spec, null, 2) + '\n');
+    written.push({ mode, ...countsOf(raw) });
+  }
+
+  writeManifest({ provenance, written });
+
+  print(`${written.length} specs → ${OUT}${KEEP_FULL ? ' (completo)' : ' (dados elididos)'}`);
   for (const [label, info] of Object.entries(provenance)) {
-    if (info.absent) console.log(`  overlay ausente: ${label} — ${info.absent}`);
+    if (info.absent) print(`  overlay ausente: ${label} — ${info.absent}`);
   }
 };
 

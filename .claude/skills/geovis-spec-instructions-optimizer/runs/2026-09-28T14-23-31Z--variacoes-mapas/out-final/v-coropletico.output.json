@@ -1,0 +1,9 @@
+{
+  "prompt": "Quero ver o mapa coroplético da quantidade de cozinhas por município",
+  "httpStatus": 502,
+  "durationMs": 12152,
+  "response": {
+    "error": true,
+    "message": "Falha de comunicação com o modelo de IA: (0 , _mapDataCatalogue__WEBPACK_IMPORTED_MODULE_1__.isRenderableDatasetId) is not a function"
+  }
+}

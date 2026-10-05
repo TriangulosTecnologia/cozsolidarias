@@ -9,11 +9,11 @@ import type {
 } from '@ttoss/geovis';
 
 import type {
-  cadinsanByCity,
-  cafByCity,
+  CadinsanByCity,
+  CafByCity,
   CafHexbinFeatureCollection,
   CafUfFeatureCollection,
-  kitchenRateByCity,
+  KitchenRateByCity,
   MunicipioIvs,
 } from '@/data-gateway/schema';
 
@@ -82,7 +82,7 @@ type MapOverlays = {
    */
   cozinhaStatus?: Record<string, string>;
   /** Per-município CAF share rows; painted in `coropletico-cafs-percentual` mode. */
-  cafByCity?: cafByCity[];
+  cafByCity?: CafByCity[];
   /**
    * The 27 UF anchors with their CAF totals, held by the app. Feeds both the
    * `cafs` mode's country level (as the source's data, so the anchors are not
@@ -118,7 +118,7 @@ type MapOverlays = {
    * Per-município CADINSAN food-insecurity share rows; painted in the
    * `coropletico-cadinsan-com-pbf` and `coropletico-cadinsan-sem-pbf` modes.
    */
-  cadinsanByCity?: cadinsanByCity[];
+  cadinsanByCity?: CadinsanByCity[];
 };
 
 /**
@@ -127,8 +127,8 @@ type MapOverlays = {
  * `resolveChoropleth` memoizes on reference identity, and a fresh array per call
  * would defeat it.
  */
-const NO_CAF_ROWS: cafByCity[] = [];
-const NO_CADINSAN_ROWS: cadinsanByCity[] = [];
+const NO_CAF_ROWS: CafByCity[] = [];
+const NO_CADINSAN_ROWS: CadinsanByCity[] = [];
 const NO_IVS_ROWS: MunicipioIvs[] = [];
 
 /**
@@ -538,7 +538,7 @@ const buildMapData = ({
   showAssentamentos,
   overlays,
 }: {
-  byCity: kitchenRateByCity[];
+  byCity: KitchenRateByCity[];
   choroplethRows: MapDataRow[];
   mode: MapMode;
   showAssentamentos: boolean;
@@ -646,7 +646,7 @@ const buildMapData = ({
  * buildSpec(byCity, 'assentamentos', undefined, [], { assentamentos: { atributos } });
  */
 export const buildSpec = (
-  byCity: kitchenRateByCity[],
+  byCity: KitchenRateByCity[],
   mode: MapMode = 'coropletico',
   hoverTooltipRender?: HoverTooltipConfig['render'],
   ivsByCity: MunicipioIvs[] = NO_IVS_ROWS,

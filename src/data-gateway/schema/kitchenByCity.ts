@@ -7,13 +7,27 @@
  * to a polygon. `municipio` carries the human-readable name for tooltips/labels.
  */
 
-/** A single município with its cozinha count. */
-export type kitchenByCity = {
+/**
+ * A single município with its cozinha count.
+ *
+ * @example
+ * const salvador: KitchenByCity = {
+ *   codigoIbge: '2927408',
+ *   municipio: 'SALVADOR',
+ *   quantidade: 26,
+ *   pessoasAtendidas: 45897,
+ * };
+ */
+export type KitchenByCity = {
   /** 7-digit IBGE code; joins to `feature.properties.codarea` on the map. */
   codigoIbge: string;
   /** Município name (for display); taken from the source records. */
   municipio: string;
-  /** Number of cozinhas located inside this município's polygon. */
+  /**
+   * Number of cozinhas located inside this município's polygon, plus those
+   * whose point falls outside every polygon and that declare this município's
+   * IBGE code (a polygon match always wins over the declared code).
+   */
   quantidade: number;
   /**
    * Total people served, summed from each cozinha's free-text
@@ -28,14 +42,28 @@ export type kitchenByCity = {
  * A município row enriched with its IBGE Census 2022 population, its Cadastro
  * Único registration count, and three derived choropleth metrics — the shape
  * served by `/api/cozinhas/por-municipio` and consumed by every choropleth
- * variant. The count variant colors the fill by {@link kitchenByCity.quantidade},
- * the rate variant by {@link kitchenRateByCity.porCemMil}, the share variant by
- * {@link kitchenRateByCity.percentualDoBrasil}, the CadÚnico variant by
- * {@link kitchenRateByCity.porDezMilCadUnico}, and the coverage variant by
- * {@link kitchenRateByCity.pessoasPorCozinha}; each variant ignores the fields it
+ * variant. The count variant colors the fill by {@link KitchenByCity.quantidade},
+ * the rate variant by {@link KitchenRateByCity.porCemMil}, the share variant by
+ * {@link KitchenRateByCity.percentualDoBrasil}, the CadÚnico variant by
+ * {@link KitchenRateByCity.porDezMilCadUnico}, and the coverage variant by
+ * {@link KitchenRateByCity.pessoasPorCozinha}; each variant ignores the fields it
  * doesn't use.
+ *
+ * @example
+ * const salvador: KitchenRateByCity = {
+ *   codigoIbge: '2927408',
+ *   municipio: 'SALVADOR',
+ *   quantidade: 26,
+ *   pessoasAtendidas: 45897,
+ *   populacao: 2417678,
+ *   porCemMil: 1.08, // 26 / 2417678 * 100_000
+ *   percentualDoBrasil: 1.87,
+ *   pessoasCadUnico: 1157799,
+ *   porDezMilCadUnico: 0.22, // 26 / 1157799 * 10_000
+ *   pessoasPorCozinha: 44531, // 1157799 / 26
+ * };
  */
-export type kitchenRateByCity = kitchenByCity & {
+export type KitchenRateByCity = KitchenByCity & {
   /**
    * Município resident population (IBGE Census 2022). `null` when the município
    * has no entry in the population snapshot (no valid rate denominator).

@@ -1,0 +1,10 @@
+{
+  "id": "v-cadinsan-com-pbf",
+  "mapMode": "coropletico-cadinsan-com-pbf",
+  "durationMs": 8099,
+  "kind": "variation",
+  "httpStatus": 502,
+  "ok": false,
+  "reason": "no-spec",
+  "error": "Falha de comunicação com o modelo de IA: (0 , _mapDataCatalogue__WEBPACK_IMPORTED_MODULE_1__.isRenderableDatasetId) is not a function"
+}

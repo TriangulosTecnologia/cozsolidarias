@@ -1,13 +1,13 @@
 import type { GeoJSONFeature, GeoJSONFeatureCollection } from '@ttoss/geovis';
 import type { MunicipioAggregate } from 'src/data-gateway/transformers/toCozinhasPorMunicipio';
 import {
+  aggregateCozinhasPorMunicipio,
   cozinhasPercentualDoBrasil,
   cozinhasPorCemMil,
   cozinhasPorDezMilCadUnico,
   parsePessoasAtendidas,
   pessoasCadUnicoPorCozinha,
   projectComTaxa,
-  toCozinhasPorMunicipio,
 } from 'src/data-gateway/transformers/toCozinhasPorMunicipio';
 import type { StaticCozinhaSource } from 'src/data-source-static/types';
 
@@ -55,11 +55,14 @@ const collection = (features: GeoJSONFeature[]): GeoJSONFeatureCollection => {
   return { type: 'FeatureCollection', features };
 };
 
-describe('toCozinhasPorMunicipio', () => {
+describe('aggregateCozinhasPorMunicipio', () => {
   test('counts a kitchen that falls inside a municipality polygon', () => {
     const municipios = collection([square('111', 0, 0, 10)]);
 
-    const result = toCozinhasPorMunicipio([coz(5, 5, 'Alpha')], municipios);
+    const result = aggregateCozinhasPorMunicipio({
+      cozinhas: [coz(5, 5, 'Alpha')],
+      municipios,
+    });
 
     expect(result).toEqual([
       {
@@ -67,6 +70,7 @@ describe('toCozinhasPorMunicipio', () => {
         municipio: 'Alpha',
         quantidade: 1,
         pessoasAtendidas: null,
+        centroid: [5, 5],
       },
     ]);
   });
@@ -77,10 +81,10 @@ describe('toCozinhasPorMunicipio', () => {
       square('222', 20, 20, 10),
     ]);
 
-    const result = toCozinhasPorMunicipio(
-      [coz(5, 5, 'Alpha'), coz(25, 25, 'Beta')],
-      municipios
-    );
+    const result = aggregateCozinhasPorMunicipio({
+      cozinhas: [coz(5, 5, 'Alpha'), coz(25, 25, 'Beta')],
+      municipios,
+    });
 
     expect(result).toHaveLength(2);
     expect(result).toContainEqual({
@@ -88,22 +92,52 @@ describe('toCozinhasPorMunicipio', () => {
       municipio: 'Alpha',
       quantidade: 1,
       pessoasAtendidas: null,
+      centroid: [5, 5],
     });
     expect(result).toContainEqual({
       codigoIbge: '222',
       municipio: 'Beta',
       quantidade: 1,
       pessoasAtendidas: null,
+      centroid: [25, 25],
     });
   });
 
-  test('drops kitchens that fall outside every polygon', () => {
+  test('counts an off-polygon kitchen in the indexed município it declares', () => {
     const municipios = collection([square('111', 0, 0, 10)]);
 
-    const result = toCozinhasPorMunicipio(
-      [coz(5, 5, 'Alpha'), coz(100, 100, 'Far away')],
-      municipios
-    );
+    const result = aggregateCozinhasPorMunicipio({
+      cozinhas: [
+        coz(5, 5, 'Alpha', '100'),
+        { ...coz(12, 5, 'Beta', '20'), codigoIbge: '111' },
+        { ...coz(13, 5, 'Beta', '30'), codigoIbge: '111' },
+      ],
+      municipios,
+    });
+
+    expect(result).toEqual([
+      {
+        codigoIbge: '111',
+        municipio: 'Beta',
+        quantidade: 3,
+        pessoasAtendidas: 150,
+        centroid: [10, 5],
+      },
+    ]);
+  });
+
+  test('drops off-polygon kitchens whose declared code is empty or not indexed', () => {
+    const municipios = collection([square('111', 0, 0, 10)]);
+
+    const result = aggregateCozinhasPorMunicipio({
+      cozinhas: [
+        coz(5, 5, 'Alpha'),
+        coz(100, 100, 'Far away'),
+        { ...coz(100, 100, 'Blank code'), codigoIbge: '' },
+        { ...coz(100, 100, 'Unknown code'), codigoIbge: '999' },
+      ],
+      municipios,
+    });
 
     expect(result).toEqual([
       {
@@ -111,6 +145,29 @@ describe('toCozinhasPorMunicipio', () => {
         municipio: 'Alpha',
         quantidade: 1,
         pessoasAtendidas: null,
+        centroid: [5, 5],
+      },
+    ]);
+  });
+
+  test('counts a kitchen in the polygon containing it over the município it declares', () => {
+    const municipios = collection([
+      square('111', 0, 0, 10),
+      square('222', 20, 20, 10),
+    ]);
+
+    const result = aggregateCozinhasPorMunicipio({
+      cozinhas: [{ ...coz(5, 5, 'Alpha'), codigoIbge: '222' }],
+      municipios,
+    });
+
+    expect(result).toEqual([
+      {
+        codigoIbge: '111',
+        municipio: 'Alpha',
+        quantidade: 1,
+        pessoasAtendidas: null,
+        centroid: [5, 5],
       },
     ]);
   });
@@ -118,10 +175,10 @@ describe('toCozinhasPorMunicipio', () => {
   test('drops kitchens without coordinates', () => {
     const municipios = collection([square('111', 0, 0, 10)]);
 
-    const result = toCozinhasPorMunicipio(
-      [coz(null, null, 'No coords'), coz(5, 5, 'Alpha')],
-      municipios
-    );
+    const result = aggregateCozinhasPorMunicipio({
+      cozinhas: [coz(null, null, 'No coords'), coz(5, 5, 'Alpha')],
+      municipios,
+    });
 
     expect(result).toEqual([
       {
@@ -129,6 +186,7 @@ describe('toCozinhasPorMunicipio', () => {
         municipio: 'Alpha',
         quantidade: 1,
         pessoasAtendidas: null,
+        centroid: [5, 5],
       },
     ]);
   });
@@ -136,10 +194,14 @@ describe('toCozinhasPorMunicipio', () => {
   test('picks the most frequent municipality name for a polygon', () => {
     const municipios = collection([square('111', 0, 0, 10)]);
 
-    const result = toCozinhasPorMunicipio(
-      [coz(2, 2, 'São Paulo'), coz(3, 3, 'Sao Paulo'), coz(4, 4, 'São Paulo')],
-      municipios
-    );
+    const result = aggregateCozinhasPorMunicipio({
+      cozinhas: [
+        coz(2, 2, 'São Paulo'),
+        coz(3, 3, 'Sao Paulo'),
+        coz(4, 4, 'São Paulo'),
+      ],
+      municipios,
+    });
 
     expect(result).toEqual([
       {
@@ -147,6 +209,7 @@ describe('toCozinhasPorMunicipio', () => {
         municipio: 'São Paulo',
         quantidade: 3,
         pessoasAtendidas: null,
+        centroid: [3, 3],
       },
     ]);
   });
@@ -154,10 +217,10 @@ describe('toCozinhasPorMunicipio', () => {
   test('never picks an empty name even when it is the most frequent', () => {
     const municipios = collection([square('111', 0, 0, 10)]);
 
-    const result = toCozinhasPorMunicipio(
-      [coz(2, 2, ''), coz(3, 3, ''), coz(4, 4, 'Valid record')],
-      municipios
-    );
+    const result = aggregateCozinhasPorMunicipio({
+      cozinhas: [coz(2, 2, ''), coz(3, 3, ''), coz(4, 4, 'Valid record')],
+      municipios,
+    });
 
     expect(result).toEqual([
       {
@@ -165,6 +228,7 @@ describe('toCozinhasPorMunicipio', () => {
         municipio: 'Valid record',
         quantidade: 3,
         pessoasAtendidas: null,
+        centroid: [3, 3],
       },
     ]);
   });
@@ -198,10 +262,10 @@ describe('toCozinhasPorMunicipio', () => {
       },
     };
 
-    const result = toCozinhasPorMunicipio(
-      [coz(25, 25, 'Island')],
-      collection([multi])
-    );
+    const result = aggregateCozinhasPorMunicipio({
+      cozinhas: [coz(25, 25, 'Island')],
+      municipios: collection([multi]),
+    });
 
     expect(result).toEqual([
       {
@@ -209,6 +273,7 @@ describe('toCozinhasPorMunicipio', () => {
         municipio: 'Island',
         quantidade: 1,
         pessoasAtendidas: null,
+        centroid: [25, 25],
       },
     ]);
   });
@@ -238,10 +303,10 @@ describe('toCozinhasPorMunicipio', () => {
       },
     };
 
-    const result = toCozinhasPorMunicipio(
-      [coz(5, 5, 'In the hole'), coz(1, 1, 'On the solid edge')],
-      collection([withHole])
-    );
+    const result = aggregateCozinhasPorMunicipio({
+      cozinhas: [coz(5, 5, 'In the hole'), coz(1, 1, 'On the solid edge')],
+      municipios: collection([withHole]),
+    });
 
     expect(result).toEqual([
       {
@@ -249,6 +314,7 @@ describe('toCozinhasPorMunicipio', () => {
         municipio: 'On the solid edge',
         quantidade: 1,
         pessoasAtendidas: null,
+        centroid: [1, 1],
       },
     ]);
   });
@@ -270,10 +336,10 @@ describe('toCozinhasPorMunicipio', () => {
       geometry: null,
     };
 
-    const result = toCozinhasPorMunicipio(
-      [coz(5, 5, 'Any')],
-      collection([pointFeature, noCodarea, nullGeometry])
-    );
+    const result = aggregateCozinhasPorMunicipio({
+      cozinhas: [coz(5, 5, 'Any')],
+      municipios: collection([pointFeature, noCodarea, nullGeometry]),
+    });
 
     expect(result).toEqual([]);
   });
@@ -281,10 +347,10 @@ describe('toCozinhasPorMunicipio', () => {
   test('sums parsed pessoasAtendidas per município', () => {
     const municipios = collection([square('111', 0, 0, 10)]);
 
-    const result = toCozinhasPorMunicipio(
-      [coz(2, 2, 'Alpha', '200'), coz(3, 3, 'Alpha', '150')],
-      municipios
-    );
+    const result = aggregateCozinhasPorMunicipio({
+      cozinhas: [coz(2, 2, 'Alpha', '200'), coz(3, 3, 'Alpha', '150')],
+      municipios,
+    });
 
     expect(result).toEqual([
       {
@@ -292,6 +358,7 @@ describe('toCozinhasPorMunicipio', () => {
         municipio: 'Alpha',
         quantidade: 2,
         pessoasAtendidas: 350,
+        centroid: [2.5, 2.5],
       },
     ]);
   });
@@ -299,14 +366,14 @@ describe('toCozinhasPorMunicipio', () => {
   test('sums only the known values, ignoring blank/unparseable ones', () => {
     const municipios = collection([square('111', 0, 0, 10)]);
 
-    const result = toCozinhasPorMunicipio(
-      [
+    const result = aggregateCozinhasPorMunicipio({
+      cozinhas: [
         coz(2, 2, 'Alpha', '200'),
         coz(3, 3, 'Alpha', ''),
         coz(4, 4, 'Alpha', 'desconhecido'),
       ],
-      municipios
-    );
+      municipios,
+    });
 
     expect(result).toEqual([
       {
@@ -314,6 +381,7 @@ describe('toCozinhasPorMunicipio', () => {
         municipio: 'Alpha',
         quantidade: 3,
         pessoasAtendidas: 200,
+        centroid: [3, 3],
       },
     ]);
   });
@@ -321,10 +389,10 @@ describe('toCozinhasPorMunicipio', () => {
   test('leaves pessoasAtendidas as null when no kitchen reports a parseable count', () => {
     const municipios = collection([square('111', 0, 0, 10)]);
 
-    const result = toCozinhasPorMunicipio(
-      [coz(2, 2, 'Alpha', ''), coz(3, 3, 'Alpha', 'desconhecido')],
-      municipios
-    );
+    const result = aggregateCozinhasPorMunicipio({
+      cozinhas: [coz(2, 2, 'Alpha', ''), coz(3, 3, 'Alpha', 'desconhecido')],
+      municipios,
+    });
 
     expect(result).toEqual([
       {
@@ -332,6 +400,7 @@ describe('toCozinhasPorMunicipio', () => {
         municipio: 'Alpha',
         quantidade: 2,
         pessoasAtendidas: null,
+        centroid: [2.5, 2.5],
       },
     ]);
   });

@@ -1,0 +1,41 @@
+# Validates devanity.rules.json, checks per-path delta budgets, runs the `check` of every
+# touched high-risk path, and requires a `devanity-proof:` block in the PR body for normal or
+# high-risk changes. Binds only once it is a required status check.
+name: devanity-rules
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+jobs:
+  rules:
+    runs-on: ubuntu-latest
+    env:
+      DEVANITY_REF: 1bed312320a80b9f17d11adcfb72d2732c72c6fc
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Toolchain copied from pr.yml: the declared checks run on this runner.
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Fetch the devanity plugin
+        run: |
+          dir="$RUNNER_TEMP/devanity"
+          git init -q "$dir"
+          git -C "$dir" fetch -q --depth 1 https://github.com/usedevanity/skills "$DEVANITY_REF"
+          git -C "$dir" checkout -q FETCH_HEAD
+
+      - name: devanity rules
+        run: node "$RUNNER_TEMP/devanity/plugin/scripts/devanity-rules-ci.mjs" --base "origin/${{ github.base_ref }}"

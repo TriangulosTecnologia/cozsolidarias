@@ -1,0 +1,42 @@
+{
+  "id": "v-pessoas-atendidas",
+  "mapMode": "coropletico-pessoas-atendidas",
+  "durationMs": 106,
+  "kind": "variation",
+  "httpStatus": 200,
+  "ok": true,
+  "renderEquivalent": false,
+  "minimal": false,
+  "bindingRecall": 0,
+  "expected": [
+    "polygon @ /geo/geojs-100-mun.json | legend=quantitative/6"
+  ],
+  "got": [
+    "line @ /geo/estados.json | legend=none",
+    "line @ /geo/geojs-100-mun.json | legend=none",
+    "polygon @ /geo/geojs-100-mun.json | legend=quantitative/5"
+  ],
+  "missing": [
+    "polygon @ /geo/geojs-100-mun.json | legend=quantitative/6"
+  ],
+  "extra": [
+    "line @ /geo/estados.json | legend=none",
+    "line @ /geo/geojs-100-mun.json | legend=none",
+    "polygon @ /geo/geojs-100-mun.json | legend=quantitative/5"
+  ],
+  "orphans": {
+    "sources": [],
+    "mapData": [],
+    "legends": [],
+    "hiddenLayers": [
+      "cozinhas-bolhas",
+      "cozinhas-pts"
+    ]
+  },
+  "presentationKeys": [
+    "view",
+    "basemap",
+    "attributionControlEnabled",
+    "control"
+  ]
+}
