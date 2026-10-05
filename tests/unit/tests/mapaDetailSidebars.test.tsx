@@ -15,5 +15,6 @@ describe('modeShowsCozinhaDetail', () => {
 
   test('is false for circulos (bubbles carry no clickable points)', () => {
     expect(modeShowsCozinhaDetail('circulos')).toBe(false);
+    expect(modeShowsCozinhaDetail('circulos-pessoas')).toBe(false);
   });
 });

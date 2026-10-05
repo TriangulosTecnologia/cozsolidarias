@@ -87,6 +87,7 @@ describe('buildLeftSidebar', () => {
     expect(blockIds('coropletico-ivs')).toEqual(['opacidade', 'cores']);
     expect(blockIds('coropletico-idhm')).toEqual(['opacidade', 'cores']);
     expect(blockIds('circulos')).toEqual(['opacidade']);
+    expect(blockIds('circulos-pessoas')).toEqual(['opacidade']);
     expect(blockIds('pontos')).not.toContain('cores');
   });
 
@@ -143,6 +144,7 @@ describe('MAP_MODE_VALUES', () => {
   test('is every variation the menu offers, and nothing else', () => {
     expect(MAP_MODE_VALUES).toContain('coropletico');
     expect(MAP_MODE_VALUES).toContain('cafs-hexbin');
+    expect(MAP_MODE_VALUES).toContain('circulos-pessoas');
     expect(MAP_MODE_VALUES).toContain('coropletico-idhm-educacao-frequencia');
     expect(new Set(MAP_MODE_VALUES).size).toBe(MAP_MODE_VALUES.length);
   });

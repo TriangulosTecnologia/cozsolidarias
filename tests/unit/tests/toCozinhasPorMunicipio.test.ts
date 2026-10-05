@@ -505,3 +505,17 @@ describe('projectComTaxa', () => {
     ]);
   });
 });
+
+describe('toCozinhasPorMunicipio non-polygon geometries', () => {
+  test('never matches a kitchen to a município whose geometry is not a polygon', () => {
+    const point: GeoJSONFeature = {
+      type: 'Feature',
+      properties: { codarea: '999' },
+      geometry: { type: 'Point', coordinates: [5, 5] },
+    };
+
+    expect(
+      toCozinhasPorMunicipio([coz(5, 5, 'Alpha')], collection([point]))
+    ).toEqual([]);
+  });
+});

@@ -62,6 +62,7 @@ describe('datasetsForMode', () => {
     expect(datasetsForMode('coropletico')).toEqual(['data', 'nomes']);
     expect(datasetsForMode('pontos')).toEqual(['data', 'nomes']);
     expect(datasetsForMode('circulos')).toEqual(['data', 'nomes']);
+    expect(datasetsForMode('circulos-pessoas')).toEqual(['data', 'nomes']);
   });
 
   test('a mode adds only the snapshot it paints from', () => {
