@@ -619,6 +619,25 @@ describe('findReclassifiedOfficialIndex', () => {
     }
   });
 
+  test('ignores a spec without layers, legends or numeric thresholds', () => {
+    const layers = [{ mapDataId: 'municipios_ivs', activeLegendId: 'l' }];
+
+    expect(findReclassifiedOfficialIndex({ mapData: [] })).toBeNull();
+    expect(findReclassifiedOfficialIndex({ layers })).toBeNull();
+    expect(
+      findReclassifiedOfficialIndex({
+        layers,
+        legends: ['not-a-record', { id: 'l' }, { id: 'l', colorBy: {} }],
+      })
+    ).toBeNull();
+    expect(
+      findReclassifiedOfficialIndex({
+        layers: ['not-a-record', {}],
+        legends: [],
+      })
+    ).toBeNull();
+  });
+
   test('ignores datasets outside the official families', () => {
     expect(
       findReclassifiedOfficialIndex(
