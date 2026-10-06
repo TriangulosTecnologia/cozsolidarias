@@ -41,6 +41,20 @@ describe('collectStructuralIssues', () => {
     ]);
   });
 
+  test('flags an IVS legend that reclassifies the official faixas', () => {
+    const issues = collectStructuralIssues({
+      mapData: [{ mapDataId: 'municipios_ivs' }],
+      layers: [{ mapDataId: 'municipios_ivs', activeLegendId: 'l' }],
+      legends: [{ id: 'l', colorBy: { thresholds: [0.1, 0.22, 0.31, 0.47] } }],
+    });
+
+    expect(
+      issues.map((issue) => {
+        return [issue.code, issue.path];
+      })
+    ).toEqual([['reclassified-official-index', 'mapData[municipios_ivs]']]);
+  });
+
   test('returns no issues for a spec that passes every check', () => {
     expect(
       collectStructuralIssues({

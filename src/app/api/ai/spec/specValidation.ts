@@ -1,8 +1,13 @@
+import {
+  IDHM_FAMILY_THRESHOLDS,
+  IVS_FAMILY_THRESHOLDS,
+} from '@/app/(features)/mapas/geovisScoreScales';
 import { gateway } from '@/gateway';
 
 import {
   ABSOLUTE_TOTAL_DATASET_IDS,
   isRenderableDatasetId,
+  officialFaixasOf,
   RENDERABLE_DATASET_FETCHERS,
   RENDERABLE_DATASET_IDS,
 } from './mapDataCatalogue';
@@ -453,6 +458,109 @@ export const findChoroplethOnAbsoluteTotal = (
       typeof mapDataId === 'string' &&
       (ABSOLUTE_TOTAL_DATASET_IDS as readonly string[]).includes(mapDataId)
     ) {
+      return mapDataId;
+    }
+  }
+
+  return null;
+};
+
+/**
+ * The official faixa breaks (IPEA) per family (see `officialFaixasOf`). Both
+ * arrays are floor-prefixed (see `SCORE_FLOOR`); a legend may carry them with
+ * or without that floor.
+ */
+const OFFICIAL_FAIXA_THRESHOLDS: Record<'ivs' | 'idhm', readonly number[]> = {
+  ivs: IVS_FAMILY_THRESHOLDS,
+  idhm: IDHM_FAMILY_THRESHOLDS,
+};
+
+const isOfficialFaixa = (params: {
+  thresholds: unknown[];
+  official: readonly number[];
+}): boolean => {
+  const matches = (expected: readonly number[]) => {
+    return (
+      params.thresholds.length === expected.length &&
+      expected.every((value, index) => {
+        return params.thresholds[index] === value;
+      })
+    );
+  };
+  return matches(params.official) || matches(params.official.slice(1));
+};
+
+/** Numeric-or-not `colorBy.thresholds` of each legend, keyed by legend id. */
+const thresholdsByLegendId = (legends: unknown): Map<unknown, unknown[]> => {
+  return new Map(
+    (Array.isArray(legends) ? legends : []).flatMap(
+      (legend): Array<[unknown, unknown[]]> => {
+        const colorBy = isRecord(legend) ? legend['colorBy'] : undefined;
+        return isRecord(legend) &&
+          isRecord(colorBy) &&
+          Array.isArray(colorBy['thresholds'])
+          ? [[legend['id'], colorBy['thresholds']]]
+          : [];
+      }
+    )
+  );
+};
+
+/** The layer's `mapDataId` when it paints an official index with non-official faixas, else `null`. */
+const reclassifiedLayerMapDataId = (params: {
+  layer: unknown;
+  thresholdsById: Map<unknown, unknown[]>;
+}): string | null => {
+  const { layer, thresholdsById } = params;
+  if (!isRecord(layer) || typeof layer['mapDataId'] !== 'string') {
+    return null;
+  }
+
+  const mapDataId = layer['mapDataId'];
+  const family = officialFaixasOf(mapDataId);
+  const thresholds = thresholdsById.get(layer['activeLegendId']);
+  if (!family || !thresholds) {
+    return null;
+  }
+
+  return isOfficialFaixa({
+    thresholds,
+    official: OFFICIAL_FAIXA_THRESHOLDS[family],
+  })
+    ? null
+    : mapDataId;
+};
+
+/**
+ * Finds the first IVS/IDHM `mapData` entry whose fill layer is bound to a
+ * quantitative legend with thresholds other than the official IPEA faixas — the
+ * model re-deriving an official index by Jenks or by guess, which silently
+ * shifts which municípios read as "alta"/"muito alta". Only the legend a layer
+ * actually shows (`activeLegendId`) is checked; a layer or legend without
+ * numeric thresholds is not this guard's concern.
+ *
+ * @param spec - The candidate spec, after {@link hoistLayerLegends}.
+ * @returns The offending `mapDataId`, or `null`.
+ *
+ * @example
+ * findReclassifiedOfficialIndex({
+ *   mapData: [{ mapDataId: 'municipios_ivs' }],
+ *   layers: [{ mapDataId: 'municipios_ivs', activeLegendId: 'l' }],
+ *   legends: [{ id: 'l', colorBy: { thresholds: [1, 2, 3] } }],
+ * }); // 'municipios_ivs'
+ */
+export const findReclassifiedOfficialIndex = (
+  spec: UnknownRecord
+): string | null => {
+  const layers = spec['layers'];
+  if (!Array.isArray(layers)) {
+    return null;
+  }
+
+  const thresholdsById = thresholdsByLegendId(spec['legends']);
+  for (const layer of layers) {
+    const mapDataId = reclassifiedLayerMapDataId({ layer, thresholdsById });
+    if (mapDataId) {
       return mapDataId;
     }
   }

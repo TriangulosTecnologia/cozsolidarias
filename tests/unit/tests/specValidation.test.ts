@@ -1,4 +1,9 @@
 import {
+  buildCatalogueContext,
+  officialFaixasOf,
+  RENDERABLE_DATASET_IDS,
+} from 'src/app/api/ai/spec/mapDataCatalogue';
+import {
   appendRealMapData,
   appendRealSourceData,
   buildSourcesTable,
@@ -7,6 +12,7 @@ import {
   findInvalidBasemapStyleUrl,
   findInvalidGeojsonSource,
   findMissingLegend,
+  findReclassifiedOfficialIndex,
   hoistLayerLegends,
   invalidSpecResponse,
   isRecord,
@@ -15,6 +21,7 @@ import {
   SOURCE_METADATA,
 } from 'src/app/api/ai/spec/specValidation';
 
+import type { CadinsanByCity, MunicipioIvs } from '@/data-gateway/schema';
 import { gateway } from '@/gateway';
 
 describe('isRecord', () => {
@@ -565,7 +572,107 @@ describe('findMissingLegend', () => {
   });
 });
 
+describe('findReclassifiedOfficialIndex', () => {
+  const specWith = (mapDataId: string, thresholds: number[]) => {
+    return {
+      mapData: [{ mapDataId }],
+      layers: [{ mapDataId, activeLegendId: 'l' }],
+      legends: [{ id: 'l', colorBy: { thresholds } }],
+    };
+  };
+
+  test('flags a Jenks-style legend on an IVS or IDHM id', () => {
+    expect(
+      findReclassifiedOfficialIndex(
+        specWith('municipios_ivs_capital_humano', [0.1, 0.22, 0.31, 0.47])
+      )
+    ).toBe('municipios_ivs_capital_humano');
+    expect(
+      findReclassifiedOfficialIndex(specWith('municipios_idhm', [0.4, 0.9]))
+    ).toBe('municipios_idhm');
+  });
+
+  test('accepts the official faixas, with or without the floor', () => {
+    expect(
+      findReclassifiedOfficialIndex(
+        specWith('municipios_ivs', [0.2, 0.3, 0.4, 0.5])
+      )
+    ).toBeNull();
+    expect(
+      findReclassifiedOfficialIndex(
+        specWith('municipios_idhm_renda', [0.001, 0.5, 0.6, 0.7, 0.8])
+      )
+    ).toBeNull();
+  });
+
+  test('protects every IVS/IDHM renderable id, whatever its name prefix', () => {
+    const family = RENDERABLE_DATASET_IDS.filter((id) => {
+      return /ivs|idhm/.test(id);
+    });
+
+    expect(family).toHaveLength(10);
+    for (const id of family) {
+      expect(officialFaixasOf(id)).toBeDefined();
+      expect(findReclassifiedOfficialIndex(specWith(id, [0.11, 0.37]))).toBe(
+        id
+      );
+    }
+  });
+
+  test('ignores datasets outside the official families', () => {
+    expect(
+      findReclassifiedOfficialIndex(
+        specWith('municipios_cadinsan', [5, 15, 25])
+      )
+    ).toBeNull();
+  });
+});
+
+describe('buildCatalogueContext', () => {
+  const projectedEntries = async (
+    filter: (dataset: { id: string }) => boolean = () => {
+      return true;
+    }
+  ) => {
+    const real = await gateway.getCatalogue();
+    const { catalogue } = JSON.parse(
+      buildCatalogueContext({ ...real, datasets: real.datasets.filter(filter) })
+    );
+    return Object.fromEntries(
+      catalogue.datasets.map(
+        (entry: { id: string; description: string; fields: unknown[] }) => {
+          return [entry.id, entry];
+        }
+      )
+    );
+  };
+
+  test('exposes every renderable id to the agent', async () => {
+    const byId = await projectedEntries();
+
+    expect(
+      RENDERABLE_DATASET_IDS.filter((id) => {
+        return !(id in byId);
+      })
+    ).toEqual([]);
+  });
+
+  test('describes each IVS/IDHM id with its own field and scale direction', async () => {
+    const byId = await projectedEntries((dataset) => {
+      return dataset.id === 'municipios_ivs';
+    });
+
+    expect(byId.municipios_ivs.description).toMatch(/maior = mais vulnerável/);
+    expect(byId.municipios_idhm.description).toMatch(/escala oposta à do IVS/);
+    expect(byId.municipios_idhm.fields).toHaveLength(1);
+  });
+});
+
 describe('appendRealMapData', () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   test('rejects a dataset outside the renderable list with a 422 naming it', async () => {
     const result = await appendRealMapData({
       mapData: [{ mapDataId: 'caf_areas' }],
@@ -576,5 +683,97 @@ describe('appendRealMapData', () => {
     }
     expect(result.status).toBe(422);
     expect((await result.json()).message).toMatch(/"caf_areas"/);
+  });
+
+  const IVS_ROW: MunicipioIvs = {
+    codigoIbge: '2927408',
+    municipio: 'Salvador (BA)',
+    ivs: 0.11,
+    ivsInfraestruturaUrbana: 0.12,
+    ivsCapitalHumano: 0.13,
+    ivsRendaETrabalho: 0.14,
+    idhm: 0.21,
+    idhmLongevidade: 0.22,
+    idhmEducacao: 0.23,
+    idhmRenda: 0.24,
+    idhmEducacaoEscolaridade: 0.25,
+    idhmEducacaoFrequencia: 0.26,
+  };
+
+  test.each([
+    ['municipios_ivs', 0.11],
+    ['municipios_ivs_infraestrutura', 0.12],
+    ['municipios_ivs_capital_humano', 0.13],
+    ['municipios_ivs_renda_trabalho', 0.14],
+    ['municipios_idhm', 0.21],
+    ['municipios_idhm_longevidade', 0.22],
+    ['municipios_idhm_educacao', 0.23],
+    ['municipios_idhm_renda', 0.24],
+    ['municipios_idhm_educacao_escolaridade', 0.25],
+    ['municipios_idhm_educacao_frequencia', 0.26],
+  ])('%s paints its own IVS/IDHM field', async (mapDataId, value) => {
+    jest.spyOn(gateway, 'getIvsPorMunicipio').mockResolvedValue([IVS_ROW]);
+
+    const result = await appendRealMapData({
+      mapData: [{ mapDataId, data: [], keep: 'me' }],
+    });
+
+    expect(result).toEqual({
+      mapData: [
+        {
+          mapDataId,
+          keep: 'me',
+          data: [{ geometryId: '2927408', value }],
+        },
+      ],
+    });
+  });
+
+  test.each([
+    ['municipios_cadinsan', 19.56],
+    ['municipios_cadinsan_sem_pbf', 26.26],
+  ])('%s paints its own CADINSAN share', async (mapDataId, value) => {
+    const row: CadinsanByCity = {
+      codigoIbge: '2927408',
+      municipio: 'Salvador',
+      uf: 'Bahia',
+      regiao: 'Nordeste',
+      absolutoComPbf: 57160,
+      absolutoSemPbf: 76754,
+      cadastrosCadunico: 292251,
+      proporcaoComPbf: 19.56,
+      proporcaoSemPbf: 26.26,
+    };
+    jest.spyOn(gateway, 'getCadinsanPorMunicipio').mockResolvedValue([row]);
+
+    const result = await appendRealMapData({ mapData: [{ mapDataId }] });
+
+    expect(result).toEqual({
+      mapData: [{ mapDataId, data: [{ geometryId: '2927408', value }] }],
+    });
+  });
+
+  test('drops a município with a null share instead of painting 0', async () => {
+    jest.spyOn(gateway, 'getCadinsanPorMunicipio').mockResolvedValue([
+      {
+        codigoIbge: '1100015',
+        municipio: 'Sem cadastro',
+        uf: 'Rondônia',
+        regiao: 'Norte',
+        absolutoComPbf: 0,
+        absolutoSemPbf: 0,
+        cadastrosCadunico: 0,
+        proporcaoComPbf: null,
+        proporcaoSemPbf: null,
+      },
+    ]);
+
+    const result = await appendRealMapData({
+      mapData: [{ mapDataId: 'municipios_cadinsan_sem_pbf' }],
+    });
+
+    expect(result).toEqual({
+      mapData: [{ mapDataId: 'municipios_cadinsan_sem_pbf', data: [] }],
+    });
   });
 });
