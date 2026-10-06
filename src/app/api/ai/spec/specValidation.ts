@@ -475,6 +475,21 @@ const OFFICIAL_FAIXA_THRESHOLDS: Record<'ivs' | 'idhm', readonly number[]> = {
   idhm: IDHM_FAMILY_THRESHOLDS,
 };
 
+/**
+ * The official faixa cutpoints (IPEA) of an IVS/IDHM `mapDataId`, without the
+ * leading floor — what the model must use as `thresholds`.
+ *
+ * @param mapDataId - A `mapData[].mapDataId`.
+ * @returns The cutpoints, or `[]` when the id has no official faixas.
+ *
+ * @example
+ * officialFaixaBreaks('municipios_ivs'); // [0.2, 0.3, 0.4, 0.5]
+ */
+export const officialFaixaBreaks = (mapDataId: string): readonly number[] => {
+  const family = officialFaixasOf(mapDataId);
+  return family ? OFFICIAL_FAIXA_THRESHOLDS[family].slice(1) : [];
+};
+
 const isOfficialFaixa = (params: {
   thresholds: unknown[];
   official: readonly number[];

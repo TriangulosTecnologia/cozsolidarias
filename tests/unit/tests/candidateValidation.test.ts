@@ -55,6 +55,18 @@ describe('collectStructuralIssues', () => {
     ).toEqual([['reclassified-official-index', 'mapData[municipios_ivs]']]);
   });
 
+  test.each([
+    ['municipios_ivs_renda_trabalho', '0.2, 0.3, 0.4, 0.5'],
+    ['municipios_idhm', '0.5, 0.6, 0.7, 0.8'],
+  ])('tells the model the official faixas of %s', (mapDataId, breaks) => {
+    const [issue] = collectStructuralIssues({
+      layers: [{ mapDataId, activeLegendId: 'l' }],
+      legends: [{ id: 'l', colorBy: { thresholds: [0.1, 0.9] } }],
+    });
+
+    expect(issue.message).toContain(breaks);
+  });
+
   test('returns no issues for a spec that passes every check', () => {
     expect(
       collectStructuralIssues({

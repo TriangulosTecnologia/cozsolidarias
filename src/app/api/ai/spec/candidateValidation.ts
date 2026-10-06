@@ -16,6 +16,7 @@ import {
   isRecord,
   KNOWN_BASEMAP_STYLE_URLS,
   KNOWN_SOURCE_URLS,
+  officialFaixaBreaks,
   type SpecIssue,
   type UnknownRecord,
   unsupportedDatasetMessage,
@@ -46,7 +47,7 @@ const reclassifiedOfficialIndexIssues = (spec: UnknownRecord): SpecIssue[] => {
         {
           code: 'reclassified-official-index',
           path: `mapData[${mapDataId}]`,
-          message: `A legend de "${mapDataId}" usa faixas diferentes das oficiais do IPEA. IVS e IDHM são índices oficiais: não reclassifique (Jenks, quantis, palpite). Use as faixas publicadas pelo IPEA.`,
+          message: `A legend de "${mapDataId}" usa faixas diferentes das oficiais do IPEA. IVS e IDHM são índices oficiais: não reclassifique (Jenks, quantis, palpite). Use exatamente estes limiares: ${officialFaixaBreaks(mapDataId).join(', ')}.`,
         },
       ]
     : [];

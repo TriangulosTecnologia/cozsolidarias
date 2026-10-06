@@ -18,6 +18,7 @@ import {
   isRecord,
   KNOWN_BASEMAP_STYLE_URLS,
   KNOWN_SOURCE_URLS,
+  officialFaixaBreaks,
   SOURCE_METADATA,
 } from 'src/app/api/ai/spec/specValidation';
 
@@ -636,6 +637,11 @@ describe('findReclassifiedOfficialIndex', () => {
         legends: [],
       })
     ).toBeNull();
+  });
+
+  test('exposes the official cutpoints, none for a free-scale id', () => {
+    expect(officialFaixaBreaks('municipios_ivs')).toEqual([0.2, 0.3, 0.4, 0.5]);
+    expect(officialFaixaBreaks('municipios_cadinsan')).toEqual([]);
   });
 
   test('ignores datasets outside the official families', () => {
