@@ -11,10 +11,12 @@ import {
   findInvalidBasemapStyleUrl,
   findInvalidGeojsonSource,
   findMissingLegend,
+  findReclassifiedOfficialIndex,
   hoistLayerLegends,
   isRecord,
   KNOWN_BASEMAP_STYLE_URLS,
   KNOWN_SOURCE_URLS,
+  officialFaixaBreaks,
   type SpecIssue,
   type UnknownRecord,
   unsupportedDatasetMessage,
@@ -35,6 +37,20 @@ const unsupportedDatasetIssues = (spec: UnknownRecord): SpecIssue[] => {
         ]
       : [];
   });
+};
+
+/** One `reclassified-official-index` issue when an IVS/IDHM legend departs from the official IPEA faixas. */
+const reclassifiedOfficialIndexIssues = (spec: UnknownRecord): SpecIssue[] => {
+  const mapDataId = findReclassifiedOfficialIndex(spec);
+  return mapDataId
+    ? [
+        {
+          code: 'reclassified-official-index',
+          path: `mapData[${mapDataId}]`,
+          message: `A legend de "${mapDataId}" usa faixas diferentes das oficiais do IPEA. IVS e IDHM são índices oficiais: não reclassifique (Jenks, quantis, palpite). Use exatamente estes limiares: ${officialFaixaBreaks(mapDataId).join(', ')}.`,
+        },
+      ]
+    : [];
 };
 
 /**
@@ -99,7 +115,11 @@ export const collectStructuralIssues = (spec: UnknownRecord): SpecIssue[] => {
     });
   }
 
-  return [...issues, ...unsupportedDatasetIssues(spec)];
+  return [
+    ...issues,
+    ...reclassifiedOfficialIndexIssues(spec),
+    ...unsupportedDatasetIssues(spec),
+  ];
 };
 
 const REPAIR_PATH_SEGMENT = /^([^[\]]+)(?:\[([^\]]+)\])?$/;
