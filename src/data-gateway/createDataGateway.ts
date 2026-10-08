@@ -166,31 +166,8 @@ const isKnownSource = (value: string): value is KnownSource => {
   return (KNOWN_SOURCES as readonly string[]).includes(value);
 };
 
-/**
- * Creates the data gateway. Source selection is internal, driven by the
- * `DATA_SOURCE` environment variable (defaults to `'static'`).
- *
- * @returns A gateway exposing canonical read functions.
- * @throws If `DATA_SOURCE` is set to a value outside {@link KNOWN_SOURCES}.
- *
- * @example
- * const gateway = createDataGateway();
- * const cozinhas = await gateway.getCozinhas();
- * // { type: 'FeatureCollection', features: [...] }
- */
-export const createDataGateway = (): DataGateway => {
-  const raw = process.env['DATA_SOURCE'] ?? 'static';
-
-  if (!isKnownSource(raw)) {
-    throw new Error(
-      `[data-gateway] Unknown DATA_SOURCE: "${raw}". Known: ${KNOWN_SOURCES.join(', ')}.`
-    );
-  }
-
-  // Pins the narrowed source: widening KNOWN_SOURCES fails typecheck here until
-  // its gateway is implemented.
-  const _pinnedSource: 'static' = raw;
-
+/** The gateway backed by `data-source-static`. */
+const createStaticGateway = (): DataGateway => {
   // The choropleth and the circle map are two projections of the same
   // point-in-polygon aggregation. It's the expensive step (every cozinha
   // tested against ~5.5k município polygons), so memoize it per year for the
@@ -264,4 +241,33 @@ export const createDataGateway = (): DataGateway => {
       return toMunicipioIvs(await readStaticIvs());
     },
   };
+};
+
+/** One factory per {@link KnownSource}; the `Record` type makes a new source a compile error until it is wired. */
+const GATEWAYS: Record<KnownSource, () => DataGateway> = {
+  static: createStaticGateway,
+};
+
+/**
+ * Creates the data gateway. Source selection is internal, driven by the
+ * `DATA_SOURCE` environment variable (defaults to `'static'`).
+ *
+ * @returns A gateway exposing canonical read functions.
+ * @throws If `DATA_SOURCE` is set to a value outside {@link KNOWN_SOURCES}.
+ *
+ * @example
+ * const gateway = createDataGateway();
+ * const cozinhas = await gateway.getCozinhas();
+ * // { type: 'FeatureCollection', features: [...] }
+ */
+export const createDataGateway = (): DataGateway => {
+  const raw = process.env['DATA_SOURCE'] ?? 'static';
+
+  if (!isKnownSource(raw)) {
+    throw new Error(
+      `[data-gateway] Unknown DATA_SOURCE: "${raw}". Known: ${KNOWN_SOURCES.join(', ')}.`
+    );
+  }
+
+  return GATEWAYS[raw]();
 };

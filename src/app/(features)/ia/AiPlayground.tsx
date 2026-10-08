@@ -21,6 +21,7 @@ import { ThemeUIProvider } from 'theme-ui';
 
 import { JsonPanel } from './JsonPanel';
 import { useAiPlaygroundLogic } from './useAiPlaygroundLogic';
+import { withHoverTooltips } from './withHoverTooltips';
 
 const BRAZIL_VIEW = {
   center: [-53.0, -14.5] as [number, number],
@@ -61,10 +62,10 @@ const MapResultView = ({ result }: { result: VisualizationSpec }) => {
         <ThemeUIProvider theme={BruttalTheme}>
           <GeovisWorkspace
             config={{ appearance: 'bare' }}
-            visualizationSpec={{
+            visualizationSpec={withHoverTooltips({
               ...result,
               view: result.view ?? BRAZIL_VIEW,
-            }}
+            })}
           />
         </ThemeUIProvider>
       </I18nProvider>

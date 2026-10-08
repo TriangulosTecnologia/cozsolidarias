@@ -483,7 +483,7 @@ describe('POST /api/ai/spec', () => {
     const message = sentBody.messages[0].content;
     const catalogueJsonString = message
       .split('Catálogo de datasets:\n')[1]
-      .split('\n\n## O que é')[0];
+      .split('\n\n\n## O catálogo:')[0];
 
     // buildCatalogueContext sends the raw CatalogueContract under `catalogue`.
     const catalogueJson = JSON.parse(catalogueJsonString) as {
