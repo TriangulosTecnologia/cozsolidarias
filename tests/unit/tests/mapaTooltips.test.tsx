@@ -337,6 +337,36 @@ describe('renderMunicipioTooltip', () => {
     expect(screen.getByText('Sem cozinha registrada')).toBeInTheDocument();
   });
 
+  test('pessoas mode shows the formatted total and the kitchen count', () => {
+    renderTooltip({
+      mode: 'circulos-pessoas',
+      register: { ...REGISTER, pessoasAtendidas: 12_345 },
+    });
+
+    expect(screen.getByText('12.345 pessoas atendidas')).toBeInTheDocument();
+    expect(screen.getByText(/5 cozinhas/)).toBeInTheDocument();
+  });
+
+  test('pessoas mode flags a missing total, and omits the count with no kitchens', () => {
+    renderTooltip({
+      mode: 'circulos-pessoas',
+      register: { ...REGISTER, pessoasAtendidas: null, quantidade: 0 },
+    });
+
+    expect(
+      screen.getByText('Sem total de pessoas informado')
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/cozinha/)).not.toBeInTheDocument();
+  });
+
+  test('pessoas mode without a register reads as no total', () => {
+    renderTooltip({ mode: 'circulos-pessoas', register: undefined });
+
+    expect(
+      screen.getByText('Sem total de pessoas informado')
+    ).toBeInTheDocument();
+  });
+
   test('IVS mode shows the score and its faixa', () => {
     renderTooltip({ mode: 'coropletico-ivs', value: 0.15 });
 

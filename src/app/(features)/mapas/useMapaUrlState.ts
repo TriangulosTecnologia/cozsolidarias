@@ -31,27 +31,22 @@ import {
  * the code keys it: a link is something people read and sometimes edit, and
  * `variacao` is the word the tab uses where the selection says `visualizacao`.
  */
-export const URL_PARAMS: { menuId: string; param: string }[] = [
-  { menuId: MODE_MENU_ID, param: 'variacao' },
-  { menuId: OPACITY_MENU_ID, param: 'opacidade' },
-  { menuId: COLOR_RAMP_MENU_ID, param: 'cores' },
-];
+const MODE_PARAM = 'variacao';
+const OPACITY_PARAM = 'opacidade';
+const COLOR_RAMP_PARAM = 'cores';
 
-/** The parameter a menu travels under. */
-const paramFor = (menuId: string): string => {
-  return (
-    URL_PARAMS.find((entry) => {
-      return entry.menuId === menuId;
-    })?.param ?? menuId
-  );
-};
+export const URL_PARAMS: { menuId: string; param: string }[] = [
+  { menuId: MODE_MENU_ID, param: MODE_PARAM },
+  { menuId: OPACITY_MENU_ID, param: OPACITY_PARAM },
+  { menuId: COLOR_RAMP_MENU_ID, param: COLOR_RAMP_PARAM },
+];
 
 /** The lowest and highest fill opacity the slider offers, in percent. */
 const OPACITY_RANGE = { min: 30, max: 100 };
 
 /** The variation a query string asks for, if this map draws it. */
 const variacaoFrom = (params: URLSearchParams): MapMode | undefined => {
-  const asked = params.get(paramFor(MODE_MENU_ID));
+  const asked = params.get(MODE_PARAM);
 
   return MAP_MODE_VALUES.find((value) => {
     return value === asked;
@@ -60,7 +55,7 @@ const variacaoFrom = (params: URLSearchParams): MapMode | undefined => {
 
 /** The opacity a query string asks for, if the slider could have produced it. */
 const opacidadeFrom = (params: URLSearchParams): string | undefined => {
-  const asked = Number(params.get(paramFor(OPACITY_MENU_ID)));
+  const asked = Number(params.get(OPACITY_PARAM));
 
   return Number.isInteger(asked) &&
     asked >= OPACITY_RANGE.min &&
@@ -71,7 +66,7 @@ const opacidadeFrom = (params: URLSearchParams): string | undefined => {
 
 /** The ramp a query string asks for, if it is one of the offered ones. */
 const coresFrom = (params: URLSearchParams): string | undefined => {
-  const asked = params.get(paramFor(COLOR_RAMP_MENU_ID));
+  const asked = params.get(COLOR_RAMP_PARAM);
 
   return colorRampOptions().find((option) => {
     return option.id === asked;
@@ -184,7 +179,7 @@ export const useMapaUrlState = () => {
 
       // The variation always travels, default or not: it is what the link is
       // about, and a bare `/mapas` reads as "someone forgot to copy the rest".
-      url.searchParams.set(paramFor(MODE_MENU_ID), mode);
+      url.searchParams.set(MODE_PARAM, mode);
 
       if (url.href === window.location.href) {
         return;

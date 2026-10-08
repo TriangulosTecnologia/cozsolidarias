@@ -47,6 +47,7 @@ import {
   COZINHA_STATUS_LEGEND_ID,
   cozinhaStatusLabel,
 } from './geovisCozinhaStatusScales';
+import { buildPessoasLegend, toPessoasRows } from './geovisPessoas';
 import { buildLegends, legendIdForMode, type MapMode } from './geovisScales';
 import { applyLegendOpacity } from './legendOpacity';
 import { applyLegendRamp } from './mapaColorRamp';
@@ -279,7 +280,13 @@ const BUBBLES_MAP_DATA_ID = 'cozinhas-bolhas-data';
  * proportional to the count, and `thresholds` set the data bounds the radius
  * range maps across (`[1, maxQuantidade]`, clamped so it's strictly ascending).
  */
-const buildBubblesLayer = (maxQuantidade: number): VisualizationLayer => {
+const buildBubblesLayer = ({
+  maxQuantidade,
+  byPessoas,
+}: {
+  maxQuantidade: number;
+  byPessoas: boolean;
+}): VisualizationLayer => {
   return {
     id: 'cozinhas-bolhas',
     sourceId: BUBBLES_SOURCE_ID,
@@ -294,7 +301,11 @@ const buildBubblesLayer = (maxQuantidade: number): VisualizationLayer => {
     sizeBy: {
       range: [4, 38],
       transform: 'sqrt',
-      thresholds: [1, Math.max(maxQuantidade, 2)],
+      // People totals start the sqrt scale at 0 so the circle legend, which
+      // sizes its reference circles from `scaleMaxValue` alone, matches them.
+      thresholds: byPessoas
+        ? [0, Math.max(maxQuantidade, 1)]
+        : [1, Math.max(maxQuantidade, 2)],
     },
   };
 };
@@ -494,8 +505,11 @@ const buildOverlayLayers = ({
   // points is fixed at mount and never reordered by a later mode switch. Only
   // visible in `circulos`, where they are the primary layer.
   layers.push({
-    ...buildBubblesLayer(maxQuantidade),
-    visible: mode === 'circulos',
+    ...buildBubblesLayer({
+      maxQuantidade,
+      byPessoas: mode === 'circulos-pessoas',
+    }),
+    visible: mode === 'circulos' || mode === 'circulos-pessoas',
   });
 
   // Kitchen points: always present and always added AFTER the bubbles, so they
@@ -535,8 +549,14 @@ const buildMapData = ({
       mapDataId: BUBBLES_MAP_DATA_ID,
       mapId: BUBBLES_SOURCE_ID,
       joinKey: 'codarea',
-      title: 'Cozinhas por município',
-      data: toValueRows(byCity),
+      title:
+        mode === 'circulos-pessoas'
+          ? 'Pessoas atendidas por município'
+          : 'Cozinhas por município',
+      data:
+        mode === 'circulos-pessoas'
+          ? toPessoasRows(byCity)
+          : toValueRows(byCity),
     },
     // Doubles as (a) the `promoteId: 'codigo'` promotion — the `joinKey` makes
     // geovis promote each point's `codigo` to the MapLibre `feature.id` (without
@@ -652,7 +672,12 @@ export const buildSpec = (
   // Bounds for the circle-size scale: the largest per-município count. Falls
   // back to 1 when there's no data so `buildBubblesLayer` can still clamp it.
   const maxQuantidade = byCity.reduce((max, register) => {
-    return Math.max(max, register.quantidade);
+    return Math.max(
+      max,
+      mode === 'circulos-pessoas'
+        ? (register.pessoasAtendidas ?? 0)
+        : register.quantidade
+    );
   }, 1);
 
   return {
@@ -702,6 +727,7 @@ export const buildSpec = (
         legends: [
           ...buildLegends(mode, jenksBreaks),
           buildCozinhaStatusLegend(mode === 'pontos'),
+          buildPessoasLegend(mode === 'circulos-pessoas'),
         ],
         rampId: overlays.paintSettings?.colorRamp,
       }),
@@ -714,5 +740,6 @@ export const buildSpec = (
       overlays,
     }),
     control: buildControl(mode),
+    ...(mode === 'circulos-pessoas' ? { scaleMaxValue: maxQuantidade } : {}),
   };
 };

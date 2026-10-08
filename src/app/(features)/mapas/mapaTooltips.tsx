@@ -88,9 +88,15 @@ const renderRateTooltip = ({
   register?: KitchenRateByCity;
   rampId?: string;
 }) => {
-  const taxa = register?.porCemMil ?? null;
-  const populacao = register?.populacao ?? null;
-  const quantidade = register?.quantidade ?? 0;
+  const {
+    porCemMil: taxa,
+    populacao,
+    quantidade,
+  } = register ?? {
+    porCemMil: null,
+    populacao: null,
+    quantidade: 0,
+  };
 
   const primary =
     taxa === null
@@ -154,8 +160,10 @@ const renderPercentTooltip = ({
   register?: KitchenRateByCity;
   rampId?: string;
 }) => {
-  const percentual = register?.percentualDoBrasil ?? 0;
-  const quantidade = register?.quantidade ?? 0;
+  const { percentualDoBrasil: percentual, quantidade } = register ?? {
+    percentualDoBrasil: 0,
+    quantidade: 0,
+  };
 
   const primary =
     percentual <= 0
@@ -191,8 +199,10 @@ const renderCafPercentTooltip = ({
   register?: CafByCity;
   rampId?: string;
 }) => {
-  const percentual = register?.percentualDoBrasil ?? 0;
-  const quantidade = register?.quantidade ?? 0;
+  const { percentualDoBrasil: percentual, quantidade } = register ?? {
+    percentualDoBrasil: 0,
+    quantidade: 0,
+  };
 
   const primary =
     percentual <= 0
@@ -228,9 +238,15 @@ const renderCadUnicoTooltip = ({
   register?: KitchenRateByCity;
   rampId?: string;
 }) => {
-  const taxa = register?.porDezMilCadUnico ?? null;
-  const pessoas = register?.pessoasCadUnico ?? null;
-  const quantidade = register?.quantidade ?? 0;
+  const {
+    porDezMilCadUnico: taxa,
+    pessoasCadUnico: pessoas,
+    quantidade,
+  } = register ?? {
+    porDezMilCadUnico: null,
+    pessoasCadUnico: null,
+    quantidade: 0,
+  };
 
   const primary =
     taxa === null
@@ -264,9 +280,15 @@ const renderPessoasPorCozinhaTooltip = ({
   register?: KitchenRateByCity;
   rampId?: string;
 }) => {
-  const pessoasPorCozinha = register?.pessoasPorCozinha ?? null;
-  const pessoas = register?.pessoasCadUnico ?? null;
-  const quantidade = register?.quantidade ?? 0;
+  const {
+    pessoasPorCozinha,
+    pessoasCadUnico: pessoas,
+    quantidade,
+  } = register ?? {
+    pessoasPorCozinha: null,
+    pessoasCadUnico: null,
+    quantidade: 0,
+  };
 
   const primary =
     pessoasPorCozinha === null
@@ -288,25 +310,30 @@ const renderPessoasPorCozinhaTooltip = ({
   );
 };
 
-/**
- * Choropleth modes whose tooltip reads only `{ name, register }` from the
- * canonical cozinha rate rows. Keyed by {@link MapMode} so the dispatcher
- * resolves them in one lookup instead of a branch each.
- */
-const RATE_TOOLTIPS: Partial<
-  Record<
-    MapMode,
-    (args: {
-      name: string;
-      register?: KitchenRateByCity;
-      rampId?: string;
-    }) => React.ReactNode
-  >
-> = {
-  'coropletico-taxa': renderRateTooltip,
-  'coropletico-percentual': renderPercentTooltip,
-  'coropletico-cadunico': renderCadUnicoTooltip,
-  'coropletico-pessoas-cozinha': renderPessoasPorCozinhaTooltip,
+/** Município tooltip for the `circulos-pessoas` mode: people served plus the kitchen count. */
+const renderPessoasAtendidasTooltip = ({
+  name,
+  register,
+}: {
+  name: string;
+  register?: KitchenRateByCity;
+}) => {
+  const { pessoasAtendidas: pessoas, quantidade: cozinhas } = register ?? {
+    pessoasAtendidas: null,
+    quantidade: 0,
+  };
+
+  return (
+    <TooltipCard
+      name={name}
+      primary={
+        pessoas === null
+          ? 'Sem total de pessoas informado'
+          : `${pessoas.toLocaleString('pt-BR')} pessoas atendidas`
+      }
+      secondary={cozinhas > 0 ? formatCozinhas(cozinhas) : undefined}
+    />
+  );
 };
 
 /**
@@ -340,10 +367,51 @@ const renderCafCountTooltip = ({
   );
 };
 
-/** The two CADINSAN modes and the com/sem-PBF scenario each one shows. */
-const CADINSAN_VARIANTS: Partial<Record<MapMode, 'com' | 'sem'>> = {
-  'coropletico-cadinsan-com-pbf': 'com',
-  'coropletico-cadinsan-sem-pbf': 'sem',
+/** Every row a municipio tooltip may read, as the dispatcher receives them. */
+type MunicipioTooltipArgs = {
+  name: string;
+  register?: KitchenRateByCity;
+  cafRegister?: CafByCity;
+  cadinsanRegister?: CadinsanByCity;
+  value: MapHoverInfo['value'];
+  rampId?: string;
+};
+
+/**
+ * Municipio tooltip per map mode, each reading only the row it needs. Keyed by
+ * {@link MapMode} so the dispatcher resolves a mode in one lookup instead of a
+ * branch each.
+ */
+const MUNICIPIO_TOOLTIPS: Partial<
+  Record<MapMode, (args: MunicipioTooltipArgs) => React.ReactNode>
+> = {
+  'coropletico-taxa': renderRateTooltip,
+  'coropletico-percentual': renderPercentTooltip,
+  'coropletico-cadunico': renderCadUnicoTooltip,
+  'coropletico-pessoas-cozinha': renderPessoasPorCozinhaTooltip,
+  'circulos-pessoas': renderPessoasAtendidasTooltip,
+  'coropletico-cafs-percentual': ({ name, cafRegister, rampId }) => {
+    return renderCafPercentTooltip({ name, register: cafRegister, rampId });
+  },
+  cafs: ({ name, cafRegister }) => {
+    return renderCafCountTooltip({ name, register: cafRegister });
+  },
+  'coropletico-cadinsan-com-pbf': ({ name, cadinsanRegister, rampId }) => {
+    return renderCadinsanTooltip({
+      name,
+      register: cadinsanRegister,
+      variant: 'com',
+      rampId,
+    });
+  },
+  'coropletico-cadinsan-sem-pbf': ({ name, cadinsanRegister, rampId }) => {
+    return renderCadinsanTooltip({
+      name,
+      register: cadinsanRegister,
+      variant: 'sem',
+      rampId,
+    });
+  },
 };
 
 /**
@@ -395,25 +463,14 @@ export const renderMunicipioTooltip = ({
    */
   rampId?: string;
 }): React.ReactNode => {
-  const rateTooltip = RATE_TOOLTIPS[mode];
-  if (rateTooltip) {
-    return rateTooltip({ name, register, rampId });
-  }
-
-  if (mode === 'coropletico-cafs-percentual') {
-    return renderCafPercentTooltip({ name, register: cafRegister, rampId });
-  }
-
-  if (mode === 'cafs') {
-    return renderCafCountTooltip({ name, register: cafRegister });
-  }
-
-  const cadinsanVariant = CADINSAN_VARIANTS[mode];
-  if (cadinsanVariant) {
-    return renderCadinsanTooltip({
+  const renderTooltip = MUNICIPIO_TOOLTIPS[mode];
+  if (renderTooltip) {
+    return renderTooltip({
       name,
-      register: cadinsanRegister,
-      variant: cadinsanVariant,
+      register,
+      cafRegister,
+      cadinsanRegister,
+      value,
       rampId,
     });
   }

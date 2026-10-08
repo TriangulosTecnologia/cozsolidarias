@@ -93,6 +93,27 @@ describe('applyLegendRamp', () => {
     } as LegendSpec;
   };
 
+  test('a single-band legend takes the first colour of the ramp', () => {
+    const single = {
+      id: 'one',
+      colorBy: {
+        type: 'threshold',
+        property: 'value',
+        thresholds: [],
+        colors: ['#C6DBEF'],
+        defaultColor: '#DDDDDD',
+      },
+    } as LegendSpec;
+    const [legend] = applyLegendRamp({ legends: [single], rampId: 'vermelho' });
+    const colors =
+      legend.colorBy && 'colors' in legend.colorBy
+        ? legend.colorBy.colors
+        : undefined;
+
+    expect(colors).toHaveLength(1);
+    expect(colors).not.toEqual(['#C6DBEF']);
+  });
+
   test('redraws the bands and keeps their count', () => {
     const [legend] = applyLegendRamp({
       legends: [graduated()],

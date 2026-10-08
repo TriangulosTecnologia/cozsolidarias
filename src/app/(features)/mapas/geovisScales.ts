@@ -130,7 +130,6 @@ type LegendConfig = {
   colors: string[];
   labels: string[];
   reference: string;
-  noDataLabel?: string;
   /**
    * Rebuilds this scale's labels from a threshold array. Present only on the
    * ad-hoc (hand-picked) choropleths, which opt into data-driven Jenks breaks;
@@ -419,7 +418,6 @@ export const buildLegends = (
         defaultColor: WITHOUT_KITCHEN_COLOR,
       },
       labelFormat: { type: 'labels', labels },
-      ...(config.noDataLabel ? { noDataLabel: config.noDataLabel } : {}),
       reference: config.reference,
     };
   });

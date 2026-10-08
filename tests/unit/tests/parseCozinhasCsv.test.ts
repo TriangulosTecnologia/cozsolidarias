@@ -64,6 +64,13 @@ const csv = (...lines: string[]): string => {
 };
 
 describe('parseCozinhasCsv', () => {
+  test('reads the cells a short row lacks as blank', () => {
+    const [record] = parseCozinhasCsv(csv('C1,Kitchen One'));
+
+    expect(record).toMatchObject({ codigo: 'C1', nome: 'Kitchen One' });
+    expect(record.latitude).toBeNull();
+  });
+
   test('parses a single data row into a typed record', () => {
     const text = csv(
       line(

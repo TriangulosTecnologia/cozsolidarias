@@ -55,20 +55,12 @@
       "count": 1
     }
   },
-  "src/app/(features)/mapas/mapaDetailSidebars.tsx": {
-    "complexity": {
-      "count": 1
-    }
-  },
   "src/app/(features)/mapas/mapaLeftSidebar.ts": {
     "max-lines": {
       "count": 1
     }
   },
   "src/app/(features)/mapas/mapaTooltips.tsx": {
-    "complexity": {
-      "count": 6
-    },
     "max-lines": {
       "count": 1
     }

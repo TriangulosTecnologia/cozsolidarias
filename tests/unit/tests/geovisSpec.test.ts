@@ -1327,6 +1327,88 @@ describe('buildSpec', () => {
     );
   });
 
+  test('circulos-pessoas sizes the bubble join by people served, with an automatic legend', () => {
+    const spec = buildSpec(BY_CITY, 'circulos-pessoas');
+
+    const join = spec.mapData?.find((entry) => {
+      return entry.mapDataId === 'cozinhas-bolhas-data';
+    });
+    expect(join?.mapId).toBe('cozinhas-bubbles');
+    // Beta has no parseable total, so it gets no circle rather than a zero.
+    expect(join?.data).toEqual([{ geometryId: '111', value: 1_000 }]);
+
+    const bubbles = spec.layers.find((layer) => {
+      return layer.id === 'cozinhas-bolhas';
+    });
+    expect(bubbles?.visible).toBe(true);
+    expect(bubbles?.sizeBy).toMatchObject({
+      transform: 'sqrt',
+      thresholds: [0, 1_000],
+    });
+    expect(spec.scaleMaxValue).toBe(1_000);
+
+    const legend = spec.legends?.find((entry) => {
+      return entry.id === 'legenda-pessoas-atendidas';
+    });
+    expect(legend?.position).toBe('bottom-right');
+  });
+
+  test('circulos-pessoas titles the join and keeps the kitchen points hidden on top of the bubbles', () => {
+    const spec = buildSpec(BY_CITY, 'circulos-pessoas');
+    const ids = layerIds(spec);
+
+    expect(
+      spec.mapData?.find((entry) => {
+        return entry.mapDataId === 'cozinhas-bolhas-data';
+      })?.title
+    ).toBe('Pessoas atendidas por município');
+    expect(ids.indexOf('cozinhas-bolhas')).toBeLessThan(
+      ids.indexOf('cozinhas-pts')
+    );
+    expect(
+      spec.layers.find((layer) => {
+        return layer.id === 'cozinhas-pts';
+      })?.visible
+    ).toBe(false);
+  });
+
+  test('circulos-pessoas scale bounds follow people served, not kitchen count', () => {
+    const spec = buildSpec(BY_CITY, 'circulos-pessoas');
+    // BY_CITY: quantidade max is 5, pessoasAtendidas max is 1_000.
+    expect(spec.scaleMaxValue).toBe(1_000);
+
+    const noTotals = buildSpec(
+      BY_CITY.map((register) => {
+        return { ...register, pessoasAtendidas: null };
+      }),
+      'circulos-pessoas'
+    );
+    const bubbles = noTotals.layers.find((layer) => {
+      return layer.id === 'cozinhas-bolhas';
+    });
+    expect(bubbles?.sizeBy).toMatchObject({ thresholds: [0, 1] });
+    expect(noTotals.scaleMaxValue).toBe(1);
+  });
+
+  test.each(['circulos', 'pontos', 'coropletico'] as const)(
+    '%s keeps the pessoas legend hidden and leaves the kitchen-count scale untouched',
+    (mode) => {
+      const spec = buildSpec(BY_CITY, mode);
+      const legend = spec.legends?.find((entry) => {
+        return entry.id === 'legenda-pessoas-atendidas';
+      });
+      expect(legend).toBeDefined();
+      expect(legend?.position).toBeUndefined();
+      expect(spec.scaleMaxValue).toBeUndefined();
+
+      const bubbles = spec.layers.find((layer) => {
+        return layer.id === 'cozinhas-bolhas';
+      });
+      expect(bubbles?.visible).toBe(mode === 'circulos');
+      expect(bubbles?.sizeBy).toMatchObject({ thresholds: [1, 5] });
+    }
+  );
+
   test('choropleths render the kitchen points as a hidden opt-in overlay', () => {
     const modes = [
       'coropletico',

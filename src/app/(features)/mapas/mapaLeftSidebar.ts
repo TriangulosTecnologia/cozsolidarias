@@ -103,6 +103,7 @@ const TAKES_COLOR_RAMP: Record<MapMode, boolean> = {
   'coropletico-idhm-educacao-frequencia': true,
   pontos: false,
   circulos: false,
+  'circulos-pessoas': false,
   assentamentos: false,
   cafs: false,
   'cafs-hexbin': true,
@@ -186,6 +187,7 @@ const TAKES_OPACITY: Record<MapMode, boolean> = {
   'cafs-hexbin': true,
   pontos: true,
   circulos: true,
+  'circulos-pessoas': true,
   assentamentos: false,
   cafs: false,
 };
@@ -352,6 +354,11 @@ const VARIATION_GROUPS = [
         value: 'circulos',
         label: 'Cozinhas por município',
         icon: 'lucide:circle-dot',
+      },
+      {
+        value: 'circulos-pessoas',
+        label: 'Pessoas atendidas por município',
+        icon: 'lucide:users',
       },
       {
         value: 'assentamentos',
