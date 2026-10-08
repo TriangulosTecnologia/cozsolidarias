@@ -1,5 +1,68 @@
 import { isRecord, type UnknownRecord } from './specValidation';
 
+/** The only point source keyed by município (`codarea`), the join every renderable dataset uses. */
+const BUBBLES_URL = '/api/cozinhas/bolhas';
+
+/**
+ * Moves `point` layers off a polygon source (`/geo/*`) onto the municipality
+ * bubbles source the model declared but never used. Only the unambiguous case
+ * is repaired: exactly one declared {@link BUBBLES_URL} source that no layer
+ * draws. With none or several candidates (or only `/api/cozinhas`, whose
+ * points carry no `codarea`) the layers stay and the structural check reports it.
+ *
+ * @param spec - The candidate spec.
+ * @returns The same reference when there is nothing to move; otherwise the
+ * spec with the offending layers' `sourceId` pointing at that source.
+ *
+ * @example
+ * repointPointLayers({ sources: [{ id: 'm', data: '/geo/geojs-100-mun.json' }, { id: 'b', data: '/api/cozinhas/bolhas' }], layers: [{ id: 'dots', sourceId: 'm', geometry: 'point' }] });
+ * // layers => [{ id: 'dots', sourceId: 'b', geometry: 'point' }]
+ */
+export const repointPointLayers = (spec: UnknownRecord): UnknownRecord => {
+  const { sources, layers } = spec;
+  if (!Array.isArray(sources) || !Array.isArray(layers)) {
+    return spec;
+  }
+
+  const idsServedFrom = (prefix: string): unknown[] => {
+    return sources.flatMap((source) => {
+      return isRecord(source) &&
+        typeof source['data'] === 'string' &&
+        source['data'].startsWith(prefix)
+        ? [source['id']]
+        : [];
+    });
+  };
+  const polygonIds = idsServedFrom('/geo/');
+  const drawn = new Set(
+    layers.flatMap((layer) => {
+      return isRecord(layer) ? [layer['sourceId']] : [];
+    })
+  );
+  const free = idsServedFrom(BUBBLES_URL).filter((id) => {
+    return !drawn.has(id);
+  });
+  const misplaced = layers.filter((layer) => {
+    return (
+      isRecord(layer) &&
+      layer['geometry'] === 'point' &&
+      polygonIds.includes(layer['sourceId'])
+    );
+  });
+  if (free.length !== 1 || misplaced.length === 0) {
+    return spec;
+  }
+
+  return {
+    ...spec,
+    layers: layers.map((layer) => {
+      return misplaced.includes(layer) && isRecord(layer)
+        ? { ...layer, sourceId: free[0] }
+        : layer;
+    }),
+  };
+};
+
 /**
  * Re-attaches a `mapData` the model left dangling: when exactly one `point`
  * layer has no `mapDataId` and exactly one `mapData` entry is used by no layer,
@@ -51,9 +114,10 @@ export const linkOrphanMapData = (spec: UnknownRecord): UnknownRecord => {
 
 /**
  * Ties each `mapData` entry to the source its layer actually draws. The model
- * keeps writing a `mapId` that names no declared source (a stale template id),
- * and geovis' own repair for the resulting `source-scope-conflict` points the
- * layer at that nonexistent source — so the layer's `sourceId` is the truth.
+ * keeps writing a `mapId` that names no declared source (a stale template id)
+ * or another one than its layer draws, and geovis' own repair for the resulting
+ * `source-scope-conflict` points the layer back at that source — so the
+ * layer's `sourceId` is the truth.
  * A missing `joinKey` defaults to `codarea`: every renderable dataset is keyed
  * by the município IBGE code, which the served sources carry as a property.
  *
@@ -93,7 +157,7 @@ export const alignMapDataJoin = (spec: UnknownRecord): UnknownRecord => {
       const layerSource = layerSourceByMapData.get(String(entry['mapDataId']));
       return {
         ...entry,
-        ...(!sourceIds.has(entry['mapId']) && sourceIds.has(layerSource)
+        ...(sourceIds.has(layerSource) && entry['mapId'] !== layerSource
           ? { mapId: layerSource }
           : {}),
         joinKey: entry['joinKey'] ?? 'codarea',
@@ -145,7 +209,8 @@ export const separateStateKeys = (spec: UnknownRecord): UnknownRecord => {
 
 /**
  * Applies, in order, the deterministic repairs of the model's `mapData` wiring:
- * {@link linkOrphanMapData}, {@link alignMapDataJoin} and {@link separateStateKeys}.
+ * {@link repointPointLayers}, {@link linkOrphanMapData}, {@link alignMapDataJoin}
+ * and {@link separateStateKeys}.
  *
  * @param spec - The candidate spec.
  * @returns The spec with every applicable link, source id, join key and state key filled in.
@@ -154,5 +219,7 @@ export const separateStateKeys = (spec: UnknownRecord): UnknownRecord => {
  * const repaired = repairMapDataWiring(candidate);
  */
 export const repairMapDataWiring = (spec: UnknownRecord): UnknownRecord => {
-  return separateStateKeys(alignMapDataJoin(linkOrphanMapData(spec)));
+  return separateStateKeys(
+    alignMapDataJoin(linkOrphanMapData(repointPointLayers(spec)))
+  );
 };

@@ -8,6 +8,7 @@ import {
 import {
   alignMapDataJoin,
   linkOrphanMapData,
+  repointPointLayers,
   separateStateKeys,
 } from 'src/app/api/ai/spec/specRepairs';
 
@@ -190,6 +191,18 @@ describe('alignMapDataJoin', () => {
     ]);
   });
 
+  test('also realigns a declared mapId that differs from the source its layer draws', () => {
+    const aligned = alignMapDataJoin({
+      sources: [{ id: 'mun' }, { id: 'bolhas' }],
+      layers: [{ id: 'dots', sourceId: 'bolhas', mapDataId: 'p' }],
+      mapData: [{ mapDataId: 'p', mapId: 'mun', joinKey: 'codarea' }],
+    });
+
+    expect(aligned['mapData']).toEqual([
+      { mapDataId: 'p', mapId: 'bolhas', joinKey: 'codarea' },
+    ]);
+  });
+
   test('leaves a spec with no mapData untouched', () => {
     const bare = { sources: [], layers: [] };
 
@@ -200,6 +213,62 @@ describe('alignMapDataJoin', () => {
     const aligned = alignMapDataJoin({ sources: [], mapData: ['x'] });
 
     expect(aligned['mapData']).toEqual(['x']);
+  });
+});
+
+describe('repointPointLayers', () => {
+  const sources = [
+    { id: 'mun', type: 'geojson', data: '/geo/geojs-100-mun.json' },
+    { id: 'bolhas', type: 'geojson', data: '/api/cozinhas/bolhas' },
+  ];
+
+  test('moves a point layer off a polygon source onto the only unused API point source', () => {
+    const spec = {
+      sources,
+      layers: [
+        { id: 'fill', sourceId: 'mun', geometry: 'polygon' },
+        { id: 'dots', sourceId: 'mun', geometry: 'point' },
+      ],
+    };
+
+    expect(repointPointLayers(spec)['layers']).toEqual([
+      { id: 'fill', sourceId: 'mun', geometry: 'polygon' },
+      { id: 'dots', sourceId: 'bolhas', geometry: 'point' },
+    ]);
+  });
+
+  test('leaves the spec alone when no single unused point source can take the layer', () => {
+    const used = {
+      sources,
+      layers: [{ id: 'dots', sourceId: 'bolhas', geometry: 'point' }],
+    };
+    const none = {
+      sources: [sources[0]],
+      layers: [{ id: 'dots', sourceId: 'mun', geometry: 'point' }],
+    };
+    const two = {
+      sources: [
+        ...sources,
+        { id: 'b2', type: 'geojson', data: '/api/cozinhas/bolhas' },
+      ],
+      layers: [{ id: 'dots', sourceId: 'mun', geometry: 'point' }],
+    };
+    const wrongKey = {
+      sources: [
+        sources[0],
+        { id: 'pts', type: 'geojson', data: '/api/cozinhas' },
+      ],
+      layers: [{ id: 'dots', sourceId: 'mun', geometry: 'point' }],
+    };
+    const junk = { sources: ['x'], layers: ['y'] };
+    const bare = { layers: [] };
+
+    expect(repointPointLayers(used)).toBe(used);
+    expect(repointPointLayers(none)).toBe(none);
+    expect(repointPointLayers(two)).toBe(two);
+    expect(repointPointLayers(wrongKey)).toBe(wrongKey);
+    expect(repointPointLayers(junk)).toBe(junk);
+    expect(repointPointLayers(bare)).toBe(bare);
   });
 });
 
