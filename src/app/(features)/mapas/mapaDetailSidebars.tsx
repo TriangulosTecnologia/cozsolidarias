@@ -2,99 +2,13 @@ import type { GeovisWorkspaceConfig } from '@ttoss/geovis-workspace';
 
 import type { CozinhaDetalhe } from '@/data-gateway/schema';
 
-import {
-  colorForCozinhaStatus,
-  cozinhaStatusLabel,
-  cozinhaStatusShortLabel,
-} from './geovisCozinhaStatusScales';
+import { CozinhaDetailPanel } from './CozinhaDetailPanel';
 import { COZINHAS_POINTS_LAYER_ID, type MapMode } from './geovisSpec';
 
 // Persists the last successfully loaded kitchen so non-point clicks (e.g.
 // municipalities) keep showing the same detail instead of clearing the sidebar.
 // Synchronous return skips the workspace's loading state for those clicks.
 let lastCozinhaDetail: CozinhaDetalhe | null = null;
-
-const field = (label: string, value: string) => {
-  return (
-    <>
-      <span style={{ fontSize: '11px', color: '#6b7280' }}>{label}</span>
-      <span style={{ fontSize: '13px', color: '#111827' }}>{value}</span>
-    </>
-  );
-};
-
-const CozinhaDetailPanel = ({ cozinha }: { cozinha: CozinhaDetalhe }) => {
-  // Same derivation as the point color: the source-native `emFuncionamento` text
-  // → descriptive label → terse label + point color, so the sidebar badge reads
-  // Ativo/Reduzido/Inativo and matches the color painting the point on the map.
-  const statusLabel = cozinhaStatusLabel(cozinha.emFuncionamento);
-  const statusColor = colorForCozinhaStatus(statusLabel);
-  const statusShort = cozinhaStatusShortLabel(statusLabel);
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-        <span
-          style={{ fontSize: '15px', fontWeight: 'bold', color: '#111827' }}
-        >
-          {cozinha.nome}
-        </span>
-        <span
-          style={{
-            alignSelf: 'flex-start',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            padding: '2px 10px',
-            borderRadius: '9999px',
-            fontSize: '11px',
-            fontWeight: '600',
-            color: '#374151',
-            backgroundColor: `${statusColor}22`,
-          }}
-        >
-          <span
-            style={{
-              width: '8px',
-              height: '8px',
-              borderRadius: '9999px',
-              backgroundColor: statusColor,
-            }}
-          />
-          {statusShort}
-        </span>
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-        {field('Em funcionamento', cozinha.emFuncionamento || '—')}
-        {cozinha.diasFuncionamento &&
-          field('Dias de funcionamento', cozinha.diasFuncionamento)}
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-        {field('Endereço', cozinha.endereco)}
-        <span style={{ fontSize: '11px', color: '#374151' }}>
-          {cozinha.bairro ? `${cozinha.bairro} · ` : ''}
-          {cozinha.municipio}/{cozinha.uf}
-          {cozinha.cep ? ` · CEP ${cozinha.cep}` : ''}
-        </span>
-      </div>
-      {cozinha.publicoAtendido && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          {field('Público atendido', cozinha.publicoAtendido)}
-          {cozinha.publicoTotalAtendido && (
-            <span style={{ fontSize: '11px', color: '#374151' }}>
-              {cozinha.publicoTotalAtendido} pessoas
-            </span>
-          )}
-        </div>
-      )}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-        <span style={{ fontSize: '11px', color: '#9ca3af' }}>
-          {cozinha.codigo}
-        </span>
-      </div>
-    </div>
-  );
-};
 
 /**
  * Fetches a kitchen's detail from `/api/cozinhas/[codigo]`, keeping the last
