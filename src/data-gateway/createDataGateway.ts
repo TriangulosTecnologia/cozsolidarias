@@ -187,82 +187,81 @@ export const createDataGateway = (): DataGateway => {
     );
   }
 
-  if (raw === 'static') {
-    // The choropleth and the circle map are two projections of the same
-    // point-in-polygon aggregation. It's the expensive step (every cozinha
-    // tested against ~5.5k município polygons), so memoize it per year for the
-    // process lifetime and let both endpoints share each year's result — the
-    // second caller (and every later request) only pays the cheap projection.
-    const aggregates = new Map<CozinhaYear, Promise<MunicipioAggregate[]>>();
-    const getAggregate = (year: CozinhaYear) => {
-      const existing = aggregates.get(year);
-      if (existing) {
-        return existing;
-      }
-      const promise = Promise.all([
-        readStaticCozinhas({ year }),
-        readStaticMunicipios(),
-      ]).then(([cozinhas, municipios]) => {
-        return aggregateCozinhasPorMunicipio({ cozinhas, municipios });
+  // Pins the narrowed source: widening KNOWN_SOURCES fails typecheck here until
+  // its gateway is implemented.
+  const _pinnedSource: 'static' = raw;
+
+  // The choropleth and the circle map are two projections of the same
+  // point-in-polygon aggregation. It's the expensive step (every cozinha
+  // tested against ~5.5k município polygons), so memoize it per year for the
+  // process lifetime and let both endpoints share each year's result — the
+  // second caller (and every later request) only pays the cheap projection.
+  const aggregates = new Map<CozinhaYear, Promise<MunicipioAggregate[]>>();
+  const getAggregate = (year: CozinhaYear) => {
+    const existing = aggregates.get(year);
+    if (existing) {
+      return existing;
+    }
+    const promise = Promise.all([
+      readStaticCozinhas({ year }),
+      readStaticMunicipios(),
+    ]).then(([cozinhas, municipios]) => {
+      return aggregateCozinhasPorMunicipio({ cozinhas, municipios });
+    });
+    aggregates.set(year, promise);
+    return promise;
+  };
+
+  // Coerce a requested year to a known snapshot, falling back to the latest.
+  const resolveYear = (year?: number): CozinhaYear => {
+    return year !== undefined && isCozinhaYear(year)
+      ? year
+      : LATEST_COZINHA_YEAR;
+  };
+
+  return {
+    getCafsPorMunicipio: async () => {
+      return toCafsPorMunicipio(await readStaticCafsPorMunicipio());
+    },
+    getCafPontosPorUf: async () => {
+      return toCafUfPontos(await readCafAnchors());
+    },
+    getCafHexbin: async (resolution = DEFAULT_CAF_HEXBIN_RESOLUTION) => {
+      return toCafHexbin(await readStaticCafHexbin(resolution));
+    },
+    getCadinsanPorMunicipio: async () => {
+      return toCadinsanPorMunicipio(await readStaticCadinsanMunicipal());
+    },
+    getCatalogue: async () => {
+      return toAppCatalogue(await readStaticDataCatalogue());
+    },
+    getCozinhas: async (year) => {
+      const sources = await readStaticCozinhas({ year: resolveYear(year) });
+      return toCozinhasFeatureCollection(sources);
+    },
+    getCozinhaByCodigo: async (codigo, year) => {
+      const sources = await readStaticCozinhas({ year: resolveYear(year) });
+      const match = sources.find((source) => {
+        return source.codigo === codigo;
       });
-      aggregates.set(year, promise);
-      return promise;
-    };
-
-    // Coerce a requested year to a known snapshot, falling back to the latest.
-    const resolveYear = (year?: number): CozinhaYear => {
-      return year !== undefined && isCozinhaYear(year)
-        ? year
-        : LATEST_COZINHA_YEAR;
-    };
-
-    return {
-      getCafsPorMunicipio: async () => {
-        return toCafsPorMunicipio(await readStaticCafsPorMunicipio());
-      },
-      getCafPontosPorUf: async () => {
-        return toCafUfPontos(await readCafAnchors());
-      },
-      getCafHexbin: async (resolution = DEFAULT_CAF_HEXBIN_RESOLUTION) => {
-        return toCafHexbin(await readStaticCafHexbin(resolution));
-      },
-      getCadinsanPorMunicipio: async () => {
-        return toCadinsanPorMunicipio(await readStaticCadinsanMunicipal());
-      },
-      getCatalogue: async () => {
-        return toAppCatalogue(await readStaticDataCatalogue());
-      },
-      getCozinhas: async (year) => {
-        const sources = await readStaticCozinhas({ year: resolveYear(year) });
-        return toCozinhasFeatureCollection(sources);
-      },
-      getCozinhaByCodigo: async (codigo, year) => {
-        const sources = await readStaticCozinhas({ year: resolveYear(year) });
-        const match = sources.find((source) => {
-          return source.codigo === codigo;
-        });
-        return match ? toCozinhaDetalhe(match) : null;
-      },
-      getCozinhasPorMunicipio: async (year) => {
-        const [aggregate, populacao, cadunico] = await Promise.all([
-          getAggregate(resolveYear(year)),
-          readStaticPopulacao(),
-          readStaticCadUnico(),
-        ]);
-        return projectComTaxa({ aggregate, populacao, cadunico });
-      },
-      getCozinhasBubbles: async (year) => {
-        return toCozinhasBubbles(await getAggregate(resolveYear(year)));
-      },
-      getCozinhasYears: () => {
-        return [...COZINHAS_YEARS];
-      },
-      getIvsPorMunicipio: async () => {
-        return toMunicipioIvs(await readStaticIvs());
-      },
-    };
-  }
-
-  const exhaustive: never = raw;
-  throw new Error(`[data-gateway] Unhandled source: ${exhaustive}`);
+      return match ? toCozinhaDetalhe(match) : null;
+    },
+    getCozinhasPorMunicipio: async (year) => {
+      const [aggregate, populacao, cadunico] = await Promise.all([
+        getAggregate(resolveYear(year)),
+        readStaticPopulacao(),
+        readStaticCadUnico(),
+      ]);
+      return projectComTaxa({ aggregate, populacao, cadunico });
+    },
+    getCozinhasBubbles: async (year) => {
+      return toCozinhasBubbles(await getAggregate(resolveYear(year)));
+    },
+    getCozinhasYears: () => {
+      return [...COZINHAS_YEARS];
+    },
+    getIvsPorMunicipio: async () => {
+      return toMunicipioIvs(await readStaticIvs());
+    },
+  };
 };

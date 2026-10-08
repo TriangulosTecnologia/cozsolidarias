@@ -2,12 +2,12 @@ import {
   buildPessoasLegend,
   toPessoasRows,
 } from 'src/app/(features)/mapas/geovisPessoas';
-import type { kitchenRateByCity } from 'src/data-gateway/schema';
+import type { KitchenRateByCity } from 'src/data-gateway/schema';
 
 const register = (
   codigoIbge: string,
   pessoasAtendidas: number | null
-): kitchenRateByCity => {
+): KitchenRateByCity => {
   return {
     codigoIbge,
     municipio: codigoIbge,

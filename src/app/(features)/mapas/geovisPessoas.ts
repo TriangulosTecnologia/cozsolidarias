@@ -1,6 +1,6 @@
 import type { LegendSpec, MapDataRow } from '@ttoss/geovis';
 
-import type { kitchenRateByCity } from '@/data-gateway/schema';
+import type { KitchenRateByCity } from '@/data-gateway/schema';
 
 const PESSOAS_LEGEND_ID = 'legenda-pessoas-atendidas';
 const PESSOAS_COLOR = '#E4572E';
@@ -45,7 +45,7 @@ export const buildPessoasLegend = (active: boolean): LegendSpec => {
  * @example
  * toPessoasRows([{ codigoIbge: '2927408', pessoasAtendidas: 120 }]);
  */
-export const toPessoasRows = (byCity: kitchenRateByCity[]): MapDataRow[] => {
+export const toPessoasRows = (byCity: KitchenRateByCity[]): MapDataRow[] => {
   return byCity.flatMap(({ codigoIbge, pessoasAtendidas }) => {
     return pessoasAtendidas === null
       ? []

@@ -584,7 +584,10 @@ describe('toCozinhasPorMunicipio non-polygon geometries', () => {
     };
 
     expect(
-      toCozinhasPorMunicipio([coz(5, 5, 'Alpha')], collection([point]))
+      aggregateCozinhasPorMunicipio({
+        cozinhas: [coz(5, 5, 'Alpha')],
+        municipios: collection([point]),
+      })
     ).toEqual([]);
   });
 });
