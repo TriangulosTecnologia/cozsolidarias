@@ -148,6 +148,14 @@ type UseMapaSpecParams = {
     fillOpacity?: number;
     colorRamp?: string;
   };
+  /**
+   * The 3D view, from the settings zone; absent for the flat map. See
+   * `buildSpec`'s `view3d` overlay.
+   */
+  view3d?: {
+    extrusionHeight: number;
+    pitch: number;
+  };
   mode: MapMode;
   /**
    * Kitchen points for the selected time-lapse year, held in memory. When set,
@@ -196,6 +204,23 @@ const fitToViewport = ({
   };
 };
 
+/**
+ * The container the camera is fitted to, re-read on rotation only (see
+ * `subscribeToOrientation`), so the fit is a framing applied when the map
+ * opens rather than something that fights the user's own panning and zooming.
+ */
+const useOrientationViewport = () => {
+  const viewportSize = React.useSyncExternalStore(
+    subscribeToOrientation,
+    viewportSnapshot,
+    emptyViewportSnapshot
+  );
+
+  return React.useMemo(() => {
+    return parseViewport(viewportSize);
+  }, [viewportSize]);
+};
+
 export const useMapaSpec = ({
   kitchenByCity,
   ivsByCity,
@@ -208,6 +233,7 @@ export const useMapaSpec = ({
   cadinsanByCity,
   cafHexbin,
   paintSettings,
+  view3d,
   mode,
   cozinhasPoints,
 }: UseMapaSpecParams) => {
@@ -223,20 +249,7 @@ export const useMapaSpec = ({
     colorRamp: paintSettings?.colorRamp,
   });
 
-  /*
-   * Re-read on rotation only (see `subscribeToOrientation`), so the fit below is
-   * a framing applied when the map opens rather than something that fights the
-   * user's own panning and zooming.
-   */
-  const viewportSize = React.useSyncExternalStore(
-    subscribeToOrientation,
-    viewportSnapshot,
-    emptyViewportSnapshot
-  );
-
-  const viewport = React.useMemo(() => {
-    return parseViewport(viewportSize);
-  }, [viewportSize]);
+  const viewport = useOrientationViewport();
 
   const baseSpec = React.useMemo(() => {
     const spec = buildSpec(
@@ -257,6 +270,7 @@ export const useMapaSpec = ({
         cadinsanByCity,
         cafHexbin,
         paintSettings,
+        view3d,
         cafHexbinHoverRender: tooltips.cafHexbinTooltip,
       }
     );
@@ -277,6 +291,7 @@ export const useMapaSpec = ({
     cadinsanByCity,
     cafHexbin,
     paintSettings,
+    view3d,
     cozinhasPoints,
     viewport,
   ]);

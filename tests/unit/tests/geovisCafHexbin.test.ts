@@ -63,6 +63,21 @@ describe('buildCafHexbinLayer', () => {
   test('stays opaque, leaving the opacity to the colours', () => {
     expect(buildCafHexbinLayer().paint?.fillOpacity).toBe(1);
   });
+
+  test('is flat unless given a height', () => {
+    expect(buildCafHexbinLayer().extrusion).toBeUndefined();
+  });
+
+  /*
+   * The default `'class'` mode: one height per legend band, read off the same
+   * counts that colour the cells.
+   */
+  test('extrudes by its own counts when given a height', () => {
+    const layer = buildCafHexbinLayer({ extrusionHeight: 60_000 });
+
+    expect(layer.extrusion).toEqual({ maxHeight: 60_000 });
+    expect(layer.mapDataId).toBe('caf-hexbin-counts');
+  });
 });
 
 describe('buildCafHexbinMapData', () => {

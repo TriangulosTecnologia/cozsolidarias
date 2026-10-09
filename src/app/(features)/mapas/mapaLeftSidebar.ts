@@ -8,11 +8,18 @@
  * contract between this config and the component reading the selection.
  */
 
-import type { GeovisWorkspaceConfig } from '@ttoss/geovis-workspace';
+import type {
+  GeovisWorkspaceConfig,
+  GeovisWorkspaceSelection,
+} from '@ttoss/geovis-workspace';
 
 import { DEFAULT_CAF_HEXBIN_RESOLUTION } from '@/data-gateway/schema';
 
-import { DEFAULT_CAF_HEXBIN_OPACITY } from './geovisCafHexbin';
+import {
+  CAF_HEXBIN_BASE_EXTRUSION_HEIGHT,
+  CAF_HEXBIN_COLORS,
+  DEFAULT_CAF_HEXBIN_OPACITY,
+} from './geovisCafHexbin';
 import type { MapMode } from './geovisSpec';
 import {
   colorRampOptions,
@@ -34,6 +41,83 @@ export const OPACITY_MENU_ID = 'opacidade';
 
 /** Id of the settings menu driving which ramp the graduated fills are read through. */
 export const COLOR_RAMP_MENU_ID = 'cores';
+
+/** Id of the settings menu choosing between the flat and the extruded map. */
+export const VIEW_MENU_ID = 'vista';
+
+/** Id of the settings menu scaling the 3D prisms, `1`..`5`. */
+export const EXTRUSION_SCALE_MENU_ID = 'altura';
+
+/** Id of the settings menu tilting the camera in 3D, in degrees. */
+export const PITCH_MENU_ID = 'inclinacao';
+
+/** The {@link VIEW_MENU_ID} value of the extruded map. */
+export const VIEW_3D = '3d';
+
+/** The 3D height step the slider opens on. */
+const DEFAULT_EXTRUSION_SCALE = 3;
+
+/** The camera tilt, in degrees, the 3D view opens on. */
+const DEFAULT_PITCH = 45;
+
+/** The camera tilts the 3D view offers, in degrees. */
+const PITCH_OPTIONS = [30, 45, 60];
+
+/**
+ * Whether a mode can be drawn in 3D.
+ *
+ * Only the hexagon grid for now: its cells are all the same size, so a prism's
+ * height compares counts without the area bias a município would add — a vast
+ * Amazonian município would tower over a dense coastal one for its size alone.
+ *
+ * @param mode - The mode the map is drawing.
+ * @returns `true` where the settings tab offers the 2D/3D choice.
+ *
+ * @example
+ * modeTakes3d('cafs-hexbin'); // true
+ * modeTakes3d('coropletico'); // false
+ */
+export const modeTakes3d = (mode: MapMode): boolean => {
+  return mode === 'cafs-hexbin';
+};
+
+/**
+ * The 3D view a selection asks for, as the spec reads it.
+ *
+ * `undefined` wherever the map is flat — and in every mode that does not offer
+ * the choice, so a 3D left on in the grid does not tilt the next variation.
+ * A height step or tilt the selection has not seeded yet falls back to the
+ * value its control opens on.
+ *
+ * @param params.selection - The shared sidebar selection.
+ * @param params.mode - The mode the map is drawing.
+ * @returns The top band's height, in metres, and the camera tilt, in degrees;
+ * or `undefined` for the flat map.
+ *
+ * @example
+ * view3dFromSelection({ selection: { vista: '3d', altura: '2' }, mode: 'cafs-hexbin' });
+ * // { extrusionHeight: 40000, pitch: 45 }
+ * view3dFromSelection({ selection: { vista: '3d' }, mode: 'coropletico' }); // undefined
+ */
+export const view3dFromSelection = ({
+  selection,
+  mode,
+}: {
+  selection: GeovisWorkspaceSelection;
+  mode: MapMode;
+}): { extrusionHeight: number; pitch: number } | undefined => {
+  if (!modeTakes3d(mode) || selection[VIEW_MENU_ID] !== VIEW_3D) {
+    return undefined;
+  }
+
+  const scale =
+    Number(selection[EXTRUSION_SCALE_MENU_ID]) || DEFAULT_EXTRUSION_SCALE;
+
+  return {
+    extrusionHeight: CAF_HEXBIN_BASE_EXTRUSION_HEIGHT * scale,
+    pitch: Number(selection[PITCH_MENU_ID]) || DEFAULT_PITCH,
+  };
+};
 
 /**
  * Whether each mode's subject is read through a graduated ramp the reader can
@@ -374,6 +458,8 @@ const VARIATION_GROUPS = [
         value: 'cafs-hexbin',
         label: 'CAFs (hexbin-pf)',
         icon: 'lucide:hexagon',
+        // The one variation with a 3D view — see `modeTakes3d`.
+        badge: '3D',
       },
     ],
   },
@@ -447,6 +533,80 @@ const TIMELINE_SECTION: NonNullable<
   },
 };
 
+/** Shown only while the map is extruded. */
+const ONLY_3D = { menuId: VIEW_MENU_ID, values: [VIEW_3D] };
+
+/**
+ * The 2D/3D choice, and the height and tilt the 3D view is read at. The two
+ * adjustments hide in 2D, where they would move nothing.
+ */
+const VIEW_3D_BLOCKS = [
+  {
+    id: 'vista',
+    title: 'Visualização',
+    icon: 'lucide:box',
+    control: {
+      kind: 'choice' as const,
+      menuId: VIEW_MENU_ID,
+      defaultValue: '2d',
+      // The grid's own palette, so the cards preview the map they switch.
+      glyphColors: CAF_HEXBIN_COLORS,
+      options: [
+        {
+          value: '2d',
+          label: '2D',
+          sublabel: 'Plano',
+          glyph: 'flat' as const,
+        },
+        {
+          value: VIEW_3D,
+          label: '3D',
+          sublabel: 'Extrudado',
+          glyph: 'extruded' as const,
+        },
+      ],
+    },
+  },
+  {
+    id: 'altura',
+    title: 'Altura das extrusões',
+    icon: 'lucide:move-vertical',
+    shownWhen: ONLY_3D,
+    control: {
+      kind: 'slider' as const,
+      menuId: EXTRUSION_SCALE_MENU_ID,
+      defaultValue: DEFAULT_EXTRUSION_SCALE,
+      stops: [1, 2, 3, 4, 5].map((scale) => {
+        return { value: scale, label: `${scale}×` };
+      }),
+      endLabels: ['Baixa', 'Alta'] as [string, string],
+      stepButtons: true,
+    },
+  },
+  {
+    id: 'inclinacao',
+    title: 'Inclinação da câmera',
+    icon: 'lucide:rotate-3d',
+    shownWhen: ONLY_3D,
+    control: {
+      kind: 'choice' as const,
+      menuId: PITCH_MENU_ID,
+      defaultValue: String(DEFAULT_PITCH),
+      options: PITCH_OPTIONS.map((pitch) => {
+        return { value: String(pitch), label: `${pitch}°` };
+      }),
+    },
+  },
+];
+
+/**
+ * The 3D blocks a mode offers. Built per mode like the mesh, so only the
+ * variations that can extrude offer the choice at all — see `modeTakes3d`.
+ */
+const view3dBlocks = (mode: MapMode) => {
+  return modeTakes3d(mode) ? VIEW_3D_BLOCKS : [];
+};
+
 /**
  * The settings tab, which is the one section that differs per mode: only the
  * hexagon grid has a resolution to choose, and `enabledWhen` gates whole
@@ -472,6 +632,7 @@ const buildSettingsSection = ({
     body: {
       kind: 'settings',
       blocks: [
+        ...view3dBlocks(mode),
         // The mesh is the one block that is not about every mode: only the
         // hexagon grid has a resolution to choose. `enabledWhen` gates whole
         // sections, not blocks, so the block is omitted per mode instead —

@@ -1670,6 +1670,42 @@ describe('buildSpec', () => {
       expect(join?.data).toEqual([{ geometryId: '84occupied', value: 7 }]);
     });
 
+    test('draws the grid flat, with the camera level and north up', () => {
+      const spec = hexbinSpec();
+      const layer = spec.layers.find((entry) => {
+        return entry.id === 'caf-hexbin-fill';
+      });
+
+      expect(layer?.extrusion).toBeUndefined();
+      expect(spec.view).toMatchObject({ pitch: 0, bearing: 0 });
+    });
+
+    test('extrudes the grid and tilts the camera in 3D', () => {
+      const spec = buildSpec(BY_CITY, 'cafs-hexbin', undefined, [], {
+        cafHexbin: HEXBIN,
+        view3d: { extrusionHeight: 60_000, pitch: 45 },
+      });
+      const layer = spec.layers.find((entry) => {
+        return entry.id === 'caf-hexbin-fill';
+      });
+
+      expect(layer?.extrusion).toEqual({ maxHeight: 60_000 });
+      expect(spec.view).toMatchObject({ pitch: 45, bearing: -25 });
+      expect(spec.view?.cameraAngleTransitionMs).toBeGreaterThan(0);
+    });
+
+    /*
+     * Every mode declares the level camera and its ease, so leaving the 3D
+     * grid for another variation tilts the camera back down rather than
+     * leaving it where the grid had it.
+     */
+    test('eases every other mode to a level camera', () => {
+      const view = buildSpec(BY_CITY, 'coropletico').view;
+
+      expect(view).toMatchObject({ pitch: 0, bearing: 0 });
+      expect(view?.cameraAngleTransitionMs).toBeGreaterThan(0);
+    });
+
     test('anchors the grid legend only while the mode is active', () => {
       const legendOf = (spec: ReturnType<typeof buildSpec>) => {
         return spec.legends?.find((entry) => {
