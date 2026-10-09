@@ -1,5 +1,6 @@
 import { gateway } from '@/gateway';
 
+import baseVisualizationSpecJson from './baseVisualizationSpec.json';
 import {
   collectStructuralIssues,
   validateCandidate,
@@ -9,6 +10,7 @@ import {
   buildCozinhasChoroplethSpec,
   isCozinhasChoroplethRequest,
 } from './canonicalChoropleth';
+import endpointsDocumentation from './endpointsDocumentation.json';
 import { buildCatalogueContext } from './mapDataCatalogue';
 import { generateSpec, type SpecReplyStopped } from './naturaliSession';
 import {
@@ -22,106 +24,29 @@ import {
   type UnknownRecord,
 } from './specValidation';
 
-const INSTRUCTIONS = `## O que é
-
-Cozinhas Solidárias é uma aplicação pública que mapeia cozinhas comunitárias
-de combate à fome no Brasil — onde estão, quantas pessoas atendem e como essa
-presença se relaciona com vulnerabilidade social, insegurança alimentar e
-agricultura familiar em cada município. O público-alvo é qualquer pessoa
-interessada em segurança alimentar (jornalistas, gestores públicos,
-pesquisadores, a própria rede de cozinhas), não apenas especialistas em SIG.
-Todo dado exibido é agregado por município — o cadastro individual das
-cozinhas contém dados pessoais (endereço, CNPJ, e-mail) e nunca é exposto
-linha a linha.
-
-## O catálogo:
-
-O catalogo json schema do projeto Cozinha Solidária em Rede contém todos os datasets conhecidos e o detalhe completo apenas dos datasets que podem popular \`mapData\` hoje. Use-o para gerar um spec de visualização geográfica (um mapa) que atenda ao pedido do usuário.
-
-Se o pedido do usuário só corresponder a um dataset do catálogo que NÃO está na lista "renderableDatasets" (ainda não disponível), responda apenas com {"error": "..."} explicando em português que aquele dado ainda não está disponível para visualização — não mapeie para outro dataset ao acaso.
-
-## Para resolver os campos da spec, siga as instruções abaixo:
-
-tipo de mapa (mapType):
-"Dado pergunta '[pergunta usuário]', qual tipo cartográfico melhor representa? Considerar: coroplético (área agregada) - válido somente para variáveis relativas (razões, taxas e percentuais), não utilizar para contagens absolutas (exceção única: quando o usuário pede explicitamente o mapa coroplético da quantidade de cozinhas por município — ex.: 'Quero ver o mapa coroplético de cozinhas por município' —, use \`mapType: "choropleth"\` com \`mapDataId: "cozinhas_geolocalizadas"\`; o servidor aplica a escala e as camadas canônicas do /mapas), pontos proporcionais (unidade individual) - para constagens, dot density - escolha quando uma unidade representar uma quantidade fixa (ex: 1 ponto = 1.000 habitantes, 1 ponto = 1 cozinha. Sempre adicione esta informação na legenda), cluster. Justificar pela granularidade real do dado — se maioria município tem só 1-2 pontos, coroplético mascara variação, pontos melhor. Listar tipo recomendado + 1 alternativa com trade-off."                                                                                            Variável:
-"Varrer dataset_catalogue.json (campo schema.fields[].name/description/unit) e achar campo cujo description bata literal com conceito pedido — não sinônimo, não correlato. Se não existir pronto, apontar campo-base + operação necessária (soma/agregação/join) pra derivar. Retornar: dataset_id, campo, grain (spatial.grain.code), se precisa agregação e por qual chave (Código IBGE/codarea)."
-
-Prompt ampliado — proxy seguro:
-"Antes de aceitar variável como resposta: (1) listar todo campo do catálogo cujo description/tags toquem tema semelhante (ex.: cadastro, vulnerabilidade, cobertura); (2) pra cada um, testar se mede exatamente o pedido ou mede algo adjacente (input, causa, correlato) — declarar explicitamente a diferença semântica; (3) só aceitar como resposta direta campo cujo description bate 1:1 com a pergunta; (4) todo outro campo correlato entra como 'proxy descartado' com motivo, nunca usado sem aviso. Objetivo: nunca responder pergunta X com dado que mede Y só por estarem no mesmo domínio."
-
-resolução de mapDataId (obrigatório, antes de montar mapData):
-"\`mapData[].mapDataId\` NUNCA é inventado: é sempre, literalmente, o \`id\` de um dataset do catálogo (um dos \`renderableDatasets\`) — nunca um nome de join, nunca o \`id\` de uma source. Para escolher esse \`id\`: (1) percorrer TODOS os datasets do catálogo (não só renderableDatasets) comparando \`description\`/\`fields[].description\` com o pedido, seguindo a instrução 'Variável' e o 'Prompt ampliado — proxy seguro' acima; (2) restringir o resultado aos \`renderableDatasets\`; (3) se o dataset que bate 1:1 não estiver em \`renderableDatasets\`, responder \`{"error": "..."}\` (não há mapDataId alternativo aceitável). Nunca gerar um \`mapDataId\` que só 'parece' com o pedido — ele tem que ser exatamente um \`id\` presente no catálogo."
-
-combinação com abrangência de município/estado:
-"A geometria de \`sources\` e o grain de \`mapData\` têm que casar. Hoje todo dataset em \`renderableDatasets\` tem grain de município (join por \`codarea\`/Código IBGE contra \`/geo/geojs-100-mun.json\`) — não existe dataset renderável em grain de estado. Se o pedido pede a variável agregada por estado, ou combinada com estado, usar \`/geo/estados.json\` apenas como camada de contorno/contexto (uma layer sem \`mapDataId\`, sem legend própria), nunca como source de um \`mapData\` pintado — pintar a variável sempre no fill de município. Se o pedido só faz sentido em grain de estado (nenhuma leitura por município resolve o pedido), tratar como dataset indisponível e responder \`{"error": "..."}\`. Quando o pedido combina duas variáveis (ex.: pontos de cozinhas sobre coroplético de IVS), gerar um \`mapData\` (e uma layer com sua própria \`activeLegendId\`) por variável — nunca misturar dois \`mapDataId\` numa mesma entrada."
-
-abrangência espacial (spatial.coverage + spatial.extent):
-"Ler spatial.coverage (exhaustive/partial) e spatial.extent do dataset escolhido. Se partial, listar em access.notes/description o que fica de fora (ex.: sem coordenada, só habilitadas) e se isso muda leitura do mapa (sub-representação real vs. dado ausente). Retornar abrangência = extent + ressalva de cobertura. Se houver incerteza, baixa confiança, escolha a menor granularidade representada pelos dados: estado(s) ou Brasil (BRAZIL_VIEW)"
-
-intervalo temporal (temporal.extent + temporal.grain + temporal.frequency + temporal.history):
-"Ler temporal.status. Se described, retornar extent+grain+frequency+history (snapshot/overwrite). Se unknown, declarar explicitamente que não há corte de data — é snapshot do estado atual — e não inventar intervalo. Se não informado e houver dados do último ano, escolha-o. Se não, se existir mais de uma versão temporal do mesmo dataset (ex.: _2025 vs _all), perguntar qual ano o usuário quer antes de escolher."
-
-## legenda (legends):
-
-Todo spec gerado DEVE incluir ao menos uma legend cobrindo a variável pintada,
-sempre no \`legends[]\` de primeiro nível do spec — nunca em \`layers[].legends\`
-(a layer só aponta para a legend via \`activeLegendId\`). Coroplético: legend
-quantitativa com os mesmos breaks usados no colorBy (nunca inventar breaks novos).
-Pontos proporcionais/dot density: legend com valor de referência explícito (ex:
-'1 ponto = 1.000 pessoas'). Nunca retornar spec cujo mapa pintado não tenha
-nenhuma legend.
-
-## mapData nunca é geometria:
-
-\`mapData\` carrega só valores de join, indexados por \`geometryId\` — nunca a
-geometria de base. A geometria de municípios já existe como GeoJSON público em
-\`/geo/geojs-100-mun.json\` (propriedade de join: \`codarea\`); referencie-a em
-\`sources\`, nunca em \`mapData\`. 
-
-Um \`mapData[].mapDataId\` nunca pode repetir o
-\`id\` de uma source, e \`mapData[].data\` nunca pode ser uma \`FeatureCollection\`.
-
-## label deve nomear a variável, nunca o id bruto:
-
-Todo \`label\` de \`mapData\`/\`legends\` é uma frase legível em pt-BR que nomeia a
-variável pedida pelo usuário (ex.: "Pessoas atendidas"), igual ao \`description\` do
-campo do catálogo usado para responder a instrução "variável" acima — nunca o id
-bruto do dataset/campo (ex.: \`pessoasAtendidas\`, \`cozinhas_pessoas_atendidas\`).
-
-## sources: tipo e URL nunca são inventados:
-
-Todo item de \`sources[]\` é sempre \`{ "id": "...", "type": "geojson", "data": "<uma das URLs abaixo>" }\`.
-Nunca use os outros tipos de source que o schema do geovis também aceita
-(\`vector-tiles\`, \`raster-tiles\`, \`raster-dem\`, \`video\`, \`image\`) — esta aplicação
-não serve tile server, DEM, vídeo ou imagem, só os endpoints GeoJSON abaixo.
-Isso vale para TODO mapType, inclusive pontos proporcionais/dot density/cluster:
-a geometria de pontos das cozinhas também é servida como \`geojson\`, nunca como
-tiles.
+const INSTRUCTIONS = `
 
 ${buildSourcesTable()}
 
-\`sources[].data\` é sempre a URL da tabela, como texto — nunca dados embutidos:
-URLs estáticas (\`/geo/*\`, arquivos de \`public/geo\`) chegam ao navegador como
-URL, e URLs de API (\`/api/*\`) são resolvidas no servidor e trocadas pelos dados
-reais antes da resposta.
+## VisualizationSpec Base
 
-## validação (tool validate_spec):
+Utilize como valores padrão, a partir para gerar o VisualizationSpec output solicitado
 
-Antes da resposta final, valide a spec candidata com o tool \`validate_spec\`.
-Ele devolve a spec já reparada pelo servidor e as issues restantes; corrija só
-essas issues, partindo da spec devolvida. \`mapData[].data\` vai sempre como \`[]\`:
-os valores reais são preenchidos pelo servidor.
+${JSON.stringify(baseVisualizationSpecJson, null, 2)}
 
-## basemap: nunca inventar um styleUrl:
+- Faça a remoção dos objetos de legends que não serão utilizados para o resultado do mapa
 
-Não inclua o campo \`basemap\` na spec, a menos que o pedido exija explicitamente
-trocar o mapa-base — omitir \`basemap\` usa o estilo padrão do app
-(\`https://tiles.openfreemap.org/styles/positron\`), que já é o comportamento
-correto na imensa maioria dos pedidos. Se precisar mesmo assim, \`basemap.styleUrl\`
-só pode ser uma URL de *style* MapLibre (um JSON com definição de camadas), nunca
-um template de raster tiles como \`https://tile.openstreetmap.org/{z}/{x}/{y}.png\`
-— isso quebra o carregamento do mapa (CORS/404 no browser). A única URL de style
-aceita hoje é \`https://tiles.openfreemap.org/styles/positron\` (o próprio padrão).
+- Faça a remoção dos objetos de layers que não serão utilizados para o resultado do mapa
+
+ex: cozinhas-bolhas só é incluída quando há dados de /api/cozinhas/bolhas
+
+## Rotas de API Cozinhas Solidárias
+
+Utilize para identificar quais rotas de api popular no campo sources[].data para incluir ao json output
+
+ex: Como um pedido de mapa de pontos proporcionais com o número de cozinhas por município foi solicitado, o path correto é o /api/cozinhas/bolhas.
+
+${JSON.stringify(endpointsDocumentation, null, 2)}
 `;
 
 let cachedCatalogueText: Promise<string> | null = null;
@@ -268,6 +193,7 @@ const getAgentResponse = async (params: {
       projectId: params.projectId,
       agentId: params.agentId,
       message: [
+        'O catalogo json schema do projeto Cozinha Solidária em Rede contém todos os datasets conhecidos e o detalhe completo apenas dos datasets que podem popular `mapData` hoje. Use-o para gerar um spec de visualização geográfica (um mapa) que atenda ao pedido do usuário.',
         `Catálogo de datasets:\n${catalogueText}`,
         INSTRUCTIONS,
         params.prompt,
