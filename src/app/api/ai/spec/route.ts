@@ -1,6 +1,5 @@
 import { gateway } from '@/gateway';
 
-import datasetCatalogue from '../../../../../public/dataset_catalogue.json';
 import baseVisualizationSpecJson from './baseVisualizationSpec.json';
 import {
   collectStructuralIssues,
@@ -26,11 +25,6 @@ import {
 } from './specValidation';
 
 const INSTRUCTIONS = `
-## O catálogo:
-
-O catalogo json schema do projeto Cozinha Solidária em Rede contém todos os datasets conhecidos e o detalhe completo apenas dos datasets que podem popular \`mapData\` hoje. Use-o para gerar um spec de visualização geográfica (um mapa) que atenda ao pedido do usuário.
-
-${JSON.stringify(datasetCatalogue, null, 2)}
 
 ${buildSourcesTable()}
 
@@ -199,6 +193,7 @@ const getAgentResponse = async (params: {
       projectId: params.projectId,
       agentId: params.agentId,
       message: [
+        'O catalogo json schema do projeto Cozinha Solidária em Rede contém todos os datasets conhecidos e o detalhe completo apenas dos datasets que podem popular `mapData` hoje. Use-o para gerar um spec de visualização geográfica (um mapa) que atenda ao pedido do usuário.',
         `Catálogo de datasets:\n${catalogueText}`,
         INSTRUCTIONS,
         params.prompt,
