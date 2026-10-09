@@ -112,6 +112,16 @@ type MapOverlays = {
      */
     colorRamp?: string;
   };
+  /**
+   * The 3D view, from the settings zone; absent for the flat map. Only read in
+   * the modes that offer it — see `modeTakes3d`.
+   */
+  view3d?: {
+    /** Height, in metres, of the top band's prisms. */
+    extrusionHeight: number;
+    /** Camera tilt, in degrees. */
+    pitch: number;
+  };
   /** Hover tooltip renderer for the `cafs` mode's UF circles. */
   cafUfHoverRender?: HoverTooltipConfig['render'];
   /**
@@ -376,6 +386,28 @@ const buildSources = ({
  */
 
 /**
+ * How far the camera turns from north in 3D, in degrees (negative: left), so
+ * the prisms show a side face instead of only their tops.
+ */
+const BEARING_3D = -25;
+
+/** How long the camera takes to tilt into 3D and level out of it, in ms. */
+const CAMERA_ANGLE_TRANSITION_MS = 600;
+
+/**
+ * The camera's tilt and turn: tilted and turned in 3D, level and north up
+ * otherwise. Declared in every mode, not only the 3D one, so leaving the 3D
+ * view by switching variation eases the camera back down as well.
+ */
+const cameraAngles = (view3d: MapOverlays['view3d']) => {
+  return {
+    pitch: view3d ? view3d.pitch : 0,
+    bearing: view3d ? BEARING_3D : 0,
+    cameraAngleTransitionMs: CAMERA_ANGLE_TRANSITION_MS,
+  };
+};
+
+/**
  * The município fill layer — identical across modes (keeps its `mapDataId` +
  * `activeLegendId`), so the hover tooltip, which only tracks polygon layers
  * with an `activeLegendId`, keeps working everywhere. Only the *data* fed to it
@@ -497,6 +529,7 @@ const buildOverlayLayers = ({
     layers.push(
       buildCafHexbinLayer({
         hoverTooltipRender: overlays.cafHexbinHoverRender,
+        extrusionHeight: overlays.view3d?.extrusionHeight,
       })
     );
   }
@@ -685,7 +718,7 @@ export const buildSpec = (
     // The assentamentos data covers only some states, so frame that region when
     // the mode is active; every other mode frames the country. Unmeasured here
     // (see the note by the imports) — `useMapaSpec` fits it to the container.
-    view: viewForMode({ mode }),
+    view: { ...viewForMode({ mode }), ...cameraAngles(overlays.view3d) },
     // Hide the basemap's text/icon labels (place, road and POI names) so the
     // choropleths, points and bubbles read against a clean geography.
     //

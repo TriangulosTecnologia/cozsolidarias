@@ -74,7 +74,21 @@ const CAF_HEXBIN_LABELS = [
   '8.000+',
 ];
 
-const CAF_HEXBIN_COLORS = Array.from(
+/**
+ * Height, in metres, of the top class at the `1×` step of the 3D view's height
+ * slider; each step multiplies it.
+ *
+ * Sized for the country-wide camera rather than for a city: at the zoom that
+ * frames Brazil a pixel covers about ten kilometres, so a prism has to stand
+ * tens of kilometres tall before its side face reads at all.
+ */
+export const CAF_HEXBIN_BASE_EXTRUSION_HEIGHT = 20_000;
+
+/**
+ * The grid's palette, palest band first, the empty colour not among them — also
+ * what the 2D/3D cards in the settings tab preview the grid in.
+ */
+export const CAF_HEXBIN_COLORS = Array.from(
   { length: CAF_HEXBIN_THRESHOLDS.length + 1 },
   (_, index) => {
     const ramp = mapTokens.dataviz.color.sequential[1];
@@ -151,7 +165,7 @@ export const buildCafHexbinSource = (cells?: CafHexbinFeatureCollection) => {
 };
 
 /**
- * The grid's single fill layer.
+ * The grid's single fill layer, extruded in the 3D view.
  *
  * One layer, not the four-per-resolution stack the `cafs` mode needs: that mode
  * reads a tiled source, which cannot carry a `mapData` join, so its colour ramp
@@ -159,16 +173,28 @@ export const buildCafHexbinSource = (cells?: CafHexbinFeatureCollection) => {
  * so a real `colorBy` ramp applies — the same shape as every município
  * choropleth in this app.
  *
- * @param hoverTooltipRender - Renders the cell's hover card; omit for no card.
+ * In 3D each cell is lifted by the same count that colours it, one height per
+ * legend band (`extrusion`'s default `'class'` mode). Proportional heights
+ * would hide almost the whole grid: the counts span four orders of magnitude,
+ * so the median cell would stand at a fraction of a percent of the tallest.
+ * Empty cells, which have no row in the join, stay flat.
+ *
+ * @param params.hoverTooltipRender - Renders the cell's hover card; omit for
+ * no card.
+ * @param params.extrusionHeight - Height, in metres, of the top band's prisms;
+ * omit for the flat 2D grid.
  * @returns The polygon layer, joined and pointed at this mode's legend.
  *
  * @example
  * buildCafHexbinLayer().mapDataId; // 'caf-hexbin-counts'
+ * buildCafHexbinLayer({ extrusionHeight: 60_000 }).extrusion; // { maxHeight: 60000 }
  */
 export const buildCafHexbinLayer = ({
   hoverTooltipRender,
+  extrusionHeight,
 }: {
   hoverTooltipRender?: HoverTooltipConfig['render'];
+  extrusionHeight?: number;
 } = {}): VisualizationLayer => {
   return {
     id: CAF_HEXBIN_LAYER_ID,
@@ -191,6 +217,9 @@ export const buildCafHexbinLayer = ({
       // width — declaring one would only suggest a knob that does nothing.
       lineColor: mapTokens.dataviz.color.status.suppressed,
     },
+    ...(extrusionHeight === undefined
+      ? {}
+      : { extrusion: { maxHeight: extrusionHeight } }),
     ...(hoverTooltipRender
       ? { hoverTooltip: { render: hoverTooltipRender, style: TOOLTIP_STYLE } }
       : {}),
