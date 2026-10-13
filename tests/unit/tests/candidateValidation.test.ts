@@ -2,6 +2,7 @@ import { type GeoVisIssue, validateSpec } from '@ttoss/geovis';
 import {
   applyLocalRepairs,
   collectStructuralIssues,
+  normalizeCandidate,
   validateCandidate,
   validateWithLocalRepairs,
 } from 'src/app/api/ai/spec/candidateValidation';
@@ -511,6 +512,32 @@ describe('validateCandidate', () => {
     expect(result.issues).toEqual([]);
     expect(result.spec).toMatchObject({
       layers: [{ id: 'dots', sourceId: 'bolhas', geometry: 'point' }],
+    });
+  });
+});
+
+describe('normalizeCandidate', () => {
+  test('hoists layer legends and repoints a point layer off a polygon source in one pass', () => {
+    const sources = [
+      { id: 'mun', type: 'geojson', data: '/geo/geojs-100-mun.json' },
+      { id: 'bolhas', type: 'geojson', data: '/api/cozinhas/bolhas' },
+    ];
+
+    expect(
+      normalizeCandidate({
+        sources,
+        layers: [
+          { id: 'fill', sourceId: 'mun', legends: [{ id: 'l' }] },
+          { id: 'dots', sourceId: 'mun', geometry: 'point' },
+        ],
+      })
+    ).toEqual({
+      sources,
+      legends: [{ id: 'l' }],
+      layers: [
+        { id: 'fill', sourceId: 'mun' },
+        { id: 'dots', sourceId: 'bolhas', geometry: 'point' },
+      ],
     });
   });
 });
