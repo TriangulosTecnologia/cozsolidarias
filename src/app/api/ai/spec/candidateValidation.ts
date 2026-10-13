@@ -87,7 +87,7 @@ const layerIssues = (spec: UnknownRecord): SpecIssue[] => {
  * the renderable-dataset list) and returns every violation instead of the
  * first, so one validation round reports all of them.
  *
- * @param spec - The candidate spec, after {@link hoistLayerLegends}.
+ * @param spec - The candidate spec, after {@link normalizeCandidate}.
  * @returns The violations found; empty when the spec passes every check.
  *
  * @example
