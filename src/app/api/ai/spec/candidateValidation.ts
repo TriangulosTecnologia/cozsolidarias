@@ -260,8 +260,25 @@ export const validateWithLocalRepairs = (
 };
 
 /**
- * Validates one candidate spec the model proposed: hoists layer-scoped
- * legends, runs {@link collectStructuralIssues} and
+ * Applies every deterministic repair that needs no model round-trip, before
+ * any structural check reads the spec: hoists layer-scoped legends, then
+ * repairs the `mapData` wiring. Structural checks must run on this output,
+ * otherwise they report issues the repairs already fixed.
+ *
+ * @param spec - The spec the model proposed.
+ * @returns The normalized spec; the same content as `spec` when nothing needed repair.
+ *
+ * @example
+ * normalizeCandidate({ layers: [{ id: 'a', legends: [{ id: 'l' }] }] });
+ * // → { layers: [{ id: 'a' }], legends: [{ id: 'l' }] }
+ */
+export const normalizeCandidate = (spec: UnknownRecord): UnknownRecord => {
+  return repairMapDataWiring(hoistLayerLegends(spec));
+};
+
+/**
+ * Validates one candidate spec the model proposed: normalizes it with
+ * {@link normalizeCandidate}, runs {@link collectStructuralIssues} and
  * {@link validateWithLocalRepairs}. Only what is left needs the model — this
  * is the body of the `validate_spec` tool.
  *
@@ -288,8 +305,8 @@ export const validateCandidate = (
     };
   }
 
-  const hoisted = hoistLayerLegends(spec);
-  const structural = collectStructuralIssues(hoisted);
-  const checked = validateWithLocalRepairs(hoisted);
+  const normalized = normalizeCandidate(spec);
+  const structural = collectStructuralIssues(normalized);
+  const checked = validateWithLocalRepairs(normalized);
   return { spec: checked.spec, issues: [...structural, ...checked.issues] };
 };

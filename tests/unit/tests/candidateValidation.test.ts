@@ -497,4 +497,20 @@ describe('validateCandidate', () => {
       issues: [],
     });
   });
+
+  test('repairs a point layer on a polygon source before checking, so the returned spec is already fixed', () => {
+    const result = validateCandidate({
+      sources: [
+        { id: 'mun', type: 'geojson', data: '/geo/geojs-100-mun.json' },
+        { id: 'bolhas', type: 'geojson', data: '/api/cozinhas/bolhas' },
+      ],
+      legends: [{ id: 'l' }],
+      layers: [{ id: 'dots', sourceId: 'mun', geometry: 'point' }],
+    });
+
+    expect(result.issues).toEqual([]);
+    expect(result.spec).toMatchObject({
+      layers: [{ id: 'dots', sourceId: 'bolhas', geometry: 'point' }],
+    });
+  });
 });

@@ -588,6 +588,43 @@ describe('POST /api/ai/spec', () => {
     expect(body.message).toMatch(/caf_areas/);
   }, 10000);
 
+  test('repairs a point layer on a polygon source before the structural checks, returning 200 instead of 422', async () => {
+    jest.spyOn(gateway, 'getCozinhasBubbles').mockResolvedValue({
+      type: 'FeatureCollection',
+      features: [
+        {
+          type: 'Feature',
+          geometry: { type: 'Point', coordinates: [-43.2, -22.9] },
+          properties: {
+            codarea: '3304557',
+            municipio: 'Rio de Janeiro (RJ)',
+            quantidade: 69,
+          },
+        },
+      ],
+    });
+    mockAgentReply(
+      JSON.stringify({
+        sources: [
+          { id: 'mun', type: 'geojson', data: '/geo/geojs-100-mun.json' },
+          { id: 'bolhas', type: 'geojson', data: '/api/cozinhas/bolhas' },
+        ],
+        legends: A_LEGEND,
+        layers: [{ id: 'dots', sourceId: 'mun', geometry: 'point' }],
+      })
+    );
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de cozinhas por município' })
+    );
+    const body = (await response.json()) as { spec?: SpecRecord };
+
+    expect(response.status).toBe(200);
+    expect(body.spec?.['layers']).toEqual([
+      { id: 'dots', sourceId: 'bolhas', geometry: 'point' },
+    ]);
+  }, 10000);
+
   test('returns 422 when an API-backed source resolves to no features', async () => {
     jest.spyOn(gateway, 'getCozinhas').mockResolvedValue({
       type: 'FeatureCollection',
