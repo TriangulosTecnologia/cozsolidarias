@@ -5,6 +5,12 @@ import {
   validateCandidate,
   validateWithLocalRepairs,
 } from 'src/app/api/ai/spec/candidateValidation';
+import {
+  alignMapDataJoin,
+  linkOrphanMapData,
+  repointPointLayers,
+  separateStateKeys,
+} from 'src/app/api/ai/spec/specRepairs';
 
 jest.mock('@ttoss/geovis', () => {
   return {
@@ -67,6 +73,77 @@ describe('collectStructuralIssues', () => {
     expect(issue.message).toContain(breaks);
   });
 
+  test('flags a polygon layer painting an absolute total even when mapType is not set', () => {
+    const base = {
+      sources: [
+        { id: 'mun', type: 'geojson', data: '/geo/geojs-100-mun.json' },
+      ],
+      legends: [{ id: 'l' }],
+      mapData: [{ mapDataId: 'cozinhas_pessoas_atendidas', mapId: 'mun' }],
+    };
+    const polygon = {
+      ...base,
+      layers: [
+        {
+          id: 'fill',
+          sourceId: 'mun',
+          geometry: 'polygon',
+          mapDataId: 'cozinhas_pessoas_atendidas',
+        },
+      ],
+    };
+    const circles = {
+      ...base,
+      layers: [
+        {
+          id: 'dots',
+          sourceId: 'mun',
+          geometry: 'point',
+          mapDataId: 'cozinhas_pessoas_atendidas',
+        },
+      ],
+    };
+
+    expect(
+      collectStructuralIssues(polygon).map((issue) => {
+        return issue.code;
+      })
+    ).toContain('choropleth-on-absolute-total');
+    expect(
+      collectStructuralIssues(circles).map((issue) => {
+        return issue.code;
+      })
+    ).not.toContain('choropleth-on-absolute-total');
+  });
+
+  test('flags a point layer drawn on a polygon source', () => {
+    const spec = (sourceId: string, data: string) => {
+      return {
+        sources: [{ id: sourceId, type: 'geojson', data }],
+        legends: [{ id: 'l' }],
+        layers: [{ id: 'dots', sourceId, geometry: 'point' }],
+      };
+    };
+
+    expect(
+      collectStructuralIssues(spec('mun', '/geo/geojs-100-mun.json')).map(
+        (issue) => {
+          return [issue.code, issue.path];
+        }
+      )
+    ).toContainEqual([
+      'point-layer-on-polygon-source',
+      'layers[dots].sourceId',
+    ]);
+    expect(
+      collectStructuralIssues(spec('b', '/api/cozinhas/bolhas')).map(
+        (issue) => {
+          return issue.code;
+        }
+      )
+    ).not.toContain('point-layer-on-polygon-source');
+  });
+
   test('returns no issues for a spec that passes every check', () => {
     expect(
       collectStructuralIssues({
@@ -88,6 +165,176 @@ const issueWith = (repair: GeoVisIssue['repair']): GeoVisIssue => {
     repair,
   };
 };
+
+describe('alignMapDataJoin', () => {
+  const spec = {
+    sources: [
+      { id: 'municipios-boundary', type: 'geojson', data: '/geo/m.json' },
+      { id: 'bolhas', type: 'geojson', data: '/api/cozinhas/bolhas' },
+    ],
+    layers: [
+      { id: 'circles', sourceId: 'bolhas', mapDataId: 'pessoas' },
+      { id: 'fill', sourceId: 'municipios-boundary', mapDataId: 'ok' },
+    ],
+    mapData: [
+      { mapDataId: 'pessoas', mapId: 'municipios' },
+      { mapDataId: 'ok', mapId: 'municipios-boundary', joinKey: 'id' },
+    ],
+  };
+
+  test('points a mapId naming no source at the layer source and defaults the join to codarea', () => {
+    const aligned = alignMapDataJoin(spec);
+
+    expect(aligned['mapData']).toEqual([
+      { mapDataId: 'pessoas', mapId: 'bolhas', joinKey: 'codarea' },
+      { mapDataId: 'ok', mapId: 'municipios-boundary', joinKey: 'id' },
+    ]);
+  });
+
+  test('also realigns a declared mapId that differs from the source its layer draws', () => {
+    const aligned = alignMapDataJoin({
+      sources: [{ id: 'mun' }, { id: 'bolhas' }],
+      layers: [{ id: 'dots', sourceId: 'bolhas', mapDataId: 'p' }],
+      mapData: [{ mapDataId: 'p', mapId: 'mun', joinKey: 'codarea' }],
+    });
+
+    expect(aligned['mapData']).toEqual([
+      { mapDataId: 'p', mapId: 'bolhas', joinKey: 'codarea' },
+    ]);
+  });
+
+  test('leaves a spec with no mapData untouched', () => {
+    const bare = { sources: [], layers: [] };
+
+    expect(alignMapDataJoin(bare)).toBe(bare);
+  });
+
+  test('passes a non-object mapData entry through for the structural checks to report', () => {
+    const aligned = alignMapDataJoin({ sources: [], mapData: ['x'] });
+
+    expect(aligned['mapData']).toEqual(['x']);
+  });
+});
+
+describe('repointPointLayers', () => {
+  const sources = [
+    { id: 'mun', type: 'geojson', data: '/geo/geojs-100-mun.json' },
+    { id: 'bolhas', type: 'geojson', data: '/api/cozinhas/bolhas' },
+  ];
+
+  test('moves a point layer off a polygon source onto the only unused API point source', () => {
+    const spec = {
+      sources,
+      layers: [
+        { id: 'fill', sourceId: 'mun', geometry: 'polygon' },
+        { id: 'dots', sourceId: 'mun', geometry: 'point' },
+      ],
+    };
+
+    expect(repointPointLayers(spec)['layers']).toEqual([
+      { id: 'fill', sourceId: 'mun', geometry: 'polygon' },
+      { id: 'dots', sourceId: 'bolhas', geometry: 'point' },
+    ]);
+  });
+
+  test('leaves the spec alone when no single unused point source can take the layer', () => {
+    const used = {
+      sources,
+      layers: [{ id: 'dots', sourceId: 'bolhas', geometry: 'point' }],
+    };
+    const none = {
+      sources: [sources[0]],
+      layers: [{ id: 'dots', sourceId: 'mun', geometry: 'point' }],
+    };
+    const two = {
+      sources: [
+        ...sources,
+        { id: 'b2', type: 'geojson', data: '/api/cozinhas/bolhas' },
+      ],
+      layers: [{ id: 'dots', sourceId: 'mun', geometry: 'point' }],
+    };
+    const wrongKey = {
+      sources: [
+        sources[0],
+        { id: 'pts', type: 'geojson', data: '/api/cozinhas' },
+      ],
+      layers: [{ id: 'dots', sourceId: 'mun', geometry: 'point' }],
+    };
+    const junk = { sources: ['x'], layers: ['y'] };
+    const bare = { layers: [] };
+
+    expect(repointPointLayers(used)).toBe(used);
+    expect(repointPointLayers(none)).toBe(none);
+    expect(repointPointLayers(two)).toBe(two);
+    expect(repointPointLayers(wrongKey)).toBe(wrongKey);
+    expect(repointPointLayers(junk)).toBe(junk);
+    expect(repointPointLayers(bare)).toBe(bare);
+  });
+});
+
+describe('linkOrphanMapData', () => {
+  const layers = (extra: Array<Record<string, unknown>> = []) => {
+    return [
+      { id: 'fill', sourceId: 'mun', geometry: 'polygon' },
+      { id: 'dots', sourceId: 'b', geometry: 'point' },
+      ...extra,
+    ];
+  };
+  const mapData = [{ mapDataId: 'pessoas', mapId: 'mun' }];
+
+  test('links the only point layer without a mapDataId to the only mapData no layer uses', () => {
+    const linked = linkOrphanMapData({ layers: layers(), mapData });
+
+    expect(linked['layers']).toEqual([
+      { id: 'fill', sourceId: 'mun', geometry: 'polygon' },
+      { id: 'dots', sourceId: 'b', geometry: 'point', mapDataId: 'pessoas' },
+    ]);
+  });
+
+  test('leaves the spec alone when the match is ambiguous or already made', () => {
+    const twoPoints = {
+      layers: layers([{ id: 'x', geometry: 'point' }]),
+      mapData,
+    };
+    const used = {
+      layers: [{ id: 'dots', geometry: 'point', mapDataId: 'pessoas' }],
+      mapData,
+    };
+    const bare = { layers: [] };
+    const junk = { layers: ['x'], mapData };
+
+    expect(linkOrphanMapData(junk)).toBe(junk);
+    expect(linkOrphanMapData(twoPoints)).toBe(twoPoints);
+    expect(linkOrphanMapData(used)).toBe(used);
+    expect(linkOrphanMapData(bare)).toBe(bare);
+  });
+});
+
+describe('separateStateKeys', () => {
+  test('gives each dimensioned entry on a shared source its own stateKey, keeping declared ones', () => {
+    const separated = separateStateKeys({
+      mapData: [
+        { mapDataId: 'a', mapId: 's', dimension: 'size' },
+        { mapDataId: 'b', mapId: 's', dimension: 'color', stateKey: 'dens' },
+        { mapDataId: 'c', mapId: 'other', dimension: 'size' },
+        { mapDataId: 'd', mapId: 'plain' },
+      ],
+    });
+
+    expect(separated['mapData']).toEqual([
+      { mapDataId: 'a', mapId: 's', dimension: 'size', stateKey: 'size' },
+      { mapDataId: 'b', mapId: 's', dimension: 'color', stateKey: 'dens' },
+      { mapDataId: 'c', mapId: 'other', dimension: 'size' },
+      { mapDataId: 'd', mapId: 'plain' },
+    ]);
+  });
+
+  test('leaves a spec without mapData untouched', () => {
+    const bare = { sources: [] };
+
+    expect(separateStateKeys(bare)).toBe(bare);
+  });
+});
 
 describe('applyLocalRepairs', () => {
   test('applies set-value repairs and single-candidate allowed-values at id-keyed paths', () => {

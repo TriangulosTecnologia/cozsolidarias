@@ -73,14 +73,11 @@
   "src/app/api/ai/spec/route.ts": {
     "complexity": {
       "count": 3
-    },
-    "max-lines": {
-      "count": 1
     }
   },
   "src/app/api/ai/spec/specValidation.ts": {
     "complexity": {
-      "count": 5
+      "count": 4
     },
     "max-lines": {
       "count": 1

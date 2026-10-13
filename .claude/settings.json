@@ -19,5 +19,10 @@
   },
   "enabledPlugins": {
     "devanity@devanity": true
+  },
+  "env": {
+    "NATURALI_PROJECT_ID": "${NATURALI_PROJECT_ID}",
+    "NATURALI_API_KEY": "${NATURALI_API_KEY}",
+    "NATURALI_AGENT_ID": "${NATURALI_AGENT_ID}"
   }
 }

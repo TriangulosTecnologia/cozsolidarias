@@ -425,44 +425,88 @@ export const hoistLayerLegends = (spec: UnknownRecord): UnknownRecord => {
 };
 
 /**
- * Finds the first `mapData[].mapDataId` that references an absolute-total
- * dataset (see {@link ABSOLUTE_TOTAL_DATASET_IDS}) while the spec paints it
- * as a choropleth (`spec.mapType === 'choropleth'`) — Bertin's area-bias
- * rule, already stated in prose in both the dataset's own catalogue
+ * Finds the first absolute-total dataset (see {@link ABSOLUTE_TOTAL_DATASET_IDS})
+ * the spec paints as a choropleth — either through the `mapType: 'choropleth'`
+ * shorthand (any `mapData` entry) or through a `polygon` layer joined to it by
+ * `mapDataId`, which is how a spec without `mapType` fills areas. Bertin's
+ * area-bias rule, already stated in prose in the dataset's own catalogue
  * `description` and `route.ts`'s `INSTRUCTIONS`, enforced here structurally
  * instead of trusting the model to follow the prompt.
  *
- * A spec with no `mapType` (or a hand-built spec that never sets it) isn't
- * checked — this guard only catches the `mapType` shorthand the agent is
- * instructed to use, the same scope as the rest of this file's structural
- * checks.
+ * @param spec - The candidate spec.
+ * @returns The offending `mapDataId`, or `null` when none is painted by area.
+ *
+ * @example
+ * findChoroplethOnAbsoluteTotal({ layers: [{ geometry: 'polygon', mapDataId: 'cozinhas_pessoas_atendidas' }] });
+ * // => 'cozinhas_pessoas_atendidas'
  */
 export const findChoroplethOnAbsoluteTotal = (
   spec: UnknownRecord
 ): string | null => {
-  if (spec['mapType'] !== 'choropleth') {
-    return null;
-  }
+  const isAbsolute = (id: unknown): id is string => {
+    return (
+      typeof id === 'string' &&
+      (ABSOLUTE_TOTAL_DATASET_IDS as readonly string[]).includes(id)
+    );
+  };
+  const polygonIds = (
+    Array.isArray(spec['layers']) ? spec['layers'] : []
+  ).flatMap((layer) => {
+    return isRecord(layer) && layer['geometry'] === 'polygon'
+      ? [layer['mapDataId']]
+      : [];
+  });
+  const mapDataIds = (
+    Array.isArray(spec['mapData']) ? spec['mapData'] : []
+  ).flatMap((entry) => {
+    return isRecord(entry) ? [entry['mapDataId']] : [];
+  });
 
-  const mapData = spec['mapData'];
-  if (!Array.isArray(mapData)) {
-    return null;
-  }
+  return (
+    (spec['mapType'] === 'choropleth' ? mapDataIds : polygonIds).find(
+      isAbsolute
+    ) ?? null
+  );
+};
 
-  for (const entry of mapData) {
-    if (!isRecord(entry)) {
-      continue;
+/**
+ * Finds the first `point` layer drawn on a polygon source. Every static
+ * `/geo/*` source holds polygons or lines, so a circle layer pointed at one
+ * (the model reusing the município source for bubbles) paints nothing
+ * meaningful; point data only comes from the `/api/*` sources.
+ *
+ * @param spec - The candidate spec.
+ * @returns The offending layer id, or `null` when every point layer sits on an API source.
+ *
+ * @example
+ * findPointLayerOnPolygonSource({ sources: [{ id: 'm', data: '/geo/geojs-100-mun.json' }], layers: [{ id: 'dots', sourceId: 'm', geometry: 'point' }] });
+ * // => 'dots'
+ */
+export const findPointLayerOnPolygonSource = (
+  spec: UnknownRecord
+): string | null => {
+  const polygonSourceIds = new Set(
+    (Array.isArray(spec['sources']) ? spec['sources'] : []).flatMap(
+      (source) => {
+        return isRecord(source) &&
+          typeof source['data'] === 'string' &&
+          source['data'].startsWith('/geo/')
+          ? [source['id']]
+          : [];
+      }
+    )
+  );
+  const offender = (Array.isArray(spec['layers']) ? spec['layers'] : []).find(
+    (layer) => {
+      return (
+        isRecord(layer) &&
+        layer['geometry'] === 'point' &&
+        polygonSourceIds.has(layer['sourceId'])
+      );
     }
-    const mapDataId = entry['mapDataId'];
-    if (
-      typeof mapDataId === 'string' &&
-      (ABSOLUTE_TOTAL_DATASET_IDS as readonly string[]).includes(mapDataId)
-    ) {
-      return mapDataId;
-    }
-  }
+  );
 
-  return null;
+  return isRecord(offender) ? String(offender['id']) : null;
 };
 
 /**

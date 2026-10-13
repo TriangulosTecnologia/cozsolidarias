@@ -4,7 +4,7 @@ version: 2.0.0
 description: |
   Consolida e mede as duas fontes de instrução do gerador de spec do cozsolidarias — as
   `instructions` do agente Naturali `geovis-spec-generator-loop` (formation local
-  `~/geovis-spec-generator-loop.formation.json`) e a const `INSTRUCTIONS` inline em
+  `agents/geovis-spec-generator/formation.json`) e a const `INSTRUCTIONS` inline em
   `src/app/api/ai/spec/route.ts` — ao essencial robusto, e mede quão perto cada variação da rota
   `/mapas` fica da spec mínima que renderiza igual (mesma UI, mesmas legendas), rodando eval real
   contra `POST /api/ai/spec`. Use quando o usuário pedir para podar/otimizar/consolidar essas
@@ -46,31 +46,21 @@ Além das instruções do agente e da `INSTRUCTIONS` da aplicação, toda rodada
 | Variações do `/mapas` | `MapMode` (`geovisMapMode.ts`, 23 modos) + `buildSpec` (`geovisSpec.ts`) | Corpus golden (spec mínima esperada) |
 | Contrato de saída | `output_schema` da formation (`status` ok/error, `spec`, `error.code`) | Forma da resposta do agente |
 
-## Por que separada de geovis-spec-agent-creator
-
-`geovis-spec-agent-creator` resincroniza o agente contra o `schema.json` do `@ttoss/geovis` —
-schema, não robustez de prompt. Esta skill nunca aplica uma poda no agente de produção: entrega a
+Esta skill nunca aplica uma poda no agente de produção: entrega a
 proposta e, se aprovada, a aplicação segue o fluxo de provisionamento (backup → validate →
 formation). Overlap zero.
 
 ## As duas fontes — nunca fundir
 
 1. **`instructions` do agente Naturali** — declaradas em
-   `~/geovis-spec-generator-loop.formation.json` (fora do repo, sem CI/review), referenciadas só
+   `agents/geovis-spec-generator/formation.json` (sem CI/review), referenciadas só
    por `NATURALI_AGENT_ID`. Deveriam ser genéricas ao schema `@ttoss/geovis`.
-2. **`INSTRUCTIONS`** (const inline em `src/app/api/ai/spec/route.ts`; `instructions.ts` não
-   existe mais) — enviada em `messages[0].content` junto com o catálogo e o prompt do usuário.
-   Domínio cozsolidarias: `mapType`/variável/`mapDataId`, grain, cobertura, legendas, sources,
-   basemap, e o bloco do tool `validate_spec`.
+2. **`INSTRUCTIONS`** Contém a descrição da aplicação, o catálogo e documentação da API dos dados`.
 
 Fundir as duas acopla deploy de regra de negócio (`route.ts`, sob CI) a reprovisionamento de
-agente (fora de banda). **Estado atual viola isso**: as `instructions` do agente loop embutem uma
-cópia congelada do catálogo e de uma versão antiga da `INSTRUCTIONS` (legend em `layers[]` aceita,
-sem a exceção do coroplético de cozinhas), que diverge da que `route.ts` envia na mesma request.
-O Passo 1 sempre começa diffando essa cópia contra a `route.ts` — a duplicata é a primeira poda
-candidata e a divergência entre elas é bug, não estilo.
+agente (fora de banda).
 
-## Regra permanente — versionar resultados, skill e schema
+## Regra permanente — versionar formation.json, resultados, skill e schema
 
 Restrição inegociável: **nada é sobrescrito, tudo carrega versão**.
 
@@ -83,7 +73,7 @@ execução, nunca reutilizado, nunca editado depois). Na raiz, `versions.json` o
   "runId": "2026-09-28T14-03-11Z--poda-duplicata",
   "skillVersion": "2.0.0",
   "sources": {
-    "agentInstructions": { "formationFile": "~/geovis-spec-generator-loop.formation.json", "sha256": "…" },
+    "agentInstructions": { "formationFile": "agents/geovis-spec-generator/formation.json", "sha256": "…" },
     "instructions": { "path": "src/app/api/ai/spec/route.ts", "gitSha": "…", "sha256": "…" },
     "catalogue": { "path": "public/dataset_catalogue.json", "sha256": "…" }
   },
@@ -168,7 +158,7 @@ Estado de referência (verificado 2026-09-28, vivo ≡ arquivo local):
 
 | Papel | Formation | Agente | Arquivo local |
 |---|---|---|---|
-| Produção da branch (loop, `validate_spec`) | `form_u4byEDCIaWR9w132` | `agent_FdJNYpl3XbBgLJfQ` v1 | `~/geovis-spec-generator-loop.formation.json` |
+| Produção da branch (loop, `validate_spec`) | `form_u4byEDCIaWR9w132` | `agent_FdJNYpl3XbBgLJfQ` v1 | `agents/geovis-spec-generator/formation.json` |
 | Compartilhado antigo (sem tool) — nunca tocar | `form_22U2jykONy2zvOcv` | `agent_aBWkhUlqZObSry0x` v5 | `~/geovis-spec-generator.formation.json` |
 
 Sempre reconfirme com `naturali list-formations`/`get-agent` e compare `instructions` +
@@ -180,7 +170,7 @@ Regras inegociáveis:
 - **Use sempre a formation existente do loop** (`NATURALI_FORMATION_ID`), a menos que o usuário
   peça uma nova (decisão do usuário, 2026-09-28). A compartilhada antiga continua intocável.
 - Fluxo por configuração: backup do vivo (`get-formation`/`get-agent`) em `runs/<runId>/` →
-  editar o arquivo local `~/geovis-spec-generator-loop.formation.json` → copiar para
+  editar o arquivo local `agents/geovis-spec-generator/formation.json` → copiar para
   `runs/<runId>/formation.<config>.json` → `naturali validate-formation` → `update-formation` →
   registrar `agentVersion` em `versions.json`. Ao fim, restaurar o arquivo local e o vivo à
   variante aprovada (ou ao backup).

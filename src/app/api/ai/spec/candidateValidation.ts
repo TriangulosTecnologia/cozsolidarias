@@ -5,12 +5,14 @@ import {
 } from '@ttoss/geovis';
 
 import { isRenderableDatasetId } from './mapDataCatalogue';
+import { repairMapDataWiring } from './specRepairs';
 import {
   findChoroplethOnAbsoluteTotal,
   findGeometryInMapData,
   findInvalidBasemapStyleUrl,
   findInvalidGeojsonSource,
   findMissingLegend,
+  findPointLayerOnPolygonSource,
   findReclassifiedOfficialIndex,
   hoistLayerLegends,
   isRecord,
@@ -51,6 +53,31 @@ const reclassifiedOfficialIndexIssues = (spec: UnknownRecord): SpecIssue[] => {
         },
       ]
     : [];
+};
+
+/** Issues about how layers use their sources and datasets (area bias, point layers on polygons). */
+const layerIssues = (spec: UnknownRecord): SpecIssue[] => {
+  const issues: SpecIssue[] = [];
+
+  const pointLayerId = findPointLayerOnPolygonSource(spec);
+  if (pointLayerId) {
+    issues.push({
+      code: 'point-layer-on-polygon-source',
+      path: `layers[${pointLayerId}].sourceId`,
+      message: `A layer de pontos "${pointLayerId}" usa uma source de polígonos (/geo/*). Declare a source de pontos do pedido (ex.: /api/cozinhas/bolhas, um círculo por município) e aponte a layer e o "mapData[].mapId" para ela.`,
+    });
+  }
+
+  const choroplethMapDataId = findChoroplethOnAbsoluteTotal(spec);
+  if (choroplethMapDataId) {
+    issues.push({
+      code: 'choropleth-on-absolute-total',
+      path: 'mapType',
+      message: `O dataset "${choroplethMapDataId}" é um total absoluto, nunca uma variável relativa — pintá-lo como coroplético (mapType "choropleth") introduz viés de tamanho do polígono. Use pontos proporcionais ou dot density.`,
+    });
+  }
+
+  return issues;
 };
 
 /**
@@ -106,17 +133,9 @@ export const collectStructuralIssues = (spec: UnknownRecord): SpecIssue[] => {
     });
   }
 
-  const choroplethMapDataId = findChoroplethOnAbsoluteTotal(spec);
-  if (choroplethMapDataId) {
-    issues.push({
-      code: 'choropleth-on-absolute-total',
-      path: 'mapType',
-      message: `O dataset "${choroplethMapDataId}" é um total absoluto, nunca uma variável relativa — pintá-lo como coroplético (mapType "choropleth") introduz viés de tamanho do polígono. Use pontos proporcionais ou dot density.`,
-    });
-  }
-
   return [
     ...issues,
+    ...layerIssues(spec),
     ...reclassifiedOfficialIndexIssues(spec),
     ...unsupportedDatasetIssues(spec),
   ];
@@ -224,8 +243,9 @@ const toSpecIssue = (issue: GeoVisIssue): SpecIssue => {
  * const { spec: served, issues } = validateWithLocalRepairs(resolvedSpec);
  */
 export const validateWithLocalRepairs = (
-  spec: UnknownRecord
+  input: UnknownRecord
 ): { spec: UnknownRecord; issues: SpecIssue[] } => {
+  const spec = repairMapDataWiring(input);
   const first = validateSpec(spec);
   if (first.status === 'resolved') {
     return { spec, issues: [] };
