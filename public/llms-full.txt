@@ -46,3 +46,5 @@ Data flows through one boundary: `src/app → src/data-gateway → src/data-sour
 - [.github/copilot-instructions.md](.github/copilot-instructions.md): Copilot-specific repo instructions.
 - [public/geo](public/geo): raw/simplified GeoJSON boundaries for Brazilian municipalities.
 - [public/tiles](public/tiles): generated CAF vector tiles.
+
+- [Enabled kitchen share overlay](docs/enabledKitchenShare2025.md): fixed-2025 municipal habilitadas / all national kitchens, assignment provenance and independent layer controls.

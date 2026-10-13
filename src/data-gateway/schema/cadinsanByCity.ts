@@ -39,9 +39,9 @@ export type CadinsanByCity = {
   uf: string;
   /** Macro-region, from the CADINSAN source. */
   regiao: string;
-  /** Food-insecure CadÚnico families including PBF beneficiaries. */
+  /** Families classified at risk of severe food insecurity with PBF income. */
   absolutoComPbf: number;
-  /** Food-insecure CadÚnico families excluding PBF beneficiaries. */
+  /** Families classified at risk of severe food insecurity after removing PBF income. */
   absolutoSemPbf: number;
   /** Total CadÚnico registrations in the município (the share denominator). */
   cadastrosCadunico: number;

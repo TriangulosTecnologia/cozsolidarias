@@ -17,3 +17,7 @@ vendors, not source modules, so the repository's camelCase rule does not apply t
 
 o geojson dos municípios brasileiros obtidos de https://github.com/tbrugz/geodata-br
 com fonte IBGE e simplificado com aproximadamente 24% dos pontos originais.
+
+## Enabled kitchen share (2025)
+
+The independent map overlay and its data derivation are documented in [enabledKitchenShare2025](docs/enabledKitchenShare2025.md).

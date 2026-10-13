@@ -28,3 +28,5 @@ Data flows through one boundary: `src/app → src/data-gateway → src/data-sour
 ## Optional
 
 - [scripts](scripts): data-generation scripts (CAF tiles, municípios population/names, geocoding).
+
+- [Enabled kitchen share overlay](docs/enabledKitchenShare2025.md): fixed-2025 municipal habilitadas / all national kitchens, assignment provenance and independent layer controls.

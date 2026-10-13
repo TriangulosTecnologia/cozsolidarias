@@ -373,6 +373,7 @@ type MunicipioTooltipArgs = {
   register?: KitchenRateByCity;
   cafRegister?: CafByCity;
   cadinsanRegister?: CadinsanByCity;
+  cadinsanThresholds?: number[];
   value: MapHoverInfo['value'];
   rampId?: string;
 };
@@ -396,19 +397,31 @@ const MUNICIPIO_TOOLTIPS: Partial<
   cafs: ({ name, cafRegister }) => {
     return renderCafCountTooltip({ name, register: cafRegister });
   },
-  'coropletico-cadinsan-com-pbf': ({ name, cadinsanRegister, rampId }) => {
+  'coropletico-cadinsan-com-pbf': ({
+    name,
+    cadinsanRegister,
+    rampId,
+    cadinsanThresholds,
+  }) => {
     return renderCadinsanTooltip({
       name,
       register: cadinsanRegister,
       variant: 'com',
+      thresholds: cadinsanThresholds,
       rampId,
     });
   },
-  'coropletico-cadinsan-sem-pbf': ({ name, cadinsanRegister, rampId }) => {
+  'coropletico-cadinsan-sem-pbf': ({
+    name,
+    cadinsanRegister,
+    rampId,
+    cadinsanThresholds,
+  }) => {
     return renderCadinsanTooltip({
       name,
       register: cadinsanRegister,
       variant: 'sem',
+      thresholds: cadinsanThresholds,
       rampId,
     });
   },
@@ -446,6 +459,7 @@ export const renderMunicipioTooltip = ({
   register,
   cafRegister,
   cadinsanRegister,
+  cadinsanThresholds,
   value,
   rampId,
 }: {
@@ -454,6 +468,7 @@ export const renderMunicipioTooltip = ({
   register?: KitchenRateByCity;
   cafRegister?: CafByCity;
   cadinsanRegister?: CadinsanByCity;
+  cadinsanThresholds?: number[];
   value: MapHoverInfo['value'];
   /**
    * The ramp the map is being read through, from the settings zone. The card's
@@ -470,6 +485,7 @@ export const renderMunicipioTooltip = ({
       register,
       cafRegister,
       cadinsanRegister,
+      cadinsanThresholds,
       value,
       rampId,
     });

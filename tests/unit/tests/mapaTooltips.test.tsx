@@ -239,7 +239,9 @@ describe('renderMunicipioTooltip', () => {
     });
 
     expect(
-      screen.getByText('39,4% em insegurança alimentar (sem o Bolsa Família)')
+      screen.getByText(
+        '39,4% em risco de insegurança alimentar grave (sem o Bolsa Família)'
+      )
     ).toBeInTheDocument();
     expect(
       screen.getByText('5.779 de 14.656 famílias do CadÚnico neste cenário')
@@ -257,7 +259,9 @@ describe('renderMunicipioTooltip', () => {
     });
 
     expect(
-      screen.getByText('17,9% em insegurança alimentar (com o Bolsa Família)')
+      screen.getByText(
+        '17,9% em risco de insegurança alimentar grave (com o Bolsa Família)'
+      )
     ).toBeInTheDocument();
     expect(
       screen.getByText('Sem o Bolsa Família, seria 39,4% (5.779 famílias)')
@@ -304,7 +308,7 @@ describe('renderMunicipioTooltip', () => {
 
     // The active (com-PBF) scenario still shows; the "seria" effect is dropped.
     expect(
-      screen.getByText(/17,9% em insegurança alimentar/)
+      screen.getByText(/17,9% em risco de insegurança alimentar grave/)
     ).toBeInTheDocument();
     expect(
       screen.queryByText(/Sem o Bolsa Família, seria/)

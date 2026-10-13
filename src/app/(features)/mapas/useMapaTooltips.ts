@@ -7,6 +7,7 @@ import type {
   KitchenRateByCity,
 } from '@/data-gateway/schema';
 
+import { sharedCadinsanQuintiles } from './cadinsanQuintiles';
 import { cozinhaStatusLabel } from './geovisCozinhaStatusScales';
 import { type AssentamentoAtributo, type MapMode } from './geovisSpec';
 import { renderCafHexbinTooltip } from './mapaCafHexbinTooltip';
@@ -69,6 +70,27 @@ type UseMapaTooltipsParams = {
   colorRamp?: string;
 };
 
+const useTooltipLookups = (
+  kitchenByCity: KitchenRateByCity[],
+  cafByCity: CafByCity[],
+  cadinsanByCity: CadinsanByCity[],
+  assentamentos: AssentamentoAtributo[]
+) => {
+  return React.useMemo(() => {
+    return {
+      cities: indexByCodigoIbge(kitchenByCity),
+      cafs: indexByCodigoIbge(cafByCity),
+      cadinsan: indexByCodigoIbge(cadinsanByCity),
+      cadinsanThresholds: sharedCadinsanQuintiles(cadinsanByCity),
+      assentamentos: new Map(
+        assentamentos.map((atributo) => {
+          return [atributo.codImovel, atributo];
+        })
+      ),
+    };
+  }, [kitchenByCity, cafByCity, cadinsanByCity, assentamentos]);
+};
+
 /**
  * Builds the five spec-driven hover-tooltip renderers (município, assentamento,
  * kitchen point, CAF UF circle, CAF hexbin cell) for the maps playground. Each renderer and its
@@ -95,18 +117,12 @@ export const useMapaTooltips = ({
   // Every hover lookup is indexed in one memo: the four datasets all arrive
   // from the same mount fetch, so they are never stale relative to each other.
   // The choropleths join on `codigoIbge`, the assentamentos on `codImovel`.
-  const byCode = React.useMemo(() => {
-    return {
-      cities: indexByCodigoIbge(kitchenByCity),
-      cafs: indexByCodigoIbge(cafByCity),
-      cadinsan: indexByCodigoIbge(cadinsanByCity),
-      assentamentos: new Map(
-        assentamentos.map((atributo) => {
-          return [atributo.codImovel, atributo];
-        })
-      ),
-    };
-  }, [kitchenByCity, cafByCity, cadinsanByCity, assentamentos]);
+  const byCode = useTooltipLookups(
+    kitchenByCity,
+    cafByCity,
+    cadinsanByCity,
+    assentamentos
+  );
 
   const hoverTooltip = React.useCallback(
     (info: MapHoverInfo) => {
@@ -125,6 +141,7 @@ export const useMapaTooltips = ({
         cadinsanRegister: byCode.cadinsan.get(code),
         value: info.value,
         rampId: colorRamp,
+        cadinsanThresholds: byCode.cadinsanThresholds,
       });
     },
     [byCode, nomesPorCodigo, mode, colorRamp]
