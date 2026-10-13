@@ -36,4 +36,5 @@ export type {
 } from './cozinha';
 export type { CozinhaDetalhe } from './cozinhaDetalhe';
 export type { KitchenByCity, KitchenRateByCity } from './kitchenByCity';
+export type { KitchenEnabledShare2025 } from './kitchenEnabledShare';
 export type { MunicipioIvs } from './municipioIvs';

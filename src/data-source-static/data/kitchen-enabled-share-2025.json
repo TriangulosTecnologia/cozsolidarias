@@ -1,0 +1,6941 @@
+{
+  "year": 2025,
+  "nationalTotal": 5913,
+  "nationalEnabled": 1013,
+  "unresolvedEnabled": 0,
+  "provenance": [
+    {
+      "path": "src/data-source-static/data/cozinhas_com_geolocalizacao_2025.csv",
+      "sha256": "2f21354b35d31cbb418fef46763fa237cb818e2ab5b1fbb84f066a5be242bc69"
+    },
+    {
+      "path": "public/geo/geojs-100-mun.json",
+      "sha256": "133090e9d098f70cfda839492b10410cd051be5874cc09dcd0565768ae7d901f"
+    },
+    {
+      "path": "public/geo/municipios-nomes.json",
+      "sha256": "590adbc706a069ee90d4472629b2981aa95d7b01bac2dcfcb0babdb350feebbf"
+    },
+    {
+      "path": "src/data-source-static/data/caf-pontos.json",
+      "sha256": "b931b311172aa62931670f6fa1755c3de746a970c3268ee65651e60bdf332d1f"
+    }
+  ],
+  "assignments": [
+    {
+      "kitchenCode": "CS016282",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014987",
+      "municipalityCode": "2930501",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017298",
+      "municipalityCode": "3120904",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016249",
+      "municipalityCode": "2709400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015205",
+      "municipalityCode": "3513801",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016724",
+      "municipalityCode": "2408102",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016862",
+      "municipalityCode": "3302205",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014755",
+      "municipalityCode": "2705309",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016568",
+      "municipalityCode": "2303709",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016244",
+      "municipalityCode": "5201108",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015014",
+      "municipalityCode": "4317103",
+      "method": "point-in-polygon"
+    },
+    {
+      "kitchenCode": "CS014912",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016708",
+      "municipalityCode": "2800308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014558",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015412",
+      "municipalityCode": "2704302",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016854",
+      "municipalityCode": "4323002",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016954",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015245",
+      "municipalityCode": "2927408",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016337",
+      "municipalityCode": "3304144",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016973",
+      "municipalityCode": "3300456",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016905",
+      "municipalityCode": "3505609",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016487",
+      "municipalityCode": "5300108",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017303",
+      "municipalityCode": "2927408",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014534",
+      "municipalityCode": "3302007",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016759",
+      "municipalityCode": "2507507",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016671",
+      "municipalityCode": "2408102",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014876",
+      "municipalityCode": "2105401",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016009",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015171",
+      "municipalityCode": "2928604",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014686",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014775",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015938",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016127",
+      "municipalityCode": "5300108",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016992",
+      "municipalityCode": "3303401",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017138",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016511",
+      "municipalityCode": "5205109",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017260",
+      "municipalityCode": "1506559",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017256",
+      "municipalityCode": "1500800",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015442",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014633",
+      "municipalityCode": "3302403",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015703",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016172",
+      "municipalityCode": "2910800",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016993",
+      "municipalityCode": "3201407",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015134",
+      "municipalityCode": "2914802",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017136",
+      "municipalityCode": "1506302",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017137",
+      "municipalityCode": "3151602",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015552",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016530",
+      "municipalityCode": "1505502",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016991",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017152",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017150",
+      "municipalityCode": "2302206",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017153",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014567",
+      "municipalityCode": "2507507",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016157",
+      "municipalityCode": "2211001",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017149",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017129",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015930",
+      "municipalityCode": "3151206",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017104",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017247",
+      "municipalityCode": "2609600",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016526",
+      "municipalityCode": "1503200",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016303",
+      "municipalityCode": "2408102",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017199",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016478",
+      "municipalityCode": "5300108",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016861",
+      "municipalityCode": "4323002",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017189",
+      "municipalityCode": "1503200",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014639",
+      "municipalityCode": "3201308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017340",
+      "municipalityCode": "1506203",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016451",
+      "municipalityCode": "1600303",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016720",
+      "municipalityCode": "5101803",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014925",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015763",
+      "municipalityCode": "1400100",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016011",
+      "municipalityCode": "2309706",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016234",
+      "municipalityCode": "5300108",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017044",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016555",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016356",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017238",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015482",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015403",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017132",
+      "municipalityCode": "2805703",
+      "method": "point-in-polygon"
+    },
+    {
+      "kitchenCode": "CS017244",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016477",
+      "municipalityCode": "5300108",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017218",
+      "municipalityCode": "5003702",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016779",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017123",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017203",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017209",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017236",
+      "municipalityCode": "3502507",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016686",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017372",
+      "municipalityCode": "2408102",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016252",
+      "municipalityCode": "4205407",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014627",
+      "municipalityCode": "4202008",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014684",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016447",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016150",
+      "municipalityCode": "2602605",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014820",
+      "municipalityCode": "2303709",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015172",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017337",
+      "municipalityCode": "2927408",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015839",
+      "municipalityCode": "4321600",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015453",
+      "municipalityCode": "3506003",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016653",
+      "municipalityCode": "3305109",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017330",
+      "municipalityCode": "1600303",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017081",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016620",
+      "municipalityCode": "1400100",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014829",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015933",
+      "municipalityCode": "2913309",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017258",
+      "municipalityCode": "5205109",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014741",
+      "municipalityCode": "3301702",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016083",
+      "municipalityCode": "2607901",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017429",
+      "municipalityCode": "2302701",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015216",
+      "municipalityCode": "2704302",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014702",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015821",
+      "municipalityCode": "2105302",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016347",
+      "municipalityCode": "2301950",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014862",
+      "municipalityCode": "2919207",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015577",
+      "municipalityCode": "2111201",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017466",
+      "municipalityCode": "3529401",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016403",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017437",
+      "municipalityCode": "2704302",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017483",
+      "municipalityCode": "1200401",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015419",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017442",
+      "municipalityCode": "2611606",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015409",
+      "municipalityCode": "4104808",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015219",
+      "municipalityCode": "2704302",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016892",
+      "municipalityCode": "3518800",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017443",
+      "municipalityCode": "5300108",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016937",
+      "municipalityCode": "2616407",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016387",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017009",
+      "municipalityCode": "4113700",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016455",
+      "municipalityCode": "5300108",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017521",
+      "municipalityCode": "2806701",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016402",
+      "municipalityCode": "3523107",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016899",
+      "municipalityCode": "2706802",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015164",
+      "municipalityCode": "3105905",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017091",
+      "municipalityCode": "4125506",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015371",
+      "municipalityCode": "2704302",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016509",
+      "municipalityCode": "2609600",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016433",
+      "municipalityCode": "5300108",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017074",
+      "municipalityCode": "4101507",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017474",
+      "municipalityCode": "1500800",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017569",
+      "municipalityCode": "3302858",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015438",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015244",
+      "municipalityCode": "2704302",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014681",
+      "municipalityCode": "3300704",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017597",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016518",
+      "municipalityCode": "2807600",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017617",
+      "municipalityCode": "2308104",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016397",
+      "municipalityCode": "3305109",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017620",
+      "municipalityCode": "3518701",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017147",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017632",
+      "municipalityCode": "3538006",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016409",
+      "municipalityCode": "2507507",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017640",
+      "municipalityCode": "3301702",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014569",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017656",
+      "municipalityCode": "3548500",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015750",
+      "municipalityCode": "3118601",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017595",
+      "municipalityCode": "3161106",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016855",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017376",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016915",
+      "municipalityCode": "3302205",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014617",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017095",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014985",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017572",
+      "municipalityCode": "3302007",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017715",
+      "municipalityCode": "4300604",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016699",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017718",
+      "municipalityCode": "4300604",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015214",
+      "municipalityCode": "2927408",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017720",
+      "municipalityCode": "4300604",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017721",
+      "municipalityCode": "4300604",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014732",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017041",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016450",
+      "municipalityCode": "5300108",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015940",
+      "municipalityCode": "3300456",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017143",
+      "municipalityCode": "4300604",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017580",
+      "municipalityCode": "3143302",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017581",
+      "municipalityCode": "3143302",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017489",
+      "municipalityCode": "3143302",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017588",
+      "municipalityCode": "3143302",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017818",
+      "municipalityCode": "3302858",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017589",
+      "municipalityCode": "3143302",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015805",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015105",
+      "municipalityCode": "2901106",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017829",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017836",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016513",
+      "municipalityCode": "2611606",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017540",
+      "municipalityCode": "5300108",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017837",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017839",
+      "municipalityCode": "3552809",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017111",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016610",
+      "municipalityCode": "2312908",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017842",
+      "municipalityCode": "2927408",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015659",
+      "municipalityCode": "3538907",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017804",
+      "municipalityCode": "1302603",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014602",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014634",
+      "municipalityCode": "2203008",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014605",
+      "municipalityCode": "3303500",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017855",
+      "municipalityCode": "3549805",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017239",
+      "municipalityCode": "3301702",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017125",
+      "municipalityCode": "2308104",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017222",
+      "municipalityCode": "1400175",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017767",
+      "municipalityCode": "3518800",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014945",
+      "municipalityCode": "3121605",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017878",
+      "municipalityCode": "3547809",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017879",
+      "municipalityCode": "3534401",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017884",
+      "municipalityCode": "3515004",
+      "method": "historical-name"
+    },
+    {
+      "kitchenCode": "CS017885",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017886",
+      "municipalityCode": "3518800",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014618",
+      "municipalityCode": "4106902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015858",
+      "municipalityCode": "1505536",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015146",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017909",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017912",
+      "municipalityCode": "3548708",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017816",
+      "municipalityCode": "2311355",
+      "method": "point-in-polygon"
+    },
+    {
+      "kitchenCode": "CS016517",
+      "municipalityCode": "2600104",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017667",
+      "municipalityCode": "3303302",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014641",
+      "municipalityCode": "2507507",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017655",
+      "municipalityCode": "4202404",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017641",
+      "municipalityCode": "3304904",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015324",
+      "municipalityCode": "2927408",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017522",
+      "municipalityCode": "3303500",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016803",
+      "municipalityCode": "4316907",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015811",
+      "municipalityCode": "2704302",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018000",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017972",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017963",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018020",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018021",
+      "municipalityCode": "2704302",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018027",
+      "municipalityCode": "2704302",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017993",
+      "municipalityCode": "2919207",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017825",
+      "municipalityCode": "2313757",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014797",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014543",
+      "municipalityCode": "5300108",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018080",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018077",
+      "municipalityCode": "2927408",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018083",
+      "municipalityCode": "2304202",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017607",
+      "municipalityCode": "2302503",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018100",
+      "municipalityCode": "2910800",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018003",
+      "municipalityCode": "2211001",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016512",
+      "municipalityCode": "5208707",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017779",
+      "municipalityCode": "2300903",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017866",
+      "municipalityCode": "4313375",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017191",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018113",
+      "municipalityCode": "3548906",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017535",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017782",
+      "municipalityCode": "2300903",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018120",
+      "municipalityCode": "3531100",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016682",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015548",
+      "municipalityCode": "5300108",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018035",
+      "municipalityCode": "2306504",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017753",
+      "municipalityCode": "2313757",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018062",
+      "municipalityCode": "2309458",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015261",
+      "municipalityCode": "2700409",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018152",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018017",
+      "municipalityCode": "2309102",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018119",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018154",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017938",
+      "municipalityCode": "4307005",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018040",
+      "municipalityCode": "2302107",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018056",
+      "municipalityCode": "2302107",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018160",
+      "municipalityCode": "2407104",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017995",
+      "municipalityCode": "2303709",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018162",
+      "municipalityCode": "2304202",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017651",
+      "municipalityCode": "3300803",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018182",
+      "municipalityCode": "2304202",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017140",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014710",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017821",
+      "municipalityCode": "2703106",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018192",
+      "municipalityCode": "2304202",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018198",
+      "municipalityCode": "2304202",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017163",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018204",
+      "municipalityCode": "2301901",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018226",
+      "municipalityCode": "2307106",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018238",
+      "municipalityCode": "2307106",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017497",
+      "municipalityCode": "3300456",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018015",
+      "municipalityCode": "2309805",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018258",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018272",
+      "municipalityCode": "3106200",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015425",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018252",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018156",
+      "municipalityCode": "2901007",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016332",
+      "municipalityCode": "2309607",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018263",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018109",
+      "municipalityCode": "2603454",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014843",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016396",
+      "municipalityCode": "3120300",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018245",
+      "municipalityCode": "2901007",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018271",
+      "municipalityCode": "2602902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014758",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016053",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014590",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015712",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016945",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018334",
+      "municipalityCode": "4314407",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018339",
+      "municipalityCode": "2314003",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018341",
+      "municipalityCode": "2304301",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018342",
+      "municipalityCode": "2314003",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018343",
+      "municipalityCode": "2304301",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018344",
+      "municipalityCode": "2314003",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018345",
+      "municipalityCode": "2304301",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018346",
+      "municipalityCode": "2314003",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018347",
+      "municipalityCode": "2304301",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018348",
+      "municipalityCode": "2314003",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018138",
+      "municipalityCode": "3303500",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018233",
+      "municipalityCode": "3515004",
+      "method": "historical-name"
+    },
+    {
+      "kitchenCode": "CS018048",
+      "municipalityCode": "2302107",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018254",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016503",
+      "municipalityCode": "4314407",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018155",
+      "municipalityCode": "1501402",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016988",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017524",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017529",
+      "municipalityCode": "2307650",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018374",
+      "municipalityCode": "2313203",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018373",
+      "municipalityCode": "2313203",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018377",
+      "municipalityCode": "2308609",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015562",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018030",
+      "municipalityCode": "3305554",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018383",
+      "municipalityCode": "2308609",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018340",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018390",
+      "municipalityCode": "2305209",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018391",
+      "municipalityCode": "2305209",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018398",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018329",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018411",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018423",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018439",
+      "municipalityCode": "2305209",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017724",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018165",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018409",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015718",
+      "municipalityCode": "3127701",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014622",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018402",
+      "municipalityCode": "3302700",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017719",
+      "municipalityCode": "3304904",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018467",
+      "municipalityCode": "5220686",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014823",
+      "municipalityCode": "4318705",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018146",
+      "municipalityCode": "2208007",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015443",
+      "municipalityCode": "2105401",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017822",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018396",
+      "municipalityCode": "1501402",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018381",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018296",
+      "municipalityCode": "3106200",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016004",
+      "municipalityCode": "2600500",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018004",
+      "municipalityCode": "2211001",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017139",
+      "municipalityCode": "3552403",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018586",
+      "municipalityCode": "2925303",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018584",
+      "municipalityCode": "2931350",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018571",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017331",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018440",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015583",
+      "municipalityCode": "2708402",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018607",
+      "municipalityCode": "2303709",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018134",
+      "municipalityCode": "2704302",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018624",
+      "municipalityCode": "2303709",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018237",
+      "municipalityCode": "4205407",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018365",
+      "municipalityCode": "2408102",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018242",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018665",
+      "municipalityCode": "2704302",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018580",
+      "municipalityCode": "5300108",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018696",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017798",
+      "municipalityCode": "2309706",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018476",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018699",
+      "municipalityCode": "3552502",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018618",
+      "municipalityCode": "4106902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018641",
+      "municipalityCode": "2800308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018549",
+      "municipalityCode": "4106902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018579",
+      "municipalityCode": "3508801",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018378",
+      "municipalityCode": "2313203",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016716",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018321",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014800",
+      "municipalityCode": "4106902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018636",
+      "municipalityCode": "2303709",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018589",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015306",
+      "municipalityCode": "2111300",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018701",
+      "municipalityCode": "3168606",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018720",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018526",
+      "municipalityCode": "4205407",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017513",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015964",
+      "municipalityCode": "5221858",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018574",
+      "municipalityCode": "3543402",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018468",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016196",
+      "municipalityCode": "2211001",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016893",
+      "municipalityCode": "3518800",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018313",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018777",
+      "municipalityCode": "3552403",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018781",
+      "municipalityCode": "4205407",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018041",
+      "municipalityCode": "2306009",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018043",
+      "municipalityCode": "2306009",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017796",
+      "municipalityCode": "3304904",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014938",
+      "municipalityCode": "2611606",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018727",
+      "municipalityCode": "1506609",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018767",
+      "municipalityCode": "2611606",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018809",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018762",
+      "municipalityCode": "2610707",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016523",
+      "municipalityCode": "5206404",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018032",
+      "municipalityCode": "2306504",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017748",
+      "municipalityCode": "3304904",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018688",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018031",
+      "municipalityCode": "2309805",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018728",
+      "municipalityCode": "2301950",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018682",
+      "municipalityCode": "3516200",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018829",
+      "municipalityCode": "2301208",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018772",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018689",
+      "municipalityCode": "2302909",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018795",
+      "municipalityCode": "3126109",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018823",
+      "municipalityCode": "2303709",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018668",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018042",
+      "municipalityCode": "2302107",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018115",
+      "municipalityCode": "2302107",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018066",
+      "municipalityCode": "2309458",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018723",
+      "municipalityCode": "3509502",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018135",
+      "municipalityCode": "3543402",
+      "method": "point-in-polygon"
+    },
+    {
+      "kitchenCode": "CS018675",
+      "municipalityCode": "2800308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017375",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018556",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018844",
+      "municipalityCode": "2303709",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018851",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015379",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018857",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018266",
+      "municipalityCode": "3303500",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018700",
+      "municipalityCode": "2608453",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018522",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018865",
+      "municipalityCode": "4300604",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018868",
+      "municipalityCode": "4300604",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018815",
+      "municipalityCode": "3305109",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018599",
+      "municipalityCode": "5002704",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018831",
+      "municipalityCode": "4205407",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018837",
+      "municipalityCode": "2800308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018422",
+      "municipalityCode": "3515707",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018750",
+      "municipalityCode": "2609600",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018804",
+      "municipalityCode": "3518800",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017683",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018800",
+      "municipalityCode": "2507507",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015653",
+      "municipalityCode": "3556206",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018794",
+      "municipalityCode": "2202208",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018559",
+      "municipalityCode": "3508801",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018653",
+      "municipalityCode": "2303709",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018265",
+      "municipalityCode": "3301900",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018847",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018907",
+      "municipalityCode": "3301702",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018905",
+      "municipalityCode": "1302603",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018906",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018841",
+      "municipalityCode": "2800308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014668",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014649",
+      "municipalityCode": "3305109",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018920",
+      "municipalityCode": "2303709",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018443",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018925",
+      "municipalityCode": "3106200",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018855",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018552",
+      "municipalityCode": "2704302",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018933",
+      "municipalityCode": "2908903",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018797",
+      "municipalityCode": "2303709",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018822",
+      "municipalityCode": "2301950",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018924",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018934",
+      "municipalityCode": "2700409",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015582",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018764",
+      "municipalityCode": "2609600",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018706",
+      "municipalityCode": "2111300",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018859",
+      "municipalityCode": "3305554",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018942",
+      "municipalityCode": "4216602",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018536",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018929",
+      "municipalityCode": "4106902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018918",
+      "municipalityCode": "4202305",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018938",
+      "municipalityCode": "2303709",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018959",
+      "municipalityCode": "2806206",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017629",
+      "municipalityCode": "1501402",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018974",
+      "municipalityCode": "2303709",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018646",
+      "municipalityCode": "2303709",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018977",
+      "municipalityCode": "2800308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018737",
+      "municipalityCode": "2311603",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018958",
+      "municipalityCode": "2303956",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018962",
+      "municipalityCode": "2301208",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016525",
+      "municipalityCode": "2802106",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018480",
+      "municipalityCode": "2805802",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017877",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018768",
+      "municipalityCode": "2200400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017062",
+      "municipalityCode": "2408003",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018705",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018661",
+      "municipalityCode": "2303709",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015844",
+      "municipalityCode": "2111300",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018547",
+      "municipalityCode": "3304144",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018926",
+      "municipalityCode": "2303709",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019020",
+      "municipalityCode": "4307005",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016413",
+      "municipalityCode": "1501402",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017771",
+      "municipalityCode": "2704708",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018778",
+      "municipalityCode": "2507507",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018835",
+      "municipalityCode": "4318705",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018775",
+      "municipalityCode": "4318705",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019021",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019024",
+      "municipalityCode": "2303709",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018801",
+      "municipalityCode": "2303709",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018742",
+      "municipalityCode": "1500800",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018774",
+      "municipalityCode": "2301208",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018820",
+      "municipalityCode": "4317103",
+      "method": "point-in-polygon"
+    },
+    {
+      "kitchenCode": "CS016874",
+      "municipalityCode": "4318705",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018697",
+      "municipalityCode": "2927408",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019019",
+      "municipalityCode": "2310100",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018555",
+      "municipalityCode": "2704302",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018740",
+      "municipalityCode": "2611606",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019066",
+      "municipalityCode": "2704302",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018954",
+      "municipalityCode": "2303709",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017741",
+      "municipalityCode": "4300604",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019073",
+      "municipalityCode": "4300604",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018850",
+      "municipalityCode": "2200400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019076",
+      "municipalityCode": "4300604",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019078",
+      "municipalityCode": "4300604",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018873",
+      "municipalityCode": "2200400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017990",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018871",
+      "municipalityCode": "2200400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019053",
+      "municipalityCode": "4317103",
+      "method": "point-in-polygon"
+    },
+    {
+      "kitchenCode": "CS018936",
+      "municipalityCode": "4205407",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019085",
+      "municipalityCode": "2307635",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015668",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015127",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019126",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019133",
+      "municipalityCode": "4205407",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018883",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014653",
+      "municipalityCode": "3542602",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019134",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019055",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018973",
+      "municipalityCode": "2611606",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018956",
+      "municipalityCode": "2310100",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018980",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018818",
+      "municipalityCode": "4318705",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019102",
+      "municipalityCode": "4318705",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019155",
+      "municipalityCode": "3302270",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019156",
+      "municipalityCode": "2310100",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019142",
+      "municipalityCode": "3301702",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019001",
+      "municipalityCode": "2303709",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019152",
+      "municipalityCode": "2200400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018927",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019031",
+      "municipalityCode": "5211800",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019125",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019179",
+      "municipalityCode": "4300604",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019103",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019174",
+      "municipalityCode": "3305109",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017190",
+      "municipalityCode": "1507003",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018704",
+      "municipalityCode": "3300308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019151",
+      "municipalityCode": "2611606",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014791",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019193",
+      "municipalityCode": "2927408",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019018",
+      "municipalityCode": "3552403",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018139",
+      "municipalityCode": "2311231",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018866",
+      "municipalityCode": "1500800",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018545",
+      "municipalityCode": "2301208",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019206",
+      "municipalityCode": "2925303",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018843",
+      "municipalityCode": "5002704",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019195",
+      "municipalityCode": "4318705",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018025",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019219",
+      "municipalityCode": "3302700",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019003",
+      "municipalityCode": "2207702",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016306",
+      "municipalityCode": "3543402",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019107",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019023",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018978",
+      "municipalityCode": "4318705",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019013",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019227",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015318",
+      "municipalityCode": "4316907",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018803",
+      "municipalityCode": "2609600",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019225",
+      "municipalityCode": "2800308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019239",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019062",
+      "municipalityCode": "4305108",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019037",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016601",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015675",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018881",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019072",
+      "municipalityCode": "2200400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019143",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016342",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018678",
+      "municipalityCode": "2303709",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017275",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019040",
+      "municipalityCode": "4318705",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019127",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019262",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014821",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019249",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019135",
+      "municipalityCode": "2928000",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018838",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018886",
+      "municipalityCode": "2611606",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019251",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015107",
+      "municipalityCode": "2609600",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019256",
+      "municipalityCode": "2509107",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019275",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015495",
+      "municipalityCode": "2111300",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018917",
+      "municipalityCode": "4318705",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019139",
+      "municipalityCode": "3530607",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019248",
+      "municipalityCode": "3106200",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015256",
+      "municipalityCode": "2902104",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019217",
+      "municipalityCode": "2303709",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019279",
+      "municipalityCode": "2927408",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019222",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019090",
+      "municipalityCode": "4317103",
+      "method": "point-in-polygon"
+    },
+    {
+      "kitchenCode": "CS018982",
+      "municipalityCode": "4316808",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019141",
+      "municipalityCode": "2800308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019216",
+      "municipalityCode": "2301950",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018703",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015530",
+      "municipalityCode": "4316907",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019244",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019005",
+      "municipalityCode": "1302603",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019271",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019197",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019121",
+      "municipalityCode": "2516003",
+      "method": "point-in-polygon"
+    },
+    {
+      "kitchenCode": "CS019017",
+      "municipalityCode": "2301950",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019291",
+      "municipalityCode": "2300150",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019009",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019300",
+      "municipalityCode": "2927408",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018174",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019269",
+      "municipalityCode": "2311603",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016322",
+      "municipalityCode": "2930709",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019285",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019015",
+      "municipalityCode": "2208007",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017564",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016185",
+      "municipalityCode": "2211001",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019030",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019224",
+      "municipalityCode": "2927408",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019029",
+      "municipalityCode": "2303709",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019039",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017414",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019319",
+      "municipalityCode": "5300108",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019316",
+      "municipalityCode": "2903607",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018669",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017505",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019283",
+      "municipalityCode": "2925907",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019201",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019333",
+      "municipalityCode": "3304904",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019007",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015728",
+      "municipalityCode": "5208707",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018623",
+      "municipalityCode": "2303709",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014948",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019241",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018806",
+      "municipalityCode": "3154606",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019277",
+      "municipalityCode": "4304606",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017598",
+      "municipalityCode": "3300456",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019187",
+      "municipalityCode": "1302603",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019057",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017977",
+      "municipalityCode": "3115300",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019347",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018987",
+      "municipalityCode": "2610806",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018904",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017322",
+      "municipalityCode": "5222005",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019360",
+      "municipalityCode": "2303709",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019080",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017553",
+      "municipalityCode": "5300108",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017713",
+      "municipalityCode": "3510203",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016516",
+      "municipalityCode": "2607901",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019223",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018827",
+      "municipalityCode": "4317103",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018930",
+      "municipalityCode": "2303709",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019036",
+      "municipalityCode": "4205407",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018137",
+      "municipalityCode": "2403608",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016804",
+      "municipalityCode": "4316907",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017030",
+      "municipalityCode": "2108603",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019435",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019413",
+      "municipalityCode": "4106902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019367",
+      "municipalityCode": "4106902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019452",
+      "municipalityCode": "2303709",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019454",
+      "municipalityCode": "4125506",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019447",
+      "municipalityCode": "4205407",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016456",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019455",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018734",
+      "municipalityCode": "4318705",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017601",
+      "municipalityCode": "3302502",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019473",
+      "municipalityCode": "1500800",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019386",
+      "municipalityCode": "4105805",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018394",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019472",
+      "municipalityCode": "5208707",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019487",
+      "municipalityCode": "5208707",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017861",
+      "municipalityCode": "2311355",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019470",
+      "municipalityCode": "4106902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019366",
+      "municipalityCode": "5300108",
+      "method": "point-in-polygon"
+    },
+    {
+      "kitchenCode": "CS019486",
+      "municipalityCode": "4205407",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019465",
+      "municipalityCode": "4205407",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016255",
+      "municipalityCode": "4113700",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019512",
+      "municipalityCode": "2611606",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019461",
+      "municipalityCode": "2611606",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019462",
+      "municipalityCode": "2611606",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019460",
+      "municipalityCode": "2611606",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019428",
+      "municipalityCode": "4205407",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019459",
+      "municipalityCode": "2611606",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019213",
+      "municipalityCode": "2603454",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019433",
+      "municipalityCode": "2611606",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019484",
+      "municipalityCode": "2609600",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019489",
+      "municipalityCode": "2610707",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019469",
+      "municipalityCode": "2609600",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019464",
+      "municipalityCode": "2609600",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019458",
+      "municipalityCode": "2610707",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019528",
+      "municipalityCode": "2611606",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019421",
+      "municipalityCode": "4205407",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018649",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018647",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019535",
+      "municipalityCode": "2611606",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018267",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018632",
+      "municipalityCode": "2611606",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019530",
+      "municipalityCode": "2610707",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019537",
+      "municipalityCode": "2211001",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019531",
+      "municipalityCode": "2507507",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019546",
+      "municipalityCode": "2506004",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019480",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019543",
+      "municipalityCode": "2501104",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014575",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016971",
+      "municipalityCode": "1400100",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015390",
+      "municipalityCode": "1100114",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018939",
+      "municipalityCode": "2507507",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017636",
+      "municipalityCode": "3300456",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019548",
+      "municipalityCode": "2612208",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019604",
+      "municipalityCode": "4209102",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017819",
+      "municipalityCode": "3170206",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019203",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018932",
+      "municipalityCode": "2303709",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019334",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019590",
+      "municipalityCode": "4305108",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019658",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019551",
+      "municipalityCode": "4305108",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015955",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019575",
+      "municipalityCode": "3516408",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019620",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019679",
+      "municipalityCode": "2504009",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019671",
+      "municipalityCode": "2928000",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019686",
+      "municipalityCode": "3518800",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015084",
+      "municipalityCode": "2915601",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019702",
+      "municipalityCode": "2504009",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018984",
+      "municipalityCode": "5002704",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019706",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019708",
+      "municipalityCode": "5300108",
+      "method": "point-in-polygon"
+    },
+    {
+      "kitchenCode": "CS019663",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019713",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019672",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019515",
+      "municipalityCode": "3509007",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016778",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019639",
+      "municipalityCode": "2504009",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019718",
+      "municipalityCode": "4119905",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019586",
+      "municipalityCode": "5201108",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019698",
+      "municipalityCode": "2504009",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019635",
+      "municipalityCode": "4305108",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019636",
+      "municipalityCode": "4305108",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019637",
+      "municipalityCode": "4305108",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019564",
+      "municipalityCode": "4305108",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019688",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016702",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016558",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019661",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015328",
+      "municipalityCode": "2919926",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014690",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019358",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019722",
+      "municipalityCode": "2704302",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019678",
+      "municipalityCode": "5201108",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019563",
+      "municipalityCode": "2101970",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019553",
+      "municipalityCode": "4305108",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019098",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019680",
+      "municipalityCode": "4305108",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018382",
+      "municipalityCode": "2308609",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018372",
+      "municipalityCode": "2308609",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019759",
+      "municipalityCode": "4106902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019558",
+      "municipalityCode": "4305108",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019709",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019200",
+      "municipalityCode": "4314407",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019385",
+      "municipalityCode": "3303302",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019771",
+      "municipalityCode": "3301702",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019783",
+      "municipalityCode": "4106902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019205",
+      "municipalityCode": "4306767",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019787",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019606",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019694",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019750",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019803",
+      "municipalityCode": "4106902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017133",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016062",
+      "municipalityCode": "4209102",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015040",
+      "municipalityCode": "1302603",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019556",
+      "municipalityCode": "4209102",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018819",
+      "municipalityCode": "2800308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019691",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019689",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019690",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019828",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019768",
+      "municipalityCode": "3509007",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019369",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019824",
+      "municipalityCode": "4125506",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019805",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016208",
+      "municipalityCode": "2704302",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019557",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019782",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019732",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019704",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019779",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019786",
+      "municipalityCode": "2408102",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019818",
+      "municipalityCode": "3516309",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019113",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019826",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019150",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019756",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019819",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019096",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019022",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019725",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019848",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019773",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019760",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019665",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019846",
+      "municipalityCode": "4106902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019695",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019696",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019726",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019867",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019861",
+      "municipalityCode": "2211001",
+      "method": "point-in-polygon"
+    },
+    {
+      "kitchenCode": "CS019667",
+      "municipalityCode": "3301702",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019873",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019147",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019612",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016751",
+      "municipalityCode": "2408102",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019832",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019727",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019692",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019739",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015619",
+      "municipalityCode": "2704005",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019856",
+      "municipalityCode": "2611101",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019752",
+      "municipalityCode": "2304400",
+      "method": "point-in-polygon"
+    },
+    {
+      "kitchenCode": "CS019891",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019711",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019897",
+      "municipalityCode": "2930709",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019884",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019901",
+      "municipalityCode": "2930709",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019904",
+      "municipalityCode": "5201108",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019896",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019890",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019881",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017178",
+      "municipalityCode": "2302602",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019937",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019874",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019882",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019855",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019918",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019926",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019932",
+      "municipalityCode": "2310258",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019983",
+      "municipalityCode": "2310258",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019960",
+      "municipalityCode": "2310258",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016358",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019979",
+      "municipalityCode": "2308203",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019974",
+      "municipalityCode": "2304905",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019978",
+      "municipalityCode": "2304905",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015389",
+      "municipalityCode": "3132107",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019700",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015730",
+      "municipalityCode": "2702900",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014632",
+      "municipalityCode": "3300456",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020018",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019453",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019398",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018990",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020036",
+      "municipalityCode": "2604106",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020038",
+      "municipalityCode": "2604106",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020025",
+      "municipalityCode": "5002704",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020052",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020056",
+      "municipalityCode": "5201108",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020058",
+      "municipalityCode": "2604106",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019467",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019357",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019990",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019534",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020041",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019395",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019900",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020037",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019751",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019991",
+      "municipalityCode": "2305654",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020088",
+      "municipalityCode": "2927408",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020093",
+      "municipalityCode": "2927408",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020100",
+      "municipalityCode": "2927408",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020101",
+      "municipalityCode": "2927408",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020020",
+      "municipalityCode": "2305654",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017043",
+      "municipalityCode": "3136702",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018674",
+      "municipalityCode": "2507507",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020133",
+      "municipalityCode": "2927408",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020136",
+      "municipalityCode": "2931707",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020141",
+      "municipalityCode": "2930709",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020143",
+      "municipalityCode": "2927408",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017983",
+      "municipalityCode": "2927408",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020154",
+      "municipalityCode": "2908507",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020158",
+      "municipalityCode": "2927408",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020161",
+      "municipalityCode": "2927408",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020169",
+      "municipalityCode": "2921005",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020155",
+      "municipalityCode": "2313500",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020160",
+      "municipalityCode": "2313500",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018964",
+      "municipalityCode": "4106902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019264",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019613",
+      "municipalityCode": "4305108",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019490",
+      "municipalityCode": "2610707",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018335",
+      "municipalityCode": "2111300",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019456",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016662",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019591",
+      "municipalityCode": "4305108",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020208",
+      "municipalityCode": "2927408",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019906",
+      "municipalityCode": "2200400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020210",
+      "municipalityCode": "2611101",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020202",
+      "municipalityCode": "3505708",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014545",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019742",
+      "municipalityCode": "2111300",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017056",
+      "municipalityCode": "3170206",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020005",
+      "municipalityCode": "3300605",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015391",
+      "municipalityCode": "2408102",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016472",
+      "municipalityCode": "5103403",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019254",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019010",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018576",
+      "municipalityCode": "2211001",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019233",
+      "municipalityCode": "2504009",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019850",
+      "municipalityCode": "2800308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018506",
+      "municipalityCode": "4313409",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014623",
+      "municipalityCode": "2504009",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016951",
+      "municipalityCode": "4300406",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015560",
+      "municipalityCode": "4316907",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019954",
+      "municipalityCode": "5201108",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020159",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019229",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015862",
+      "municipalityCode": "3538709",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020296",
+      "municipalityCode": "2611606",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015154",
+      "municipalityCode": "4323002",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020350",
+      "municipalityCode": "2211001",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019280",
+      "municipalityCode": "3301702",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019295",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019331",
+      "municipalityCode": "5201108",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020242",
+      "municipalityCode": "4318705",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020432",
+      "municipalityCode": "2704302",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017045",
+      "municipalityCode": "2919207",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019253",
+      "municipalityCode": "4313706",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019806",
+      "municipalityCode": "4314407",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019601",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020419",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019875",
+      "municipalityCode": "4309209",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018981",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017048",
+      "municipalityCode": "3111309",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020468",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019081",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014756",
+      "municipalityCode": "4316907",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019992",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020473",
+      "municipalityCode": "4313706",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020494",
+      "municipalityCode": "4313706",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020509",
+      "municipalityCode": "4313706",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015242",
+      "municipalityCode": "2408102",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020317",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019580",
+      "municipalityCode": "4300604",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020291",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017254",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018403",
+      "municipalityCode": "5103403",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020256",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019660",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020541",
+      "municipalityCode": "4323002",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020546",
+      "municipalityCode": "4316808",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020548",
+      "municipalityCode": "4316808",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020306",
+      "municipalityCode": "2211001",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019491",
+      "municipalityCode": "4314407",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018692",
+      "municipalityCode": "2304400",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020241",
+      "municipalityCode": "4306908",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020458",
+      "municipalityCode": "2910800",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018970",
+      "municipalityCode": "4300604",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020336",
+      "municipalityCode": "2927408",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015402",
+      "municipalityCode": "3106200",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020342",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019207",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020606",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020412",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020639",
+      "municipalityCode": "4125506",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020316",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020617",
+      "municipalityCode": "3528502",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018420",
+      "municipalityCode": "4314407",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020413",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020252",
+      "municipalityCode": "4307807",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020251",
+      "municipalityCode": "4307807",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020484",
+      "municipalityCode": "4313706",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS017269",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020304",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020471",
+      "municipalityCode": "2700300",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016767",
+      "municipalityCode": "2800308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020326",
+      "municipalityCode": "4318705",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS018725",
+      "municipalityCode": "4322202",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020426",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS015252",
+      "municipalityCode": "3304557",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020649",
+      "municipalityCode": "3548708",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020415",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020400",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019252",
+      "municipalityCode": "3303500",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020501",
+      "municipalityCode": "2510709",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020630",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020387",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020695",
+      "municipalityCode": "4300604",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020691",
+      "municipalityCode": "4300604",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016589",
+      "municipalityCode": "4313706",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020660",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020331",
+      "municipalityCode": "2306900",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS019208",
+      "municipalityCode": "4306767",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020750",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020751",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020764",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020686",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020707",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020508",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020771",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020769",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020770",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020743",
+      "municipalityCode": "5300108",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020759",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020757",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020766",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS016888",
+      "municipalityCode": "4318705",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020790",
+      "municipalityCode": "3550308",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020788",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020814",
+      "municipalityCode": "4316808",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS014958",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020789",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020754",
+      "municipalityCode": "4314902",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020756",
+      "municipalityCode": "4323002",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020760",
+      "municipalityCode": "4323002",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020869",
+      "municipalityCode": "4323002",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020783",
+      "municipalityCode": "2910800",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020907",
+      "municipalityCode": "3518800",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020664",
+      "municipalityCode": "3518800",
+      "method": "name-uf"
+    },
+    {
+      "kitchenCode": "CS020680",
+      "municipalityCode": "3106200",
+      "method": "name-uf"
+    }
+  ],
+  "municipalities": [
+    {
+      "code": "1100114",
+      "name": "Jaru",
+      "uf": "RO",
+      "count": 1,
+      "anchor": [-62.48115022583559, -10.432]
+    },
+    {
+      "code": "1200401",
+      "name": "Rio Branco",
+      "uf": "AC",
+      "count": 1,
+      "anchor": [-68.16758663366338, -10.0085]
+    },
+    {
+      "code": "1302603",
+      "name": "Manaus",
+      "uf": "AM",
+      "count": 5,
+      "anchor": [-60.01713377192982, -3.0265]
+    },
+    {
+      "code": "1400100",
+      "name": "Boa Vista",
+      "uf": "RR",
+      "count": 3,
+      "anchor": [-60.66068333333334, 3.3855000000000004]
+    },
+    {
+      "code": "1400175",
+      "name": "Cantá",
+      "uf": "RR",
+      "count": 1,
+      "anchor": [-60.59659886363636, 2.0125]
+    },
+    {
+      "code": "1500800",
+      "name": "Ananindeua",
+      "uf": "PA",
+      "count": 5,
+      "anchor": [-48.391679701492535, -1.3450000000000002]
+    },
+    {
+      "code": "1501402",
+      "name": "Belém",
+      "uf": "PA",
+      "count": 4,
+      "anchor": [-48.45916413932888, -1.168]
+    },
+    {
+      "code": "1503200",
+      "name": "Igarapé-Açu",
+      "uf": "PA",
+      "count": 2,
+      "anchor": [-47.56252932330827, -1.07]
+    },
+    {
+      "code": "1505502",
+      "name": "Paragominas",
+      "uf": "PA",
+      "count": 1,
+      "anchor": [-47.87954310344828, -3.4475]
+    },
+    {
+      "code": "1505536",
+      "name": "Parauapebas",
+      "uf": "PA",
+      "count": 1,
+      "anchor": [-50.43386538461539, -6.192]
+    },
+    {
+      "code": "1506203",
+      "name": "Salinópolis",
+      "uf": "PA",
+      "count": 1,
+      "anchor": [-47.33869886363637, -0.6615]
+    },
+    {
+      "code": "1506302",
+      "name": "Salvaterra",
+      "uf": "PA",
+      "count": 1,
+      "anchor": [-48.53807312467998, -0.8654999999999999]
+    },
+    {
+      "code": "1506559",
+      "name": "Santa Luzia do Pará",
+      "uf": "PA",
+      "count": 1,
+      "anchor": [-47.03911366985999, -1.345]
+    },
+    {
+      "code": "1506609",
+      "name": "Santa Maria do Pará",
+      "uf": "PA",
+      "count": 1,
+      "anchor": [-47.542120406189554, -1.416]
+    },
+    {
+      "code": "1507003",
+      "name": "Santo Antônio do Tauá",
+      "uf": "PA",
+      "count": 1,
+      "anchor": [-48.22775201612903, -1.0465]
+    },
+    {
+      "code": "1600303",
+      "name": "Macapá",
+      "uf": "AP",
+      "count": 2,
+      "anchor": [-50.469245, 0.8025]
+    },
+    {
+      "code": "2101970",
+      "name": "Boa Vista do Gurupi",
+      "uf": "MA",
+      "count": 1,
+      "anchor": [-46.199085, -1.7465]
+    },
+    {
+      "code": "2105302",
+      "name": "Imperatriz",
+      "uf": "MA",
+      "count": 1,
+      "anchor": [-47.648700552825545, -5.3375]
+    },
+    {
+      "code": "2105401",
+      "name": "Itapecuru Mirim",
+      "uf": "MA",
+      "count": 2,
+      "anchor": [-44.295019960861055, -3.393]
+    },
+    {
+      "code": "2108603",
+      "name": "Pinheiro",
+      "uf": "MA",
+      "count": 1,
+      "anchor": [-45.0931820494186, -2.3975]
+    },
+    {
+      "code": "2111201",
+      "name": "São José de Ribamar",
+      "uf": "MA",
+      "count": 1,
+      "anchor": [-44.095946874999996, -2.5645]
+    },
+    {
+      "code": "2111300",
+      "name": "São Luís",
+      "uf": "MA",
+      "count": 6,
+      "anchor": [-44.30250418994413, -2.7110000000000003]
+    },
+    {
+      "code": "2200400",
+      "name": "Altos",
+      "uf": "PI",
+      "count": 7,
+      "anchor": [-42.46151213402733, -4.920999999999999]
+    },
+    {
+      "code": "2202208",
+      "name": "Campo Maior",
+      "uf": "PI",
+      "count": 1,
+      "anchor": [-42.13752824733096, -4.754]
+    },
+    {
+      "code": "2203008",
+      "name": "Cristalândia do Piauí",
+      "uf": "PI",
+      "count": 1,
+      "anchor": [-45.116023823028925, -10.742]
+    },
+    {
+      "code": "2207702",
+      "name": "Parnaíba",
+      "uf": "PI",
+      "count": 1,
+      "anchor": [-41.74761025311025, -2.9139999999999997]
+    },
+    {
+      "code": "2208007",
+      "name": "Picos",
+      "uf": "PI",
+      "count": 2,
+      "anchor": [-41.46229516129032, -7.0805]
+    },
+    {
+      "code": "2211001",
+      "name": "Teresina",
+      "uf": "PI",
+      "count": 10,
+      "anchor": [-42.733969387755096, -4.92]
+    },
+    {
+      "code": "2300150",
+      "name": "Acarape",
+      "uf": "CE",
+      "count": 1,
+      "anchor": [-38.641774946287896, -4.234500000000001]
+    },
+    {
+      "code": "2300903",
+      "name": "Apuiarés",
+      "uf": "CE",
+      "count": 2,
+      "anchor": [-39.32631643356643, -3.9535]
+    },
+    {
+      "code": "2301208",
+      "name": "Aracoiaba",
+      "uf": "CE",
+      "count": 4,
+      "anchor": [-38.71581182795699, -4.42]
+    },
+    {
+      "code": "2301901",
+      "name": "Barbalha",
+      "uf": "CE",
+      "count": 1,
+      "anchor": [-39.348945732433506, -7.37]
+    },
+    {
+      "code": "2301950",
+      "name": "Barreira",
+      "uf": "CE",
+      "count": 5,
+      "anchor": [-38.61850285714286, -4.349]
+    },
+    {
+      "code": "2302107",
+      "name": "Baturité",
+      "uf": "CE",
+      "count": 5,
+      "anchor": [-38.849434283088236, -4.3095]
+    },
+    {
+      "code": "2302206",
+      "name": "Beberibe",
+      "uf": "CE",
+      "count": 1,
+      "anchor": [-38.04562517592516, -4.395]
+    },
+    {
+      "code": "2302503",
+      "name": "Brejo Santo",
+      "uf": "CE",
+      "count": 1,
+      "anchor": [-38.89972578562204, -7.605]
+    },
+    {
+      "code": "2302602",
+      "name": "Camocim",
+      "uf": "CE",
+      "count": 1,
+      "anchor": [-40.78924128781878, -2.9855]
+    },
+    {
+      "code": "2302701",
+      "name": "Campos Sales",
+      "uf": "CE",
+      "count": 1,
+      "anchor": [-40.25090819397993, -6.9559999999999995]
+    },
+    {
+      "code": "2302909",
+      "name": "Capistrano",
+      "uf": "CE",
+      "count": 1,
+      "anchor": [-38.917556737588654, -4.486000000000001]
+    },
+    {
+      "code": "2303709",
+      "name": "Caucaia",
+      "uf": "CE",
+      "count": 28,
+      "anchor": [-38.79190697674419, -3.776]
+    },
+    {
+      "code": "2303956",
+      "name": "Chorozinho",
+      "uf": "CE",
+      "count": 1,
+      "anchor": [-38.474109161793365, -4.259]
+    },
+    {
+      "code": "2304202",
+      "name": "Crato",
+      "uf": "CE",
+      "count": 5,
+      "anchor": [-39.4695, -7.119999999999999]
+    },
+    {
+      "code": "2304301",
+      "name": "Farias Brito",
+      "uf": "CE",
+      "count": 4,
+      "anchor": [-39.514271171171174, -6.929]
+    },
+    {
+      "code": "2304400",
+      "name": "Fortaleza",
+      "uf": "CE",
+      "count": 89,
+      "anchor": [-38.52494907407407, -3.8025]
+    },
+    {
+      "code": "2304905",
+      "name": "Groaíras",
+      "uf": "CE",
+      "count": 2,
+      "anchor": [-40.356267787114845, -3.9320000000000004]
+    },
+    {
+      "code": "2305209",
+      "name": "Hidrolândia",
+      "uf": "CE",
+      "count": 3,
+      "anchor": [-40.41730595813205, -4.478]
+    },
+    {
+      "code": "2305654",
+      "name": "Ipaporanga",
+      "uf": "CE",
+      "count": 2,
+      "anchor": [-40.792229999999996, -4.9195]
+    },
+    {
+      "code": "2306009",
+      "name": "Iracema",
+      "uf": "CE",
+      "count": 2,
+      "anchor": [-38.3149035218254, -5.8629999999999995]
+    },
+    {
+      "code": "2306504",
+      "name": "Itapiúna",
+      "uf": "CE",
+      "count": 2,
+      "anchor": [-38.95342985074627, -4.627000000000001]
+    },
+    {
+      "code": "2306900",
+      "name": "Jaguaribe",
+      "uf": "CE",
+      "count": 1,
+      "anchor": [-38.727868002544525, -5.995]
+    },
+    {
+      "code": "2307106",
+      "name": "Jardim",
+      "uf": "CE",
+      "count": 2,
+      "anchor": [-39.22051515151515, -7.625]
+    },
+    {
+      "code": "2307635",
+      "name": "Madalena",
+      "uf": "CE",
+      "count": 1,
+      "anchor": [-39.52306162162162, -4.757]
+    },
+    {
+      "code": "2307650",
+      "name": "Maracanaú",
+      "uf": "CE",
+      "count": 1,
+      "anchor": [-38.61532692307692, -3.8585000000000003]
+    },
+    {
+      "code": "2308104",
+      "name": "Mauriti",
+      "uf": "CE",
+      "count": 2,
+      "anchor": [-38.73522639484979, -7.445]
+    },
+    {
+      "code": "2308203",
+      "name": "Meruoca",
+      "uf": "CE",
+      "count": 1,
+      "anchor": [-40.441541666666666, -3.621]
+    },
+    {
+      "code": "2308609",
+      "name": "Monsenhor Tabosa",
+      "uf": "CE",
+      "count": 4,
+      "anchor": [-40.04014361702128, -4.904]
+    },
+    {
+      "code": "2309102",
+      "name": "Mulungu",
+      "uf": "CE",
+      "count": 1,
+      "anchor": [-38.987557479443396, -4.3115000000000006]
+    },
+    {
+      "code": "2309458",
+      "name": "Ocara",
+      "uf": "CE",
+      "count": 2,
+      "anchor": [-38.50672894736842, -4.5655]
+    },
+    {
+      "code": "2309607",
+      "name": "Pacajus",
+      "uf": "CE",
+      "count": 1,
+      "anchor": [-38.4999, -4.167]
+    },
+    {
+      "code": "2309706",
+      "name": "Pacatuba",
+      "uf": "CE",
+      "count": 2,
+      "anchor": [-38.61762159090909, -4.0045]
+    },
+    {
+      "code": "2309805",
+      "name": "Pacoti",
+      "uf": "CE",
+      "count": 2,
+      "anchor": [-38.90243219076006, -4.1775]
+    },
+    {
+      "code": "2310100",
+      "name": "Palmácia",
+      "uf": "CE",
+      "count": 3,
+      "anchor": [-38.86508333333333, -4.1425]
+    },
+    {
+      "code": "2310258",
+      "name": "Paraipaba",
+      "uf": "CE",
+      "count": 3,
+      "anchor": [-39.16733333333333, -3.385]
+    },
+    {
+      "code": "2311231",
+      "name": "Potiretama",
+      "uf": "CE",
+      "count": 1,
+      "anchor": [-38.1723850087668, -5.685499999999999]
+    },
+    {
+      "code": "2311355",
+      "name": "Quixelô",
+      "uf": "CE",
+      "count": 2,
+      "anchor": [-39.14033727746418, -6.1635]
+    },
+    {
+      "code": "2311603",
+      "name": "Redenção",
+      "uf": "CE",
+      "count": 2,
+      "anchor": [-38.779919780219785, -4.232]
+    },
+    {
+      "code": "2312908",
+      "name": "Sobral",
+      "uf": "CE",
+      "count": 1,
+      "anchor": [-40.3198843537415, -3.695]
+    },
+    {
+      "code": "2313203",
+      "name": "Tamboril",
+      "uf": "CE",
+      "count": 3,
+      "anchor": [-40.33689130434783, -5.007]
+    },
+    {
+      "code": "2313500",
+      "name": "Trairi",
+      "uf": "CE",
+      "count": 2,
+      "anchor": [-39.33966428571429, -3.31]
+    },
+    {
+      "code": "2313757",
+      "name": "Umirim",
+      "uf": "CE",
+      "count": 2,
+      "anchor": [-39.394600439882694, -3.6885]
+    },
+    {
+      "code": "2314003",
+      "name": "Várzea Alegre",
+      "uf": "CE",
+      "count": 5,
+      "anchor": [-39.33618877889981, -6.7985]
+    },
+    {
+      "code": "2403608",
+      "name": "Extremoz",
+      "uf": "RN",
+      "count": 1,
+      "anchor": [-35.26806234656301, -5.6965]
+    },
+    {
+      "code": "2407104",
+      "name": "Macaíba",
+      "uf": "RN",
+      "count": 1,
+      "anchor": [-35.429733850129196, -5.945]
+    },
+    {
+      "code": "2408003",
+      "name": "Mossoró",
+      "uf": "RN",
+      "count": 1,
+      "anchor": [-37.32366091954023, -5.158]
+    },
+    {
+      "code": "2408102",
+      "name": "Natal",
+      "uf": "RN",
+      "count": 9,
+      "anchor": [-35.230753731343285, -5.834]
+    },
+    {
+      "code": "2501104",
+      "name": "Areia",
+      "uf": "PB",
+      "count": 1,
+      "anchor": [-35.681738764044944, -6.927]
+    },
+    {
+      "code": "2504009",
+      "name": "Campina Grande",
+      "uf": "PB",
+      "count": 6,
+      "anchor": [-35.9550669117647, -7.2695]
+    },
+    {
+      "code": "2506004",
+      "name": "Esperança",
+      "uf": "PB",
+      "count": 1,
+      "anchor": [-35.894999999999996, -6.992]
+    },
+    {
+      "code": "2507507",
+      "name": "João Pessoa",
+      "uf": "PB",
+      "count": 9,
+      "anchor": [-34.8852006029049, -7.1935]
+    },
+    {
+      "code": "2509107",
+      "name": "Mari",
+      "uf": "PB",
+      "count": 1,
+      "anchor": [-35.30817346491229, -7.037]
+    },
+    {
+      "code": "2510709",
+      "name": "Passagem",
+      "uf": "PB",
+      "count": 1,
+      "anchor": [-37.04619571314103, -7.1325]
+    },
+    {
+      "code": "2516003",
+      "name": "Solânea",
+      "uf": "PB",
+      "count": 1,
+      "anchor": [-35.723948280098284, -6.7844999999999995]
+    },
+    {
+      "code": "2600104",
+      "name": "Afogados da Ingazeira",
+      "uf": "PE",
+      "count": 1,
+      "anchor": [-37.61306081081081, -7.765499999999999]
+    },
+    {
+      "code": "2600500",
+      "name": "Águas Belas",
+      "uf": "PE",
+      "count": 1,
+      "anchor": [-37.07016247126437, -9.1965]
+    },
+    {
+      "code": "2602605",
+      "name": "Brejo da Madre de Deus",
+      "uf": "PE",
+      "count": 1,
+      "anchor": [-36.24758579881657, -7.986000000000001]
+    },
+    {
+      "code": "2602902",
+      "name": "Cabo de Santo Agostinho",
+      "uf": "PE",
+      "count": 1,
+      "anchor": [-35.09772937100213, -8.2485]
+    },
+    {
+      "code": "2603454",
+      "name": "Camaragibe",
+      "uf": "PE",
+      "count": 2,
+      "anchor": [-34.98875555555556, -8.0185]
+    },
+    {
+      "code": "2604106",
+      "name": "Caruaru",
+      "uf": "PE",
+      "count": 3,
+      "anchor": [-36.04662893617021, -8.0465]
+    },
+    {
+      "code": "2607901",
+      "name": "Jaboatão dos Guararapes",
+      "uf": "PE",
+      "count": 2,
+      "anchor": [-35.004352150537635, -8.1525]
+    },
+    {
+      "code": "2608453",
+      "name": "Lagoa do Carro",
+      "uf": "PE",
+      "count": 1,
+      "anchor": [-35.34127884615384, -7.835]
+    },
+    {
+      "code": "2609600",
+      "name": "Olinda",
+      "uf": "PE",
+      "count": 9,
+      "anchor": [-34.86718023255814, -7.984500000000001]
+    },
+    {
+      "code": "2610707",
+      "name": "Paulista",
+      "uf": "PE",
+      "count": 5,
+      "anchor": [-34.968135714285715, -7.9315]
+    },
+    {
+      "code": "2610806",
+      "name": "Pedra",
+      "uf": "PE",
+      "count": 1,
+      "anchor": [-36.873599685732245, -8.73]
+    },
+    {
+      "code": "2611101",
+      "name": "Petrolina",
+      "uf": "PE",
+      "count": 2,
+      "anchor": [-40.52866929133859, -9.030999999999999]
+    },
+    {
+      "code": "2611606",
+      "name": "Recife",
+      "uf": "PE",
+      "count": 18,
+      "anchor": [-34.934637823371986, -8.05]
+    },
+    {
+      "code": "2612208",
+      "name": "Salgueiro",
+      "uf": "PE",
+      "count": 1,
+      "anchor": [-39.09114670582227, -8.175]
+    },
+    {
+      "code": "2616407",
+      "name": "Vitória de Santo Antão",
+      "uf": "PE",
+      "count": 1,
+      "anchor": [-35.31082, -8.08]
+    },
+    {
+      "code": "2700300",
+      "name": "Arapiraca",
+      "uf": "AL",
+      "count": 1,
+      "anchor": [-36.66184429824561, -9.7085]
+    },
+    {
+      "code": "2700409",
+      "name": "Atalaia",
+      "uf": "AL",
+      "count": 2,
+      "anchor": [-36.07823529411765, -9.485]
+    },
+    {
+      "code": "2702900",
+      "name": "Girau do Ponciano",
+      "uf": "AL",
+      "count": 1,
+      "anchor": [-36.83664959285527, -9.8825]
+    },
+    {
+      "code": "2703106",
+      "name": "Igaci",
+      "uf": "AL",
+      "count": 1,
+      "anchor": [-36.68747596153846, -9.535499999999999]
+    },
+    {
+      "code": "2704005",
+      "name": "Junqueiro",
+      "uf": "AL",
+      "count": 1,
+      "anchor": [-36.4337447368421, -9.853000000000002]
+    },
+    {
+      "code": "2704302",
+      "name": "Maceió",
+      "uf": "AL",
+      "count": 17,
+      "anchor": [-35.675178427215826, -9.496500000000001]
+    },
+    {
+      "code": "2704708",
+      "name": "Marechal Deodoro",
+      "uf": "AL",
+      "count": 1,
+      "anchor": [-35.90155133928572, -9.6845]
+    },
+    {
+      "code": "2705309",
+      "name": "Minador do Negrão",
+      "uf": "AL",
+      "count": 1,
+      "anchor": [-36.87161538461538, -9.3725]
+    },
+    {
+      "code": "2706802",
+      "name": "Piaçabuçu",
+      "uf": "AL",
+      "count": 1,
+      "anchor": [-36.40075068493151, -10.366]
+    },
+    {
+      "code": "2708402",
+      "name": "São José da Tapera",
+      "uf": "AL",
+      "count": 1,
+      "anchor": [-37.51294644808743, -9.52]
+    },
+    {
+      "code": "2709400",
+      "name": "Viçosa",
+      "uf": "AL",
+      "count": 1,
+      "anchor": [-36.28834946808511, -9.403500000000001]
+    },
+    {
+      "code": "2800308",
+      "name": "Aracaju",
+      "uf": "SE",
+      "count": 11,
+      "anchor": [-37.13323496282946, -11.07]
+    },
+    {
+      "code": "2802106",
+      "name": "Estância",
+      "uf": "SE",
+      "count": 1,
+      "anchor": [-37.389626286134245, -11.2905]
+    },
+    {
+      "code": "2805703",
+      "name": "Propriá",
+      "uf": "SE",
+      "count": 1,
+      "anchor": [-36.813265625, -10.2295]
+    },
+    {
+      "code": "2805802",
+      "name": "Riachão do Dantas",
+      "uf": "SE",
+      "count": 1,
+      "anchor": [-37.778046875, -11.0435]
+    },
+    {
+      "code": "2806206",
+      "name": "Salgado",
+      "uf": "SE",
+      "count": 1,
+      "anchor": [-37.47658149171271, -11.07]
+    },
+    {
+      "code": "2806701",
+      "name": "São Cristóvão",
+      "uf": "SE",
+      "count": 1,
+      "anchor": [-37.21476225913143, -10.9435]
+    },
+    {
+      "code": "2807600",
+      "name": "Umbaúba",
+      "uf": "SE",
+      "count": 1,
+      "anchor": [-37.66451274341352, -11.3945]
+    },
+    {
+      "code": "2901007",
+      "name": "Amargosa",
+      "uf": "BA",
+      "count": 2,
+      "anchor": [-39.6804117965368, -13.0115]
+    },
+    {
+      "code": "2901106",
+      "name": "Amélia Rodrigues",
+      "uf": "BA",
+      "count": 1,
+      "anchor": [-38.71425235849057, -12.406500000000001]
+    },
+    {
+      "code": "2902104",
+      "name": "Araci",
+      "uf": "BA",
+      "count": 1,
+      "anchor": [-39.12663299663299, -11.061]
+    },
+    {
+      "code": "2903607",
+      "name": "Biritinga",
+      "uf": "BA",
+      "count": 1,
+      "anchor": [-38.765140943877554, -11.6875]
+    },
+    {
+      "code": "2908507",
+      "name": "Conceição do Jacuípe",
+      "uf": "BA",
+      "count": 1,
+      "anchor": [-38.74684615384615, -12.3585]
+    },
+    {
+      "code": "2908903",
+      "name": "Coração de Maria",
+      "uf": "BA",
+      "count": 1,
+      "anchor": [-38.764775143678165, -12.217500000000001]
+    },
+    {
+      "code": "2910800",
+      "name": "Feira de Santana",
+      "uf": "BA",
+      "count": 4,
+      "anchor": [-39.04352734375, -12.2665]
+    },
+    {
+      "code": "2913309",
+      "name": "Ichu",
+      "uf": "BA",
+      "count": 1,
+      "anchor": [-39.15091568751985, -11.733]
+    },
+    {
+      "code": "2914802",
+      "name": "Itabuna",
+      "uf": "BA",
+      "count": 1,
+      "anchor": [-39.35928202087287, -14.8295]
+    },
+    {
+      "code": "2915601",
+      "name": "Itamaraju",
+      "uf": "BA",
+      "count": 1,
+      "anchor": [-39.763276636713734, -17.033]
+    },
+    {
+      "code": "2919207",
+      "name": "Lauro de Freitas",
+      "uf": "BA",
+      "count": 3,
+      "anchor": [-38.321578931390405, -12.879999999999999]
+    },
+    {
+      "code": "2919926",
+      "name": "Madre de Deus",
+      "uf": "BA",
+      "count": 1,
+      "anchor": [-38.627349264705884, -12.739]
+    },
+    {
+      "code": "2921005",
+      "name": "Mata de São João",
+      "uf": "BA",
+      "count": 1,
+      "anchor": [-38.137804633143574, -12.4485]
+    },
+    {
+      "code": "2925303",
+      "name": "Porto Seguro",
+      "uf": "BA",
+      "count": 2,
+      "anchor": [-39.30817325227963, -16.448999999999998]
+    },
+    {
+      "code": "2925907",
+      "name": "Quijingue",
+      "uf": "BA",
+      "count": 1,
+      "anchor": [-39.0503194964525, -10.6915]
+    },
+    {
+      "code": "2927408",
+      "name": "Salvador",
+      "uf": "BA",
+      "count": 23,
+      "anchor": [-38.46412500000001, -12.8935]
+    },
+    {
+      "code": "2928000",
+      "name": "Santaluz",
+      "uf": "BA",
+      "count": 2,
+      "anchor": [-39.501594257425744, -11.256]
+    },
+    {
+      "code": "2928604",
+      "name": "Santo Amaro",
+      "uf": "BA",
+      "count": 1,
+      "anchor": [-38.7523397260274, -12.5135]
+    },
+    {
+      "code": "2930501",
+      "name": "Serrinha",
+      "uf": "BA",
+      "count": 1,
+      "anchor": [-38.976010775862065, -11.6965]
+    },
+    {
+      "code": "2930709",
+      "name": "Simões Filho",
+      "uf": "BA",
+      "count": 4,
+      "anchor": [-38.395649914456804, -12.802499999999998]
+    },
+    {
+      "code": "2931350",
+      "name": "Teixeira de Freitas",
+      "uf": "BA",
+      "count": 1,
+      "anchor": [-39.808888655462184, -17.366500000000002]
+    },
+    {
+      "code": "2931707",
+      "name": "Terra Nova",
+      "uf": "BA",
+      "count": 1,
+      "anchor": [-38.59406487341772, -12.4095]
+    },
+    {
+      "code": "3105905",
+      "name": "Barroso",
+      "uf": "MG",
+      "count": 1,
+      "anchor": [-43.95230797101449, -21.194499999999998]
+    },
+    {
+      "code": "3106200",
+      "name": "Belo Horizonte",
+      "uf": "MG",
+      "count": 6,
+      "anchor": [-43.93658333333333, -19.847]
+    },
+    {
+      "code": "3111309",
+      "name": "Campo do Meio",
+      "uf": "MG",
+      "count": 1,
+      "anchor": [-45.834929919137466, -21.108]
+    },
+    {
+      "code": "3115300",
+      "name": "Cataguases",
+      "uf": "MG",
+      "count": 1,
+      "anchor": [-42.65216071428571, -21.399]
+    },
+    {
+      "code": "3118601",
+      "name": "Contagem",
+      "uf": "MG",
+      "count": 1,
+      "anchor": [-44.082974378881985, -19.8485]
+    },
+    {
+      "code": "3120300",
+      "name": "Cristália",
+      "uf": "MG",
+      "count": 1,
+      "anchor": [-42.794, -16.73]
+    },
+    {
+      "code": "3120904",
+      "name": "Curvelo",
+      "uf": "MG",
+      "count": 1,
+      "anchor": [-44.43341602316602, -18.9295]
+    },
+    {
+      "code": "3121605",
+      "name": "Diamantina",
+      "uf": "MG",
+      "count": 1,
+      "anchor": [-43.72793055555556, -18.242]
+    },
+    {
+      "code": "3126109",
+      "name": "Formiga",
+      "uf": "MG",
+      "count": 1,
+      "anchor": [-45.5422004048583, -20.652]
+    },
+    {
+      "code": "3127701",
+      "name": "Governador Valadares",
+      "uf": "MG",
+      "count": 1,
+      "anchor": [-41.966208695652185, -18.749000000000002]
+    },
+    {
+      "code": "3132107",
+      "name": "Itacarambi",
+      "uf": "MG",
+      "count": 1,
+      "anchor": [-44.179385309278345, -15.0085]
+    },
+    {
+      "code": "3136702",
+      "name": "Juiz de Fora",
+      "uf": "MG",
+      "count": 1,
+      "anchor": [-43.4136496040724, -21.7685]
+    },
+    {
+      "code": "3143302",
+      "name": "Montes Claros",
+      "uf": "MG",
+      "count": 5,
+      "anchor": [-43.90771695226438, -16.7265]
+    },
+    {
+      "code": "3151206",
+      "name": "Pirapora",
+      "uf": "MG",
+      "count": 1,
+      "anchor": [-44.848173780487805, -17.4365]
+    },
+    {
+      "code": "3151602",
+      "name": "Planura",
+      "uf": "MG",
+      "count": 1,
+      "anchor": [-48.635242132867134, -20.093]
+    },
+    {
+      "code": "3154606",
+      "name": "Ribeirão das Neves",
+      "uf": "MG",
+      "count": 1,
+      "anchor": [-44.06108562367865, -19.777]
+    },
+    {
+      "code": "3161106",
+      "name": "São Francisco",
+      "uf": "MG",
+      "count": 1,
+      "anchor": [-44.77394841269842, -15.917]
+    },
+    {
+      "code": "3168606",
+      "name": "Teófilo Otoni",
+      "uf": "MG",
+      "count": 1,
+      "anchor": [-41.34640902777778, -17.5905]
+    },
+    {
+      "code": "3170206",
+      "name": "Uberlândia",
+      "uf": "MG",
+      "count": 2,
+      "anchor": [-48.36322321428571, -19.109]
+    },
+    {
+      "code": "3201308",
+      "name": "Cariacica",
+      "uf": "ES",
+      "count": 1,
+      "anchor": [-40.4696390224359, -20.2755]
+    },
+    {
+      "code": "3201407",
+      "name": "Castelo",
+      "uf": "ES",
+      "count": 1,
+      "anchor": [-41.22277935222672, -20.563]
+    },
+    {
+      "code": "3300308",
+      "name": "Barra do Piraí",
+      "uf": "RJ",
+      "count": 1,
+      "anchor": [-43.90217280219781, -22.3935]
+    },
+    {
+      "code": "3300456",
+      "name": "Belford Roxo",
+      "uf": "RJ",
+      "count": 6,
+      "anchor": [-43.37746823770492, -22.706]
+    },
+    {
+      "code": "3300605",
+      "name": "Bom Jesus do Itabapoana",
+      "uf": "RJ",
+      "count": 1,
+      "anchor": [-41.59810377358491, -21.21]
+    },
+    {
+      "code": "3300704",
+      "name": "Cabo Frio",
+      "uf": "RJ",
+      "count": 1,
+      "anchor": [-42.088187500000004, -22.581]
+    },
+    {
+      "code": "3300803",
+      "name": "Cachoeiras de Macacu",
+      "uf": "RJ",
+      "count": 1,
+      "anchor": [-42.735055984555984, -22.463]
+    },
+    {
+      "code": "3301702",
+      "name": "Duque de Caxias",
+      "uf": "RJ",
+      "count": 8,
+      "anchor": [-43.29925847457628, -22.6115]
+    },
+    {
+      "code": "3301900",
+      "name": "Itaboraí",
+      "uf": "RJ",
+      "count": 1,
+      "anchor": [-42.89706842105263, -22.732]
+    },
+    {
+      "code": "3302007",
+      "name": "Itaguaí",
+      "uf": "RJ",
+      "count": 2,
+      "anchor": [-43.819250000000004, -22.871000000000002]
+    },
+    {
+      "code": "3302205",
+      "name": "Itaperuna",
+      "uf": "RJ",
+      "count": 2,
+      "anchor": [-41.84670265151515, -21.281]
+    },
+    {
+      "code": "3302270",
+      "name": "Japeri",
+      "uf": "RJ",
+      "count": 1,
+      "anchor": [-43.59969444444445, -22.653]
+    },
+    {
+      "code": "3302403",
+      "name": "Macaé",
+      "uf": "RJ",
+      "count": 1,
+      "anchor": [-41.97880568181818, -22.3075]
+    },
+    {
+      "code": "3302502",
+      "name": "Magé",
+      "uf": "RJ",
+      "count": 1,
+      "anchor": [-43.12452339622641, -22.6695]
+    },
+    {
+      "code": "3302700",
+      "name": "Maricá",
+      "uf": "RJ",
+      "count": 2,
+      "anchor": [-42.831896825396825, -22.9495]
+    },
+    {
+      "code": "3302858",
+      "name": "Mesquita",
+      "uf": "RJ",
+      "count": 2,
+      "anchor": [-43.433855158730154, -22.7825]
+    },
+    {
+      "code": "3303302",
+      "name": "Niterói",
+      "uf": "RJ",
+      "count": 2,
+      "anchor": [-43.0600474137931, -22.9015]
+    },
+    {
+      "code": "3303401",
+      "name": "Nova Friburgo",
+      "uf": "RJ",
+      "count": 1,
+      "anchor": [-42.46865410052911, -22.3465]
+    },
+    {
+      "code": "3303500",
+      "name": "Nova Iguaçu",
+      "uf": "RJ",
+      "count": 5,
+      "anchor": [-43.516856593406594, -22.759500000000003]
+    },
+    {
+      "code": "3304144",
+      "name": "Queimados",
+      "uf": "RJ",
+      "count": 2,
+      "anchor": [-43.589788345410625, -22.7425]
+    },
+    {
+      "code": "3304557",
+      "name": "Rio de Janeiro",
+      "uf": "RJ",
+      "count": 69,
+      "anchor": [-43.47861974789916, -22.908]
+    },
+    {
+      "code": "3304904",
+      "name": "São Gonçalo",
+      "uf": "RJ",
+      "count": 5,
+      "anchor": [-42.9975, -22.842]
+    },
+    {
+      "code": "3305109",
+      "name": "São João de Meriti",
+      "uf": "RJ",
+      "count": 5,
+      "anchor": [-43.36822727272727, -22.797]
+    },
+    {
+      "code": "3305554",
+      "name": "Seropédica",
+      "uf": "RJ",
+      "count": 2,
+      "anchor": [-43.714496376811596, -22.788]
+    },
+    {
+      "code": "3502507",
+      "name": "Aparecida",
+      "uf": "SP",
+      "count": 1,
+      "anchor": [-45.23678233830846, -22.954]
+    },
+    {
+      "code": "3505609",
+      "name": "Barrinha",
+      "uf": "SP",
+      "count": 1,
+      "anchor": [-48.10430487804878, -21.218]
+    },
+    {
+      "code": "3505708",
+      "name": "Barueri",
+      "uf": "SP",
+      "count": 1,
+      "anchor": [-46.88299487179487, -23.494]
+    },
+    {
+      "code": "3506003",
+      "name": "Bauru",
+      "uf": "SP",
+      "count": 1,
+      "anchor": [-49.15041447368421, -22.288]
+    },
+    {
+      "code": "3508801",
+      "name": "Cafelândia",
+      "uf": "SP",
+      "count": 2,
+      "anchor": [-49.59219335406141, -21.782]
+    },
+    {
+      "code": "3509007",
+      "name": "Caieiras",
+      "uf": "SP",
+      "count": 2,
+      "anchor": [-46.743560606060605, -23.3735]
+    },
+    {
+      "code": "3509502",
+      "name": "Campinas",
+      "uf": "SP",
+      "count": 1,
+      "anchor": [-46.992872115384614, -22.8955]
+    },
+    {
+      "code": "3510203",
+      "name": "Capão Bonito",
+      "uf": "SP",
+      "count": 1,
+      "anchor": [-48.297731127012526, -24.05]
+    },
+    {
+      "code": "3513801",
+      "name": "Diadema",
+      "uf": "SP",
+      "count": 1,
+      "anchor": [-46.606088235294116, -23.680999999999997]
+    },
+    {
+      "code": "3515004",
+      "name": "Embu",
+      "uf": "SP",
+      "count": 2,
+      "anchor": [-46.85409887387388, -23.6535]
+    },
+    {
+      "code": "3515707",
+      "name": "Ferraz de Vasconcelos",
+      "uf": "SP",
+      "count": 1,
+      "anchor": [-46.374605932203394, -23.5385]
+    },
+    {
+      "code": "3516200",
+      "name": "Franca",
+      "uf": "SP",
+      "count": 1,
+      "anchor": [-47.34920622119816, -20.521]
+    },
+    {
+      "code": "3516309",
+      "name": "Francisco Morato",
+      "uf": "SP",
+      "count": 1,
+      "anchor": [-46.70672826086957, -23.261000000000003]
+    },
+    {
+      "code": "3516408",
+      "name": "Franco da Rocha",
+      "uf": "SP",
+      "count": 1,
+      "anchor": [-46.73683229813665, -23.3035]
+    },
+    {
+      "code": "3518701",
+      "name": "Guarujá",
+      "uf": "SP",
+      "count": 1,
+      "anchor": [-46.23524166666667, -23.9455]
+    },
+    {
+      "code": "3518800",
+      "name": "Guarulhos",
+      "uf": "SP",
+      "count": 8,
+      "anchor": [-46.46495478723404, -23.4265]
+    },
+    {
+      "code": "3523107",
+      "name": "Itaquaquecetuba",
+      "uf": "SP",
+      "count": 1,
+      "anchor": [-46.33317424242424, -23.463]
+    },
+    {
+      "code": "3528502",
+      "name": "Mairiporã",
+      "uf": "SP",
+      "count": 1,
+      "anchor": [-46.54204643416928, -23.3355]
+    },
+    {
+      "code": "3529401",
+      "name": "Mauá",
+      "uf": "SP",
+      "count": 1,
+      "anchor": [-46.44233863636364, -23.6625]
+    },
+    {
+      "code": "3530607",
+      "name": "Mogi das Cruzes",
+      "uf": "SP",
+      "count": 1,
+      "anchor": [-46.172601461038965, -23.4795]
+    },
+    {
+      "code": "3531100",
+      "name": "Mongaguá",
+      "uf": "SP",
+      "count": 1,
+      "anchor": [-46.67373589030206, -24.082]
+    },
+    {
+      "code": "3534401",
+      "name": "Osasco",
+      "uf": "SP",
+      "count": 1,
+      "anchor": [-46.78412790697675, -23.5335]
+    },
+    {
+      "code": "3538006",
+      "name": "Pindamonhangaba",
+      "uf": "SP",
+      "count": 1,
+      "anchor": [-45.498303030303035, -22.8645]
+    },
+    {
+      "code": "3538709",
+      "name": "Piracicaba",
+      "uf": "SP",
+      "count": 1,
+      "anchor": [-47.789120320855616, -22.718]
+    },
+    {
+      "code": "3538907",
+      "name": "Pirajuí",
+      "uf": "SP",
+      "count": 1,
+      "anchor": [-49.52073076923077, -22.037]
+    },
+    {
+      "code": "3542602",
+      "name": "Registro",
+      "uf": "SP",
+      "count": 1,
+      "anchor": [-47.83716510989011, -24.524]
+    },
+    {
+      "code": "3543402",
+      "name": "Ribeirão Preto",
+      "uf": "SP",
+      "count": 3,
+      "anchor": [-47.788981065334994, -21.198500000000003]
+    },
+    {
+      "code": "3547809",
+      "name": "Santo André",
+      "uf": "SP",
+      "count": 1,
+      "anchor": [-46.37792385620915, -23.769]
+    },
+    {
+      "code": "3548500",
+      "name": "Santos",
+      "uf": "SP",
+      "count": 1,
+      "anchor": [-46.28024642857143, -23.898]
+    },
+    {
+      "code": "3548708",
+      "name": "São Bernardo do Campo",
+      "uf": "SP",
+      "count": 2,
+      "anchor": [-46.52795098039216, -23.822000000000003]
+    },
+    {
+      "code": "3548906",
+      "name": "São Carlos",
+      "uf": "SP",
+      "count": 1,
+      "anchor": [-47.90175357142857, -22.045]
+    },
+    {
+      "code": "3549805",
+      "name": "São José do Rio Preto",
+      "uf": "SP",
+      "count": 1,
+      "anchor": [-49.367498523886205, -20.7305]
+    },
+    {
+      "code": "3550308",
+      "name": "São Paulo",
+      "uf": "SP",
+      "count": 121,
+      "anchor": [-46.59227853658537, -23.587]
+    },
+    {
+      "code": "3552403",
+      "name": "Sumaré",
+      "uf": "SP",
+      "count": 3,
+      "anchor": [-47.24437719298246, -22.823500000000003]
+    },
+    {
+      "code": "3552502",
+      "name": "Suzano",
+      "uf": "SP",
+      "count": 1,
+      "anchor": [-46.32034369409659, -23.628500000000003]
+    },
+    {
+      "code": "3552809",
+      "name": "Taboão da Serra",
+      "uf": "SP",
+      "count": 1,
+      "anchor": [-46.78725, -23.62]
+    },
+    {
+      "code": "3556206",
+      "name": "Valinhos",
+      "uf": "SP",
+      "count": 1,
+      "anchor": [-46.99093127629733, -23.000999999999998]
+    },
+    {
+      "code": "4101507",
+      "name": "Arapongas",
+      "uf": "PR",
+      "count": 1,
+      "anchor": [-51.45569640952719, -23.435000000000002]
+    },
+    {
+      "code": "4104808",
+      "name": "Cascavel",
+      "uf": "PR",
+      "count": 1,
+      "anchor": [-53.32445673076923, -24.9975]
+    },
+    {
+      "code": "4105805",
+      "name": "Colombo",
+      "uf": "PR",
+      "count": 1,
+      "anchor": [-49.18505241935484, -25.279]
+    },
+    {
+      "code": "4106902",
+      "name": "Curitiba",
+      "uf": "PR",
+      "count": 13,
+      "anchor": [-49.28886120401338, -25.456]
+    },
+    {
+      "code": "4113700",
+      "name": "Londrina",
+      "uf": "PR",
+      "count": 2,
+      "anchor": [-51.12168887492143, -23.497999999999998]
+    },
+    {
+      "code": "4119905",
+      "name": "Ponta Grossa",
+      "uf": "PR",
+      "count": 1,
+      "anchor": [-50.0659375, -25.076500000000003]
+    },
+    {
+      "code": "4125506",
+      "name": "São José dos Pinhais",
+      "uf": "PR",
+      "count": 4,
+      "anchor": [-49.097671563192904, -25.5895]
+    },
+    {
+      "code": "4202008",
+      "name": "Balneário Camboriú",
+      "uf": "SC",
+      "count": 1,
+      "anchor": [-48.611303030303034, -27.003]
+    },
+    {
+      "code": "4202305",
+      "name": "Biguaçu",
+      "uf": "SC",
+      "count": 1,
+      "anchor": [-48.714430555555566, -27.3985]
+    },
+    {
+      "code": "4202404",
+      "name": "Blumenau",
+      "uf": "SC",
+      "count": 1,
+      "anchor": [-49.09383566629339, -26.9105]
+    },
+    {
+      "code": "4205407",
+      "name": "Florianópolis",
+      "uf": "SC",
+      "count": 13,
+      "anchor": [-48.47021985815603, -27.451]
+    },
+    {
+      "code": "4209102",
+      "name": "Joinville",
+      "uf": "SC",
+      "count": 3,
+      "anchor": [-48.974818045112784, -26.209]
+    },
+    {
+      "code": "4216602",
+      "name": "São José",
+      "uf": "SC",
+      "count": 1,
+      "anchor": [-48.64530357142857, -27.5445]
+    },
+    {
+      "code": "4300406",
+      "name": "Alegrete",
+      "uf": "RS",
+      "count": 1,
+      "anchor": [-55.76196638655462, -29.701999999999998]
+    },
+    {
+      "code": "4300604",
+      "name": "Alvorada",
+      "uf": "RS",
+      "count": 16,
+      "anchor": [-51.02424534936479, -29.9825]
+    },
+    {
+      "code": "4304606",
+      "name": "Canoas",
+      "uf": "RS",
+      "count": 1,
+      "anchor": [-51.17741569767442, -29.8915]
+    },
+    {
+      "code": "4305108",
+      "name": "Caxias do Sul",
+      "uf": "RS",
+      "count": 12,
+      "anchor": [-51.06337121212121, -29.1545]
+    },
+    {
+      "code": "4306767",
+      "name": "Eldorado do Sul",
+      "uf": "RS",
+      "count": 2,
+      "anchor": [-51.526546874999994, -30.086]
+    },
+    {
+      "code": "4306908",
+      "name": "Encruzilhada do Sul",
+      "uf": "RS",
+      "count": 1,
+      "anchor": [-52.65725, -30.643]
+    },
+    {
+      "code": "4307005",
+      "name": "Erechim",
+      "uf": "RS",
+      "count": 2,
+      "anchor": [-52.2380625, -27.684]
+    },
+    {
+      "code": "4307807",
+      "name": "Estrela",
+      "uf": "RS",
+      "count": 2,
+      "anchor": [-51.91833613445378, -29.506]
+    },
+    {
+      "code": "4309209",
+      "name": "Gravataí",
+      "uf": "RS",
+      "count": 1,
+      "anchor": [-50.9762800982801, -29.8705]
+    },
+    {
+      "code": "4313375",
+      "name": "Nova Santa Rita",
+      "uf": "RS",
+      "count": 1,
+      "anchor": [-51.2751125, -29.8285]
+    },
+    {
+      "code": "4313409",
+      "name": "Novo Hamburgo",
+      "uf": "RS",
+      "count": 1,
+      "anchor": [-51.0435332278481, -29.7215]
+    },
+    {
+      "code": "4313706",
+      "name": "Palmeira das Missões",
+      "uf": "RS",
+      "count": 6,
+      "anchor": [-53.40592, -27.942999999999998]
+    },
+    {
+      "code": "4314407",
+      "name": "Pelotas",
+      "uf": "RS",
+      "count": 6,
+      "anchor": [-52.29703724256292, -31.6025]
+    },
+    {
+      "code": "4314902",
+      "name": "Porto Alegre",
+      "uf": "RS",
+      "count": 61,
+      "anchor": [-51.18187448153269, -29.991]
+    },
+    {
+      "code": "4316808",
+      "name": "Santa Cruz do Sul",
+      "uf": "RS",
+      "count": 4,
+      "anchor": [-52.443037769784176, -29.5905]
+    },
+    {
+      "code": "4316907",
+      "name": "Santa Maria",
+      "uf": "RS",
+      "count": 6,
+      "anchor": [-53.83098290598291, -29.6995]
+    },
+    {
+      "code": "4317103",
+      "name": "Sant' Ana do Livramento",
+      "uf": "RS",
+      "count": 5,
+      "anchor": [-55.6604573283859, -30.53]
+    },
+    {
+      "code": "4318705",
+      "name": "São Leopoldo",
+      "uf": "RS",
+      "count": 14,
+      "anchor": [-51.13951015394694, -29.759]
+    },
+    {
+      "code": "4321600",
+      "name": "Tramandaí",
+      "uf": "RS",
+      "count": 1,
+      "anchor": [-50.24501727166276, -30.0395]
+    },
+    {
+      "code": "4322202",
+      "name": "Tupanciretã",
+      "uf": "RS",
+      "count": 1,
+      "anchor": [-54.046652302631585, -29.0505]
+    },
+    {
+      "code": "4323002",
+      "name": "Viamão",
+      "uf": "RS",
+      "count": 7,
+      "anchor": [-50.86354089762696, -30.119]
+    },
+    {
+      "code": "5002704",
+      "name": "Campo Grande",
+      "uf": "MS",
+      "count": 4,
+      "anchor": [-54.35876428571429, -20.8565]
+    },
+    {
+      "code": "5003702",
+      "name": "Dourados",
+      "uf": "MS",
+      "count": 1,
+      "anchor": [-54.82250819672131, -22.189999999999998]
+    },
+    {
+      "code": "5101803",
+      "name": "Barra do Garças",
+      "uf": "MT",
+      "count": 1,
+      "anchor": [-52.67135826771654, -15.3]
+    },
+    {
+      "code": "5103403",
+      "name": "Cuiabá",
+      "uf": "MT",
+      "count": 2,
+      "anchor": [-55.824372503840245, -15.5495]
+    },
+    {
+      "code": "5201108",
+      "name": "Anápolis",
+      "uf": "GO",
+      "count": 7,
+      "anchor": [-48.97510459183674, -16.3455]
+    },
+    {
+      "code": "5205109",
+      "name": "Catalão",
+      "uf": "GO",
+      "count": 2,
+      "anchor": [-47.74161201298702, -17.966]
+    },
+    {
+      "code": "5206404",
+      "name": "Crixás",
+      "uf": "GO",
+      "count": 1,
+      "anchor": [-50.106697635135134, -14.738]
+    },
+    {
+      "code": "5208707",
+      "name": "Goiânia",
+      "uf": "GO",
+      "count": 4,
+      "anchor": [-49.24040000000001, -16.592]
+    },
+    {
+      "code": "5211800",
+      "name": "Jaraguá",
+      "uf": "GO",
+      "count": 1,
+      "anchor": [-49.34971385941644, -15.658000000000001]
+    },
+    {
+      "code": "5220686",
+      "name": "Simolândia",
+      "uf": "GO",
+      "count": 1,
+      "anchor": [-46.57936406495547, -14.402999999999999]
+    },
+    {
+      "code": "5221858",
+      "name": "Valparaíso de Goiás",
+      "uf": "GO",
+      "count": 1,
+      "anchor": [-47.987375, -16.0705]
+    },
+    {
+      "code": "5222005",
+      "name": "Vianópolis",
+      "uf": "GO",
+      "count": 1,
+      "anchor": [-48.40292914979757, -16.752499999999998]
+    },
+    {
+      "code": "5300108",
+      "name": "Brasília",
+      "uf": "DF",
+      "count": 18,
+      "anchor": [-47.792683333333336, -16.043]
+    }
+  ]
+}

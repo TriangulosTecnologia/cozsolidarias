@@ -20,7 +20,7 @@ import {
   isCafHexbinResolution,
 } from '@/data-gateway/schema';
 
-import CafMapPanel from './CafMapPanel';
+import { EnabledShareContext } from './enabledShareContext';
 import { DEFAULT_CAF_HEXBIN_OPACITY } from './geovisCafHexbin';
 import { type MapMode } from './geovisSpec';
 import { DEFAULT_COLOR_RAMP } from './mapaColorRamp';
@@ -41,9 +41,12 @@ import {
   type RampHandlers,
   YEAR_MENU_ID,
 } from './mapaLeftSidebar';
+import MapLayerPanel from './MapLayerPanel';
 import MapLoadingIndicator from './MapLoadingIndicator';
 import { useCafHexbin } from './useCafHexbin';
 import { useCustomRamps } from './useCustomRamps';
+import { useEnabledShareLayer } from './useEnabledShareLayer';
+import { useEnabledShareSpec } from './useEnabledShareSpec';
 import { useKitchensByYear } from './useKitchensByYear';
 import { useMapaDatasets } from './useMapaDatasets';
 import { useMapaSpec } from './useMapaSpec';
@@ -136,10 +139,12 @@ const buildMapConfig = ({
   specMode,
   year,
   rampHandlers,
+  enabledShareActive,
 }: {
   specMode: MapMode;
   year: number;
   rampHandlers: RampHandlers;
+  enabledShareActive: boolean;
 }): GeovisWorkspaceConfig => {
   // The kitchen detail, in the modes where kitchen points are clickable.
   // The CAF mode has no detail to open: a point stands for one registration,
@@ -151,7 +156,11 @@ const buildMapConfig = ({
   return {
     // Full-bleed map: no card border/radius so it fills the container.
     appearance: 'bare',
-    leftSidebar: buildLeftSidebar({ mode: specMode, ramps: rampHandlers }),
+    leftSidebar: buildLeftSidebar({
+      mode: specMode,
+      ramps: rampHandlers,
+      enabledShareActive,
+    }),
     rightSidebar,
     renderLoading,
     // geovis-workspace 0.6.x adds `legend`, `warnings` and `metadata` slots to
@@ -173,7 +182,7 @@ const buildMapConfig = ({
       // Overridden in every mode, not just `cafs`: the drill-down listens on
       // layer ids no other mode's spec declares, so it is inert elsewhere
       // without this having to branch on the mode.
-      map: { component: CafMapPanel },
+      map: { component: MapLayerPanel },
       legend: { hidden: true },
       warnings: { hidden: true },
       metadata: { hidden: true },
@@ -284,9 +293,11 @@ const MapaPlayground = () => {
   // Time-lapse year, driven by the sidebar timeline (`selection[YEAR_MENU_ID]`).
   // Falls back to the latest snapshot until the timeline seeds it on mount.
   const yearFromSelection = Number(selection[YEAR_MENU_ID]);
-  const year = Number.isFinite(yearFromSelection)
+  const selectedYear = Number.isFinite(yearFromSelection)
     ? yearFromSelection
     : DEFAULT_YEAR;
+  const { year, enabledShareState } = useEnabledShareLayer(selectedYear);
+  const { active: enabledShareActive } = enabledShareState;
 
   /*
    * The grid's settings, read off the same selection the timeline writes to.
@@ -372,12 +383,12 @@ const MapaPlayground = () => {
   }, [collections, year]);
 
   const config = React.useMemo(() => {
-    return buildMapConfig({ specMode, year, rampHandlers });
+    return buildMapConfig({ specMode, year, rampHandlers, enabledShareActive });
     // `year` is a dependency because the kitchen detail sidebar resolves the
     // clicked código inside that year's snapshot. `rampHandlers` is one because
     // it carries the ramps the reader has built: its identity changes when that
     // list does, which is what rebuilds the colour block's options.
-  }, [specMode, year, rampHandlers]);
+  }, [specMode, year, rampHandlers, enabledShareActive]);
 
   const spec = useMapaSpec({
     kitchenByCity: datasets.data,
@@ -394,6 +405,8 @@ const MapaPlayground = () => {
     mode: specMode,
     cozinhasPoints,
   });
+
+  const layeredSpec = useEnabledShareSpec({ spec, state: enabledShareState });
 
   return (
     <Box
@@ -424,12 +437,14 @@ const MapaPlayground = () => {
            * the theme-ui context is all they need.
            */}
           <ThemeUIProvider theme={scopedSidebarTheme}>
-            <GeovisWorkspace
-              config={config}
-              visualizationSpec={spec}
-              variables={selection}
-              onVariableChange={handleVariableChange}
-            />
+            <EnabledShareContext.Provider value={enabledShareState}>
+              <GeovisWorkspace
+                config={config}
+                visualizationSpec={layeredSpec}
+                variables={selection}
+                onVariableChange={handleVariableChange}
+              />
+            </EnabledShareContext.Provider>
           </ThemeUIProvider>
         </I18nProvider>
       ) : (

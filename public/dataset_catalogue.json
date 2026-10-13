@@ -7,7 +7,7 @@
     "language": "pt-BR",
     "status": "draft",
     "created_at": "2026-07-07",
-    "updated_at": "2026-08-14",
+    "updated_at": "2026-10-13",
     "typing_reference": "src/data-source-static/dataCatalogue.ts",
     "quality_notes": [
       {
@@ -1263,6 +1263,74 @@
           {
             "name": "dtAtualizacao",
             "description": "Data da última atualização do registro (DD/MM/AAAA)"
+          }
+        ]
+      }
+    },
+    "cozinhas_habilitadas_participacao_2025": {
+      "id": "cozinhas_habilitadas_participacao_2025",
+      "collection_id": "dados_primarios",
+      "slug": "cozinhas-habilitadas-participacao-2025",
+      "title": "Habilitadas no município / total nacional de cozinhas (2025)",
+      "description": "Percentual de cozinhas habilitadas no município sobre todas as 5.913 cozinhas do cadastro nacional tratado de 2025. Apenas Situação = Habilitada entra no numerador (1.013 registros no Brasil). O denominador inclui todas as situações, inclusive registros sem coordenadas ou município resolvido. Área dos círculos proporcional ao percentual; não representa taxa de habilitação municipal nem densidade por área ou população.",
+      "file": "src/data-source-static/data/kitchen-enabled-share-2025.json",
+      "format": "JSON",
+      "source": {
+        "url": "https://docs.google.com/spreadsheets/d/1fEt1zRYwajWPqRGDXsHnUoHtEktxKeDC/edit?rtpof=true&sd=true&gid=297639936#gid=297639936",
+        "notes": "Snapshot derivado offline, de forma reproduzível. Atribuição por nome e UF, associação documentada do nome histórico Embu e fallback espacial. Todas as 1.013 habilitadas atribuídas a 264 municípios, inclusive 256 sem coordenadas; hashes e método por registro ficam no snapshot interno. A resposta pública contém somente agregados."
+      },
+      "temporal": {
+        "status": "described",
+        "extent": [["2025-01-01", "2025-12-31"]],
+        "grain": "P1Y",
+        "frequency": "one_time",
+        "history": "snapshot",
+        "timezone": "America/Sao_Paulo"
+      },
+      "spatial": {
+        "status": "described",
+        "extent": [
+          {
+            "scheme": "iso3166-1",
+            "code": "BR"
+          }
+        ],
+        "coverage": "partial",
+        "grain": {
+          "scheme": "admin",
+          "code": "municipality",
+          "label": "município"
+        },
+        "geometry": "point",
+        "precision": "approximate",
+        "field": "codigoIbge"
+      },
+      "access": {
+        "level": "public",
+        "contains_personal_data": false,
+        "notes": "Agregado por município; não expõe registros individuais de cozinha."
+      },
+      "schema": {
+        "fields": [
+          {
+            "name": "codigoIbge",
+            "description": "Código municipal IBGE, ligado a codarea",
+            "role": "identifier"
+          },
+          {
+            "name": "enabledCount",
+            "description": "Habilitadas atribuídas ao município no cadastro de 2025",
+            "unit": "cozinhas"
+          },
+          {
+            "name": "sharePercent",
+            "description": "100 × enabledCount / nationalTotal; nationalTotal = 5.913, todas as situações do cadastro tratado de 2025",
+            "unit": "%"
+          },
+          {
+            "name": "nationalTotal",
+            "description": "Total nacional, incluindo registros que não podem aparecer como pontos individuais",
+            "unit": "cozinhas"
           }
         ]
       }
