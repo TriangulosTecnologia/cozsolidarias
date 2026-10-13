@@ -8,6 +8,15 @@ export type KitchenEnabledShare2025 = {
   nationalTotal: number;
   nationalEnabled: number;
   unresolvedEnabled: number;
+  municipalCoverage: Array<{
+    codigoIbge: string;
+    municipio: string;
+    uf: string;
+    registeredCount: number;
+    enabledCount: number;
+    enabledPercent: number;
+    anchor: [number, number];
+  }>;
   municipalities: Array<{
     codigoIbge: string;
     municipio: string;

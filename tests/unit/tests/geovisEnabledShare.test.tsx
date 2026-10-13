@@ -181,6 +181,10 @@ test('pins the timeline while active and memoizes the overlay spec', () => {
   expect(timeline?.enabledWhen).toMatchObject({ values: [] });
   const state = {
     active: true,
+    municipalActive: false,
+    setMunicipalActive: jest.fn(),
+    summary: false,
+    setSummary: jest.fn(),
     snapshot: enabledShareSnapshot,
     loading: false,
     error: null,
@@ -189,7 +193,7 @@ test('pins the timeline while active and memoizes the overlay spec', () => {
   };
   const spec = withMapaBoundaries(buildSpec([]));
   const { result, rerender } = renderHook(() => {
-    return useEnabledShareSpec({ spec, state });
+    return useEnabledShareSpec(spec, state);
   });
   const first = result.current;
   rerender();

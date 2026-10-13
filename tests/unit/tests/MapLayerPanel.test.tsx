@@ -9,6 +9,9 @@ import MapLayerPanel from '@/app/(features)/mapas/MapLayerPanel';
 const mockLayers: Array<{ id: string; visible?: boolean }> = [];
 jest.mock('@ttoss/geovis', () => {
   return {
+    useCompactViewport: () => {
+      return false;
+    },
     useGeoVis: () => {
       return { spec: { layers: mockLayers } };
     },
@@ -22,6 +25,15 @@ jest.mock('@/app/(features)/mapas/CafMapPanel', () => {
     },
   };
 });
+jest.mock('@/app/(features)/mapas/MunicipalCoverageLegend', () => {
+  return {
+    __esModule: true,
+    default: () => {
+      return <div>Municipal legend</div>;
+    },
+  };
+});
+
 jest.mock('@/app/(features)/mapas/EnabledShareLegend', () => {
   return {
     __esModule: true,
@@ -63,4 +75,41 @@ test('observes the control visibility and keeps legend in sync across toggles', 
   expect(screen.getByText('Size legend')).toBeInTheDocument();
   rerender(<MapLayerPanel />);
   expect(screen.queryByText('Size legend')).toBeNull();
+});
+
+test('bridges municipal control visibility independently of the national layer', () => {
+  const state = {
+    active: false,
+    setActive: jest.fn(),
+    municipalActive: false,
+    setMunicipalActive: jest.fn(),
+    snapshot: null,
+    loading: false,
+    error: null,
+    retry: jest.fn(),
+  };
+  mockLayers.splice(0, mockLayers.length, {
+    id: 'cozinhas-habilitacao-municipal-2025',
+    visible: true,
+  });
+  const { rerender } = render(
+    <EnabledShareContext.Provider value={state}>
+      <MapLayerPanel />
+    </EnabledShareContext.Provider>
+  );
+  expect(state.setMunicipalActive).toHaveBeenLastCalledWith(true);
+  mockLayers[0] = { id: 'cozinhas-habilitacao-municipal-2025', visible: true };
+  rerender(
+    <EnabledShareContext.Provider value={{ ...state, summary: true }}>
+      <MapLayerPanel />
+    </EnabledShareContext.Provider>
+  );
+  expect(state.setMunicipalActive).toHaveBeenLastCalledWith(true);
+  mockLayers[0].visible = false;
+  rerender(
+    <EnabledShareContext.Provider value={state}>
+      <MapLayerPanel />
+    </EnabledShareContext.Provider>
+  );
+  expect(state.setMunicipalActive).toHaveBeenLastCalledWith(false);
 });

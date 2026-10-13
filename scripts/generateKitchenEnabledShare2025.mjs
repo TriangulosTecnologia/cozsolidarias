@@ -128,8 +128,10 @@ const enabled = kitchens.filter((kitchen) => {
 });
 const counts = new Map();
 const assignments = [];
+const registeredCounts = new Map();
+const registeredAssignments = [];
 const unresolved = [];
-for (const kitchen of enabled) {
+for (const kitchen of kitchens) {
   const key = `${kitchen.uf}:${normalize(kitchen.municipio)}`;
   let code = nameIndex.get(key);
   let method = 'name-uf';
@@ -146,16 +148,21 @@ for (const kitchen of enabled) {
     unresolved.push(kitchen.codigo);
     continue;
   }
-  counts.set(code, (counts.get(code) ?? 0) + 1);
-  assignments.push({
+  registeredCounts.set(code, (registeredCounts.get(code) ?? 0) + 1);
+  const assignment = {
     kitchenCode: kitchen.codigo,
     municipalityCode: code,
     method,
-  });
+  };
+  registeredAssignments.push(assignment);
+  if (kitchen.situacao === 'Habilitada') {
+    counts.set(code, (counts.get(code) ?? 0) + 1);
+    assignments.push(assignment);
+  }
 }
 // Refuse a complete-looking layer when some habilitadas cannot be attributed.
 if (unresolved.length)
-  throw new Error(`Unresolved habilitadas: ${unresolved.join(', ')}`);
+  throw new Error(`Unresolved kitchens: ${unresolved.join(', ')}`);
 const municipalities = [...counts]
   .sort(([a], [b]) => {
     return a.localeCompare(b);
@@ -167,6 +174,23 @@ const municipalities = [...counts]
       uf: ufByPrefix.get(code.slice(0, 2)),
       count,
       anchor: anchorOf(byCode.get(code)),
+    };
+  });
+const registeredMunicipalities = [...registeredCounts]
+  .sort(([a], [b]) => {
+    return a.localeCompare(b);
+  })
+  .map(([code, total]) => {
+    return {
+      code,
+      name: names[code],
+      uf: ufByPrefix.get(code.slice(0, 2)),
+      total,
+      enabled: counts.get(code) ?? 0,
+      anchor:
+        municipalities.find((row) => {
+          return row.code === code;
+        })?.anchor ?? anchorOf(byCode.get(code)),
     };
   });
 const snapshot = {
@@ -183,6 +207,8 @@ const snapshot = {
     };
   }),
   assignments,
+  registeredAssignments,
+  registeredMunicipalities,
   municipalities,
 };
 await writeFile(

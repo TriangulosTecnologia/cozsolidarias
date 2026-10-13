@@ -11,6 +11,14 @@ export type StaticKitchenEnabledShareSource = {
   nationalTotal: number;
   nationalEnabled: number;
   unresolvedEnabled: number;
+  registeredMunicipalities: Array<{
+    code: string;
+    name: string;
+    uf: string;
+    total: number;
+    enabled: number;
+    anchor: [number, number];
+  }>;
   municipalities: Array<{
     code: string;
     name: string;
@@ -53,15 +61,79 @@ const isMunicipalityList = (value: unknown): boolean => {
   return Array.isArray(value) && value.every(isMunicipality);
 };
 
+const validRegisteredCounts = (row: Record<string, unknown>): boolean => {
+  return (
+    isCount(row['total']) &&
+    row['total'] > 0 &&
+    isCount(row['enabled']) &&
+    row['enabled'] <= row['total']
+  );
+};
+const isRegistered = (row: unknown): boolean => {
+  if (!isObject(row)) return false;
+  return (
+    isIdentity(row) && isPosition(row['anchor']) && validRegisteredCounts(row)
+  );
+};
+const isRegisteredList = (value: unknown): boolean => {
+  return (
+    Array.isArray(value) &&
+    value.every((row) => {
+      return isRegistered(row);
+    })
+  );
+};
+const reconcileRegistered = (
+  source: StaticKitchenEnabledShareSource
+): boolean => {
+  const rows = source.registeredMunicipalities;
+  const codes = new Set(
+    rows.map((row) => {
+      return row.code;
+    })
+  );
+  const totals = rows.reduce((sum, row) => {
+    return sum + row.total;
+  }, 0);
+  const enabled = rows.reduce((sum, row) => {
+    return sum + row.enabled;
+  }, 0);
+  return (
+    codes.size === rows.length &&
+    totals === source.nationalTotal &&
+    enabled === source.nationalEnabled &&
+    source.municipalities.every((row) => {
+      return (
+        rows.find((entry) => {
+          return entry.code === row.code;
+        })?.enabled === row.count
+      );
+    })
+  );
+};
+
+const hasValidTotals = (value: Record<string, unknown>): boolean => {
+  return (
+    isCount(value['nationalTotal']) &&
+    isCount(value['nationalEnabled']) &&
+    value['unresolvedEnabled'] === 0
+  );
+};
+const assertRegistered = (value: StaticKitchenEnabledShareSource): void => {
+  if (!reconcileRegistered(value))
+    throw new Error(
+      '[data-source-static] Municipal denominator reconciliation failed.'
+    );
+};
+
 const isSnapshot = (
   value: unknown
 ): value is StaticKitchenEnabledShareSource => {
   if (!isObject(value) || value['year'] !== 2025) return false;
   return (
-    isCount(value['nationalTotal']) &&
-    isCount(value['nationalEnabled']) &&
-    value['unresolvedEnabled'] === 0 &&
-    isMunicipalityList(value['municipalities'])
+    hasValidTotals(value) &&
+    isMunicipalityList(value['municipalities']) &&
+    isRegisteredList(value['registeredMunicipalities'])
   );
 };
 
@@ -96,6 +168,7 @@ export const parseKitchenEnabledShare2025 = (
       '[data-source-static] Enabled kitchen reconciliation failed.'
     );
   }
+  assertRegistered(value);
   return value;
 };
 

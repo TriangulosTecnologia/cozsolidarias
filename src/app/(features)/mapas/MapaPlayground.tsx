@@ -10,7 +10,6 @@ import {
   getInitialSelection,
 } from '@ttoss/geovis-workspace';
 import { I18nProvider } from '@ttoss/react-i18n';
-import { BruttalTheme } from '@ttoss/theme/Bruttal';
 import * as React from 'react';
 import { ThemeUIProvider } from 'theme-ui';
 
@@ -41,39 +40,17 @@ import {
   type RampHandlers,
   YEAR_MENU_ID,
 } from './mapaLeftSidebar';
+import { scopedSidebarTheme } from './mapaWorkspaceTheme';
 import MapLayerPanel from './MapLayerPanel';
 import MapLoadingIndicator from './MapLoadingIndicator';
 import { useCafHexbin } from './useCafHexbin';
 import { useCustomRamps } from './useCustomRamps';
-import { useEnabledShareLayer } from './useEnabledShareLayer';
 import { useEnabledShareSpec } from './useEnabledShareSpec';
 import { useKitchensByYear } from './useKitchensByYear';
 import { useMapaDatasets } from './useMapaDatasets';
 import { useMapaSpec } from './useMapaSpec';
 import { useMapaUrlState } from './useMapaUrlState';
-
-/**
- * Bruttal theme scoped for the GeovisWorkspace sidebars only.
- *
- * theme-ui's <ThemeUIProvider>, when top-level (our app root is Chakra, not
- * theme-ui), renders <RootStyles> which injects the theme's `styles.root` onto
- * the document GLOBALLY — `* { box-sizing }`, `html { ...styles.root }` and,
- * crucially, `html a { font-family, color, text-decoration }`. That leaks into
- * sibling components like the header.
- *
- * `config.useRootStyles: false` makes theme-ui skip that global injection
- * entirely (it returns null). The sidebars style themselves via `sx` against
- * the theme context, so they keep their look; only the page-wide root styles
- * are suppressed. Color custom properties (`--theme-ui-*`, namespaced) stay on
- * so sidebar colors still resolve.
- */
-const scopedSidebarTheme = {
-  ...BruttalTheme,
-  config: {
-    ...BruttalTheme.config,
-    useRootStyles: false,
-  },
-};
+import { useMunicipalCoverageBridge } from './useMunicipalCoverageBridge';
 
 /**
  * Stretches the map to fill the container: `<GeovisWorkspace>` wraps its map in
@@ -296,8 +273,16 @@ const MapaPlayground = () => {
   const selectedYear = Number.isFinite(yearFromSelection)
     ? yearFromSelection
     : DEFAULT_YEAR;
-  const { year, enabledShareState } = useEnabledShareLayer(selectedYear);
-  const { active: enabledShareActive } = enabledShareState;
+  const {
+    year,
+    state: enabledShareState,
+    active: enabledShareActive,
+  } = useMunicipalCoverageBridge(
+    selectedYear,
+    ensure,
+    datasets.cadinsanByCity,
+    specMode
+  );
 
   /*
    * The grid's settings, read off the same selection the timeline writes to.
@@ -406,7 +391,7 @@ const MapaPlayground = () => {
     cozinhasPoints,
   });
 
-  const layeredSpec = useEnabledShareSpec({ spec, state: enabledShareState });
+  const layeredSpec = useEnabledShareSpec(spec, enabledShareState);
 
   return (
     <Box

@@ -1,5 +1,6 @@
 import type { LegendSpec } from '@ttoss/geovis';
 
+import { isCadinsanMode, quintileLabels } from './cadinsanQuintiles';
 import { classifyValues } from './classifyValues';
 import { buildAssentamentoLegend } from './geovisAssentamentosScales';
 import { buildCafHexbinLegend } from './geovisCafHexbin';
@@ -199,12 +200,12 @@ const LEGEND_CONFIGS: LegendConfig[] = [
     mode: 'coropletico-cadinsan-com-pbf',
     title: CADINSAN_COM_PBF_LEGEND_TITLE,
     subtitle:
-      'Parcela das famílias do CadÚnico em insegurança alimentar já considerando o alívio do Bolsa Família. Compare com o cenário sem para ver o efeito do programa.',
+      'Risco estimado de insegurança alimentar grave, considerando a renda do PBF. Quintis da distribuição conjunta dos dois cenários; cortes fixos ao filtrar.',
     thresholds: CADINSAN_THRESHOLDS,
     colors: CADINSAN_COLORS,
     labels: CADINSAN_LEGEND_LABELS,
     labelsFrom: (thresholds) => {
-      return flooredBinLabels('Sem dado', thresholds, '%');
+      return quintileLabels(thresholds);
     },
     reference: 'Fonte dos dados: MDS — CADINSAN 2025 (base do CadÚnico)',
   },
@@ -213,12 +214,12 @@ const LEGEND_CONFIGS: LegendConfig[] = [
     mode: 'coropletico-cadinsan-sem-pbf',
     title: CADINSAN_SEM_PBF_LEGEND_TITLE,
     subtitle:
-      'Parcela das famílias do CadÚnico que estariam em insegurança alimentar se não houvesse o Bolsa Família. Quanto mais escuro, maior a parcela.',
+      'Risco estimado de insegurança alimentar grave, simulando a retirada da renda do PBF. Quintis da distribuição conjunta dos dois cenários; cortes fixos ao filtrar.',
     thresholds: CADINSAN_THRESHOLDS,
     colors: CADINSAN_COLORS,
     labels: CADINSAN_LEGEND_LABELS,
     labelsFrom: (thresholds) => {
-      return flooredBinLabels('Sem dado', thresholds, '%');
+      return quintileLabels(thresholds);
     },
     reference: 'Fonte dos dados: MDS — CADINSAN 2025 (base do CadÚnico)',
   },
@@ -414,7 +415,9 @@ export const buildLegends = (
         property: 'value',
         scale: 'threshold',
         thresholds,
-        colors: config.colors,
+        colors: isCadinsanMode(config.mode)
+          ? config.colors.slice(0, thresholds.length + 1)
+          : config.colors,
         defaultColor: WITHOUT_KITCHEN_COLOR,
       },
       labelFormat: { type: 'labels', labels },

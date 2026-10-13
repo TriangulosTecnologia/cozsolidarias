@@ -61,16 +61,18 @@ export const renderCadinsanTooltip = ({
   register,
   variant,
   rampId,
+  thresholds,
 }: {
   name: string;
   register?: CadinsanByCity;
   variant: 'com' | 'sem';
   rampId?: string;
+  thresholds?: number[];
 }) => {
   const semDado = (
     <TooltipCard
       name={name}
-      swatchColor={colorForCadinsan(null, rampId)}
+      swatchColor={colorForCadinsan(null, rampId, thresholds)}
       primary="Sem dado do CadÚnico"
     />
   );
@@ -100,8 +102,8 @@ export const renderCadinsanTooltip = ({
   return (
     <TooltipCard
       name={name}
-      swatchColor={colorForCadinsan(activeProporcao, rampId)}
-      primary={`${formatPercent(activeProporcao)} em insegurança alimentar (${qualifier})`}
+      swatchColor={colorForCadinsan(activeProporcao, rampId, thresholds)}
+      primary={`${formatPercent(activeProporcao)} em risco de insegurança alimentar grave (${qualifier})`}
       secondary={`${formatFamilias(activeAbsoluto)} de ${formatFamilias(register.cadastrosCadunico)} famílias do CadÚnico neste cenário`}
       details={effect === undefined ? undefined : [effect]}
     />

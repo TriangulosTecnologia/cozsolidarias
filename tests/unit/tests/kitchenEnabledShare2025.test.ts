@@ -87,7 +87,7 @@ test('keeps every habilitada, including 256 without coordinates, and validates i
   const index = indexMunicipios(
     JSON.parse(readFileSync('public/geo/geojs-100-mun.json', 'utf8'))
   );
-  for (const row of snapshot.municipalities) {
+  for (const row of snapshot.registeredMunicipalities) {
     expect(findMunicipio({ index, point: row.anchor })?.codigoIbge).toBe(
       row.code
     );

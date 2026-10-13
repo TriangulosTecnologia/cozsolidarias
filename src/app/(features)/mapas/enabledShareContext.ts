@@ -1,6 +1,9 @@
 import * as React from 'react';
 
-import type { KitchenEnabledShare2025 } from '@/data-gateway/schema';
+import type {
+  CadinsanByCity,
+  KitchenEnabledShare2025,
+} from '@/data-gateway/schema';
 
 /**
  * Bridges runtime control visibility (inside the map slot) to the app's year
@@ -9,6 +12,12 @@ import type { KitchenEnabledShare2025 } from '@/data-gateway/schema';
  */
 export const EnabledShareContext = React.createContext<{
   active: boolean;
+  municipalActive?: boolean;
+  setMunicipalActive?: (active: boolean) => void;
+  summary?: boolean;
+  setSummary?: (value: boolean) => void;
+  cadinsan?: CadinsanByCity[];
+  scenario?: 'com' | 'sem';
   setActive: (active: boolean) => void;
   snapshot: KitchenEnabledShare2025 | null;
   loading: boolean;

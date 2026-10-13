@@ -1272,12 +1272,12 @@
       "collection_id": "dados_primarios",
       "slug": "cozinhas-habilitadas-participacao-2025",
       "title": "Habilitadas no município / total nacional de cozinhas (2025)",
-      "description": "Percentual de cozinhas habilitadas no município sobre todas as 5.913 cozinhas do cadastro nacional tratado de 2025. Apenas Situação = Habilitada entra no numerador (1.013 registros no Brasil). O denominador inclui todas as situações, inclusive registros sem coordenadas ou município resolvido. Área dos círculos proporcional ao percentual; não representa taxa de habilitação municipal nem densidade por área ou população.",
+      "description": "Percentual de cozinhas habilitadas no município sobre todas as 5.913 cozinhas do cadastro nacional tratado de 2025. Apenas Situação = Habilitada entra no numerador (1.013 registros no Brasil). O denominador inclui todas as situações, inclusive registros sem coordenadas ou município resolvido. Área dos círculos proporcional ao percentual; não representa taxa de habilitação municipal nem densidade por área ou população. A resposta inclui também municipalCoverage: total cadastrado e habilitadas no próprio município, usados na camada Tm (habilitadas ÷ cadastradas), separada da participação nacional.",
       "file": "src/data-source-static/data/kitchen-enabled-share-2025.json",
       "format": "JSON",
       "source": {
         "url": "https://docs.google.com/spreadsheets/d/1fEt1zRYwajWPqRGDXsHnUoHtEktxKeDC/edit?rtpof=true&sd=true&gid=297639936#gid=297639936",
-        "notes": "Snapshot derivado offline, de forma reproduzível. Atribuição por nome e UF, associação documentada do nome histórico Embu e fallback espacial. Todas as 1.013 habilitadas atribuídas a 264 municípios, inclusive 256 sem coordenadas; hashes e método por registro ficam no snapshot interno. A resposta pública contém somente agregados."
+        "notes": "Snapshot derivado offline, de forma reproduzível. Atribuição por nome e UF, associação documentada do nome histórico Embu e fallback espacial. Todas as 1.013 habilitadas atribuídas a 264 municípios, inclusive 256 sem coordenadas; hashes e método por registro ficam no snapshot interno. A resposta pública contém somente agregados. Todos os 5.913 registros foram atribuídos a 904 municípios; 640 têm cozinhas cadastradas e nenhuma habilitada."
       },
       "temporal": {
         "status": "described",
@@ -1331,6 +1331,16 @@
             "name": "nationalTotal",
             "description": "Total nacional, incluindo registros que não podem aparecer como pontos individuais",
             "unit": "cozinhas"
+          },
+          {
+            "name": "registeredCount",
+            "description": "Total de cozinhas cadastradas no município, incluindo todas as situações administrativas; presente em municipalCoverage",
+            "unit": "cozinhas"
+          },
+          {
+            "name": "enabledPercent",
+            "description": "100 × habilitadas / cadastradas no próprio município (Tm); não é taxa de aprovação entre solicitantes elegíveis",
+            "unit": "%"
           }
         ]
       }

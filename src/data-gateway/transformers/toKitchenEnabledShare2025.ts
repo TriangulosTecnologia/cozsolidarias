@@ -15,6 +15,17 @@ export const toKitchenEnabledShare2025 = (
     nationalTotal: source.nationalTotal,
     nationalEnabled: source.nationalEnabled,
     unresolvedEnabled: source.unresolvedEnabled,
+    municipalCoverage: source.registeredMunicipalities.map((row) => {
+      return {
+        codigoIbge: row.code,
+        municipio: row.name,
+        uf: row.uf,
+        registeredCount: row.total,
+        enabledCount: row.enabled,
+        enabledPercent: (100 * row.enabled) / row.total,
+        anchor: [...row.anchor],
+      };
+    }),
     municipalities: source.municipalities.map((row) => {
       return {
         codigoIbge: row.code,

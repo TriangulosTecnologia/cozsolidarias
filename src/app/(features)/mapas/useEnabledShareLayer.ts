@@ -11,16 +11,27 @@ import { useEnabledShare2025 } from './useEnabledShare2025';
  */
 export const useEnabledShareLayer = (selectedYear: number) => {
   const [active, setActive] = React.useState(false);
-  const { snapshot, loading, error, retry } = useEnabledShare2025(active);
+  const [municipalActive, setMunicipalActive] = React.useState(false);
+  const [summary, setSummary] = React.useState(false);
+  const { snapshot, loading, error, retry } = useEnabledShare2025(
+    active || municipalActive
+  );
   const enabledShareState = React.useMemo(() => {
     return {
       active,
+      municipalActive,
+      setMunicipalActive,
+      summary,
+      setSummary,
       setActive,
       snapshot,
       loading,
       error,
       retry,
     };
-  }, [active, snapshot, loading, error, retry]);
-  return { year: active ? 2025 : selectedYear, enabledShareState };
+  }, [active, municipalActive, summary, snapshot, loading, error, retry]);
+  return {
+    year: active || municipalActive ? 2025 : selectedYear,
+    enabledShareState,
+  };
 };
