@@ -3,6 +3,7 @@ import { gateway } from '@/gateway';
 import baseVisualizationSpecJson from './baseVisualizationSpec.json';
 import {
   collectStructuralIssues,
+  normalizeCandidate,
   validateCandidate,
   validateWithLocalRepairs,
 } from './candidateValidation';
@@ -18,7 +19,6 @@ import {
   appendRealSourceData,
   buildSourcesTable,
   errorResponse,
-  hoistLayerLegends,
   invalidSpecResponse,
   isRecord,
   type UnknownRecord,
@@ -176,7 +176,7 @@ const stoppedResponse = (reply: SpecReplyStopped): Response => {
  * Extracted out of {@link POST} purely to keep its own branching under the
  * lint complexity budget.
  *
- * @returns The parsed spec object with layer legends hoisted, or a
+ * @returns The parsed spec object, normalized by {@link normalizeCandidate}, or a
  * `Response` for a transport failure (502) or a rejected spec (422).
  */
 const getAgentResponse = async (params: {
@@ -223,7 +223,7 @@ const getAgentResponse = async (params: {
     });
   }
 
-  const spec = hoistLayerLegends(reply.spec);
+  const spec = normalizeCandidate(reply.spec);
   const structuralIssues = collectStructuralIssues(spec);
   if (structuralIssues.length > 0) {
     return invalidSpecResponse({
