@@ -1,6 +1,8 @@
 import { execFileSync } from 'node:child_process';
+import console from 'node:console';
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
+import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -18,9 +20,13 @@ const SECTION_SEPARATOR = '\n\n';
  */
 const readInstructions = () => {
   return readdirSync(SECTIONS_DIR)
-    .filter((name) => name.endsWith('.md'))
+    .filter((name) => {
+      return name.endsWith('.md');
+    })
     .sort()
-    .map((name) => readFileSync(join(SECTIONS_DIR, name), 'utf-8').trim())
+    .map((name) => {
+      return readFileSync(join(SECTIONS_DIR, name), 'utf-8').trim();
+    })
     .join(SECTION_SEPARATOR);
 };
 
@@ -66,7 +72,9 @@ const assertWithinLimit = (text) => {
 const formationWithInstructions = (text) => {
   const source = readFileSync(FORMATION_PATH, 'utf-8');
   const lines = source.split('\n');
-  const index = lines.findIndex((line) => /^\s*"instructions": /.test(line));
+  const index = lines.findIndex((line) => {
+    return /^\s*"instructions": /.test(line);
+  });
   if (index === -1) {
     throw new Error('formation.json has no "instructions" line');
   }
@@ -109,13 +117,16 @@ const check = process.argv.includes('--check');
 const text = readInstructions();
 assertWithinLimit(text);
 const nextFormation = formationWithInstructions(text);
-const formationChanged = nextFormation !== readFileSync(FORMATION_PATH, 'utf-8');
+const formationChanged =
+  nextFormation !== readFileSync(FORMATION_PATH, 'utf-8');
 
 if (!apply) {
   console.log(
     `dry run: ${text.length} chars; formation.json changes: ${formationChanged}`
   );
-  console.log(`re-run with --apply to write formation.json and push to ${AGENT_ID}`);
+  console.log(
+    `re-run with --apply to write formation.json and push to ${AGENT_ID}`
+  );
   if (check && formationChanged) {
     process.exitCode = 1;
   }
