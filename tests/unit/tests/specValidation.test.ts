@@ -1,3 +1,4 @@
+import { buildSourcesTable } from 'src/app/api/ai/spec/instructions/sourcesTable';
 import {
   buildCatalogueContext,
   officialFaixasOf,
@@ -6,7 +7,6 @@ import {
 import {
   appendRealMapData,
   appendRealSourceData,
-  buildSourcesTable,
   errorResponse,
   findGeometryInMapData,
   findInvalidBasemapStyleUrl,
@@ -81,7 +81,7 @@ describe('buildSourcesTable', () => {
     const table = buildSourcesTable();
 
     expect(typeof table).toBe('string');
-    expect(table).toContain('| URL servida | Arquivo real | Descrição |');
+    expect(table).toContain('| URL served | Actual file | Description |');
   });
 
   test('includes all known source URLs in the table', () => {
@@ -100,10 +100,10 @@ describe('buildSourcesTable', () => {
     expect(table).toContain('public/geo/assentamentos.json');
   });
 
-  test('marks API-backed sources as "(resolvido no servidor)"', () => {
+  test('marks API-backed sources as "(resolved on server)"', () => {
     const table = buildSourcesTable();
 
-    expect(table).toContain('(resolvido no servidor)');
+    expect(table).toContain('(resolved on server)');
   });
 });
 
