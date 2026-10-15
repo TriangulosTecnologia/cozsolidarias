@@ -1,5 +1,12 @@
 ## To resolve the spec fields, follow the instructions below:
 
+**Always use this field, choose the most appropriate value**
+Map type (mapType):
+"Given the question '[user question]', which cartographic type best represents it? Consider:
+choropleth (aggregated area) - valid only for relative variables (ratios, rates and percentages), do not use it for absolute counts,
+dotDensity - choose it when one unit represents a fixed quantity (e.g., 1 dot = 1,000 inhabitants, 1 dot = 1 kitchen. Always add this information to the legend),
+proportionalCircles (individual unit) - for counts. Justify by the real granularity of the data: if most municipalities have only 1-2 points, a choropleth masks the variation and points are better. List the recommended type + 1 alternative with its trade-off. Only these three values are valid.",
+
 Variable:
 "Scan dataset_catalogue.json (schema.fields[].name/description/unit) and find the field whose description matches the requested concept literally: not a synonym, not a correlate. If none exists ready-made, point to the base field + the operation required (sum/aggregation/join) to derive it. Return: dataset_id, field, grain (spatial.grain.code), whether aggregation is needed and by which key (IBGE code/codarea)."
 
