@@ -1320,7 +1320,7 @@ describe('POST /api/ai/spec', () => {
     ]);
   }, 10000);
 
-  test('returns the spec unchanged when it declares no mapData at all', async () => {
+  test('merges the base spec into a spec that declares no mapData', async () => {
     const spec = { title: 'Só o mapa base, sem camada de valores' };
     mockAgentReply(JSON.stringify(spec));
 

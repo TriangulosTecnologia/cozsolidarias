@@ -84,6 +84,20 @@ const maxValueOf = (dataset: UnknownRecord): number | undefined => {
     : undefined;
 };
 
+// The size dataset's id and scale ceiling, or undefined when either is unusable.
+const sizeBindingOf = (
+  spec: UnknownRecord
+): { mapDataId: string; max: number } | undefined => {
+  const sizeDataset = sizeDatasetOf(spec);
+  if (!sizeDataset || typeof sizeDataset['mapDataId'] !== 'string') {
+    return undefined;
+  }
+  const max = maxValueOf(sizeDataset);
+  return max !== undefined && max > 0
+    ? { mapDataId: sizeDataset['mapDataId'], max }
+    : undefined;
+};
+
 /**
  * Applies the `proportionalCircles` defaults to a resolved spec. The scale
  * ceiling becomes the largest value of the size dataset (the `mapData` entry
@@ -101,20 +115,16 @@ const maxValueOf = (dataset: UnknownRecord): number | undefined => {
 export const applyProportionalCirclesDefaults = (
   spec: UnknownRecord
 ): UnknownRecord => {
-  if (spec['mapType'] !== 'proportionalCircles') {
+  const binding = sizeBindingOf(spec);
+  if (spec['mapType'] !== 'proportionalCircles' || !binding) {
     return spec;
   }
 
-  const sizeDataset = sizeDatasetOf(spec);
-  const max = sizeDataset ? maxValueOf(sizeDataset) : undefined;
-  if (!sizeDataset || max === undefined || max <= 0) {
-    return spec;
-  }
-
+  const { mapDataId, max } = binding;
   const sizedLayers = ([] as unknown[]).concat(spec['layers']).map((layer) => {
     return isRecord(layer) &&
       layer['geometry'] === 'point' &&
-      layer['mapDataId'] === sizeDataset['mapDataId']
+      layer['mapDataId'] === mapDataId
       ? {
           ...layer,
           sizeBy: {
