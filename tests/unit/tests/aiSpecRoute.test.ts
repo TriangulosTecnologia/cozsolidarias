@@ -1,4 +1,5 @@
 import { validateSpec } from '@ttoss/geovis';
+import baseVisualizationSpecJson from 'src/app/api/ai/spec/instructions/baseVisualizationSpec.json';
 import { POST } from 'src/app/api/ai/spec/route';
 import { invalidSpecResponse } from 'src/app/api/ai/spec/specValidation';
 
@@ -397,7 +398,7 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as { spec?: unknown };
 
     expect(response.status).toBe(200);
-    expect(body.spec).toMatchObject(spec);
+    expect(body.spec).toEqual({ ...baseVisualizationSpecJson, ...spec });
   }, 10000);
 
   // ---------------------------------------------------------------------------
@@ -452,7 +453,7 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as { spec?: unknown };
 
     expect(response.status).toBe(200);
-    expect(body.spec).toMatchObject(spec);
+    expect(body.spec).toEqual({ ...baseVisualizationSpecJson, ...spec });
   }, 10000);
 
   test('returns a gateway error when the model reply is not valid JSON', async () => {
@@ -1327,7 +1328,7 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as { spec?: unknown };
 
     expect(response.status).toBe(200);
-    expect(body.spec).toMatchObject(spec);
+    expect(body.spec).toEqual({ ...baseVisualizationSpecJson, ...spec });
   }, 10000);
 
   test('returns 422 when mapData is not an array', async () => {
