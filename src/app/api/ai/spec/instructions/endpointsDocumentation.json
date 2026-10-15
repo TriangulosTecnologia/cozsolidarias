@@ -261,6 +261,42 @@
         {
           "name": "ivs",
           "description": "Índice entre 0 e 1, onde 1 é vulnerabilidade máxima."
+        },
+        {
+          "name": "ivsInfraestruturaUrbana",
+          "description": "Sub-índice de Infraestrutura Urbana, entre 0 e 1. Maior = mais vulnerável."
+        },
+        {
+          "name": "ivsCapitalHumano",
+          "description": "Sub-índice de Capital Humano, entre 0 e 1. Maior = mais vulnerável."
+        },
+        {
+          "name": "ivsRendaETrabalho",
+          "description": "Sub-índice de Renda e Trabalho, entre 0 e 1. Maior = mais vulnerável."
+        },
+        {
+          "name": "idhm",
+          "description": "Índice de Desenvolvimento Humano Municipal (IDHM), entre 0 e 1. Maior = melhor."
+        },
+        {
+          "name": "idhmLongevidade",
+          "description": "Sub-índice de Longevidade do IDHM, entre 0 e 1. Maior = melhor."
+        },
+        {
+          "name": "idhmEducacao",
+          "description": "Sub-índice de Educação do IDHM, entre 0 e 1. Maior = melhor."
+        },
+        {
+          "name": "idhmRenda",
+          "description": "Sub-índice de Renda do IDHM, entre 0 e 1. Maior = melhor."
+        },
+        {
+          "name": "idhmEducacaoEscolaridade",
+          "description": "Sub-componente de Escolaridade do sub-índice de Educação do IDHM, entre 0 e 1. Maior = melhor."
+        },
+        {
+          "name": "idhmEducacaoFrequencia",
+          "description": "Sub-componente de Frequência Escolar do sub-índice de Educação do IDHM, entre 0 e 1. Maior = melhor."
         }
       ]
     },

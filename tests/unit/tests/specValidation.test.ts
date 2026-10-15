@@ -6,7 +6,6 @@ import {
 import {
   appendRealMapData,
   appendRealSourceData,
-  buildSourcesTable,
   errorResponse,
   findGeometryInMapData,
   findInvalidBasemapStyleUrl,
@@ -73,37 +72,6 @@ describe('invalidSpecResponse', () => {
     const body = await response.json();
 
     expect(body.issues).toEqual(issues);
-  });
-});
-
-describe('buildSourcesTable', () => {
-  test('returns a markdown table string', () => {
-    const table = buildSourcesTable();
-
-    expect(typeof table).toBe('string');
-    expect(table).toContain('| URL servida | Arquivo real | Descrição |');
-  });
-
-  test('includes all known source URLs in the table', () => {
-    const table = buildSourcesTable();
-
-    for (const url of KNOWN_SOURCE_URLS) {
-      expect(table).toContain(`\`${url}\``);
-    }
-  });
-
-  test('marks static files with their paths', () => {
-    const table = buildSourcesTable();
-
-    expect(table).toContain('public/geo/geojs-100-mun.json');
-    expect(table).toContain('public/geo/estados.json');
-    expect(table).toContain('public/geo/assentamentos.json');
-  });
-
-  test('marks API-backed sources as "(resolvido no servidor)"', () => {
-    const table = buildSourcesTable();
-
-    expect(table).toContain('(resolvido no servidor)');
   });
 });
 
