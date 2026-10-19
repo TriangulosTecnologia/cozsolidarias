@@ -176,35 +176,6 @@ export const SOURCE_METADATA: Record<
   },
 };
 
-/**
- * Builds a markdown table listing all valid source URLs, their physical paths,
- * and descriptions. Injected into INSTRUCTIONS so the model always sees
- * current sources without manual duplication. If KNOWN_SOURCE_URLS changes,
- * this table regenerates automatically.
- * @example
- * // Returns markdown table suitable for embedding in instructions
- * const table = buildSourcesTable();
- */
-export const buildSourcesTable = (): string => {
-  const rows = KNOWN_SOURCE_URLS.map((url) => {
-    const meta = SOURCE_METADATA[url];
-    const path = meta.resolver ? '(resolvido no servidor)' : meta.filepath;
-    return `| \`${url}\` | \`${path}\` | ${meta.description} |`;
-  }).join('\n');
-
-  return `## sources: URLs válidas e seus caminhos reais
-
-Cada \`sources[].data\` DEVE ser exatamente uma destas URLs.
-A coluna "Arquivo real" mostra onde o arquivo está no servidor ou identifica um endpoint dinâmico.
-
-| URL servida | Arquivo real | Descrição |
-|-------------|-------------|-----------|
-${rows}
-
-**Regra absoluta**: Nunca invente URLs. Se não está nesta tabela, a requisição retornará erro 422.
-**Nota**: URLs em \`public/geo/\` são estáticas (GeoJSON). URLs em \`/api/\` são endpoints dinâmicos (Node.js).`;
-};
-
 /** An inline, empty `FeatureCollection` — a placeholder the model sometimes emits instead of a real endpoint. */
 const isEmptyInlineFeatureCollection = (data: unknown): boolean => {
   return (
@@ -430,7 +401,7 @@ export const hoistLayerLegends = (spec: UnknownRecord): UnknownRecord => {
  * shorthand (any `mapData` entry) or through a `polygon` layer joined to it by
  * `mapDataId`, which is how a spec without `mapType` fills areas. Bertin's
  * area-bias rule, already stated in prose in the dataset's own catalogue
- * `description` and `route.ts`'s `INSTRUCTIONS`, enforced here structurally
+ * `description` and `instructions/instructions.ts`'s `INSTRUCTIONS`, enforced here structurally
  * instead of trusting the model to follow the prompt.
  *
  * @param spec - The candidate spec.

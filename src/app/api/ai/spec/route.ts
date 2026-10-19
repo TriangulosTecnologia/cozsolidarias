@@ -1,6 +1,5 @@
 import { gateway } from '@/gateway';
 
-import baseVisualizationSpecJson from './baseVisualizationSpec.json';
 import {
   collectStructuralIssues,
   normalizeCandidate,
@@ -11,43 +10,19 @@ import {
   buildCozinhasChoroplethSpec,
   isCozinhasChoroplethRequest,
 } from './canonicalChoropleth';
-import endpointsDocumentation from './endpointsDocumentation.json';
+import baseVisualizationSpecJson from './instructions/baseVisualizationSpec.json';
+import { INSTRUCTIONS } from './instructions/instructions';
 import { buildCatalogueContext } from './mapDataCatalogue';
 import { generateSpec, type SpecReplyStopped } from './naturaliSession';
+import { applyProportionalCirclesDefaults, mergeSpecs } from './specDefaults';
 import {
   appendRealMapData,
   appendRealSourceData,
-  buildSourcesTable,
   errorResponse,
   invalidSpecResponse,
   isRecord,
   type UnknownRecord,
 } from './specValidation';
-
-const INSTRUCTIONS = `
-
-${buildSourcesTable()}
-
-## VisualizationSpec Base
-
-Utilize como valores padrão, a partir para gerar o VisualizationSpec output solicitado
-
-${JSON.stringify(baseVisualizationSpecJson, null, 2)}
-
-- Faça a remoção dos objetos de legends que não serão utilizados para o resultado do mapa
-
-- Faça a remoção dos objetos de layers que não serão utilizados para o resultado do mapa
-
-ex: cozinhas-bolhas só é incluída quando há dados de /api/cozinhas/bolhas
-
-## Rotas de API Cozinhas Solidárias
-
-Utilize para identificar quais rotas de api popular no campo sources[].data para incluir ao json output
-
-ex: Como um pedido de mapa de pontos proporcionais com o número de cozinhas por município foi solicitado, o path correto é o /api/cozinhas/bolhas.
-
-${JSON.stringify(endpointsDocumentation, null, 2)}
-`;
 
 let cachedCatalogueText: Promise<string> | null = null;
 
@@ -302,18 +277,19 @@ export const POST = async (request: Request): Promise<Response> => {
     return modelJsonOrError;
   }
 
-  const servedOrError = await resolveServedSpec(modelJsonOrError);
+  const servedOrError = await resolveServedSpec(
+    mergeSpecs(baseVisualizationSpecJson as UnknownRecord, modelJsonOrError)
+  );
   if (servedOrError instanceof Response) {
     return servedOrError;
   }
 
-  const { spec, issues } = validateWithLocalRepairs(servedOrError);
+  const { spec, issues } = validateWithLocalRepairs(
+    applyProportionalCirclesDefaults(servedOrError)
+  );
   if (issues.length > 0) {
     return invalidSpecResponse({ issues, spec });
   }
 
-  return Response.json({
-    spec,
-    error: false,
-  });
+  return Response.json({ spec, error: false });
 };
