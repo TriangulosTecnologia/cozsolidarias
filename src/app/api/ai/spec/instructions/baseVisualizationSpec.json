@@ -1,0 +1,45 @@
+{
+  "engine": "maplibre",
+  "view": {
+    "center": [-53.0, -14.5],
+    "zoom": 4,
+    "maxZoomIn": 9,
+    "maxZoomOut": 4
+  },
+  "basemap": {
+    "labels": false
+  },
+  "attributionControlEnabled": false,
+  "sources": [
+    {
+      "id": "municipios",
+      "type": "geojson",
+      "data": "/geo/geojs-100-mun.json"
+    },
+    {
+      "id": "estados",
+      "type": "geojson",
+      "data": "/geo/estados.json"
+    }
+  ],
+  "layers": [
+    {
+      "id": "municipios-boundary-line",
+      "sourceId": "municipios",
+      "geometry": "line",
+      "paint": {
+        "lineColor": "#B2B2B2",
+        "lineWidth": 0.6
+      }
+    },
+    {
+      "id": "estados-boundary-line",
+      "sourceId": "estados",
+      "geometry": "line",
+      "paint": {
+        "lineColor": "#241F21",
+        "lineWidth": 0.8
+      }
+    }
+  ]
+}

@@ -17,7 +17,7 @@ import { gateway } from '@/gateway';
  * relation to the measured quantity. `cozinhas_pessoas_atendidas`'s own
  * catalogue `description` already states this ("nunca um coroplético");
  * `findChoroplethOnAbsoluteTotal` in `specValidation.ts` enforces it
- * deterministically instead of relying only on `route.ts`'s `INSTRUCTIONS`.
+ * deterministically instead of relying only on `instructions/instructions.ts`'s `INSTRUCTIONS`.
  */
 export const ABSOLUTE_TOTAL_DATASET_IDS = [
   'cozinhas_pessoas_atendidas',
