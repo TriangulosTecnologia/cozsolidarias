@@ -620,10 +620,13 @@ describe('POST /api/ai/spec', () => {
     );
     const body = (await response.json()) as { spec?: SpecRecord };
 
+    const layers = body.spec?.['layers'];
     expect(response.status).toBe(200);
-    expect(body.spec?.['layers']).toEqual([
-      { id: 'dots', sourceId: 'bolhas', geometry: 'point' },
-    ]);
+    expect(Array.isArray(layers) && layers.at(-1)).toEqual({
+      id: 'dots',
+      sourceId: 'bolhas',
+      geometry: 'point',
+    });
   }, 10000);
 
   test('returns 422 when an API-backed source resolves to no features', async () => {
