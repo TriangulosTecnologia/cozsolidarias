@@ -1,0 +1,13 @@
+diff --git a/dist/index.mjs b/dist/index.mjs
+index c1e603208af4c09b33703c4953de922900083238..b886a3d48f0030ecad245e652ccff5079925379d 100644
+--- a/dist/index.mjs
++++ b/dist/index.mjs
+@@ -2,7 +2,7 @@
+ import { C as CATEGORICAL_PALETTE, E as applyMapDataPatchToSpec, S as pickPaletteColors, T as SEQUENTIAL_PALETTES, _ as computeJenksBreaks, a as resolvePalette, b as inspectDataValues, g as resolveDotDensity, h as resolveProportionalCircles, i as resolveCategoricalFallbackColor, m as getProportionalCirclesAutoLegendId, o as resolveQuantitativeFallbackColor, s as computeFeatureBbox, u as estimateMaxZoom, v as computeNumClasses, w as DEFAULT_SEQUENTIAL_PALETTE, x as niceFloor, y as findMatchSourceId } from "./legendTranslation-BegwGH69.mjs";
+ import * as React from "react";
+ import { Fragment, jsx, jsxs } from "react/jsx-runtime";
+-import Ajv2020 from "ajv/dist/2020";
++import Ajv2020 from "ajv/dist/2020.js";
+ import { defineMessages, useI18n } from "@ttoss/react-i18n";
+ import * as ReactDOM$1 from "react-dom";
+ import ReactDOM from "react-dom";
