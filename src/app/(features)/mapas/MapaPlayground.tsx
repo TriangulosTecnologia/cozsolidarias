@@ -1,6 +1,9 @@
 'use client';
 
 import 'maplibre-gl/dist/maplibre-gl.css';
+// Side-effect import: points maplibre-gl at its bundled worker before any map
+// is created (see the module for why the default URL fails).
+import '@/components/map/maplibreWorker';
 
 import { Box } from '@chakra-ui/react';
 import {
