@@ -1,6 +1,142 @@
 [
   {
     "method": "GET",
+    "path": "/api/cadinsan/por-municipio",
+    "summary": "CADINSAN 2025: insegurança alimentar entre famílias do CadÚnico, com e sem o Bolsa Família, por município.",
+    "parameters": [],
+    "response": {
+      "type": "Array de objetos",
+      "fields": [
+        {
+          "name": "codigoIbge",
+          "description": "7-digit IBGE code; joins to `feature.properties.codarea` on the map."
+        },
+        {
+          "name": "municipio",
+          "description": "Município name (for display), from the CADINSAN source."
+        },
+        {
+          "name": "uf",
+          "description": "State (UF) full name, from the CADINSAN source."
+        },
+        {
+          "name": "regiao",
+          "description": "Macro-region, from the CADINSAN source."
+        },
+        {
+          "name": "absolutoComPbf",
+          "description": "Food-insecure CadÚnico families including PBF beneficiaries."
+        },
+        {
+          "name": "absolutoSemPbf",
+          "description": "Food-insecure CadÚnico families excluding PBF beneficiaries."
+        },
+        {
+          "name": "cadastrosCadunico",
+          "description": "Total CadÚnico registrations in the município (the share denominator)."
+        },
+        {
+          "name": "proporcaoComPbf",
+          "description": "Share (%) of CadÚnico families in food insecurity including PBF: `(absolutoComPbf / cadastrosCadunico) * 100`, rounded to two decimals, or `null` when `cadastrosCadunico` is `0` (no denominator)."
+        },
+        {
+          "name": "proporcaoSemPbf",
+          "description": "Share (%) of CadÚnico families in food insecurity excluding PBF: `(absolutoSemPbf / cadastrosCadunico) * 100`, rounded to two decimals, or `null` when `cadastrosCadunico` is `0` (no denominator)."
+        }
+      ]
+    },
+    "usage": "Coroplético de insegurança alimentar (join geometryId: codigoIbge).",
+    "constraints": [
+      "As proporções são 0–1: exiba como rampa, nunca coroplético dos totais absolutos."
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/api/cafs/hexbin",
+    "summary": "Grade de hexágonos H3 cobrindo o Brasil, cada célula com a contagem de CAFs.",
+    "parameters": [
+      {
+        "name": "r",
+        "required": false,
+        "description": "Resolução H3 (0–15). Padrão: 5. Valor inválido cai na resolução padrão, sem 404."
+      }
+    ],
+    "response": {
+      "type": "GeoJSON FeatureCollection de Polygons",
+      "fields": [
+        {
+          "name": "features[].geometry.coordinates",
+          "description": "A single closed ring, GeoJSON order (`[longitude, latitude]`). Six or eight vertices — H3 adds vertices where a cell crosses an icosahedron edge."
+        },
+        {
+          "name": "features[].properties.h3",
+          "description": "H3 index of the cell. Doubles as the map's join key (`joinKey: 'h3'`), which is what promotes it to the MapLibre feature id: a string cannot be carried in the feature's own `id`, because geojson is serialised through the vector-tile encoder and that spec allows only integer ids."
+        },
+        {
+          "name": "features[].properties.count",
+          "description": "CAFs whose principal property falls in the cell. `0` is a real answer — the grid covers the whole territory, so an empty cell is a fact about it rather than missing data."
+        }
+      ]
+    },
+    "usage": "Agregação hexagonal de CAFs (join joinKey: h3).",
+    "constraints": []
+  },
+  {
+    "method": "GET",
+    "path": "/api/cafs/pontos-por-uf",
+    "summary": "Um ponto por UF, posicionado no centroide ponderado dos CAFs.",
+    "parameters": [],
+    "response": {
+      "type": "GeoJSON FeatureCollection de Points",
+      "fields": [
+        {
+          "name": "features[].geometry.coordinates",
+          "description": "GeoJSON order: `[longitude, latitude]`. The CAF-weighted centroid."
+        },
+        {
+          "name": "features[].properties.nome",
+          "description": "Full state name, e.g. `Bahia`. Doubles as the map's join key (`joinKey: 'nome'`), so the hover card can title itself from `MapHoverInfo.featureId` without the app carrying a sigla→name table. Brazilian state names are stable and unique, which is what makes them usable as an identity."
+        },
+        {
+          "name": "features[].properties.quantidade",
+          "description": "CAFs in the UF: the sum over every município whose IBGE code it prefixes."
+        }
+      ]
+    },
+    "usage": "Nível país do zoom hierárquico de CAFs (join joinKey: nome).",
+    "constraints": []
+  },
+  {
+    "method": "GET",
+    "path": "/api/cafs/por-municipio",
+    "summary": "Contagem de CAFs (Cadastro Nacional da Agricultura Familiar) e percentual do Brasil por município.",
+    "parameters": [],
+    "response": {
+      "type": "Array de objetos",
+      "fields": [
+        {
+          "name": "codigoIbge",
+          "description": "7-digit IBGE code; joins to `feature.properties.codarea` on the map."
+        },
+        {
+          "name": "municipio",
+          "description": "Município name (for display); taken from the CAF source records."
+        },
+        {
+          "name": "quantidade",
+          "description": "Number of distinct CAFs (`nr_caf`) counted in this município."
+        },
+        {
+          "name": "percentualDoBrasil",
+          "description": "Share of all Brazilian CAFs counted in this município: `(quantidade / totalBrasil) * 100`, rounded to six decimals (CAF shares are tiny; see `cafsPercentualDoBrasil` in `toCafsPorMunicipio.ts`), where `totalBrasil` is the sum of `quantidade` across every município (the national total the choropleth paints). Always a number (never `null`) because every row has `quantidade >= 1`; `0` only in the degenerate case of no CAFs at all."
+        }
+      ]
+    },
+    "usage": "Coroplético de distribuição de CAFs (join geometryId: codigoIbge).",
+    "constraints": []
+  },
+  {
+    "method": "GET",
     "path": "/api/cozinhas",
     "summary": "Localização de cada cozinha como GeoJSON FeatureCollection de Points.",
     "parameters": [
@@ -15,91 +151,23 @@
       "fields": [
         {
           "name": "features[].geometry.coordinates",
-          "description": "Par [longitude, latitude] da cozinha."
+          "description": "GeoJSON order: `[longitude, latitude]`."
         },
         {
           "name": "features[].properties.codigo",
-          "description": "Código único da cozinha (ex.: CS016282). Também é o id da feature."
+          "description": "Registration code (`Código da Cozinha`), e.g. `CS016282`. Promoted to the map's clickable `feature.id` and used as the detail-endpoint lookup key."
         },
         {
           "name": "features[].properties.nome",
-          "description": "Nome da cozinha."
+          "description": "Display name of the cozinha, shown in the hover tooltip."
         },
         {
-          "name": "features[].properties.municipio",
-          "description": "Nome do município onde a cozinha está localizada."
-        },
-        {
-          "name": "features[].properties.codigoIbge",
-          "description": "Código IBGE do município (7 dígitos)."
+          "name": "features[].properties.emFuncionamento",
+          "description": "Current operating status (`A cozinha está em funcionamento atualmente?`), source-native text. Drives the categorical point color on the map via the `cozinhas-status` join. Empty string when the source cell is blank."
         }
       ]
     },
     "usage": "Fonte GeoJSON de pontos individuais; o time-lapse muda pelo parâmetro ano.",
-    "constraints": []
-  },
-  {
-    "method": "GET",
-    "path": "/api/cozinhas/por-municipio",
-    "summary": "Contagem de cozinhas agregada por município.",
-    "parameters": [
-      {
-        "name": "ano",
-        "required": false,
-        "description": "Ano do snapshot, no formato YYYY. Padrão: ano mais recente disponível."
-      }
-    ],
-    "response": {
-      "type": "Array de objetos",
-      "fields": [
-        {
-          "name": "codigoIbge",
-          "description": "Código IBGE do município; chave de junção (geometryId) com a geometria dos municípios."
-        },
-        {
-          "name": "municipio",
-          "description": "Nome do município."
-        },
-        {
-          "name": "quantidade",
-          "description": "Número de cozinhas cadastradas no município no ano."
-        }
-      ]
-    },
-    "usage": "Dados para coroplético de cozinhas por município (join geometryId: codigoIbge).",
-    "constraints": [
-      "Nunca use o dataset cozinhas_pessoas_atendidas em modo coroplético (retorna 422): é um total absoluto, não uma taxa."
-    ]
-  },
-  {
-    "method": "GET",
-    "path": "/api/cozinhas/bolhas",
-    "summary": "Pontos redondos proporcionais à quantidade de cozinhas por município.",
-    "parameters": [
-      {
-        "name": "ano",
-        "required": false,
-        "description": "Ano do snapshot, no formato YYYY. Padrão: ano mais recente disponível."
-      }
-    ],
-    "response": {
-      "type": "GeoJSON FeatureCollection de Points",
-      "fields": [
-        {
-          "name": "features[].geometry.coordinates",
-          "description": "Par [longitude, latitude] do ponto que representa o município."
-        },
-        {
-          "name": "features[].properties.codarea",
-          "description": "Código IBGE do município."
-        },
-        {
-          "name": "features[].properties.quantidade",
-          "description": "Número de cozinhas no município; define o tamanho da bolha (sizeBy)."
-        }
-      ]
-    },
-    "usage": "Fonte para camada de pontos proporcionais, com tamanho dirigido por sizeBy.range.",
     "constraints": []
   },
   {
@@ -119,25 +187,63 @@
       }
     ],
     "response": {
-      "type": "Objeto; 404 quando o código não existe no ano informado",
+      "type": "Objeto ou null; 404 quando o código não existe no ano informado",
       "fields": [
-        { "name": "codigo", "description": "Código único da cozinha." },
-        { "name": "nome", "description": "Nome da cozinha." },
-        { "name": "municipio", "description": "Nome do município." },
-        { "name": "codigoIbge", "description": "Código IBGE do município." },
-        { "name": "latitude", "description": "Latitude em graus decimais." },
-        { "name": "longitude", "description": "Longitude em graus decimais." },
-        { "name": "endereco", "description": "Endereço da cozinha." },
-        { "name": "cnpj", "description": "CNPJ da entidade responsável." },
-        { "name": "email", "description": "E-mail de contato." },
-        { "name": "telefone", "description": "Telefone de contato." },
         {
-          "name": "quantidade",
-          "description": "Número de cozinhas do registro no ano."
+          "name": "codigo",
+          "description": "Registration code (`Código da Cozinha`), e.g. `CS016282`. The lookup key."
         },
         {
-          "name": "pessoasAtendidas",
-          "description": "Total absoluto de pessoas atendidas pela cozinha."
+          "name": "nome",
+          "description": "Kitchen name."
+        },
+        {
+          "name": "endereco",
+          "description": "Street address."
+        },
+        {
+          "name": "bairro",
+          "description": "Neighbourhood."
+        },
+        {
+          "name": "cep",
+          "description": "Postal code (CEP)."
+        },
+        {
+          "name": "municipio",
+          "description": "Município name, as typed in the source."
+        },
+        {
+          "name": "uf",
+          "description": "State (UF) abbreviation."
+        },
+        {
+          "name": "emFuncionamento",
+          "description": "Free-text answer to \"está em funcionamento atualmente?\"."
+        },
+        {
+          "name": "diasFuncionamento",
+          "description": "Free-text description of the weekly operating days."
+        },
+        {
+          "name": "situacao",
+          "description": "Registration status (`Situação`), e.g. `Habilitada`."
+        },
+        {
+          "name": "publicoAtendido",
+          "description": "Comma-separated groups the kitchen serves (`Público Atendido`)."
+        },
+        {
+          "name": "publicoTotalAtendido",
+          "description": "People served, as reported. Kept as text; may be blank."
+        },
+        {
+          "name": "latitude",
+          "description": "Latitude in decimal degrees, or `null` when the source has no coordinate."
+        },
+        {
+          "name": "longitude",
+          "description": "Longitude in decimal degrees, or `null` when the source has no coordinate."
         }
       ]
     },
@@ -165,85 +271,99 @@
   },
   {
     "method": "GET",
-    "path": "/api/cafs/por-municipio",
-    "summary": "Contagem de CAFs (Cadastro Nacional da Agricultura Familiar) e percentual do Brasil por município.",
-    "parameters": [],
-    "response": {
-      "type": "Array de objetos",
-      "fields": [
-        {
-          "name": "codigoIbge",
-          "description": "Código IBGE do município; chave de junção (geometryId)."
-        },
-        { "name": "municipio", "description": "Nome do município." },
-        {
-          "name": "quantidade",
-          "description": "Número de CAFs no município."
-        },
-        {
-          "name": "percentualDoBrasil",
-          "description": "Participação do município no total nacional de CAFs, em percentual (ex.: 5.2 = 5,2%)."
-        }
-      ]
-    },
-    "usage": "Coroplético de distribuição de CAFs (join geometryId: codigoIbge).",
-    "constraints": []
-  },
-  {
-    "method": "GET",
-    "path": "/api/cafs/pontos-por-uf",
-    "summary": "Um ponto por UF, posicionado no centroide ponderado dos CAFs.",
-    "parameters": [],
+    "path": "/api/cozinhas/bolhas",
+    "summary": "Pontos redondos proporcionais à quantidade de cozinhas por município.",
+    "parameters": [
+      {
+        "name": "ano",
+        "required": false,
+        "description": "Ano do snapshot, no formato YYYY. Padrão: ano mais recente disponível."
+      }
+    ],
     "response": {
       "type": "GeoJSON FeatureCollection de Points",
       "fields": [
         {
           "name": "features[].geometry.coordinates",
-          "description": "Par [longitude, latitude] do centroide ponderado de CAFs da UF."
+          "description": "GeoJSON order: `[longitude, latitude]`."
         },
         {
-          "name": "features[].properties.nome",
-          "description": "Nome da UF; chave de junção (joinKey: nome)."
+          "name": "features[].properties.codarea",
+          "description": "7-digit IBGE code; the map joins it to the count via `joinKey`."
+        },
+        {
+          "name": "features[].properties.municipio",
+          "description": "Município name, for tooltips/labels."
         },
         {
           "name": "features[].properties.quantidade",
-          "description": "Número de CAFs na UF."
+          "description": "Cozinha count in this município; encodes the circle radius."
         }
       ]
     },
-    "usage": "Nível país do zoom hierárquico de CAFs (join joinKey: nome).",
+    "usage": "Fonte para camada de pontos proporcionais, com tamanho dirigido por sizeBy.range.",
     "constraints": []
   },
   {
     "method": "GET",
-    "path": "/api/cafs/hexbin",
-    "summary": "Grade de hexágonos H3 cobrindo o Brasil, cada célula com a contagem de CAFs.",
+    "path": "/api/cozinhas/por-municipio",
+    "summary": "Contagem de cozinhas agregada por município.",
     "parameters": [
       {
-        "name": "r",
+        "name": "ano",
         "required": false,
-        "description": "Resolução H3 (0–15). Padrão: 5. Valor inválido cai na resolução padrão, sem 404."
+        "description": "Ano do snapshot, no formato YYYY. Padrão: ano mais recente disponível."
       }
     ],
     "response": {
-      "type": "GeoJSON FeatureCollection de Polygons",
+      "type": "Array de objetos",
       "fields": [
         {
-          "name": "features[].geometry.coordinates",
-          "description": "Contorno do hexágono."
+          "name": "codigoIbge",
+          "description": "7-digit IBGE code; joins to `feature.properties.codarea` on the map."
         },
         {
-          "name": "features[].properties.h3",
-          "description": "Índice H3 da célula; chave de junção (joinKey: h3)."
+          "name": "municipio",
+          "description": "Município name (for display); taken from the source records."
         },
         {
-          "name": "features[].properties.count",
-          "description": "Número de CAFs na célula."
+          "name": "quantidade",
+          "description": "Number of cozinhas located inside this município's polygon, plus those whose point falls outside every polygon and that declare this município's IBGE code (a polygon match always wins over the declared code)."
+        },
+        {
+          "name": "pessoasAtendidas",
+          "description": "Total people served, summed from each cozinha's free-text `publicoTotalAtendido` in this município. Only cozinhas with a parseable count contribute to the sum; `null` when none of the município's cozinhas report a parseable count (unknown, never coerced to `0`)."
+        },
+        {
+          "name": "populacao",
+          "description": "Município resident population (IBGE Census 2022). `null` when the município has no entry in the population snapshot (no valid rate denominator)."
+        },
+        {
+          "name": "porCemMil",
+          "description": "Cozinhas per 100,000 inhabitants: `(quantidade / populacao) * 100_000`, rounded to two decimals. `null` when `populacao` is unknown, so the rate choropleth treats the município as \"sem dado\"."
+        },
+        {
+          "name": "percentualDoBrasil",
+          "description": "Share of all Brazilian cozinhas located in this município: `(quantidade / totalBrasil) * 100`, rounded to two decimals, where `totalBrasil` is the sum of `quantidade` across every município (the national total the choropleth paints). Always a number (never `null`) because every row has `quantidade >= 1`; `0` only in the degenerate case of no cozinhas at all."
+        },
+        {
+          "name": "pessoasCadUnico",
+          "description": "People registered in the Cadastro Único in this município (MDS/SAGI MI Social, reference month 2026-06). `null` when the município has no entry in the CadÚnico snapshot (no valid rate denominator)."
+        },
+        {
+          "name": "porDezMilCadUnico",
+          "description": "Cozinhas per 10,000 people registered in the Cadastro Único: `(quantidade / pessoasCadUnico) * 10_000`, rounded to two decimals. `null` when `pessoasCadUnico` is unknown, so the CadÚnico choropleth treats the município as \"sem dado\". Measures coverage of the vulnerable population the cozinhas serve, rather than density over the whole population."
+        },
+        {
+          "name": "pessoasPorCozinha",
+          "description": "People registered in the Cadastro Único per cozinha — the inverse coverage ratio `pessoasCadUnico / quantidade`, rounded to a whole person (higher = each cozinha serves more people = thinner coverage). `null` when `pessoasCadUnico` is unknown, so the coverage choropleth treats the município as \"sem dado\"."
         }
       ]
     },
-    "usage": "Agregação hexagonal de CAFs (join joinKey: h3).",
-    "constraints": []
+    "usage": "Dados para coroplético de cozinhas por município (join geometryId: codigoIbge).",
+    "constraints": [
+      "Nunca use o dataset cozinhas_pessoas_atendidas em modo coroplético (retorna 422): é um total absoluto, não uma taxa."
+    ]
   },
   {
     "method": "GET",
@@ -255,96 +375,57 @@
       "fields": [
         {
           "name": "codigoIbge",
-          "description": "Código IBGE do município; chave de junção (geometryId)."
+          "description": "7-digit IBGE code; joins to `feature.properties.codarea` on the map."
         },
-        { "name": "municipio", "description": "Nome do município." },
+        {
+          "name": "municipio",
+          "description": "Município name (for display); taken from the source records."
+        },
         {
           "name": "ivs",
-          "description": "Índice entre 0 e 1, onde 1 é vulnerabilidade máxima."
+          "description": "Overall IVS score, `0`–`1` (Atlas da Vulnerabilidade Social, IPEA, 2010). Higher = more vulnerable. Always present and within `[0, 1]` — the transformer drops rows where this or any sub-index is out of range or missing."
         },
         {
           "name": "ivsInfraestruturaUrbana",
-          "description": "Sub-índice de Infraestrutura Urbana, entre 0 e 1. Maior = mais vulnerável."
+          "description": "IVS Infraestrutura Urbana sub-index, `0`–`1`; higher = more vulnerable."
         },
         {
           "name": "ivsCapitalHumano",
-          "description": "Sub-índice de Capital Humano, entre 0 e 1. Maior = mais vulnerável."
+          "description": "IVS Capital Humano sub-index, `0`–`1`; higher = more vulnerable."
         },
         {
           "name": "ivsRendaETrabalho",
-          "description": "Sub-índice de Renda e Trabalho, entre 0 e 1. Maior = mais vulnerável."
+          "description": "IVS Renda e Trabalho sub-index, `0`–`1`; higher = more vulnerable."
         },
         {
           "name": "idhm",
-          "description": "Índice de Desenvolvimento Humano Municipal (IDHM), entre 0 e 1. Maior = melhor."
+          "description": "Overall Municipal Human Development Index (IDHM), `0`–`1`; higher = better."
         },
         {
           "name": "idhmLongevidade",
-          "description": "Sub-índice de Longevidade do IDHM, entre 0 e 1. Maior = melhor."
+          "description": "IDHM Longevidade dimension, `0`–`1`; higher = better."
         },
         {
           "name": "idhmEducacao",
-          "description": "Sub-índice de Educação do IDHM, entre 0 e 1. Maior = melhor."
+          "description": "IDHM Educação dimension, `0`–`1`; higher = better."
         },
         {
           "name": "idhmRenda",
-          "description": "Sub-índice de Renda do IDHM, entre 0 e 1. Maior = melhor."
+          "description": "IDHM Renda dimension, `0`–`1`; higher = better."
         },
         {
           "name": "idhmEducacaoEscolaridade",
-          "description": "Sub-componente de Escolaridade do sub-índice de Educação do IDHM, entre 0 e 1. Maior = melhor."
+          "description": "IDHM Educação escolaridade sub-component, `0`–`1`; higher = better."
         },
         {
           "name": "idhmEducacaoFrequencia",
-          "description": "Sub-componente de Frequência Escolar do sub-índice de Educação do IDHM, entre 0 e 1. Maior = melhor."
+          "description": "IDHM Educação frequência escolar sub-component, `0`–`1`; higher = better."
         }
       ]
     },
     "usage": "Coroplético de vulnerabilidade social (join geometryId: codigoIbge).",
     "constraints": [
       "É um índice ordinal (0–1): exiba como rampa/intervalos, nunca como bolhas."
-    ]
-  },
-  {
-    "method": "GET",
-    "path": "/api/cadinsan/por-municipio",
-    "summary": "CADINSAN 2025: insegurança alimentar entre famílias do CadÚnico, com e sem o Bolsa Família, por município.",
-    "parameters": [],
-    "response": {
-      "type": "Array de objetos",
-      "fields": [
-        {
-          "name": "codigoIbge",
-          "description": "Código IBGE do município; chave de junção (geometryId)."
-        },
-        { "name": "municipio", "description": "Nome do município." },
-        { "name": "uf", "description": "Sigla da UF." },
-        { "name": "regiao", "description": "Região do Brasil." },
-        {
-          "name": "absolutoComPbf",
-          "description": "Número absoluto de famílias em insegurança alimentar no cenário com o Bolsa Família."
-        },
-        {
-          "name": "absolutoSemPbf",
-          "description": "Número absoluto de famílias em insegurança alimentar no cenário sem o Bolsa Família."
-        },
-        {
-          "name": "cadastrosCadunico",
-          "description": "Total de cadastros do CadÚnico no município; denominador das proporções."
-        },
-        {
-          "name": "proporcaoComPbf",
-          "description": "Proporção (0–1) de cadastros em insegurança alimentar no cenário com o Bolsa Família."
-        },
-        {
-          "name": "proporcaoSemPbf",
-          "description": "Proporção (0–1) de cadastros em insegurança alimentar no cenário sem o Bolsa Família."
-        }
-      ]
-    },
-    "usage": "Coroplético de insegurança alimentar (join geometryId: codigoIbge).",
-    "constraints": [
-      "As proporções são 0–1: exiba como rampa, nunca coroplético dos totais absolutos."
     ]
   }
 ]

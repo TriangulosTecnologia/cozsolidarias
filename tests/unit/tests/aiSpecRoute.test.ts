@@ -1,5 +1,6 @@
 import { validateSpec } from '@ttoss/geovis';
-import baseVisualizationSpecJson from 'src/app/api/ai/spec/instructions/baseVisualizationSpec.json';
+import baseVisualizationSpecJson from 'src/app/api/ai/spec/baseVisualizationSpec.json';
+import { INSTRUCTIONS } from 'src/app/api/ai/spec/instructions/instructions';
 import { POST } from 'src/app/api/ai/spec/route';
 import { invalidSpecResponse } from 'src/app/api/ai/spec/specValidation';
 
@@ -469,10 +470,10 @@ describe('POST /api/ai/spec', () => {
   }, 10000);
 
   // ---------------------------------------------------------------------------
-  // Dataset catalogue context - It should always send the full catalogue, not just renderable datasets
+  // Agent message - instructions and prompt only, the dataset catalogue is not sent
   // ---------------------------------------------------------------------------
 
-  test('sends the full dataset catalogue as context, renderable and non-renderable datasets alike', async () => {
+  test('sends only the instructions and the prompt to the agent, without the dataset catalogue', async () => {
     const fetchMock = mockAgentReply(JSON.stringify({ mapData: [] }));
 
     await POST(jsonRequest({ prompt: 'mapa de cozinhas por município' }));
@@ -481,33 +482,10 @@ describe('POST /api/ai/spec', () => {
     const sentBody = JSON.parse(generateCall[1].body) as {
       messages: Array<{ content: string }>;
     };
-    const message = sentBody.messages[0].content;
-    const catalogueJsonString = message
-      .split('Catálogo de datasets:\n')[1]
-      .split('\n\n')[0];
 
-    // buildCatalogueContext sends the raw CatalogueContract under `catalogue`.
-    const catalogueJson = JSON.parse(catalogueJsonString) as {
-      catalogue: { datasets: Array<{ id: string }> };
-    };
-
-    // Every dataset is included, renderable or not — the agent's own
-    // instructions restrict which ids it may use for `mapData`.
-    expect(
-      catalogueJson.catalogue.datasets.some((d) => {
-        return d.id === 'caf_areas';
-      })
-    ).toBe(true);
-    expect(
-      catalogueJson.catalogue.datasets.some((d) => {
-        return d.id === 'assentamentos';
-      })
-    ).toBe(true);
-    expect(
-      catalogueJson.catalogue.datasets.some((d) => {
-        return d.id === 'municipios_ivs';
-      })
-    ).toBe(true);
+    expect(sentBody.messages[0].content).toBe(
+      [INSTRUCTIONS, 'mapa de cozinhas por município'].join('\n\n')
+    );
   }, 10000);
 
   // ---------------------------------------------------------------------------

@@ -338,6 +338,48 @@ describe('separateStateKeys', () => {
 });
 
 describe('applyLocalRepairs', () => {
+  test('renames a kebab-case paint key, leaving no copy under the old name', () => {
+    const spec = {
+      layers: [
+        {
+          id: 'fill',
+          sourceId: 'mun',
+          geometry: 'polygon',
+          paint: { 'fill-color': '#e8e0d5' },
+        },
+      ],
+    };
+
+    const repaired = applyLocalRepairs({
+      spec,
+      issues: [
+        {
+          code: 'invalid-schema',
+          subject: { path: 'layers[fill].paint.fill-color', id: 'fill' },
+          message: '',
+          repair: [
+            {
+              kind: 'set-value',
+              path: 'layers[fill].paint.fillColor',
+              value: '#e8e0d5',
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(repaired).toEqual({
+      layers: [
+        {
+          id: 'fill',
+          sourceId: 'mun',
+          geometry: 'polygon',
+          paint: { fillColor: '#e8e0d5' },
+        },
+      ],
+    });
+  });
+
   test('applies set-value repairs and single-candidate allowed-values at id-keyed paths', () => {
     const spec = {
       engine: 'leaflet',
@@ -401,6 +443,42 @@ describe('applyLocalRepairs', () => {
     });
 
     expect(repaired).toEqual(spec);
+  });
+
+  test('leaves a non-record parent untouched when removing a renamed invalid-schema key', () => {
+    const spec = { meta: 'text' };
+
+    const repaired = applyLocalRepairs({
+      spec,
+      issues: [
+        {
+          code: 'invalid-schema',
+          subject: { path: 'meta.fill-color' },
+          message: '',
+          repair: [
+            { kind: 'set-value', path: 'meta.fillColor', value: '#fff' },
+          ],
+        },
+      ],
+    });
+
+    expect(repaired).toEqual(spec);
+  });
+
+  test('keeps a top-level invalid-schema key when its subject path has no parent segment', () => {
+    const repaired = applyLocalRepairs({
+      spec: { 'fill-color': '#fff' },
+      issues: [
+        {
+          code: 'invalid-schema',
+          subject: { path: 'fill-color' },
+          message: '',
+          repair: [{ kind: 'set-value', path: 'fillColor', value: '#fff' }],
+        },
+      ],
+    });
+
+    expect(repaired).toEqual({ 'fill-color': '#fff', fillColor: '#fff' });
   });
 });
 
@@ -517,6 +595,158 @@ describe('validateCandidate', () => {
 });
 
 describe('normalizeCandidate', () => {
+  test('converts every kebab-case paint key to its camelCase spec key', () => {
+    const normalized = normalizeCandidate({
+      layers: [
+        {
+          id: 'fill',
+          geometry: 'polygon',
+          paint: {
+            'fill-color': '#e8e0d5',
+            'fill-opacity': 0.5,
+            'fill-outline-color': '#241F21',
+          },
+        },
+        {
+          id: 'extruded',
+          geometry: 'polygon',
+          paint: {
+            'fill-extrusion-color': '#3b82f6',
+            'fill-extrusion-opacity': 0.8,
+          },
+        },
+        {
+          id: 'line',
+          geometry: 'line',
+          paint: { 'line-width': 2, 'line-dasharray': [2, 1] },
+        },
+        {
+          id: 'point',
+          geometry: 'point',
+          paint: { 'circle-radius': 6, 'circle-stroke-width': 1 },
+        },
+      ],
+    });
+
+    expect(normalized).toEqual({
+      layers: [
+        {
+          id: 'fill',
+          geometry: 'polygon',
+          paint: {
+            fillColor: '#e8e0d5',
+            fillOpacity: 0.5,
+            lineColor: '#241F21',
+          },
+        },
+        {
+          id: 'extruded',
+          geometry: 'polygon',
+          paint: { fillColor: '#3b82f6', fillOpacity: 0.8 },
+        },
+        {
+          id: 'line',
+          geometry: 'line',
+          paint: { lineWidth: 2, lineDasharray: [2, 1] },
+        },
+        {
+          id: 'point',
+          geometry: 'point',
+          paint: { circleRadius: 6, circleStrokeWidth: 1 },
+        },
+      ],
+    });
+  });
+
+  test('leaves two kebab-case keys that name the same spec key untouched, so no value is lost', () => {
+    const normalized = normalizeCandidate({
+      layers: [
+        {
+          id: 'fill',
+          geometry: 'polygon',
+          paint: { 'fill-outline-color': '#111111', 'line-color': '#222222' },
+        },
+      ],
+    });
+
+    expect(normalized).toEqual({
+      layers: [
+        {
+          id: 'fill',
+          geometry: 'polygon',
+          paint: { 'fill-outline-color': '#111111', 'line-color': '#222222' },
+        },
+      ],
+    });
+  });
+
+  test('keeps the camelCase key when a layer carries both forms of it', () => {
+    const normalized = normalizeCandidate({
+      layers: [
+        {
+          id: 'fill',
+          geometry: 'polygon',
+          paint: { 'fill-color': '#000000', fillColor: '#ffffff' },
+        },
+      ],
+    });
+
+    expect(normalized).toEqual({
+      layers: [
+        { id: 'fill', geometry: 'polygon', paint: { fillColor: '#ffffff' } },
+      ],
+    });
+  });
+
+  // Every `paint` key geovis accepts, as the MapLibre kebab-case name a model
+  // would write for it. Spelled out rather than derived, so the table is an
+  // oracle independent of the conversion it checks.
+  test.each([
+    ['polygon', 'fill-color', 'fillColor'],
+    ['polygon', 'fill-opacity', 'fillOpacity'],
+    ['polygon', 'fill-outline-color', 'lineColor'],
+    ['polygon', 'line-color', 'lineColor'],
+    ['polygon', 'fill-extrusion-color', 'fillColor'],
+    ['polygon', 'fill-extrusion-opacity', 'fillOpacity'],
+    ['line', 'line-color', 'lineColor'],
+    ['line', 'line-width', 'lineWidth'],
+    ['line', 'line-opacity', 'lineOpacity'],
+    ['line', 'line-dasharray', 'lineDasharray'],
+    ['point', 'circle-color', 'circleColor'],
+    ['point', 'circle-radius', 'circleRadius'],
+    ['point', 'circle-opacity', 'circleOpacity'],
+    ['point', 'circle-stroke-color', 'circleStrokeColor'],
+    ['point', 'circle-stroke-opacity', 'circleStrokeOpacity'],
+    ['point', 'circle-stroke-width', 'circleStrokeWidth'],
+    ['raster', 'raster-opacity', 'rasterOpacity'],
+    ['heatmap', 'heatmap-radius', 'heatmapRadius'],
+    ['heatmap', 'heatmap-opacity', 'heatmapOpacity'],
+    ['heatmap', 'heatmap-intensity', 'heatmapIntensity'],
+    ['heatmap', 'heatmap-weight', 'heatmapWeight'],
+    ['symbol', 'text-color', 'textColor'],
+    ['symbol', 'text-opacity', 'textOpacity'],
+    ['symbol', 'text-halo-color', 'textHaloColor'],
+    ['symbol', 'text-halo-width', 'textHaloWidth'],
+    ['symbol', 'icon-color', 'iconColor'],
+    ['symbol', 'icon-opacity', 'iconOpacity'],
+    ['symbol', 'text-field', 'textField'],
+    ['symbol', 'text-size', 'textSize'],
+    ['symbol', 'text-font', 'textFont'],
+    ['symbol', 'icon-image', 'iconImage'],
+    ['symbol', 'icon-size', 'iconSize'],
+    ['symbol', 'icon-anchor', 'iconAnchor'],
+    ['symbol', 'icon-offset', 'iconOffset'],
+    ['symbol', 'icon-allow-overlap', 'iconAllowOverlap'],
+  ])('converts the %s paint key %s to %s', (geometry, kebabKey, specKey) => {
+    const normalized = normalizeCandidate({
+      layers: [{ id: 'layer', geometry, paint: { [kebabKey]: 'value' } }],
+    });
+
+    expect(normalized).toEqual({
+      layers: [{ id: 'layer', geometry, paint: { [specKey]: 'value' } }],
+    });
+  });
+
   test('hoists layer legends and repoints a point layer off a polygon source in one pass', () => {
     const sources = [
       { id: 'mun', type: 'geojson', data: '/geo/geojs-100-mun.json' },

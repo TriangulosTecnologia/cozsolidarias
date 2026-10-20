@@ -5,6 +5,7 @@ import {
 } from '@ttoss/geovis';
 
 import { isRenderableDatasetId } from './mapDataCatalogue';
+import { convertPaintKeys } from './paintKeyConversion';
 import { repairMapDataWiring } from './specRepairs';
 import {
   findChoroplethOnAbsoluteTotal,
@@ -144,15 +145,15 @@ export const collectStructuralIssues = (spec: UnknownRecord): SpecIssue[] => {
 const REPAIR_PATH_SEGMENT = /^([^[\]]+)(?:\[([^\]]+)\])?$/;
 
 /**
- * Immutably writes `value` at a geovis repair path inside `node` —
- * dot-separated segments, each optionally keyed by an array entry's
- * `id`/`mapDataId` (`layers[fill].sourceId`, `view.pitch`). A path that does
- * not resolve leaves the node unchanged.
+ * Immutably replaces the node at a geovis repair path inside `node` with
+ * `update(current)` — dot-separated segments, each optionally keyed by an
+ * array entry's `id`/`mapDataId` (`layers[fill].sourceId`, `view.pitch`). A
+ * path that does not resolve leaves the node unchanged.
  */
 const setInRecord = (
   node: UnknownRecord,
   segments: string[],
-  value: unknown
+  update: (current: unknown) => unknown
 ): UnknownRecord => {
   const match = REPAIR_PATH_SEGMENT.exec(segments[0]);
   if (!match) {
@@ -163,9 +164,9 @@ const setInRecord = (
   const rest = segments.slice(1);
   const write = (child: unknown): unknown => {
     if (rest.length === 0) {
-      return value;
+      return update(child);
     }
-    return isRecord(child) ? setInRecord(child, rest, value) : child;
+    return isRecord(child) ? setInRecord(child, rest, update) : child;
   };
 
   if (id === undefined) {
@@ -207,6 +208,36 @@ const autoRepairValue = (repair: RepairOption): { value: unknown } | null => {
  * @example
  * applyLocalRepairs({ spec, issues: [{ code: 'unsupported-engine', subject: { path: 'engine' }, message: '', repair: [{ kind: 'set-value', path: 'engine', value: 'maplibre' }] }] });
  */
+/** Removes `key` from a record; any other value passes through unchanged. */
+const withoutKey = (key: string) => {
+  return (node: unknown): unknown => {
+    return isRecord(node)
+      ? Object.fromEntries(
+          Object.entries(node).filter(([entryKey]) => {
+            return entryKey !== key;
+          })
+        )
+      : node;
+  };
+};
+
+/**
+ * Applies, without a model round-trip, every geovis repair whose answer is
+ * already known: each `set-value`, and each `allowed-values` with exactly one
+ * candidate. An `allowed-values` with two or more candidates is a genuine
+ * choice and is left for the model.
+ *
+ * A `set-value` on an `invalid-schema` issue at another path renames the
+ * offending key (`fill-color` → `fillColor`): the subject key is removed too,
+ * otherwise the old key survives and the same issue fires again on re-validation.
+ *
+ * @param params.spec - The spec the issues were found in.
+ * @param params.issues - The `validateSpec` issues, carrying their `repair`.
+ * @returns The same reference when nothing was applicable; otherwise the repaired spec.
+ *
+ * @example
+ * applyLocalRepairs({ spec, issues: [{ code: 'unsupported-engine', subject: { path: 'engine' }, message: '', repair: [{ kind: 'set-value', path: 'engine', value: 'maplibre' }] }] });
+ */
 export const applyLocalRepairs = (params: {
   spec: UnknownRecord;
   issues: GeoVisIssue[];
@@ -217,7 +248,25 @@ export const applyLocalRepairs = (params: {
       if (!applicable) {
         return acc;
       }
-      return setInRecord(acc, repair.path.split('.'), applicable.value);
+      const written = setInRecord(acc, repair.path.split('.'), () => {
+        return applicable.value;
+      });
+      if (
+        issue.code !== 'invalid-schema' ||
+        repair.path === issue.subject.path
+      ) {
+        return written;
+      }
+      const subjectPath = issue.subject.path;
+      const lastDot = subjectPath.lastIndexOf('.');
+      if (lastDot === -1) {
+        return written;
+      }
+      return setInRecord(
+        written,
+        subjectPath.slice(0, lastDot).split('.'),
+        withoutKey(subjectPath.slice(lastDot + 1))
+      );
     }, current);
   }, params.spec);
 };
@@ -273,7 +322,7 @@ export const validateWithLocalRepairs = (
  * // → { layers: [{ id: 'a' }], legends: [{ id: 'l' }] }
  */
 export const normalizeCandidate = (spec: UnknownRecord): UnknownRecord => {
-  return repairMapDataWiring(hoistLayerLegends(spec));
+  return repairMapDataWiring(convertPaintKeys(hoistLayerLegends(spec)));
 };
 
 /**
