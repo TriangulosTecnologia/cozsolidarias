@@ -1,4 +1,5 @@
 import { validateSpec } from '@ttoss/geovis';
+import baseVisualizationSpecJson from 'src/app/api/ai/spec/instructions/baseVisualizationSpec.json';
 import { POST } from 'src/app/api/ai/spec/route';
 import { invalidSpecResponse } from 'src/app/api/ai/spec/specValidation';
 
@@ -397,7 +398,7 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as { spec?: unknown };
 
     expect(response.status).toBe(200);
-    expect(body.spec).toEqual(spec);
+    expect(body.spec).toEqual({ ...baseVisualizationSpecJson, ...spec });
   }, 10000);
 
   // ---------------------------------------------------------------------------
@@ -452,7 +453,7 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as { spec?: unknown };
 
     expect(response.status).toBe(200);
-    expect(body.spec).toEqual(spec);
+    expect(body.spec).toEqual({ ...baseVisualizationSpecJson, ...spec });
   }, 10000);
 
   test('returns a gateway error when the model reply is not valid JSON', async () => {
@@ -483,7 +484,7 @@ describe('POST /api/ai/spec', () => {
     const message = sentBody.messages[0].content;
     const catalogueJsonString = message
       .split('Catálogo de datasets:\n')[1]
-      .split('\n\n## O que é')[0];
+      .split('\n\n')[0];
 
     // buildCatalogueContext sends the raw CatalogueContract under `catalogue`.
     const catalogueJson = JSON.parse(catalogueJsonString) as {
@@ -586,6 +587,46 @@ describe('POST /api/ai/spec', () => {
 
     expect(response.status).toBe(422);
     expect(body.message).toMatch(/caf_areas/);
+  }, 10000);
+
+  test('repairs a point layer on a polygon source before the structural checks, returning 200 instead of 422', async () => {
+    jest.spyOn(gateway, 'getCozinhasBubbles').mockResolvedValue({
+      type: 'FeatureCollection',
+      features: [
+        {
+          type: 'Feature',
+          geometry: { type: 'Point', coordinates: [-43.2, -22.9] },
+          properties: {
+            codarea: '3304557',
+            municipio: 'Rio de Janeiro (RJ)',
+            quantidade: 69,
+          },
+        },
+      ],
+    });
+    mockAgentReply(
+      JSON.stringify({
+        sources: [
+          { id: 'mun', type: 'geojson', data: '/geo/geojs-100-mun.json' },
+          { id: 'bolhas', type: 'geojson', data: '/api/cozinhas/bolhas' },
+        ],
+        legends: A_LEGEND,
+        layers: [{ id: 'dots', sourceId: 'mun', geometry: 'point' }],
+      })
+    );
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de cozinhas por município' })
+    );
+    const body = (await response.json()) as { spec?: SpecRecord };
+
+    const layers = body.spec?.['layers'];
+    expect(response.status).toBe(200);
+    expect(Array.isArray(layers) && layers.at(-1)).toEqual({
+      id: 'dots',
+      sourceId: 'bolhas',
+      geometry: 'point',
+    });
   }, 10000);
 
   test('returns 422 when an API-backed source resolves to no features', async () => {
@@ -1279,7 +1320,7 @@ describe('POST /api/ai/spec', () => {
     ]);
   }, 10000);
 
-  test('returns the spec unchanged when it declares no mapData at all', async () => {
+  test('merges the base spec into a spec that declares no mapData', async () => {
     const spec = { title: 'Só o mapa base, sem camada de valores' };
     mockAgentReply(JSON.stringify(spec));
 
@@ -1287,7 +1328,7 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as { spec?: unknown };
 
     expect(response.status).toBe(200);
-    expect(body.spec).toEqual(spec);
+    expect(body.spec).toEqual({ ...baseVisualizationSpecJson, ...spec });
   }, 10000);
 
   test('returns 422 when mapData is not an array', async () => {
@@ -1507,6 +1548,277 @@ describe('POST /api/ai/spec', () => {
 // ---------------------------------------------------------------------------
 // invalidSpecResponse function
 // ---------------------------------------------------------------------------
+
+describe('POST /api/ai/spec: base merge and proportionalCircles defaults', () => {
+  const originalEnv: Partial<Record<(typeof ENV_KEYS)[number], string>> = {};
+
+  const pessoasRows = (values: number[]) => {
+    return values.map((pessoasAtendidas, index) => {
+      return {
+        codigoIbge: String(3550308 + index),
+        municipio: `Município ${index} (SP)`,
+        quantidade: 1,
+        pessoasAtendidas,
+        populacao: 1000,
+        porCemMil: 0.1,
+        percentualDoBrasil: 0.01,
+        pessoasCadUnico: 100,
+        porDezMilCadUnico: 1,
+        pessoasPorCozinha: 1,
+      };
+    });
+  };
+
+  const BUBBLES = {
+    type: 'FeatureCollection',
+    features: [
+      {
+        type: 'Feature',
+        geometry: { type: 'Point', coordinates: [-43.2, -22.9] },
+        properties: {
+          codarea: '3304557',
+          municipio: 'Rio de Janeiro (RJ)',
+          quantidade: 69,
+        },
+      },
+    ],
+  };
+
+  const proportionalSpec = (overrides: SpecRecord = {}): SpecRecord => {
+    return {
+      mapType: 'proportionalCircles',
+      sources: [
+        {
+          id: 'cozinhas-bubbles',
+          type: 'geojson',
+          data: '/api/cozinhas/bolhas',
+        },
+      ],
+      mapData: [
+        {
+          mapDataId: 'cozinhas_pessoas_atendidas',
+          mapId: 'municipios-boundary',
+          joinKey: 'codarea',
+          label: 'Pessoas atendidas',
+          data: [],
+        },
+      ],
+      layers: [
+        {
+          id: 'cozinhas-bolhas',
+          sourceId: 'cozinhas-bubbles',
+          geometry: 'point',
+          mapDataId: 'cozinhas_pessoas_atendidas',
+          sizeBy: { range: [1, 2], transform: 'linear' },
+        },
+        {
+          id: 'cozinhas-pontos',
+          sourceId: 'cozinhas-bubbles',
+          geometry: 'point',
+        },
+      ],
+      legends: A_LEGEND,
+      ...overrides,
+    };
+  };
+
+  const servedSpec = async (spec: SpecRecord): Promise<SpecRecord> => {
+    mockAgentReply(JSON.stringify(spec));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de pessoas atendidas por município' })
+    );
+    expect(response.status).toBe(200);
+
+    const body = (await response.json()) as { spec: SpecRecord };
+    return body.spec;
+  };
+
+  const layerOf = (spec: SpecRecord, id: string): SpecRecord | undefined => {
+    return records(spec['layers']).find((layer) => {
+      return layer['id'] === id;
+    });
+  };
+
+  beforeEach(() => {
+    for (const key of ENV_KEYS) {
+      originalEnv[key] = process.env[key];
+      process.env[key] = `test-${key}`;
+    }
+    jest
+      .spyOn(gateway, 'getCozinhasPorMunicipio')
+      .mockResolvedValue(pessoasRows([1000, 4000, 250]));
+    jest.spyOn(gateway, 'getCozinhasBubbles').mockResolvedValue(BUBBLES);
+  });
+
+  afterEach(() => {
+    for (const key of ENV_KEYS) {
+      const original = originalEnv[key];
+      if (original === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = original;
+      }
+    }
+    jest.restoreAllMocks();
+  });
+
+  describe('mergeSpecs', () => {
+    test('fills the top-level fields the agent omits from the base spec', async () => {
+      const spec = await servedSpec({ legends: A_LEGEND });
+
+      expect(spec['engine']).toBe('maplibre');
+      expect(spec['attributionControlEnabled']).toBe(false);
+      expect(spec['view']).toEqual({
+        center: [-53.0, -14.5],
+        zoom: 4,
+        maxZoomIn: 9,
+        maxZoomOut: 4,
+      });
+      expect(
+        records(spec['layers']).map((layer) => {
+          return layer['id'];
+        })
+      ).toEqual(['municipios-boundary-line', 'estados-boundary-line']);
+    });
+
+    test('replaces a base entry that shares its id, keeping its position', async () => {
+      const spec = await servedSpec({
+        sources: [
+          {
+            id: 'municipios',
+            type: 'geojson',
+            data: '/geo/geojs-100-mun.json',
+            attribution: 'Agente',
+          },
+        ],
+        legends: A_LEGEND,
+      });
+      const sources = records(spec['sources']);
+
+      expect(
+        sources.map((source) => {
+          return source['id'];
+        })
+      ).toEqual(['municipios', 'estados']);
+      expect(sources[0]['attribution']).toBe('Agente');
+    });
+
+    test('appends agent entries whose id is new after the base entries', async () => {
+      const spec = await servedSpec({
+        layers: [
+          { id: 'agent-layer', sourceId: 'municipios', geometry: 'line' },
+        ],
+        legends: A_LEGEND,
+      });
+
+      expect(
+        records(spec['layers']).map((layer) => {
+          return layer['id'];
+        })
+      ).toEqual([
+        'municipios-boundary-line',
+        'estados-boundary-line',
+        'agent-layer',
+      ]);
+    });
+
+    test('lets an agent scalar override the base value', async () => {
+      const spec = await servedSpec({
+        view: { center: [0, 0], zoom: 2 },
+        legends: A_LEGEND,
+      });
+
+      expect(spec['view']).toEqual({ center: [0, 0], zoom: 2 });
+    });
+  });
+
+  describe('applyProportionalCirclesDefaults', () => {
+    test('sets scaleMaxValue to the largest value of the size dataset', async () => {
+      const spec = await servedSpec(proportionalSpec());
+
+      expect(spec['scaleMaxValue']).toBe(4000);
+    });
+
+    test('sets the bound point layer sizeBy range to [6, 28]', async () => {
+      const spec = await servedSpec(proportionalSpec());
+
+      expect(layerOf(spec, 'cozinhas-bolhas')?.['sizeBy']).toMatchObject({
+        range: [6, 28],
+      });
+    });
+
+    test('sets the bound point layer sizeBy transform to sqrt', async () => {
+      const spec = await servedSpec(proportionalSpec());
+
+      expect(layerOf(spec, 'cozinhas-bolhas')?.['sizeBy']).toMatchObject({
+        transform: 'sqrt',
+      });
+    });
+
+    test('sets the bound point layer sizeBy thresholds to [0, max]', async () => {
+      const spec = await servedSpec(proportionalSpec());
+
+      expect(layerOf(spec, 'cozinhas-bolhas')?.['sizeBy']).toMatchObject({
+        thresholds: [0, 4000],
+      });
+    });
+
+    test('leaves point layers without that mapDataId untouched', async () => {
+      const spec = await servedSpec(proportionalSpec());
+
+      expect(layerOf(spec, 'cozinhas-pontos')?.['sizeBy']).toBeUndefined();
+    });
+
+    test('leaves the spec unchanged when mapType is not proportionalCircles', async () => {
+      const spec = await servedSpec(proportionalSpec({ mapType: undefined }));
+
+      expect(spec['scaleMaxValue']).toBeUndefined();
+      expect(layerOf(spec, 'cozinhas-bolhas')?.['sizeBy']).toEqual({
+        range: [1, 2],
+        transform: 'linear',
+      });
+    });
+
+    test('leaves the spec unchanged when no size value is positive', async () => {
+      jest
+        .spyOn(gateway, 'getCozinhasPorMunicipio')
+        .mockResolvedValue(pessoasRows([0, 0, 0]));
+
+      const spec = await servedSpec(proportionalSpec());
+
+      expect(spec['scaleMaxValue']).toBeUndefined();
+      expect(layerOf(spec, 'cozinhas-bolhas')?.['sizeBy']).toEqual({
+        range: [1, 2],
+        transform: 'linear',
+      });
+    });
+
+    test('leaves the spec unchanged when the size dataset has no rows', async () => {
+      jest
+        .spyOn(gateway, 'getCozinhasPorMunicipio')
+        .mockResolvedValue(pessoasRows([]));
+
+      const spec = await servedSpec(proportionalSpec());
+
+      expect(spec['scaleMaxValue']).toBeUndefined();
+      expect(layerOf(spec, 'cozinhas-bolhas')?.['sizeBy']).toEqual({
+        range: [1, 2],
+        transform: 'linear',
+      });
+    });
+
+    test('leaves the spec unchanged when no mapData is declared', async () => {
+      const spec = await servedSpec(proportionalSpec({ mapData: undefined }));
+
+      expect(spec['scaleMaxValue']).toBeUndefined();
+      expect(layerOf(spec, 'cozinhas-bolhas')?.['sizeBy']).toEqual({
+        range: [1, 2],
+        transform: 'linear',
+      });
+    });
+  });
+});
 
 describe('invalidSpecResponse', () => {
   test('defaults the message and omits issues/spec when called with no params', async () => {

@@ -5,12 +5,14 @@ import {
 } from '@ttoss/geovis';
 
 import { isRenderableDatasetId } from './mapDataCatalogue';
+import { repairMapDataWiring } from './specRepairs';
 import {
   findChoroplethOnAbsoluteTotal,
   findGeometryInMapData,
   findInvalidBasemapStyleUrl,
   findInvalidGeojsonSource,
   findMissingLegend,
+  findPointLayerOnPolygonSource,
   findReclassifiedOfficialIndex,
   hoistLayerLegends,
   isRecord,
@@ -53,6 +55,31 @@ const reclassifiedOfficialIndexIssues = (spec: UnknownRecord): SpecIssue[] => {
     : [];
 };
 
+/** Issues about how layers use their sources and datasets (area bias, point layers on polygons). */
+const layerIssues = (spec: UnknownRecord): SpecIssue[] => {
+  const issues: SpecIssue[] = [];
+
+  const pointLayerId = findPointLayerOnPolygonSource(spec);
+  if (pointLayerId) {
+    issues.push({
+      code: 'point-layer-on-polygon-source',
+      path: `layers[${pointLayerId}].sourceId`,
+      message: `A layer de pontos "${pointLayerId}" usa uma source de polígonos (/geo/*). Declare a source de pontos do pedido (ex.: /api/cozinhas/bolhas, um círculo por município) e aponte a layer e o "mapData[].mapId" para ela.`,
+    });
+  }
+
+  const choroplethMapDataId = findChoroplethOnAbsoluteTotal(spec);
+  if (choroplethMapDataId) {
+    issues.push({
+      code: 'choropleth-on-absolute-total',
+      path: 'mapType',
+      message: `O dataset "${choroplethMapDataId}" é um total absoluto, nunca uma variável relativa — pintá-lo como coroplético (mapType "choropleth") introduz viés de tamanho do polígono. Use pontos proporcionais ou dot density.`,
+    });
+  }
+
+  return issues;
+};
+
 /**
  * Runs this route's own structural checks (everything `validateSpec` cannot
  * know about the app: served URLs, basemap styles, geometry smuggled into
@@ -60,7 +87,7 @@ const reclassifiedOfficialIndexIssues = (spec: UnknownRecord): SpecIssue[] => {
  * the renderable-dataset list) and returns every violation instead of the
  * first, so one validation round reports all of them.
  *
- * @param spec - The candidate spec, after {@link hoistLayerLegends}.
+ * @param spec - The candidate spec, after {@link normalizeCandidate}.
  * @returns The violations found; empty when the spec passes every check.
  *
  * @example
@@ -106,17 +133,9 @@ export const collectStructuralIssues = (spec: UnknownRecord): SpecIssue[] => {
     });
   }
 
-  const choroplethMapDataId = findChoroplethOnAbsoluteTotal(spec);
-  if (choroplethMapDataId) {
-    issues.push({
-      code: 'choropleth-on-absolute-total',
-      path: 'mapType',
-      message: `O dataset "${choroplethMapDataId}" é um total absoluto, nunca uma variável relativa — pintá-lo como coroplético (mapType "choropleth") introduz viés de tamanho do polígono. Use pontos proporcionais ou dot density.`,
-    });
-  }
-
   return [
     ...issues,
+    ...layerIssues(spec),
     ...reclassifiedOfficialIndexIssues(spec),
     ...unsupportedDatasetIssues(spec),
   ];
@@ -224,8 +243,9 @@ const toSpecIssue = (issue: GeoVisIssue): SpecIssue => {
  * const { spec: served, issues } = validateWithLocalRepairs(resolvedSpec);
  */
 export const validateWithLocalRepairs = (
-  spec: UnknownRecord
+  input: UnknownRecord
 ): { spec: UnknownRecord; issues: SpecIssue[] } => {
+  const spec = repairMapDataWiring(input);
   const first = validateSpec(spec);
   if (first.status === 'resolved') {
     return { spec, issues: [] };
@@ -240,8 +260,25 @@ export const validateWithLocalRepairs = (
 };
 
 /**
- * Validates one candidate spec the model proposed: hoists layer-scoped
- * legends, runs {@link collectStructuralIssues} and
+ * Applies every deterministic repair that needs no model round-trip, before
+ * any structural check reads the spec: hoists layer-scoped legends, then
+ * repairs the `mapData` wiring. Structural checks must run on this output,
+ * otherwise they report issues the repairs already fixed.
+ *
+ * @param spec - The spec the model proposed.
+ * @returns The normalized spec; the same content as `spec` when nothing needed repair.
+ *
+ * @example
+ * normalizeCandidate({ layers: [{ id: 'a', legends: [{ id: 'l' }] }] });
+ * // → { layers: [{ id: 'a' }], legends: [{ id: 'l' }] }
+ */
+export const normalizeCandidate = (spec: UnknownRecord): UnknownRecord => {
+  return repairMapDataWiring(hoistLayerLegends(spec));
+};
+
+/**
+ * Validates one candidate spec the model proposed: normalizes it with
+ * {@link normalizeCandidate}, runs {@link collectStructuralIssues} and
  * {@link validateWithLocalRepairs}. Only what is left needs the model — this
  * is the body of the `validate_spec` tool.
  *
@@ -268,8 +305,8 @@ export const validateCandidate = (
     };
   }
 
-  const hoisted = hoistLayerLegends(spec);
-  const structural = collectStructuralIssues(hoisted);
-  const checked = validateWithLocalRepairs(hoisted);
+  const normalized = normalizeCandidate(spec);
+  const structural = collectStructuralIssues(normalized);
+  const checked = validateWithLocalRepairs(normalized);
   return { spec: checked.spec, issues: [...structural, ...checked.issues] };
 };
