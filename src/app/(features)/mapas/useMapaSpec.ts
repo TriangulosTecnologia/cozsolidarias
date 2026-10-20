@@ -13,6 +13,8 @@ import type {
   CozinhasFeatureCollection,
   KitchenRateByCity,
   MunicipioIvs,
+  PaaAlimentosByCity,
+  PaaKgPorPessoaByCity,
 } from '@/data-gateway/schema';
 
 import {
@@ -138,6 +140,10 @@ type UseMapaSpecParams = {
   cafPontosPorUf?: CafUfFeatureCollection;
   /** Per-município CADINSAN food-insecurity shares for the food-insecurity choropleths. */
   cadinsanByCity: CadinsanByCity[];
+  /** Per-município planned PAA food for the "alimentos previstos" choropleth. */
+  paaAlimentosByCity: PaaAlimentosByCity[];
+  /** Per-município planned PAA kg per person served, for its choropleth. */
+  paaKgPorPessoaByCity: PaaKgPorPessoaByCity[];
   /**
    * The H3 hexagon grid with its CAF counts, behind the `cafs-hexbin` mode.
    * `undefined` until it loads, which leaves the source on its URL.
@@ -221,31 +227,26 @@ const useOrientationViewport = () => {
   }, [viewportSize]);
 };
 
-export const useMapaSpec = ({
-  kitchenByCity,
-  ivsByCity,
-  nomesPorCodigo,
-  assentamentos,
-  cozinhaNames,
-  cozinhaStatus,
-  cafByCity,
-  cafPontosPorUf,
-  cadinsanByCity,
-  cafHexbin,
-  paintSettings,
-  view3d,
-  mode,
-  cozinhasPoints,
-}: UseMapaSpecParams) => {
-  const tooltips = useMapaTooltips({
+export const useMapaSpec = (params: UseMapaSpecParams) => {
+  const {
     kitchenByCity,
-    nomesPorCodigo,
+    ivsByCity,
     assentamentos,
-    cozinhaNames,
     cozinhaStatus,
     cafByCity,
+    cafPontosPorUf,
     cadinsanByCity,
+    paaAlimentosByCity,
+    paaKgPorPessoaByCity,
+    cafHexbin,
+    paintSettings,
+    view3d,
     mode,
+    cozinhasPoints,
+  } = params;
+  // The tooltips read a subset of the same lookups; the hook picks its own.
+  const tooltips = useMapaTooltips({
+    ...params,
     colorRamp: paintSettings?.colorRamp,
   });
 
@@ -268,6 +269,8 @@ export const useMapaSpec = ({
         cafPontosPorUf,
         cafUfHoverRender: tooltips.cafUfTooltip,
         cadinsanByCity,
+        paaAlimentosByCity,
+        paaKgPorPessoaByCity,
         cafHexbin,
         paintSettings,
         view3d,
@@ -289,6 +292,8 @@ export const useMapaSpec = ({
     cafByCity,
     cafPontosPorUf,
     cadinsanByCity,
+    paaAlimentosByCity,
+    paaKgPorPessoaByCity,
     cafHexbin,
     paintSettings,
     view3d,

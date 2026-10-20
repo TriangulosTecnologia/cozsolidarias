@@ -411,6 +411,8 @@ const MapaPlayground = () => {
     cafByCity: datasets.cafsByCity,
     cafPontosPorUf: datasets.cafPontosPorUf,
     cadinsanByCity: datasets.cadinsanByCity,
+    paaAlimentosByCity: datasets.paaAlimentosByCity,
+    paaKgPorPessoaByCity: datasets.paaKgPorPessoaByCity,
     cafHexbin: cafHexbinCells,
     paintSettings,
     view3d,

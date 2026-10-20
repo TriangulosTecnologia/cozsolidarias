@@ -7,6 +7,8 @@ import {
   colorForCadinsan,
   colorForCadUnico,
   colorForCafPercentual,
+  colorForPaaAlimentos,
+  colorForPaaKgPorPessoa,
   colorForPercentual,
   colorForPessoasPorCozinha,
   colorForQuantidade,
@@ -29,6 +31,8 @@ import type {
   CafUfFeatureCollection,
   KitchenRateByCity,
   MunicipioIvs,
+  PaaAlimentosByCity,
+  PaaKgPorPessoaByCity,
 } from 'src/data-gateway/schema';
 
 const BY_CITY: KitchenRateByCity[] = [
@@ -279,6 +283,28 @@ describe('colorForCadinsan', () => {
 
   test('shares of 40% or more share the darkest band', () => {
     expect(colorForCadinsan(45)).toBe(colorForCadinsan(90));
+  });
+});
+
+describe('colorForPaaAlimentos', () => {
+  test('a município without planned purchase is the grey fill', () => {
+    expect(colorForPaaAlimentos(null)).toBe(colorForQuantidade(0));
+  });
+
+  test('any positive share is painted, and larger shares go darker', () => {
+    expect(colorForPaaAlimentos(0.009)).not.toBe(colorForPaaAlimentos(null));
+    expect(colorForPaaAlimentos(0.05)).not.toBe(colorForPaaAlimentos(6.7));
+  });
+});
+
+describe('colorForPaaKgPorPessoa', () => {
+  test('no receiving cozinha (null) is the grey fill', () => {
+    expect(colorForPaaKgPorPessoa(null)).toBe(colorForQuantidade(0));
+  });
+
+  test('any positive ratio is painted, and larger ratios go darker', () => {
+    expect(colorForPaaKgPorPessoa(0.6)).not.toBe(colorForPaaKgPorPessoa(null));
+    expect(colorForPaaKgPorPessoa(2)).not.toBe(colorForPaaKgPorPessoa(50));
   });
 });
 
@@ -1076,6 +1102,72 @@ describe('buildSpec', () => {
       return entry.id === 'legenda-cadinsan-com-pbf';
     });
     expect(legend?.position).toBe('bottom-right');
+  });
+
+  test("coropletico-paa-alimentos paints each supplier município's share (%) and positions its legend", () => {
+    const paaAlimentosByCity: PaaAlimentosByCity[] = [
+      {
+        codigoIbge: '111',
+        municipio: 'Alpha',
+        quantidadeKg: 3000,
+        percentualDoBrasil: 75,
+        produtos: 2,
+        fornecedores: 1,
+      },
+    ];
+    const spec = buildSpec(
+      BY_CITY,
+      'coropletico-paa-alimentos',
+      undefined,
+      [],
+      {
+        paaAlimentosByCity,
+      }
+    );
+
+    expect(mapDataById(spec, 'cozinhas-por-municipio')?.data).toEqual([
+      { geometryId: '111', value: 75 },
+    ]);
+    const legend = spec.legends?.find((entry) => {
+      return entry.id === 'legenda-paa-alimentos';
+    });
+    expect(legend?.position).toBe('bottom-right');
+  });
+
+  test('coropletico-paa-kg-por-pessoa paints the kg per person, drops null ratios, positions its legend', () => {
+    const paaKgPorPessoaByCity: PaaKgPorPessoaByCity[] = [
+      {
+        codigoIbge: '111',
+        municipio: 'Alpha',
+        kgPrevistos: 600,
+        pessoasAtendidas: 200,
+        cozinhas: 1,
+        kgPorPessoa: 3,
+      },
+      {
+        codigoIbge: '222',
+        municipio: 'Beta',
+        kgPrevistos: 0,
+        pessoasAtendidas: 0,
+        cozinhas: 1,
+        kgPorPessoa: null,
+      },
+    ];
+    const spec = buildSpec(
+      BY_CITY,
+      'coropletico-paa-kg-por-pessoa',
+      undefined,
+      [],
+      { paaKgPorPessoaByCity }
+    );
+
+    expect(mapDataById(spec, 'cozinhas-por-municipio')?.data).toEqual([
+      { geometryId: '111', value: 3 },
+    ]);
+    const fill = spec.layers.find((layer) => {
+      return layer.id === 'municipios-br-fill';
+    });
+    expect(fill?.activeLegendId).toBe('legenda-paa-kg-por-pessoa');
   });
 
   test('coropletico-cadinsan-* feeds nothing when no CADINSAN data is provided', () => {

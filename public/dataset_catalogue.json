@@ -7,7 +7,7 @@
     "language": "pt-BR",
     "status": "draft",
     "created_at": "2026-07-07",
-    "updated_at": "2026-08-14",
+    "updated_at": "2026-10-19",
     "typing_reference": "src/data-source-static/dataCatalogue.ts",
     "quality_notes": [
       {
@@ -118,6 +118,22 @@
         "imoveis-rurais",
         "brasil",
         "dados-publicos"
+      ]
+    },
+    "conab": {
+      "id": "conab",
+      "slug": "conab",
+      "title": "CONAB",
+      "description": "Datasets da Companhia Nacional de Abastecimento sobre as compras do Programa de Aquisição de Alimentos (PAA) da agricultura familiar.",
+      "organization": "Companhia Nacional de Abastecimento (CONAB)",
+      "source_url": "https://www.conab.gov.br",
+      "tags": [
+        "conab",
+        "paa",
+        "agricultura-familiar",
+        "compras-publicas",
+        "alimentos",
+        "brasil"
       ]
     }
   },
@@ -1263,6 +1279,300 @@
           {
             "name": "dtAtualizacao",
             "description": "Data da última atualização do registro (DD/MM/AAAA)"
+          }
+        ]
+      }
+    },
+    "paa_cozinhas_produtos": {
+      "id": "paa_cozinhas_produtos",
+      "collection_id": "conab",
+      "slug": "paa-cozinhas-produtos",
+      "title": "Compras do PAA para as Cozinhas Solidárias por produto (CONAB 2025)",
+      "description": "Produtos previstos nas propostas de compra do Programa de Aquisição de Alimentos (PAA), modalidade Cozinhas Solidárias, em 2025: uma linha por produto de cada proposta (TPAF), com o fornecedor, o município do fornecedor, a quantidade em kg e o valor. Cobre 197 municípios fornecedores nas 27 UFs. Alimenta a variação coroplética \"% dos alimentos previstos no PAA\", que soma `QUANTIDADE (KG)` por `IBGE` (código de 7 dígitos ↔ `codarea`) e divide pelo total do Brasil, e, ligada às cozinhas recebedoras pela proposta (`TPAF`), a variação \"kg previstos no PAA por pessoa atendida\". O município é o do fornecedor — de onde o alimento é comprado —, não o da cozinha que o recebe; as quantidades são as previstas (contratadas), não as entregues.",
+      "file": "src/data-source-static/data/conab_paa_cozinhas_produtos_2025.csv",
+      "format": "CSV",
+      "source": {
+        "url": null,
+        "notes": "Aba \"PRODUTOS\" da planilha \"DADOS_CONAB_PAA_COZINHAS SOLIDÁRIAS 2025\" (CONAB — DIPAI/SUPAF/GEIAF), recebida pelo projeto e exportada para CSV sem alterações. O arquivo abre com linhas institucionais e de filtro (\"ESTADOS: TODOS\", \"PERÍODO: 2025\") antes do cabeçalho e termina com uma linha de total do valor; números no formato pt-BR (`R$ 15.000,00`, `1.250`). Limitações conhecidas: `UF CONAB` é a superintendência da CONAB, não a UF do município (use o código IBGE); `ORG DE MULHERES` está vazia em todas as linhas; algumas quantidades parecem estar em outra unidade que não kg (ex.: ovos a R$ 334,89/kg em Paulistana/PI); alguns nomes de proponente têm acentuação corrompida e grafias diferentes para o mesmo CNPJ e o mesmo tipo de organização."
+      },
+      "temporal": {
+        "status": "described",
+        "extent": [["2025-01-01", "2025-12-31"]],
+        "grain": "P1Y",
+        "frequency": "one_time",
+        "history": "snapshot",
+        "timezone": "America/Sao_Paulo"
+      },
+      "spatial": {
+        "status": "described",
+        "extent": [
+          {
+            "scheme": "iso3166-1",
+            "code": "BR"
+          }
+        ],
+        "coverage": "partial",
+        "grain": {
+          "scheme": "admin",
+          "code": "municipality",
+          "label": "município"
+        },
+        "geometry": "none",
+        "precision": "not_applicable",
+        "field": "IBGE"
+      },
+      "access": {
+        "level": "public",
+        "contains_personal_data": false
+      },
+      "stats": {
+        "rows": 1995,
+        "size_bytes": 518575,
+        "checkSum": "sha256:7e645cb68e9e7f5671ba8b232e89f49a9abebb8c2b2641689dd31cfb1f764541"
+      },
+      "schema": {
+        "fields": [
+          {
+            "name": "ANO ORÇAMENTO",
+            "description": "Ano do orçamento da compra"
+          },
+          {
+            "name": "MECANISMO",
+            "description": "Origem do recurso (ex.: MDS)"
+          },
+          {
+            "name": "MECANISMO RESUMO",
+            "description": "Modalidade e destinação (CDS/COZINHAS — Compra com Doação Simultânea; CDAF/COZINHAS; CI/COZINHAS)"
+          },
+          {
+            "name": "RECURSO",
+            "description": "Destinação do recurso (COZINHAS)"
+          },
+          {
+            "name": "UF CONAB",
+            "description": "Superintendência regional da CONAB que operou a compra — não é a UF do município"
+          },
+          {
+            "name": "REGIÃO",
+            "description": "Macro-região da superintendência"
+          },
+          {
+            "name": "TPAF",
+            "description": "Identificador da proposta de compra (Termo de Participação na Agricultura Familiar)",
+            "role": "identifier"
+          },
+          {
+            "name": "IBGE",
+            "description": "Código IBGE do município do fornecedor (7 dígitos), chave de join com o mapa (↔ codarea)",
+            "role": "identifier"
+          },
+          {
+            "name": "MUNICÍPIO",
+            "description": "Nome do município do fornecedor"
+          },
+          {
+            "name": "NOME PROPONENTE",
+            "description": "Nome da organização fornecedora (cooperativa, associação)"
+          },
+          {
+            "name": "CNPJ PROPONENTE",
+            "description": "CNPJ da organização fornecedora"
+          },
+          {
+            "name": "TIPO DE ORG",
+            "description": "Público da organização (agricultor familiar, assentado da reforma agrária, pescador artesanal, quilombola, indígena…), com grafias variadas"
+          },
+          {
+            "name": "ORG DE MULHERES",
+            "description": "Marca organizações de mulheres; vazia em todas as linhas"
+          },
+          {
+            "name": "PRODUTO",
+            "description": "Nome do produto (ex.: FEIJAO, BANANA)"
+          },
+          {
+            "name": "Categoria produto",
+            "description": "Categoria do produto (HORTIGRANJEIROS, CARNES, GRÃOS E OLEAGINOSAS, PROCESSADOS, PESCADOS, LATICÍNIOS, CASTANHAS, MEL)"
+          },
+          {
+            "name": "CLASSIFICAÇÃO",
+            "description": "Variedade ou classificação do produto, texto livre (\"NÃO INFORMADO\" em quase metade das linhas)"
+          },
+          {
+            "name": "VALOR (R$)",
+            "description": "Valor previsto da compra do produto, formato pt-BR (ex.: R$ 15.000,00)",
+            "unit": "R$"
+          },
+          {
+            "name": "QUANTIDADE (KG)",
+            "description": "Quantidade prevista do produto, formato pt-BR com ponto de milhar (ex.: 1.250); somada por município no mapa",
+            "unit": "kg"
+          },
+          {
+            "name": "ORGÂNICO (SIM)",
+            "description": "\"SIM\" quando o produto é orgânico; vazio caso contrário"
+          },
+          {
+            "name": "Preço",
+            "description": "Preço por kg (VALOR ÷ QUANTIDADE), formato pt-BR",
+            "unit": "R$/kg"
+          }
+        ]
+      }
+    },
+    "paa_cozinhas_unidades_recebedoras": {
+      "id": "paa_cozinhas_unidades_recebedoras",
+      "collection_id": "conab",
+      "slug": "paa-cozinhas-unidades-recebedoras",
+      "title": "Cozinhas recebedoras das compras do PAA e pessoas atendidas (CONAB 2025)",
+      "description": "Unidades recebedoras (cozinhas) das propostas de compra do Programa de Aquisição de Alimentos (PAA), modalidade Cozinhas Solidárias, em 2025: uma linha por cozinha de cada proposta (TPAF), com o município da cozinha e as pessoas atendidas por faixa etária. Cobre 251 cozinhas em 152 municípios. Junto com as compras por produto (`paa_cozinhas_produtos`), ligadas pela proposta (`Num TPAF` ↔ `TPAF`), alimenta a variação coroplética \"kg previstos no PAA por pessoa atendida\": os kg de cada proposta são divididos entre as suas cozinhas na proporção das pessoas atendidas e somados no município da cozinha (`Cod IBGE Consumidor` ↔ `codarea`).",
+      "file": "src/data-source-static/data/conab_paa_cozinhas_unidades_recebedoras_2025.csv",
+      "format": "CSV",
+      "source": {
+        "url": null,
+        "notes": "Aba \"UNIDADES RECEBEDORAS\" da planilha \"DADOS_CONAB_PAA_COZINHAS SOLIDÁRIAS 2025\" (CONAB — DIPAI/SUPAF/GEIAF), recebida pelo projeto e exportada para CSV sem alterações. O arquivo abre com linhas institucionais antes do cabeçalho. Limitações conhecidas: a mesma cozinha aparece em várias propostas (170 das 251), cada linha com as pessoas que aquela proposta declara, de modo que somar pessoas entre propostas pode contar a mesma pessoa mais de uma vez; algumas linhas declaram 1 a 5 pessoas atendidas (ex.: Palmeira das Missões/RS, Canoas/RS), o que gera razões de kg por pessoa muito altas; 22 propostas da aba de produtos não têm cozinha recebedora listada; alguns nomes têm acentuação corrompida."
+      },
+      "temporal": {
+        "status": "described",
+        "extent": [["2025-01-01", "2025-12-31"]],
+        "grain": "P1Y",
+        "frequency": "one_time",
+        "history": "snapshot",
+        "timezone": "America/Sao_Paulo"
+      },
+      "spatial": {
+        "status": "described",
+        "extent": [
+          {
+            "scheme": "iso3166-1",
+            "code": "BR"
+          }
+        ],
+        "coverage": "partial",
+        "grain": {
+          "scheme": "admin",
+          "code": "municipality",
+          "label": "município"
+        },
+        "geometry": "none",
+        "precision": "not_applicable",
+        "field": "Cod IBGE Consumidor"
+      },
+      "access": {
+        "level": "public",
+        "contains_personal_data": false
+      },
+      "stats": {
+        "rows": 1116,
+        "size_bytes": 287260,
+        "checkSum": "sha256:6754d7152e46ded005c27e61072420b40710a80bec86be79b3184fd0bc1db102"
+      },
+      "schema": {
+        "fields": [
+          {
+            "name": "ANO",
+            "description": "Ano da proposta"
+          },
+          {
+            "name": "RECURSO",
+            "description": "Origem do recurso (ex.: MDS)"
+          },
+          {
+            "name": "MODALIDADE 1",
+            "description": "Modalidade e destinação (CDS/COZINHAS, CI/COZINHAS, CDAF/COZINHAS)"
+          },
+          {
+            "name": "MODALIDADE 2",
+            "description": "Destinação do recurso (COZINHAS)"
+          },
+          {
+            "name": "MODALIDADE 3",
+            "description": "Modalidade resumida (CDS, CI, CDAF)"
+          },
+          {
+            "name": "UF Proposta",
+            "description": "Superintendência regional da CONAB da proposta"
+          },
+          {
+            "name": "Regiao Proposta",
+            "description": "Macro-região da superintendência"
+          },
+          {
+            "name": "Num TPAF",
+            "description": "Identificador da proposta de compra; chave de ligação com as compras por produto (`TPAF`)",
+            "role": "identifier"
+          },
+          {
+            "name": "UF Consumidor",
+            "description": "UF da cozinha recebedora"
+          },
+          {
+            "name": "Cod IBGE Consumidor",
+            "description": "Código IBGE do município da cozinha (7 dígitos), chave de join com o mapa (↔ codarea)",
+            "role": "identifier"
+          },
+          {
+            "name": "Municipio Consumidor",
+            "description": "Nome do município da cozinha"
+          },
+          {
+            "name": "Nome Consumidor",
+            "description": "Nome da cozinha ou entidade recebedora"
+          },
+          {
+            "name": "CNPJ Consumidor",
+            "description": "CNPJ da cozinha ou entidade recebedora"
+          },
+          {
+            "name": "Entidade Cedente CNPJ",
+            "description": "Entidade que cede o CNPJ quando a cozinha não tem CNPJ próprio (\"NÃO SE APLICA\" caso contrário)"
+          },
+          {
+            "name": "Ind CNPJ Proprio",
+            "description": "\"SIM\" quando a cozinha tem CNPJ próprio"
+          },
+          {
+            "name": "Tipo Consumidor",
+            "description": "Tipo da unidade recebedora (ex.: PROGRAMA COZINHA SOLIDÁRIA, ENTIDADE E ORGANIZAÇÃO DE ASSISTÊNCIA SOCIAL)"
+          },
+          {
+            "name": "Tipo Consumidor RESUMO",
+            "description": "Tipo resumido da unidade recebedora"
+          },
+          {
+            "name": "Qtd Atendidos ( 0 a 6 anos)",
+            "description": "Pessoas atendidas de 0 a 6 anos",
+            "unit": "pessoas"
+          },
+          {
+            "name": "Qtd Atendidos (7 a 14 anos)",
+            "description": "Pessoas atendidas de 7 a 14 anos",
+            "unit": "pessoas"
+          },
+          {
+            "name": "Qtd Atendidos (15 a 23 anos)",
+            "description": "Pessoas atendidas de 15 a 23 anos",
+            "unit": "pessoas"
+          },
+          {
+            "name": "Qtd Atendidos (24 a 65 anos)",
+            "description": "Pessoas atendidas de 24 a 65 anos",
+            "unit": "pessoas"
+          },
+          {
+            "name": "Qtd Atendidos (+ 65 anos)",
+            "description": "Pessoas atendidas com mais de 65 anos",
+            "unit": "pessoas"
+          },
+          {
+            "name": "Qtd Total Atendidos",
+            "description": "Total de pessoas atendidas pela cozinha na proposta (soma das faixas); denominador do kg por pessoa",
+            "unit": "pessoas"
+          },
+          {
+            "name": "Código da Cozinha",
+            "description": "Código de cadastro da cozinha (ex.: CS023192)",
+            "role": "identifier"
           }
         ]
       }

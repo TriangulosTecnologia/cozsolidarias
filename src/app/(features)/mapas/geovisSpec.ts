@@ -15,6 +15,8 @@ import type {
   CafUfFeatureCollection,
   KitchenRateByCity,
   MunicipioIvs,
+  PaaAlimentosByCity,
+  PaaKgPorPessoaByCity,
 } from '@/data-gateway/schema';
 
 import {
@@ -129,6 +131,10 @@ type MapOverlays = {
    * `coropletico-cadinsan-com-pbf` and `coropletico-cadinsan-sem-pbf` modes.
    */
   cadinsanByCity?: CadinsanByCity[];
+  /** Per-município planned PAA food rows; painted in `coropletico-paa-alimentos` mode. */
+  paaAlimentosByCity?: PaaAlimentosByCity[];
+  /** Per-município planned PAA kg-per-person rows; painted in `coropletico-paa-kg-por-pessoa` mode. */
+  paaKgPorPessoaByCity?: PaaKgPorPessoaByCity[];
 };
 
 /**
@@ -139,6 +145,8 @@ type MapOverlays = {
  */
 const NO_CAF_ROWS: CafByCity[] = [];
 const NO_CADINSAN_ROWS: CadinsanByCity[] = [];
+const NO_PAA_ALIMENTOS_ROWS: PaaAlimentosByCity[] = [];
+const NO_PAA_KG_POR_PESSOA_ROWS: PaaKgPorPessoaByCity[] = [];
 const NO_IVS_ROWS: MunicipioIvs[] = [];
 
 /**
@@ -669,7 +677,9 @@ const buildMapData = ({
  * settlement polygons by status and `hoverRender` draws their tooltip;
  * `cozinhaStatus` (`codigo → emFuncionamento`) colors the kitchen points by
  * operating status; `cafByCity` paints the CAF share choropleth; `cadinsanByCity`
- * paints the CADINSAN food-insecurity choropleths. Defaults to `{}`.
+ * paints the CADINSAN food-insecurity choropleths; `paaAlimentosByCity` and
+ * `paaKgPorPessoaByCity` paint the two planned PAA food choropleths. Defaults
+ * to `{}`.
  * @returns The geovis visualization spec (sources, mapData, legends, layers).
  *
  * @example
@@ -700,6 +710,9 @@ export const buildSpec = (
     // identity, and a new array every call would miss on every call.
     cafByCity: overlays.cafByCity ?? NO_CAF_ROWS,
     cadinsanByCity: overlays.cadinsanByCity ?? NO_CADINSAN_ROWS,
+    paaAlimentosByCity: overlays.paaAlimentosByCity ?? NO_PAA_ALIMENTOS_ROWS,
+    paaKgPorPessoaByCity:
+      overlays.paaKgPorPessoaByCity ?? NO_PAA_KG_POR_PESSOA_ROWS,
   });
 
   // Bounds for the circle-size scale: the largest per-município count. Falls
