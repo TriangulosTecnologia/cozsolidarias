@@ -568,15 +568,22 @@ const buildSettingsSection = ({
 export const buildLeftSidebar = ({
   mode,
   ramps,
+  enabledShareActive = false,
 }: {
   mode: MapMode;
   ramps?: RampHandlers;
+  enabledShareActive?: boolean;
 }): NonNullable<GeovisWorkspaceConfig['leftSidebar']> => {
   return {
     initialState: 'open',
     sections: [
       VARIATIONS_SECTION,
-      TIMELINE_SECTION,
+      enabledShareActive
+        ? {
+            ...TIMELINE_SECTION,
+            enabledWhen: { menuId: MODE_MENU_ID, values: [] },
+          }
+        : TIMELINE_SECTION,
       buildSettingsSection({ mode, ramps }),
     ],
   };

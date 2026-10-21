@@ -323,12 +323,14 @@ export const CADINSAN_COLORS = sampleRamp(
  */
 export const colorForCadinsan = (
   proporcao: number | null,
-  rampId?: string
+  rampId?: string,
+  thresholds: number[] = CADINSAN_THRESHOLDS
 ): string => {
   return colorForFlooredScale(
     proporcao,
-    CADINSAN_THRESHOLDS,
-    rampPalette({ rampId, count: CADINSAN_COLORS.length }) ?? CADINSAN_COLORS
+    thresholds,
+    rampPalette({ rampId, count: thresholds.length + 1 }) ??
+      CADINSAN_COLORS.slice(0, thresholds.length + 1)
   );
 };
 

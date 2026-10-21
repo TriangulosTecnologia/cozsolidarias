@@ -12,6 +12,7 @@ import {
 } from '../data-source-static/readStaticCozinhas';
 import { readStaticDataCatalogue } from '../data-source-static/readStaticDataCatalogue';
 import { readStaticIvs } from '../data-source-static/readStaticIvs';
+import { readStaticKitchenEnabledShare2025 } from '../data-source-static/readStaticKitchenEnabledShare2025';
 import { readStaticMunicipios } from '../data-source-static/readStaticMunicipios';
 import { readStaticPopulacao } from '../data-source-static/readStaticPopulacao';
 import type {
@@ -28,6 +29,7 @@ import type {
   MunicipioIvs,
 } from './schema';
 import { DEFAULT_CAF_HEXBIN_RESOLUTION } from './schema';
+import type { KitchenEnabledShare2025 } from './schema/kitchenEnabledShare';
 import { toAppCatalogue } from './transformers/toAppCatalogue';
 import { toCadinsanPorMunicipio } from './transformers/toCadinsanPorMunicipio';
 import { toCafHexbin } from './transformers/toCafHexbin';
@@ -41,6 +43,7 @@ import {
   type MunicipioAggregate,
   projectComTaxa,
 } from './transformers/toCozinhasPorMunicipio';
+import { toKitchenEnabledShare2025 } from './transformers/toKitchenEnabledShare2025';
 import { toMunicipioIvs } from './transformers/toMunicipioIvs';
 
 /**
@@ -53,6 +56,8 @@ import { toMunicipioIvs } from './transformers/toMunicipioIvs';
  * // [{ codigoIbge: '3550308', municipio: 'São Paulo', quantidade: 573, ... }]
  */
 export type DataGateway = {
+  /** Returns the fixed 2025 municipal enabled shares over all national kitchens. */
+  getKitchenEnabledShare2025: () => Promise<KitchenEnabledShare2025>;
   /**
    * Returns one row per município with its distinct-CAF count and the derived
    * share (%) of Brazil's CAFs, for the CAF share choropleth. Reads the
@@ -197,6 +202,11 @@ const createStaticGateway = (): DataGateway => {
   };
 
   return {
+    getKitchenEnabledShare2025: async () => {
+      return toKitchenEnabledShare2025(
+        await readStaticKitchenEnabledShare2025()
+      );
+    },
     getCafsPorMunicipio: async () => {
       return toCafsPorMunicipio(await readStaticCafsPorMunicipio());
     },

@@ -8,6 +8,7 @@ import type {
   MunicipioIvs,
 } from '@/data-gateway/schema';
 
+import { isCadinsanMode, sharedCadinsanQuintiles } from './cadinsanQuintiles';
 import { jenksBreaksForMode, type MapMode } from './geovisScales';
 
 /**
@@ -314,7 +315,7 @@ export const resolveChoropleth = ({
     sources.byCity,
     sources.ivsByCity,
     sources.cafByCity,
-    sources.cadinsanByCity
+    sources.cadinsanByCity ?? []
   );
 
   const cached = jenksCache.get(mode);
@@ -322,12 +323,14 @@ export const resolveChoropleth = ({
     return { rows, jenksBreaks: cached.jenksBreaks };
   }
 
-  const jenksBreaks = jenksBreaksForMode(
-    mode,
-    rows.map((row) => {
-      return row.value;
-    })
-  );
+  const jenksBreaks = isCadinsanMode(mode)
+    ? sharedCadinsanQuintiles(sources.cadinsanByCity ?? [])
+    : jenksBreaksForMode(
+        mode,
+        rows.map((row) => {
+          return row.value;
+        })
+      );
 
   jenksCache.set(mode, { sources, jenksBreaks });
   return { rows, jenksBreaks };
