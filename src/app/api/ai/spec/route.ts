@@ -1,5 +1,4 @@
-import { gateway } from '@/gateway';
-
+import baseVisualizationSpecJson from './baseVisualizationSpec.json';
 import {
   collectStructuralIssues,
   normalizeCandidate,
@@ -10,9 +9,7 @@ import {
   buildCozinhasChoroplethSpec,
   isCozinhasChoroplethRequest,
 } from './canonicalChoropleth';
-import baseVisualizationSpecJson from './instructions/baseVisualizationSpec.json';
 import { INSTRUCTIONS } from './instructions/instructions';
-import { buildCatalogueContext } from './mapDataCatalogue';
 import { generateSpec, type SpecReplyStopped } from './naturaliSession';
 import { applyProportionalCirclesDefaults, mergeSpecs } from './specDefaults';
 import {
@@ -23,21 +20,6 @@ import {
   isRecord,
   type UnknownRecord,
 } from './specValidation';
-
-let cachedCatalogueText: Promise<string> | null = null;
-
-/**
- * Builds the two-tier catalog context (see {@link buildCatalogueContext})
- * once and keeps it in memory for the process lifetime. Joined into the
- * single `messages[0].content` sent on every call (see
- * {@link getAgentResponse}), never resent mid-turn.
- */
-const readCatalogueContext = (): Promise<string> => {
-  if (!cachedCatalogueText) {
-    cachedCatalogueText = gateway.getCatalogue().then(buildCatalogueContext);
-  }
-  return cachedCatalogueText;
-};
 
 const promptError = (message: string): Response => {
   return errorResponse({ status: 400, message: `Campo "prompt": ${message}` });
@@ -162,17 +144,11 @@ const getAgentResponse = async (params: {
 }): Promise<UnknownRecord | Response> => {
   let reply: Awaited<ReturnType<typeof generateSpec>>;
   try {
-    const catalogueText = await readCatalogueContext();
     reply = await generateSpec({
       apiKey: params.apiKey,
       projectId: params.projectId,
       agentId: params.agentId,
-      message: [
-        'O catalogo json schema do projeto Cozinha Solidária em Rede contém todos os datasets conhecidos e o detalhe completo apenas dos datasets que podem popular `mapData` hoje. Use-o para gerar um spec de visualização geográfica (um mapa) que atenda ao pedido do usuário.',
-        `Catálogo de datasets:\n${catalogueText}`,
-        INSTRUCTIONS,
-        params.prompt,
-      ].join('\n\n'),
+      message: [INSTRUCTIONS, params.prompt].join('\n\n'),
       validateCandidate,
     });
   } catch (error) {
