@@ -45,9 +45,14 @@ jest.mock('theme-ui', () => {
   };
 });
 
-const jsonResponse = (body: unknown, ok = true) => {
+const jsonResponse = (
+  body: unknown,
+  ok = true,
+  headers: Record<string, string> = {}
+) => {
   return {
     ok,
+    headers: new Headers(headers),
     json: () => {
       return Promise.resolve(body);
     },
@@ -287,5 +292,204 @@ describe('AiPlayground', () => {
 
     resolveFetch(jsonResponse({ spec: { layers: [] }, error: false }));
     await screen.findByRole('button', { name: 'Gerar mapa' });
+  });
+
+  describe('choices', () => {
+    const MAP_TYPES = [
+      { value: 'choropleth', label: 'Coroplético' },
+      { value: 'dotDensity', label: 'Densidade de pontos' },
+      { value: 'proportionalCircles', label: 'Círculos proporcionais' },
+    ];
+    const PROMPT = 'pessoas atendidas por município';
+
+    const submit = () => {
+      fireEvent.change(screen.getByLabelText('O que você quer ver?'), {
+        target: { value: PROMPT },
+      });
+      fireEvent.click(screen.getByRole('button', { name: 'Gerar mapa' }));
+    };
+
+    const sentBody = (call: number): unknown => {
+      const init = jest.mocked(global.fetch).mock.calls[call][1] as RequestInit;
+      return JSON.parse(String(init.body));
+    };
+
+    test('asks the question and resubmits the prompt with the chosen map type', async () => {
+      global.fetch = jest
+        .fn()
+        .mockResolvedValueOnce(
+          jsonResponse({
+            error: false,
+            mapTypeOptions: MAP_TYPES,
+            clarify: {
+              facet: 'mapType',
+              question: 'Qual tipo de mapa você prefere?',
+              options: [MAP_TYPES[2], MAP_TYPES[1]],
+              default: 'proportionalCircles',
+            },
+          })
+        )
+        .mockResolvedValueOnce(
+          jsonResponse({ error: false, spec: { layers: [] } })
+        );
+
+      renderWithChakra(<AiPlayground />);
+      submit();
+
+      expect(
+        await screen.findByText('Qual tipo de mapa você prefere?')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('Círculos proporcionais (sugerido)')
+      ).toBeVisible();
+
+      fireEvent.click(
+        screen.getByRole('button', { name: 'Densidade de pontos' })
+      );
+
+      await screen.findByRole('button', { name: 'Ver JSON' });
+      expect(sentBody(1)).toEqual({ prompt: PROMPT, mapType: 'dotDensity' });
+    });
+
+    test('sends a chosen dataset as datasetId', async () => {
+      global.fetch = jest
+        .fn()
+        .mockResolvedValueOnce(
+          jsonResponse({
+            error: false,
+            mapTypeOptions: MAP_TYPES,
+            clarify: {
+              facet: 'dataset',
+              question: 'Qual destes indicadores?',
+              options: [
+                {
+                  value: 'municipios_ivs_renda_trabalho',
+                  label: 'IVS – Renda',
+                },
+              ],
+              default: 'municipios_ivs_renda_trabalho',
+            },
+          })
+        )
+        .mockResolvedValueOnce(
+          jsonResponse({ error: false, spec: { layers: [] } })
+        );
+
+      renderWithChakra(<AiPlayground />);
+      submit();
+      fireEvent.click(
+        await screen.findByRole('button', { name: /IVS – Renda/ })
+      );
+
+      await screen.findByRole('button', { name: 'Ver JSON' });
+      expect(sentBody(1)).toEqual({
+        prompt: PROMPT,
+        datasetId: 'municipios_ivs_renda_trabalho',
+      });
+    });
+
+    test('explains what to fix and continues the session with another map type', async () => {
+      global.fetch = jest
+        .fn()
+        .mockResolvedValueOnce(
+          jsonResponse(
+            {
+              error: true,
+              message: 'Spec inválida',
+              issues: [{ code: 'missing-legend', message: 'Falta legenda' }],
+              requirements: [
+                {
+                  code: 'missing-legend',
+                  message: 'Falta legenda',
+                  fix: 'Peça que o mapa tenha legenda.',
+                },
+              ],
+              mapTypeOptions: MAP_TYPES,
+            },
+            false,
+            { 'x-session-id': 'sess_abc12345' }
+          )
+        )
+        .mockResolvedValueOnce(
+          jsonResponse({ error: false, spec: { layers: [] } })
+        );
+
+      renderWithChakra(<AiPlayground />);
+      submit();
+
+      expect(
+        await screen.findByText('Peça que o mapa tenha legenda.')
+      ).toBeInTheDocument();
+      expect(screen.queryByText('Falta legenda')).not.toBeInTheDocument();
+
+      fireEvent.click(
+        screen.getByRole('button', { name: 'Densidade de pontos' })
+      );
+
+      await screen.findByRole('button', { name: 'Ver JSON' });
+      expect(sentBody(1)).toEqual({
+        prompt: PROMPT,
+        mapType: 'dotDensity',
+        sessionId: 'sess_abc12345',
+      });
+    });
+
+    test('keeps earlier answers when a second question follows the first', async () => {
+      const ask = (facet: string, option: { value: string; label: string }) => {
+        return jsonResponse({
+          error: false,
+          mapTypeOptions: MAP_TYPES,
+          clarify: {
+            facet,
+            question: `Pergunta ${facet}`,
+            options: [option],
+            default: option.value,
+          },
+        });
+      };
+      global.fetch = jest
+        .fn()
+        .mockResolvedValueOnce(
+          ask('dataset', {
+            value: 'cozinhas_pessoas_atendidas',
+            label: 'Pessoas',
+          })
+        )
+        .mockResolvedValueOnce(
+          ask('mapType', { value: 'dotDensity', label: 'Pontos' })
+        )
+        .mockResolvedValueOnce(
+          jsonResponse({ error: false, spec: { layers: [] } })
+        );
+
+      renderWithChakra(<AiPlayground />);
+      submit();
+      fireEvent.click(await screen.findByRole('button', { name: /Pessoas/ }));
+      fireEvent.click(await screen.findByRole('button', { name: /Pontos/ }));
+
+      await screen.findByRole('button', { name: 'Ver JSON' });
+      expect(sentBody(2)).toEqual({
+        prompt: PROMPT,
+        datasetId: 'cozinhas_pessoas_atendidas',
+        mapType: 'dotDensity',
+      });
+    });
+
+    test('keeps offering the map types after a success', async () => {
+      global.fetch = jest.fn().mockResolvedValue(
+        jsonResponse({
+          error: false,
+          spec: { layers: [] },
+          mapTypeOptions: MAP_TYPES,
+        })
+      );
+
+      renderWithChakra(<AiPlayground />);
+      submit();
+
+      expect(
+        await screen.findByRole('button', { name: 'Círculos proporcionais' })
+      ).toBeInTheDocument();
+    });
   });
 });
