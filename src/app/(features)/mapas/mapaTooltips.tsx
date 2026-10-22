@@ -6,6 +6,8 @@ import type {
   CadinsanByCity,
   CafByCity,
   KitchenRateByCity,
+  PaaAlimentosByCity,
+  PaaKgPorPessoaByCity,
 } from '@/data-gateway/schema';
 
 import {
@@ -23,6 +25,10 @@ import {
 } from './geovisScales';
 import { renderAssentamentoTooltip } from './mapaAssentamentoTooltip';
 import { renderCadinsanTooltip } from './mapaCadinsanTooltips';
+import {
+  renderPaaAlimentosTooltip,
+  renderPaaKgPorPessoaTooltip,
+} from './mapaPaaAlimentosTooltip';
 import { renderScoreTooltip, SCORE_TOOLTIPS } from './mapaScoreTooltips';
 import { TooltipCard } from './mapaTooltipCard';
 
@@ -373,6 +379,8 @@ type MunicipioTooltipArgs = {
   register?: KitchenRateByCity;
   cafRegister?: CafByCity;
   cadinsanRegister?: CadinsanByCity;
+  paaAlimentosRegister?: PaaAlimentosByCity;
+  paaKgPorPessoaRegister?: PaaKgPorPessoaByCity;
   value: MapHoverInfo['value'];
   rampId?: string;
 };
@@ -395,6 +403,24 @@ const MUNICIPIO_TOOLTIPS: Partial<
   },
   cafs: ({ name, cafRegister }) => {
     return renderCafCountTooltip({ name, register: cafRegister });
+  },
+  'coropletico-paa-alimentos': ({ name, paaAlimentosRegister, rampId }) => {
+    return renderPaaAlimentosTooltip({
+      name,
+      register: paaAlimentosRegister,
+      rampId,
+    });
+  },
+  'coropletico-paa-kg-por-pessoa': ({
+    name,
+    paaKgPorPessoaRegister,
+    rampId,
+  }) => {
+    return renderPaaKgPorPessoaTooltip({
+      name,
+      register: paaKgPorPessoaRegister,
+      rampId,
+    });
   },
   'coropletico-cadinsan-com-pbf': ({ name, cadinsanRegister, rampId }) => {
     return renderCadinsanTooltip({
@@ -432,6 +458,12 @@ const MUNICIPIO_TOOLTIPS: Partial<
  * when it has no CAF; read only in the `coropletico-cafs-percentual` mode.
  * @param params.cadinsanRegister - Canonical CADINSAN row for the município, or
  * `undefined` when absent; read only in the `coropletico-cadinsan-*` modes.
+ * @param params.paaAlimentosRegister - Canonical planned-PAA-food row for the
+ * município, or `undefined` when it has none; read only in the
+ * `coropletico-paa-alimentos` mode.
+ * @param params.paaKgPorPessoaRegister - Canonical planned-PAA kg-per-person row
+ * for the município, or `undefined` when it has no receiving cozinha; read only
+ * in the `coropletico-paa-kg-por-pessoa` mode.
  * @param params.value - The hovered feature's `value` from geovis feature-state
  * (the painted count), used only by the count fallback.
  * @returns The tooltip card element for the hovered município.
@@ -446,6 +478,8 @@ export const renderMunicipioTooltip = ({
   register,
   cafRegister,
   cadinsanRegister,
+  paaAlimentosRegister,
+  paaKgPorPessoaRegister,
   value,
   rampId,
 }: {
@@ -454,6 +488,8 @@ export const renderMunicipioTooltip = ({
   register?: KitchenRateByCity;
   cafRegister?: CafByCity;
   cadinsanRegister?: CadinsanByCity;
+  paaAlimentosRegister?: PaaAlimentosByCity;
+  paaKgPorPessoaRegister?: PaaKgPorPessoaByCity;
   value: MapHoverInfo['value'];
   /**
    * The ramp the map is being read through, from the settings zone. The card's
@@ -470,6 +506,8 @@ export const renderMunicipioTooltip = ({
       register,
       cafRegister,
       cadinsanRegister,
+      paaAlimentosRegister,
+      paaKgPorPessoaRegister,
       value,
       rampId,
     });

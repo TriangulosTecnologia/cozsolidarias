@@ -316,6 +316,36 @@ describe('createDataGateway', () => {
     expect(totalShare).toBeLessThan(101);
   });
 
+  test('returns the planned PAA food per supplier município, its shares summing to 100%', async () => {
+    const gateway = createDataGateway();
+
+    const byCity = await gateway.getPaaAlimentosPorMunicipio();
+
+    expect(byCity).toHaveLength(197);
+    const totalShare = byCity.reduce((sum, entry) => {
+      return sum + entry.percentualDoBrasil;
+    }, 0);
+    expect(totalShare).toBeCloseTo(100, 1);
+
+    // Spot-check the largest supplier município against the source CSV.
+    const eldorado = byCity.find((entry) => {
+      return entry.codigoIbge === '4306767';
+    });
+    expect(eldorado?.quantidadeKg).toBe(796439);
+  });
+
+  test('returns the planned PAA kg per person served per cozinha município', async () => {
+    const gateway = createDataGateway();
+
+    const byCity = await gateway.getPaaKgPorPessoaPorMunicipio();
+
+    expect(byCity).toHaveLength(152);
+    for (const entry of byCity) {
+      expect(entry.pessoasAtendidas).toBeGreaterThan(0);
+      expect(entry.kgPorPessoa).not.toBeNull();
+    }
+  });
+
   test('returns CADINSAN food-insecurity shares per município from the default static source', async () => {
     const gateway = createDataGateway();
 
@@ -355,7 +385,7 @@ describe('createDataGateway', () => {
     expect(catalogue.meta.title).toBe(
       'Catálogo de Dados — Cozinhas Solidárias'
     );
-    expect(catalogue.datasets).toHaveLength(13);
+    expect(catalogue.datasets).toHaveLength(15);
     for (const dataset of catalogue.datasets) {
       expect(dataset.source.title).not.toBe('');
       expect(Array.isArray(dataset.fields)).toBe(true);
