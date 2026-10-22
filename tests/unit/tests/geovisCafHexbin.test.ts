@@ -78,6 +78,17 @@ describe('buildCafHexbinLayer', () => {
     expect(layer.extrusion).toEqual({ maxHeight: 60_000 });
     expect(layer.mapDataId).toBe('caf-hexbin-counts');
   });
+
+  /*
+   * An extruded polygon is a `fill-extrusion`, which has no outline: geovis
+   * rejects the whole spec over a `lineColor` on it.
+   */
+  test('outlines the flat cells only', () => {
+    expect(buildCafHexbinLayer().paint?.lineColor).toBeDefined();
+    expect(
+      buildCafHexbinLayer({ extrusionHeight: 60_000 }).paint
+    ).not.toHaveProperty('lineColor');
+  });
 });
 
 describe('buildCafHexbinMapData', () => {

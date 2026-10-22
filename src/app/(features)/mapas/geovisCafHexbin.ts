@@ -215,7 +215,13 @@ export const buildCafHexbinLayer = ({
       // No `lineWidth`: geovis compiles a polygon layer's `lineColor` to
       // MapLibre's `fill-outline-color`, which is always one pixel and takes no
       // width — declaring one would only suggest a knob that does nothing.
-      lineColor: mapTokens.dataviz.color.status.suppressed,
+      //
+      // Flat grid only: an extruded polygon is drawn as `fill-extrusion`, which
+      // has no outline, and geovis rejects the whole spec over a `lineColor`
+      // there.
+      ...(extrusionHeight === undefined
+        ? { lineColor: mapTokens.dataviz.color.status.suppressed }
+        : {}),
     },
     ...(extrusionHeight === undefined
       ? {}
