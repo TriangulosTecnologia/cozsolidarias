@@ -131,6 +131,9 @@ const pushToAgent = (text) => {
 
 const apply = process.argv.includes('--apply');
 const check = process.argv.includes('--check');
+if (check && apply) {
+  throw new Error('--check cannot be combined with --apply');
+}
 if (apply && !AGENT_ID) {
   throw new Error('NATURALI_AGENT_ID is required with --apply');
 }
