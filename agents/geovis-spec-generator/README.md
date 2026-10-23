@@ -9,7 +9,7 @@
 
 ## Commands
 
-The CLI reads `NATURALI_TOKEN` (a `nat_sk_…` key) and `NATURALI_PROJECT`. The app's `.env` holds the same values as `NATURALI_API_KEY` and `NATURALI_PROJECT_ID`.
+The CLI reads `NATURALI_TOKEN` (a `nat_sk_…` key) and `NATURALI_PROJECT`. The app's `.env` holds the same values as `NATURALI_API_KEY` and `NATURALI_PROJECT_ID`. `scripts/update-instructions.mjs` reads `NATURALI_API_KEY` from that `.env` (not `NATURALI_TOKEN`).
 
 ```bash
 export NATURALI_TOKEN=nat_sk_...
