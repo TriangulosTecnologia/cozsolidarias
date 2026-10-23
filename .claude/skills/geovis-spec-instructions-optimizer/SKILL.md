@@ -1,6 +1,5 @@
 ---
 name: geovis-spec-instructions-optimizer
-version: 2.0.0
 description: |
   Consolida e mede as duas fontes de instrução do gerador de spec do cozsolidarias — as
   `instructions` do agente Naturali `geovis-spec-generator-loop` (formation local
@@ -11,6 +10,8 @@ description: |
   instruções, reduzir tokens sem perder robustez, medir se uma regra do prompt é redundante com a
   malha determinística (`candidateValidation.ts`/`specValidation.ts`), ou medir a distância das
   specs geradas até a spec mínima de cada modo do `/mapas`.
+metadata:
+  skillVersion: 2.0.0
 ---
 
 # Otimizador de instruções do geovis-spec-generator
