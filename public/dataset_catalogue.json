@@ -7,7 +7,7 @@
     "language": "pt-BR",
     "status": "draft",
     "created_at": "2026-07-07",
-    "updated_at": "2026-08-14",
+    "updated_at": "2026-10-19",
     "typing_reference": "src/data-source-static/dataCatalogue.ts",
     "quality_notes": [
       {
@@ -135,7 +135,12 @@
         "notes": "Dado primário coletado pela equipe do projeto;"
       },
       "temporal": {
-        "status": "unknown"
+        "status": "described",
+        "extent": [["2026-01-01", "2026-12-31"]],
+        "grain": "P1Y",
+        "frequency": "one_time",
+        "history": "snapshot",
+        "timezone": "America/Sao_Paulo"
       },
       "spatial": {
         "status": "described",
@@ -153,7 +158,8 @@
         },
         "geometry": "point",
         "precision": "unknown",
-        "field": "Código da Cozinha"
+        "srid": 4326,
+        "field": "Latitude, Longitude"
       },
       "access": {
         "level": "restricted",
@@ -289,7 +295,8 @@
         },
         "geometry": "point",
         "precision": "unknown",
-        "field": "Código da Cozinha"
+        "srid": 4326,
+        "field": "Latitude, Longitude"
       },
       "access": {
         "level": "restricted",
@@ -1094,7 +1101,7 @@
         },
         "geometry": "point",
         "precision": "unknown",
-        "field": "nr_caf"
+        "field": "nr_latitude, nr_longitude"
       },
       "access": {
         "level": "public",
