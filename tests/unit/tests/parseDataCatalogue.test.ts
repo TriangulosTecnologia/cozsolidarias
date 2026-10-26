@@ -64,8 +64,8 @@ describe('parseDataCatalogue', () => {
     const catalogue = parseDataCatalogue(text);
 
     expect(catalogue.schema_version).toBe('2.0.0');
-    expect(Object.keys(catalogue.datasets)).toHaveLength(13);
-    expect(Object.keys(catalogue.collections)).toHaveLength(6);
+    expect(Object.keys(catalogue.datasets)).toHaveLength(15);
+    expect(Object.keys(catalogue.collections)).toHaveLength(7);
 
     const cozinhas = catalogue.datasets['cozinhas_geolocalizadas'];
     expect(cozinhas.access.level).toBe('restricted');

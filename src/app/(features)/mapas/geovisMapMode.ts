@@ -14,6 +14,12 @@
  * - `coropletico-ivs`: data-driven choropleth of each município's overall Social
  *   Vulnerability Index (IPEA), colored by the official faixas (green = low,
  *   red = high vulnerability);
+ * - `coropletico-paa-alimentos`: data-driven choropleth of each supplier
+ *   município's share (%) of the food planned in the 2025 PAA purchases for the
+ *   cozinhas (darker = more food bought there);
+ * - `coropletico-paa-kg-por-pessoa`: data-driven choropleth of the planned PAA
+ *   kg per person served, by the cozinhas' município (darker = more food per
+ *   person);
  * - `pontos`: flat background so the individual kitchen points stand out;
  * - `circulos`: flat background with one proportional circle per município
  *   (radius encodes the kitchen count);
@@ -49,6 +55,8 @@ export type MapMode =
   | 'coropletico-idhm-renda'
   | 'coropletico-idhm-educacao-escolaridade'
   | 'coropletico-idhm-educacao-frequencia'
+  | 'coropletico-paa-alimentos'
+  | 'coropletico-paa-kg-por-pessoa'
   | 'pontos'
   | 'circulos'
   | 'circulos-pessoas'

@@ -1,6 +1,9 @@
 'use client';
 
 import 'maplibre-gl/dist/maplibre-gl.css';
+// Side-effect import: points maplibre-gl at its bundled worker before any map
+// is created (see the module for why the default URL fails).
+import '@/components/map/maplibreWorker';
 
 import { Box } from '@chakra-ui/react';
 import {
@@ -39,6 +42,7 @@ import {
   modeTakesOpacity,
   OPACITY_MENU_ID,
   type RampHandlers,
+  view3dFromSelection,
   YEAR_MENU_ID,
 } from './mapaLeftSidebar';
 import MapLoadingIndicator from './MapLoadingIndicator';
@@ -180,6 +184,23 @@ const buildMapConfig = ({
       inspector: { hidden: rightSidebar === undefined },
     },
   };
+};
+
+/**
+ * The 3D view the selection asks for (see `view3dFromSelection`), memoized on
+ * its two numbers: the selection changes on every timeline tick, and a fresh
+ * object each time would rebuild the whole spec.
+ */
+const useView3d = (params: Parameters<typeof view3dFromSelection>[0]) => {
+  const asked = view3dFromSelection(params);
+  const extrusionHeight = asked?.extrusionHeight;
+  const pitch = asked?.pitch;
+
+  return React.useMemo(() => {
+    return extrusionHeight === undefined || pitch === undefined
+      ? undefined
+      : { extrusionHeight, pitch };
+  }, [extrusionHeight, pitch]);
 };
 
 const MapaPlayground = () => {
@@ -333,6 +354,10 @@ const MapaPlayground = () => {
     };
   }, [colorRampFromSelection, opacityFromSelection, specMode]);
 
+  // Read off `specMode`, like the paint, so the prisms rise with the grid they
+  // stand on rather than over the previous mode while it loads.
+  const view3d = useView3d({ selection, mode: specMode });
+
   // The grid for the selected resolution. Seeded with the one the mode already
   // loaded, so opening `cafs-hexbin` costs no second request.
   const { cells: cafHexbinCells } = useCafHexbin({
@@ -389,8 +414,11 @@ const MapaPlayground = () => {
     cafByCity: datasets.cafsByCity,
     cafPontosPorUf: datasets.cafPontosPorUf,
     cadinsanByCity: datasets.cadinsanByCity,
+    paaAlimentosByCity: datasets.paaAlimentosByCity,
+    paaKgPorPessoaByCity: datasets.paaKgPorPessoaByCity,
     cafHexbin: cafHexbinCells,
     paintSettings,
+    view3d,
     mode: specMode,
     cozinhasPoints,
   });

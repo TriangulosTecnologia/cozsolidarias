@@ -24,6 +24,14 @@ export {
 } from './readStaticDataCatalogue';
 export type { StaticIvsSource } from './readStaticIvs';
 export { parseIvsCsv, readStaticIvs } from './readStaticIvs';
+export {
+  parsePaaProdutos,
+  readStaticPaaProdutos,
+} from './readStaticPaaProdutos';
+export {
+  parsePaaUnidadesRecebedoras,
+  readStaticPaaUnidadesRecebedoras,
+} from './readStaticPaaUnidadesRecebedoras';
 export type { StaticPopulacao } from './readStaticPopulacao';
 export { readStaticPopulacao } from './readStaticPopulacao';
 export type { StaticCozinhaSource } from './types';

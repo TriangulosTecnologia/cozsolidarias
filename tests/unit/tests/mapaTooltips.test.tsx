@@ -15,6 +15,8 @@ import type {
   CadinsanByCity,
   CafByCity,
   KitchenRateByCity,
+  PaaAlimentosByCity,
+  PaaKgPorPessoaByCity,
 } from 'src/data-gateway/schema';
 
 import { renderWithChakra } from './renderWithChakra';
@@ -51,6 +53,8 @@ const renderTooltip = (args: {
   register?: KitchenRateByCity;
   cafRegister?: CafByCity;
   cadinsanRegister?: CadinsanByCity;
+  paaAlimentosRegister?: PaaAlimentosByCity;
+  paaKgPorPessoaRegister?: PaaKgPorPessoaByCity;
   value?: number | null;
 }) => {
   return renderWithChakra(
@@ -61,6 +65,8 @@ const renderTooltip = (args: {
         register: args.register,
         cafRegister: args.cafRegister,
         cadinsanRegister: args.cadinsanRegister,
+        paaAlimentosRegister: args.paaAlimentosRegister,
+        paaKgPorPessoaRegister: args.paaKgPorPessoaRegister,
         value: args.value ?? null,
       })}
     </>
@@ -261,6 +267,58 @@ describe('renderMunicipioTooltip', () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText('Sem o Bolsa Família, seria 39,4% (5.779 famílias)')
+    ).toBeInTheDocument();
+  });
+
+  test('PAA food mode shows the share of Brazil, the tonnes and the product/supplier counts', () => {
+    renderTooltip({
+      mode: 'coropletico-paa-alimentos',
+      paaAlimentosRegister: {
+        codigoIbge: '4306767',
+        municipio: 'ELDORADO DO SUL',
+        quantidadeKg: 796439,
+        percentualDoBrasil: 6.6993,
+        produtos: 17,
+        fornecedores: 1,
+      },
+    });
+
+    expect(
+      screen.getByText('6,699% dos alimentos previstos no PAA')
+    ).toBeInTheDocument();
+    expect(screen.getByText('796,4 t (796.439 kg)')).toBeInTheDocument();
+    expect(screen.getByText('17 produtos · 1 fornecedor')).toBeInTheDocument();
+  });
+
+  test('PAA food mode reads "sem compra" for a município with none', () => {
+    renderTooltip({ mode: 'coropletico-paa-alimentos' });
+
+    expect(screen.getByText('Sem compra prevista no PAA')).toBeInTheDocument();
+  });
+
+  test('PAA kg-per-person mode shows the ratio, the tonnes for the people and the cozinhas', () => {
+    renderTooltip({
+      mode: 'coropletico-paa-kg-por-pessoa',
+      paaKgPorPessoaRegister: {
+        codigoIbge: '1200401',
+        municipio: 'RIO BRANCO',
+        kgPrevistos: 61750,
+        pessoasAtendidas: 2650,
+        cozinhas: 1,
+        kgPorPessoa: 23.3,
+      },
+    });
+
+    expect(screen.getByText('23,3 kg por pessoa atendida')).toBeInTheDocument();
+    expect(screen.getByText('61,8 t para 2.650 pessoas')).toBeInTheDocument();
+    expect(screen.getByText('1 cozinha recebedora')).toBeInTheDocument();
+  });
+
+  test('PAA kg-per-person mode reads "sem cozinha" without a ratio', () => {
+    renderTooltip({ mode: 'coropletico-paa-kg-por-pessoa' });
+
+    expect(
+      screen.getByText('Sem cozinha recebedora no PAA')
     ).toBeInTheDocument();
   });
 

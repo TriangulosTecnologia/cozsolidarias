@@ -37,3 +37,5 @@ export type {
 export type { CozinhaDetalhe } from './cozinhaDetalhe';
 export type { KitchenByCity, KitchenRateByCity } from './kitchenByCity';
 export type { MunicipioIvs } from './municipioIvs';
+export type { PaaAlimentosByCity } from './paaAlimentosByCity';
+export type { PaaKgPorPessoaByCity } from './paaKgPorPessoaByCity';

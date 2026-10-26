@@ -40,6 +40,48 @@ export type StaticCadinsanMunicipioSource = {
 };
 
 /**
+ * Shape of one product row of the CONAB "PAA Cozinhas Solidárias 2025 —
+ * PRODUTOS" export after parsing. Each row is one product of one purchase
+ * proposal; the município is the **supplier's** (where the food comes from),
+ * not where the cozinha that consumes it sits. `quantidadeKg` is the planned
+ * (contracted) quantity, coerced from the pt-BR `1.250` format.
+ */
+export type StaticPaaProdutoSource = {
+  /** Purchase proposal id (`TPAF`), e.g. `AC/2025/02/0208`; joins to the receiving units. */
+  tpaf: string;
+  /** 7-digit IBGE code of the supplier's município (`IBGE`); joins to `codarea`. */
+  codigoIbge: string;
+  /** Município name as spelled in the source (`MUNICÍPIO`), upper-case. */
+  municipio: string;
+  /** Supplier organization's CNPJ (`CNPJ PROPONENTE`). */
+  cnpjProponente: string;
+  /** Product name (`PRODUTO`), e.g. `FEIJAO`. */
+  produto: string;
+  /** Planned quantity in kg (`QUANTIDADE (KG)`). */
+  quantidadeKg: number;
+};
+
+/**
+ * Shape of one row of the CONAB "PAA Cozinhas Solidárias 2025 — UNIDADES
+ * RECEBEDORAS" export after parsing: one receiving unit (a cozinha) of one
+ * purchase proposal, with how many people it serves. The município is the
+ * **cozinha's** (where the food is consumed). The same cozinha may appear
+ * under several proposals, each row carrying the people that proposal declares.
+ */
+export type StaticPaaUnidadeRecebedoraSource = {
+  /** Purchase proposal id (`Num TPAF`); joins to the product rows. */
+  tpaf: string;
+  /** 7-digit IBGE code of the cozinha's município (`Cod IBGE Consumidor`). */
+  codigoIbge: string;
+  /** Município name as spelled in the source (`Municipio Consumidor`). */
+  municipio: string;
+  /** Cozinha registration code (`Código da Cozinha`), e.g. `CS023192`. */
+  codigoCozinha: string;
+  /** People served under this proposal (`Qtd Total Atendidos`). */
+  pessoasAtendidas: number;
+};
+
+/**
  * Shape of a single "cozinha solidária" record after the CSV snapshot is
  * parsed. Every column becomes a string, except the coordinates which are
  * coerced to `number | null` (missing values in the CSV are `---`).
