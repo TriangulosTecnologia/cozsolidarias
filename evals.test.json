@@ -1,5 +1,5 @@
 {
-  "datasetVersion": "2026-09-28-variacoes-1",
+  "datasetVersion": "2026-09-28-variations-1",
   "skillVersion": "2.0.0",
   "goldenCorpus": "src/app/(features)/mapas/specs/full-evalued",
   "notes": "Reachable = the value the mode paints is returned by a RENDERABLE_DATASET_FETCHERS entry. municipios_ivs returns only `ivs` and municipios_cadinsan only `proporcaoComPbf`, so IDHM and 'sem PBF' are refusals even though the fields exist in the catalogue.",
