@@ -21,10 +21,9 @@ const STOP_REASON_MESSAGE: Record<SpecReplyStopped['reason'], string> = {
 /**
  * The 422 for a validation loop that gave up, carrying its last candidate.
  *
- * Deliberate exception to "MapData append runs before any client sees the
- * spec" (decision A): the candidate is the agent's own output, with its
- * placeholder `mapData`, never served as a map. It is kept so the playground
- * can show what was rejected.
+ * Carries the candidate as the agent produced it, before MapData append: the
+ * playground shows it so a rejected spec can be inspected. Never served as a
+ * map (see the `devanity.rules.json` invariant for every 422 form).
  */
 const stoppedResponse = (reply: SpecReplyStopped): Response => {
   return invalidSpecResponse({
