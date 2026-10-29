@@ -644,11 +644,12 @@ describe('POST /api/ai/spec', () => {
 
     expect(response.status).toBe(502);
     expect(body.message).toMatch(
-      /Falha de comunicação com o modelo de IA: boom/
+      /Falha de comunicação com o modelo de IA\. Tente novamente/
     );
+    expect(body.message).not.toMatch(/boom/);
   });
 
-  test('stringifies a non-Error thrown value for the fallback agent-failure message', async () => {
+  test('does not reflect a non-Error thrown value in the fallback agent-failure message', async () => {
     global.fetch = jest.fn().mockRejectedValue('boom-string');
 
     const response = await POST(
@@ -657,9 +658,27 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as ErrorBody;
 
     expect(response.status).toBe(502);
-    expect(body.message).toMatch(
-      /Falha de comunicação com o modelo de IA: boom-string/
+    expect(body.message).toMatch(/Falha de comunicação com o modelo de IA/);
+    expect(body.message).not.toMatch(/boom-string/);
+  });
+
+  test('does not reflect the upstream error detail of a failed generation', async () => {
+    global.fetch = mockSessionOpening().mockResolvedValueOnce(
+      jsonResponse({
+        generation_id: 'gen_123',
+        status: 'failed',
+        error: { message: 'upstream-secret-detail' },
+      })
     );
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de cozinhas por município' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(502);
+    expect(body.message).toMatch(/O modelo de IA não concluiu a geração/);
+    expect(body.message).not.toMatch(/upstream-secret-detail/);
   });
 
   // ---------------------------------------------------------------------------

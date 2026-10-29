@@ -32,10 +32,10 @@
     "src/app/api/ai/spec/**": {
       "tier": "high-risk",
       "check": "pnpm typecheck && pnpm test",
-      "purpose": "POST /api/ai/spec: calls the Naturali agent, validates its spec and appends real mapData before any client sees it",
+      "purpose": "POST /api/ai/spec: calls the Naturali agent, validates its spec and, before a spec is served as a map (a 200 body), replaces mapData with real gateway data (or the cozinhas-per-município builder output) and resolves API-backed sources",
       "invariants": [
         "NATURALI_* credentials are read only server-side and never serialized to the browser",
-        "MapData Append runs server-side before the spec reaches any client as a map; the only exception is a 422, which returns the agent's VisualizationSpec candidate unrendered, with its placeholder mapData, so it can be inspected"
+        "A spec is served as a map only in a 200 body, after its mapData holds real gateway data (or the cozinhas builder output) and its API-backed sources are resolved. A 422 body is never served as a map; it carries spec only for inspection, in one of four forms: (1) the agent's reply as received, possibly normalized or locally repaired, or no spec, or a non-record value; (2) the base and agent spec merged, before any mapData replacement; (3) the spec after mapData replacement, with sources still unresolved; (4) the served spec after applyProportionalCirclesDefaults and validateWithLocalRepairs, with mapData and sources resolved"
       ]
     },
     "next.config.ts": { "tier": "high-risk", "check": "pnpm typecheck" },

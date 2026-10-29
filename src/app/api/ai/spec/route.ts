@@ -156,8 +156,7 @@ const validateEnv = ():
  * cause-specific message — so a 502 never collapses a transport failure, a
  * failed generation, and an unparseable reply into the same generic
  * sentence. Matches on the fixed prefixes that function throws; anything
- * else (e.g. a network-level fetch failure) falls back to the raw
- * `error.message` so it's still legible.
+ * else gets a generic message. No upstream text is reflected to the browser.
  */
 const describeAgentFailure = (error: unknown): string => {
   const message = error instanceof Error ? error.message : String(error);
@@ -166,7 +165,7 @@ const describeAgentFailure = (error: unknown): string => {
     return `Não foi possível iniciar a geração com o modelo de IA (${message}). Tente novamente em instantes.`;
   }
   if (message.startsWith('Naturali generation ended with status')) {
-    return `O modelo de IA não concluiu a geração (${message}). Tente reformular o pedido ou tentar novamente.`;
+    return 'O modelo de IA não concluiu a geração. Tente reformular o pedido ou tentar novamente.';
   }
   if (
     message ===
@@ -178,7 +177,7 @@ const describeAgentFailure = (error: unknown): string => {
     return 'O modelo de IA não respondeu dentro do tempo limite. Tente novamente ou simplifique o pedido.';
   }
 
-  return `Falha de comunicação com o modelo de IA: ${message}`;
+  return 'Falha de comunicação com o modelo de IA. Tente novamente em instantes.';
 };
 
 /**
