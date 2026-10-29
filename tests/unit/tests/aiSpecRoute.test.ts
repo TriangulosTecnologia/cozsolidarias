@@ -106,6 +106,16 @@ const neutralizeDataDerived = (spec: SpecRecord): SpecRecord => {
 /** Minimal `legends[]` entry — enough to satisfy `findMissingLegend`. */
 const A_LEGEND = [{ id: 'legend-1', title: 'Valor' }];
 
+/** One renderable mapData entry: the route rejects an empty `mapData` list. */
+const ONE_MAP_DATA = [
+  {
+    mapDataId: 'municipios_ivs',
+    mapId: 'municipios-boundary',
+    joinKey: 'codarea',
+    data: [],
+  },
+];
+
 const ENV_KEYS = [
   'NATURALI_API_KEY',
   'NATURALI_PROJECT_ID',
@@ -686,7 +696,12 @@ describe('POST /api/ai/spec', () => {
   // ---------------------------------------------------------------------------
 
   test('returns the parsed spec JSON on a full successful turn', async () => {
-    const spec = { title: 'Cozinhas por município', mapData: [] };
+    jest.spyOn(gateway, 'getIvsPorMunicipio').mockResolvedValue([]);
+    const spec = {
+      title: 'Cozinhas por município',
+      legends: A_LEGEND,
+      mapData: ONE_MAP_DATA,
+    };
     mockAgentReply(JSON.stringify(spec));
 
     const response = await POST(
@@ -695,7 +710,11 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as { spec?: unknown };
 
     expect(response.status).toBe(200);
-    expect(body.spec).toEqual({ ...baseVisualizationSpecJson, ...spec });
+    expect(body.spec).toEqual({
+      ...baseVisualizationSpecJson,
+      ...spec,
+      mapData: [{ ...ONE_MAP_DATA[0], data: [] }],
+    });
   }, 10000);
 
   // ---------------------------------------------------------------------------
@@ -735,7 +754,12 @@ describe('POST /api/ai/spec', () => {
   // ---------------------------------------------------------------------------
 
   test('strips a ```json code fence from the model reply before parsing', async () => {
-    const spec = { title: 'Cozinhas por município', mapData: [] };
+    jest.spyOn(gateway, 'getIvsPorMunicipio').mockResolvedValue([]);
+    const spec = {
+      title: 'Cozinhas por município',
+      legends: A_LEGEND,
+      mapData: ONE_MAP_DATA,
+    };
     // Exercises `generateSpec`'s reply parsing of raw `content`, the only
     // path that ever sees a code fence —
     // a provider-parsed `object` never carries markdown around it.
@@ -749,7 +773,11 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as { spec?: unknown };
 
     expect(response.status).toBe(200);
-    expect(body.spec).toEqual({ ...baseVisualizationSpecJson, ...spec });
+    expect(body.spec).toEqual({
+      ...baseVisualizationSpecJson,
+      ...spec,
+      mapData: [{ ...ONE_MAP_DATA[0], data: [] }],
+    });
   }, 10000);
 
   test('returns a gateway error when the model reply is not valid JSON', async () => {
@@ -953,6 +981,7 @@ describe('POST /api/ai/spec', () => {
   }, 10000);
 
   test('repairs a point layer on a polygon source before the structural checks, returning 200 instead of 422', async () => {
+    jest.spyOn(gateway, 'getIvsPorMunicipio').mockResolvedValue([]);
     jest.spyOn(gateway, 'getCozinhasBubbles').mockResolvedValue({
       type: 'FeatureCollection',
       features: [
@@ -974,7 +1003,7 @@ describe('POST /api/ai/spec', () => {
           { id: 'bolhas', type: 'geojson', data: '/api/cozinhas/bolhas' },
         ],
         legends: A_LEGEND,
-        mapData: [],
+        mapData: ONE_MAP_DATA,
         layers: [{ id: 'dots', sourceId: 'mun', geometry: 'point' }],
       })
     );
@@ -990,10 +1019,12 @@ describe('POST /api/ai/spec', () => {
       id: 'dots',
       sourceId: 'bolhas',
       geometry: 'point',
+      mapDataId: 'municipios_ivs',
     });
   }, 10000);
 
   test('returns 422 when an API-backed source resolves to no features', async () => {
+    jest.spyOn(gateway, 'getIvsPorMunicipio').mockResolvedValue([]);
     jest.spyOn(gateway, 'getCozinhas').mockResolvedValue({
       type: 'FeatureCollection',
       features: [],
@@ -1003,7 +1034,7 @@ describe('POST /api/ai/spec', () => {
       title: 'Cozinhas comunitárias',
       sources: [{ id: 'cozinhas', type: 'geojson', data: '/api/cozinhas' }],
       legends: A_LEGEND,
-      mapData: [],
+      mapData: ONE_MAP_DATA,
     };
 
     mockAgentReply(JSON.stringify(specWithEmptySource));
@@ -1216,6 +1247,7 @@ describe('POST /api/ai/spec', () => {
   // ---------------------------------------------------------------------------
 
   test('accepts geojson sources that reference known geometry endpoints, skipping non-geojson entries', async () => {
+    jest.spyOn(gateway, 'getIvsPorMunicipio').mockResolvedValue([]);
     const spec = {
       sources: [
         // Not a record at all — must be skipped, not crash the loop.
@@ -1224,7 +1256,8 @@ describe('POST /api/ai/spec', () => {
         { id: 'points', type: 'raster' },
         { id: 'municipios', type: 'geojson', data: '/geo/estados.json' },
       ],
-      mapData: [],
+      legends: A_LEGEND,
+      mapData: ONE_MAP_DATA,
     };
     mockAgentReply(JSON.stringify(spec));
 
@@ -1315,11 +1348,13 @@ describe('POST /api/ai/spec', () => {
   }, 10000);
 
   test('accepts a spec with no basemap field at all', async () => {
+    jest.spyOn(gateway, 'getIvsPorMunicipio').mockResolvedValue([]);
     const spec = {
       sources: [
         { id: 'municipios', type: 'geojson', data: '/geo/geojs-100-mun.json' },
       ],
-      mapData: [],
+      legends: A_LEGEND,
+      mapData: ONE_MAP_DATA,
     };
     mockAgentReply(JSON.stringify(spec));
 
@@ -1348,12 +1383,14 @@ describe('POST /api/ai/spec', () => {
   }, 10000);
 
   test('accepts a basemap object with no styleUrl field', async () => {
+    jest.spyOn(gateway, 'getIvsPorMunicipio').mockResolvedValue([]);
     const spec = {
       basemap: { visible: false },
       sources: [
         { id: 'municipios', type: 'geojson', data: '/geo/geojs-100-mun.json' },
       ],
-      mapData: [],
+      legends: A_LEGEND,
+      mapData: ONE_MAP_DATA,
     };
     mockAgentReply(JSON.stringify(spec));
 
@@ -1365,12 +1402,14 @@ describe('POST /api/ai/spec', () => {
   }, 10000);
 
   test('accepts a basemap.styleUrl that matches the known default style', async () => {
+    jest.spyOn(gateway, 'getIvsPorMunicipio').mockResolvedValue([]);
     const spec = {
       basemap: { styleUrl: 'https://tiles.openfreemap.org/styles/positron' },
       sources: [
         { id: 'municipios', type: 'geojson', data: '/geo/geojs-100-mun.json' },
       ],
-      mapData: [],
+      legends: A_LEGEND,
+      mapData: ONE_MAP_DATA,
     };
     mockAgentReply(JSON.stringify(spec));
 
@@ -1653,6 +1692,7 @@ describe('POST /api/ai/spec', () => {
   // ---------------------------------------------------------------------------
 
   test('returns 422 with the geovis issues, defaulting the message, when validateSpec rejects the resolved spec', async () => {
+    jest.spyOn(gateway, 'getIvsPorMunicipio').mockResolvedValue([]);
     jest.mocked(validateSpec).mockReturnValueOnce({
       status: 'invalid',
       issues: [
@@ -1664,7 +1704,9 @@ describe('POST /api/ai/spec', () => {
       ],
     });
 
-    mockAgentReply(JSON.stringify({ mapData: [] }));
+    mockAgentReply(
+      JSON.stringify({ legends: A_LEGEND, mapData: ONE_MAP_DATA })
+    );
 
     const response = await POST(
       jsonRequest({ prompt: 'mapa de cozinhas por município' })
@@ -1688,6 +1730,16 @@ describe('POST /api/ai/spec', () => {
   test('returns 422 when the spec declares no mapData, instead of serving the base map', async () => {
     const spec = { title: 'Só o mapa base, sem camada de valores' };
     mockAgentReply(JSON.stringify(spec));
+
+    const response = await POST(jsonRequest({ prompt: 'mapa base do Brasil' }));
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(422);
+    expect(body.message).toMatch(/campo "mapData" é obrigatório/);
+  }, 10000);
+
+  test('returns 422 when mapData is an empty list, instead of serving a map with no data', async () => {
+    mockAgentReply(JSON.stringify({ mapData: [] }));
 
     const response = await POST(jsonRequest({ prompt: 'mapa base do Brasil' }));
     const body = (await response.json()) as ErrorBody;
@@ -2028,8 +2080,15 @@ describe('POST /api/ai/spec: base merge and proportionalCircles defaults', () =>
   });
 
   describe('mergeSpecs', () => {
+    beforeEach(() => {
+      jest.spyOn(gateway, 'getIvsPorMunicipio').mockResolvedValue([]);
+    });
+
     test('fills the top-level fields the agent omits from the base spec', async () => {
-      const spec = await servedSpec({ legends: A_LEGEND, mapData: [] });
+      const spec = await servedSpec({
+        legends: A_LEGEND,
+        mapData: ONE_MAP_DATA,
+      });
 
       expect(spec['engine']).toBe('maplibre');
       expect(spec['attributionControlEnabled']).toBe(false);
@@ -2057,7 +2116,7 @@ describe('POST /api/ai/spec: base merge and proportionalCircles defaults', () =>
           },
         ],
         legends: A_LEGEND,
-        mapData: [],
+        mapData: ONE_MAP_DATA,
       });
       const sources = records(spec['sources']);
 
@@ -2075,7 +2134,7 @@ describe('POST /api/ai/spec: base merge and proportionalCircles defaults', () =>
           { id: 'agent-layer', sourceId: 'municipios', geometry: 'line' },
         ],
         legends: A_LEGEND,
-        mapData: [],
+        mapData: ONE_MAP_DATA,
       });
 
       expect(
@@ -2093,7 +2152,7 @@ describe('POST /api/ai/spec: base merge and proportionalCircles defaults', () =>
       const spec = await servedSpec({
         view: { center: [0, 0], zoom: 2 },
         legends: A_LEGEND,
-        mapData: [],
+        mapData: ONE_MAP_DATA,
       });
 
       expect(spec['view']).toEqual({ center: [0, 0], zoom: 2 });

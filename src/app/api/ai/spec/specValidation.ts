@@ -625,7 +625,10 @@ export const appendRealMapData = async (
   spec: UnknownRecord
 ): Promise<UnknownRecord | Response> => {
   const mapData = spec['mapData'];
-  if (mapData === undefined) {
+  if (
+    mapData === undefined ||
+    (Array.isArray(mapData) && mapData.length === 0)
+  ) {
     return invalidSpecResponse({
       message:
         'O campo "mapData" é obrigatório: o modelo não declarou nenhum dado para o mapa.',
