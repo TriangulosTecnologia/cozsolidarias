@@ -30,33 +30,20 @@ const readInstructions = () => {
     .join(SECTION_SEPARATOR);
 };
 
-const MAX_GROWTH = 1.5;
+const MAX_INSTRUCTIONS_CHARS = 27000;
 
 /**
- * Returns the `instructions` currently stored in `formation.json`, the
- * baseline the length limit is measured against.
- * @returns {string}
- * @example
- * const current = currentInstructions(); // "Convert a natural-language..."
- */
-const currentInstructions = () => {
-  const formation = JSON.parse(readFileSync(FORMATION_PATH, 'utf-8'));
-  return formation.resources.geovis_spec_generator_loop.properties.instructions;
-};
-
-/**
- * Throws when the new text grows past 150% of the length currently in
- * `formation.json`, so an oversized prompt never reaches the live agent.
+ * Throws when the new text is longer than `MAX_INSTRUCTIONS_CHARS`, so an
+ * oversized prompt never reaches the live agent.
  * @param {string} text
  * @returns {void}
  * @example
  * assertWithinLimit('Convert a natural-language...');
  */
 const assertWithinLimit = (text) => {
-  const limit = Math.floor(currentInstructions().length * MAX_GROWTH);
-  if (text.length > limit) {
+  if (text.length > MAX_INSTRUCTIONS_CHARS) {
     throw new Error(
-      `instructions have ${text.length} chars, above the ${limit} limit (150% of the current formation.json)`
+      `instructions have ${text.length} chars, above the ${MAX_INSTRUCTIONS_CHARS} limit`
     );
   }
 };

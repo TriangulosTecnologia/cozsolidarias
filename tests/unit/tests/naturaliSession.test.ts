@@ -20,7 +20,7 @@ const pausedOn = (
   toolName = 'validate_spec'
 ) => {
   return jsonResponse({
-    id: 'gen_1',
+    generation_id: 'gen_1',
     status: 'requires_action',
     required_action: {
       type: 'submit_tool_outputs',
@@ -31,10 +31,15 @@ const pausedOn = (
 
 const completedWith = (spec: unknown) => {
   return jsonResponse({
-    id: 'gen_1',
+    generation_id: 'gen_1',
     status: 'completed',
-    output: { object: { status: 'ok', spec } },
+    content: JSON.stringify({ status: 'ok', spec }),
   });
+};
+
+/** The reply to saving the user message into the session. */
+const messageSaved = () => {
+  return jsonResponse({ id: 'msg_1' });
 };
 
 const issues = (count: number) => {
@@ -46,7 +51,8 @@ const issues = (count: number) => {
 const BASE_PARAMS = {
   apiKey: 'key',
   projectId: 'proj_1',
-  agentId: 'agent_1',
+  sessionId: 'sess_test0001',
+  signal: AbortSignal.timeout(5000),
   message: 'Quero ver o mapa coroplético de cozinhas por município',
 };
 
@@ -63,6 +69,7 @@ describe('generateSpec', () => {
   test('answers validate_spec with the repaired spec and resumes until the agent completes', async () => {
     const fetchMock = jest
       .fn()
+      .mockResolvedValueOnce(messageSaved())
       .mockResolvedValueOnce(pausedOn('call_1', { engine: 'wrong' }))
       .mockResolvedValueOnce(completedWith({ engine: 'maplibre' }));
     global.fetch = fetchMock;
@@ -76,12 +83,19 @@ describe('generateSpec', () => {
     expect(reply).toEqual({ status: 'ok', spec: { engine: 'maplibre' } });
     expect(validateCandidate).toHaveBeenCalledWith({ engine: 'wrong' });
     expect(fetchMock.mock.calls[0][0]).toBe(
-      'https://api.naturali.ai/v1/projects/proj_1/agents/agent_1/generate?wait=true'
+      'https://api.naturali.ai/v1/projects/proj_1/sessions/sess_test0001/messages'
     );
+    expect(submittedBody(fetchMock, 0)).toEqual({
+      message: BASE_PARAMS.message,
+    });
     expect(fetchMock.mock.calls[1][0]).toBe(
-      'https://api.naturali.ai/v1/projects/proj_1/agents/agent_1/generate/gen_1/tool-outputs'
+      'https://api.naturali.ai/v1/projects/proj_1/sessions/sess_test0001/generate?wait=true'
     );
-    expect(submittedBody(fetchMock, 1)).toEqual({
+    expect(fetchMock.mock.calls[2][0]).toBe(
+      'https://api.naturali.ai/v1/projects/proj_1/sessions/sess_test0001/tool-outputs'
+    );
+    expect(submittedBody(fetchMock, 2)).toEqual({
+      generation_id: 'gen_1',
       tool_outputs: [
         {
           tool_call_id: 'call_1',
@@ -92,7 +106,7 @@ describe('generateSpec', () => {
   });
 
   test(`stops after ${MAX_VALIDATION_ATTEMPTS} validate_spec calls that still carry issues, even while they shrink`, async () => {
-    const fetchMock = jest.fn();
+    const fetchMock = jest.fn().mockResolvedValueOnce(messageSaved());
     for (let call = 1; call <= MAX_VALIDATION_ATTEMPTS; call += 1) {
       fetchMock.mockResolvedValueOnce(
         pausedOn(`call_${call}`, { round: call })
@@ -114,13 +128,14 @@ describe('generateSpec', () => {
       issues: issues(1),
     });
     expect(validateCandidate).toHaveBeenCalledTimes(MAX_VALIDATION_ATTEMPTS);
-    // The first generate plus one resume per non-final call.
-    expect(fetchMock).toHaveBeenCalledTimes(MAX_VALIDATION_ATTEMPTS);
+    // The saved message, the first generate plus one resume per non-final call.
+    expect(fetchMock).toHaveBeenCalledTimes(MAX_VALIDATION_ATTEMPTS + 1);
   });
 
   test('stops as soon as a call leaves as many issues as the previous one', async () => {
     const fetchMock = jest
       .fn()
+      .mockResolvedValueOnce(messageSaved())
       .mockResolvedValueOnce(pausedOn('call_1', { round: 1 }))
       .mockResolvedValueOnce(pausedOn('call_2', { round: 2 }));
     global.fetch = fetchMock;
@@ -136,12 +151,13 @@ describe('generateSpec', () => {
       attempts: 2,
       spec: { round: 2 },
     });
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
   });
 
   test('answers a call to an unknown tool with an error output instead of validating', async () => {
     const fetchMock = jest
       .fn()
+      .mockResolvedValueOnce(messageSaved())
       .mockResolvedValueOnce(pausedOn('call_1', {}, 'search_web'))
       .mockResolvedValueOnce(completedWith({ engine: 'maplibre' }));
     global.fetch = fetchMock;
@@ -150,7 +166,8 @@ describe('generateSpec', () => {
     await generateSpec({ ...BASE_PARAMS, validateCandidate });
 
     expect(validateCandidate).not.toHaveBeenCalled();
-    expect(submittedBody(fetchMock, 1)).toEqual({
+    expect(submittedBody(fetchMock, 2)).toEqual({
+      generation_id: 'gen_1',
       tool_outputs: [
         {
           tool_call_id: 'call_1',
@@ -170,12 +187,15 @@ describe('generateSpec', () => {
   });
 
   test('throws when a paused generation carries no id to resume', async () => {
-    global.fetch = jest.fn().mockResolvedValueOnce(
-      jsonResponse({
-        status: 'requires_action',
-        required_action: { type: 'submit_tool_outputs', tool_calls: [] },
-      })
-    );
+    global.fetch = jest
+      .fn()
+      .mockResolvedValueOnce(messageSaved())
+      .mockResolvedValueOnce(
+        jsonResponse({
+          status: 'requires_action',
+          required_action: { type: 'submit_tool_outputs', tool_calls: [] },
+        })
+      );
 
     await expect(
       generateSpec({ ...BASE_PARAMS, validateCandidate: jest.fn() })
@@ -187,6 +207,7 @@ describe('generateSpec', () => {
   test('throws when a resume request fails', async () => {
     global.fetch = jest
       .fn()
+      .mockResolvedValueOnce(messageSaved())
       .mockResolvedValueOnce(pausedOn('call_1', {}))
       .mockResolvedValueOnce(jsonResponse({}, false));
 
@@ -201,9 +222,10 @@ describe('generateSpec', () => {
   test('passes the tool arguments through when they carry no spec key', async () => {
     global.fetch = jest
       .fn()
+      .mockResolvedValueOnce(messageSaved())
       .mockResolvedValueOnce(
         jsonResponse({
-          id: 'gen_1',
+          generation_id: 'gen_1',
           status: 'requires_action',
           required_action: {
             type: 'submit_tool_outputs',
@@ -226,9 +248,10 @@ describe('generateSpec', () => {
   test('resumes with no outputs when a paused generation lists no tool calls', async () => {
     const fetchMock = jest
       .fn()
+      .mockResolvedValueOnce(messageSaved())
       .mockResolvedValueOnce(
         jsonResponse({
-          id: 'gen_1',
+          generation_id: 'gen_1',
           status: 'requires_action',
           required_action: null,
         })
@@ -238,6 +261,9 @@ describe('generateSpec', () => {
 
     await generateSpec({ ...BASE_PARAMS, validateCandidate: jest.fn() });
 
-    expect(submittedBody(fetchMock, 1)).toEqual({ tool_outputs: [] });
+    expect(submittedBody(fetchMock, 2)).toEqual({
+      generation_id: 'gen_1',
+      tool_outputs: [],
+    });
   });
 });

@@ -108,7 +108,9 @@ export const RENDERABLE_DATASET_IDS = Object.keys(
 export const isRenderableDatasetId = (
   id: unknown
 ): id is RenderableDatasetId => {
-  return typeof id === 'string' && id in RENDERABLE_DATASET_FETCHERS;
+  return (
+    typeof id === 'string' && Object.hasOwn(RENDERABLE_DATASET_FETCHERS, id)
+  );
 };
 
 /** The index-only shape a non-renderable dataset is reduced to — enough for

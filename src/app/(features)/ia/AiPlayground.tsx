@@ -6,7 +6,6 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import '@/components/map/maplibreWorker';
 
 import {
-  Alert,
   Box,
   Button,
   Field,
@@ -22,6 +21,7 @@ import { I18nProvider } from '@ttoss/react-i18n';
 import { BruttalTheme } from '@ttoss/theme/Bruttal';
 import { ThemeUIProvider } from 'theme-ui';
 
+import { ChoiceSection, ErrorAlert } from './ChoicePanel';
 import { JsonPanel } from './JsonPanel';
 import { useAiPlaygroundLogic } from './useAiPlaygroundLogic';
 import { withHoverTooltips } from './withHoverTooltips';
@@ -81,13 +81,15 @@ const AiPlayground = () => {
     prompt,
     setPrompt,
     status,
-    errorMessage,
+    failure,
     result,
     showJson,
     setShowJson,
-    errorDetails,
     spec,
+    clarify,
+    mapTypeOptions,
     handleSubmit,
+    choose,
   } = useAiPlaygroundLogic();
 
   return (
@@ -135,26 +137,14 @@ const AiPlayground = () => {
         </Stack>
       )}
 
-      {status === 'error' && (
-        <Alert.Root status="error">
-          <Alert.Indicator />
-          <Alert.Content>
-            <Alert.Title>Não foi possível gerar o mapa</Alert.Title>
-            <Alert.Description>
-              {errorMessage}
-              {errorDetails?.issues && errorDetails.issues.length > 0 && (
-                <Box as="ul" pl={5} mt={2}>
-                  {errorDetails.issues.map((issue, index) => {
-                    return (
-                      <li key={`${issue.code}-${index}`}>{issue.message}</li>
-                    );
-                  })}
-                </Box>
-              )}
-            </Alert.Description>
-          </Alert.Content>
-        </Alert.Root>
-      )}
+      {status === 'error' && <ErrorAlert failure={failure} />}
+
+      <ChoiceSection
+        status={status}
+        clarify={clarify}
+        mapTypeOptions={mapTypeOptions}
+        onChoose={choose}
+      />
 
       <JsonPanel
         jsonPayload={status === 'loading' ? null : spec}
