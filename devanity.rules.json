@@ -35,7 +35,7 @@
       "purpose": "POST /api/ai/spec: calls the Naturali agent, validates its spec and appends real mapData before any client sees it",
       "invariants": [
         "NATURALI_* credentials are read only server-side and never serialized to the browser",
-        "MapData Append runs server-side before the spec reaches any client"
+        "MapData Append runs server-side before the spec reaches any client as a map; the only exception is a 422, which returns the agent's VisualizationSpec candidate unrendered, with its placeholder mapData, so it can be inspected"
       ]
     },
     "next.config.ts": { "tier": "high-risk", "check": "pnpm typecheck" },

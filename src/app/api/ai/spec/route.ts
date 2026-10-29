@@ -291,12 +291,13 @@ export const POST = async (request: Request): Promise<Response> => {
   }
   const { sessionId } = modelJsonOrError;
 
-  const servedOrError = await resolveServedSpec(
-    mergeSpecs(
+  const servedOrError = await resolveServedSpec({
+    prompt: requestOrError.prompt,
+    spec: mergeSpecs(
       baseVisualizationSpecJson as UnknownRecord,
       modelJsonOrError.spec
-    )
-  );
+    ),
+  });
   if (servedOrError instanceof Response) {
     return withSessionId(servedOrError, sessionId);
   }

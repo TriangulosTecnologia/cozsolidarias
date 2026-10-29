@@ -2,6 +2,7 @@ import {
   buildCozinhasChoroplethSpec,
   isCozinhasChoroplethRequest,
 } from './canonicalChoropleth';
+import { logGeneration } from './generationLogger';
 import {
   appendRealMapData,
   appendRealSourceData,
@@ -16,20 +17,28 @@ import {
  * `mapData` values (see {@link appendRealMapData}). Either way, API-backed
  * `sources[].data` is then fetched server-side (see
  * {@link appendRealSourceData}) while static `/geo/*` URLs are kept for the
- * browser.
+ * browser. A failure is logged with its cause (see {@link logGeneration}) and
+ * answered with a fixed 502.
  */
-export const resolveServedSpec = async (
-  spec: UnknownRecord
-): Promise<UnknownRecord | Response> => {
+export const resolveServedSpec = async (params: {
+  prompt: string;
+  spec: UnknownRecord;
+}): Promise<UnknownRecord | Response> => {
   try {
-    const withMapData = isCozinhasChoroplethRequest(spec)
+    const withMapData = isCozinhasChoroplethRequest(params.spec)
       ? await buildCozinhasChoroplethSpec()
-      : await appendRealMapData(spec);
+      : await appendRealMapData(params.spec);
     if (withMapData instanceof Response) {
       return withMapData;
     }
     return await appendRealSourceData(withMapData);
-  } catch {
+  } catch (error) {
+    logGeneration({
+      prompt: params.prompt,
+      reply: {
+        cause: error instanceof Error ? error.message : String(error),
+      },
+    });
     // A gateway rejection after the session exists is a 502, with the session
     // id attached by the caller; the message is fixed so no internal detail leaks.
     return errorResponse({

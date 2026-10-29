@@ -1,4 +1,5 @@
 import { validateSpec } from '@ttoss/geovis';
+import * as generationLogger from 'src/app/api/ai/spec/generationLogger';
 import baseVisualizationSpecJson from 'src/app/api/ai/spec/instructions/baseVisualizationSpec.json';
 import { POST } from 'src/app/api/ai/spec/route';
 import { invalidSpecResponse } from 'src/app/api/ai/spec/specValidation';
@@ -791,6 +792,9 @@ describe('POST /api/ai/spec', () => {
     jest
       .spyOn(gateway, 'getIvsPorMunicipio')
       .mockRejectedValue(new Error('gateway down'));
+    const logSpy = jest
+      .spyOn(generationLogger, 'logGeneration')
+      .mockImplementation(() => {});
     mockAgentReply(
       JSON.stringify({
         title: 'IVS por município',
@@ -814,6 +818,43 @@ describe('POST /api/ai/spec', () => {
     expect(response.status).toBe(502);
     expect(body.message).toMatch(/Não foi possível carregar os dados do mapa/);
     expect(response.headers.get('x-session-id')).toBe('sess_route0001');
+    expect(logSpy).toHaveBeenCalledWith({
+      prompt: 'mapa de IVS por município',
+      reply: { cause: 'gateway down' },
+    });
+  });
+
+  test('logs a gateway rejection that is not an Error by its string value', async () => {
+    jest
+      .spyOn(gateway, 'getIvsPorMunicipio')
+      .mockRejectedValue('gateway down as text');
+    const logSpy = jest
+      .spyOn(generationLogger, 'logGeneration')
+      .mockImplementation(() => {});
+    mockAgentReply(
+      JSON.stringify({
+        title: 'IVS por município',
+        mapData: [
+          {
+            mapDataId: 'municipios_ivs',
+            mapId: 'municipios-boundary',
+            joinKey: 'codarea',
+            data: [],
+          },
+        ],
+        legends: A_LEGEND,
+      })
+    );
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de IVS por município' })
+    );
+
+    expect(response.status).toBe(502);
+    expect(logSpy).toHaveBeenCalledWith({
+      prompt: 'mapa de IVS por município',
+      reply: { cause: 'gateway down as text' },
+    });
   });
 
   test('replaces placeholder mapData with real gateway data for a renderable dataset', async () => {
