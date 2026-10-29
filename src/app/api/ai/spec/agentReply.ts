@@ -13,6 +13,10 @@ import {
   type UnknownRecord,
 } from './specValidation';
 
+/** Fixed text for a declined request: the agent's own message is never sent to the browser. */
+const AGENT_DECLINED_MESSAGE =
+  'O modelo de IA não pôde gerar o mapa com este pedido. Reformule o pedido informando o dataset e o tipo de mapa desejados.';
+
 const STOP_REASON_MESSAGE: Record<SpecReplyStopped['reason'], string> = {
   'max-attempts': 'esgotou as tentativas de validação',
   'no-shrinkage': 'parou de reduzir os problemas entre tentativas',
@@ -55,8 +59,8 @@ export const resolveAgentReply = (
 
   if (reply.status === 'error') {
     return invalidSpecResponse({
-      message: reply.error.message,
-      issues: [{ code: reply.error.code, message: reply.error.message }],
+      message: AGENT_DECLINED_MESSAGE,
+      issues: [{ code: reply.error.code, message: AGENT_DECLINED_MESSAGE }],
     });
   }
 

@@ -723,9 +723,10 @@ describe('POST /api/ai/spec', () => {
     };
 
     expect(response.status).toBe(422);
-    expect(body.message).toBe('dado não fornecido');
+    expect(body.message).toMatch(/O modelo de IA não pôde gerar o mapa/);
+    expect(body.message).not.toMatch(/dado não fornecido/);
     expect(body.issues).toEqual([
-      { code: 'missing_data', message: 'dado não fornecido' },
+      { code: 'missing_data', message: body.message },
     ]);
   });
 
@@ -973,6 +974,7 @@ describe('POST /api/ai/spec', () => {
           { id: 'bolhas', type: 'geojson', data: '/api/cozinhas/bolhas' },
         ],
         legends: A_LEGEND,
+        mapData: [],
         layers: [{ id: 'dots', sourceId: 'mun', geometry: 'point' }],
       })
     );
@@ -1001,6 +1003,7 @@ describe('POST /api/ai/spec', () => {
       title: 'Cozinhas comunitárias',
       sources: [{ id: 'cozinhas', type: 'geojson', data: '/api/cozinhas' }],
       legends: A_LEGEND,
+      mapData: [],
     };
 
     mockAgentReply(JSON.stringify(specWithEmptySource));
@@ -1682,15 +1685,15 @@ describe('POST /api/ai/spec', () => {
     ]);
   }, 10000);
 
-  test('merges the base spec into a spec that declares no mapData', async () => {
+  test('returns 422 when the spec declares no mapData, instead of serving the base map', async () => {
     const spec = { title: 'Só o mapa base, sem camada de valores' };
     mockAgentReply(JSON.stringify(spec));
 
     const response = await POST(jsonRequest({ prompt: 'mapa base do Brasil' }));
-    const body = (await response.json()) as { spec?: unknown };
+    const body = (await response.json()) as ErrorBody;
 
-    expect(response.status).toBe(200);
-    expect(body.spec).toEqual({ ...baseVisualizationSpecJson, ...spec });
+    expect(response.status).toBe(422);
+    expect(body.message).toMatch(/campo "mapData" é obrigatório/);
   }, 10000);
 
   test('returns 422 when mapData is not an array', async () => {
@@ -2026,7 +2029,7 @@ describe('POST /api/ai/spec: base merge and proportionalCircles defaults', () =>
 
   describe('mergeSpecs', () => {
     test('fills the top-level fields the agent omits from the base spec', async () => {
-      const spec = await servedSpec({ legends: A_LEGEND });
+      const spec = await servedSpec({ legends: A_LEGEND, mapData: [] });
 
       expect(spec['engine']).toBe('maplibre');
       expect(spec['attributionControlEnabled']).toBe(false);
@@ -2054,6 +2057,7 @@ describe('POST /api/ai/spec: base merge and proportionalCircles defaults', () =>
           },
         ],
         legends: A_LEGEND,
+        mapData: [],
       });
       const sources = records(spec['sources']);
 
@@ -2071,6 +2075,7 @@ describe('POST /api/ai/spec: base merge and proportionalCircles defaults', () =>
           { id: 'agent-layer', sourceId: 'municipios', geometry: 'line' },
         ],
         legends: A_LEGEND,
+        mapData: [],
       });
 
       expect(
@@ -2088,6 +2093,7 @@ describe('POST /api/ai/spec: base merge and proportionalCircles defaults', () =>
       const spec = await servedSpec({
         view: { center: [0, 0], zoom: 2 },
         legends: A_LEGEND,
+        mapData: [],
       });
 
       expect(spec['view']).toEqual({ center: [0, 0], zoom: 2 });
@@ -2169,14 +2175,14 @@ describe('POST /api/ai/spec: base merge and proportionalCircles defaults', () =>
       });
     });
 
-    test('leaves the spec unchanged when no mapData is declared', async () => {
-      const spec = await servedSpec(proportionalSpec({ mapData: undefined }));
+    test('answers 422 when no mapData is declared, instead of leaving the spec unchanged', async () => {
+      mockAgentReply(JSON.stringify(proportionalSpec({ mapData: undefined })));
 
-      expect(spec['scaleMaxValue']).toBeUndefined();
-      expect(layerOf(spec, 'cozinhas-bolhas')?.['sizeBy']).toEqual({
-        range: [1, 2],
-        transform: 'linear',
-      });
+      const response = await POST(
+        jsonRequest({ prompt: 'mapa de pessoas atendidas por município' })
+      );
+
+      expect(response.status).toBe(422);
     });
   });
 });
