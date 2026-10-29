@@ -1,0 +1,32 @@
+{
+  "goldenPass": true,
+  "goldenFailures": [],
+  "mutants": [
+    {
+      "name": "M1 dataset swapped to kitchen count",
+      "caught": true,
+      "firstFailure": "C1: no mapData row for cozinhas_pessoas_atendidas"
+    },
+    {
+      "name": "M2 polygon over absolute total",
+      "caught": true,
+      "firstFailure": "C2: polygon layer painted with an absolute total (cozinhas_pessoas_atendidas)"
+    },
+    {
+      "name": "M3 scaleMaxValue doubled",
+      "caught": true,
+      "firstFailure": "C3: scaleMaxValue 320896 != max(value) 160448"
+    },
+    {
+      "name": "M4 one município dropped",
+      "caught": true,
+      "firstFailure": "T1: 3304557 candidate=undefined oracle=26971"
+    },
+    {
+      "name": "M5 one value off by one",
+      "caught": true,
+      "firstFailure": "T1: 3304557 candidate=26972 oracle=26971"
+    }
+  ],
+  "pass": true
+}

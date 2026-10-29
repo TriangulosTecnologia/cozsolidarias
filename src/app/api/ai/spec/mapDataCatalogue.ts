@@ -21,6 +21,8 @@ import { gateway } from '@/gateway';
  */
 export const ABSOLUTE_TOTAL_DATASET_IDS = [
   'cozinhas_pessoas_atendidas',
+  'cozinhas_geolocalizadas',
+  'cozinhas_geolocalizadas_2025',
 ] as const;
 
 /** One `MapDataRow`-shaped value per município, dropping unscored ones. */
