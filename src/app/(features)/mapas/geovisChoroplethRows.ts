@@ -6,6 +6,8 @@ import type {
   KitchenByCity,
   KitchenRateByCity,
   MunicipioIvs,
+  PaaAlimentosByCity,
+  PaaKgPorPessoaByCity,
 } from '@/data-gateway/schema';
 
 import { jenksBreaksForMode, type MapMode } from './geovisScales';
@@ -83,6 +85,38 @@ const toCadinsanRows = (
   return cadinsanByCity.flatMap((register) => {
     const value = pick(register);
     return value === null ? [] : [{ geometryId: register.codigoIbge, value }];
+  });
+};
+
+/**
+ * Maps per-município planned PAA food to geovis `mapData` value rows: each
+ * supplier município's share (%) of Brazil's planned food. Only municípios with
+ * a planned purchase have a row; every other one falls back to the legend's
+ * `defaultColor` ("sem compra prevista").
+ */
+const toPaaAlimentosRows = (
+  paaAlimentosByCity: PaaAlimentosByCity[]
+): MapDataRow[] => {
+  return paaAlimentosByCity.map((register) => {
+    return {
+      geometryId: register.codigoIbge,
+      value: register.percentualDoBrasil,
+    };
+  });
+};
+
+/**
+ * Maps per-município planned PAA kg per person served to geovis `mapData` value
+ * rows, dropping municípios with no denominator (`kgPorPessoa === null`) so
+ * they fall back to the legend's `defaultColor` ("sem cozinha recebedora").
+ */
+const toPaaKgPorPessoaRows = (
+  paaKgPorPessoaByCity: PaaKgPorPessoaByCity[]
+): MapDataRow[] => {
+  return paaKgPorPessoaByCity.flatMap((register) => {
+    return register.kgPorPessoa === null
+      ? []
+      : [{ geometryId: register.codigoIbge, value: register.kgPorPessoa }];
   });
 };
 
@@ -194,57 +228,80 @@ const CHOROPLETH_ROW_BUILDERS: Partial<
   'coropletico-pessoas-cozinha': toPessoasPorCozinhaRows,
 };
 
-/**
- * Resolves the município choropleth value rows for the active mode: the IVS- and
- * IDHM-families read the score snapshot (via {@link SCORE_PICKERS}), the
- * cozinha-based choropleths use their row builder (via
- * {@link CHOROPLETH_ROW_BUILDERS}), and every other mode (overlays) feeds nothing
- * so the fill stays neutral.
- *
- * @param mode - Active {@link MapMode} driving which metric is painted.
- * @param byCity - Per-município canonical cozinha rate rows.
- * @param ivsByCity - Per-município IVS/IDHM score rows.
- * @param cafByCity - Per-município CAF share rows.
- * @param cadinsanByCity - Per-município CADINSAN food-insecurity share rows.
- * @returns The value rows for the mode, or `[]` for non-choropleth modes.
- *
- * @example
- * resolveChoroplethRows('coropletico-taxa', byCity, ivsByCity, cafByCity, cadinsanByCity);
- */
-export const resolveChoroplethRows = (
-  mode: MapMode,
-  byCity: KitchenRateByCity[],
-  ivsByCity: MunicipioIvs[],
-  cafByCity: CafByCity[],
-  cadinsanByCity: CadinsanByCity[]
-): MapDataRow[] => {
-  if (mode === 'coropletico-cafs-percentual') {
-    return toCafPercentRows(cafByCity);
-  }
-  if (mode === 'coropletico-cadinsan-com-pbf') {
-    return toCadinsanRows(cadinsanByCity, (register) => {
-      return register.proporcaoComPbf;
-    });
-  }
-  if (mode === 'coropletico-cadinsan-sem-pbf') {
-    return toCadinsanRows(cadinsanByCity, (register) => {
-      return register.proporcaoSemPbf;
-    });
-  }
-  const scorePick = SCORE_PICKERS[mode];
-  if (scorePick) {
-    return toScoreRows(ivsByCity, scorePick);
-  }
-  const buildRows = CHOROPLETH_ROW_BUILDERS[mode];
-  return buildRows ? buildRows(byCity) : [];
-};
-
 /** The snapshots a mode's choropleth is derived from; the memo's identity key. */
 export type ChoroplethSources = {
   byCity: KitchenRateByCity[];
   ivsByCity: MunicipioIvs[];
   cafByCity: CafByCity[];
   cadinsanByCity: CadinsanByCity[];
+  paaAlimentosByCity: PaaAlimentosByCity[];
+  paaKgPorPessoaByCity: PaaKgPorPessoaByCity[];
+};
+
+/**
+ * The choropleth modes painted from a snapshot of their own (not the cozinha
+ * rows, not the IVS/IDHM scores) and the value rows each one builds from it.
+ * Keyed by {@link MapMode} so `resolveChoroplethRows` resolves them in one
+ * lookup instead of a branch each.
+ */
+const SOURCE_ROW_BUILDERS: Partial<
+  Record<MapMode, (sources: ChoroplethSources) => MapDataRow[]>
+> = {
+  'coropletico-cafs-percentual': (sources) => {
+    return toCafPercentRows(sources.cafByCity);
+  },
+  'coropletico-cadinsan-com-pbf': (sources) => {
+    return toCadinsanRows(sources.cadinsanByCity, (register) => {
+      return register.proporcaoComPbf;
+    });
+  },
+  'coropletico-cadinsan-sem-pbf': (sources) => {
+    return toCadinsanRows(sources.cadinsanByCity, (register) => {
+      return register.proporcaoSemPbf;
+    });
+  },
+  'coropletico-paa-alimentos': (sources) => {
+    return toPaaAlimentosRows(sources.paaAlimentosByCity);
+  },
+  'coropletico-paa-kg-por-pessoa': (sources) => {
+    return toPaaKgPorPessoaRows(sources.paaKgPorPessoaByCity);
+  },
+};
+
+/**
+ * Resolves the município choropleth value rows for the active mode: the modes
+ * with a snapshot of their own read it (via {@link SOURCE_ROW_BUILDERS}), the
+ * IVS- and IDHM-families read the score snapshot (via {@link SCORE_PICKERS}),
+ * the cozinha-based choropleths use their row builder (via
+ * {@link CHOROPLETH_ROW_BUILDERS}), and every other mode (overlays) feeds
+ * nothing so the fill stays neutral.
+ *
+ * @param params.mode - Active {@link MapMode} driving which metric is painted.
+ * @param params.byCity - Per-município canonical cozinha rate rows.
+ * @param params.ivsByCity - Per-município IVS/IDHM score rows.
+ * @param params.cafByCity - Per-município CAF share rows.
+ * @param params.cadinsanByCity - Per-município CADINSAN food-insecurity share rows.
+ * @param params.paaAlimentosByCity - Per-município planned PAA food rows.
+ * @param params.paaKgPorPessoaByCity - Per-município planned PAA kg-per-person rows.
+ * @returns The value rows for the mode, or `[]` for non-choropleth modes.
+ *
+ * @example
+ * resolveChoroplethRows({ mode: 'coropletico-taxa', byCity, ivsByCity, cafByCity, cadinsanByCity, paaAlimentosByCity, paaKgPorPessoaByCity });
+ */
+export const resolveChoroplethRows = ({
+  mode,
+  ...sources
+}: ChoroplethSources & { mode: MapMode }): MapDataRow[] => {
+  const buildFromSource = SOURCE_ROW_BUILDERS[mode];
+  if (buildFromSource) {
+    return buildFromSource(sources);
+  }
+  const scorePick = SCORE_PICKERS[mode];
+  if (scorePick) {
+    return toScoreRows(sources.ivsByCity, scorePick);
+  }
+  const buildRows = CHOROPLETH_ROW_BUILDERS[mode];
+  return buildRows ? buildRows(sources.byCity) : [];
 };
 
 /** What a mode paints: its value rows and the Jenks breaks fitted to them. */
@@ -275,7 +332,9 @@ const sameSources = (a: ChoroplethSources, b: ChoroplethSources): boolean => {
     a.byCity === b.byCity &&
     a.ivsByCity === b.ivsByCity &&
     a.cafByCity === b.cafByCity &&
-    a.cadinsanByCity === b.cadinsanByCity
+    a.cadinsanByCity === b.cadinsanByCity &&
+    a.paaAlimentosByCity === b.paaAlimentosByCity &&
+    a.paaKgPorPessoaByCity === b.paaKgPorPessoaByCity
   );
 };
 
@@ -299,6 +358,8 @@ const sameSources = (a: ChoroplethSources, b: ChoroplethSources): boolean => {
  * @param params.ivsByCity - Per-município IVS/IDHM score rows.
  * @param params.cafByCity - Per-município CAF share rows.
  * @param params.cadinsanByCity - Per-município CADINSAN share rows.
+ * @param params.paaAlimentosByCity - Per-município planned PAA food rows.
+ * @param params.paaKgPorPessoaByCity - Per-município planned PAA kg-per-person rows.
  * @returns The mode's {@link Choropleth}: fresh `rows`, memoized `jenksBreaks`.
  *
  * @example
@@ -309,13 +370,7 @@ export const resolveChoropleth = ({
   mode,
   ...sources
 }: ChoroplethSources & { mode: MapMode }): Choropleth => {
-  const rows = resolveChoroplethRows(
-    mode,
-    sources.byCity,
-    sources.ivsByCity,
-    sources.cafByCity,
-    sources.cadinsanByCity
-  );
+  const rows = resolveChoroplethRows({ mode, ...sources });
 
   const cached = jenksCache.get(mode);
   if (cached && sameSources(cached.sources, sources)) {

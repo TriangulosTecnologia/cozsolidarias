@@ -61,6 +61,18 @@ const AD_HOC: {
     classes: 6,
     firstLabel: 'Sem cozinha',
   },
+  {
+    mode: 'coropletico-paa-alimentos',
+    floor: 0.0001,
+    classes: 5,
+    firstLabel: 'Sem compra prevista',
+  },
+  {
+    mode: 'coropletico-paa-kg-por-pessoa',
+    floor: 0.01,
+    classes: 5,
+    firstLabel: 'Sem cozinha recebedora',
+  },
 ];
 
 describe('jenksBreaksForMode', () => {
