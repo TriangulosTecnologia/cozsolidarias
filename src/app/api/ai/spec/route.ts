@@ -258,8 +258,9 @@ const getAgentResponse = async (params: {
  * @returns `{ spec, error: false }` on success; `{ error: true, message,
  * issues?, spec? }` on any failure (missing config, prompt validation,
  * upstream API failure, a declined request, a validation loop that gave up,
- * or an unsupported dataset reference) — `spec` is the last generated
- * candidate whenever one exists.
+ * or an unsupported dataset reference) — `spec`, when present, is the spec at
+ * the stage that failed (see the `src/app/api/ai/spec/**` invariant in
+ * devanity.rules.json).
  */
 export const POST = async (request: Request): Promise<Response> => {
   const rawBody: unknown = await request.json().catch(() => {

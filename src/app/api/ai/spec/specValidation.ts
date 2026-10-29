@@ -32,8 +32,8 @@ export type SpecIssue = { code: string; message: string; path?: string };
 
 /**
  * Builds every failure body of `POST /api/ai/spec`: `{ error: true, message }`
- * plus the `issues` (with their actionable `requirements`) and the last
- * generated `spec`, when known, so the client can always inspect what the
+ * plus the `issues` (with their actionable `requirements`) and the `spec` at
+ * the stage that failed, when known, so the client can always inspect what the
  * model produced. Always carries `mapTypeOptions`, so another map type is
  * always on offer.
  *
@@ -330,8 +330,7 @@ const hasLegendEntries = (legends: unknown): boolean => {
  * top-level `spec.legends[]` entry to describe it. Only the top-level list
  * counts: `layers[].legends` is folded into it beforehand by
  * {@link hoistLayerLegends}, so the rendered spec always carries its legends
- * in one place. A spec with no `mapData` at all (a bare base map) needs no
- * legend — there is nothing painted to explain.
+ * in one place.
  *
  * @example
  * findMissingLegend({ mapData: [{ mapDataId: 'x' }], legends: [] }); // true
