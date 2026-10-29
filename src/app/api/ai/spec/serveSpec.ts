@@ -11,7 +11,7 @@ import {
 } from './specValidation';
 
 /**
- * Resolves the agent's spec into the one served to the client: the
+ * Resolves the agent's spec into the one the route then validates: the
  * cozinhas-per-município choropleth is rebuilt from `/mapas`'s own builder
  * (see {@link buildCozinhasChoroplethSpec}); every other spec gets its real
  * `mapData` values (see {@link appendRealMapData}). Either way, API-backed

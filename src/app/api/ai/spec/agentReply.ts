@@ -25,7 +25,8 @@ const STOP_REASON_MESSAGE: Record<SpecReplyStopped['reason'], string> = {
 /**
  * The 422 for a validation loop that gave up, carrying its last candidate.
  *
- * Carries the candidate as the agent produced it, before MapData append: the
+ * Carries the candidate as validateCandidate returned it (locally repaired),
+ * before MapData append: the
  * playground shows it so a rejected spec can be inspected. Never served as a
  * map (see the `devanity.rules.json` invariant for every 422 form).
  */
@@ -41,8 +42,9 @@ const stoppedResponse = (reply: SpecReplyStopped): Response => {
  * Resolves the agent's structured reply into the raw spec object
  * (`status: "ok"`), or the 422 `Response` for a declined request
  * (`status: "error"`), a validation loop that gave up (`status: "stopped"`),
- * a non-object spec or one failing the structural checks. Those 422s carry the
- * agent's candidate as-is (decision A, see {@link stoppedResponse}).
+ * a non-object spec or one failing the structural checks. A non-object spec
+ * is carried raw; a structural failure carries it normalized by
+ * `normalizeCandidate` (see {@link stoppedResponse}).
  *
  * @param reply - The `reply` of {@link generateInSession}.
  * @returns The spec normalized by `normalizeCandidate`, or the 422 `Response`.
