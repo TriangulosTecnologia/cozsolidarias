@@ -1,4 +1,5 @@
 import { validateSpec } from '@ttoss/geovis';
+import * as generationLogger from 'src/app/api/ai/spec/generationLogger';
 import baseVisualizationSpecJson from 'src/app/api/ai/spec/instructions/baseVisualizationSpec.json';
 import { POST } from 'src/app/api/ai/spec/route';
 import { invalidSpecResponse } from 'src/app/api/ai/spec/specValidation';
@@ -105,6 +106,16 @@ const neutralizeDataDerived = (spec: SpecRecord): SpecRecord => {
 /** Minimal `legends[]` entry — enough to satisfy `findMissingLegend`. */
 const A_LEGEND = [{ id: 'legend-1', title: 'Valor' }];
 
+/** One renderable mapData entry: the route rejects an empty `mapData` list. */
+const ONE_MAP_DATA = [
+  {
+    mapDataId: 'municipios_ivs',
+    mapId: 'municipios-boundary',
+    joinKey: 'codarea',
+    data: [],
+  },
+];
+
 const ENV_KEYS = [
   'NATURALI_API_KEY',
   'NATURALI_PROJECT_ID',
@@ -125,24 +136,35 @@ const jsonResponse = (body: unknown, ok = true): Response => {
     json: () => {
       return Promise.resolve(body);
     },
+    text: () => {
+      return Promise.resolve(JSON.stringify(body));
+    },
   } as Response;
 };
 
 /**
+ * A `fetch` mock that already answers the two calls preceding a generation
+ * in a new session: creating it (`sess_route0001`) and saving the user message.
+ */
+const mockSessionOpening = (): jest.Mock => {
+  return jest
+    .fn()
+    .mockResolvedValueOnce(jsonResponse({ id: 'sess_route0001' }))
+    .mockResolvedValueOnce(jsonResponse({ id: 'msg_1' }));
+};
+
+/**
  * Mocks a single, completed `generate?wait=true` call whose structured
- * `output.object` is `{status: "ok", spec}` — `spec` is `JSON.parse(text)`,
+ * `content` is the JSON text of `{status: "ok", spec}` — `spec` is `JSON.parse(text)`,
  * so every existing call site keeps passing a `JSON.stringify`'d spec, not a
  * pre-wrapped `{status, spec}` envelope.
  */
 const mockAgentReply = (text: string): jest.Mock => {
-  const fetchMock = jest.fn().mockResolvedValueOnce(
+  const fetchMock = mockSessionOpening().mockResolvedValueOnce(
     jsonResponse({
-      id: 'gen_123',
+      generation_id: 'gen_123',
       status: 'completed',
-      output: {
-        object: { status: 'ok', spec: JSON.parse(text) },
-        content: text,
-      },
+      content: JSON.stringify({ status: 'ok', spec: JSON.parse(text) }),
     })
   );
   global.fetch = fetchMock;
@@ -151,17 +173,17 @@ const mockAgentReply = (text: string): jest.Mock => {
 
 /**
  * Mocks a single, completed `generate?wait=true` call whose reply carries
- * only raw `output.content` — no `object` — forcing {@link generateSpec}'s
+ * only raw `content` text (fenced or not) — forcing {@link generateSpec}'s
  * fallback parse path. Used only by tests exercising that fallback (a
  * code-fenced reply, or a reply with no parseable structured content at
  * all).
  */
 const mockRawAgentReply = (content: string): jest.Mock => {
-  const fetchMock = jest.fn().mockResolvedValueOnce(
+  const fetchMock = mockSessionOpening().mockResolvedValueOnce(
     jsonResponse({
-      id: 'gen_123',
+      generation_id: 'gen_123',
       status: 'completed',
-      output: { content },
+      content,
     })
   );
   global.fetch = fetchMock;
@@ -250,6 +272,268 @@ describe('POST /api/ai/spec', () => {
   });
 
   // ---------------------------------------------------------------------------
+  // mapType choice - optional input, always-listed options
+  // ---------------------------------------------------------------------------
+
+  test('rejects a mapType outside the available ones', async () => {
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de cozinhas', mapType: 'heatmap' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(400);
+    expect(body.message).toMatch(/Campo "mapType"/);
+  });
+
+  test('lists the available mapTypes on every failure', async () => {
+    const response = await POST(jsonRequest({}));
+    const body = (await response.json()) as {
+      mapTypeOptions?: Array<{ value: string }>;
+    };
+
+    expect(
+      body.mapTypeOptions?.map((option) => {
+        return option.value;
+      })
+    ).toEqual(['choropleth', 'dotDensity', 'proportionalCircles']);
+  });
+
+  test('tells the agent which mapType the user chose', async () => {
+    const fetchMock = mockAgentReply(JSON.stringify({ mapData: [] }));
+
+    await POST(
+      jsonRequest({ prompt: 'mapa de cozinhas', mapType: 'dotDensity' })
+    );
+
+    const sent = JSON.parse(
+      (fetchMock.mock.calls[1][1] as { body: string }).body
+    ) as { message: string };
+    expect(sent.message).toMatch(/mapType.*dotDensity/);
+  });
+
+  // ---------------------------------------------------------------------------
+  // Preflight - ask before generating, never block
+  // ---------------------------------------------------------------------------
+
+  test('asks which map type before generating for a choropleth of an absolute total', async () => {
+    const fetchMock = jest.fn();
+    global.fetch = fetchMock;
+
+    const response = await POST(
+      jsonRequest({ prompt: 'coroplético de pessoas atendidas' })
+    );
+    const body = (await response.json()) as {
+      error: boolean;
+      spec?: unknown;
+      clarify?: { facet: string; default: string };
+    };
+
+    expect(response.status).toBe(200);
+    expect(body.error).toBe(false);
+    expect(body.spec).toBeUndefined();
+    expect(body.clarify).toMatchObject({
+      facet: 'mapType',
+      default: 'proportionalCircles',
+    });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  test('an explicit choropleth on an absolute total reaches the agent and is rejected with its reason', async () => {
+    const fetchMock = mockAgentReply(
+      JSON.stringify({
+        mapType: 'choropleth',
+        mapData: [
+          {
+            mapDataId: 'cozinhas_pessoas_atendidas',
+            mapId: 'municipios-boundary',
+            joinKey: 'codarea',
+            data: [],
+          },
+        ],
+        legends: A_LEGEND,
+      })
+    );
+
+    const response = await POST(
+      jsonRequest({
+        prompt: 'pessoas atendidas por município',
+        mapType: 'choropleth',
+      })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(fetchMock).toHaveBeenCalled();
+    expect(response.status).toBe(422);
+    expect(body.message).toMatch(/nunca uma variável relativa/);
+  });
+
+  test('answers a datasetId that is an object with a 400, not a crash', async () => {
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa', datasetId: { toString: 1 } })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(400);
+    expect(body.message).toMatch(/Campo "datasetId"/);
+  });
+
+  test('answers an agent mapDataId that is an object with a 422 that keeps the session id', async () => {
+    mockAgentReply(
+      JSON.stringify({ sources: [], mapData: [{ mapDataId: { toString: 1 } }] })
+    );
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de cozinhas por município' })
+    );
+
+    expect(response.status).toBe(422);
+    expect(response.headers.get('x-session-id')).toBe('sess_route0001');
+  });
+
+  test('rejects a datasetId the route cannot render', async () => {
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa', datasetId: 'caf_areas' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(400);
+    expect(body.message).toMatch(/Campo "datasetId"/);
+  });
+
+  test.each(['constructor', 'toString', '__proto__'])(
+    'rejects the inherited object key %s as a datasetId',
+    async (datasetId) => {
+      const response = await POST(jsonRequest({ prompt: 'mapa', datasetId }));
+
+      expect(response.status).toBe(400);
+    }
+  );
+
+  test('tells the agent which dataset the user chose', async () => {
+    const fetchMock = mockAgentReply(JSON.stringify({ mapData: [] }));
+
+    await POST(
+      jsonRequest({
+        prompt: 'ivs de infraestrutura e de renda',
+        datasetId: 'municipios_ivs_renda_trabalho',
+      })
+    );
+
+    const sent = JSON.parse(
+      (fetchMock.mock.calls[1][1] as { body: string }).body
+    ) as { message: string };
+    expect(sent.message).toMatch(/dataset.*municipios_ivs_renda_trabalho/);
+  });
+
+  // ---------------------------------------------------------------------------
+  // Sessions - one per conversation, handed back in x-session-id
+  // ---------------------------------------------------------------------------
+
+  test('answers an agent error reply that carries no details with a gateway error, not a crash', async () => {
+    mockRawAgentReply('{"status":"error"}');
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de cozinhas por município' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(502);
+    expect(body.message).toMatch(/sem gerar nenhum conteúdo estruturado/);
+  });
+
+  test('hands the session id back on a success, but not on a transport failure', async () => {
+    mockAgentReply(JSON.stringify({ mapData: [] }));
+    const first = await POST(jsonRequest({ prompt: 'mapa de cozinhas' }));
+
+    global.fetch = jest.fn().mockResolvedValue(jsonResponse({}, false));
+    const failed = await POST(jsonRequest({ prompt: 'mapa de cozinhas' }));
+
+    expect(first.headers.get('x-session-id')).toBe('sess_route0001');
+    // A transport failure happens before any session is known to be usable.
+    expect(failed.status).toBe(502);
+    expect(failed.headers.get('x-session-id')).toBeNull();
+  });
+
+  test('hands the session id back when the generation fails after the session exists', async () => {
+    global.fetch = mockSessionOpening().mockResolvedValueOnce(
+      jsonResponse({
+        generation_id: 'gen_123',
+        status: 'failed',
+        error: { message: 'provider boom' },
+      })
+    );
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de cozinhas por município' })
+    );
+
+    expect(response.status).toBe(502);
+    expect(response.headers.get('x-session-id')).toBe('sess_route0001');
+  });
+
+  test('keeps the client session id on a clarify answer, so the conversation can continue', async () => {
+    const fetchMock = jest.fn();
+    global.fetch = fetchMock;
+
+    const response = await POST(
+      jsonRequest({
+        prompt: 'ivs de infraestrutura e de renda',
+        sessionId: 'sess_existing01',
+      })
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('x-session-id')).toBe('sess_existing01');
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  test('rejects a sessionId that is not a Naturali session id', async () => {
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de cozinhas', sessionId: 'agent_123' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(400);
+    expect(body.message).toMatch(/Campo "sessionId"/);
+  });
+
+  test('continues an owned session with only the follow-up, without the catalogue', async () => {
+    const fetchMock = jest
+      .fn()
+      .mockResolvedValueOnce(
+        jsonResponse({
+          agent_id: 'test-NATURALI_AGENT_ID',
+          name: 'cozsolidarias-ai-spec',
+          status: 'open',
+        })
+      )
+      .mockResolvedValueOnce(jsonResponse({ id: 'msg_2' }))
+      .mockResolvedValueOnce(
+        jsonResponse({
+          generation_id: 'gen_2',
+          status: 'completed',
+          content: JSON.stringify({ status: 'ok', spec: { mapData: [] } }),
+        })
+      );
+    global.fetch = fetchMock;
+
+    const response = await POST(
+      jsonRequest({
+        prompt: 'mapa de cozinhas',
+        mapType: 'dotDensity',
+        sessionId: 'sess_existing01',
+      })
+    );
+
+    const { message } = JSON.parse(
+      (fetchMock.mock.calls[1][1] as { body: string }).body
+    ) as { message: string };
+    expect(response.headers.get('x-session-id')).toBe('sess_existing01');
+    expect(message).toMatch(/mapType.*dotDensity/);
+    expect(message).not.toMatch(/Catálogo de datasets/);
+  });
+
+  // ---------------------------------------------------------------------------
   // Server configuration - API key, project ID, agent ID
   // ---------------------------------------------------------------------------
 
@@ -299,7 +583,7 @@ describe('POST /api/ai/spec', () => {
   test('returns a gateway error when the generation itself fails', async () => {
     global.fetch = jest.fn().mockResolvedValue(
       jsonResponse({
-        id: 'gen_123',
+        generation_id: 'gen_123',
         status: 'failed',
         error: { message: 'provider boom' },
       })
@@ -317,7 +601,9 @@ describe('POST /api/ai/spec', () => {
   test('returns a gateway error when the generation fails with no error message', async () => {
     global.fetch = jest
       .fn()
-      .mockResolvedValue(jsonResponse({ id: 'gen_123', status: 'failed' }));
+      .mockResolvedValue(
+        jsonResponse({ generation_id: 'gen_123', status: 'failed' })
+      );
 
     const response = await POST(
       jsonRequest({ prompt: 'mapa de cozinhas por município' })
@@ -341,11 +627,13 @@ describe('POST /api/ai/spec', () => {
   });
 
   test('returns a gateway error when the generation completes with no structured reply', async () => {
-    global.fetch = jest
-      .fn()
-      .mockResolvedValue(
-        jsonResponse({ id: 'gen_123', status: 'completed', output: {} })
-      );
+    global.fetch = jest.fn().mockResolvedValue(
+      jsonResponse({
+        generation_id: 'gen_123',
+        status: 'completed',
+        content: '',
+      })
+    );
 
     const response = await POST(
       jsonRequest({ prompt: 'mapa de cozinhas por município' })
@@ -366,11 +654,12 @@ describe('POST /api/ai/spec', () => {
 
     expect(response.status).toBe(502);
     expect(body.message).toMatch(
-      /Falha de comunicação com o modelo de IA: boom/
+      /Falha de comunicação com o modelo de IA\. Tente novamente/
     );
+    expect(body.message).not.toMatch(/boom/);
   });
 
-  test('stringifies a non-Error thrown value for the fallback agent-failure message', async () => {
+  test('does not reflect a non-Error thrown value in the fallback agent-failure message', async () => {
     global.fetch = jest.fn().mockRejectedValue('boom-string');
 
     const response = await POST(
@@ -379,9 +668,27 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as ErrorBody;
 
     expect(response.status).toBe(502);
-    expect(body.message).toMatch(
-      /Falha de comunicação com o modelo de IA: boom-string/
+    expect(body.message).toMatch(/Falha de comunicação com o modelo de IA/);
+    expect(body.message).not.toMatch(/boom-string/);
+  });
+
+  test('does not reflect the upstream error detail of a failed generation', async () => {
+    global.fetch = mockSessionOpening().mockResolvedValueOnce(
+      jsonResponse({
+        generation_id: 'gen_123',
+        status: 'failed',
+        error: { message: 'upstream-secret-detail' },
+      })
     );
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de cozinhas por município' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(502);
+    expect(body.message).toMatch(/O modelo de IA não concluiu a geração/);
+    expect(body.message).not.toMatch(/upstream-secret-detail/);
   });
 
   // ---------------------------------------------------------------------------
@@ -389,7 +696,12 @@ describe('POST /api/ai/spec', () => {
   // ---------------------------------------------------------------------------
 
   test('returns the parsed spec JSON on a full successful turn', async () => {
-    const spec = { title: 'Cozinhas por município', mapData: [] };
+    jest.spyOn(gateway, 'getIvsPorMunicipio').mockResolvedValue([]);
+    const spec = {
+      title: 'Cozinhas por município',
+      legends: A_LEGEND,
+      mapData: ONE_MAP_DATA,
+    };
     mockAgentReply(JSON.stringify(spec));
 
     const response = await POST(
@@ -398,7 +710,11 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as { spec?: unknown };
 
     expect(response.status).toBe(200);
-    expect(body.spec).toEqual({ ...baseVisualizationSpecJson, ...spec });
+    expect(body.spec).toEqual({
+      ...baseVisualizationSpecJson,
+      ...spec,
+      mapData: [{ ...ONE_MAP_DATA[0], data: [] }],
+    });
   }, 10000);
 
   // ---------------------------------------------------------------------------
@@ -408,14 +724,12 @@ describe('POST /api/ai/spec', () => {
   test("returns 422 with the agent's own message when it declines the request", async () => {
     global.fetch = jest.fn().mockResolvedValue(
       jsonResponse({
-        id: 'gen_123',
+        generation_id: 'gen_123',
         status: 'completed',
-        output: {
-          object: {
-            status: 'error',
-            error: { code: 'missing_data', message: 'dado não fornecido' },
-          },
-        },
+        content: JSON.stringify({
+          status: 'error',
+          error: { code: 'missing_data', message: 'dado não fornecido' },
+        }),
       })
     );
 
@@ -428,9 +742,10 @@ describe('POST /api/ai/spec', () => {
     };
 
     expect(response.status).toBe(422);
-    expect(body.message).toBe('dado não fornecido');
+    expect(body.message).toMatch(/O modelo de IA não pôde gerar o mapa/);
+    expect(body.message).not.toMatch(/dado não fornecido/);
     expect(body.issues).toEqual([
-      { code: 'missing_data', message: 'dado não fornecido' },
+      { code: 'missing_data', message: body.message },
     ]);
   });
 
@@ -439,9 +754,14 @@ describe('POST /api/ai/spec', () => {
   // ---------------------------------------------------------------------------
 
   test('strips a ```json code fence from the model reply before parsing', async () => {
-    const spec = { title: 'Cozinhas por município', mapData: [] };
-    // Exercises `generateSpec`'s fallback path (`output.content`, no
-    // `output.object`), which is the only path that ever sees a code fence —
+    jest.spyOn(gateway, 'getIvsPorMunicipio').mockResolvedValue([]);
+    const spec = {
+      title: 'Cozinhas por município',
+      legends: A_LEGEND,
+      mapData: ONE_MAP_DATA,
+    };
+    // Exercises `generateSpec`'s reply parsing of raw `content`, the only
+    // path that ever sees a code fence —
     // a provider-parsed `object` never carries markdown around it.
     mockRawAgentReply(
       '```json\n' + JSON.stringify({ status: 'ok', spec }) + '\n```'
@@ -453,7 +773,11 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as { spec?: unknown };
 
     expect(response.status).toBe(200);
-    expect(body.spec).toEqual({ ...baseVisualizationSpecJson, ...spec });
+    expect(body.spec).toEqual({
+      ...baseVisualizationSpecJson,
+      ...spec,
+      mapData: [{ ...ONE_MAP_DATA[0], data: [] }],
+    });
   }, 10000);
 
   test('returns a gateway error when the model reply is not valid JSON', async () => {
@@ -477,11 +801,9 @@ describe('POST /api/ai/spec', () => {
 
     await POST(jsonRequest({ prompt: 'mapa de cozinhas por município' }));
 
-    const generateCall = fetchMock.mock.calls[0] as [string, { body: string }];
-    const sentBody = JSON.parse(generateCall[1].body) as {
-      messages: Array<{ content: string }>;
-    };
-    const message = sentBody.messages[0].content;
+    // Call 0 creates the session, call 1 saves the opening message.
+    const messageCall = fetchMock.mock.calls[1] as [string, { body: string }];
+    const { message } = JSON.parse(messageCall[1].body) as { message: string };
     const catalogueJsonString = message
       .split('Catálogo de datasets:\n')[1]
       .split('\n\n')[0];
@@ -513,6 +835,75 @@ describe('POST /api/ai/spec', () => {
   // ---------------------------------------------------------------------------
   // MapData resolution - data field is replaced with real gateway data for renderable datasets
   // ---------------------------------------------------------------------------
+
+  test('answers a gateway failure after the session exists with a 502 that keeps the session id', async () => {
+    jest
+      .spyOn(gateway, 'getIvsPorMunicipio')
+      .mockRejectedValue(new Error('gateway down'));
+    const logSpy = jest
+      .spyOn(generationLogger, 'logGeneration')
+      .mockImplementation(() => {});
+    mockAgentReply(
+      JSON.stringify({
+        title: 'IVS por município',
+        mapData: [
+          {
+            mapDataId: 'municipios_ivs',
+            mapId: 'municipios-boundary',
+            joinKey: 'codarea',
+            data: [],
+          },
+        ],
+        legends: A_LEGEND,
+      })
+    );
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de IVS por município' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(502);
+    expect(body.message).toMatch(/Não foi possível carregar os dados do mapa/);
+    expect(response.headers.get('x-session-id')).toBe('sess_route0001');
+    expect(logSpy).toHaveBeenCalledWith({
+      prompt: 'mapa de IVS por município',
+      reply: { cause: 'gateway down' },
+    });
+  });
+
+  test('logs a gateway rejection that is not an Error by its string value', async () => {
+    jest
+      .spyOn(gateway, 'getIvsPorMunicipio')
+      .mockRejectedValue('gateway down as text');
+    const logSpy = jest
+      .spyOn(generationLogger, 'logGeneration')
+      .mockImplementation(() => {});
+    mockAgentReply(
+      JSON.stringify({
+        title: 'IVS por município',
+        mapData: [
+          {
+            mapDataId: 'municipios_ivs',
+            mapId: 'municipios-boundary',
+            joinKey: 'codarea',
+            data: [],
+          },
+        ],
+        legends: A_LEGEND,
+      })
+    );
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de IVS por município' })
+    );
+
+    expect(response.status).toBe(502);
+    expect(logSpy).toHaveBeenCalledWith({
+      prompt: 'mapa de IVS por município',
+      reply: { cause: 'gateway down as text' },
+    });
+  });
 
   test('replaces placeholder mapData with real gateway data for a renderable dataset', async () => {
     jest.spyOn(gateway, 'getIvsPorMunicipio').mockResolvedValue([
@@ -590,6 +981,7 @@ describe('POST /api/ai/spec', () => {
   }, 10000);
 
   test('repairs a point layer on a polygon source before the structural checks, returning 200 instead of 422', async () => {
+    jest.spyOn(gateway, 'getIvsPorMunicipio').mockResolvedValue([]);
     jest.spyOn(gateway, 'getCozinhasBubbles').mockResolvedValue({
       type: 'FeatureCollection',
       features: [
@@ -611,6 +1003,7 @@ describe('POST /api/ai/spec', () => {
           { id: 'bolhas', type: 'geojson', data: '/api/cozinhas/bolhas' },
         ],
         legends: A_LEGEND,
+        mapData: ONE_MAP_DATA,
         layers: [{ id: 'dots', sourceId: 'mun', geometry: 'point' }],
       })
     );
@@ -626,10 +1019,12 @@ describe('POST /api/ai/spec', () => {
       id: 'dots',
       sourceId: 'bolhas',
       geometry: 'point',
+      mapDataId: 'municipios_ivs',
     });
   }, 10000);
 
   test('returns 422 when an API-backed source resolves to no features', async () => {
+    jest.spyOn(gateway, 'getIvsPorMunicipio').mockResolvedValue([]);
     jest.spyOn(gateway, 'getCozinhas').mockResolvedValue({
       type: 'FeatureCollection',
       features: [],
@@ -639,6 +1034,7 @@ describe('POST /api/ai/spec', () => {
       title: 'Cozinhas comunitárias',
       sources: [{ id: 'cozinhas', type: 'geojson', data: '/api/cozinhas' }],
       legends: A_LEGEND,
+      mapData: ONE_MAP_DATA,
     };
 
     mockAgentReply(JSON.stringify(specWithEmptySource));
@@ -851,6 +1247,7 @@ describe('POST /api/ai/spec', () => {
   // ---------------------------------------------------------------------------
 
   test('accepts geojson sources that reference known geometry endpoints, skipping non-geojson entries', async () => {
+    jest.spyOn(gateway, 'getIvsPorMunicipio').mockResolvedValue([]);
     const spec = {
       sources: [
         // Not a record at all — must be skipped, not crash the loop.
@@ -859,7 +1256,8 @@ describe('POST /api/ai/spec', () => {
         { id: 'points', type: 'raster' },
         { id: 'municipios', type: 'geojson', data: '/geo/estados.json' },
       ],
-      mapData: [],
+      legends: A_LEGEND,
+      mapData: ONE_MAP_DATA,
     };
     mockAgentReply(JSON.stringify(spec));
 
@@ -950,11 +1348,13 @@ describe('POST /api/ai/spec', () => {
   }, 10000);
 
   test('accepts a spec with no basemap field at all', async () => {
+    jest.spyOn(gateway, 'getIvsPorMunicipio').mockResolvedValue([]);
     const spec = {
       sources: [
         { id: 'municipios', type: 'geojson', data: '/geo/geojs-100-mun.json' },
       ],
-      mapData: [],
+      legends: A_LEGEND,
+      mapData: ONE_MAP_DATA,
     };
     mockAgentReply(JSON.stringify(spec));
 
@@ -983,12 +1383,14 @@ describe('POST /api/ai/spec', () => {
   }, 10000);
 
   test('accepts a basemap object with no styleUrl field', async () => {
+    jest.spyOn(gateway, 'getIvsPorMunicipio').mockResolvedValue([]);
     const spec = {
       basemap: { visible: false },
       sources: [
         { id: 'municipios', type: 'geojson', data: '/geo/geojs-100-mun.json' },
       ],
-      mapData: [],
+      legends: A_LEGEND,
+      mapData: ONE_MAP_DATA,
     };
     mockAgentReply(JSON.stringify(spec));
 
@@ -1000,12 +1402,14 @@ describe('POST /api/ai/spec', () => {
   }, 10000);
 
   test('accepts a basemap.styleUrl that matches the known default style', async () => {
+    jest.spyOn(gateway, 'getIvsPorMunicipio').mockResolvedValue([]);
     const spec = {
       basemap: { styleUrl: 'https://tiles.openfreemap.org/styles/positron' },
       sources: [
         { id: 'municipios', type: 'geojson', data: '/geo/geojs-100-mun.json' },
       ],
-      mapData: [],
+      legends: A_LEGEND,
+      mapData: ONE_MAP_DATA,
     };
     mockAgentReply(JSON.stringify(spec));
 
@@ -1176,7 +1580,7 @@ describe('POST /api/ai/spec', () => {
   // MapType constraints
   // ---------------------------------------------------------------------------
 
-  test('returns 422 when an absolute-total dataset is painted as a choropleth', async () => {
+  test('returns 422 when the agent paints an absolute-total dataset as a choropleth the preflight did not catch', async () => {
     const spec = {
       mapType: 'choropleth',
       mapData: [
@@ -1193,7 +1597,7 @@ describe('POST /api/ai/spec', () => {
 
     const response = await POST(
       jsonRequest({
-        prompt: 'mapa coroplético de pessoas atendidas por município',
+        prompt: 'mapa de pessoas atendidas por município',
       })
     );
     const body = (await response.json()) as ErrorBody;
@@ -1288,6 +1692,7 @@ describe('POST /api/ai/spec', () => {
   // ---------------------------------------------------------------------------
 
   test('returns 422 with the geovis issues, defaulting the message, when validateSpec rejects the resolved spec', async () => {
+    jest.spyOn(gateway, 'getIvsPorMunicipio').mockResolvedValue([]);
     jest.mocked(validateSpec).mockReturnValueOnce({
       status: 'invalid',
       issues: [
@@ -1299,7 +1704,9 @@ describe('POST /api/ai/spec', () => {
       ],
     });
 
-    mockAgentReply(JSON.stringify({ mapData: [] }));
+    mockAgentReply(
+      JSON.stringify({ legends: A_LEGEND, mapData: ONE_MAP_DATA })
+    );
 
     const response = await POST(
       jsonRequest({ prompt: 'mapa de cozinhas por município' })
@@ -1320,15 +1727,25 @@ describe('POST /api/ai/spec', () => {
     ]);
   }, 10000);
 
-  test('merges the base spec into a spec that declares no mapData', async () => {
+  test('returns 422 when the spec declares no mapData, instead of serving the base map', async () => {
     const spec = { title: 'Só o mapa base, sem camada de valores' };
     mockAgentReply(JSON.stringify(spec));
 
     const response = await POST(jsonRequest({ prompt: 'mapa base do Brasil' }));
-    const body = (await response.json()) as { spec?: unknown };
+    const body = (await response.json()) as ErrorBody;
 
-    expect(response.status).toBe(200);
-    expect(body.spec).toEqual({ ...baseVisualizationSpecJson, ...spec });
+    expect(response.status).toBe(422);
+    expect(body.message).toMatch(/campo "mapData" é obrigatório/);
+  }, 10000);
+
+  test('returns 422 when mapData is an empty list, instead of serving a map with no data', async () => {
+    mockAgentReply(JSON.stringify({ mapData: [] }));
+
+    const response = await POST(jsonRequest({ prompt: 'mapa base do Brasil' }));
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(422);
+    expect(body.message).toMatch(/campo "mapData" é obrigatório/);
   }, 10000);
 
   test('returns 422 when mapData is not an array', async () => {
@@ -1402,7 +1819,7 @@ describe('POST /api/ai/spec', () => {
     });
     const paused = (callId: string) => {
       return jsonResponse({
-        id: 'gen_1',
+        generation_id: 'gen_1',
         status: 'requires_action',
         required_action: {
           type: 'submit_tool_outputs',
@@ -1416,8 +1833,7 @@ describe('POST /api/ai/spec', () => {
         },
       });
     };
-    global.fetch = jest
-      .fn()
+    global.fetch = mockSessionOpening()
       .mockResolvedValueOnce(paused('call_1'))
       .mockResolvedValueOnce(paused('call_2'));
 
@@ -1664,8 +2080,15 @@ describe('POST /api/ai/spec: base merge and proportionalCircles defaults', () =>
   });
 
   describe('mergeSpecs', () => {
+    beforeEach(() => {
+      jest.spyOn(gateway, 'getIvsPorMunicipio').mockResolvedValue([]);
+    });
+
     test('fills the top-level fields the agent omits from the base spec', async () => {
-      const spec = await servedSpec({ legends: A_LEGEND });
+      const spec = await servedSpec({
+        legends: A_LEGEND,
+        mapData: ONE_MAP_DATA,
+      });
 
       expect(spec['engine']).toBe('maplibre');
       expect(spec['attributionControlEnabled']).toBe(false);
@@ -1693,6 +2116,7 @@ describe('POST /api/ai/spec: base merge and proportionalCircles defaults', () =>
           },
         ],
         legends: A_LEGEND,
+        mapData: ONE_MAP_DATA,
       });
       const sources = records(spec['sources']);
 
@@ -1710,6 +2134,7 @@ describe('POST /api/ai/spec: base merge and proportionalCircles defaults', () =>
           { id: 'agent-layer', sourceId: 'municipios', geometry: 'line' },
         ],
         legends: A_LEGEND,
+        mapData: ONE_MAP_DATA,
       });
 
       expect(
@@ -1727,6 +2152,7 @@ describe('POST /api/ai/spec: base merge and proportionalCircles defaults', () =>
       const spec = await servedSpec({
         view: { center: [0, 0], zoom: 2 },
         legends: A_LEGEND,
+        mapData: ONE_MAP_DATA,
       });
 
       expect(spec['view']).toEqual({ center: [0, 0], zoom: 2 });
@@ -1808,14 +2234,14 @@ describe('POST /api/ai/spec: base merge and proportionalCircles defaults', () =>
       });
     });
 
-    test('leaves the spec unchanged when no mapData is declared', async () => {
-      const spec = await servedSpec(proportionalSpec({ mapData: undefined }));
+    test('answers 422 when no mapData is declared, instead of leaving the spec unchanged', async () => {
+      mockAgentReply(JSON.stringify(proportionalSpec({ mapData: undefined })));
 
-      expect(spec['scaleMaxValue']).toBeUndefined();
-      expect(layerOf(spec, 'cozinhas-bolhas')?.['sizeBy']).toEqual({
-        range: [1, 2],
-        transform: 'linear',
-      });
+      const response = await POST(
+        jsonRequest({ prompt: 'mapa de pessoas atendidas por município' })
+      );
+
+      expect(response.status).toBe(422);
     });
   });
 });

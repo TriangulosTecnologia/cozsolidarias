@@ -18,6 +18,7 @@ type ScriptParams = {
   currentInstructions?: string;
   args?: string[];
   projectId?: string | null;
+  extraSection?: string;
 };
 
 /**
@@ -29,6 +30,12 @@ const runScript = (params: ScriptParams): ScriptRun => {
   try {
     const agentCopy = join(workdir, 'geovis-spec-generator');
     cpSync(AGENT_DIR, agentCopy, { recursive: true });
+    if (params.extraSection !== undefined) {
+      writeFileSync(
+        join(agentCopy, 'instructions', '99-extra.md'),
+        params.extraSection
+      );
+    }
 
     const formationPath = join(agentCopy, 'formation.json');
     const formationLines = readFileSync(formationPath, 'utf-8').split('\n');
@@ -77,18 +84,18 @@ const runScript = (params: ScriptParams): ScriptRun => {
 };
 
 describe('update-instructions.mjs', () => {
-  test('dry run succeeds when the new text is within 150% of the current instructions', () => {
+  test('dry run succeeds when the new text is within the 27000 char limit', () => {
     const run = runScript({ currentInstructions: 'x'.repeat(20_000) });
 
     expect(run.status).toBe(0);
     expect(run.output).toMatch(/dry run: \d+ chars/);
   });
 
-  test('fails when the new text is above 150% of the current instructions', () => {
-    const run = runScript({ currentInstructions: 'x'.repeat(100) });
+  test('fails when the new text is above the 27000 char limit', () => {
+    const run = runScript({ extraSection: 'x'.repeat(30_000) });
 
     expect(run.status).not.toBe(0);
-    expect(run.output).toMatch(/above the 150 limit/);
+    expect(run.output).toMatch(/above the 27000 limit/);
   });
 
   test('fails when NATURALI_PROJECT_ID is not set', () => {

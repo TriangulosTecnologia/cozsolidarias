@@ -1,105 +1,76 @@
 import type { VisualizationSpec } from '@ttoss/geovis';
 import * as React from 'react';
 
+import {
+  type ChoiceOption,
+  type Choices,
+  type Clarification,
+  type Issue,
+  type Requirement,
+  type SubmitOutcome,
+  submitPrompt,
+} from './submitPrompt';
+
 /** Submission lifecycle for the prompt-to-map form. */
-type Status = 'idle' | 'loading' | 'error' | 'success';
+type Status = 'idle' | 'loading' | 'error' | 'success' | 'clarify';
 
-/** One validation issue reported by `POST /api/ai/spec`. */
-type Issue = { code: string; message: string; path?: string };
+/** An answer to a question or a map-type pick, ready to resubmit. */
+export type Choice = { facet: 'dataset' | 'mapType'; value: string };
 
-/** Error diagnostic details from API (validation issues behind the failure). */
-type ErrorDetails = {
-  issues?: Issue[];
+/** Everything a failed submission leaves for the user to read. */
+type Failure = {
+  message: string;
+  issues: Issue[];
+  requirements: Requirement[];
+  spec: unknown;
 };
 
-/** Body of every `POST /api/ai/spec` response (see the route's `POST`). */
-type SpecResponseBody = {
-  spec?: unknown;
-  error?: boolean;
-  message?: string;
-  issues?: Issue[];
-};
-
-/**
- * Outcome of one `POST /api/ai/spec` submission. `spec` is carried on failure
- * too, whenever the server generated one, so it can always be inspected.
- */
-type SubmitOutcome =
-  | { ok: true; result: VisualizationSpec }
-  | { ok: false; message: string; details?: ErrorDetails; spec?: unknown };
-
-const isVisualizationSpec = (value: unknown): value is VisualizationSpec => {
-  return typeof value === 'object' && value !== null && 'layers' in value;
-};
-
-/**
- * Calls `POST /api/ai/spec` with `prompt` and reduces every failure mode
- * (network failure, non-JSON body, `error: true`, a success with no `spec`)
- * to a single pt-BR message — {@link useAiPlaygroundLogic.handleSubmit} only
- * has to branch on {@link SubmitOutcome.ok}. The server's `spec` and `issues`
- * are carried on failure so the caller can offer them for inspection.
- */
-const submitPrompt = async (prompt: string): Promise<SubmitOutcome> => {
-  let response: Response;
-  try {
-    response = await fetch('/api/ai/spec', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ prompt }),
-    });
-  } catch {
-    return {
-      ok: false,
-      message: 'Falha de conexão. Verifique sua internet e tente novamente.',
-    };
-  }
-
-  let body: SpecResponseBody;
-  try {
-    body = (await response.json()) as SpecResponseBody;
-  } catch {
-    return {
-      ok: false,
-      message: `O servidor respondeu com um conteúdo inesperado (status ${response.status}). Tente novamente.`,
-    };
-  }
-
-  const details = body.issues ? { issues: body.issues } : undefined;
-
-  if (!response.ok || body.error !== false) {
-    return {
-      ok: false,
-      message:
-        body.message ??
-        `O servidor recusou o pedido (status ${response.status}), sem detalhar o motivo.`,
-      details,
-      spec: body.spec,
-    };
-  }
-
-  if (!isVisualizationSpec(body.spec)) {
-    return {
-      ok: false,
-      message:
-        'O servidor respondeu com sucesso, mas sem a especificação do mapa ("spec" ausente).',
-      details,
-      spec: body.spec,
-    };
-  }
-
-  return { ok: true, result: body.spec };
+const NO_FAILURE: Failure = {
+  message: '',
+  issues: [],
+  requirements: [],
+  spec: null,
 };
 
 export const useAiPlaygroundLogic = () => {
   const [prompt, setPrompt] = React.useState('');
   const [status, setStatus] = React.useState<Status>('idle');
-  const [errorMessage, setErrorMessage] = React.useState('');
+  const [failure, setFailure] = React.useState<Failure>(NO_FAILURE);
   const [result, setResult] = React.useState<VisualizationSpec | null>(null);
   const [showJson, setShowJson] = React.useState(false);
-  const [errorDetails, setErrorDetails] = React.useState<ErrorDetails | null>(
-    null
-  );
   const [spec, setSpec] = React.useState<unknown>(null);
+  const [clarify, setClarify] = React.useState<Clarification | null>(null);
+  const [mapTypeOptions, setMapTypeOptions] = React.useState<ChoiceOption[]>(
+    []
+  );
+  const [sessionId, setSessionId] = React.useState<string | null>(null);
+  // Answers given since the last prompt, kept so a later question doesn't re-ask an earlier one.
+  const [answers, setAnswers] = React.useState<Choices>({});
+
+  const apply = (outcome: SubmitOutcome) => {
+    setSessionId(outcome.sessionId);
+    setMapTypeOptions(outcome.mapTypeOptions);
+    if (outcome.kind === 'clarify') {
+      setClarify(outcome.clarify);
+      setStatus('clarify');
+    } else if (outcome.kind === 'failure') {
+      setFailure({ ...outcome, spec: outcome.spec ?? null });
+      setSpec(outcome.spec ?? null);
+      setStatus('error');
+    } else {
+      setResult(outcome.result);
+      setSpec(outcome.result);
+      setStatus('success');
+    }
+  };
+
+  const run = async (choices: Choices) => {
+    setStatus('loading');
+    setFailure(NO_FAILURE);
+    setClarify(null);
+    setShowJson(false);
+    apply(await submitPrompt({ prompt, ...choices }));
+  };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -107,37 +78,33 @@ export const useAiPlaygroundLogic = () => {
     if (prompt.trim() === '' || status === 'loading') {
       return;
     }
+    setAnswers({});
+    await run({});
+  };
 
-    setStatus('loading');
-    setErrorMessage('');
-    setShowJson(false);
-
-    const outcome = await submitPrompt(prompt);
-
-    if (!outcome.ok) {
-      setErrorMessage(outcome.message);
-      setErrorDetails(outcome.details ?? null);
-      setSpec(outcome.spec ?? null);
-      setStatus('error');
-      return;
-    }
-
-    setResult(outcome.result);
-    setSpec(outcome.result);
-    setErrorDetails(null);
-    setStatus('success');
+  const choose = async (choice: Choice) => {
+    // A choice continues the conversation that raised it.
+    const answer =
+      choice.facet === 'mapType'
+        ? { mapType: choice.value }
+        : { datasetId: choice.value };
+    const next = { ...answers, ...answer };
+    setAnswers(next);
+    await run({ ...next, sessionId: sessionId ?? undefined });
   };
 
   return {
     prompt,
     setPrompt,
     status,
-    errorMessage,
+    failure,
     result,
     showJson,
     setShowJson,
-    errorDetails,
     spec,
+    clarify,
+    mapTypeOptions,
     handleSubmit,
+    choose,
   };
 };

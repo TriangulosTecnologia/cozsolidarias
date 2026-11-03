@@ -4,16 +4,6 @@
       "count": 1
     }
   },
-  "src/app/(features)/ia/AiPlayground.tsx": {
-    "complexity": {
-      "count": 1
-    }
-  },
-  "src/app/(features)/ia/useAiPlaygroundLogic.ts": {
-    "complexity": {
-      "count": 1
-    }
-  },
   "src/app/(features)/mapas/classifyValues.ts": {
     "complexity": {
       "count": 1
@@ -62,11 +52,6 @@
   },
   "src/app/(features)/mapas/mapaTooltips.tsx": {
     "max-lines": {
-      "count": 1
-    }
-  },
-  "src/app/api/ai/spec/naturaliSession.ts": {
-    "complexity": {
       "count": 1
     }
   },

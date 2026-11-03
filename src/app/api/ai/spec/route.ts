@@ -1,28 +1,35 @@
+import type { MapType } from '@ttoss/geovis';
+
 import { gateway } from '@/gateway';
 
+import { buildAgentMessage } from './agentMessage';
+import { resolveAgentReply } from './agentReply';
 import {
-  collectStructuralIssues,
-  normalizeCandidate,
   validateCandidate,
   validateWithLocalRepairs,
 } from './candidateValidation';
-import {
-  buildCozinhasChoroplethSpec,
-  isCozinhasChoroplethRequest,
-} from './canonicalChoropleth';
 import baseVisualizationSpecJson from './instructions/baseVisualizationSpec.json';
-import { INSTRUCTIONS } from './instructions/instructions';
-import { buildCatalogueContext } from './mapDataCatalogue';
-import { generateSpec, type SpecReplyStopped } from './naturaliSession';
+import {
+  buildCatalogueContext,
+  type RenderableDatasetId,
+} from './mapDataCatalogue';
+import { MAP_TYPE_OPTIONS } from './mapTypeOptions';
+import { generateInSession, withSessionId } from './naturaliSessionApi';
+import {
+  type Clarification,
+  clarifyResponse,
+  preflightPrompt,
+} from './preflight';
+import { resolveServedSpec } from './serveSpec';
 import { applyProportionalCirclesDefaults, mergeSpecs } from './specDefaults';
 import {
-  appendRealMapData,
-  appendRealSourceData,
   errorResponse,
   invalidSpecResponse,
-  isRecord,
   type UnknownRecord,
 } from './specValidation';
+import { validateDatasetId } from './validateDatasetId';
+import { validateMapType } from './validateMapType';
+import { validateSessionId } from './validateSessionId';
 
 let cachedCatalogueText: Promise<string> | null = null;
 
@@ -70,6 +77,51 @@ const validatePrompt = (rawBody: unknown): string | Response => {
   return prompt;
 };
 
+type ParsedRequest = {
+  prompt: string;
+  sessionId?: string;
+  mapType?: MapType;
+  datasetId?: RenderableDatasetId;
+};
+
+/** The clarify question, echoing the client's session so the conversation can continue. */
+const clarifyAnswer = (
+  clarify: Clarification,
+  sessionId?: string
+): Response => {
+  const response = clarifyResponse(clarify);
+  return sessionId ? withSessionId(response, sessionId) : response;
+};
+
+/**
+ * Validates the whole request body — the `prompt` and the optional `mapType`
+ * and `datasetId` — then runs the {@link preflightPrompt}, answering with the
+ * question when the request is ambiguous.
+ */
+const parseRequest = (rawBody: unknown): ParsedRequest | Response => {
+  const prompt = validatePrompt(rawBody);
+  if (prompt instanceof Response) {
+    return prompt;
+  }
+  // `validatePrompt` guarantees `rawBody` is an object.
+  const mapType = validateMapType(rawBody as object);
+  if (mapType instanceof Response) {
+    return mapType;
+  }
+  const datasetId = validateDatasetId(rawBody as object);
+  if (datasetId instanceof Response) {
+    return datasetId;
+  }
+  const sessionId = validateSessionId(rawBody as object);
+  if (sessionId instanceof Response) {
+    return sessionId;
+  }
+  const preflight = preflightPrompt({ prompt, mapType, datasetId });
+  return preflight.status === 'ambiguous'
+    ? clarifyAnswer(preflight.clarify, sessionId)
+    : { prompt, mapType, datasetId, sessionId };
+};
+
 const validateEnv = ():
   | {
       apiKey: string;
@@ -100,12 +152,11 @@ const validateEnv = ():
 };
 
 /**
- * Turns one of {@link generateSpec}'s thrown errors into a Portuguese,
+ * Turns one of {@link generateSpec}'s thrown errors (reached through {@link generateInSession}) into a Portuguese,
  * cause-specific message — so a 502 never collapses a transport failure, a
  * failed generation, and an unparseable reply into the same generic
  * sentence. Matches on the fixed prefixes that function throws; anything
- * else (e.g. a network-level fetch failure) falls back to the raw
- * `error.message` so it's still legible.
+ * else gets a generic message. No upstream text is reflected to the browser.
  */
 const describeAgentFailure = (error: unknown): string => {
   const message = error instanceof Error ? error.message : String(error);
@@ -114,7 +165,7 @@ const describeAgentFailure = (error: unknown): string => {
     return `Não foi possível iniciar a geração com o modelo de IA (${message}). Tente novamente em instantes.`;
   }
   if (message.startsWith('Naturali generation ended with status')) {
-    return `O modelo de IA não concluiu a geração (${message}). Tente reformular o pedido ou tentar novamente.`;
+    return 'O modelo de IA não concluiu a geração. Tente reformular o pedido ou tentar novamente.';
   }
   if (
     message ===
@@ -126,116 +177,71 @@ const describeAgentFailure = (error: unknown): string => {
     return 'O modelo de IA não respondeu dentro do tempo limite. Tente novamente ou simplifique o pedido.';
   }
 
-  return `Falha de comunicação com o modelo de IA: ${message}`;
-};
-
-const STOP_REASON_MESSAGE: Record<SpecReplyStopped['reason'], string> = {
-  'max-attempts': 'esgotou as tentativas de validação',
-  'no-shrinkage': 'parou de reduzir os problemas entre tentativas',
-};
-
-/** The 422 for a validation loop that gave up, carrying its last candidate. */
-const stoppedResponse = (reply: SpecReplyStopped): Response => {
-  return invalidSpecResponse({
-    message: `A spec gerada não passou na validação: o modelo ${STOP_REASON_MESSAGE[reply.reason]} (${reply.attempts} de até 5). Tente reformular o pedido.`,
-    issues: reply.issues,
-    spec: reply.spec,
-  });
+  return 'Falha de comunicação com o modelo de IA. Tente novamente em instantes.';
 };
 
 /**
- * Runs one turn against the Naturali agent — serving its `validate_spec`
- * tool with {@link validateCandidate} — and resolves the reply into the raw
- * spec object (`status: "ok"`), or the 422 `Response` for a declined request
- * (`status: "error"`) or a validation loop that gave up (`status: "stopped"`).
- * Extracted out of {@link POST} purely to keep its own branching under the
- * lint complexity budget.
+ * Runs one turn in a Naturali session — serving the agent's `validate_spec`
+ * tool with {@link validateCandidate} — and resolves the reply (see
+ * {@link resolveAgentReply}). Extracted out of {@link POST} purely to keep its
+ * own branching under the lint complexity budget.
  *
- * @returns The parsed spec object, normalized by {@link normalizeCandidate}, or a
- * `Response` for a transport failure (502) or a rejected spec (422).
+ * @returns The spec object and the id of the session it ran in, or a
+ * `Response` for a transport failure (502) or a rejected spec (422; stamped
+ * with the session id once one exists).
  */
 const getAgentResponse = async (params: {
   apiKey: string;
   projectId: string;
   agentId: string;
+  sessionId?: string;
   prompt: string;
-}): Promise<UnknownRecord | Response> => {
-  let reply: Awaited<ReturnType<typeof generateSpec>>;
+  mapType?: MapType;
+  datasetId?: RenderableDatasetId;
+}): Promise<{ spec: UnknownRecord; sessionId: string } | Response> => {
+  const choices = {
+    prompt: params.prompt,
+    mapType: params.mapType,
+    datasetId: params.datasetId,
+  };
+  let generated: Awaited<ReturnType<typeof generateInSession>>;
   try {
-    const catalogueText = await readCatalogueContext();
-    reply = await generateSpec({
+    generated = await generateInSession({
       apiKey: params.apiKey,
       projectId: params.projectId,
       agentId: params.agentId,
-      message: [
-        'O catalogo json schema do projeto Cozinha Solidária em Rede contém todos os datasets conhecidos e o detalhe completo apenas dos datasets que podem popular `mapData` hoje. Use-o para gerar um spec de visualização geográfica (um mapa) que atenda ao pedido do usuário.',
-        `Catálogo de datasets:\n${catalogueText}`,
-        INSTRUCTIONS,
-        params.prompt,
-      ].join('\n\n'),
+      sessionId: params.sessionId,
+      message: buildAgentMessage({
+        ...choices,
+        catalogueText: await readCatalogueContext(),
+      }),
+      followUpMessage: buildAgentMessage(choices),
       validateCandidate,
     });
   } catch (error) {
     return errorResponse({ status: 502, message: describeAgentFailure(error) });
   }
 
-  if (reply.status === 'stopped') {
-    return stoppedResponse(reply);
+  if ('error' in generated) {
+    return withSessionId(
+      errorResponse({
+        status: 502,
+        message: describeAgentFailure(generated.error),
+      }),
+      generated.sessionId
+    );
   }
 
-  if (reply.status === 'error') {
-    return invalidSpecResponse({
-      message: reply.error.message,
-      issues: [{ code: reply.error.code, message: reply.error.message }],
-    });
-  }
-
-  if (!isRecord(reply.spec)) {
-    return invalidSpecResponse({
-      message:
-        'A resposta do modelo deveria ser um objeto JSON representando o spec.',
-      spec: reply.spec,
-    });
-  }
-
-  const spec = normalizeCandidate(reply.spec);
-  const structuralIssues = collectStructuralIssues(spec);
-  if (structuralIssues.length > 0) {
-    return invalidSpecResponse({
-      message: `${structuralIssues[0].message} Tente reformular o pedido.`,
-      issues: structuralIssues,
-      spec,
-    });
-  }
-
-  return spec;
-};
-
-/**
- * Resolves the agent's spec into the one served to the client: the
- * cozinhas-per-município choropleth is rebuilt from `/mapas`'s own builder
- * (see {@link buildCozinhasChoroplethSpec}); every other spec gets its real
- * `mapData` values (see {@link appendRealMapData}). Either way, API-backed
- * `sources[].data` is then fetched server-side (see
- * {@link appendRealSourceData}) while static `/geo/*` URLs are kept for the
- * browser.
- */
-const resolveServedSpec = async (
-  spec: UnknownRecord
-): Promise<UnknownRecord | Response> => {
-  const withMapData = isCozinhasChoroplethRequest(spec)
-    ? await buildCozinhasChoroplethSpec()
-    : await appendRealMapData(spec);
-  if (withMapData instanceof Response) {
-    return withMapData;
-  }
-  return appendRealSourceData(withMapData);
+  const spec = resolveAgentReply(generated.reply);
+  return spec instanceof Response
+    ? withSessionId(spec, generated.sessionId)
+    : { spec, sessionId: generated.sessionId };
 };
 
 /**
  * Turns a natural-language prompt into a `VisualizationSpec`, via a Naturali
- * agent (`POST /agents/{agentId}/generate?wait=true`, see
- * {@link generateSpec}) declared by the `geovis-spec-generator-loop`
+ * agent running in a session (`POST /sessions/{id}/generate?wait=true`, see
+ * {@link generateInSession}) declared by the `geovis-spec-generator-loop`
  * formation (`agents/geovis-spec-generator/formation.json`, deployed by that
  * folder's scripts) and referenced here only by ID. The agent validates its candidate
  * with the client-side `validate_spec` tool — repaired locally first, at most
@@ -244,22 +250,26 @@ const resolveServedSpec = async (
  * error}` reply.
  *
  * The reply is then resolved into real data (see {@link resolveServedSpec})
- * and validated once more, with the same local repairs.
+ * and validated once more, with the same local repairs. Before any of that,
+ * an ambiguous request is answered with a `clarify` question instead (see
+ * {@link preflightPrompt}); the session id travels in the `x-session-id`
+ * response header, and sending it back as `sessionId` continues the session.
  *
  * @returns `{ spec, error: false }` on success; `{ error: true, message,
  * issues?, spec? }` on any failure (missing config, prompt validation,
  * upstream API failure, a declined request, a validation loop that gave up,
- * or an unsupported dataset reference) — `spec` is the last generated
- * candidate whenever one exists.
+ * or an unsupported dataset reference) — `spec`, when present, is the spec at
+ * the stage that failed (see the `src/app/api/ai/spec/**` invariant in
+ * devanity.rules.json).
  */
 export const POST = async (request: Request): Promise<Response> => {
   const rawBody: unknown = await request.json().catch(() => {
     return null;
   });
 
-  const promptOrError = validatePrompt(rawBody);
-  if (promptOrError instanceof Response) {
-    return promptOrError;
+  const requestOrError = parseRequest(rawBody);
+  if (requestOrError instanceof Response) {
+    return requestOrError;
   }
 
   const envOrError = validateEnv();
@@ -271,25 +281,36 @@ export const POST = async (request: Request): Promise<Response> => {
     apiKey: envOrError.apiKey,
     projectId: envOrError.projectId,
     agentId: envOrError.agentId,
-    prompt: promptOrError,
+    sessionId: requestOrError.sessionId,
+    prompt: requestOrError.prompt,
+    mapType: requestOrError.mapType,
+    datasetId: requestOrError.datasetId,
   });
   if (modelJsonOrError instanceof Response) {
     return modelJsonOrError;
   }
+  const { sessionId } = modelJsonOrError;
 
-  const servedOrError = await resolveServedSpec(
-    mergeSpecs(baseVisualizationSpecJson as UnknownRecord, modelJsonOrError)
-  );
+  const servedOrError = await resolveServedSpec({
+    prompt: requestOrError.prompt,
+    spec: mergeSpecs(
+      baseVisualizationSpecJson as UnknownRecord,
+      modelJsonOrError.spec
+    ),
+  });
   if (servedOrError instanceof Response) {
-    return servedOrError;
+    return withSessionId(servedOrError, sessionId);
   }
 
   const { spec, issues } = validateWithLocalRepairs(
     applyProportionalCirclesDefaults(servedOrError)
   );
   if (issues.length > 0) {
-    return invalidSpecResponse({ issues, spec });
+    return withSessionId(invalidSpecResponse({ issues, spec }), sessionId);
   }
 
-  return Response.json({ spec, error: false });
+  return withSessionId(
+    Response.json({ spec, error: false, mapTypeOptions: MAP_TYPE_OPTIONS }),
+    sessionId
+  );
 };

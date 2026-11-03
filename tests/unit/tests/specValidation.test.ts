@@ -3,6 +3,7 @@ import {
   officialFaixasOf,
   RENDERABLE_DATASET_IDS,
 } from 'src/app/api/ai/spec/mapDataCatalogue';
+import { MAP_TYPE_OPTIONS } from 'src/app/api/ai/spec/mapTypeOptions';
 import {
   appendRealMapData,
   appendRealSourceData,
@@ -54,7 +55,11 @@ describe('invalidSpecResponse', () => {
     const response = invalidSpecResponse({ message: 'Custom error' });
     const body = await response.json();
 
-    expect(body).toEqual({ error: true, message: 'Custom error' });
+    expect(body).toEqual({
+      error: true,
+      message: 'Custom error',
+      mapTypeOptions: MAP_TYPE_OPTIONS,
+    });
     expect(response.status).toBe(422);
   });
 
@@ -487,7 +492,9 @@ describe('errorResponse', () => {
       error: true,
       message: 'Falha',
       issues: [{ code: 'x', message: 'y' }],
+      requirements: [{ code: 'x', message: 'y', fix: expect.any(String) }],
       spec: { a: 1 },
+      mapTypeOptions: MAP_TYPE_OPTIONS,
     });
   });
 });

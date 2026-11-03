@@ -154,7 +154,11 @@ export const alignMapDataJoin = (spec: UnknownRecord): UnknownRecord => {
       if (!isRecord(entry)) {
         return entry;
       }
-      const layerSource = layerSourceByMapData.get(String(entry['mapDataId']));
+      const mapDataId = entry['mapDataId'];
+      const layerSource =
+        typeof mapDataId === 'string'
+          ? layerSourceByMapData.get(mapDataId)
+          : undefined;
       return {
         ...entry,
         ...(sourceIds.has(layerSource) && entry['mapId'] !== layerSource

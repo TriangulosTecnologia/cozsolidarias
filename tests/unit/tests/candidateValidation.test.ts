@@ -117,6 +117,23 @@ describe('collectStructuralIssues', () => {
     ).not.toContain('choropleth-on-absolute-total');
   });
 
+  test('names a point layer without an id as desconhecido, not as a stringified undefined', () => {
+    const issues = collectStructuralIssues({
+      sources: [
+        { id: 'mun', type: 'geojson', data: '/geo/geojs-100-mun.json' },
+      ],
+      legends: [{ id: 'l' }],
+      layers: [{ geometry: 'point', sourceId: 'mun' }],
+    });
+
+    expect(issues).toContainEqual(
+      expect.objectContaining({
+        code: 'point-layer-on-polygon-source',
+        message: expect.stringContaining('desconhecido'),
+      })
+    );
+  });
+
   test('flags a point layer drawn on a polygon source', () => {
     const spec = (sourceId: string, data: string) => {
       return {

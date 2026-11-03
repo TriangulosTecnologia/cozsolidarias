@@ -11,6 +11,8 @@ import {
   RENDERABLE_DATASET_FETCHERS,
   RENDERABLE_DATASET_IDS,
 } from './mapDataCatalogue';
+import { MAP_TYPE_OPTIONS } from './mapTypeOptions';
+import { requirementsFrom } from './specRequirements';
 
 export type UnknownRecord = Record<string, unknown>;
 
@@ -30,8 +32,10 @@ export type SpecIssue = { code: string; message: string; path?: string };
 
 /**
  * Builds every failure body of `POST /api/ai/spec`: `{ error: true, message }`
- * plus the `issues` and the last generated `spec`, when known, so the client
- * can always inspect what the model produced.
+ * plus the `issues` (with their actionable `requirements`) and the `spec` at
+ * the stage that failed, when known, so the client can always inspect what the
+ * model produced. Always carries `mapTypeOptions`, so another map type is
+ * always on offer.
  *
  * @param params.status - HTTP status of the failure.
  * @param params.message - pt-BR explanation shown to the user.
@@ -52,8 +56,14 @@ export const errorResponse = (params: {
     {
       error: true,
       message: params.message,
-      ...(params.issues ? { issues: params.issues } : {}),
+      ...(params.issues
+        ? {
+            issues: params.issues,
+            requirements: requirementsFrom(params.issues),
+          }
+        : {}),
       ...(params.spec !== undefined ? { spec: params.spec } : {}),
+      mapTypeOptions: MAP_TYPE_OPTIONS,
     },
     { status: params.status }
   );
@@ -320,8 +330,7 @@ const hasLegendEntries = (legends: unknown): boolean => {
  * top-level `spec.legends[]` entry to describe it. Only the top-level list
  * counts: `layers[].legends` is folded into it beforehand by
  * {@link hoistLayerLegends}, so the rendered spec always carries its legends
- * in one place. A spec with no `mapData` at all (a bare base map) needs no
- * legend — there is nothing painted to explain.
+ * in one place.
  *
  * @example
  * findMissingLegend({ mapData: [{ mapDataId: 'x' }], legends: [] }); // true
@@ -477,7 +486,13 @@ export const findPointLayerOnPolygonSource = (
     }
   );
 
-  return isRecord(offender) ? String(offender['id']) : null;
+  if (!isRecord(offender)) {
+    return null;
+  }
+  const id = offender['id'];
+  return typeof id === 'string' || typeof id === 'number'
+    ? String(id)
+    : 'desconhecido';
 };
 
 /**
@@ -610,8 +625,15 @@ export const appendRealMapData = async (
   spec: UnknownRecord
 ): Promise<UnknownRecord | Response> => {
   const mapData = spec['mapData'];
-  if (mapData === undefined) {
-    return spec;
+  if (
+    mapData === undefined ||
+    (Array.isArray(mapData) && mapData.length === 0)
+  ) {
+    return invalidSpecResponse({
+      message:
+        'O campo "mapData" é obrigatório: o modelo não declarou nenhum dado para o mapa.',
+      spec,
+    });
   }
   if (!Array.isArray(mapData)) {
     return invalidSpecResponse({
