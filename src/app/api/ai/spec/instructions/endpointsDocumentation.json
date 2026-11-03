@@ -121,16 +121,46 @@
     "response": {
       "type": "Objeto; 404 quando o código não existe no ano informado",
       "fields": [
-        { "name": "codigo", "description": "Código único da cozinha." },
-        { "name": "nome", "description": "Nome da cozinha." },
-        { "name": "municipio", "description": "Nome do município." },
-        { "name": "codigoIbge", "description": "Código IBGE do município." },
-        { "name": "latitude", "description": "Latitude em graus decimais." },
-        { "name": "longitude", "description": "Longitude em graus decimais." },
-        { "name": "endereco", "description": "Endereço da cozinha." },
-        { "name": "cnpj", "description": "CNPJ da entidade responsável." },
-        { "name": "email", "description": "E-mail de contato." },
-        { "name": "telefone", "description": "Telefone de contato." },
+        {
+          "name": "codigo",
+          "description": "Código único da cozinha."
+        },
+        {
+          "name": "nome",
+          "description": "Nome da cozinha."
+        },
+        {
+          "name": "municipio",
+          "description": "Nome do município."
+        },
+        {
+          "name": "codigoIbge",
+          "description": "Código IBGE do município."
+        },
+        {
+          "name": "latitude",
+          "description": "Latitude em graus decimais."
+        },
+        {
+          "name": "longitude",
+          "description": "Longitude em graus decimais."
+        },
+        {
+          "name": "endereco",
+          "description": "Endereço da cozinha."
+        },
+        {
+          "name": "cnpj",
+          "description": "CNPJ da entidade responsável."
+        },
+        {
+          "name": "email",
+          "description": "E-mail de contato."
+        },
+        {
+          "name": "telefone",
+          "description": "Telefone de contato."
+        },
         {
           "name": "quantidade",
           "description": "Número de cozinhas do registro no ano."
@@ -175,7 +205,10 @@
           "name": "codigoIbge",
           "description": "Código IBGE do município; chave de junção (geometryId)."
         },
-        { "name": "municipio", "description": "Nome do município." },
+        {
+          "name": "municipio",
+          "description": "Nome do município."
+        },
         {
           "name": "quantidade",
           "description": "Número de CAFs no município."
@@ -257,7 +290,10 @@
           "name": "codigoIbge",
           "description": "Código IBGE do município; chave de junção (geometryId)."
         },
-        { "name": "municipio", "description": "Nome do município." },
+        {
+          "name": "municipio",
+          "description": "Nome do município."
+        },
         {
           "name": "ivs",
           "description": "Índice entre 0 e 1, onde 1 é vulnerabilidade máxima."
@@ -317,9 +353,18 @@
           "name": "codigoIbge",
           "description": "Código IBGE do município; chave de junção (geometryId)."
         },
-        { "name": "municipio", "description": "Nome do município." },
-        { "name": "uf", "description": "Sigla da UF." },
-        { "name": "regiao", "description": "Região do Brasil." },
+        {
+          "name": "municipio",
+          "description": "Nome do município."
+        },
+        {
+          "name": "uf",
+          "description": "Sigla da UF."
+        },
+        {
+          "name": "regiao",
+          "description": "Região do Brasil."
+        },
         {
           "name": "absolutoComPbf",
           "description": "Número absoluto de famílias em insegurança alimentar no cenário com o Bolsa Família."
@@ -345,6 +390,20 @@
     "usage": "Coroplético de insegurança alimentar (join geometryId: codigoIbge).",
     "constraints": [
       "As proporções são 0–1: exiba como rampa, nunca coroplético dos totais absolutos."
+    ]
+  },
+  {
+    "method": "MAPDATA",
+    "path": "(mapDataId cozinhas por situação e ano)",
+    "summary": "Contagem de cozinhas por município, por situação (habilitadas, não habilitadas ou outras) e por ano.",
+    "parameters": [],
+    "response": {
+      "description": "Um mapDataId por combinação de situação e ano; o valor é a contagem de cozinhas localizadas no município."
+    },
+    "usage": "Quando o pedido for sobre situação de cozinhas, use exatamente um destes mapDataId: cozinhas_habilitadas_2025, cozinhas_habilitadas_2026, cozinhas_nao_habilitadas_2025, cozinhas_nao_habilitadas_2026, cozinhas_outras_2025, cozinhas_outras_2026.",
+    "constraints": [
+      "O snapshot de 2026 só contém cozinhas habilitadas: cozinhas_nao_habilitadas_2026 e cozinhas_outras_2026 são desconhecidos, nunca zero.",
+      "Não combine duas situações em um mesmo mapa."
     ]
   }
 ]

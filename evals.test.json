@@ -1,6 +1,6 @@
 {
   "datasetVersion": "2026-09-28-variacoes-1",
-  "skillVersion": "2.0.0",
+  "skillVersion": "2.1.0",
   "goldenCorpus": "src/app/(features)/mapas/specs/full-evalued",
   "notes": "Reachable = the value the mode paints is returned by a RENDERABLE_DATASET_FETCHERS entry. municipios_ivs returns only `ivs` and municipios_cadinsan only `proporcaoComPbf`, so IDHM and 'sem PBF' are refusals even though the fields exist in the catalogue.",
   "cases": [
@@ -75,6 +75,36 @@
       "kind": "refusal",
       "expect": "error",
       "prompt": "Mapa da proporção de famílias em insegurança alimentar sem o efeito do Bolsa Família, por município"
+    },
+    {
+      "id": "v-cozinhas-habilitadas-2026",
+      "mapMode": "coropletico-cozinhas-habilitadas-2026",
+      "kind": "variation",
+      "golden": null,
+      "goldenPending": "gerar golden com execução real do agente; a verificação estrutural está em tests/unit/tests/preflightGolden.test.ts",
+      "prompt": "Mapa de cozinhas habilitadas por município em 2026"
+    },
+    {
+      "id": "v-cozinhas-nao-habilitadas-2025",
+      "mapMode": "coropletico-cozinhas-nao-habilitadas-2025",
+      "kind": "variation",
+      "golden": null,
+      "goldenPending": "gerar golden com execução real do agente",
+      "prompt": "Mapa de cozinhas não habilitadas em 2025 por município"
+    },
+    {
+      "id": "r-cozinhas-nao-habilitadas-2026",
+      "mapMode": "coropletico-cozinhas-nao-habilitadas-2026",
+      "kind": "refusal",
+      "expect": "error",
+      "prompt": "Mapa de cozinhas não habilitadas em 2026 por município"
+    },
+    {
+      "id": "r-cozinhas-combinacao-situacoes",
+      "mapMode": "coropletico-cozinhas-habilitadas-e-nao-habilitadas",
+      "kind": "refusal",
+      "expect": "error",
+      "prompt": "Mapa de cozinhas habilitadas e não habilitadas por município"
     }
   ]
 }

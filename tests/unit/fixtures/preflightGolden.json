@@ -1,0 +1,240 @@
+[
+  {
+    "input": {
+      "prompt": "mapa de cozinhas por município"
+    },
+    "output": {
+      "status": "resolved"
+    }
+  },
+  {
+    "input": {
+      "prompt": "IVS dos municípios"
+    },
+    "output": {
+      "status": "resolved"
+    }
+  },
+  {
+    "input": {
+      "prompt": "ivs de infraestrutura"
+    },
+    "output": {
+      "status": "resolved"
+    }
+  },
+  {
+    "input": {
+      "prompt": "idhm de educação, escolaridade"
+    },
+    "output": {
+      "status": "resolved"
+    }
+  },
+  {
+    "input": {
+      "prompt": "ivs de infraestrutura e de renda"
+    },
+    "output": {
+      "status": "ambiguous",
+      "clarify": {
+        "facet": "dataset",
+        "question": "Qual destes indicadores você quer no mapa?",
+        "options": [
+          {
+            "value": "municipios_ivs_infraestrutura",
+            "label": "IVS – Infraestrutura urbana"
+          },
+          {
+            "value": "municipios_ivs_renda_trabalho",
+            "label": "IVS – Renda e trabalho"
+          }
+        ],
+        "default": "municipios_ivs_infraestrutura"
+      }
+    }
+  },
+  {
+    "input": {
+      "prompt": "coroplético de pessoas atendidas"
+    },
+    "output": {
+      "status": "ambiguous",
+      "clarify": {
+        "facet": "mapType",
+        "question": "Este indicador é um total absoluto; um mapa coroplético distorce a leitura pelo tamanho das áreas. Qual tipo de mapa você prefere?",
+        "options": [
+          {
+            "value": "proportionalCircles",
+            "label": "Círculos proporcionais"
+          },
+          {
+            "value": "dotDensity",
+            "label": "Densidade de pontos"
+          }
+        ],
+        "default": "proportionalCircles"
+      }
+    }
+  },
+  {
+    "input": {
+      "prompt": "mapa de pessoas atendidas",
+      "mapType": "choropleth"
+    },
+    "output": {
+      "status": "resolved"
+    }
+  },
+  {
+    "input": {
+      "prompt": "cozinhas habilitadas 2025"
+    },
+    "output": {
+      "status": "resolved",
+      "datasetId": "cozinhas_habilitadas_2025"
+    }
+  },
+  {
+    "input": {
+      "prompt": "cozinhas não habilitadas"
+    },
+    "output": {
+      "status": "resolved",
+      "datasetId": "cozinhas_nao_habilitadas_2026"
+    }
+  },
+  {
+    "input": {
+      "prompt": "cozinhas habilitadas e não habilitadas"
+    },
+    "output": {
+      "status": "unsupported",
+      "message": "Combinar mais de uma situação de cozinhas em um mapa ainda não é suportado. Peça uma situação por vez."
+    }
+  },
+  {
+    "input": {
+      "prompt": "cozinhas com outra situação"
+    },
+    "output": {
+      "status": "resolved",
+      "datasetId": "cozinhas_outras_2026"
+    }
+  },
+  {
+    "input": {
+      "prompt": "cadinsan com PBF"
+    },
+    "output": {
+      "status": "resolved"
+    }
+  },
+  {
+    "input": {
+      "prompt": "cadinsan sem PBF"
+    },
+    "output": {
+      "status": "resolved"
+    }
+  },
+  {
+    "input": {
+      "prompt": "insegurança alimentar"
+    },
+    "output": {
+      "status": "resolved"
+    }
+  },
+  {
+    "input": {
+      "prompt": "IVS; IDHM longevidade",
+      "datasetId": "municipios_idhm_longevidade"
+    },
+    "output": {
+      "status": "resolved"
+    }
+  },
+  {
+    "input": {
+      "prompt": "ivs infraestrutura e capital humano; idhm educacao e longevidade"
+    },
+    "output": {
+      "status": "ambiguous",
+      "clarify": {
+        "facet": "dataset",
+        "question": "Qual destes indicadores você quer no mapa?",
+        "options": [
+          {
+            "value": "municipios_ivs_infraestrutura",
+            "label": "IVS – Infraestrutura urbana"
+          },
+          {
+            "value": "municipios_ivs_capital_humano",
+            "label": "IVS – Capital humano"
+          },
+          {
+            "value": "municipios_idhm_longevidade",
+            "label": "IDHM – Longevidade"
+          },
+          {
+            "value": "municipios_idhm_educacao",
+            "label": "IDHM – Educação"
+          }
+        ],
+        "default": "municipios_ivs_infraestrutura"
+      }
+    }
+  },
+  {
+    "input": {
+      "prompt": "ivs infraestrutura e cozinhas habilitadas",
+      "datasetId": "municipios_ivs_infraestrutura"
+    },
+    "output": {
+      "status": "unsupported",
+      "message": "Escolher um dataset e pedir uma situação de cozinhas ao mesmo tempo ainda não é suportado. Peça uma coisa por vez."
+    }
+  },
+  {
+    "input": {
+      "prompt": "mapa",
+      "datasetId": "cozinhas_pessoas_atendidas",
+      "mapType": "choropleth"
+    },
+    "output": {
+      "status": "resolved"
+    }
+  },
+  {
+    "input": {
+      "prompt": "algo totalmente diferente"
+    },
+    "output": {
+      "status": "unmatched"
+    }
+  },
+  {
+    "input": {
+      "prompt": "cozinhas 2025 atendidas"
+    },
+    "output": {
+      "status": "ambiguous",
+      "clarify": {
+        "facet": "dataset",
+        "question": "Qual destes indicadores você quer no mapa?",
+        "options": [
+          {
+            "value": "cozinhas_geolocalizadas_2025",
+            "label": "Cozinhas em 2025"
+          },
+          {
+            "value": "cozinhas_pessoas_atendidas",
+            "label": "Pessoas atendidas pelas cozinhas"
+          }
+        ],
+        "default": "cozinhas_geolocalizadas_2025"
+      }
+    }
+  }
+]

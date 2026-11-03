@@ -9,6 +9,13 @@ import type {
 import { gateway } from '@/gateway';
 
 import { situacaoCatalogueEntries } from './cozinhasSituacao';
+import {
+  ABSOLUTE_TOTAL_IDS,
+  CATALOG_VARIANTS,
+  type FamilyName,
+  familyOf,
+  type RenderableFieldId,
+} from './renderableFields';
 import { SITUACAO_FETCHERS } from './situacaoFetchers';
 
 /**
@@ -22,9 +29,7 @@ import { SITUACAO_FETCHERS } from './situacaoFetchers';
  * `findChoroplethOnAbsoluteTotal` in `specValidation.ts` enforces it
  * deterministically instead of relying only on `instructions/instructions.ts`'s `INSTRUCTIONS`.
  */
-export const ABSOLUTE_TOTAL_DATASET_IDS = [
-  'cozinhas_pessoas_atendidas',
-] as const;
+export const ABSOLUTE_TOTAL_DATASET_IDS = ABSOLUTE_TOTAL_IDS;
 
 /** One `MapDataRow`-shaped value per município, dropping unscored ones. */
 const toMapDataRows = <T extends { codigoIbge: string }>(
@@ -99,7 +104,7 @@ export const RENDERABLE_DATASET_FETCHERS = {
   municipios_cadinsan: cadinsanField('proporcaoComPbf'),
   municipios_cadinsan_sem_pbf: cadinsanField('proporcaoSemPbf'),
   ...SITUACAO_FETCHERS,
-} as const;
+} as const satisfies Record<RenderableFieldId, unknown>;
 
 export type RenderableDatasetId = keyof typeof RENDERABLE_DATASET_FETCHERS;
 
@@ -174,88 +179,10 @@ const toAiDatasetProjection = (
 };
 
 /**
- * Renderable ids that paint one field of a catalogue dataset: each is exposed
- * to the agent as its own entry whose `description` is that field's own
- * `description` (plus `note` when the field text omits what the id's scale
- * means), so the agent can tell IVS from IDHM and "com PBF" from "sem PBF".
- * A variant whose id equals its dataset's id replaces that dataset's entry.
- * `officialFaixas` marks an official IPEA index whose legend thresholds the
- * model must not reclassify (see {@link officialFaixasOf}).
+ * Catalogue variants, derived from the renderable-field registry: each id is
+ * exposed to the agent with its own field description, note and faixa.
  */
-const CATALOGUE_VARIANTS: Record<
-  string,
-  {
-    datasetId: string;
-    fieldName: string;
-    note?: string;
-    officialFaixas?: 'ivs' | 'idhm';
-  }
-> = {
-  municipios_ivs: {
-    datasetId: 'municipios_ivs',
-    fieldName: 'ivs',
-    officialFaixas: 'ivs',
-  },
-  municipios_ivs_infraestrutura: {
-    datasetId: 'municipios_ivs',
-    fieldName: 'ivs_infraestrutura_urbana',
-    officialFaixas: 'ivs',
-    note: 'Maior = mais vulnerável',
-  },
-  municipios_ivs_capital_humano: {
-    datasetId: 'municipios_ivs',
-    fieldName: 'ivs_capital_humano',
-    officialFaixas: 'ivs',
-    note: 'Maior = mais vulnerável',
-  },
-  municipios_ivs_renda_trabalho: {
-    datasetId: 'municipios_ivs',
-    fieldName: 'ivs_renda_e_trabalho',
-    officialFaixas: 'ivs',
-    note: 'Maior = mais vulnerável',
-  },
-  municipios_idhm: {
-    datasetId: 'municipios_ivs',
-    fieldName: 'idhm',
-    officialFaixas: 'idhm',
-    note: 'Maior = melhor desenvolvimento humano (escala oposta à do IVS)',
-  },
-  municipios_idhm_longevidade: {
-    datasetId: 'municipios_ivs',
-    fieldName: 'idhm_long',
-    officialFaixas: 'idhm',
-    note: 'Maior = melhor',
-  },
-  municipios_idhm_educacao: {
-    datasetId: 'municipios_ivs',
-    fieldName: 'idhm_educ',
-    officialFaixas: 'idhm',
-    note: 'Maior = melhor',
-  },
-  municipios_idhm_renda: {
-    datasetId: 'municipios_ivs',
-    fieldName: 'idhm_renda',
-    officialFaixas: 'idhm',
-    note: 'Maior = melhor',
-  },
-  municipios_idhm_educacao_escolaridade: {
-    datasetId: 'municipios_ivs',
-    fieldName: 'idhm_educ_sub_esc',
-    officialFaixas: 'idhm',
-    note: 'Maior = melhor',
-  },
-  municipios_idhm_educacao_frequencia: {
-    datasetId: 'municipios_ivs',
-    fieldName: 'idhm_educ_sub_freq',
-    officialFaixas: 'idhm',
-    note: 'Maior = melhor',
-  },
-  municipios_cadinsan_sem_pbf: {
-    datasetId: 'municipios_cadinsan',
-    fieldName: 'Cadinsan_absoluto_sem_PBF',
-    note: 'O mapa pinta a proporção (%) sobre o total de cadastros do CadÚnico, não a contagem',
-  },
-};
+const CATALOGUE_VARIANTS = CATALOG_VARIANTS;
 
 /**
  * The official faixa family (IPEA) a renderable id paints, or `undefined` when
@@ -323,12 +250,34 @@ const toAiDatasetEntries = (
  * instructions read (see
  * {@link toAiDatasetProjection}). See ADR-0001 for why the split exists (token
  * cost vs. silent mismapping).
+ *
+ * With `focus`, only the datasets of that family keep their detail; every other
+ * entry is reduced to its index (id, title, description), so the agent sees the
+ * whole catalogue but the fields of the chosen dataset alone.
+ *
+ * @param catalogue - The gateway's catalogue contract.
+ * @param focus - The family whose detail to keep; omitted = full detail.
+ * @returns The catalogue as a JSON string.
+ *
+ * @example
+ * buildCatalogueContext(catalogue, 'cozinhas');
  */
-export const buildCatalogueContext = (catalogue: CatalogueContract): string => {
+export const buildCatalogueContext = (
+  catalogue: CatalogueContract,
+  focus?: FamilyName
+): string => {
   return JSON.stringify({
     catalogue: {
       ...catalogue,
-      datasets: catalogue.datasets.flatMap(toAiDatasetEntries),
+      datasets: catalogue.datasets.flatMap(toAiDatasetEntries).map((entry) => {
+        return focus === undefined || familyOf(entry.id) === focus
+          ? entry
+          : {
+              id: entry.id,
+              title: entry.title,
+              description: entry.description,
+            };
+      }),
     },
   });
 };

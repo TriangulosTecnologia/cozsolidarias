@@ -1,18 +1,14 @@
 import type { MapType } from '@ttoss/geovis';
 
-import { gateway } from '@/gateway';
-
 import { buildAgentMessage } from './agentMessage';
 import { resolveAgentReply } from './agentReply';
 import {
   validateCandidate,
   validateWithLocalRepairs,
 } from './candidateValidation';
+import { readCatalogueContext } from './catalogueContext';
 import baseVisualizationSpecJson from './instructions/baseVisualizationSpec.json';
-import {
-  buildCatalogueContext,
-  type RenderableDatasetId,
-} from './mapDataCatalogue';
+import { type RenderableDatasetId } from './mapDataCatalogue';
 import { MAP_TYPE_OPTIONS } from './mapTypeOptions';
 import { generateInSession, withSessionId } from './naturaliSessionApi';
 import {
@@ -21,6 +17,7 @@ import {
   preflightPrompt,
   type PreflightResult,
 } from './preflight';
+import { familyOf } from './renderableFields';
 import { resolveServedSpec } from './serveSpec';
 import { applyProportionalCirclesDefaults, mergeSpecs } from './specDefaults';
 import {
@@ -31,21 +28,6 @@ import {
 import { validateDatasetId } from './validateDatasetId';
 import { validateMapType } from './validateMapType';
 import { validateSessionId } from './validateSessionId';
-
-let cachedCatalogueText: Promise<string> | null = null;
-
-/**
- * Builds the two-tier catalog context (see {@link buildCatalogueContext})
- * once and keeps it in memory for the process lifetime. Joined into the
- * single `messages[0].content` sent on every call (see
- * {@link getAgentResponse}), never resent mid-turn.
- */
-const readCatalogueContext = (): Promise<string> => {
-  if (!cachedCatalogueText) {
-    cachedCatalogueText = gateway.getCatalogue().then(buildCatalogueContext);
-  }
-  return cachedCatalogueText;
-};
 
 const promptError = (message: string): Response => {
   return errorResponse({ status: 400, message: `Campo "prompt": ${message}` });
@@ -233,7 +215,11 @@ const getAgentResponse = async (params: {
       sessionId: params.sessionId,
       message: buildAgentMessage({
         ...choices,
-        catalogueText: await readCatalogueContext(),
+        catalogueText: await readCatalogueContext(
+          choices.datasetId === undefined
+            ? undefined
+            : familyOf(choices.datasetId)
+        ),
       }),
       followUpMessage: buildAgentMessage(choices),
       validateCandidate,
