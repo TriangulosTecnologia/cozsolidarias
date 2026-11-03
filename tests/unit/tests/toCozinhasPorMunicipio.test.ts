@@ -23,6 +23,7 @@ const coz = (
     latitude,
     municipio,
     publicoTotalAtendido,
+    situacao: 'Habilitada',
   } as StaticCozinhaSource;
 };
 
@@ -69,6 +70,7 @@ describe('aggregateCozinhasPorMunicipio', () => {
         codigoIbge: '111',
         municipio: 'Alpha',
         quantidade: 1,
+        quantidadePorSituacao: { Habilitada: 1 },
         pessoasAtendidas: null,
         centroid: [5, 5],
       },
@@ -91,6 +93,7 @@ describe('aggregateCozinhasPorMunicipio', () => {
       codigoIbge: '111',
       municipio: 'Alpha',
       quantidade: 1,
+      quantidadePorSituacao: { Habilitada: 1 },
       pessoasAtendidas: null,
       centroid: [5, 5],
     });
@@ -98,6 +101,7 @@ describe('aggregateCozinhasPorMunicipio', () => {
       codigoIbge: '222',
       municipio: 'Beta',
       quantidade: 1,
+      quantidadePorSituacao: { Habilitada: 1 },
       pessoasAtendidas: null,
       centroid: [25, 25],
     });
@@ -120,6 +124,7 @@ describe('aggregateCozinhasPorMunicipio', () => {
         codigoIbge: '111',
         municipio: 'Beta',
         quantidade: 3,
+        quantidadePorSituacao: { Habilitada: 3 },
         pessoasAtendidas: 150,
         centroid: [10, 5],
       },
@@ -144,6 +149,7 @@ describe('aggregateCozinhasPorMunicipio', () => {
         codigoIbge: '111',
         municipio: 'Alpha',
         quantidade: 1,
+        quantidadePorSituacao: { Habilitada: 1 },
         pessoasAtendidas: null,
         centroid: [5, 5],
       },
@@ -166,6 +172,7 @@ describe('aggregateCozinhasPorMunicipio', () => {
         codigoIbge: '111',
         municipio: 'Alpha',
         quantidade: 1,
+        quantidadePorSituacao: { Habilitada: 1 },
         pessoasAtendidas: null,
         centroid: [5, 5],
       },
@@ -185,6 +192,7 @@ describe('aggregateCozinhasPorMunicipio', () => {
         codigoIbge: '111',
         municipio: 'Alpha',
         quantidade: 1,
+        quantidadePorSituacao: { Habilitada: 1 },
         pessoasAtendidas: null,
         centroid: [5, 5],
       },
@@ -208,6 +216,7 @@ describe('aggregateCozinhasPorMunicipio', () => {
         codigoIbge: '111',
         municipio: 'São Paulo',
         quantidade: 3,
+        quantidadePorSituacao: { Habilitada: 3 },
         pessoasAtendidas: null,
         centroid: [3, 3],
       },
@@ -227,6 +236,7 @@ describe('aggregateCozinhasPorMunicipio', () => {
         codigoIbge: '111',
         municipio: 'Valid record',
         quantidade: 3,
+        quantidadePorSituacao: { Habilitada: 3 },
         pessoasAtendidas: null,
         centroid: [3, 3],
       },
@@ -272,6 +282,7 @@ describe('aggregateCozinhasPorMunicipio', () => {
         codigoIbge: '333',
         municipio: 'Island',
         quantidade: 1,
+        quantidadePorSituacao: { Habilitada: 1 },
         pessoasAtendidas: null,
         centroid: [25, 25],
       },
@@ -313,6 +324,7 @@ describe('aggregateCozinhasPorMunicipio', () => {
         codigoIbge: '444',
         municipio: 'On the solid edge',
         quantidade: 1,
+        quantidadePorSituacao: { Habilitada: 1 },
         pessoasAtendidas: null,
         centroid: [1, 1],
       },
@@ -357,6 +369,7 @@ describe('aggregateCozinhasPorMunicipio', () => {
         codigoIbge: '111',
         municipio: 'Alpha',
         quantidade: 2,
+        quantidadePorSituacao: { Habilitada: 2 },
         pessoasAtendidas: 350,
         centroid: [2.5, 2.5],
       },
@@ -380,6 +393,7 @@ describe('aggregateCozinhasPorMunicipio', () => {
         codigoIbge: '111',
         municipio: 'Alpha',
         quantidade: 3,
+        quantidadePorSituacao: { Habilitada: 3 },
         pessoasAtendidas: 200,
         centroid: [3, 3],
       },
@@ -399,10 +413,36 @@ describe('aggregateCozinhasPorMunicipio', () => {
         codigoIbge: '111',
         municipio: 'Alpha',
         quantidade: 2,
+        quantidadePorSituacao: { Habilitada: 2 },
         pessoasAtendidas: null,
         centroid: [2.5, 2.5],
       },
     ]);
+  });
+  test('counts located cozinhas per raw situação, summing to quantidade', () => {
+    const municipios = collection([square('111', 0, 0, 10)]);
+
+    const [row] = aggregateCozinhasPorMunicipio({
+      cozinhas: [
+        coz(1, 1),
+        { ...coz(2, 2), situacao: 'Não Habilitada' },
+        coz(3, 3),
+        { ...coz(4, 4), situacao: 'Mapeada' },
+        { ...coz(50, 50), situacao: 'Não Habilitada' },
+      ],
+      municipios,
+    });
+
+    expect(row.quantidadePorSituacao).toEqual({
+      Habilitada: 2,
+      'Não Habilitada': 1,
+      Mapeada: 1,
+    });
+    expect(
+      Object.values(row.quantidadePorSituacao).reduce((sum, n) => {
+        return sum + n;
+      }, 0)
+    ).toBe(row.quantidade);
   });
 });
 
@@ -522,6 +562,7 @@ describe('projectComTaxa', () => {
       codigoIbge: '111',
       municipio: 'Alpha',
       quantidade: 5,
+      quantidadePorSituacao: { Habilitada: 5 },
       pessoasAtendidas: 1_000,
       centroid: [0, 0],
     },
@@ -529,6 +570,7 @@ describe('projectComTaxa', () => {
       codigoIbge: '222',
       municipio: 'Beta',
       quantidade: 2,
+      quantidadePorSituacao: { Habilitada: 2 },
       pessoasAtendidas: null,
       centroid: [1, 1],
     },

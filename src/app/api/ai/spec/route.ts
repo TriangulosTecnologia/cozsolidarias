@@ -19,6 +19,7 @@ import {
   type Clarification,
   clarifyResponse,
   preflightPrompt,
+  type PreflightResult,
 } from './preflight';
 import { resolveServedSpec } from './serveSpec';
 import { applyProportionalCirclesDefaults, mergeSpecs } from './specDefaults';
@@ -94,6 +95,25 @@ const clarifyAnswer = (
 };
 
 /**
+ * Turns the preflight verdict into the request the generation runs with: a
+ * question for an ambiguous prompt, a refusal for an unsupported one, else the
+ * request with the server-resolved `mapDataId` when the user chose none.
+ */
+const answerPreflight = (params: {
+  request: ParsedRequest;
+  preflight: PreflightResult;
+}): ParsedRequest | Response => {
+  const { request, preflight } = params;
+  if (preflight.status === 'ambiguous') {
+    return clarifyAnswer(preflight.clarify, request.sessionId);
+  }
+  if (preflight.status === 'unsupported') {
+    return invalidSpecResponse({ message: preflight.message });
+  }
+  return { ...request, datasetId: request.datasetId ?? preflight.datasetId };
+};
+
+/**
  * Validates the whole request body — the `prompt` and the optional `mapType`
  * and `datasetId` — then runs the {@link preflightPrompt}, answering with the
  * question when the request is ambiguous.
@@ -116,10 +136,10 @@ const parseRequest = (rawBody: unknown): ParsedRequest | Response => {
   if (sessionId instanceof Response) {
     return sessionId;
   }
-  const preflight = preflightPrompt({ prompt, mapType, datasetId });
-  return preflight.status === 'ambiguous'
-    ? clarifyAnswer(preflight.clarify, sessionId)
-    : { prompt, mapType, datasetId, sessionId };
+  return answerPreflight({
+    request: { prompt, mapType, datasetId, sessionId },
+    preflight: preflightPrompt({ prompt, mapType, datasetId }),
+  });
 };
 
 const validateEnv = ():
@@ -297,6 +317,8 @@ export const POST = async (request: Request): Promise<Response> => {
       baseVisualizationSpecJson as UnknownRecord,
       modelJsonOrError.spec
     ),
+    agentSpec: modelJsonOrError.spec,
+    chosen: requestOrError.datasetId,
   });
   if (servedOrError instanceof Response) {
     return withSessionId(servedOrError, sessionId);

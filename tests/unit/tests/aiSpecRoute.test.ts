@@ -390,6 +390,142 @@ describe('POST /api/ai/spec', () => {
     expect(response.headers.get('x-session-id')).toBe('sess_route0001');
   });
 
+  test('serves the situação the server resolved when the agent used that dataset', async () => {
+    jest.spyOn(gateway, 'getCozinhasSituacaoPorMunicipio').mockResolvedValue({
+      situacoesCobertas: ['Habilitada'],
+      porMunicipio: [
+        {
+          codigoIbge: '3550308',
+          municipio: 'São Paulo',
+          quantidadePorSituacao: { Habilitada: 7 },
+        },
+      ],
+    });
+    mockAgentReply(
+      JSON.stringify({
+        mapData: [
+          {
+            mapDataId: 'cozinhas_habilitadas_2026',
+            mapId: 'municipios-boundary',
+            joinKey: 'codarea',
+            data: [],
+          },
+        ],
+        legends: [{ id: 'legend-habilitadas', title: 'Habilitadas' }],
+      })
+    );
+
+    const response = await POST(
+      jsonRequest({ prompt: 'cozinhas habilitadas por município' })
+    );
+    const body = (await response.json()) as {
+      spec?: { mapData?: Array<{ data: Array<{ value: number }> }> };
+    };
+
+    expect(response.status).toBe(200);
+    expect(body.spec?.mapData?.[0].data).toEqual([
+      { geometryId: '3550308', value: 7 },
+    ]);
+  });
+
+  test('keeps the public response keys of POST /api/ai/spec on success', async () => {
+    jest.spyOn(gateway, 'getCozinhasSituacaoPorMunicipio').mockResolvedValue({
+      situacoesCobertas: ['Habilitada'],
+      porMunicipio: [],
+      semLocalizacao: 0,
+    });
+    mockAgentReply(
+      JSON.stringify({
+        mapData: [
+          {
+            mapDataId: 'cozinhas_habilitadas_2026',
+            mapId: 'municipios-boundary',
+            joinKey: 'codarea',
+            data: [],
+          },
+        ],
+        legends: [{ id: 'legend-habilitadas', title: 'Habilitadas' }],
+      })
+    );
+
+    const response = await POST(
+      jsonRequest({ prompt: 'cozinhas habilitadas por município' })
+    );
+    const body = (await response.json()) as Record<string, unknown>;
+
+    expect(response.status).toBe(200);
+    expect(Object.keys(body).sort()).toEqual([
+      'error',
+      'mapTypeOptions',
+      'spec',
+    ]);
+  });
+
+  test('answers a 422 when the agent ignores the dataset the server resolved', async () => {
+    mockAgentReply(
+      JSON.stringify({
+        mapData: [
+          {
+            mapDataId: 'cozinhas_pessoas_atendidas',
+            mapId: 'municipios-boundary',
+            joinKey: 'codarea',
+            data: [],
+          },
+        ],
+        legends: [{ id: 'legend-atendidas', title: 'Atendidas' }],
+      })
+    );
+
+    const response = await POST(
+      jsonRequest({ prompt: 'cozinhas habilitadas por município' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(422);
+    expect(body.message).toMatch(/não usou o dataset escolhido/);
+  });
+
+  test('answers a 422 when the agent returns no mapData at all for the chosen dataset', async () => {
+    mockAgentReply(JSON.stringify({ legends: [] }));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'cozinhas habilitadas por município' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(422);
+    expect(body.message).toMatch(/não usou o dataset escolhido/);
+  });
+
+  test('answers a 422 when the agent places a non-object in mapData instead of the chosen dataset', async () => {
+    mockAgentReply(
+      JSON.stringify({
+        mapData: ['cozinhas_habilitadas_2026'],
+        legends: [{ id: 'legend-x', title: 'X' }],
+      })
+    );
+
+    const response = await POST(
+      jsonRequest({ prompt: 'cozinhas habilitadas por município' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(422);
+    expect(body.message).toMatch(/não usou o dataset escolhido/);
+  });
+
+  test('refuses a prompt that combines two cozinhas situations with a 422 and no agent call', async () => {
+    const fetchMock = mockAgentReply(JSON.stringify({ mapData: [] }));
+    const response = await POST(
+      jsonRequest({ prompt: 'cozinhas habilitadas e não habilitadas 2025' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(422);
+    expect(body.message).toMatch(/ainda não é suportado/);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   test('rejects a datasetId the route cannot render', async () => {
     const response = await POST(
       jsonRequest({ prompt: 'mapa', datasetId: 'caf_areas' })

@@ -673,6 +673,51 @@ describe('appendRealMapData', () => {
     jest.restoreAllMocks();
   });
 
+  test('refuses a situação the snapshot does not cover, never filling it with zero', async () => {
+    jest.spyOn(gateway, 'getCozinhasSituacaoPorMunicipio').mockResolvedValue({
+      situacoesCobertas: ['Habilitada'],
+      porMunicipio: [],
+    });
+
+    const result = await appendRealMapData({
+      mapData: [{ mapDataId: 'cozinhas_nao_habilitadas_2026' }],
+    });
+
+    if (!(result instanceof Response)) {
+      throw new Error('expected a 422 Response');
+    }
+    expect(result.status).toBe(422);
+    const body = (await result.json()) as { message: string };
+    expect(body.message).toMatch(/Dado indisponível/);
+  });
+
+  test('fills a covered situação with the real per-município counts', async () => {
+    jest.spyOn(gateway, 'getCozinhasSituacaoPorMunicipio').mockResolvedValue({
+      situacoesCobertas: null,
+      porMunicipio: [
+        {
+          codigoIbge: '111',
+          municipio: 'Alpha',
+          quantidadePorSituacao: { Habilitada: 4 },
+        },
+      ],
+    });
+
+    const result = await appendRealMapData({
+      mapData: [{ mapDataId: 'cozinhas_habilitadas_2025' }],
+    });
+
+    expect(result).not.toBeInstanceOf(Response);
+    expect(result).toEqual({
+      mapData: [
+        {
+          mapDataId: 'cozinhas_habilitadas_2025',
+          data: [{ geometryId: '111', value: 4 }],
+        },
+      ],
+    });
+  });
+
   test('rejects a dataset outside the renderable list with a 422 naming it', async () => {
     const result = await appendRealMapData({
       mapData: [{ mapDataId: 'caf_areas' }],

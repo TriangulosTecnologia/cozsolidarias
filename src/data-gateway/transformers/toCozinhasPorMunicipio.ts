@@ -1,7 +1,11 @@
 import type { GeoJSONFeatureCollection } from '@ttoss/geovis';
 
 import type { StaticCozinhaSource } from '../../data-source-static/types';
-import type { KitchenByCity, KitchenRateByCity } from '../schema';
+import type {
+  CozinhasSituacaoPorMunicipio,
+  KitchenByCity,
+  KitchenRateByCity,
+} from '../schema';
 import type { IndexedMunicipio } from './municipioIndex';
 import { findMunicipio, indexMunicipios } from './municipioIndex';
 
@@ -49,6 +53,7 @@ const mostVotedName = (nameVotes: Map<string, number>): string => {
 /** Running tallies of one município while cozinhas are being aggregated. */
 type MunicipioBucket = {
   quantidade: number;
+  quantidadePorSituacao: Map<string, number>;
   nameVotes: Map<string, number>;
   sumLng: number;
   sumLat: number;
@@ -99,6 +104,12 @@ export type MunicipioAggregate = KitchenByCity & {
    * a good anchor for a proportional-symbol (bubble) marker.
    */
   centroid: [number, number];
+  /**
+   * Located cozinhas counted per raw `situacao` value (`Situação` column, kept
+   * verbatim). Its values sum to `quantidade`. Internal to the gateway: the
+   * public projections pick explicit fields and never expose it.
+   */
+  quantidadePorSituacao: Record<string, number>;
 };
 
 /**
@@ -166,6 +177,7 @@ export const aggregateCozinhasPorMunicipio = ({
     if (!current) {
       current = {
         quantidade: 0,
+        quantidadePorSituacao: new Map(),
         nameVotes: new Map(),
         sumLng: 0,
         sumLat: 0,
@@ -176,6 +188,10 @@ export const aggregateCozinhasPorMunicipio = ({
     }
 
     current.quantidade += 1;
+    current.quantidadePorSituacao.set(
+      cozinha.situacao,
+      (current.quantidadePorSituacao.get(cozinha.situacao) ?? 0) + 1
+    );
     current.sumLng += cozinha.longitude;
     current.sumLat += cozinha.latitude;
     const name = cozinha.municipio;
@@ -188,30 +204,48 @@ export const aggregateCozinhasPorMunicipio = ({
     }
   }
 
-  return [...counts].map(
-    ([
+  return [...counts].map(([codigoIbge, bucket]) => {
+    return {
       codigoIbge,
-      {
-        quantidade,
-        nameVotes,
-        sumLng,
-        sumLat,
-        pessoasAtendidas,
-        pessoasAtendidasKnown,
-      },
-    ]) => {
-      return {
-        codigoIbge,
-        municipio: mostVotedName(nameVotes),
-        quantidade,
-        pessoasAtendidas: pessoasAtendidasKnown ? pessoasAtendidas : null,
-        centroid: [sumLng / quantidade, sumLat / quantidade] as [
-          number,
-          number,
-        ],
-      };
-    }
-  );
+      municipio: mostVotedName(bucket.nameVotes),
+      quantidade: bucket.quantidade,
+      quantidadePorSituacao: Object.fromEntries(bucket.quantidadePorSituacao),
+      pessoasAtendidas: bucket.pessoasAtendidasKnown
+        ? bucket.pessoasAtendidas
+        : null,
+      centroid: [
+        bucket.sumLng / bucket.quantidade,
+        bucket.sumLat / bucket.quantidade,
+      ] as [number, number],
+    };
+  });
+};
+
+/**
+ * The per-situação counts of one snapshot year, as the gateway serves them to
+ * the `/ia` aggregation layer. Pure projection of an aggregate.
+ *
+ * @param params.aggregate - The year's município aggregate (see {@link aggregateCozinhasPorMunicipio}).
+ * @param params.situacoesCobertas - The raw situações the snapshot holds, or `null` for all.
+ * @returns The snapshot with one row per município.
+ *
+ * @example
+ * toCozinhasSituacaoPorMunicipio({ aggregate, situacoesCobertas: ['Habilitada'] });
+ */
+export const toCozinhasSituacaoPorMunicipio = (params: {
+  aggregate: MunicipioAggregate[];
+  situacoesCobertas: readonly string[] | null;
+  semLocalizacao: number;
+}): CozinhasSituacaoPorMunicipio => {
+  return {
+    situacoesCobertas: params.situacoesCobertas,
+    semLocalizacao: params.semLocalizacao,
+    porMunicipio: params.aggregate.map(
+      ({ codigoIbge, municipio, quantidadePorSituacao }) => {
+        return { codigoIbge, municipio, quantidadePorSituacao };
+      }
+    ),
+  };
 };
 
 /**

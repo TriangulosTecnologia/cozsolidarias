@@ -100,6 +100,97 @@ describe('preflightPrompt', () => {
     ).toEqual({ status: 'resolved' });
   });
 
+  test('resolves a cozinhas situation to its deterministic mapDataId and year', () => {
+    expect(preflightPrompt({ prompt: 'cozinhas habilitadas 2025' })).toEqual({
+      status: 'resolved',
+      datasetId: 'cozinhas_habilitadas_2025',
+    });
+    expect(preflightPrompt({ prompt: 'cozinhas não habilitadas' })).toEqual({
+      status: 'resolved',
+      datasetId: 'cozinhas_nao_habilitadas_2026',
+    });
+    expect(preflightPrompt({ prompt: 'cozinhas com outra situação' })).toEqual({
+      status: 'resolved',
+      datasetId: 'cozinhas_outras_2026',
+    });
+  });
+
+  test('never reads a negated não habilitada as habilitada', () => {
+    expect(
+      preflightPrompt({ prompt: 'cozinhas não habilitadas 2025' })
+    ).toEqual({
+      status: 'resolved',
+      datasetId: 'cozinhas_nao_habilitadas_2025',
+    });
+  });
+
+  test('refuses a prompt that names two situations, never answering one silently', () => {
+    const result = preflightPrompt({
+      prompt: 'cozinhas habilitadas e não habilitadas',
+    });
+
+    expect(result.status).toBe('unsupported');
+  });
+
+  test('refuses a situation named alongside a dataset the user already chose, never dropping it silently', () => {
+    expect(
+      preflightPrompt({
+        prompt: 'cozinhas habilitadas',
+        datasetId: 'cozinhas_pessoas_atendidas',
+      }).status
+    ).toBe('unsupported');
+    expect(
+      preflightPrompt({
+        prompt: 'ivs infraestrutura e cozinhas habilitadas',
+        datasetId: 'municipios_ivs_infraestrutura',
+      }).status
+    ).toBe('unsupported');
+  });
+
+  test('asks one question listing every ambiguous family', () => {
+    const result = preflightPrompt({
+      prompt:
+        'ivs infraestrutura e capital humano; idhm educacao e longevidade',
+    });
+
+    expect(result.status).toBe('ambiguous');
+    if (result.status !== 'ambiguous') {
+      throw new Error('expected ambiguous');
+    }
+    expect(
+      result.clarify.options.map((option) => {
+        return option.value;
+      })
+    ).toEqual([
+      'municipios_ivs_infraestrutura',
+      'municipios_ivs_capital_humano',
+      'municipios_idhm_longevidade',
+      'municipios_idhm_educacao',
+    ]);
+    expect(result.clarify.default).toBe('municipios_ivs_infraestrutura');
+  });
+
+  test('a chosen dataset answers only its own family, so the other family still asks', () => {
+    const result = preflightPrompt({
+      prompt:
+        'ivs infraestrutura e capital humano; idhm educacao e longevidade',
+      datasetId: 'municipios_idhm_longevidade',
+    });
+
+    expect(result.status).toBe('ambiguous');
+    if (result.status !== 'ambiguous') {
+      throw new Error('expected ambiguous');
+    }
+    expect(
+      result.clarify.options.map((option) => {
+        return option.value;
+      })
+    ).toEqual([
+      'municipios_ivs_infraestrutura',
+      'municipios_ivs_capital_humano',
+    ]);
+  });
+
   test('never blocks a prompt it does not recognise', () => {
     expect(preflightPrompt({ prompt: 'algo totalmente diferente' })).toEqual({
       status: 'unmatched',

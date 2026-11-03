@@ -182,6 +182,54 @@ describe('createDataGateway', () => {
     expect(second).toEqual(first);
   });
 
+  test('counts the cozinhas without coordinates as semLocalizacao, outside every município', async () => {
+    const gateway = createDataGateway();
+    const cozinhas = await readStaticCozinhas({ year: 2026 });
+
+    const snapshot = await gateway.getCozinhasSituacaoPorMunicipio(2026);
+
+    expect(snapshot.semLocalizacao).toBe(
+      cozinhas.filter((cozinha) => {
+        return cozinha.latitude === null || cozinha.longitude === null;
+      }).length
+    );
+  });
+
+  test('shares one situação snapshot per year across reads, so each table is aggregated once', () => {
+    const gateway = createDataGateway();
+
+    expect(gateway.getCozinhasSituacaoPorMunicipio(2026)).toBe(
+      gateway.getCozinhasSituacaoPorMunicipio(2026)
+    );
+  });
+
+  test('memoizes the IVS and CADINSAN projections, so repeated reads share one result', () => {
+    const gateway = createDataGateway();
+
+    expect(gateway.getIvsPorMunicipio()).toBe(gateway.getIvsPorMunicipio());
+    expect(gateway.getCadinsanPorMunicipio()).toBe(
+      gateway.getCadinsanPorMunicipio()
+    );
+  });
+
+  test('covers only Habilitada for 2026 and every situação for 2025, summing to quantidade', async () => {
+    const gateway = createDataGateway();
+
+    const snapshot2026 = await gateway.getCozinhasSituacaoPorMunicipio(2026);
+    const snapshot2025 = await gateway.getCozinhasSituacaoPorMunicipio(2025);
+
+    expect(snapshot2026.situacoesCobertas).toEqual(['Habilitada']);
+    expect(snapshot2025.situacoesCobertas).toBeNull();
+    for (const row of snapshot2026.porMunicipio) {
+      expect(Object.keys(row.quantidadePorSituacao)).toEqual(['Habilitada']);
+    }
+    expect(
+      snapshot2025.porMunicipio.some((row) => {
+        return 'Não Habilitada' in row.quantidadePorSituacao;
+      })
+    ).toBe(true);
+  });
+
   test('returns one bubble Point feature per municipality from the default static source', async () => {
     const gateway = createDataGateway();
 

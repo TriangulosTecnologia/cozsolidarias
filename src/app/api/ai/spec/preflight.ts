@@ -1,5 +1,6 @@
 import type { MapType } from '@ttoss/geovis';
 
+import { type SituacaoMapDataId, situacaoRequest } from './cozinhasSituacao';
 import {
   ABSOLUTE_TOTAL_DATASET_IDS,
   type RenderableDatasetId,
@@ -23,8 +24,9 @@ export type Clarification = {
  * `ambiguous` stops to ask.
  */
 export type PreflightResult =
-  | { status: 'resolved' | 'unmatched' }
-  | { status: 'ambiguous'; clarify: Clarification };
+  | { status: 'resolved' | 'unmatched'; datasetId?: SituacaoMapDataId }
+  | { status: 'ambiguous'; clarify: Clarification }
+  | { status: 'unsupported'; message: string };
 
 type Variant = { id: RenderableDatasetId; label: string; match: RegExp };
 
@@ -187,16 +189,41 @@ const isAbsoluteTotal = (id: string): boolean => {
   return (ABSOLUTE_TOTAL_DATASET_IDS as readonly string[]).includes(id);
 };
 
-/** The dataset ids the prompt resolves to: the user's pick, else each family's variant or default. */
+/**
+ * Whether the user's chosen dataset answers this family: the family owns the
+ * id. An answered family is no longer ambiguous and takes no text match.
+ */
+const answeredBy = (params: {
+  hit: ReturnType<typeof familyHits>[number];
+  datasetId?: RenderableDatasetId;
+}): boolean => {
+  const { hit, datasetId } = params;
+  return (
+    datasetId !== undefined &&
+    (hit.family.defaultId === datasetId ||
+      hit.family.variants.some((variant) => {
+        return variant.id === datasetId;
+      }))
+  );
+};
+
+/**
+ * The dataset ids the prompt resolves to: the user's pick first, then each
+ * unanswered family's variant or default. Families the pick answers keep no
+ * text match, so a pick never drops the prompt's other facets.
+ */
 const chosenIds = (params: {
   datasetId?: RenderableDatasetId;
   hits: ReturnType<typeof familyHits>;
 }): string[] => {
-  return params.datasetId
-    ? [params.datasetId]
-    : params.hits.map((hit) => {
-        return hit.variants[0]?.id ?? hit.family.defaultId;
-      });
+  const open = params.hits
+    .filter((hit) => {
+      return !answeredBy({ hit, datasetId: params.datasetId });
+    })
+    .map((hit) => {
+      return hit.variants[0]?.id ?? hit.family.defaultId;
+    });
+  return params.datasetId ? [params.datasetId, ...open] : open;
 };
 
 const choroplethOnAbsoluteTotal = (params: {
@@ -237,17 +264,28 @@ export const preflightPrompt = (params: {
   datasetId?: RenderableDatasetId;
 }): PreflightResult => {
   const text = normalize(params.prompt);
-  const hits = params.datasetId ? [] : familyHits(text);
-  const split = hits.find((hit) => {
-    return hit.variants.length > 1;
+  const hits = familyHits(text);
+  const splits = hits.filter((hit) => {
+    return (
+      hit.variants.length > 1 &&
+      !answeredBy({ hit, datasetId: params.datasetId })
+    );
   });
-  if (split) {
+  if (splits.length > 0) {
     return {
       status: 'ambiguous',
-      clarify: datasetClarification(split.variants),
+      clarify: datasetClarification(
+        splits.flatMap((split) => {
+          return split.variants;
+        })
+      ),
     };
   }
 
+  const situacao = situacaoRequest({ text, datasetId: params.datasetId });
+  if (situacao) {
+    return situacao;
+  }
   const ids = chosenIds({ datasetId: params.datasetId, hits });
   if (ids.length === 0) {
     return { status: 'unmatched' };

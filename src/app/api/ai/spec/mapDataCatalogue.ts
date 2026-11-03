@@ -8,6 +8,9 @@ import type {
 } from '@/data-gateway/schema';
 import { gateway } from '@/gateway';
 
+import { situacaoCatalogueEntries } from './cozinhasSituacao';
+import { SITUACAO_FETCHERS } from './situacaoFetchers';
+
 /**
  * Renderable datasets whose value is an absolute total (a raw sum), never a
  * relative variable (rate/ratio/percentage) — per Bertin's graphic semiology
@@ -95,6 +98,7 @@ export const RENDERABLE_DATASET_FETCHERS = {
   municipios_idhm_educacao_frequencia: ivsField('idhmEducacaoFrequencia'),
   municipios_cadinsan: cadinsanField('proporcaoComPbf'),
   municipios_cadinsan_sem_pbf: cadinsanField('proporcaoSemPbf'),
+  ...SITUACAO_FETCHERS,
 } as const;
 
 export type RenderableDatasetId = keyof typeof RENDERABLE_DATASET_FETCHERS;
@@ -304,7 +308,11 @@ const toAiDatasetEntries = (
   const replaced = variants.some((variant) => {
     return variant.id === dataset.id;
   });
-  return replaced ? variants : [projection, ...variants];
+  const situacao =
+    dataset.id === 'cozinhas_geolocalizadas'
+      ? situacaoCatalogueEntries(projection)
+      : [];
+  return [...(replaced ? variants : [projection, ...variants]), ...situacao];
 };
 
 /**

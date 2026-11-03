@@ -120,6 +120,17 @@ const unsupportedDatasetResponse = (
   });
 };
 
+/** The 422 for a dataset whose snapshot does not cover the requested situação. */
+const unavailableDatasetResponse = (
+  mapDataId: string,
+  spec: unknown
+): Response => {
+  return invalidSpecResponse({
+    message: `Dado indisponível para "${mapDataId}": o snapshot do ano não cobre essa situação. Valor desconhecido não é zero; escolha outra situação ou ano.`,
+    spec,
+  });
+};
+
 /**
  * The only `geojson` source URLs this app actually serves. A source's `data`
  * is never rewritten after generation (unlike `mapData[].data`), so a URL
@@ -663,6 +674,9 @@ export const appendRealMapData = async (
     }
 
     const data = await RENDERABLE_DATASET_FETCHERS[mapDataId]();
+    if (data === null) {
+      return unavailableDatasetResponse(mapDataId, spec);
+    }
     resolvedMapData.push({ ...entry, data });
   }
 
