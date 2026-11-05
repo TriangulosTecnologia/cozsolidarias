@@ -21,9 +21,7 @@ const ENV_PATH = join(ROOT, '..', '..', '.env');
  * const key = readApiKey(); // "nat_..."
  */
 const readApiKey = () => {
-  const match = readFileSync(ENV_PATH, 'utf-8').match(
-    /^NATURALI_TOKEN=(.+)$/m
-  );
+  const match = readFileSync(ENV_PATH, 'utf-8').match(/^NATURALI_TOKEN=(.+)$/m);
   if (!match) {
     throw new Error(`NATURALI_TOKEN is missing from ${ENV_PATH}`);
   }

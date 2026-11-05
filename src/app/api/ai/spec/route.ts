@@ -130,7 +130,8 @@ const validateEnv = ():
     }
   | Response => {
   // deferred: legacy NATURALI_API_KEY fallback, remove once Vercel renames it to NATURALI_TOKEN
-  const apiKey = process.env['NATURALI_TOKEN'] ?? process.env['NATURALI_API_KEY'];
+  const apiKey =
+    process.env['NATURALI_TOKEN'] ?? process.env['NATURALI_API_KEY'];
   const projectId = process.env['NATURALI_PROJECT_ID'];
   const agentId = process.env['NATURALI_AGENT_ID'];
 
