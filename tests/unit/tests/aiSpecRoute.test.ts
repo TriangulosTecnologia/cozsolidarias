@@ -117,7 +117,7 @@ const ONE_MAP_DATA = [
 ];
 
 const ENV_KEYS = [
-  'NATURALI_API_KEY',
+  'NATURALI_TOKEN',
   'NATURALI_PROJECT_ID',
   'NATURALI_AGENT_ID',
 ] as const;
@@ -537,8 +537,23 @@ describe('POST /api/ai/spec', () => {
   // Server configuration - API key, project ID, agent ID
   // ---------------------------------------------------------------------------
 
+  test('accepts the legacy NATURALI_API_KEY while the NATURALI_TOKEN rename is pending', async () => {
+    delete process.env['NATURALI_TOKEN'];
+    process.env['NATURALI_API_KEY'] = 'test-legacy-key';
+
+    try {
+      const response = await POST(
+        jsonRequest({ prompt: 'mapa de cozinhas por município' })
+      );
+
+      expect(response.status).not.toBe(400);
+    } finally {
+      delete process.env['NATURALI_API_KEY'];
+    }
+  });
+
   test('rejects the request when server config is missing', async () => {
-    delete process.env['NATURALI_API_KEY'];
+    delete process.env['NATURALI_TOKEN'];
 
     const response = await POST(
       jsonRequest({ prompt: 'mapa de cozinhas por município' })
