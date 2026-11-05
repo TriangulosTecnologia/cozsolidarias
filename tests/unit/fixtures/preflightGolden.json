@@ -92,7 +92,7 @@
     },
     "output": {
       "status": "resolved",
-      "datasetId": "cozinhas_habilitadas_2025"
+      "datasetId": "cozinhas_geolocalizadas_2025?situacao=Habilitada"
     }
   },
   {
@@ -100,8 +100,8 @@
       "prompt": "cozinhas não habilitadas"
     },
     "output": {
-      "status": "resolved",
-      "datasetId": "cozinhas_nao_habilitadas_2026"
+      "status": "unsupported",
+      "message": "O snapshot de 2026 não cobre esse valor de \"Situação\": o dado é desconhecido, não zero. Peça outro ano."
     }
   },
   {
@@ -118,8 +118,18 @@
       "prompt": "cozinhas com outra situação"
     },
     "output": {
-      "status": "resolved",
-      "datasetId": "cozinhas_outras_2026"
+      "status": "ambiguous",
+      "clarify": {
+        "facet": "dataset",
+        "question": "Qual valor de \"Situação\" você quer no mapa?",
+        "options": [
+          {
+            "value": "cozinhas_geolocalizadas?situacao=Habilitada",
+            "label": "Situação: Habilitada (2026)"
+          }
+        ],
+        "default": "cozinhas_geolocalizadas?situacao=Habilitada"
+      }
     }
   },
   {

@@ -1,6 +1,11 @@
 import type { MapType } from '@ttoss/geovis';
 
-import { type SituacaoMapDataId, situacaoRequest } from './cozinhasSituacao';
+import {
+  type FilterDomain,
+  normalizeText,
+  parseFilteredMapDataId,
+} from './fieldFilters';
+import { valueRequest } from './filterRequest';
 import {
   ABSOLUTE_TOTAL_DATASET_IDS,
   type RenderableDatasetId,
@@ -25,7 +30,7 @@ export type Clarification = {
  * `ambiguous` stops to ask.
  */
 export type PreflightResult =
-  | { status: 'resolved' | 'unmatched'; datasetId?: SituacaoMapDataId }
+  | { status: 'resolved' | 'unmatched'; datasetId?: RenderableDatasetId }
   | { status: 'ambiguous'; clarify: Clarification }
   | { status: 'unsupported'; message: string };
 
@@ -51,13 +56,6 @@ export const FAMILIES: Family[] = FAMILY_NAMES.map((name) => {
     }),
   };
 });
-
-const normalize = (text: string): string => {
-  return text
-    .normalize('NFD')
-    .replace(/\p{Diacritic}/gu, '')
-    .toLowerCase();
-};
 
 /**
  * The variants a prompt names, minus any that a more specific hit refines
@@ -127,11 +125,15 @@ const answeredBy = (params: {
   datasetId?: RenderableDatasetId;
 }): boolean => {
   const { hit, datasetId } = params;
+  const id =
+    datasetId === undefined
+      ? undefined
+      : (parseFilteredMapDataId(datasetId)?.baseId ?? datasetId);
   return (
-    datasetId !== undefined &&
-    (hit.family.defaultId === datasetId ||
+    id !== undefined &&
+    (hit.family.defaultId === id ||
       hit.family.variants.some((variant) => {
-        return variant.id === datasetId;
+        return variant.id === id;
       }))
   );
 };
@@ -182,6 +184,8 @@ const choroplethOnAbsoluteTotal = (params: {
  * @param params.prompt - The user's request.
  * @param params.mapType - The map type the user already chose, if any.
  * @param params.datasetId - The dataset the user already chose; replaces the text matching.
+ * @param params.filterDomains - The values each filterable base holds (see
+ * `readFilterDomainsFor`); omitted = no field filter is matched.
  * @returns `resolved`, `unmatched`, or `ambiguous` with the question to ask.
  *
  * @example
@@ -191,8 +195,9 @@ export const preflightPrompt = (params: {
   prompt: string;
   mapType?: MapType;
   datasetId?: RenderableDatasetId;
+  filterDomains?: FilterDomain[];
 }): PreflightResult => {
-  const text = normalize(params.prompt);
+  const text = normalizeText(params.prompt);
   const hits = familyHits(text);
   const splits = hits.filter((hit) => {
     return (
@@ -211,9 +216,13 @@ export const preflightPrompt = (params: {
     };
   }
 
-  const situacao = situacaoRequest({ text, datasetId: params.datasetId });
-  if (situacao) {
-    return situacao;
+  const valued = valueRequest({
+    text,
+    datasetId: params.datasetId,
+    domains: params.filterDomains,
+  });
+  if (valued) {
+    return valued;
   }
   const ids = chosenIds({ datasetId: params.datasetId, hits });
   if (ids.length === 0) {

@@ -6,9 +6,14 @@ import {
 import {
   CATALOG_VARIANTS,
   familyOf,
+  FILTERABLE_BASES,
   RENDERABLE_FIELD_IDS,
   RENDERABLE_FIELD_META,
 } from 'src/app/api/ai/spec/renderableFields';
+import {
+  COZINHAS_YEARS,
+  LATEST_COZINHA_YEAR,
+} from 'src/data-source-static/readStaticCozinhas';
 
 describe('renderable-field registry parity', () => {
   test('every registry id has a fetcher, and every fetcher has a registry entry', () => {
@@ -36,7 +41,20 @@ describe('renderable-field registry parity', () => {
 
   test('familyOf reads the family a registry id belongs to, and nothing for an unknown id', () => {
     expect(familyOf('municipios_ivs_infraestrutura')).toBe('ivs');
-    expect(familyOf('cozinhas_habilitadas_2025')).toBe('cozinhas');
+    expect(familyOf('cozinhas_geolocalizadas_2025?situacao=Mapeada')).toBe(
+      'cozinhas'
+    );
     expect(familyOf('caf_areas')).toBeUndefined();
+  });
+
+  test('filterable bases count snapshot years the data source has, the default one the latest', () => {
+    for (const { ano } of FILTERABLE_BASES) {
+      expect(COZINHAS_YEARS).toContain(ano);
+    }
+    expect(
+      FILTERABLE_BASES.find(({ baseId }) => {
+        return baseId === 'cozinhas_geolocalizadas';
+      })?.ano
+    ).toBe(LATEST_COZINHA_YEAR);
   });
 });

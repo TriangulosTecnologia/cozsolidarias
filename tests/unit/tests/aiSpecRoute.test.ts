@@ -405,7 +405,7 @@ describe('POST /api/ai/spec', () => {
       JSON.stringify({
         mapData: [
           {
-            mapDataId: 'cozinhas_habilitadas_2026',
+            mapDataId: 'cozinhas_geolocalizadas?situacao=Habilitada',
             mapId: 'municipios-boundary',
             joinKey: 'codarea',
             data: [],
@@ -431,14 +431,20 @@ describe('POST /api/ai/spec', () => {
   test('keeps the public response keys of POST /api/ai/spec on success', async () => {
     jest.spyOn(gateway, 'getCozinhasSituacaoPorMunicipio').mockResolvedValue({
       situacoesCobertas: ['Habilitada'],
-      porMunicipio: [],
+      porMunicipio: [
+        {
+          codigoIbge: '3550308',
+          municipio: 'São Paulo',
+          quantidadePorSituacao: { Habilitada: 1 },
+        },
+      ],
       semLocalizacao: 0,
     });
     mockAgentReply(
       JSON.stringify({
         mapData: [
           {
-            mapDataId: 'cozinhas_habilitadas_2026',
+            mapDataId: 'cozinhas_geolocalizadas?situacao=Habilitada',
             mapId: 'municipios-boundary',
             joinKey: 'codarea',
             data: [],
@@ -460,6 +466,70 @@ describe('POST /api/ai/spec', () => {
       'spec',
     ]);
   });
+
+  test('serves a value of an allowlisted field read from the data, not a fixed group', async () => {
+    jest.spyOn(gateway, 'getCozinhasSituacaoPorMunicipio').mockResolvedValue({
+      situacoesCobertas: null,
+      semLocalizacao: 0,
+      porMunicipio: [
+        {
+          codigoIbge: '3550308',
+          municipio: 'São Paulo',
+          quantidadePorSituacao: { Mapeada: 3, Habilitada: 1 },
+        },
+      ],
+    });
+    const fetchMock = mockAgentReply(
+      JSON.stringify({
+        mapData: [
+          {
+            mapDataId: 'cozinhas_geolocalizadas_2025?situacao=Mapeada',
+            mapId: 'municipios-boundary',
+            joinKey: 'codarea',
+            data: [],
+          },
+        ],
+        legends: [{ id: 'legend-mapeadas', title: 'Mapeadas' }],
+      })
+    );
+
+    const response = await POST(
+      jsonRequest({ prompt: 'cozinhas mapeadas 2025 por município' })
+    );
+    const body = (await response.json()) as {
+      spec?: { mapData?: Array<{ data: unknown }> };
+    };
+
+    expect(response.status).toBe(200);
+    expect(body.spec?.mapData?.[0].data).toEqual([
+      { geometryId: '3550308', value: 3 },
+    ]);
+    expect(JSON.stringify(fetchMock.mock.calls)).toContain(
+      'cozinhas_geolocalizadas_2025?situacao=Mapeada'
+    );
+  });
+
+  test.each([new Error('disk gone'), 'disk gone'])(
+    'answers a fixed 502 when the filter values cannot be read (%p)',
+    async (failure) => {
+      jest
+        .spyOn(gateway, 'getCozinhasSituacaoPorMunicipio')
+        .mockRejectedValue(failure);
+      const logSpy = jest
+        .spyOn(generationLogger, 'logGeneration')
+        .mockImplementation(() => {});
+
+      const response = await POST(jsonRequest({ prompt: 'cozinhas mapeadas' }));
+      const body = (await response.json()) as { message: string };
+
+      expect(response.status).toBe(502);
+      expect(body.message).not.toContain('disk gone');
+      expect(logSpy).toHaveBeenCalledWith({
+        prompt: 'cozinhas mapeadas',
+        reply: { cause: 'disk gone' },
+      });
+    }
+  );
 
   test('answers a 422 when the agent ignores the dataset the server resolved', async () => {
     mockAgentReply(
@@ -500,7 +570,7 @@ describe('POST /api/ai/spec', () => {
   test('answers a 422 when the agent places a non-object in mapData instead of the chosen dataset', async () => {
     mockAgentReply(
       JSON.stringify({
-        mapData: ['cozinhas_habilitadas_2026'],
+        mapData: ['cozinhas_geolocalizadas?situacao=Habilitada'],
         legends: [{ id: 'legend-x', title: 'X' }],
       })
     );
@@ -2089,10 +2159,26 @@ describe('POST /api/ai/spec', () => {
       error: boolean;
     };
 
+    // G-6: the 2026 snapshot holds only habilitadas, so every legend of the
+    // reference spec also states that coverage; the rest is unchanged.
+    const note =
+      'Dados de 2026: apenas situação Habilitada; o snapshot não contém as demais.';
+    const reference = {
+      ...COROPLETICO_SPEC,
+      legends: records(COROPLETICO_SPEC.legends).map((legend) => {
+        const subtitle = legend['subtitle'];
+        return {
+          ...legend,
+          subtitle:
+            typeof subtitle === 'string' ? `${subtitle} · ${note}` : note,
+        };
+      }),
+    };
+
     expect(response.status).toBe(200);
     expect(body.error).toBe(false);
     expect(neutralizeDataDerived(normalizeSpec(body.spec))).toEqual(
-      neutralizeDataDerived(COROPLETICO_SPEC)
+      neutralizeDataDerived(reference)
     );
   }, 10000);
 });

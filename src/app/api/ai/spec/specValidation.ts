@@ -6,9 +6,9 @@ import { gateway } from '@/gateway';
 
 import {
   ABSOLUTE_TOTAL_DATASET_IDS,
+  fetchRenderableData,
   isRenderableDatasetId,
   officialFaixasOf,
-  RENDERABLE_DATASET_FETCHERS,
   RENDERABLE_DATASET_IDS,
 } from './mapDataCatalogue';
 import { MAP_TYPE_OPTIONS } from './mapTypeOptions';
@@ -120,13 +120,13 @@ const unsupportedDatasetResponse = (
   });
 };
 
-/** The 422 for a dataset whose snapshot does not cover the requested situação. */
+/** The 422 for a filtered dataset whose snapshot does not cover, or never holds, the requested value. */
 const unavailableDatasetResponse = (
   mapDataId: string,
   spec: unknown
 ): Response => {
   return invalidSpecResponse({
-    message: `Dado indisponível para "${mapDataId}": o snapshot do ano não cobre essa situação. Valor desconhecido não é zero; escolha outra situação ou ano.`,
+    message: `Dado indisponível para "${mapDataId}": o snapshot do ano não cobre esse valor. Valor desconhecido não é zero; escolha outro valor ou ano.`,
     spec,
   });
 };
@@ -148,7 +148,7 @@ export const KNOWN_SOURCE_URLS = [
 /**
  * Maps each KNOWN_SOURCE_URL to its physical location on disk or endpoint
  * type, and — for an API-backed URL — a `resolver` that fetches the real
- * `data-gateway` value the same way {@link RENDERABLE_DATASET_FETCHERS} does
+ * `data-gateway` value the same way {@link fetchRenderableData} does
  * for `mapData` (see {@link appendRealSourceData}). A static file under
  * `public/geo/` has no `resolver`: the client fetches that URL itself, so its
  * `sources[].data` string is left untouched. Used to generate explicit
@@ -626,10 +626,11 @@ export const findReclassifiedOfficialIndex = (
 
 /**
  * MapData Append (ADR-0001): resolves each `mapData[].mapDataId` the agent
- * emitted against {@link RENDERABLE_DATASET_FETCHERS} and replaces its
+ * emitted against {@link fetchRenderableData} and replaces its
  * placeholder `data` with real `data-gateway` values. Returns a `Response`
- * (422) instead of the spec when an entry references a dataset outside
- * {@link RENDERABLE_DATASET_IDS} or the shape is malformed — never a spec
+ * (422) instead of the spec when an entry references a dataset that is not
+ * renderable (see `isRenderableDatasetId`), one its snapshot cannot answer, or
+ * the shape is malformed — never a spec
  * with stale/fictitious `data` reaches the client.
  */
 export const appendRealMapData = async (
@@ -673,7 +674,7 @@ export const appendRealMapData = async (
       return unsupportedDatasetResponse(mapDataId, spec);
     }
 
-    const data = await RENDERABLE_DATASET_FETCHERS[mapDataId]();
+    const data = await fetchRenderableData(mapDataId);
     if (data === null) {
       return unavailableDatasetResponse(mapDataId, spec);
     }

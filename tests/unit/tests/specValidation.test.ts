@@ -673,14 +673,16 @@ describe('appendRealMapData', () => {
     jest.restoreAllMocks();
   });
 
-  test('refuses a situação the snapshot does not cover, never filling it with zero', async () => {
+  test('refuses a value the snapshot does not cover, never filling it with zero', async () => {
     jest.spyOn(gateway, 'getCozinhasSituacaoPorMunicipio').mockResolvedValue({
       situacoesCobertas: ['Habilitada'],
       porMunicipio: [],
     });
 
     const result = await appendRealMapData({
-      mapData: [{ mapDataId: 'cozinhas_nao_habilitadas_2026' }],
+      mapData: [
+        { mapDataId: 'cozinhas_geolocalizadas?situacao=Não Habilitada' },
+      ],
     });
 
     if (!(result instanceof Response)) {
@@ -691,7 +693,7 @@ describe('appendRealMapData', () => {
     expect(body.message).toMatch(/Dado indisponível/);
   });
 
-  test('fills a covered situação with the real per-município counts', async () => {
+  test('fills a covered value with the real per-município counts', async () => {
     jest.spyOn(gateway, 'getCozinhasSituacaoPorMunicipio').mockResolvedValue({
       situacoesCobertas: null,
       porMunicipio: [
@@ -704,14 +706,16 @@ describe('appendRealMapData', () => {
     });
 
     const result = await appendRealMapData({
-      mapData: [{ mapDataId: 'cozinhas_habilitadas_2025' }],
+      mapData: [
+        { mapDataId: 'cozinhas_geolocalizadas_2025?situacao=Habilitada' },
+      ],
     });
 
     expect(result).not.toBeInstanceOf(Response);
     expect(result).toEqual({
       mapData: [
         {
-          mapDataId: 'cozinhas_habilitadas_2025',
+          mapDataId: 'cozinhas_geolocalizadas_2025?situacao=Habilitada',
           data: [{ geometryId: '111', value: 4 }],
         },
       ],

@@ -8,15 +8,20 @@ import type {
 } from '@/data-gateway/schema';
 import { gateway } from '@/gateway';
 
-import { situacaoCatalogueEntries } from './cozinhasSituacao';
+import {
+  type FilterDomain,
+  type FilteredMapDataId,
+  filteredMapDataRows,
+  parseFilteredMapDataId,
+} from './fieldFilters';
 import {
   ABSOLUTE_TOTAL_IDS,
   CATALOG_VARIANTS,
   type FamilyName,
   familyOf,
+  FILTER_FIELDS,
   type RenderableFieldId,
 } from './renderableFields';
-import { SITUACAO_FETCHERS } from './situacaoFetchers';
 
 /**
  * Renderable datasets whose value is an absolute total (a raw sum), never a
@@ -103,23 +108,54 @@ export const RENDERABLE_DATASET_FETCHERS = {
   municipios_idhm_educacao_frequencia: ivsField('idhmEducacaoFrequencia'),
   municipios_cadinsan: cadinsanField('proporcaoComPbf'),
   municipios_cadinsan_sem_pbf: cadinsanField('proporcaoSemPbf'),
-  ...SITUACAO_FETCHERS,
 } as const satisfies Record<RenderableFieldId, unknown>;
 
-export type RenderableDatasetId = keyof typeof RENDERABLE_DATASET_FETCHERS;
+/** A renderable id with its own fetcher. */
+type FetcherDatasetId = keyof typeof RENDERABLE_DATASET_FETCHERS;
 
-/** List of dataset IDs that the agent may reference in `mapData`. */
+/**
+ * Every id the agent may reference in `mapData`: one with its own fetcher, or
+ * a {@link FilteredMapDataId} over a filterable one.
+ */
+export type RenderableDatasetId = FetcherDatasetId | FilteredMapDataId;
+
+/** The renderable ids with their own fetcher; filtered ids are built from them. */
 export const RENDERABLE_DATASET_IDS = Object.keys(
   RENDERABLE_DATASET_FETCHERS
-) as RenderableDatasetId[];
+) as FetcherDatasetId[];
 
-/** Type guard: check if a dataset ID is renderable. */
+const hasFetcher = (id: string): id is FetcherDatasetId => {
+  return Object.hasOwn(RENDERABLE_DATASET_FETCHERS, id);
+};
+
+/** Type guard: check if a dataset ID is renderable, filtered ids included. */
 export const isRenderableDatasetId = (
   id: unknown
 ): id is RenderableDatasetId => {
   return (
-    typeof id === 'string' && Object.hasOwn(RENDERABLE_DATASET_FETCHERS, id)
+    typeof id === 'string' &&
+    (hasFetcher(id) || parseFilteredMapDataId(id) !== null)
   );
+};
+
+/**
+ * The real `mapData` rows of a renderable id, from its own fetcher or, for a
+ * filtered id, from {@link filteredMapDataRows}.
+ *
+ * @param id - A renderable id.
+ * @returns The rows, or `null` when the snapshot cannot answer the id.
+ *
+ * @example
+ * await fetchRenderableData('cozinhas_geolocalizadas_2025?situacao=Mapeada');
+ */
+export const fetchRenderableData = async (
+  id: RenderableDatasetId
+): Promise<Array<{ geometryId: string; value: number }> | null> => {
+  if (hasFetcher(id)) {
+    return RENDERABLE_DATASET_FETCHERS[id]();
+  }
+  const filter = parseFilteredMapDataId(id);
+  return filter ? filteredMapDataRows(filter) : null;
 };
 
 /** The index-only shape a non-renderable dataset is reduced to — enough for
@@ -235,11 +271,34 @@ const toAiDatasetEntries = (
   const replaced = variants.some((variant) => {
     return variant.id === dataset.id;
   });
-  const situacao =
-    dataset.id === 'cozinhas_geolocalizadas'
-      ? situacaoCatalogueEntries(projection)
-      : [];
-  return [...(replaced ? variants : [projection, ...variants]), ...situacao];
+  return replaced ? variants : [projection, ...variants];
+};
+
+/**
+ * The `filtros` a filterable dataset's entry carries: per allowlisted field,
+ * the values its snapshot holds and the filtered `mapDataId` format. Read from
+ * the data, so the agent never sees a hand-written value list.
+ */
+const withFilters = <T extends { id: string }>(
+  entry: T,
+  domains: FilterDomain[]
+): T => {
+  const own = domains.filter((domain) => {
+    return domain.baseId === entry.id;
+  });
+  return own.length === 0
+    ? entry
+    : {
+        ...entry,
+        filtros: own.map((domain) => {
+          return {
+            campo: domain.field,
+            rotulo: FILTER_FIELDS[domain.field],
+            formato: `${entry.id}?${domain.field}=<valor>`,
+            valores: domain.values,
+          };
+        }),
+      };
 };
 
 /**
@@ -255,23 +314,28 @@ const toAiDatasetEntries = (
  * entry is reduced to its index (id, title, description), so the agent sees the
  * whole catalogue but the fields of the chosen dataset alone.
  *
+ * A detailed entry of a filterable dataset also lists its `filtros` (see
+ * {@link withFilters}) from `domains`.
+ *
  * @param catalogue - The gateway's catalogue contract.
  * @param focus - The family whose detail to keep; omitted = full detail.
+ * @param domains - The values each filterable dataset holds; omitted = no `filtros`.
  * @returns The catalogue as a JSON string.
  *
  * @example
- * buildCatalogueContext(catalogue, 'cozinhas');
+ * buildCatalogueContext(catalogue, 'cozinhas', await readFilterDomains());
  */
 export const buildCatalogueContext = (
   catalogue: CatalogueContract,
-  focus?: FamilyName
+  focus?: FamilyName,
+  domains: FilterDomain[] = []
 ): string => {
   return JSON.stringify({
     catalogue: {
       ...catalogue,
       datasets: catalogue.datasets.flatMap(toAiDatasetEntries).map((entry) => {
         return focus === undefined || familyOf(entry.id) === focus
-          ? entry
+          ? withFilters(entry, domains)
           : {
               id: entry.id,
               title: entry.title,

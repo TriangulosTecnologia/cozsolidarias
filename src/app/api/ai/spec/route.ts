@@ -7,6 +7,7 @@ import {
   validateWithLocalRepairs,
 } from './candidateValidation';
 import { readCatalogueContext } from './catalogueContext';
+import type { FilterDomain } from './fieldFilters';
 import baseVisualizationSpecJson from './instructions/baseVisualizationSpec.json';
 import { type RenderableDatasetId } from './mapDataCatalogue';
 import { MAP_TYPE_OPTIONS } from './mapTypeOptions';
@@ -18,7 +19,7 @@ import {
   type PreflightResult,
 } from './preflight';
 import { familyOf } from './renderableFields';
-import { resolveServedSpec } from './serveSpec';
+import { readDomains, resolveServedSpec } from './serveSpec';
 import { applyProportionalCirclesDefaults, mergeSpecs } from './specDefaults';
 import {
   errorResponse,
@@ -65,6 +66,7 @@ type ParsedRequest = {
   sessionId?: string;
   mapType?: MapType;
   datasetId?: RenderableDatasetId;
+  filterDomains?: FilterDomain[];
 };
 
 /** The clarify question, echoing the client's session so the conversation can continue. */
@@ -97,10 +99,13 @@ const answerPreflight = (params: {
 
 /**
  * Validates the whole request body — the `prompt` and the optional `mapType`
- * and `datasetId` — then runs the {@link preflightPrompt}, answering with the
- * question when the request is ambiguous.
+ * and `datasetId` — then runs the {@link preflightPrompt} with the values the
+ * data holds for its filterable fields, answering with the question when the
+ * request is ambiguous.
  */
-const parseRequest = (rawBody: unknown): ParsedRequest | Response => {
+const parseRequest = async (
+  rawBody: unknown
+): Promise<ParsedRequest | Response> => {
   const prompt = validatePrompt(rawBody);
   if (prompt instanceof Response) {
     return prompt;
@@ -118,9 +123,13 @@ const parseRequest = (rawBody: unknown): ParsedRequest | Response => {
   if (sessionId instanceof Response) {
     return sessionId;
   }
+  const filterDomains = await readDomains(prompt);
+  if (filterDomains instanceof Response) {
+    return filterDomains;
+  }
   return answerPreflight({
-    request: { prompt, mapType, datasetId, sessionId },
-    preflight: preflightPrompt({ prompt, mapType, datasetId }),
+    request: { prompt, mapType, datasetId, sessionId, filterDomains },
+    preflight: preflightPrompt({ prompt, mapType, datasetId, filterDomains }),
   });
 };
 
@@ -200,6 +209,7 @@ const getAgentResponse = async (params: {
   prompt: string;
   mapType?: MapType;
   datasetId?: RenderableDatasetId;
+  filterDomains?: FilterDomain[];
 }): Promise<{ spec: UnknownRecord; sessionId: string } | Response> => {
   const choices = {
     prompt: params.prompt,
@@ -218,7 +228,8 @@ const getAgentResponse = async (params: {
         catalogueText: await readCatalogueContext(
           choices.datasetId === undefined
             ? undefined
-            : familyOf(choices.datasetId)
+            : familyOf(choices.datasetId),
+          params.filterDomains
         ),
       }),
       followUpMessage: buildAgentMessage(choices),
@@ -273,7 +284,7 @@ export const POST = async (request: Request): Promise<Response> => {
     return null;
   });
 
-  const requestOrError = parseRequest(rawBody);
+  const requestOrError = await parseRequest(rawBody);
   if (requestOrError instanceof Response) {
     return requestOrError;
   }
@@ -284,13 +295,8 @@ export const POST = async (request: Request): Promise<Response> => {
   }
 
   const modelJsonOrError = await getAgentResponse({
-    apiKey: envOrError.apiKey,
-    projectId: envOrError.projectId,
-    agentId: envOrError.agentId,
-    sessionId: requestOrError.sessionId,
-    prompt: requestOrError.prompt,
-    mapType: requestOrError.mapType,
-    datasetId: requestOrError.datasetId,
+    ...envOrError,
+    ...requestOrError,
   });
   if (modelJsonOrError instanceof Response) {
     return modelJsonOrError;

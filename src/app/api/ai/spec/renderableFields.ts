@@ -12,12 +12,6 @@ export type CatalogSpec = {
   officialFaixas?: 'ivs' | 'idhm';
 };
 
-/** The situation group and snapshot year a cozinhas count is taken for. */
-export type SituacaoSpec = {
-  grupo: 'habilitadas' | 'nao_habilitadas' | 'outras';
-  ano: 2025 | 2026;
-};
-
 /** Everything the app knows about one renderable `mapDataId`. */
 export type RenderableFieldMeta = {
   family?: FamilyName;
@@ -25,7 +19,8 @@ export type RenderableFieldMeta = {
   variant?: VariantSpec;
   catalog?: CatalogSpec;
   absolutoTotal?: true;
-  situacao?: SituacaoSpec;
+  /** The snapshot year a filtered id of this dataset counts (see `fieldFilters.ts`). */
+  filterYear?: 2025 | 2026;
 };
 
 /**
@@ -166,10 +161,15 @@ export const RENDERABLE_FIELD_META = {
       note: 'O mapa pinta a proporção (%) sobre o total de cadastros do CadÚnico, não a contagem',
     },
   },
-  cozinhas_geolocalizadas: { family: 'cozinhas', isDefault: true },
+  cozinhas_geolocalizadas: {
+    family: 'cozinhas',
+    isDefault: true,
+    filterYear: 2026,
+  },
   cozinhas_geolocalizadas_2025: {
     family: 'cozinhas',
     variant: { label: 'Cozinhas em 2025', match: /2025/ },
+    filterYear: 2025,
   },
   cozinhas_pessoas_atendidas: {
     family: 'cozinhas',
@@ -178,30 +178,6 @@ export const RENDERABLE_FIELD_META = {
       match: /atendid/,
     },
     absolutoTotal: true,
-  },
-  cozinhas_habilitadas_2025: {
-    family: 'cozinhas',
-    situacao: { grupo: 'habilitadas', ano: 2025 },
-  },
-  cozinhas_habilitadas_2026: {
-    family: 'cozinhas',
-    situacao: { grupo: 'habilitadas', ano: 2026 },
-  },
-  cozinhas_nao_habilitadas_2025: {
-    family: 'cozinhas',
-    situacao: { grupo: 'nao_habilitadas', ano: 2025 },
-  },
-  cozinhas_nao_habilitadas_2026: {
-    family: 'cozinhas',
-    situacao: { grupo: 'nao_habilitadas', ano: 2026 },
-  },
-  cozinhas_outras_2025: {
-    family: 'cozinhas',
-    situacao: { grupo: 'outras', ano: 2025 },
-  },
-  cozinhas_outras_2026: {
-    family: 'cozinhas',
-    situacao: { grupo: 'outras', ano: 2026 },
   },
 } satisfies Record<string, RenderableFieldMeta>;
 
@@ -231,12 +207,7 @@ export const FAMILY_DEFS: Record<
 };
 
 /** The family order the preflight tests a prompt against. */
-export const FAMILY_NAMES: FamilyName[] = [
-  'ivs',
-  'idhm',
-  'cadinsan',
-  'cozinhas',
-];
+export const FAMILY_NAMES = Object.keys(FAMILY_DEFS) as FamilyName[];
 
 /** Entries of the registry with a value, as `[id, meta]` pairs in registry order. */
 const entriesWhere = (
@@ -282,9 +253,55 @@ export const familyVariants = (
   });
 };
 
-/** The family a renderable id belongs to, or `undefined` when it has none. */
+/**
+ * The family a renderable id belongs to, or `undefined` when it has none. A
+ * filtered id (`<base>?<field>=<value>`) belongs to its base's family.
+ */
 export const familyOf = (id: string): FamilyName | undefined => {
   return (
     RENDERABLE_FIELD_META as Record<string, RenderableFieldMeta | undefined>
-  )[id]?.family;
+  )[id.split('?')[0]]?.family;
 };
+
+/**
+ * The allowlist of fields a filtered `mapDataId` may constrain, with each
+ * field's pt-BR label. A field is listed only when the gateway serves it for
+ * every filterable dataset and it is neither sensitive nor free text.
+ *
+ * deferred: `situacao` is read from the gateway's per-situação counts, which
+ * cannot answer a joint filter; a second field needs the gateway to count per
+ * located row. Revisit when a second field is requested (G-2: `situacao` only);
+ * a filter on it over a snapshot that holds only some situações answers within
+ * that coverage and states it in the legend (G-6, see `coverageNotes`).
+ *
+ * @example
+ * FILTER_FIELDS.situacao; // 'Situação'
+ */
+export const FILTER_FIELDS = { situacao: 'Situação' } as const;
+
+/** One field of {@link FILTER_FIELDS}. */
+export type FilterField = keyof typeof FILTER_FIELDS;
+
+/** The registry ids that declare a `filterYear`, i.e. accept a filter (see `fieldFilters.ts`). */
+export type FilterableBaseId = {
+  [K in keyof typeof RENDERABLE_FIELD_META]: (typeof RENDERABLE_FIELD_META)[K] extends {
+    filterYear: number;
+  }
+    ? K
+    : never;
+}[keyof typeof RENDERABLE_FIELD_META];
+
+/**
+ * The registry ids that accept a filter, each with its snapshot year.
+ *
+ * @example
+ * FILTERABLE_BASES.map(({ baseId }) => baseId); // ['cozinhas_geolocalizadas', 'cozinhas_geolocalizadas_2025']
+ */
+export const FILTERABLE_BASES = entriesWhere((meta) => {
+  return meta.filterYear !== undefined;
+}).map(([id, meta]) => {
+  return {
+    baseId: id as FilterableBaseId,
+    ano: meta.filterYear as 2025 | 2026,
+  };
+});

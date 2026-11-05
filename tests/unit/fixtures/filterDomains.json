@@ -1,0 +1,24 @@
+[
+  {
+    "baseId": "cozinhas_geolocalizadas",
+    "ano": 2026,
+    "field": "situacao",
+    "values": ["Habilitada"]
+  },
+  {
+    "baseId": "cozinhas_geolocalizadas_2025",
+    "ano": 2025,
+    "field": "situacao",
+    "values": [
+      "Em análise",
+      "Enviada para análise",
+      "Habilitada",
+      "Homologada para Habilitação",
+      "Homologada para Retirada",
+      "Mapeada",
+      "Não Habilitada",
+      "Pendência emitida pelo MDS (Prazo para adequações 15 dias)",
+      "Retirada"
+    ]
+  }
+]

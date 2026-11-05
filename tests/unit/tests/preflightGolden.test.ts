@@ -1,5 +1,7 @@
+import type { FilterDomain } from 'src/app/api/ai/spec/fieldFilters';
 import { preflightPrompt } from 'src/app/api/ai/spec/preflight';
 
+import filterDomains from '../fixtures/filterDomains.json';
 import golden from '../fixtures/preflightGolden.json';
 
 type GoldenCase = {
@@ -9,7 +11,8 @@ type GoldenCase = {
 
 /**
  * Behaviour lock for the preflight: every recorded prompt must keep producing
- * the exact same verdict. Refactors of the field registry must leave this file
+ * the exact same verdict, matched against the real snapshots' filter values
+ * (`filterDomains.json`). Refactors of the field registry must leave this file
  * untouched; a diff here means behaviour changed.
  */
 describe('preflightPrompt golden behaviour', () => {
@@ -24,6 +27,7 @@ describe('preflightPrompt golden behaviour', () => {
         prompt: input.prompt,
         datasetId: input.datasetId as never,
         mapType: input.mapType as never,
+        filterDomains: filterDomains as FilterDomain[],
       })
     ).toEqual(output);
   });

@@ -1,9 +1,14 @@
+import type { FilterDomain } from 'src/app/api/ai/spec/fieldFilters';
 import { RENDERABLE_DATASET_IDS } from 'src/app/api/ai/spec/mapDataCatalogue';
 import {
   clarifyResponse,
   FAMILIES,
   preflightPrompt,
 } from 'src/app/api/ai/spec/preflight';
+
+import filterDomains from '../fixtures/filterDomains.json';
+
+const FILTER_DOMAINS = filterDomains as FilterDomain[];
 
 describe('preflightPrompt', () => {
   test('resolves a family named without a variant to its default dataset', () => {
@@ -100,33 +105,69 @@ describe('preflightPrompt', () => {
     ).toEqual({ status: 'resolved' });
   });
 
-  test('resolves a cozinhas situation to its deterministic mapDataId and year', () => {
-    expect(preflightPrompt({ prompt: 'cozinhas habilitadas 2025' })).toEqual({
+  test('resolves a cozinhas situation to the filtered id of its year', () => {
+    expect(
+      preflightPrompt({
+        prompt: 'cozinhas habilitadas 2025',
+        filterDomains: FILTER_DOMAINS,
+      })
+    ).toEqual({
       status: 'resolved',
-      datasetId: 'cozinhas_habilitadas_2025',
+      datasetId: 'cozinhas_geolocalizadas_2025?situacao=Habilitada',
     });
-    expect(preflightPrompt({ prompt: 'cozinhas não habilitadas' })).toEqual({
+    expect(
+      preflightPrompt({
+        prompt: 'cozinhas habilitadas',
+        filterDomains: FILTER_DOMAINS,
+      })
+    ).toEqual({
       status: 'resolved',
-      datasetId: 'cozinhas_nao_habilitadas_2026',
+      datasetId: 'cozinhas_geolocalizadas?situacao=Habilitada',
     });
-    expect(preflightPrompt({ prompt: 'cozinhas com outra situação' })).toEqual({
-      status: 'resolved',
-      datasetId: 'cozinhas_outras_2026',
+  });
+
+  test('refuses não habilitadas in 2026, whose snapshot holds only habilitadas', () => {
+    expect(
+      preflightPrompt({
+        prompt: 'cozinhas não habilitadas',
+        filterDomains: FILTER_DOMAINS,
+      }).status
+    ).toBe('unsupported');
+  });
+
+  test('asks which value for "outras", never one fixed group', () => {
+    const result = preflightPrompt({
+      prompt: 'cozinhas com outra situação em 2025',
+      filterDomains: FILTER_DOMAINS,
     });
+
+    expect(result.status).toBe('ambiguous');
+    if (result.status !== 'ambiguous') {
+      throw new Error('expected ambiguous');
+    }
+    expect(
+      result.clarify.options.map((option) => {
+        return option.value;
+      })
+    ).toContain('cozinhas_geolocalizadas_2025?situacao=Mapeada');
   });
 
   test('never reads a negated não habilitada as habilitada', () => {
     expect(
-      preflightPrompt({ prompt: 'cozinhas não habilitadas 2025' })
+      preflightPrompt({
+        prompt: 'cozinhas não habilitadas 2025',
+        filterDomains: FILTER_DOMAINS,
+      })
     ).toEqual({
       status: 'resolved',
-      datasetId: 'cozinhas_nao_habilitadas_2025',
+      datasetId: 'cozinhas_geolocalizadas_2025?situacao=Não Habilitada',
     });
   });
 
   test('refuses a prompt that names two situations, never answering one silently', () => {
     const result = preflightPrompt({
       prompt: 'cozinhas habilitadas e não habilitadas',
+      filterDomains: FILTER_DOMAINS,
     });
 
     expect(result.status).toBe('unsupported');
@@ -137,12 +178,14 @@ describe('preflightPrompt', () => {
       preflightPrompt({
         prompt: 'cozinhas habilitadas',
         datasetId: 'cozinhas_pessoas_atendidas',
+        filterDomains: FILTER_DOMAINS,
       }).status
     ).toBe('unsupported');
     expect(
       preflightPrompt({
         prompt: 'ivs infraestrutura e cozinhas habilitadas',
         datasetId: 'municipios_ivs_infraestrutura',
+        filterDomains: FILTER_DOMAINS,
       }).status
     ).toBe('unsupported');
   });

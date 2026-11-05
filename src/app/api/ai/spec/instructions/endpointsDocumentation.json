@@ -394,16 +394,16 @@
   },
   {
     "method": "MAPDATA",
-    "path": "(mapDataId cozinhas por situação e ano)",
-    "summary": "Contagem de cozinhas por município, por situação (habilitadas, não habilitadas ou outras) e por ano.",
+    "path": "(mapDataId filtrado por valor de campo)",
+    "summary": "Contagem de cozinhas por município cujo campo tem um valor, como uma situação.",
     "parameters": [],
     "response": {
-      "description": "Um mapDataId por combinação de situação e ano; o valor é a contagem de cozinhas localizadas no município."
+      "description": "O valor é a contagem de cozinhas localizadas no município cujo campo tem o valor pedido."
     },
-    "usage": "Quando o pedido for sobre situação de cozinhas, use exatamente um destes mapDataId: cozinhas_habilitadas_2025, cozinhas_habilitadas_2026, cozinhas_nao_habilitadas_2025, cozinhas_nao_habilitadas_2026, cozinhas_outras_2025, cozinhas_outras_2026.",
+    "usage": "Para contar só as cozinhas com um valor de campo, use um mapDataId no formato <base>?<campo>=<valor>, com <base> em cozinhas_geolocalizadas, cozinhas_geolocalizadas_2025 e <campo> em situacao. Os valores aceitos estão em \"filtros\" na entrada da base no catálogo; copie o valor exatamente.",
     "constraints": [
-      "O snapshot de 2026 só contém cozinhas habilitadas: cozinhas_nao_habilitadas_2026 e cozinhas_outras_2026 são desconhecidos, nunca zero.",
-      "Não combine duas situações em um mesmo mapa."
+      "Um valor ausente de \"filtros\" é desconhecido, nunca zero: não o use.",
+      "Um campo e um valor por mapDataId; não combine valores em um mesmo mapa."
     ]
   }
 ]

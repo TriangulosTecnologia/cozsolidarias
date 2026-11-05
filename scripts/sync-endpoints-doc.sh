@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Regenerates the situação entry of endpointsDocumentation.json from the
-# renderable-field registry. Compiles the TypeScript sources with the local tsc
+# Regenerates the filter entry of endpointsDocumentation.json from the
+# filterable bases and the field allowlist. Compiles the TypeScript sources with the local tsc
 # into a temporary CommonJS build, then runs it. Run from the repository root.
 set -euo pipefail
 
