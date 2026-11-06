@@ -178,12 +178,6 @@ const toAiDatasetProjection = (
 };
 
 /**
- * Catalogue variants, derived from the renderable-field registry: each id is
- * exposed to the agent with its own field description, note and faixa.
- */
-const CATALOGUE_VARIANTS = CATALOG_VARIANTS;
-
-/**
  * The official faixa family (IPEA) a renderable id paints, or `undefined` when
  * its scale is free to be chosen. Read by `findReclassifiedOfficialIndex`.
  *
@@ -196,7 +190,7 @@ const CATALOGUE_VARIANTS = CATALOG_VARIANTS;
 export const officialFaixasOf = (
   mapDataId: string
 ): 'ivs' | 'idhm' | undefined => {
-  return CATALOGUE_VARIANTS[mapDataId]?.officialFaixas;
+  return CATALOG_VARIANTS[mapDataId]?.officialFaixas;
 };
 
 /** The catalogue entries a dataset yields: itself, unless a variant takes its id, plus one per variant it owns. */
@@ -204,33 +198,31 @@ const toAiDatasetEntries = (
   dataset: CatalogueDatasetContract
 ): Array<CatalogueDatasetIndexEntry | CatalogueDatasetDetailEntry> => {
   const projection = toAiDatasetProjection(dataset);
-  const variants = Object.entries(CATALOGUE_VARIANTS).flatMap(
-    ([id, variant]) => {
-      const field = dataset.fields.find((candidate) => {
-        return candidate.name === variant.fieldName && !candidate.sensitive;
-      });
-      if (variant.datasetId !== dataset.id || !field) {
-        return [];
-      }
-      return [
-        {
-          ...projection,
-          id,
-          title: `${dataset.title} — ${field.name}`,
-          description: variant.note
-            ? `${field.description}. ${variant.note}.`
-            : field.description,
-          fields: [
-            {
-              name: field.name,
-              description: field.description,
-              unit: field.unit,
-            },
-          ],
-        },
-      ];
+  const variants = Object.entries(CATALOG_VARIANTS).flatMap(([id, variant]) => {
+    const field = dataset.fields.find((candidate) => {
+      return candidate.name === variant.fieldName && !candidate.sensitive;
+    });
+    if (variant.datasetId !== dataset.id || !field) {
+      return [];
     }
-  );
+    return [
+      {
+        ...projection,
+        id,
+        title: `${dataset.title} — ${field.name}`,
+        description: variant.note
+          ? `${field.description}. ${variant.note}.`
+          : field.description,
+        fields: [
+          {
+            name: field.name,
+            description: field.description,
+            unit: field.unit,
+          },
+        ],
+      },
+    ];
+  });
   const replaced = variants.some((variant) => {
     return variant.id === dataset.id;
   });

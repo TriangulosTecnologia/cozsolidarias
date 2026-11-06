@@ -11,7 +11,7 @@ description: |
   malha determinística (`candidateValidation.ts`/`specValidation.ts`), ou medir a distância das
   specs geradas até a spec mínima de cada modo do `/mapas`.
 metadata:
-  skillVersion: 2.0.0
+  skillVersion: 2.1.0
 ---
 
 # Otimizador de instruções do geovis-spec-generator
@@ -72,7 +72,7 @@ execução, nunca reutilizado, nunca editado depois). Na raiz, `versions.json` o
 ```json
 {
   "runId": "2026-09-28T14-03-11Z--poda-duplicata",
-  "skillVersion": "2.0.0",
+  "skillVersion": "2.1.0",
   "sources": {
     "agentInstructions": { "formationFile": "agents/geovis-spec-generator/formation.json", "sha256": "…" },
     "instructions": { "path": "src/app/api/ai/spec/route.ts", "gitSha": "…", "sha256": "…" },
@@ -92,7 +92,7 @@ execução, nunca reutilizado, nunca editado depois). Na raiz, `versions.json` o
 
 Regras de preenchimento:
 
-- **`skillVersion`** — o `version` do frontmatter. Semver: patch = texto, minor = novo gate/eixo,
+- **`skillVersion`** — o `metadata.skillVersion` do frontmatter. Semver: patch = texto, minor = novo gate/eixo,
   major = formato de `runs/`/`versions.json` ou transporte do agente muda. Rodadas com
   `skillVersion` major diferente (ex.: 1.x Managed Agents × 2.x Naturali) nunca são comparadas.
 - **`spec.schemaVersion`** — hoje **2**. Registre `geovisPackageVersion` do `package.json` e o

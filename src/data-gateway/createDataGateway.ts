@@ -239,6 +239,10 @@ const getAggregate = (year: CozinhaYear) => {
     return aggregateCozinhasPorMunicipio({ cozinhas, municipios });
   });
   aggregates.set(year, promise);
+  // A failed read must not stay cached: the next call retries.
+  promise.catch(() => {
+    aggregates.delete(year);
+  });
   return promise;
 };
 
@@ -263,6 +267,9 @@ const getSituacaoSnapshot = (
     });
   });
   situacaoSnapshots.set(year, snapshot);
+  snapshot.catch(() => {
+    situacaoSnapshots.delete(year);
+  });
   return snapshot;
 };
 
@@ -287,9 +294,14 @@ const createStaticGateway = (): DataGateway => {
     },
     getCadinsanPorMunicipio: () => {
       // Static snapshot: the projection is memoized for the process lifetime.
-      cadinsanRows ??= readStaticCadinsanMunicipal().then(
-        toCadinsanPorMunicipio
-      );
+      if (!cadinsanRows) {
+        cadinsanRows = readStaticCadinsanMunicipal().then(
+          toCadinsanPorMunicipio
+        );
+        cadinsanRows.catch(() => {
+          cadinsanRows = undefined;
+        });
+      }
       return cadinsanRows;
     },
     getCatalogue: async () => {
@@ -325,7 +337,12 @@ const createStaticGateway = (): DataGateway => {
     },
     getIvsPorMunicipio: () => {
       // Static snapshot: the projection is memoized for the process lifetime.
-      ivsRows ??= readStaticIvs().then(toMunicipioIvs);
+      if (!ivsRows) {
+        ivsRows = readStaticIvs().then(toMunicipioIvs);
+        ivsRows.catch(() => {
+          ivsRows = undefined;
+        });
+      }
       return ivsRows;
     },
     getPaaAlimentosPorMunicipio: async () => {

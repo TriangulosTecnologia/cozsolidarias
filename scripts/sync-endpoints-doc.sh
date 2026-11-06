@@ -5,6 +5,8 @@
 set -euo pipefail
 
 OUT="$(mktemp -d)"
+trap 'rm -rf "$OUT"' EXIT
+DOC=src/app/api/ai/spec/instructions/endpointsDocumentation.json
 
 node_modules/.bin/tsc \
   --ignoreConfig \
@@ -17,3 +19,6 @@ node_modules/.bin/tsc \
   scripts/sync-endpoints-doc.ts
 
 node "$OUT/scripts/sync-endpoints-doc.js"
+
+# The generator emits expanded JSON; prettier restores the repository format.
+node_modules/.bin/prettier --write "$DOC"
