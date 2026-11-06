@@ -138,13 +138,10 @@ const parseRequest = async (
   });
 };
 
-const validateEnv = ():
-  | {
-      apiKey: string;
-      projectId: string;
-      agentId: string;
-    }
-  | Response => {
+/** The Naturali credentials and ids the route reads from the server environment. */
+type NaturaliEnv = { apiKey: string; projectId: string; agentId: string };
+
+const validateEnv = (): NaturaliEnv | Response => {
   // deferred: legacy NATURALI_API_KEY fallback, remove once Vercel renames it to NATURALI_TOKEN
   const apiKey =
     process.env['NATURALI_TOKEN'] || process.env['NATURALI_API_KEY'];
