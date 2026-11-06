@@ -151,7 +151,12 @@
         "notes": "Dado primário coletado pela equipe do projeto;"
       },
       "temporal": {
-        "status": "unknown"
+        "status": "described",
+        "extent": [["2026-01-01", "2026-12-31"]],
+        "grain": "P1Y",
+        "frequency": "one_time",
+        "history": "snapshot",
+        "timezone": "America/Sao_Paulo"
       },
       "spatial": {
         "status": "described",
@@ -418,7 +423,12 @@
         "notes": "Mesma planilha de cozinhas_geolocalizadas; este dataset é a agregação por município do campo \"Público Total Atendido\", computada em data-gateway (`aggregateCozinhasPorMunicipio` / `parsePessoasAtendidas`), não uma leitura direta do CSV."
       },
       "temporal": {
-        "status": "unknown"
+        "status": "described",
+        "extent": [["2026-01-01", "2026-12-31"]],
+        "grain": "P1Y",
+        "frequency": "one_time",
+        "history": "snapshot",
+        "timezone": "America/Sao_Paulo"
       },
       "spatial": {
         "status": "described",
