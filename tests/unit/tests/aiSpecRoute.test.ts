@@ -117,7 +117,7 @@ const ONE_MAP_DATA = [
 ];
 
 const ENV_KEYS = [
-  'NATURALI_API_KEY',
+  'NATURALI_TOKEN',
   'NATURALI_PROJECT_ID',
   'NATURALI_AGENT_ID',
 ] as const;
@@ -209,6 +209,7 @@ describe('POST /api/ai/spec', () => {
         process.env[key] = original;
       }
     }
+    delete process.env['NATURALI_API_KEY'];
     jest.restoreAllMocks();
     jest.useRealTimers();
   });
@@ -537,8 +538,33 @@ describe('POST /api/ai/spec', () => {
   // Server configuration - API key, project ID, agent ID
   // ---------------------------------------------------------------------------
 
+  test.each([
+    ['unset', undefined],
+    ['empty', ''],
+  ])(
+    'falls back to NATURALI_API_KEY when NATURALI_TOKEN is %s',
+    async (_label, token) => {
+      if (token === undefined) {
+        delete process.env['NATURALI_TOKEN'];
+      } else {
+        process.env['NATURALI_TOKEN'] = token;
+      }
+      process.env['NATURALI_API_KEY'] = 'test-legacy-key';
+      const fetchMock = mockSessionOpening().mockResolvedValue(
+        jsonResponse({}, false)
+      );
+      global.fetch = fetchMock;
+
+      await POST(jsonRequest({ prompt: 'mapa de cozinhas por município' }));
+
+      expect(fetchMock.mock.calls[0]?.[1]).toMatchObject({
+        headers: { authorization: 'Bearer test-legacy-key' },
+      });
+    }
+  );
+
   test('rejects the request when server config is missing', async () => {
-    delete process.env['NATURALI_API_KEY'];
+    delete process.env['NATURALI_TOKEN'];
 
     const response = await POST(
       jsonRequest({ prompt: 'mapa de cozinhas por município' })

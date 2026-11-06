@@ -59,7 +59,10 @@ const runScript = (params: ScriptParams): ScriptRun => {
       `        "instructions": ${JSON.stringify(currentText)},`;
     writeFileSync(formationPath, formationLines.join('\n'));
 
-    const env: NodeJS.ProcessEnv = { ...process.env };
+    const env: NodeJS.ProcessEnv = {
+      ...process.env,
+      NATURALI_AGENT_ID: 'agent_test',
+    };
     if (params.projectId === null) {
       delete env['NATURALI_PROJECT_ID'];
     } else {
@@ -88,7 +91,8 @@ describe('update-instructions.mjs', () => {
     const run = runScript({ currentInstructions: 'x'.repeat(20_000) });
 
     expect(run.status).toBe(0);
-    expect(run.output).toMatch(/dry run: \d+ chars/);
+    expect(run.output).toMatch(/formation\.json changed: \w+ \(\d+ chars\)/);
+    expect(run.output).toMatch(/re-run with --apply to push/);
   });
 
   test('fails when the new text is above the 27000 char limit', () => {
@@ -101,6 +105,7 @@ describe('update-instructions.mjs', () => {
   test('fails when NATURALI_PROJECT_ID is not set', () => {
     const run = runScript({
       currentInstructions: 'x'.repeat(20_000),
+      args: ['--apply'],
       projectId: null,
     });
 

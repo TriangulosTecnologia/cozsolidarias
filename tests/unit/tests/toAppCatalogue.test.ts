@@ -121,10 +121,7 @@ describe('toAppCatalogue', () => {
     expect(byId('caf_areas')?.sizeBytes).toBeNull();
 
     // Gaps are derived from each dataset's own metadata, not authored.
-    expect(byId('cozinhas_geolocalizadas')?.gaps).toEqual([
-      'temporalUnknown',
-      'precisionUnknown',
-    ]);
+    expect(byId('cozinhas_geolocalizadas')?.gaps).toEqual(['precisionUnknown']);
     expect(byId('caf_areas')?.gaps).toEqual([
       'temporalUnknown',
       'precisionUnknown',

@@ -129,13 +129,15 @@ const validateEnv = ():
       agentId: string;
     }
   | Response => {
-  const apiKey = process.env['NATURALI_API_KEY'];
+  // deferred: legacy NATURALI_API_KEY fallback, remove once Vercel renames it to NATURALI_TOKEN
+  const apiKey =
+    process.env['NATURALI_TOKEN'] || process.env['NATURALI_API_KEY'];
   const projectId = process.env['NATURALI_PROJECT_ID'];
   const agentId = process.env['NATURALI_AGENT_ID'];
 
   if (!apiKey || !projectId || !agentId) {
     const missing = [
-      !apiKey ? 'NATURALI_API_KEY' : null,
+      !apiKey ? 'NATURALI_TOKEN' : null,
       !projectId ? 'NATURALI_PROJECT_ID' : null,
       !agentId ? 'NATURALI_AGENT_ID' : null,
     ].filter((name): name is string => {
