@@ -681,7 +681,10 @@ describe('appendRealMapData', () => {
 
     const result = await appendRealMapData({
       mapData: [
-        { mapDataId: 'cozinhas_geolocalizadas?situacao=Não Habilitada' },
+        {
+          mapDataId: 'cozinhas_geolocalizadas',
+          filter: { situacao: 'Não Habilitada' },
+        },
       ],
     });
 
@@ -707,7 +710,10 @@ describe('appendRealMapData', () => {
 
     const result = await appendRealMapData({
       mapData: [
-        { mapDataId: 'cozinhas_geolocalizadas_2025?situacao=Habilitada' },
+        {
+          mapDataId: 'cozinhas_geolocalizadas_2025',
+          filter: { situacao: 'Habilitada' },
+        },
       ],
     });
 
@@ -715,7 +721,7 @@ describe('appendRealMapData', () => {
     expect(result).toEqual({
       mapData: [
         {
-          mapDataId: 'cozinhas_geolocalizadas_2025?situacao=Habilitada',
+          mapDataId: 'cozinhas_geolocalizadas_2025',
           data: [{ geometryId: '111', value: 4 }],
         },
       ],

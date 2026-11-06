@@ -5,11 +5,17 @@ import {
 import { gateway } from '@/gateway';
 
 import {
+  filteredMapDataRows,
+  type ParsedFilter,
+  parseMapDataFilter,
+} from './fieldFilters';
+import {
   ABSOLUTE_TOTAL_DATASET_IDS,
-  fetchRenderableData,
   isRenderableDatasetId,
   officialFaixasOf,
+  RENDERABLE_DATASET_FETCHERS,
   RENDERABLE_DATASET_IDS,
+  type RenderableDatasetId,
 } from './mapDataCatalogue';
 import { MAP_TYPE_OPTIONS } from './mapTypeOptions';
 import { requirementsFrom } from './specRequirements';
@@ -148,7 +154,7 @@ export const KNOWN_SOURCE_URLS = [
 /**
  * Maps each KNOWN_SOURCE_URL to its physical location on disk or endpoint
  * type, and — for an API-backed URL — a `resolver` that fetches the real
- * `data-gateway` value the same way {@link fetchRenderableData} does
+ * `data-gateway` value the same way {@link RENDERABLE_DATASET_FETCHERS} does
  * for `mapData` (see {@link appendRealSourceData}). A static file under
  * `public/geo/` has no `resolver`: the client fetches that URL itself, so its
  * `sources[].data` string is left untouched. Used to generate explicit
@@ -625,16 +631,62 @@ export const findReclassifiedOfficialIndex = (
 };
 
 /**
+ * A `mapData` entry without its `filter`: geovis accepts no such property, and
+ * a served spec never carries one (the filter stays on the server).
+ *
+ * @example
+ * withoutFilter({ mapDataId: 'x', filter: { situacao: 'Mapeada' } }); // { mapDataId: 'x' }
+ */
+export const withoutFilter = (entry: UnknownRecord): UnknownRecord => {
+  return Object.fromEntries(
+    Object.entries(entry).filter(([key]) => {
+      return key !== 'filter';
+    })
+  );
+};
+
+/**
+ * The real rows of one entry: its dataset's fetcher, or a filter applied —
+ * the server's for that dataset, else the entry's `filter` (see
+ * {@link parseMapDataFilter}). A malformed `filter` is a 422; a value the
+ * snapshot does not cover is the 422 for an unavailable dataset.
+ */
+const fetchEntryData = async (params: {
+  mapDataId: RenderableDatasetId;
+  entry: UnknownRecord;
+  serverFilter?: ParsedFilter;
+  spec: unknown;
+}): Promise<Array<{ geometryId: string; value: number }> | Response> => {
+  const { mapDataId, entry, spec } = params;
+  const filter =
+    params.serverFilter ??
+    ('filter' in entry
+      ? parseMapDataFilter({ mapDataId, filter: entry['filter'] })
+      : undefined);
+  if (typeof filter === 'string') {
+    return invalidSpecResponse({ message: filter, spec });
+  }
+  const data = filter
+    ? await filteredMapDataRows(filter)
+    : await RENDERABLE_DATASET_FETCHERS[mapDataId]();
+  return data ?? unavailableDatasetResponse(mapDataId, spec);
+};
+
+/**
  * MapData Append (ADR-0001): resolves each `mapData[].mapDataId` the agent
- * emitted against {@link fetchRenderableData} and replaces its
- * placeholder `data` with real `data-gateway` values. Returns a `Response`
- * (422) instead of the spec when an entry references a dataset that is not
- * renderable (see `isRenderableDatasetId`), one its snapshot cannot answer, or
- * the shape is malformed — never a spec
- * with stale/fictitious `data` reaches the client.
+ * emitted against {@link RENDERABLE_DATASET_FETCHERS} — or, for an entry with
+ * a `filter`, against that filter on the dataset's snapshot — and replaces its
+ * placeholder `data` with real `data-gateway` values, dropping `filter`.
+ * Returns a `Response` (422) instead of the spec when an entry references a
+ * dataset outside {@link RENDERABLE_DATASET_IDS}, carries a malformed
+ * `filter`, asks for a value its snapshot cannot answer, or the shape is
+ * malformed — never a spec with stale/fictitious `data` reaches the client.
+ * `serverFilters` (by dataset id) override an entry's `filter` without
+ * touching `spec`, so every 422 carries the spec as it came in.
  */
 export const appendRealMapData = async (
-  spec: UnknownRecord
+  spec: UnknownRecord,
+  serverFilters: ReadonlyMap<string, ParsedFilter> = new Map()
 ): Promise<UnknownRecord | Response> => {
   const mapData = spec['mapData'];
   if (
@@ -674,11 +726,16 @@ export const appendRealMapData = async (
       return unsupportedDatasetResponse(mapDataId, spec);
     }
 
-    const data = await fetchRenderableData(mapDataId);
-    if (data === null) {
-      return unavailableDatasetResponse(mapDataId, spec);
+    const data = await fetchEntryData({
+      mapDataId,
+      entry,
+      serverFilter: serverFilters.get(mapDataId),
+      spec,
+    });
+    if (data instanceof Response) {
+      return data;
     }
-    resolvedMapData.push({ ...entry, data });
+    resolvedMapData.push({ ...withoutFilter(entry), data });
   }
 
   return { ...spec, mapData: resolvedMapData };

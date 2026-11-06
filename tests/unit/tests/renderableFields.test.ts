@@ -41,9 +41,7 @@ describe('renderable-field registry parity', () => {
 
   test('familyOf reads the family a registry id belongs to, and nothing for an unknown id', () => {
     expect(familyOf('municipios_ivs_infraestrutura')).toBe('ivs');
-    expect(familyOf('cozinhas_geolocalizadas_2025?situacao=Mapeada')).toBe(
-      'cozinhas'
-    );
+    expect(familyOf('cozinhas_geolocalizadas_2025')).toBe('cozinhas');
     expect(familyOf('caf_areas')).toBeUndefined();
   });
 

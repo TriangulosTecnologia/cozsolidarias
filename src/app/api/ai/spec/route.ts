@@ -7,7 +7,7 @@ import {
   validateWithLocalRepairs,
 } from './candidateValidation';
 import { readCatalogueContext } from './catalogueContext';
-import type { FilterDomain } from './fieldFilters';
+import type { FilterDomain, ServerFilter } from './fieldFilters';
 import baseVisualizationSpecJson from './instructions/baseVisualizationSpec.json';
 import { type RenderableDatasetId } from './mapDataCatalogue';
 import { MAP_TYPE_OPTIONS } from './mapTypeOptions';
@@ -66,6 +66,7 @@ type ParsedRequest = {
   sessionId?: string;
   mapType?: MapType;
   datasetId?: RenderableDatasetId;
+  filter?: ServerFilter;
   filterDomains?: FilterDomain[];
 };
 
@@ -94,7 +95,11 @@ const answerPreflight = (params: {
   if (preflight.status === 'unsupported') {
     return invalidSpecResponse({ message: preflight.message });
   }
-  return { ...request, datasetId: request.datasetId ?? preflight.datasetId };
+  return {
+    ...request,
+    datasetId: request.datasetId ?? preflight.datasetId,
+    filter: preflight.filter,
+  };
 };
 
 /**
@@ -203,21 +208,11 @@ const describeAgentFailure = (error: unknown): string => {
  * `Response` for a transport failure (502) or a rejected spec (422; stamped
  * with the session id once one exists).
  */
-const getAgentResponse = async (params: {
-  apiKey: string;
-  projectId: string;
-  agentId: string;
-  sessionId?: string;
-  prompt: string;
-  mapType?: MapType;
-  datasetId?: RenderableDatasetId;
-  filterDomains?: FilterDomain[];
-}): Promise<{ spec: UnknownRecord; sessionId: string } | Response> => {
-  const choices = {
-    prompt: params.prompt,
-    mapType: params.mapType,
-    datasetId: params.datasetId,
-  };
+const getAgentResponse = async (
+  params: NaturaliEnv & ParsedRequest
+): Promise<{ spec: UnknownRecord; sessionId: string } | Response> => {
+  const { prompt, mapType, datasetId, filter } = params;
+  const choices = { prompt, mapType, datasetId, filter };
   let generated: Awaited<ReturnType<typeof generateInSession>>;
   try {
     generated = await generateInSession({
@@ -313,6 +308,7 @@ export const POST = async (request: Request): Promise<Response> => {
     ),
     agentSpec: modelJsonOrError.spec,
     chosen: requestOrError.datasetId,
+    filter: requestOrError.filter,
   });
   if (servedOrError instanceof Response) {
     return withSessionId(servedOrError, sessionId);

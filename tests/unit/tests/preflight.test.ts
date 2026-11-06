@@ -105,7 +105,7 @@ describe('preflightPrompt', () => {
     ).toEqual({ status: 'resolved' });
   });
 
-  test('resolves a cozinhas situation to the filtered id of its year', () => {
+  test('resolves a cozinhas situation to its year base plus a server filter', () => {
     expect(
       preflightPrompt({
         prompt: 'cozinhas habilitadas 2025',
@@ -113,7 +113,8 @@ describe('preflightPrompt', () => {
       })
     ).toEqual({
       status: 'resolved',
-      datasetId: 'cozinhas_geolocalizadas_2025?situacao=Habilitada',
+      datasetId: 'cozinhas_geolocalizadas_2025',
+      filter: { field: 'situacao', value: 'Habilitada' },
     });
     expect(
       preflightPrompt({
@@ -122,7 +123,8 @@ describe('preflightPrompt', () => {
       })
     ).toEqual({
       status: 'resolved',
-      datasetId: 'cozinhas_geolocalizadas?situacao=Habilitada',
+      datasetId: 'cozinhas_geolocalizadas',
+      filter: { field: 'situacao', value: 'Habilitada' },
     });
   });
 
@@ -135,21 +137,16 @@ describe('preflightPrompt', () => {
     ).toBe('unsupported');
   });
 
-  test('asks which value for "outras", never one fixed group', () => {
+  test('refuses "outras" with the values to name, never one fixed group', () => {
     const result = preflightPrompt({
       prompt: 'cozinhas com outra situação em 2025',
       filterDomains: FILTER_DOMAINS,
     });
 
-    expect(result.status).toBe('ambiguous');
-    if (result.status !== 'ambiguous') {
-      throw new Error('expected ambiguous');
-    }
-    expect(
-      result.clarify.options.map((option) => {
-        return option.value;
-      })
-    ).toContain('cozinhas_geolocalizadas_2025?situacao=Mapeada');
+    expect(result).toMatchObject({
+      status: 'unsupported',
+      message: expect.stringContaining('Mapeada'),
+    });
   });
 
   test('never reads a negated não habilitada as habilitada', () => {
@@ -160,7 +157,8 @@ describe('preflightPrompt', () => {
       })
     ).toEqual({
       status: 'resolved',
-      datasetId: 'cozinhas_geolocalizadas_2025?situacao=Não Habilitada',
+      datasetId: 'cozinhas_geolocalizadas_2025',
+      filter: { field: 'situacao', value: 'Não Habilitada' },
     });
   });
 

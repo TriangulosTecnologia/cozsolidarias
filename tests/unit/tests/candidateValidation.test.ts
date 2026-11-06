@@ -490,6 +490,7 @@ describe('validateCandidate', () => {
   test('rejects a non-object candidate', () => {
     expect(validateCandidate('text')).toEqual({
       spec: 'text',
+      filters: [],
       issues: [
         {
           code: 'invalid-spec-shape',
@@ -512,6 +513,7 @@ describe('validateCandidate', () => {
         layers: [{ id: 'fill' }],
         legends: [{ id: 'l' }],
       },
+      filters: [],
       issues: [],
     });
   });

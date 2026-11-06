@@ -253,14 +253,11 @@ export const familyVariants = (
   });
 };
 
-/**
- * The family a renderable id belongs to, or `undefined` when it has none. A
- * filtered id (`<base>?<field>=<value>`) belongs to its base's family.
- */
+/** The family a renderable id belongs to, or `undefined` when it has none. */
 export const familyOf = (id: string): FamilyName | undefined => {
   return (
     RENDERABLE_FIELD_META as Record<string, RenderableFieldMeta | undefined>
-  )[id.split('?')[0]]?.family;
+  )[id]?.family;
 };
 
 /**

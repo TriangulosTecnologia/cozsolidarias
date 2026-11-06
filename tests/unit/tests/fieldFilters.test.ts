@@ -1,18 +1,17 @@
 import {
   type FilterDomain,
-  filteredMapDataId,
   filteredMapDataRows,
+  filterNote,
+  filterOn,
   matchFilterValues,
   namesFilterableFamily,
-  parseFilteredMapDataId,
+  parseMapDataFilter,
   readFilterDomains,
   readFilterDomainsFor,
 } from 'src/app/api/ai/spec/fieldFilters';
 import {
   buildCatalogueContext,
-  fetchRenderableData,
   isRenderableDatasetId,
-  type RenderableDatasetId,
 } from 'src/app/api/ai/spec/mapDataCatalogue';
 import { preflightPrompt } from 'src/app/api/ai/spec/preflight';
 import { appendRealMapData } from 'src/app/api/ai/spec/specValidation';
@@ -90,12 +89,22 @@ afterEach(() => {
   jest.restoreAllMocks();
 });
 
-describe('parseFilteredMapDataId', () => {
+/** The preflight verdict for a value resolved on a base, filter kept server-side. */
+const resolved = (datasetId: string, value: string) => {
+  return {
+    status: 'resolved',
+    datasetId,
+    filter: { field: 'situacao', value },
+  };
+};
+
+describe('parseMapDataFilter', () => {
   test('reads the base, its snapshot year, the field and the raw value', () => {
     expect(
-      parseFilteredMapDataId(
-        'cozinhas_geolocalizadas_2025?situacao=Não Habilitada'
-      )
+      parseMapDataFilter({
+        mapDataId: 'cozinhas_geolocalizadas_2025',
+        filter: { situacao: 'Não Habilitada' },
+      })
     ).toEqual({
       baseId: 'cozinhas_geolocalizadas_2025',
       ano: 2025,
@@ -105,25 +114,33 @@ describe('parseFilteredMapDataId', () => {
   });
 
   test.each([
-    'cozinhas_geolocalizadas',
-    'municipios_ivs?situacao=Habilitada',
-    'cozinhas_geolocalizadas?cnpj=123',
-    'cozinhas_geolocalizadas?situacao=',
-    'cozinhas_geolocalizadas?situacao',
-    'cozinhas_geolocalizadas?situacao=Habilitada&situacao=Mapeada',
-    'cozinhas_geolocalizadas?situacao=  ',
-  ])('refuses "%s"', (id) => {
-    expect(parseFilteredMapDataId(id)).toBeNull();
+    ['municipios_ivs', { situacao: 'Habilitada' }],
+    ['cozinhas_geolocalizadas', { cnpj: '123' }],
+    ['cozinhas_geolocalizadas', { situacao: '' }],
+    ['cozinhas_geolocalizadas', { situacao: '  ' }],
+    ['cozinhas_geolocalizadas', { situacao: 3 }],
+    ['cozinhas_geolocalizadas', { situacao: 'Habilitada', uf: 'SP' }],
+    ['cozinhas_geolocalizadas', 'Habilitada'],
+    ['cozinhas_geolocalizadas', null],
+  ])('refuses %s with %p', (mapDataId, filter) => {
+    expect(typeof parseMapDataFilter({ mapDataId, filter })).toBe('string');
   });
 
-  test('round-trips through filteredMapDataId', () => {
-    const id = filteredMapDataId({
-      baseId: 'cozinhas_geolocalizadas',
-      field: 'situacao',
-      value: 'Mapeada',
-    });
-    expect(id).toBe('cozinhas_geolocalizadas?situacao=Mapeada');
-    expect(parseFilteredMapDataId(id)?.value).toBe('Mapeada');
+  test('filterOn refuses a base that accepts no filter', () => {
+    expect(
+      filterOn({ baseId: 'municipios_ivs', field: 'situacao', value: 'x' })
+    ).toBeUndefined();
+  });
+
+  test('filterNote names the field, the value and the year', () => {
+    expect(
+      filterNote({
+        baseId: 'cozinhas_geolocalizadas_2025',
+        ano: 2025,
+        field: 'situacao',
+        value: 'Mapeada',
+      })
+    ).toBe('Recorte: situação Mapeada (2025).');
   });
 });
 
@@ -216,10 +233,7 @@ describe('readFilterDomains', () => {
         prompt: 'cozinhas suspensas',
         filterDomains: [domain],
       })
-    ).toEqual({
-      status: 'resolved',
-      datasetId: 'cozinhas_geolocalizadas?situacao=Suspensa',
-    });
+    ).toEqual(resolved('cozinhas_geolocalizadas', 'Suspensa'));
   });
 
   test('reads nothing for a prompt that names no filterable family', async () => {
@@ -272,16 +286,13 @@ describe('matchFilterValues', () => {
 });
 
 describe('preflightPrompt with filter domains', () => {
-  test('answers "cozinhas mapeadas 2025" with the filtered 2025 id', () => {
+  test('answers "cozinhas mapeadas 2025" with the 2025 base and a server filter', () => {
     expect(
       preflightPrompt({
         prompt: 'cozinhas mapeadas 2025',
         filterDomains: DOMAINS,
       })
-    ).toEqual({
-      status: 'resolved',
-      datasetId: 'cozinhas_geolocalizadas_2025?situacao=Mapeada',
-    });
+    ).toEqual(resolved('cozinhas_geolocalizadas_2025', 'Mapeada'));
   });
 
   test('a prompt with no year takes the most recent snapshot, whatever the order', () => {
@@ -290,10 +301,7 @@ describe('preflightPrompt with filter domains', () => {
         prompt: 'cozinhas habilitadas agora',
         filterDomains: [DOMAINS[1], DOMAINS[0]],
       })
-    ).toEqual({
-      status: 'resolved',
-      datasetId: 'cozinhas_geolocalizadas?situacao=Habilitada',
-    });
+    ).toEqual(resolved('cozinhas_geolocalizadas', 'Habilitada'));
     expect(
       preflightPrompt({
         prompt: 'cozinhas mapeadas',
@@ -308,10 +316,7 @@ describe('preflightPrompt with filter domains', () => {
         prompt: 'cozinhas em análise em 2025',
         filterDomains: DOMAINS,
       })
-    ).toEqual({
-      status: 'resolved',
-      datasetId: 'cozinhas_geolocalizadas_2025?situacao=Em análise',
-    });
+    ).toEqual(resolved('cozinhas_geolocalizadas_2025', 'Em análise'));
   });
 
   test('refuses a value the chosen year does not cover, never zero', () => {
@@ -341,32 +346,17 @@ describe('preflightPrompt with filter domains', () => {
     ).toBe('unsupported');
   });
 
-  test('asks which value when a head word starts several', () => {
-    expect(
-      preflightPrompt({
-        prompt: 'cozinhas homologadas 2025',
-        filterDomains: DOMAINS,
-      })
-    ).toEqual({
-      status: 'ambiguous',
-      clarify: {
-        facet: 'dataset',
-        question: 'Qual valor de "Situação" você quer no mapa?',
-        options: [
-          {
-            value:
-              'cozinhas_geolocalizadas_2025?situacao=Homologada para Habilitação',
-            label: 'Situação: Homologada para Habilitação (2025)',
-          },
-          {
-            value:
-              'cozinhas_geolocalizadas_2025?situacao=Homologada para Retirada',
-            label: 'Situação: Homologada para Retirada (2025)',
-          },
-        ],
-        default:
-          'cozinhas_geolocalizadas_2025?situacao=Homologada para Habilitação',
-      },
+  test('refuses a head word that starts several values, listing them to pick from', () => {
+    const result = preflightPrompt({
+      prompt: 'cozinhas homologadas 2025',
+      filterDomains: DOMAINS,
+    });
+
+    expect(result.status).toBe('unsupported');
+    expect(result).toMatchObject({
+      message: expect.stringContaining(
+        'Homologada para Habilitação; Homologada para Retirada'
+      ),
     });
   });
 
@@ -385,22 +375,26 @@ describe('preflightPrompt with filter domains', () => {
         prompt: 'cozinhas com pendência 2025',
         filterDomains: DOMAINS,
       })
-    ).toEqual({
-      status: 'resolved',
-      datasetId:
-        'cozinhas_geolocalizadas_2025?situacao=Pendência emitida pelo MDS (Prazo para adequações 15 dias)',
-    });
+    ).toEqual(
+      resolved(
+        'cozinhas_geolocalizadas_2025',
+        'Pendência emitida pelo MDS (Prazo para adequações 15 dias)'
+      )
+    );
   });
 
-  test('the user picking a filtered id answers the question', () => {
+  test('a filterable base the user picked fixes the year of the value', () => {
     expect(
       preflightPrompt({
-        prompt: 'cozinhas homologadas 2025',
-        datasetId:
-          'cozinhas_geolocalizadas_2025?situacao=Homologada para Retirada',
+        prompt: 'cozinhas mapeadas',
+        datasetId: 'cozinhas_geolocalizadas_2025',
         filterDomains: DOMAINS,
       })
-    ).toEqual({ status: 'resolved' });
+    ).toEqual({
+      status: 'resolved',
+      filter: { field: 'situacao', value: 'Mapeada' },
+      datasetId: 'cozinhas_geolocalizadas_2025',
+    });
   });
 
   test('refuses a value named while the user chose another dataset', () => {
@@ -420,15 +414,10 @@ describe('preflightPrompt with filter domains', () => {
   });
 });
 
-describe('filtered ids across the route boundary', () => {
-  test('validateDatasetId accepts a filtered id and refuses a field off the allowlist', () => {
-    expect(
-      validateDatasetId({
-        datasetId: 'cozinhas_geolocalizadas?situacao=Mapeada',
-      })
-    ).toBe('cozinhas_geolocalizadas?situacao=Mapeada');
+describe('the filter across the route boundary', () => {
+  test('validateDatasetId refuses a parameterized id like any unknown one', () => {
     const refused = validateDatasetId({
-      datasetId: 'cozinhas_geolocalizadas?cnpj=123',
+      datasetId: 'cozinhas_geolocalizadas?situacao=Mapeada',
     });
     expect(refused).toBeInstanceOf(Response);
     expect((refused as Response).status).toBe(400);
@@ -438,19 +427,22 @@ describe('filtered ids across the route boundary', () => {
     expect(isRenderableDatasetId(42)).toBe(false);
   });
 
-  test('appendRealMapData fills a filtered id with its counts', async () => {
+  test('appendRealMapData applies an entry filter and drops it', async () => {
     mockSnapshots();
 
     expect(
       await appendRealMapData({
         mapData: [
-          { mapDataId: 'cozinhas_geolocalizadas_2025?situacao=Retirada' },
+          {
+            mapDataId: 'cozinhas_geolocalizadas_2025',
+            filter: { situacao: 'Retirada' },
+          },
         ],
       })
     ).toEqual({
       mapData: [
         {
-          mapDataId: 'cozinhas_geolocalizadas_2025?situacao=Retirada',
+          mapDataId: 'cozinhas_geolocalizadas_2025',
           data: [
             { geometryId: '111', value: 1 },
             { geometryId: '222', value: 0 },
@@ -460,60 +452,78 @@ describe('filtered ids across the route boundary', () => {
     });
   });
 
-  test('fetchRenderableData answers null for an id that does not parse', async () => {
-    expect(
-      await fetchRenderableData(
-        'cozinhas_geolocalizadas?nope' as RenderableDatasetId
-      )
-    ).toBeNull();
+  test('appendRealMapData refuses a malformed filter with a 422', async () => {
+    const result = await appendRealMapData({
+      mapData: [{ mapDataId: 'municipios_ivs', filter: { situacao: 'x' } }],
+    });
+
+    expect(result).toBeInstanceOf(Response);
+    expect((result as Response).status).toBe(422);
+  });
+
+  test('appendRealMapData refuses a filter value the snapshot does not cover', async () => {
+    mockSnapshots();
+
+    const result = await appendRealMapData({
+      mapData: [
+        {
+          mapDataId: 'cozinhas_geolocalizadas',
+          filter: { situacao: 'Mapeada' },
+        },
+      ],
+    });
+
+    expect((result as Response).status).toBe(422);
   });
 });
 
-describe('catalogue filtros', () => {
+describe('catalogue filters', () => {
   test('a detailed filterable entry lists the values read from the data', async () => {
     const catalogue = JSON.parse(
       buildCatalogueContext(await gateway.getCatalogue(), 'cozinhas', DOMAINS)
     ) as {
-      catalogue: { datasets: Array<{ id: string; filtros?: unknown }> };
+      catalogue: { datasets: Array<{ id: string; filters?: unknown }> };
     };
     const byId = Object.fromEntries(
       catalogue.catalogue.datasets.map((entry) => {
-        return [entry.id, entry.filtros];
+        return [entry.id, entry.filters];
       })
     );
 
     expect(byId.cozinhas_geolocalizadas).toEqual([
       {
+        baseId: 'cozinhas_geolocalizadas',
+        dataset: 'Cozinhas Solidárias geolocalizadas (2026)',
+        ano: 2026,
         campo: 'situacao',
         rotulo: 'Situação',
-        formato: 'cozinhas_geolocalizadas?situacao=<valor>',
         valores: ['Habilitada'],
       },
     ]);
     expect(byId.cozinhas_pessoas_atendidas).toBeUndefined();
   });
 
-  test('an index-only entry carries no filtros', async () => {
+  test('an index-only entry carries no filters', async () => {
     const text = buildCatalogueContext(
       await gateway.getCatalogue(),
       'ivs',
       DOMAINS
     );
 
-    expect(text).not.toContain('filtros');
+    expect(text).not.toContain('filters');
   });
 });
 
-describe('"outras" asks which value', () => {
-  test('even when the year holds a single value', () => {
+describe('"outras" never resolves silently', () => {
+  test('alone, it is refused with the values to pick from, even a single one', () => {
     const result = preflightPrompt({
       prompt: 'demais cozinhas',
       filterDomains: DOMAINS,
     });
 
     expect(result).toMatchObject({
-      status: 'ambiguous',
-      clarify: { default: 'cozinhas_geolocalizadas?situacao=Habilitada' },
+      status: 'unsupported',
+      message: expect.stringContaining('Habilitada'),
     });
   });
 
@@ -528,14 +538,4 @@ describe('"outras" asks which value', () => {
       );
     }
   );
-
-  test('a filtered pick answers it', () => {
-    expect(
-      preflightPrompt({
-        prompt: 'outras cozinhas 2025',
-        datasetId: 'cozinhas_geolocalizadas_2025?situacao=Mapeada',
-        filterDomains: DOMAINS,
-      })
-    ).toEqual({ status: 'resolved' });
-  });
 });

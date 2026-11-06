@@ -3,7 +3,7 @@ import type { MapType } from '@ttoss/geovis';
 import {
   type FilterDomain,
   normalizeText,
-  parseFilteredMapDataId,
+  type ServerFilter,
 } from './fieldFilters';
 import { valueRequest } from './filterRequest';
 import {
@@ -30,7 +30,11 @@ export type Clarification = {
  * `ambiguous` stops to ask.
  */
 export type PreflightResult =
-  | { status: 'resolved' | 'unmatched'; datasetId?: RenderableDatasetId }
+  | {
+      status: 'resolved' | 'unmatched';
+      datasetId?: RenderableDatasetId;
+      filter?: ServerFilter;
+    }
   | { status: 'ambiguous'; clarify: Clarification }
   | { status: 'unsupported'; message: string };
 
@@ -125,15 +129,11 @@ const answeredBy = (params: {
   datasetId?: RenderableDatasetId;
 }): boolean => {
   const { hit, datasetId } = params;
-  const id =
-    datasetId === undefined
-      ? undefined
-      : (parseFilteredMapDataId(datasetId)?.baseId ?? datasetId);
   return (
-    id !== undefined &&
-    (hit.family.defaultId === id ||
+    datasetId !== undefined &&
+    (hit.family.defaultId === datasetId ||
       hit.family.variants.some((variant) => {
-        return variant.id === id;
+        return variant.id === datasetId;
       }))
   );
 };

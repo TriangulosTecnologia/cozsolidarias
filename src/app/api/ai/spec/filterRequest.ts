@@ -1,12 +1,10 @@
 import {
   type FilterDomain,
-  filteredMapDataId,
   matchFilterValues,
   namesFilterableFamily,
-  parseFilteredMapDataId,
 } from './fieldFilters';
 import type { RenderableDatasetId } from './mapDataCatalogue';
-import type { Clarification, PreflightResult } from './preflight';
+import type { PreflightResult } from './preflight';
 import { FILTER_FIELDS } from './renderableFields';
 
 /** The pt-BR refusal for a prompt that names a field value while the user already chose another dataset. */
@@ -25,40 +23,37 @@ const YEARS_COMBINED_MESSAGE =
   'Combinar mais de um ano de cozinhas em um mapa ainda não é suportado. Peça um ano por vez.';
 
 /**
- * The domain a prompt's year names, else the most recent snapshot's;
- * `undefined` when it names several years.
+ * The domain of the dataset the user chose, else the one the prompt's year
+ * names, else the most recent snapshot's; `undefined` when the prompt names
+ * several years.
  */
 const domainFor = (params: {
   text: string;
+  datasetId?: RenderableDatasetId;
   domains: FilterDomain[];
 }): FilterDomain | undefined => {
+  const chosen = params.domains.find((domain) => {
+    return domain.baseId === params.datasetId;
+  });
   const latest = params.domains.reduce((best, domain) => {
     return domain.ano > best.ano ? domain : best;
   });
   const named = params.domains.filter((domain) => {
     return new RegExp(`\\b${domain.ano}\\b`).test(params.text);
   });
-  return named.length > 1 ? undefined : (named[0] ?? latest);
+  return chosen ?? (named.length > 1 ? undefined : (named[0] ?? latest));
 };
 
-const valueClarification = (params: {
+/**
+ * The refusal asking the user to name one exact value: the choice cannot travel
+ * back in a public `datasetId` without exposing the filter (G-1 option A).
+ */
+const pickOneMessage = (params: {
   domain: FilterDomain;
   values: string[];
-}): Clarification => {
+}): string => {
   const { domain, values } = params;
-  const label = FILTER_FIELDS[domain.field];
-  const options = values.map((value) => {
-    return {
-      value: filteredMapDataId({ ...domain, value }),
-      label: `${label}: ${value} (${domain.ano})`,
-    };
-  });
-  return {
-    facet: 'dataset',
-    question: `Qual valor de "${label}" você quer no mapa?`,
-    options,
-    default: options[0].value,
-  };
+  return `Este pedido não aponta um único valor de "${FILTER_FIELDS[domain.field]}". Peça de novo nomeando exatamente um destes valores de ${domain.ano}: ${values.join('; ')}.`;
 };
 
 /**
@@ -95,11 +90,13 @@ const namedValues = (params: {
 };
 
 /**
- * Resolves the named values against the snapshot the prompt's year picks,
- * asking which one when several are covered or the prompt asked for "outras".
+ * Resolves the named values against the snapshot the user's dataset or the
+ * prompt's year picks, refusing with the exact values to pick from when
+ * several are covered or the prompt asked for "outras".
  */
 const resolveValues = (params: {
   text: string;
+  datasetId?: RenderableDatasetId;
   domains: FilterDomain[];
   values: string[];
   others?: true;
@@ -119,12 +116,13 @@ const resolveValues = (params: {
   }
   return covered.length > 1 || params.others
     ? {
-        status: 'ambiguous',
-        clarify: valueClarification({ domain, values: covered }),
+        status: 'unsupported',
+        message: pickOneMessage({ domain, values: covered }),
       }
     : {
         status: 'resolved',
-        datasetId: filteredMapDataId({ ...domain, value: covered[0] }),
+        datasetId: domain.baseId,
+        filter: { field: domain.field, value: covered[0] },
       };
 };
 
@@ -142,10 +140,13 @@ const filterRequest = (params: {
   if (named.values.length === 0) {
     return undefined;
   }
-  if (params.datasetId !== undefined) {
-    return parseFilteredMapDataId(params.datasetId)
-      ? { status: 'resolved' }
-      : { status: 'unsupported', message: VALUE_WITH_DATASET_MESSAGE };
+  const otherDataset =
+    params.datasetId !== undefined &&
+    !params.domains.some((domain) => {
+      return domain.baseId === params.datasetId;
+    });
+  if (otherDataset) {
+    return { status: 'unsupported', message: VALUE_WITH_DATASET_MESSAGE };
   }
   return named.combined
     ? { status: 'unsupported', message: VALUES_COMBINED_MESSAGE }
@@ -154,11 +155,12 @@ const filterRequest = (params: {
 
 /**
  * The preflight verdict for a prompt naming a value the data holds for an
- * allowlisted field. A user's pick of a filtered id answers the question; a
- * value named next to another pick is refused; two values named exactly are
- * refused; a value the year's snapshot does not cover is refused (unknown,
- * never zero); a head word starting several covered values, or "outras",
- * asks which.
+ * allowlisted field: the base id plus a server-side `filter`, never a
+ * parameterized id. A user's pick of a filterable base fixes the year; a value
+ * named next to another pick is refused; two values or two years named are
+ * refused; a value the snapshot does not cover is refused (unknown, never
+ * zero); a head word starting several covered values, or "outras", is refused
+ * with the exact values to name.
  *
  * @param params.text - The prompt, accent-stripped and lower-cased.
  * @param params.datasetId - The dataset the user already chose, if any.
@@ -167,7 +169,7 @@ const filterRequest = (params: {
  *
  * @example
  * valueRequest({ text: 'cozinhas mapeadas 2025', domains });
- * // { status: 'resolved', datasetId: 'cozinhas_geolocalizadas_2025?situacao=Mapeada' }
+ * // { status: 'resolved', datasetId: 'cozinhas_geolocalizadas_2025', filter: { field: 'situacao', value: 'Mapeada' } }
  */
 export const valueRequest = (params: {
   text: string;

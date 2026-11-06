@@ -16,10 +16,16 @@
           "properties": {
             "spec": {
               "type": "object"
+            },
+            "filters": {
+              "type": "array",
+              "items": {
+                "type": "object"
+              }
             }
           }
         },
-        "description": "Valida e repara no servidor um VisualizationSpec candidato; devolve a spec reparada e as issues restantes."
+        "description": "Valida e repara no servidor um VisualizationSpec candidato e os filters enviados fora dele; devolve a spec reparada, os filters e as issues restantes."
       }
     },
     "geovis_spec_generator_loop": {
@@ -1392,6 +1398,26 @@
                 }
               },
               "additionalProperties": false
+            },
+            "filters": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["mapDataId", "filter"],
+                "properties": {
+                  "mapDataId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "filter": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "additionalProperties": false
+              }
             },
             "status": {
               "enum": ["ok", "error"]

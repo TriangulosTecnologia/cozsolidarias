@@ -157,14 +157,19 @@ const mockSessionOpening = (): jest.Mock => {
  * Mocks a single, completed `generate?wait=true` call whose structured
  * `content` is the JSON text of `{status: "ok", spec}` — `spec` is `JSON.parse(text)`,
  * so every existing call site keeps passing a `JSON.stringify`'d spec, not a
- * pre-wrapped `{status, spec}` envelope.
+ * pre-wrapped `{status, spec}` envelope. `filters`, when given, travels
+ * beside the spec, as the agent's `output_schema` declares.
  */
-const mockAgentReply = (text: string): jest.Mock => {
+const mockAgentReply = (text: string, filters?: unknown): jest.Mock => {
   const fetchMock = mockSessionOpening().mockResolvedValueOnce(
     jsonResponse({
       generation_id: 'gen_123',
       status: 'completed',
-      content: JSON.stringify({ status: 'ok', spec: JSON.parse(text) }),
+      content: JSON.stringify({
+        status: 'ok',
+        spec: JSON.parse(text),
+        ...(filters === undefined ? {} : { filters }),
+      }),
     })
   );
   global.fetch = fetchMock;
@@ -189,6 +194,48 @@ const mockRawAgentReply = (content: string): jest.Mock => {
   global.fetch = fetchMock;
   return fetchMock;
 };
+
+/**
+ * The route reads the situação values for every prompt naming cozinhas. A
+ * small snapshot per year keeps those tests off the real point-in-polygon
+ * aggregation (seconds under a parallel run); a test needing other values
+ * overrides it.
+ */
+beforeEach(() => {
+  jest
+    .spyOn(gateway, 'getCozinhasSituacaoPorMunicipio')
+    .mockImplementation((year) => {
+      return Promise.resolve(
+        year === 2025
+          ? {
+              situacoesCobertas: null,
+              semLocalizacao: 0,
+              porMunicipio: [
+                {
+                  codigoIbge: '3304557',
+                  municipio: 'Rio de Janeiro (RJ)',
+                  quantidadePorSituacao: {
+                    Habilitada: 1,
+                    'Não Habilitada': 1,
+                    Mapeada: 1,
+                  },
+                },
+              ],
+            }
+          : {
+              situacoesCobertas: ['Habilitada'],
+              semLocalizacao: 0,
+              porMunicipio: [
+                {
+                  codigoIbge: '3304557',
+                  municipio: 'Rio de Janeiro (RJ)',
+                  quantidadePorSituacao: { Habilitada: 1 },
+                },
+              ],
+            }
+      );
+    });
+});
 
 describe('POST /api/ai/spec', () => {
   const originalEnv: Partial<Record<(typeof ENV_KEYS)[number], string>> = {};
@@ -406,7 +453,7 @@ describe('POST /api/ai/spec', () => {
       JSON.stringify({
         mapData: [
           {
-            mapDataId: 'cozinhas_geolocalizadas?situacao=Habilitada',
+            mapDataId: 'cozinhas_geolocalizadas',
             mapId: 'municipios-boundary',
             joinKey: 'codarea',
             data: [],
@@ -420,13 +467,22 @@ describe('POST /api/ai/spec', () => {
       jsonRequest({ prompt: 'cozinhas habilitadas por município' })
     );
     const body = (await response.json()) as {
-      spec?: { mapData?: Array<{ data: Array<{ value: number }> }> };
+      spec?: {
+        mapData?: Array<Record<string, unknown>>;
+        legends?: Array<{ subtitle?: string }>;
+      };
     };
 
     expect(response.status).toBe(200);
-    expect(body.spec?.mapData?.[0].data).toEqual([
-      { geometryId: '3550308', value: 7 },
-    ]);
+    expect(body.spec?.mapData?.[0]).toEqual({
+      mapDataId: 'cozinhas_geolocalizadas',
+      mapId: 'municipios-boundary',
+      joinKey: 'codarea',
+      data: [{ geometryId: '3550308', value: 7 }],
+    });
+    expect(body.spec?.legends?.[0].subtitle).toBe(
+      'Recorte: situação Habilitada (2026).'
+    );
   });
 
   test('keeps the public response keys of POST /api/ai/spec on success', async () => {
@@ -445,7 +501,7 @@ describe('POST /api/ai/spec', () => {
       JSON.stringify({
         mapData: [
           {
-            mapDataId: 'cozinhas_geolocalizadas?situacao=Habilitada',
+            mapDataId: 'cozinhas_geolocalizadas',
             mapId: 'municipios-boundary',
             joinKey: 'codarea',
             data: [],
@@ -484,7 +540,7 @@ describe('POST /api/ai/spec', () => {
       JSON.stringify({
         mapData: [
           {
-            mapDataId: 'cozinhas_geolocalizadas_2025?situacao=Mapeada',
+            mapDataId: 'cozinhas_geolocalizadas_2025',
             mapId: 'municipios-boundary',
             joinKey: 'codarea',
             data: [],
@@ -498,16 +554,151 @@ describe('POST /api/ai/spec', () => {
       jsonRequest({ prompt: 'cozinhas mapeadas 2025 por município' })
     );
     const body = (await response.json()) as {
-      spec?: { mapData?: Array<{ data: unknown }> };
+      spec?: { mapData?: Array<{ mapDataId: string; data: unknown }> };
     };
+    const sent = fetchMock.mock.calls
+      .flatMap(([, init]: [string, RequestInit]) => {
+        const sentBody: unknown = JSON.parse(String(init.body));
+        return typeof sentBody === 'object' &&
+          sentBody !== null &&
+          'message' in sentBody &&
+          typeof sentBody.message === 'string'
+          ? [sentBody.message]
+          : [];
+      })
+      .join('\n');
 
     expect(response.status).toBe(200);
+    expect(body.spec?.mapData?.[0].mapDataId).toBe(
+      'cozinhas_geolocalizadas_2025'
+    );
     expect(body.spec?.mapData?.[0].data).toEqual([
       { geometryId: '3550308', value: 3 },
     ]);
-    expect(JSON.stringify(fetchMock.mock.calls)).toContain(
-      'cozinhas_geolocalizadas_2025?situacao=Mapeada'
+    // The agent is told the filter in words, never as a parameterized id.
+    expect(sent).toContain('situacao = "Mapeada"');
+    expect(sent).not.toMatch(/cozinhas_geolocalizadas(_2025)?\?/);
+  });
+
+  test('serves the filter the agent set for a synonym the preflight did not match', async () => {
+    jest.spyOn(gateway, 'getCozinhasSituacaoPorMunicipio').mockResolvedValue({
+      situacoesCobertas: null,
+      semLocalizacao: 0,
+      porMunicipio: [
+        {
+          codigoIbge: '3550308',
+          municipio: 'São Paulo',
+          quantidadePorSituacao: { Mapeada: 3, Habilitada: 1 },
+        },
+      ],
+    });
+    mockAgentReply(
+      JSON.stringify({
+        mapData: [
+          {
+            mapDataId: 'cozinhas_geolocalizadas_2025',
+            mapId: 'municipios-boundary',
+            joinKey: 'codarea',
+            data: [],
+          },
+        ],
+        legends: [{ id: 'legend-x', title: 'Cozinhas recém-cadastradas' }],
+      }),
+      [
+        {
+          mapDataId: 'cozinhas_geolocalizadas_2025',
+          filter: { situacao: 'Mapeada' },
+        },
+      ]
     );
+
+    const response = await POST(
+      jsonRequest({ prompt: 'cozinhas recém-cadastradas em 2025' })
+    );
+    const body = (await response.json()) as {
+      spec?: {
+        mapData?: Array<Record<string, unknown>>;
+        legends?: Array<{ subtitle?: string }>;
+      };
+    };
+
+    expect(response.status).toBe(200);
+    expect(body.spec?.mapData?.[0]).not.toHaveProperty('filter');
+    expect(body.spec?.mapData?.[0].data).toEqual([
+      { geometryId: '3550308', value: 3 },
+    ]);
+    expect(body.spec?.legends?.[0].subtitle).toBe(
+      'Recorte: situação Mapeada (2025).'
+    );
+  });
+
+  test('answers a 422 when the agent sets a filter other than the one the server resolved', async () => {
+    jest.spyOn(gateway, 'getCozinhasSituacaoPorMunicipio').mockResolvedValue({
+      situacoesCobertas: null,
+      semLocalizacao: 0,
+      porMunicipio: [
+        {
+          codigoIbge: '3550308',
+          municipio: 'São Paulo',
+          quantidadePorSituacao: { Mapeada: 3, Habilitada: 1 },
+        },
+      ],
+    });
+    mockAgentReply(
+      JSON.stringify({
+        mapData: [
+          {
+            mapDataId: 'cozinhas_geolocalizadas_2025',
+            mapId: 'municipios-boundary',
+            joinKey: 'codarea',
+            data: [],
+          },
+        ],
+        legends: [{ id: 'legend-x', title: 'X' }],
+      }),
+      [
+        {
+          mapDataId: 'cozinhas_geolocalizadas_2025',
+          filter: { situacao: 'Habilitada' },
+        },
+      ]
+    );
+
+    const response = await POST(
+      jsonRequest({ prompt: 'cozinhas mapeadas 2025' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(422);
+    expect(body.message).toMatch(/recorte diferente do escolhido/);
+  });
+
+  test('answers a 422 when the agent sends filters naming no mapData entry', async () => {
+    mockAgentReply(
+      JSON.stringify({
+        mapData: [
+          {
+            mapDataId: 'municipios_ivs',
+            mapId: 'municipios-boundary',
+            joinKey: 'codarea',
+            data: [],
+          },
+        ],
+        legends: [{ id: 'legend-x', title: 'IVS' }],
+      }),
+      [
+        {
+          mapDataId: 'cozinhas_geolocalizadas_2025',
+          filter: { situacao: 'Mapeada' },
+        },
+      ]
+    );
+
+    const response = await POST(jsonRequest({ prompt: 'mapa do IVS' }));
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(422);
+    expect(body.message).toMatch(/"filters" precisa ser/);
   });
 
   test.each([new Error('disk gone'), 'disk gone'])(
@@ -571,7 +762,7 @@ describe('POST /api/ai/spec', () => {
   test('answers a 422 when the agent places a non-object in mapData instead of the chosen dataset', async () => {
     mockAgentReply(
       JSON.stringify({
-        mapData: ['cozinhas_geolocalizadas?situacao=Habilitada'],
+        mapData: ['cozinhas_geolocalizadas'],
         legends: [{ id: 'legend-x', title: 'X' }],
       })
     );

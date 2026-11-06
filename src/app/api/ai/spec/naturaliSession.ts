@@ -16,8 +16,11 @@ export const projectUrl = (projectId: string): string => {
   return `https://api.naturali.ai/v1/projects/${projectId}`;
 };
 
-/** The `status: "ok"` branch of the agent's structured `output_schema`. */
-export type SpecReplyOk = { status: 'ok'; spec: unknown };
+/**
+ * The `status: "ok"` branch of the agent's structured `output_schema`:
+ * `filters`, as received, travels beside the spec (see `attachFilters`).
+ */
+export type SpecReplyOk = { status: 'ok'; spec: unknown; filters?: unknown };
 
 /** The `status: "error"` branch of the agent's structured `output_schema`. */
 export type SpecReplyError = {
@@ -38,8 +41,12 @@ export type SpecReplyStopped = {
   issues: SpecIssue[];
 };
 
-/** What the `validate_spec` tool computes for one candidate (see `validateCandidate`). */
-export type ValidateCandidate = (spec: unknown) => {
+/**
+ * What the `validate_spec` tool computes from one call's arguments, as the
+ * agent sent them (see `validateCandidate`); every key it returns reaches the
+ * agent.
+ */
+export type ValidateCandidate = (args: unknown) => {
   spec: unknown;
   issues: SpecIssue[];
 };
@@ -170,12 +177,6 @@ const unknownToolOutput = (toolName: string): unknown => {
   };
 };
 
-const candidateFromArgs = (args: unknown): unknown => {
-  return typeof args === 'object' && args !== null && 'spec' in args
-    ? args.spec
-    : args;
-};
-
 /** How far the loop got: `validate_spec` calls served and the last call's issue count. */
 type LoopProgress = { attempts: number; previousIssueCount: number };
 
@@ -220,7 +221,7 @@ const answerToolCalls = (params: {
       continue;
     }
 
-    const checked = params.validateCandidate(candidateFromArgs(call.args));
+    const checked = params.validateCandidate(call.args);
     const issueCount = checked.issues.length;
     const attempted = { ...progress, attempts: progress.attempts + 1 };
     const reason = stopReason({ issueCount, progress: attempted });

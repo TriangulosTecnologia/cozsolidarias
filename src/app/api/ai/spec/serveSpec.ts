@@ -3,17 +3,19 @@ import {
   isCozinhasChoroplethRequest,
 } from './canonicalChoropleth';
 import {
-  coverageNotes,
   type FilterDomain,
+  type ParsedFilter,
   readFilterDomainsFor,
+  type ServerFilter,
 } from './fieldFilters';
 import { logGeneration } from './generationLogger';
+import { withLegendNotes } from './legendNotes';
 import type { RenderableDatasetId } from './mapDataCatalogue';
+import { filtersOf, serverFilters } from './mapDataFilters';
 import {
   appendRealMapData,
   appendRealSourceData,
   errorResponse,
-  hoistLayerLegends,
   invalidSpecResponse,
   isRecord,
   type UnknownRecord,
@@ -84,147 +86,29 @@ const checkChosenDataset = (params: {
       });
 };
 
-/** The string `mapDataId`s of a spec whose `mapData` the append already accepted as a list. */
-const mapDataIdsOf = (spec: UnknownRecord): string[] => {
-  return [spec['mapData']].flat().flatMap((entry) => {
-    return isRecord(entry) && typeof entry['mapDataId'] === 'string'
-      ? [entry['mapDataId']]
-      : [];
-  });
-};
-
 /**
- * `[legendId, mapDataId]` for each layer that shows an existing legend. A
- * layer painting no `mapData` entry (e.g. by `propertyName`) still links its
- * legend, with `mapDataId` `null`.
+ * The spec with real data and sources, then its legend notes. The canonical
+ * choropleth replaces only the unfiltered cozinhas dataset.
  */
-const legendLinks = (params: {
-  layers: unknown[];
-  legendIds: Set<string>;
-}): Array<[string, string | null]> => {
-  return params.layers.flatMap((layer): Array<[string, string | null]> => {
-    if (!isRecord(layer)) {
-      return [];
-    }
-    const { activeLegendId, mapDataId } = layer;
-    return typeof activeLegendId === 'string' &&
-      params.legendIds.has(activeLegendId)
-      ? [[activeLegendId, typeof mapDataId === 'string' ? mapDataId : null]]
-      : [];
-  });
-};
-
-/** The distinct notes of `ids`, joined; empty when none is noted. */
-const joinNotes = (params: {
-  notes: Map<string, string>;
-  ids: string[];
-}): string => {
-  return [
-    ...new Set(
-      params.ids.flatMap((id) => {
-        const note = params.notes.get(id);
-        return note === undefined ? [] : [note];
-      })
-    ),
-  ].join(' ');
-};
-
-/** One legend with `note` appended to its `subtitle`, or as it is without a note. */
-const noteLegend = (params: {
-  legend: UnknownRecord;
-  note: string;
-}): UnknownRecord => {
-  const { legend, note } = params;
-  if (note === '') {
-    return legend;
-  }
-  const subtitle = legend['subtitle'];
-  return {
-    ...legend,
-    subtitle:
-      typeof subtitle === 'string' && subtitle !== ''
-        ? `${subtitle} · ${note}`
-        : note,
-  };
-};
-
-/**
- * The note each legend id carries: a legend any layer links gets the notes of
- * the datasets whose layers link it, so another dataset's or another source's
- * legend never gets one; a legend no layer links gets the notes of the noted
- * datasets that link none.
- * With `whole`, the spec paints only the noted dataset, so every legend
- * gets every note.
- */
-const notesByLegend = (params: {
+const serveData = async (params: {
   spec: UnknownRecord;
-  legendIds: Set<string>;
-  notes: Map<string, string>;
-  whole: boolean;
-}): ((legendId: string) => string) => {
-  const noted = [...params.notes.keys()];
-  if (params.whole) {
-    return () => {
-      return joinNotes({ notes: params.notes, ids: noted });
-    };
+  filters: ReadonlyMap<string, ParsedFilter>;
+}): Promise<UnknownRecord | Response> => {
+  const { spec, filters } = params;
+  const whole =
+    isCozinhasChoroplethRequest(spec) &&
+    filtersOf(spec).length === 0 &&
+    filters.size === 0;
+  const withMapData = whole
+    ? await buildCozinhasChoroplethSpec()
+    : await appendRealMapData(spec, filters);
+  if (withMapData instanceof Response) {
+    return withMapData;
   }
-  const links = legendLinks({
-    layers: [params.spec['layers']].flat(),
-    legendIds: params.legendIds,
-  });
-  const orphans = noted.filter((id) => {
-    return !links.some(([, mapDataId]) => {
-      return mapDataId === id;
-    });
-  });
-  return (legendId) => {
-    const linking = links.filter(([linked]) => {
-      return linked === legendId;
-    });
-    return joinNotes({
-      notes: params.notes,
-      ids:
-        linking.length > 0
-          ? linking.flatMap(([, mapDataId]) => {
-              return mapDataId === null ? [] : [mapDataId];
-            })
-          : orphans,
-    });
-  };
-};
-
-/**
- * Appends each coverage note (G-6, see `coverageNotes`) to the `subtitle` of
- * the legends that describe the noted dataset (see {@link notesByLegend}).
- * Layer-scoped legends are hoisted first, so every legend is reached.
- */
-const withCoverageNotes = (params: {
-  spec: UnknownRecord;
-  notes: Map<string, string>;
-  whole: boolean;
-}): UnknownRecord => {
-  if (params.notes.size === 0) {
-    return params.spec;
-  }
-  const spec = hoistLayerLegends(params.spec);
-  const legends = Array.isArray(spec['legends']) ? spec['legends'] : [];
-  const noteOf = notesByLegend({
-    ...params,
-    spec,
-    legendIds: new Set(
-      legends.flatMap((legend) => {
-        return isRecord(legend) ? [String(legend['id'])] : [];
-      })
-    ),
-  });
-  return {
-    ...spec,
-    legends: legends.map((legend) => {
-      return isRecord(legend)
-        ? noteLegend({ legend, note: noteOf(String(legend['id'])) })
-        : legend;
-    }),
-  };
+  const served = await appendRealSourceData(withMapData);
+  return served instanceof Response
+    ? served
+    : withLegendNotes({ spec, served, serverFilters: filters, whole });
 };
 
 /**
@@ -234,16 +118,19 @@ const withCoverageNotes = (params: {
  * `mapData` values (see {@link appendRealMapData}). Either way, API-backed
  * `sources[].data` is then fetched server-side (see
  * {@link appendRealSourceData}) while static `/geo/*` URLs are kept for the
- * browser. Once both are resolved, a dataset whose snapshot covers only some
- * values gets that coverage stated in its legend (see
- * {@link withCoverageNotes}). A failure is logged with its cause (see
- * {@link logGeneration}) and answered with a fixed 502.
+ * browser. The filter the server resolved (see `serverFilters`),
+ * or the one the agent set on an entry, is applied by the append and never
+ * served. Once data and sources are resolved, each dataset's filter or partial
+ * coverage is stated in its legend (see `withLegendNotes`). A failure
+ * is logged with its cause (see {@link logGeneration}) and answered with a
+ * fixed 502.
  */
 export const resolveServedSpec = async (params: {
   prompt: string;
   spec: UnknownRecord;
   agentSpec: UnknownRecord;
   chosen?: RenderableDatasetId;
+  filter?: ServerFilter;
 }): Promise<UnknownRecord | Response> => {
   const mismatch = checkChosenDataset({
     chosen: params.chosen,
@@ -252,21 +139,12 @@ export const resolveServedSpec = async (params: {
   if (mismatch) {
     return mismatch;
   }
+  const filters = serverFilters(params);
+  if (filters instanceof Response) {
+    return filters;
+  }
   try {
-    // The canonical choropleth paints only the cozinhas dataset.
-    const whole = isCozinhasChoroplethRequest(params.spec);
-    const withMapData = whole
-      ? await buildCozinhasChoroplethSpec()
-      : await appendRealMapData(params.spec);
-    if (withMapData instanceof Response) {
-      return withMapData;
-    }
-    const withSources = await appendRealSourceData(withMapData);
-    if (withSources instanceof Response) {
-      return withSources;
-    }
-    const notes = await coverageNotes(mapDataIdsOf(params.spec));
-    return withCoverageNotes({ spec: withSources, notes, whole });
+    return await serveData({ spec: params.spec, filters });
   } catch (error) {
     // A gateway rejection after the session exists is a 502, with the session
     // id attached by the caller.

@@ -56,7 +56,6 @@ describe('coverageNotes', () => {
       await coverageNotes([
         'cozinhas_geolocalizadas',
         'cozinhas_geolocalizadas_2025',
-        'cozinhas_geolocalizadas?situacao=Habilitada',
         'municipios_ivs',
       ])
     ).toEqual(new Map([['cozinhas_geolocalizadas', NOTE_2026]]));
@@ -246,5 +245,56 @@ describe('resolveServedSpec coverage note (G-6)', () => {
       ((await serve(spec)) as { legends: Array<Record<string, unknown>> })
         .legends[0]
     ).not.toHaveProperty('subtitle');
+  });
+
+  test('the server filter lands on the chosen entry only, and an equal agent filter is no clash', async () => {
+    const served = (await resolveServedSpec({
+      prompt: 'cozinhas habilitadas e ivs',
+      chosen: 'cozinhas_geolocalizadas',
+      filter: { field: 'situacao', value: 'Habilitada' },
+      spec: {
+        mapData: [
+          {
+            mapDataId: 'cozinhas_geolocalizadas',
+            filter: { situacao: 'Habilitada' },
+            data: [],
+          },
+          { mapDataId: 'municipios_ivs', data: [] },
+        ],
+        legends: [],
+      },
+      agentSpec: {
+        mapData: [{ mapDataId: 'cozinhas_geolocalizadas' }],
+      },
+    })) as { mapData: Array<Record<string, unknown>> };
+
+    expect(served.mapData).toEqual([
+      {
+        mapDataId: 'cozinhas_geolocalizadas',
+        data: [{ geometryId: '111', value: 2 }],
+      },
+      { mapDataId: 'municipios_ivs', data: [] },
+    ]);
+  });
+
+  test('an append 422 under a server filter carries the merged spec, never an injected filter (F1)', async () => {
+    const spec = {
+      mapData: [
+        { mapDataId: 'cozinhas_geolocalizadas_2025', data: [] },
+        { mapDataId: 'municipios_ivs', filter: { situacao: 'x' }, data: [] },
+      ],
+      legends: [],
+    };
+    const result = await resolveServedSpec({
+      prompt: 'cozinhas habilitadas 2025',
+      chosen: 'cozinhas_geolocalizadas_2025',
+      filter: { field: 'situacao', value: 'Habilitada' },
+      spec,
+      agentSpec: spec,
+    });
+
+    expect(result).toBeInstanceOf(Response);
+    const body = (await (result as Response).json()) as { spec: unknown };
+    expect(body.spec).toEqual(spec);
   });
 });

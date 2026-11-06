@@ -394,16 +394,17 @@
   },
   {
     "method": "MAPDATA",
-    "path": "(mapDataId filtrado por valor de campo)",
+    "path": "(filtro de mapData por valor de campo)",
     "summary": "Contagem de cozinhas por município cujo campo tem um valor, como uma situação.",
     "parameters": [],
     "response": {
       "description": "O valor é a contagem de cozinhas localizadas no município cujo campo tem o valor pedido."
     },
-    "usage": "Para contar só as cozinhas com um valor de campo, use um mapDataId no formato <base>?<campo>=<valor>, com <base> em cozinhas_geolocalizadas, cozinhas_geolocalizadas_2025 e <campo> em situacao. Os valores aceitos estão em \"filtros\" na entrada da base no catálogo; copie o valor exatamente.",
+    "usage": "Para contar só as cozinhas com um valor de campo, inclusive quando o pedido usa um sinônimo desse valor, mantenha o mapDataId da base (cozinhas_geolocalizadas, cozinhas_geolocalizadas_2025) sem parâmetros e envie, ao lado do spec, em \"filters\" o item {\"mapDataId\": \"<base>\", \"filter\": {\"<campo>\": \"<valor>\"}}, com <campo> em situacao e <valor> copiado exatamente de \"filters[].valores\" da base no catálogo. O servidor aplica o filtro e o remove do spec.",
     "constraints": [
-      "Um valor ausente de \"filtros\" é desconhecido, nunca zero: não o use.",
-      "Um campo e um valor por mapDataId; não combine valores em um mesmo mapa."
+      "Um valor ausente de \"filters\" é desconhecido, nunca zero: não o use.",
+      "Um campo e um valor por entrada; não combine valores em um mesmo mapa.",
+      "Descreva o recorte no título da legenda."
     ]
   }
 ]

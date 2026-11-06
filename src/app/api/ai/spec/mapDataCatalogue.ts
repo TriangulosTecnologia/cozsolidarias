@@ -8,12 +8,7 @@ import type {
 } from '@/data-gateway/schema';
 import { gateway } from '@/gateway';
 
-import {
-  type FilterDomain,
-  type FilteredMapDataId,
-  filteredMapDataRows,
-  parseFilteredMapDataId,
-} from './fieldFilters';
+import type { FilterDomain } from './fieldFilters';
 import {
   ABSOLUTE_TOTAL_IDS,
   CATALOG_VARIANTS,
@@ -110,52 +105,20 @@ export const RENDERABLE_DATASET_FETCHERS = {
   municipios_cadinsan_sem_pbf: cadinsanField('proporcaoSemPbf'),
 } as const satisfies Record<RenderableFieldId, unknown>;
 
-/** A renderable id with its own fetcher. */
-type FetcherDatasetId = keyof typeof RENDERABLE_DATASET_FETCHERS;
+export type RenderableDatasetId = keyof typeof RENDERABLE_DATASET_FETCHERS;
 
-/**
- * Every id the agent may reference in `mapData`: one with its own fetcher, or
- * a {@link FilteredMapDataId} over a filterable one.
- */
-export type RenderableDatasetId = FetcherDatasetId | FilteredMapDataId;
-
-/** The renderable ids with their own fetcher; filtered ids are built from them. */
+/** List of dataset IDs that the agent may reference in `mapData`. */
 export const RENDERABLE_DATASET_IDS = Object.keys(
   RENDERABLE_DATASET_FETCHERS
-) as FetcherDatasetId[];
+) as RenderableDatasetId[];
 
-const hasFetcher = (id: string): id is FetcherDatasetId => {
-  return Object.hasOwn(RENDERABLE_DATASET_FETCHERS, id);
-};
-
-/** Type guard: check if a dataset ID is renderable, filtered ids included. */
+/** Type guard: check if a dataset ID is renderable. */
 export const isRenderableDatasetId = (
   id: unknown
 ): id is RenderableDatasetId => {
   return (
-    typeof id === 'string' &&
-    (hasFetcher(id) || parseFilteredMapDataId(id) !== null)
+    typeof id === 'string' && Object.hasOwn(RENDERABLE_DATASET_FETCHERS, id)
   );
-};
-
-/**
- * The real `mapData` rows of a renderable id, from its own fetcher or, for a
- * filtered id, from {@link filteredMapDataRows}.
- *
- * @param id - A renderable id.
- * @returns The rows, or `null` when the snapshot cannot answer the id.
- *
- * @example
- * await fetchRenderableData('cozinhas_geolocalizadas_2025?situacao=Mapeada');
- */
-export const fetchRenderableData = async (
-  id: RenderableDatasetId
-): Promise<Array<{ geometryId: string; value: number }> | null> => {
-  if (hasFetcher(id)) {
-    return RENDERABLE_DATASET_FETCHERS[id]();
-  }
-  const filter = parseFilteredMapDataId(id);
-  return filter ? filteredMapDataRows(filter) : null;
 };
 
 /** The index-only shape a non-renderable dataset is reduced to — enough for
@@ -275,11 +238,13 @@ const toAiDatasetEntries = (
 };
 
 /**
- * The `filtros` a filterable dataset's entry carries: per allowlisted field,
- * the values its snapshot holds and the filtered `mapDataId` format. Read from
- * the data, so the agent never sees a hand-written value list.
+ * The `filters` a filterable dataset's entry carries: per allowlisted field,
+ * the `filterDomains` item of the dataset (its id, title and snapshot year)
+ * and the values the snapshot holds. Read from the data, so the agent never
+ * sees a hand-written value list, and can map a synonym in the prompt to one
+ * exact value it sends in its `filters` (see `ReplyFilter`).
  */
-const withFilters = <T extends { id: string }>(
+const withFilters = <T extends { id: string; title: string }>(
   entry: T,
   domains: FilterDomain[]
 ): T => {
@@ -290,11 +255,13 @@ const withFilters = <T extends { id: string }>(
     ? entry
     : {
         ...entry,
-        filtros: own.map((domain) => {
+        filters: own.map((domain) => {
           return {
+            baseId: domain.baseId,
+            dataset: entry.title,
+            ano: domain.ano,
             campo: domain.field,
             rotulo: FILTER_FIELDS[domain.field],
-            formato: `${entry.id}?${domain.field}=<valor>`,
             valores: domain.values,
           };
         }),
@@ -314,12 +281,12 @@ const withFilters = <T extends { id: string }>(
  * entry is reduced to its index (id, title, description), so the agent sees the
  * whole catalogue but the fields of the chosen dataset alone.
  *
- * A detailed entry of a filterable dataset also lists its `filtros` (see
+ * A detailed entry of a filterable dataset also lists its `filters` (see
  * {@link withFilters}) from `domains`.
  *
  * @param catalogue - The gateway's catalogue contract.
  * @param focus - The family whose detail to keep; omitted = full detail.
- * @param domains - The values each filterable dataset holds; omitted = no `filtros`.
+ * @param domains - The values each filterable dataset holds; omitted = no `filters`.
  * @returns The catalogue as a JSON string.
  *
  * @example

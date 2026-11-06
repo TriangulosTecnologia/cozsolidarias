@@ -11,17 +11,9 @@ import {
 } from './renderableFields';
 
 /**
- * A `mapDataId` that counts the cozinhas of a filterable base whose field holds
- * one raw value: `<base>?<field>=<value>`, the value verbatim from the source.
- *
- * @example
- * const id: FilteredMapDataId = 'cozinhas_geolocalizadas_2025?situacao=Mapeada';
- */
-export type FilteredMapDataId = `${FilterableBaseId}?${string}`;
-
-/**
- * A parsed {@link FilteredMapDataId}: its base, the base's snapshot year, the
- * field and the raw value.
+ * A filter on one allowlisted field of a filterable base: the base, its
+ * snapshot year, the field and the raw value. It lives only on the server: the
+ * public `mapDataId` stays the base id (G-1 option A).
  *
  * @example
  * const filter: ParsedFilter = { baseId: 'cozinhas_geolocalizadas', ano: 2026, field: 'situacao', value: 'Habilitada' };
@@ -34,6 +26,15 @@ export type ParsedFilter = {
 };
 
 /**
+ * The field and value of a {@link ParsedFilter}, as the preflight resolves it
+ * for the dataset it also resolves.
+ *
+ * @example
+ * const filter: ServerFilter = { field: 'situacao', value: 'Habilitada' };
+ */
+export type ServerFilter = Pick<ParsedFilter, 'field' | 'value'>;
+
+/**
  * The values one field holds in one filterable base's snapshot, restricted to
  * what the snapshot covers: a value outside it is unknown, never zero.
  *
@@ -42,60 +43,84 @@ export type ParsedFilter = {
  */
 export type FilterDomain = Omit<ParsedFilter, 'value'> & { values: string[] };
 
-const splitOnce = (
-  text: string,
-  separator: string
-): [string, string | undefined] => {
-  const at = text.indexOf(separator);
-  return at < 0 ? [text, undefined] : [text.slice(0, at), text.slice(at + 1)];
-};
-
-/** A non-blank single value: `&` would start a second filter. */
-const isFilterValue = (value: string | undefined): value is string => {
-  return value !== undefined && value.trim() !== '' && !value.includes('&');
-};
-
 const isFilterField = (field: string): field is FilterField => {
   return Object.hasOwn(FILTER_FIELDS, field);
 };
 
-/**
- * Parses a {@link FilteredMapDataId}: the base must accept filters, the field
- * must be on {@link FILTER_FIELDS} and the value must not be blank. One filter
- * per id; the value's presence in the data is checked when it is fetched.
- *
- * @param id - Any `mapDataId`.
- * @returns The parsed filter, or `null` when `id` is not a valid filtered id.
- *
- * @example
- * parseFilteredMapDataId('cozinhas_geolocalizadas?cnpj=1'); // null
- */
-export const parseFilteredMapDataId = (id: string): ParsedFilter | null => {
-  const [baseId, query] = splitOnce(id, '?');
-  const base = FILTERABLE_BASES.find((candidate) => {
-    return candidate.baseId === baseId;
-  });
-  if (!base || query === undefined) {
-    return null;
+const isFilterValue = (value: unknown): value is string => {
+  return typeof value === 'string' && value.trim() !== '';
+};
+
+/** The single allowlisted `{ field: value }` pair of a `filter`, or `undefined`. */
+const fieldValueOf = (filter: unknown): ServerFilter | undefined => {
+  if (typeof filter !== 'object' || filter === null) {
+    return undefined;
   }
-  const [field, value] = splitOnce(query, '=');
-  if (!isFilterField(field) || !isFilterValue(value)) {
-    return null;
+  const pairs = Object.entries(filter);
+  if (pairs.length !== 1) {
+    return undefined;
   }
-  return { ...base, field, value };
+  const [[field, value]] = pairs;
+  return isFilterField(field) && isFilterValue(value)
+    ? { field, value }
+    : undefined;
 };
 
 /**
- * Formats the {@link FilteredMapDataId} of one value of a base's field.
+ * The {@link ParsedFilter} of a filterable base id and a field value, or
+ * `undefined` when the id does not accept filters.
  *
  * @example
- * filteredMapDataId({ baseId: 'cozinhas_geolocalizadas', field: 'situacao', value: 'Mapeada' });
- * // 'cozinhas_geolocalizadas?situacao=Mapeada'
+ * filterOn({ baseId: 'cozinhas_geolocalizadas_2025', field: 'situacao', value: 'Mapeada' })?.ano; // 2025
  */
-export const filteredMapDataId = (
-  filter: Pick<ParsedFilter, 'baseId' | 'field' | 'value'>
-): FilteredMapDataId => {
-  return `${filter.baseId}?${filter.field}=${filter.value}`;
+export const filterOn = (
+  params: { baseId: string } & ServerFilter
+): ParsedFilter | undefined => {
+  const base = FILTERABLE_BASES.find(({ baseId }) => {
+    return baseId === params.baseId;
+  });
+  return base && { ...base, field: params.field, value: params.value };
+};
+
+/**
+ * Reads the `filter` the agent put on a `mapData` entry (`{ <field>: <value> }`)
+ * when it recognized a value, a synonym included, from the catalogue's
+ * `filters`. The base must accept filters, the field must be on
+ * {@link FILTER_FIELDS} and the value must be a non-blank string; the value's
+ * presence in the data is checked when it is fetched.
+ *
+ * @param params.mapDataId - The entry's `mapDataId`, as written; only text names a base.
+ * @param params.filter - The entry's `filter`, as the agent wrote it.
+ * @returns The filter, or the pt-BR reason it is refused.
+ *
+ * @example
+ * parseMapDataFilter({ mapDataId: 'cozinhas_geolocalizadas', filter: { cnpj: '1' } }); // 'O filter ...'
+ */
+export const parseMapDataFilter = (params: {
+  mapDataId: unknown;
+  filter: unknown;
+}): ParsedFilter | string => {
+  const pair = fieldValueOf(params.filter);
+  // Only a text id names a base; nothing is coerced into one.
+  const filter =
+    pair && typeof params.mapDataId === 'string'
+      ? filterOn({ baseId: params.mapDataId, ...pair })
+      : undefined;
+  return (
+    filter ??
+    `O filter de "${String(params.mapDataId)}" precisa ser {"<campo>": "<valor>"} com um campo de ${Object.keys(FILTER_FIELDS).join(', ')}, e só vale em dataset com "filters" no catálogo.`
+  );
+};
+
+/**
+ * The legend note stating the filter a map was served with.
+ *
+ * @example
+ * filterNote({ baseId: 'cozinhas_geolocalizadas_2025', ano: 2025, field: 'situacao', value: 'Mapeada' });
+ * // 'Recorte: situação Mapeada (2025).'
+ */
+export const filterNote = (filter: ParsedFilter): string => {
+  return `Recorte: ${FILTER_FIELDS[filter.field].toLowerCase()} ${filter.value} (${filter.ano}).`;
 };
 
 const coveredValues = (snapshot: CozinhasSituacaoPorMunicipio): string[] => {
@@ -237,8 +262,10 @@ const HEAD_MIN_LENGTH = 4;
  * first word alone when that word has at least four letters, which may name
  * several values at once (`exact: false`).
  *
- * deferred: no synonyms or typos, revisit when `generationLogger` shows
- * filter wording that reaches generation unmatched.
+ * deferred: no synonyms or typos here; the agent reads the values in the
+ * catalogue's `filters` and may send a filter for a synonym (see
+ * {@link parseMapDataFilter}). Revisit when `generationLogger` shows filter
+ * wording that neither recognizes.
  *
  * @param params.text - The user's prompt.
  * @param params.values - The candidate raw values.
@@ -296,10 +323,10 @@ export const matchFilterValues = (params: {
 };
 
 /**
- * The coverage note (G-6) of each unfiltered filterable base among
- * `mapDataIds` whose snapshot holds only some values: the map answers within
- * that coverage, and its legend must say so. A filtered id needs no note: its
- * value is either covered in full or refused.
+ * The coverage note (G-6) of each filterable base among `mapDataIds` whose
+ * snapshot holds only some values: the map answers within that coverage, and
+ * its legend must say so. Pass only unfiltered bases: a filtered one's value is
+ * either covered in full or refused.
  *
  * @param mapDataIds - The `mapData[].mapDataId`s of a spec.
  * @returns The note per base id; empty when every snapshot is complete.

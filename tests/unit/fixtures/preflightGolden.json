@@ -92,7 +92,11 @@
     },
     "output": {
       "status": "resolved",
-      "datasetId": "cozinhas_geolocalizadas_2025?situacao=Habilitada"
+      "datasetId": "cozinhas_geolocalizadas_2025",
+      "filter": {
+        "field": "situacao",
+        "value": "Habilitada"
+      }
     }
   },
   {
@@ -118,18 +122,8 @@
       "prompt": "cozinhas com outra situação"
     },
     "output": {
-      "status": "ambiguous",
-      "clarify": {
-        "facet": "dataset",
-        "question": "Qual valor de \"Situação\" você quer no mapa?",
-        "options": [
-          {
-            "value": "cozinhas_geolocalizadas?situacao=Habilitada",
-            "label": "Situação: Habilitada (2026)"
-          }
-        ],
-        "default": "cozinhas_geolocalizadas?situacao=Habilitada"
-      }
+      "status": "unsupported",
+      "message": "Este pedido não aponta um único valor de \"Situação\". Peça de novo nomeando exatamente um destes valores de 2026: Habilitada."
     }
   },
   {
