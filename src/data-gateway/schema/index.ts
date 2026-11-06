@@ -35,7 +35,12 @@ export type {
   CozinhasFeatureCollection,
 } from './cozinha';
 export type { CozinhaDetalhe } from './cozinhaDetalhe';
-export type { KitchenByCity, KitchenRateByCity } from './kitchenByCity';
+export type {
+  CozinhasSituacaoPorMunicipio,
+  KitchenByCity,
+  KitchenRateByCity,
+  KitchenSituacaoByCity,
+} from './kitchenByCity';
 export type { MunicipioIvs } from './municipioIvs';
 export type { PaaAlimentosByCity } from './paaAlimentosByCity';
 export type { PaaKgPorPessoaByCity } from './paaKgPorPessoaByCity';

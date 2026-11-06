@@ -39,6 +39,43 @@ export type KitchenByCity = {
 };
 
 /**
+ * One município's located cozinhas counted per raw `situacao` value, for the
+ * `/ia` aggregation layer. Keys are the source's `Situação` text verbatim, so
+ * the gateway never interprets them.
+ */
+export type KitchenSituacaoByCity = {
+  /** 7-digit IBGE code, as in {@link KitchenByCity.codigoIbge}. */
+  codigoIbge: string;
+  /** Município name, as in {@link KitchenByCity.municipio}. */
+  municipio: string;
+  /** Located cozinhas per raw situação. Values sum to the município's `quantidade`. */
+  quantidadePorSituacao: Record<string, number>;
+};
+
+/**
+ * Per-situação counts for one snapshot year.
+ *
+ * `situacoesCobertas` lists the raw situações the snapshot actually holds
+ * (`null` = all). A count for a situação outside that list is unknown, not zero.
+ *
+ * @example
+ * const snapshot: CozinhasSituacaoPorMunicipio = {
+ *   situacoesCobertas: ['Habilitada'],
+ *   porMunicipio: [],
+ * };
+ */
+export type CozinhasSituacaoPorMunicipio = {
+  situacoesCobertas: readonly string[] | null;
+  porMunicipio: KitchenSituacaoByCity[];
+  /**
+   * Cozinhas of the snapshot year with no coordinates, so no município can
+   * count them. Excluded from every per-município count; disclosed, never
+   * assigned to a município.
+   */
+  semLocalizacao: number;
+};
+
+/**
  * A município row enriched with its IBGE Census 2022 population, its Cadastro
  * Único registration count, and three derived choropleth metrics — the shape
  * served by `/api/cozinhas/por-municipio` and consumed by every choropleth

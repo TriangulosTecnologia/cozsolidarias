@@ -9,6 +9,7 @@ import {
   isCozinhaYear,
   LATEST_COZINHA_YEAR,
   readStaticCozinhas,
+  SITUACOES_COBERTAS_POR_ANO,
 } from '../data-source-static/readStaticCozinhas';
 import { readStaticDataCatalogue } from '../data-source-static/readStaticDataCatalogue';
 import { readStaticIvs } from '../data-source-static/readStaticIvs';
@@ -26,6 +27,7 @@ import type {
   CozinhaDetalhe,
   CozinhasBubblesFeatureCollection,
   CozinhasFeatureCollection,
+  CozinhasSituacaoPorMunicipio,
   KitchenRateByCity,
   MunicipioIvs,
   PaaAlimentosByCity,
@@ -44,6 +46,7 @@ import {
   aggregateCozinhasPorMunicipio,
   type MunicipioAggregate,
   projectComTaxa,
+  toCozinhasSituacaoPorMunicipio,
 } from './transformers/toCozinhasPorMunicipio';
 import { toMunicipioIvs } from './transformers/toMunicipioIvs';
 import { toPaaAlimentosPorMunicipio } from './transformers/toPaaAlimentosPorMunicipio';
@@ -131,6 +134,18 @@ export type DataGateway = {
    */
   getCozinhasPorMunicipio: (year?: number) => Promise<KitchenRateByCity[]>;
   /**
+   * Returns the located cozinhas per município counted by raw `situacao`, for
+   * the `/ia` aggregation layer, together with the situações the year's snapshot
+   * covers. Internal: never served by a public route, so its fields may grow
+   * without a contract change.
+   *
+   * @example
+   * const { situacoesCobertas, porMunicipio } = await gateway.getCozinhasSituacaoPorMunicipio(2026);
+   */
+  getCozinhasSituacaoPorMunicipio: (
+    year?: number
+  ) => Promise<CozinhasSituacaoPorMunicipio>;
+  /**
    * Returns one anchor Point per município with its cozinha count (for the
    * proportional-circle map), for the given snapshot year.
    */
@@ -200,29 +215,66 @@ const isKnownSource = (value: string): value is KnownSource => {
   return (KNOWN_SOURCES as readonly string[]).includes(value);
 };
 
+// The choropleth and the circle map are two projections of the same
+// point-in-polygon aggregation. It's the expensive step (every cozinha tested
+// against ~5.5k município polygons), so it is memoized per year for the process
+// lifetime and both endpoints share each year's result.
+const aggregates = new Map<CozinhaYear, Promise<MunicipioAggregate[]>>();
+const situacaoSnapshots = new Map<
+  CozinhaYear,
+  Promise<CozinhasSituacaoPorMunicipio>
+>();
+let ivsRows: Promise<MunicipioIvs[]> | undefined;
+let cadinsanRows: Promise<CadinsanByCity[]> | undefined;
+
+const getAggregate = (year: CozinhaYear) => {
+  const existing = aggregates.get(year);
+  if (existing) {
+    return existing;
+  }
+  const promise = Promise.all([
+    readStaticCozinhas({ year }),
+    readStaticMunicipios(),
+  ]).then(([cozinhas, municipios]) => {
+    return aggregateCozinhasPorMunicipio({ cozinhas, municipios });
+  });
+  aggregates.set(year, promise);
+  // A failed read must not stay cached: the next call retries.
+  promise.catch(() => {
+    aggregates.delete(year);
+  });
+  return promise;
+};
+
+/** One year's per-situação snapshot, memoized with the aggregate it projects. */
+const getSituacaoSnapshot = (
+  year: CozinhaYear
+): Promise<CozinhasSituacaoPorMunicipio> => {
+  const existing = situacaoSnapshots.get(year);
+  if (existing) {
+    return existing;
+  }
+  const snapshot = Promise.all([
+    getAggregate(year),
+    readStaticCozinhas({ year }),
+  ]).then(([aggregate, cozinhas]) => {
+    return toCozinhasSituacaoPorMunicipio({
+      aggregate,
+      situacoesCobertas: SITUACOES_COBERTAS_POR_ANO[year],
+      semLocalizacao: cozinhas.filter((cozinha) => {
+        return cozinha.latitude === null || cozinha.longitude === null;
+      }).length,
+    });
+  });
+  situacaoSnapshots.set(year, snapshot);
+  snapshot.catch(() => {
+    situacaoSnapshots.delete(year);
+  });
+  return snapshot;
+};
+
 /** The gateway backed by `data-source-static`. */
 const createStaticGateway = (): DataGateway => {
-  // The choropleth and the circle map are two projections of the same
-  // point-in-polygon aggregation. It's the expensive step (every cozinha
-  // tested against ~5.5k município polygons), so memoize it per year for the
-  // process lifetime and let both endpoints share each year's result — the
-  // second caller (and every later request) only pays the cheap projection.
-  const aggregates = new Map<CozinhaYear, Promise<MunicipioAggregate[]>>();
-  const getAggregate = (year: CozinhaYear) => {
-    const existing = aggregates.get(year);
-    if (existing) {
-      return existing;
-    }
-    const promise = Promise.all([
-      readStaticCozinhas({ year }),
-      readStaticMunicipios(),
-    ]).then(([cozinhas, municipios]) => {
-      return aggregateCozinhasPorMunicipio({ cozinhas, municipios });
-    });
-    aggregates.set(year, promise);
-    return promise;
-  };
-
   // Coerce a requested year to a known snapshot, falling back to the latest.
   const resolveYear = (year?: number): CozinhaYear => {
     return year !== undefined && isCozinhaYear(year)
@@ -240,8 +292,17 @@ const createStaticGateway = (): DataGateway => {
     getCafHexbin: async (resolution = DEFAULT_CAF_HEXBIN_RESOLUTION) => {
       return toCafHexbin(await readStaticCafHexbin(resolution));
     },
-    getCadinsanPorMunicipio: async () => {
-      return toCadinsanPorMunicipio(await readStaticCadinsanMunicipal());
+    getCadinsanPorMunicipio: () => {
+      // Static snapshot: the projection is memoized for the process lifetime.
+      if (!cadinsanRows) {
+        cadinsanRows = readStaticCadinsanMunicipal().then(
+          toCadinsanPorMunicipio
+        );
+        cadinsanRows.catch(() => {
+          cadinsanRows = undefined;
+        });
+      }
+      return cadinsanRows;
     },
     getCatalogue: async () => {
       return toAppCatalogue(await readStaticDataCatalogue());
@@ -257,6 +318,9 @@ const createStaticGateway = (): DataGateway => {
       });
       return match ? toCozinhaDetalhe(match) : null;
     },
+    getCozinhasSituacaoPorMunicipio: (year) => {
+      return getSituacaoSnapshot(resolveYear(year));
+    },
     getCozinhasPorMunicipio: async (year) => {
       const [aggregate, populacao, cadunico] = await Promise.all([
         getAggregate(resolveYear(year)),
@@ -271,8 +335,15 @@ const createStaticGateway = (): DataGateway => {
     getCozinhasYears: () => {
       return [...COZINHAS_YEARS];
     },
-    getIvsPorMunicipio: async () => {
-      return toMunicipioIvs(await readStaticIvs());
+    getIvsPorMunicipio: () => {
+      // Static snapshot: the projection is memoized for the process lifetime.
+      if (!ivsRows) {
+        ivsRows = readStaticIvs().then(toMunicipioIvs);
+        ivsRows.catch(() => {
+          ivsRows = undefined;
+        });
+      }
+      return ivsRows;
     },
     getPaaAlimentosPorMunicipio: async () => {
       return toPaaAlimentosPorMunicipio(await readStaticPaaProdutos());

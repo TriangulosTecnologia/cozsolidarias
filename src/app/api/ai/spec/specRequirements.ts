@@ -21,6 +21,8 @@ const FIX_BY_CODE: Record<string, string> = {
   'unknown-source-url':
     'Use apenas as fontes geográficas do projeto (municípios, estados).',
   'unknown-basemap-style': 'Use o mapa base padrão do projeto.',
+  'invalid-filter':
+    'Peça um valor de situação das cozinhas que exista nos dados, sem combinar valores.',
 };
 
 /**

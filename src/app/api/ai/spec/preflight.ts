@@ -1,10 +1,17 @@
 import type { MapType } from '@ttoss/geovis';
 
 import {
+  type FilterDomain,
+  normalizeText,
+  type ServerFilter,
+} from './fieldFilters';
+import { valueRequest } from './filterRequest';
+import {
   ABSOLUTE_TOTAL_DATASET_IDS,
   type RenderableDatasetId,
 } from './mapDataCatalogue';
 import { MAP_TYPE_OPTIONS } from './mapTypeOptions';
+import { FAMILY_DEFS, FAMILY_NAMES, familyVariants } from './renderableFields';
 
 /** One selectable dataset or map type, with its pt-BR label. */
 export type ClarifyOption = { value: string; label: string };
@@ -23,8 +30,13 @@ export type Clarification = {
  * `ambiguous` stops to ask.
  */
 export type PreflightResult =
-  | { status: 'resolved' | 'unmatched' }
-  | { status: 'ambiguous'; clarify: Clarification };
+  | {
+      status: 'resolved' | 'unmatched';
+      datasetId?: RenderableDatasetId;
+      filter?: ServerFilter;
+    }
+  | { status: 'ambiguous'; clarify: Clarification }
+  | { status: 'unsupported'; message: string };
 
 type Variant = { id: RenderableDatasetId; label: string; match: RegExp };
 
@@ -35,98 +47,19 @@ type Family = {
 };
 
 /**
- * Dataset families whose variants a prompt can tell apart. `keyword` and
- * `match` run over the accent-stripped, lower-cased prompt.
+ * Dataset families whose variants a prompt can tell apart, derived from the
+ * renderable-field registry. `keyword` and `match` run over the accent-stripped,
+ * lower-cased prompt.
  */
-export const FAMILIES: Family[] = [
-  {
-    keyword: /\bivs\b/,
-    defaultId: 'municipios_ivs',
-    variants: [
-      {
-        id: 'municipios_ivs_infraestrutura',
-        label: 'IVS – Infraestrutura urbana',
-        match: /infraestrutura/,
-      },
-      {
-        id: 'municipios_ivs_capital_humano',
-        label: 'IVS – Capital humano',
-        match: /capital humano/,
-      },
-      {
-        id: 'municipios_ivs_renda_trabalho',
-        label: 'IVS – Renda e trabalho',
-        match: /renda|trabalho/,
-      },
-    ],
-  },
-  {
-    keyword: /idhm/,
-    defaultId: 'municipios_idhm',
-    variants: [
-      {
-        id: 'municipios_idhm_longevidade',
-        label: 'IDHM – Longevidade',
-        match: /longevidade/,
-      },
-      {
-        id: 'municipios_idhm_educacao',
-        label: 'IDHM – Educação',
-        match: /educacao/,
-      },
-      {
-        id: 'municipios_idhm_educacao_escolaridade',
-        label: 'IDHM – Educação (escolaridade)',
-        match: /escolaridade/,
-      },
-      {
-        id: 'municipios_idhm_educacao_frequencia',
-        label: 'IDHM – Educação (frequência escolar)',
-        match: /frequencia/,
-      },
-      { id: 'municipios_idhm_renda', label: 'IDHM – Renda', match: /renda/ },
-    ],
-  },
-  {
-    keyword: /cadinsan|cadunico|inseguranca alimentar/,
-    defaultId: 'municipios_cadinsan',
-    variants: [
-      {
-        id: 'municipios_cadinsan',
-        label: 'Insegurança alimentar com Bolsa Família',
-        match: /com (o )?(pbf|bolsa)/,
-      },
-      {
-        id: 'municipios_cadinsan_sem_pbf',
-        label: 'Insegurança alimentar sem Bolsa Família',
-        match: /sem (o )?(pbf|bolsa)/,
-      },
-    ],
-  },
-  {
-    keyword: /cozinha|atendid/,
-    defaultId: 'cozinhas_geolocalizadas',
-    variants: [
-      {
-        id: 'cozinhas_geolocalizadas_2025',
-        label: 'Cozinhas em 2025',
-        match: /2025/,
-      },
-      {
-        id: 'cozinhas_pessoas_atendidas',
-        label: 'Pessoas atendidas pelas cozinhas',
-        match: /atendid/,
-      },
-    ],
-  },
-];
-
-const normalize = (text: string): string => {
-  return text
-    .normalize('NFD')
-    .replace(/\p{Diacritic}/gu, '')
-    .toLowerCase();
-};
+export const FAMILIES: Family[] = FAMILY_NAMES.map((name) => {
+  return {
+    keyword: FAMILY_DEFS[name].keyword,
+    defaultId: FAMILY_DEFS[name].defaultId,
+    variants: familyVariants(name).map(({ id, variant }) => {
+      return { id, label: variant.label, match: variant.match };
+    }),
+  };
+});
 
 /**
  * The variants a prompt names, minus any that a more specific hit refines
@@ -187,16 +120,41 @@ const isAbsoluteTotal = (id: string): boolean => {
   return (ABSOLUTE_TOTAL_DATASET_IDS as readonly string[]).includes(id);
 };
 
-/** The dataset ids the prompt resolves to: the user's pick, else each family's variant or default. */
+/**
+ * Whether the user's chosen dataset answers this family: the family owns the
+ * id. An answered family is no longer ambiguous and takes no text match.
+ */
+const answeredBy = (params: {
+  hit: ReturnType<typeof familyHits>[number];
+  datasetId?: RenderableDatasetId;
+}): boolean => {
+  const { hit, datasetId } = params;
+  return (
+    datasetId !== undefined &&
+    (hit.family.defaultId === datasetId ||
+      hit.family.variants.some((variant) => {
+        return variant.id === datasetId;
+      }))
+  );
+};
+
+/**
+ * The dataset ids the prompt resolves to: the user's pick first, then each
+ * unanswered family's variant or default. Families the pick answers keep no
+ * text match, so a pick never drops the prompt's other facets.
+ */
 const chosenIds = (params: {
   datasetId?: RenderableDatasetId;
   hits: ReturnType<typeof familyHits>;
 }): string[] => {
-  return params.datasetId
-    ? [params.datasetId]
-    : params.hits.map((hit) => {
-        return hit.variants[0]?.id ?? hit.family.defaultId;
-      });
+  const open = params.hits
+    .filter((hit) => {
+      return !answeredBy({ hit, datasetId: params.datasetId });
+    })
+    .map((hit) => {
+      return hit.variants[0]?.id ?? hit.family.defaultId;
+    });
+  return params.datasetId ? [params.datasetId, ...open] : open;
 };
 
 const choroplethOnAbsoluteTotal = (params: {
@@ -226,6 +184,8 @@ const choroplethOnAbsoluteTotal = (params: {
  * @param params.prompt - The user's request.
  * @param params.mapType - The map type the user already chose, if any.
  * @param params.datasetId - The dataset the user already chose; replaces the text matching.
+ * @param params.filterDomains - The values each filterable base holds (see
+ * `readFilterDomainsFor`); omitted = no field filter is matched.
  * @returns `resolved`, `unmatched`, or `ambiguous` with the question to ask.
  *
  * @example
@@ -235,19 +195,35 @@ export const preflightPrompt = (params: {
   prompt: string;
   mapType?: MapType;
   datasetId?: RenderableDatasetId;
+  filterDomains?: FilterDomain[];
 }): PreflightResult => {
-  const text = normalize(params.prompt);
-  const hits = params.datasetId ? [] : familyHits(text);
-  const split = hits.find((hit) => {
-    return hit.variants.length > 1;
+  const text = normalizeText(params.prompt);
+  const hits = familyHits(text);
+  const splits = hits.filter((hit) => {
+    return (
+      hit.variants.length > 1 &&
+      !answeredBy({ hit, datasetId: params.datasetId })
+    );
   });
-  if (split) {
+  if (splits.length > 0) {
     return {
       status: 'ambiguous',
-      clarify: datasetClarification(split.variants),
+      clarify: datasetClarification(
+        splits.flatMap((split) => {
+          return split.variants;
+        })
+      ),
     };
   }
 
+  const valued = valueRequest({
+    text,
+    datasetId: params.datasetId,
+    domains: params.filterDomains,
+  });
+  if (valued) {
+    return valued;
+  }
   const ids = chosenIds({ datasetId: params.datasetId, hits });
   if (ids.length === 0) {
     return { status: 'unmatched' };

@@ -121,16 +121,46 @@
     "response": {
       "type": "Objeto; 404 quando o código não existe no ano informado",
       "fields": [
-        { "name": "codigo", "description": "Código único da cozinha." },
-        { "name": "nome", "description": "Nome da cozinha." },
-        { "name": "municipio", "description": "Nome do município." },
-        { "name": "codigoIbge", "description": "Código IBGE do município." },
-        { "name": "latitude", "description": "Latitude em graus decimais." },
-        { "name": "longitude", "description": "Longitude em graus decimais." },
-        { "name": "endereco", "description": "Endereço da cozinha." },
-        { "name": "cnpj", "description": "CNPJ da entidade responsável." },
-        { "name": "email", "description": "E-mail de contato." },
-        { "name": "telefone", "description": "Telefone de contato." },
+        {
+          "name": "codigo",
+          "description": "Código único da cozinha."
+        },
+        {
+          "name": "nome",
+          "description": "Nome da cozinha."
+        },
+        {
+          "name": "municipio",
+          "description": "Nome do município."
+        },
+        {
+          "name": "codigoIbge",
+          "description": "Código IBGE do município."
+        },
+        {
+          "name": "latitude",
+          "description": "Latitude em graus decimais."
+        },
+        {
+          "name": "longitude",
+          "description": "Longitude em graus decimais."
+        },
+        {
+          "name": "endereco",
+          "description": "Endereço da cozinha."
+        },
+        {
+          "name": "cnpj",
+          "description": "CNPJ da entidade responsável."
+        },
+        {
+          "name": "email",
+          "description": "E-mail de contato."
+        },
+        {
+          "name": "telefone",
+          "description": "Telefone de contato."
+        },
         {
           "name": "quantidade",
           "description": "Número de cozinhas do registro no ano."
@@ -175,7 +205,10 @@
           "name": "codigoIbge",
           "description": "Código IBGE do município; chave de junção (geometryId)."
         },
-        { "name": "municipio", "description": "Nome do município." },
+        {
+          "name": "municipio",
+          "description": "Nome do município."
+        },
         {
           "name": "quantidade",
           "description": "Número de CAFs no município."
@@ -257,7 +290,10 @@
           "name": "codigoIbge",
           "description": "Código IBGE do município; chave de junção (geometryId)."
         },
-        { "name": "municipio", "description": "Nome do município." },
+        {
+          "name": "municipio",
+          "description": "Nome do município."
+        },
         {
           "name": "ivs",
           "description": "Índice entre 0 e 1, onde 1 é vulnerabilidade máxima."
@@ -317,9 +353,18 @@
           "name": "codigoIbge",
           "description": "Código IBGE do município; chave de junção (geometryId)."
         },
-        { "name": "municipio", "description": "Nome do município." },
-        { "name": "uf", "description": "Sigla da UF." },
-        { "name": "regiao", "description": "Região do Brasil." },
+        {
+          "name": "municipio",
+          "description": "Nome do município."
+        },
+        {
+          "name": "uf",
+          "description": "Sigla da UF."
+        },
+        {
+          "name": "regiao",
+          "description": "Região do Brasil."
+        },
         {
           "name": "absolutoComPbf",
           "description": "Número absoluto de famílias em insegurança alimentar no cenário com o Bolsa Família."
@@ -345,6 +390,21 @@
     "usage": "Coroplético de insegurança alimentar (join geometryId: codigoIbge).",
     "constraints": [
       "As proporções são 0–1: exiba como rampa, nunca coroplético dos totais absolutos."
+    ]
+  },
+  {
+    "method": "MAPDATA",
+    "path": "(filtro de mapData por valor de campo)",
+    "summary": "Contagem de cozinhas por município cujo campo tem um valor, como uma situação.",
+    "parameters": [],
+    "response": {
+      "description": "O valor é a contagem de cozinhas localizadas no município cujo campo tem o valor pedido."
+    },
+    "usage": "Para contar só as cozinhas com um valor de campo, inclusive quando o pedido usa um sinônimo desse valor, mantenha o mapDataId da base (cozinhas_geolocalizadas, cozinhas_geolocalizadas_2025) sem parâmetros e envie, ao lado do spec, em \"filters\" o item {\"mapDataId\": \"<base>\", \"filter\": {\"<campo>\": \"<valor>\"}}, com <campo> em situacao e <valor> copiado exatamente de \"filters[].valores\" da base no catálogo. O servidor aplica o filtro e o remove do spec.",
+    "constraints": [
+      "Um valor ausente de \"filters\" é desconhecido, nunca zero: não o use.",
+      "Um campo e um valor por entrada; não combine valores em um mesmo mapa.",
+      "Descreva o recorte no título da legenda."
     ]
   }
 ]

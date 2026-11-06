@@ -1,5 +1,6 @@
 import type { MapType } from '@ttoss/geovis';
 
+import type { ServerFilter } from './fieldFilters';
 import { INSTRUCTIONS } from './instructions/instructions';
 
 /**
@@ -12,6 +13,8 @@ import { INSTRUCTIONS } from './instructions/instructions';
  * @param params.prompt - The user's request.
  * @param params.mapType - The map type the user chose, if any.
  * @param params.datasetId - The dataset the user chose, if any.
+ * @param params.filter - The filter the server resolved for `datasetId`, if
+ * any; the server applies it, so the `mapDataId` stays the base id.
  * @returns The message, sections separated by blank lines.
  *
  * @example
@@ -22,6 +25,7 @@ export const buildAgentMessage = (params: {
   prompt: string;
   mapType?: MapType;
   datasetId?: string;
+  filter?: ServerFilter;
 }): string => {
   return [
     ...(params.catalogueText === undefined
@@ -39,6 +43,11 @@ export const buildAgentMessage = (params: {
     ...(params.datasetId
       ? [
           `Dataset escolhido pelo usuário (mapDataId): "${params.datasetId}". Use exatamente este dataset no mapData.`,
+        ]
+      : []),
+    ...(params.filter
+      ? [
+          `Recorte resolvido pelo servidor para esse dataset: ${params.filter.field} = "${params.filter.value}". O servidor aplica o recorte: mantenha o mapDataId sem parâmetros e descreva o recorte no título da legenda.`,
         ]
       : []),
     params.prompt,

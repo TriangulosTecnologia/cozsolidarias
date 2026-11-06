@@ -2,6 +2,7 @@ import {
   collectStructuralIssues,
   normalizeCandidate,
 } from './candidateValidation';
+import { attachFilters } from './mapDataFilters';
 import type {
   SpecReplyError,
   SpecReplyOk,
@@ -42,12 +43,15 @@ const stoppedResponse = (reply: SpecReplyStopped): Response => {
  * Resolves the agent's structured reply into the raw spec object
  * (`status: "ok"`), or the 422 `Response` for a declined request
  * (`status: "error"`), a validation loop that gave up (`status: "stopped"`),
- * a non-object spec or one failing the structural checks. A non-object spec
- * is carried raw; a structural failure carries it normalized by
- * `normalizeCandidate` (see {@link stoppedResponse}).
+ * a non-object spec, `filters` naming no `mapData` entry, or one failing the
+ * structural checks. The reply's `filters` are moved onto the entries they
+ * name (see `attachFilters`), where the server reads them. A non-object spec
+ * or a `filters` failure is carried raw; a structural failure carries it
+ * normalized by `normalizeCandidate` (see {@link stoppedResponse}).
  *
  * @param reply - The `reply` of {@link generateInSession}.
- * @returns The spec normalized by `normalizeCandidate`, or the 422 `Response`.
+ * @returns The spec, with its filters on its entries, normalized by
+ * `normalizeCandidate`, or the 422 `Response`.
  *
  * @example
  * const spec = resolveAgentReply({ status: 'ok', spec: { layers: [] } });
@@ -74,7 +78,16 @@ export const resolveAgentReply = (
     });
   }
 
-  const spec = normalizeCandidate(reply.spec);
+  const attached = attachFilters({ spec: reply.spec, filters: reply.filters });
+  if (attached.issues.length > 0) {
+    return invalidSpecResponse({
+      message: `${attached.issues[0].message} Tente reformular o pedido.`,
+      issues: attached.issues,
+      spec: reply.spec,
+    });
+  }
+
+  const spec = normalizeCandidate(attached.spec);
   const structuralIssues = collectStructuralIssues(spec);
   if (structuralIssues.length > 0) {
     return invalidSpecResponse({

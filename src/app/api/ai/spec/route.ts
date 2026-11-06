@@ -1,26 +1,25 @@
 import type { MapType } from '@ttoss/geovis';
 
-import { gateway } from '@/gateway';
-
 import { buildAgentMessage } from './agentMessage';
 import { resolveAgentReply } from './agentReply';
 import {
   validateCandidate,
   validateWithLocalRepairs,
 } from './candidateValidation';
+import { readCatalogueContext } from './catalogueContext';
+import type { FilterDomain, ServerFilter } from './fieldFilters';
 import baseVisualizationSpecJson from './instructions/baseVisualizationSpec.json';
-import {
-  buildCatalogueContext,
-  type RenderableDatasetId,
-} from './mapDataCatalogue';
+import { type RenderableDatasetId } from './mapDataCatalogue';
 import { MAP_TYPE_OPTIONS } from './mapTypeOptions';
 import { generateInSession, withSessionId } from './naturaliSessionApi';
 import {
   type Clarification,
   clarifyResponse,
   preflightPrompt,
+  type PreflightResult,
 } from './preflight';
-import { resolveServedSpec } from './serveSpec';
+import { familyOf } from './renderableFields';
+import { readDomains, resolveServedSpec } from './serveSpec';
 import { applyProportionalCirclesDefaults, mergeSpecs } from './specDefaults';
 import {
   errorResponse,
@@ -30,21 +29,6 @@ import {
 import { validateDatasetId } from './validateDatasetId';
 import { validateMapType } from './validateMapType';
 import { validateSessionId } from './validateSessionId';
-
-let cachedCatalogueText: Promise<string> | null = null;
-
-/**
- * Builds the two-tier catalog context (see {@link buildCatalogueContext})
- * once and keeps it in memory for the process lifetime. Joined into the
- * single `messages[0].content` sent on every call (see
- * {@link getAgentResponse}), never resent mid-turn.
- */
-const readCatalogueContext = (): Promise<string> => {
-  if (!cachedCatalogueText) {
-    cachedCatalogueText = gateway.getCatalogue().then(buildCatalogueContext);
-  }
-  return cachedCatalogueText;
-};
 
 const promptError = (message: string): Response => {
   return errorResponse({ status: 400, message: `Campo "prompt": ${message}` });
@@ -82,6 +66,8 @@ type ParsedRequest = {
   sessionId?: string;
   mapType?: MapType;
   datasetId?: RenderableDatasetId;
+  filter?: ServerFilter;
+  filterDomains?: FilterDomain[];
 };
 
 /** The clarify question, echoing the client's session so the conversation can continue. */
@@ -94,11 +80,37 @@ const clarifyAnswer = (
 };
 
 /**
- * Validates the whole request body — the `prompt` and the optional `mapType`
- * and `datasetId` — then runs the {@link preflightPrompt}, answering with the
- * question when the request is ambiguous.
+ * Turns the preflight verdict into the request the generation runs with: a
+ * question for an ambiguous prompt, a refusal for an unsupported one, else the
+ * request with the server-resolved `mapDataId` when the user chose none.
  */
-const parseRequest = (rawBody: unknown): ParsedRequest | Response => {
+const answerPreflight = (params: {
+  request: ParsedRequest;
+  preflight: PreflightResult;
+}): ParsedRequest | Response => {
+  const { request, preflight } = params;
+  if (preflight.status === 'ambiguous') {
+    return clarifyAnswer(preflight.clarify, request.sessionId);
+  }
+  if (preflight.status === 'unsupported') {
+    return invalidSpecResponse({ message: preflight.message });
+  }
+  return {
+    ...request,
+    datasetId: request.datasetId ?? preflight.datasetId,
+    filter: preflight.filter,
+  };
+};
+
+/**
+ * Validates the whole request body — the `prompt` and the optional `mapType`
+ * and `datasetId` — then runs the {@link preflightPrompt} with the values the
+ * data holds for its filterable fields, answering with the question when the
+ * request is ambiguous.
+ */
+const parseRequest = async (
+  rawBody: unknown
+): Promise<ParsedRequest | Response> => {
   const prompt = validatePrompt(rawBody);
   if (prompt instanceof Response) {
     return prompt;
@@ -116,19 +128,20 @@ const parseRequest = (rawBody: unknown): ParsedRequest | Response => {
   if (sessionId instanceof Response) {
     return sessionId;
   }
-  const preflight = preflightPrompt({ prompt, mapType, datasetId });
-  return preflight.status === 'ambiguous'
-    ? clarifyAnswer(preflight.clarify, sessionId)
-    : { prompt, mapType, datasetId, sessionId };
+  const filterDomains = await readDomains(prompt);
+  if (filterDomains instanceof Response) {
+    return filterDomains;
+  }
+  return answerPreflight({
+    request: { prompt, mapType, datasetId, sessionId, filterDomains },
+    preflight: preflightPrompt({ prompt, mapType, datasetId, filterDomains }),
+  });
 };
 
-const validateEnv = ():
-  | {
-      apiKey: string;
-      projectId: string;
-      agentId: string;
-    }
-  | Response => {
+/** The Naturali credentials and ids the route reads from the server environment. */
+type NaturaliEnv = { apiKey: string; projectId: string; agentId: string };
+
+const validateEnv = (): NaturaliEnv | Response => {
   // deferred: legacy NATURALI_API_KEY fallback, remove once Vercel renames it to NATURALI_TOKEN
   const apiKey =
     process.env['NATURALI_TOKEN'] || process.env['NATURALI_API_KEY'];
@@ -192,20 +205,11 @@ const describeAgentFailure = (error: unknown): string => {
  * `Response` for a transport failure (502) or a rejected spec (422; stamped
  * with the session id once one exists).
  */
-const getAgentResponse = async (params: {
-  apiKey: string;
-  projectId: string;
-  agentId: string;
-  sessionId?: string;
-  prompt: string;
-  mapType?: MapType;
-  datasetId?: RenderableDatasetId;
-}): Promise<{ spec: UnknownRecord; sessionId: string } | Response> => {
-  const choices = {
-    prompt: params.prompt,
-    mapType: params.mapType,
-    datasetId: params.datasetId,
-  };
+const getAgentResponse = async (
+  params: NaturaliEnv & ParsedRequest
+): Promise<{ spec: UnknownRecord; sessionId: string } | Response> => {
+  const { prompt, mapType, datasetId, filter } = params;
+  const choices = { prompt, mapType, datasetId, filter };
   let generated: Awaited<ReturnType<typeof generateInSession>>;
   try {
     generated = await generateInSession({
@@ -215,7 +219,12 @@ const getAgentResponse = async (params: {
       sessionId: params.sessionId,
       message: buildAgentMessage({
         ...choices,
-        catalogueText: await readCatalogueContext(),
+        catalogueText: await readCatalogueContext(
+          choices.datasetId === undefined
+            ? undefined
+            : familyOf(choices.datasetId),
+          params.filterDomains
+        ),
       }),
       followUpMessage: buildAgentMessage(choices),
       validateCandidate,
@@ -269,7 +278,7 @@ export const POST = async (request: Request): Promise<Response> => {
     return null;
   });
 
-  const requestOrError = parseRequest(rawBody);
+  const requestOrError = await parseRequest(rawBody);
   if (requestOrError instanceof Response) {
     return requestOrError;
   }
@@ -280,13 +289,8 @@ export const POST = async (request: Request): Promise<Response> => {
   }
 
   const modelJsonOrError = await getAgentResponse({
-    apiKey: envOrError.apiKey,
-    projectId: envOrError.projectId,
-    agentId: envOrError.agentId,
-    sessionId: requestOrError.sessionId,
-    prompt: requestOrError.prompt,
-    mapType: requestOrError.mapType,
-    datasetId: requestOrError.datasetId,
+    ...envOrError,
+    ...requestOrError,
   });
   if (modelJsonOrError instanceof Response) {
     return modelJsonOrError;
@@ -299,6 +303,9 @@ export const POST = async (request: Request): Promise<Response> => {
       baseVisualizationSpecJson as UnknownRecord,
       modelJsonOrError.spec
     ),
+    agentSpec: modelJsonOrError.spec,
+    chosen: requestOrError.datasetId,
+    filter: requestOrError.filter,
   });
   if (servedOrError instanceof Response) {
     return withSessionId(servedOrError, sessionId);

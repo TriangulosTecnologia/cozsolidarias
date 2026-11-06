@@ -5,6 +5,13 @@ import {
 } from '@ttoss/geovis';
 
 import { isRenderableDatasetId } from './mapDataCatalogue';
+import {
+  attachFilters,
+  filtersOf,
+  invalidFilterIssues,
+  type ReplyFilter,
+  withoutFilters,
+} from './mapDataFilters';
 import { repairMapDataWiring } from './specRepairs';
 import {
   findChoroplethOnAbsoluteTotal,
@@ -282,19 +289,30 @@ export const normalizeCandidate = (spec: UnknownRecord): UnknownRecord => {
  * {@link validateWithLocalRepairs}. Only what is left needs the model — this
  * is the body of the `validate_spec` tool.
  *
- * @param spec - The candidate the model proposed.
- * @returns The repaired spec and the issues that remain; `issues` is empty
- * when the candidate is valid.
+ * The filters travel beside the spec (see `ReplyFilter`): the agent's
+ * `filters`, plus any `filter` it still put on an entry, are checked and
+ * returned in `filters`, and the returned spec carries none, so the agent can
+ * reply with both as received without breaking its `output_schema`.
+ *
+ * @param args - The tool call arguments, `{ spec, filters? }`; a bare spec is
+ * accepted as `{ spec }`.
+ * @returns The repaired spec, its filters and the issues that remain;
+ * `issues` is empty when the candidate is valid.
  *
  * @example
- * const { spec: repaired, issues } = validateCandidate(modelSpec);
+ * const { spec: repaired, filters, issues } = validateCandidate({ spec: modelSpec, filters: [] });
  */
 export const validateCandidate = (
-  spec: unknown
-): { spec: unknown; issues: SpecIssue[] } => {
+  args: unknown
+): { spec: unknown; filters: ReplyFilter[]; issues: SpecIssue[] } => {
+  const { spec, filters: replyFilters } =
+    isRecord(args) && 'spec' in args
+      ? { spec: args['spec'], filters: args['filters'] }
+      : { spec: args, filters: undefined };
   if (!isRecord(spec)) {
     return {
       spec,
+      filters: [],
       issues: [
         {
           code: 'invalid-spec-shape',
@@ -305,8 +323,21 @@ export const validateCandidate = (
     };
   }
 
-  const normalized = normalizeCandidate(spec);
+  const attached = attachFilters({ spec, filters: replyFilters });
+  const filters = filtersOf(attached.spec);
+  const normalized = normalizeCandidate(withoutFilters(attached.spec));
   const structural = collectStructuralIssues(normalized);
   const checked = validateWithLocalRepairs(normalized);
-  return { spec: checked.spec, issues: [...structural, ...checked.issues] };
+  return {
+    spec: checked.spec,
+    filters: filters.map(({ mapDataId, filter }) => {
+      return { mapDataId, filter };
+    }),
+    issues: [
+      ...attached.issues,
+      ...invalidFilterIssues(filters),
+      ...structural,
+      ...checked.issues,
+    ],
+  };
 };

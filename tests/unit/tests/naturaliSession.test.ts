@@ -81,7 +81,9 @@ describe('generateSpec', () => {
     const reply = await generateSpec({ ...BASE_PARAMS, validateCandidate });
 
     expect(reply).toEqual({ status: 'ok', spec: { engine: 'maplibre' } });
-    expect(validateCandidate).toHaveBeenCalledWith({ engine: 'wrong' });
+    expect(validateCandidate).toHaveBeenCalledWith({
+      spec: { engine: 'wrong' },
+    });
     expect(fetchMock.mock.calls[0][0]).toBe(
       'https://api.naturali.ai/v1/projects/proj_1/sessions/sess_test0001/messages'
     );
@@ -113,9 +115,12 @@ describe('generateSpec', () => {
       );
     }
     global.fetch = fetchMock;
-    const validateCandidate = jest.fn((spec: unknown) => {
-      const round = (spec as { round: number }).round;
-      return { spec, issues: issues(MAX_VALIDATION_ATTEMPTS + 1 - round) };
+    const validateCandidate = jest.fn((args: unknown) => {
+      const { spec } = args as { spec: { round: number } };
+      return {
+        spec,
+        issues: issues(MAX_VALIDATION_ATTEMPTS + 1 - spec.round),
+      };
     });
 
     const reply = await generateSpec({ ...BASE_PARAMS, validateCandidate });
@@ -139,8 +144,8 @@ describe('generateSpec', () => {
       .mockResolvedValueOnce(pausedOn('call_1', { round: 1 }))
       .mockResolvedValueOnce(pausedOn('call_2', { round: 2 }));
     global.fetch = fetchMock;
-    const validateCandidate = jest.fn((spec: unknown) => {
-      return { spec, issues: issues(2) };
+    const validateCandidate = jest.fn((args: unknown) => {
+      return { spec: (args as { spec: unknown }).spec, issues: issues(2) };
     });
 
     const reply = await generateSpec({ ...BASE_PARAMS, validateCandidate });

@@ -22,6 +22,23 @@ export const isCozinhaYear = (value: number): value is CozinhaYear => {
   return (COZINHAS_YEARS as readonly number[]).includes(value);
 };
 
+/**
+ * The raw `Situação` values each snapshot year actually contains. `null` means
+ * every situation is covered. A count for a situation outside this list is
+ * unknown for that year, never zero: the 2026 file holds only `Habilitada`
+ * kitchens (see {@link COZINHAS_YEARS}).
+ *
+ * @example
+ * SITUACOES_COBERTAS_POR_ANO[2026]; // ['Habilitada']
+ */
+export const SITUACOES_COBERTAS_POR_ANO: Record<
+  CozinhaYear,
+  readonly string[] | null
+> = {
+  2025: null,
+  2026: ['Habilitada'],
+};
+
 /** Maps each snapshot year to its CSV filename under `data/`. */
 const YEAR_TO_FILE: Record<CozinhaYear, string> = {
   2025: 'cozinhas_com_geolocalizacao_2025.csv',

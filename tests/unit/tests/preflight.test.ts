@@ -1,9 +1,14 @@
+import type { FilterDomain } from 'src/app/api/ai/spec/fieldFilters';
 import { RENDERABLE_DATASET_IDS } from 'src/app/api/ai/spec/mapDataCatalogue';
 import {
   clarifyResponse,
   FAMILIES,
   preflightPrompt,
 } from 'src/app/api/ai/spec/preflight';
+
+import filterDomains from '../fixtures/filterDomains.json';
+
+const FILTER_DOMAINS = filterDomains as FilterDomain[];
 
 describe('preflightPrompt', () => {
   test('resolves a family named without a variant to its default dataset', () => {
@@ -98,6 +103,133 @@ describe('preflightPrompt', () => {
         mapType: 'choropleth',
       })
     ).toEqual({ status: 'resolved' });
+  });
+
+  test('resolves a cozinhas situation to its year base plus a server filter', () => {
+    expect(
+      preflightPrompt({
+        prompt: 'cozinhas habilitadas 2025',
+        filterDomains: FILTER_DOMAINS,
+      })
+    ).toEqual({
+      status: 'resolved',
+      datasetId: 'cozinhas_geolocalizadas_2025',
+      filter: { field: 'situacao', value: 'Habilitada' },
+    });
+    expect(
+      preflightPrompt({
+        prompt: 'cozinhas habilitadas',
+        filterDomains: FILTER_DOMAINS,
+      })
+    ).toEqual({
+      status: 'resolved',
+      datasetId: 'cozinhas_geolocalizadas',
+      filter: { field: 'situacao', value: 'Habilitada' },
+    });
+  });
+
+  test('refuses não habilitadas in 2026, whose snapshot holds only habilitadas', () => {
+    expect(
+      preflightPrompt({
+        prompt: 'cozinhas não habilitadas',
+        filterDomains: FILTER_DOMAINS,
+      }).status
+    ).toBe('unsupported');
+  });
+
+  test('refuses "outras" with the values to name, never one fixed group', () => {
+    const result = preflightPrompt({
+      prompt: 'cozinhas com outra situação em 2025',
+      filterDomains: FILTER_DOMAINS,
+    });
+
+    expect(result).toMatchObject({
+      status: 'unsupported',
+      message: expect.stringContaining('Mapeada'),
+    });
+  });
+
+  test('never reads a negated não habilitada as habilitada', () => {
+    expect(
+      preflightPrompt({
+        prompt: 'cozinhas não habilitadas 2025',
+        filterDomains: FILTER_DOMAINS,
+      })
+    ).toEqual({
+      status: 'resolved',
+      datasetId: 'cozinhas_geolocalizadas_2025',
+      filter: { field: 'situacao', value: 'Não Habilitada' },
+    });
+  });
+
+  test('refuses a prompt that names two situations, never answering one silently', () => {
+    const result = preflightPrompt({
+      prompt: 'cozinhas habilitadas e não habilitadas',
+      filterDomains: FILTER_DOMAINS,
+    });
+
+    expect(result.status).toBe('unsupported');
+  });
+
+  test('refuses a situation named alongside a dataset the user already chose, never dropping it silently', () => {
+    expect(
+      preflightPrompt({
+        prompt: 'cozinhas habilitadas',
+        datasetId: 'cozinhas_pessoas_atendidas',
+        filterDomains: FILTER_DOMAINS,
+      }).status
+    ).toBe('unsupported');
+    expect(
+      preflightPrompt({
+        prompt: 'ivs infraestrutura e cozinhas habilitadas',
+        datasetId: 'municipios_ivs_infraestrutura',
+        filterDomains: FILTER_DOMAINS,
+      }).status
+    ).toBe('unsupported');
+  });
+
+  test('asks one question listing every ambiguous family', () => {
+    const result = preflightPrompt({
+      prompt:
+        'ivs infraestrutura e capital humano; idhm educacao e longevidade',
+    });
+
+    expect(result.status).toBe('ambiguous');
+    if (result.status !== 'ambiguous') {
+      throw new Error('expected ambiguous');
+    }
+    expect(
+      result.clarify.options.map((option) => {
+        return option.value;
+      })
+    ).toEqual([
+      'municipios_ivs_infraestrutura',
+      'municipios_ivs_capital_humano',
+      'municipios_idhm_longevidade',
+      'municipios_idhm_educacao',
+    ]);
+    expect(result.clarify.default).toBe('municipios_ivs_infraestrutura');
+  });
+
+  test('a chosen dataset answers only its own family, so the other family still asks', () => {
+    const result = preflightPrompt({
+      prompt:
+        'ivs infraestrutura e capital humano; idhm educacao e longevidade',
+      datasetId: 'municipios_idhm_longevidade',
+    });
+
+    expect(result.status).toBe('ambiguous');
+    if (result.status !== 'ambiguous') {
+      throw new Error('expected ambiguous');
+    }
+    expect(
+      result.clarify.options.map((option) => {
+        return option.value;
+      })
+    ).toEqual([
+      'municipios_ivs_infraestrutura',
+      'municipios_ivs_capital_humano',
+    ]);
   });
 
   test('never blocks a prompt it does not recognise', () => {

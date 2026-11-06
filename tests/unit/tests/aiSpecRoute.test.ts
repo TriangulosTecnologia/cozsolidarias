@@ -157,14 +157,19 @@ const mockSessionOpening = (): jest.Mock => {
  * Mocks a single, completed `generate?wait=true` call whose structured
  * `content` is the JSON text of `{status: "ok", spec}` — `spec` is `JSON.parse(text)`,
  * so every existing call site keeps passing a `JSON.stringify`'d spec, not a
- * pre-wrapped `{status, spec}` envelope.
+ * pre-wrapped `{status, spec}` envelope. `filters`, when given, travels
+ * beside the spec, as the agent's `output_schema` declares.
  */
-const mockAgentReply = (text: string): jest.Mock => {
+const mockAgentReply = (text: string, filters?: unknown): jest.Mock => {
   const fetchMock = mockSessionOpening().mockResolvedValueOnce(
     jsonResponse({
       generation_id: 'gen_123',
       status: 'completed',
-      content: JSON.stringify({ status: 'ok', spec: JSON.parse(text) }),
+      content: JSON.stringify({
+        status: 'ok',
+        spec: JSON.parse(text),
+        ...(filters === undefined ? {} : { filters }),
+      }),
     })
   );
   global.fetch = fetchMock;
@@ -189,6 +194,48 @@ const mockRawAgentReply = (content: string): jest.Mock => {
   global.fetch = fetchMock;
   return fetchMock;
 };
+
+/**
+ * The route reads the situação values for every prompt naming cozinhas. A
+ * small snapshot per year keeps those tests off the real point-in-polygon
+ * aggregation (seconds under a parallel run); a test needing other values
+ * overrides it.
+ */
+beforeEach(() => {
+  jest
+    .spyOn(gateway, 'getCozinhasSituacaoPorMunicipio')
+    .mockImplementation((year) => {
+      return Promise.resolve(
+        year === 2025
+          ? {
+              situacoesCobertas: null,
+              semLocalizacao: 0,
+              porMunicipio: [
+                {
+                  codigoIbge: '3304557',
+                  municipio: 'Rio de Janeiro (RJ)',
+                  quantidadePorSituacao: {
+                    Habilitada: 1,
+                    'Não Habilitada': 1,
+                    Mapeada: 1,
+                  },
+                },
+              ],
+            }
+          : {
+              situacoesCobertas: ['Habilitada'],
+              semLocalizacao: 0,
+              porMunicipio: [
+                {
+                  codigoIbge: '3304557',
+                  municipio: 'Rio de Janeiro (RJ)',
+                  quantidadePorSituacao: { Habilitada: 1 },
+                },
+              ],
+            }
+      );
+    });
+});
 
 describe('POST /api/ai/spec', () => {
   const originalEnv: Partial<Record<(typeof ENV_KEYS)[number], string>> = {};
@@ -389,6 +436,356 @@ describe('POST /api/ai/spec', () => {
 
     expect(response.status).toBe(422);
     expect(response.headers.get('x-session-id')).toBe('sess_route0001');
+  });
+
+  test('serves the situação the server resolved when the agent used that dataset', async () => {
+    jest.spyOn(gateway, 'getCozinhasSituacaoPorMunicipio').mockResolvedValue({
+      situacoesCobertas: ['Habilitada'],
+      porMunicipio: [
+        {
+          codigoIbge: '3550308',
+          municipio: 'São Paulo',
+          quantidadePorSituacao: { Habilitada: 7 },
+        },
+      ],
+    });
+    mockAgentReply(
+      JSON.stringify({
+        mapData: [
+          {
+            mapDataId: 'cozinhas_geolocalizadas',
+            mapId: 'municipios-boundary',
+            joinKey: 'codarea',
+            data: [],
+          },
+        ],
+        legends: [{ id: 'legend-habilitadas', title: 'Habilitadas' }],
+      })
+    );
+
+    const response = await POST(
+      jsonRequest({ prompt: 'cozinhas habilitadas por município' })
+    );
+    const body = (await response.json()) as {
+      spec?: {
+        mapData?: Array<Record<string, unknown>>;
+        legends?: Array<{ subtitle?: string }>;
+      };
+    };
+
+    expect(response.status).toBe(200);
+    expect(body.spec?.mapData?.[0]).toEqual({
+      mapDataId: 'cozinhas_geolocalizadas',
+      mapId: 'municipios-boundary',
+      joinKey: 'codarea',
+      data: [{ geometryId: '3550308', value: 7 }],
+    });
+    expect(body.spec?.legends?.[0].subtitle).toBe(
+      'Recorte: situação Habilitada (2026).'
+    );
+  });
+
+  test('keeps the public response keys of POST /api/ai/spec on success', async () => {
+    jest.spyOn(gateway, 'getCozinhasSituacaoPorMunicipio').mockResolvedValue({
+      situacoesCobertas: ['Habilitada'],
+      porMunicipio: [
+        {
+          codigoIbge: '3550308',
+          municipio: 'São Paulo',
+          quantidadePorSituacao: { Habilitada: 1 },
+        },
+      ],
+      semLocalizacao: 0,
+    });
+    mockAgentReply(
+      JSON.stringify({
+        mapData: [
+          {
+            mapDataId: 'cozinhas_geolocalizadas',
+            mapId: 'municipios-boundary',
+            joinKey: 'codarea',
+            data: [],
+          },
+        ],
+        legends: [{ id: 'legend-habilitadas', title: 'Habilitadas' }],
+      })
+    );
+
+    const response = await POST(
+      jsonRequest({ prompt: 'cozinhas habilitadas por município' })
+    );
+    const body = (await response.json()) as Record<string, unknown>;
+
+    expect(response.status).toBe(200);
+    expect(Object.keys(body).sort()).toEqual([
+      'error',
+      'mapTypeOptions',
+      'spec',
+    ]);
+  });
+
+  test('serves a value of an allowlisted field read from the data, not a fixed group', async () => {
+    jest.spyOn(gateway, 'getCozinhasSituacaoPorMunicipio').mockResolvedValue({
+      situacoesCobertas: null,
+      semLocalizacao: 0,
+      porMunicipio: [
+        {
+          codigoIbge: '3550308',
+          municipio: 'São Paulo',
+          quantidadePorSituacao: { Mapeada: 3, Habilitada: 1 },
+        },
+      ],
+    });
+    const fetchMock = mockAgentReply(
+      JSON.stringify({
+        mapData: [
+          {
+            mapDataId: 'cozinhas_geolocalizadas_2025',
+            mapId: 'municipios-boundary',
+            joinKey: 'codarea',
+            data: [],
+          },
+        ],
+        legends: [{ id: 'legend-mapeadas', title: 'Mapeadas' }],
+      })
+    );
+
+    const response = await POST(
+      jsonRequest({ prompt: 'cozinhas mapeadas 2025 por município' })
+    );
+    const body = (await response.json()) as {
+      spec?: { mapData?: Array<{ mapDataId: string; data: unknown }> };
+    };
+    const sent = fetchMock.mock.calls
+      .flatMap(([, init]: [string, RequestInit]) => {
+        const sentBody: unknown = JSON.parse(String(init.body));
+        return typeof sentBody === 'object' &&
+          sentBody !== null &&
+          'message' in sentBody &&
+          typeof sentBody.message === 'string'
+          ? [sentBody.message]
+          : [];
+      })
+      .join('\n');
+
+    expect(response.status).toBe(200);
+    expect(body.spec?.mapData?.[0].mapDataId).toBe(
+      'cozinhas_geolocalizadas_2025'
+    );
+    expect(body.spec?.mapData?.[0].data).toEqual([
+      { geometryId: '3550308', value: 3 },
+    ]);
+    // The agent is told the filter in words, never as a parameterized id.
+    expect(sent).toContain('situacao = "Mapeada"');
+    expect(sent).not.toMatch(/cozinhas_geolocalizadas(_2025)?\?/);
+  });
+
+  test('serves the filter the agent set for a synonym the preflight did not match', async () => {
+    jest.spyOn(gateway, 'getCozinhasSituacaoPorMunicipio').mockResolvedValue({
+      situacoesCobertas: null,
+      semLocalizacao: 0,
+      porMunicipio: [
+        {
+          codigoIbge: '3550308',
+          municipio: 'São Paulo',
+          quantidadePorSituacao: { Mapeada: 3, Habilitada: 1 },
+        },
+      ],
+    });
+    mockAgentReply(
+      JSON.stringify({
+        mapData: [
+          {
+            mapDataId: 'cozinhas_geolocalizadas_2025',
+            mapId: 'municipios-boundary',
+            joinKey: 'codarea',
+            data: [],
+          },
+        ],
+        legends: [{ id: 'legend-x', title: 'Cozinhas recém-cadastradas' }],
+      }),
+      [
+        {
+          mapDataId: 'cozinhas_geolocalizadas_2025',
+          filter: { situacao: 'Mapeada' },
+        },
+      ]
+    );
+
+    const response = await POST(
+      jsonRequest({ prompt: 'cozinhas recém-cadastradas em 2025' })
+    );
+    const body = (await response.json()) as {
+      spec?: {
+        mapData?: Array<Record<string, unknown>>;
+        legends?: Array<{ subtitle?: string }>;
+      };
+    };
+
+    expect(response.status).toBe(200);
+    expect(body.spec?.mapData?.[0]).not.toHaveProperty('filter');
+    expect(body.spec?.mapData?.[0].data).toEqual([
+      { geometryId: '3550308', value: 3 },
+    ]);
+    expect(body.spec?.legends?.[0].subtitle).toBe(
+      'Recorte: situação Mapeada (2025).'
+    );
+  });
+
+  test('answers a 422 when the agent sets a filter other than the one the server resolved', async () => {
+    jest.spyOn(gateway, 'getCozinhasSituacaoPorMunicipio').mockResolvedValue({
+      situacoesCobertas: null,
+      semLocalizacao: 0,
+      porMunicipio: [
+        {
+          codigoIbge: '3550308',
+          municipio: 'São Paulo',
+          quantidadePorSituacao: { Mapeada: 3, Habilitada: 1 },
+        },
+      ],
+    });
+    mockAgentReply(
+      JSON.stringify({
+        mapData: [
+          {
+            mapDataId: 'cozinhas_geolocalizadas_2025',
+            mapId: 'municipios-boundary',
+            joinKey: 'codarea',
+            data: [],
+          },
+        ],
+        legends: [{ id: 'legend-x', title: 'X' }],
+      }),
+      [
+        {
+          mapDataId: 'cozinhas_geolocalizadas_2025',
+          filter: { situacao: 'Habilitada' },
+        },
+      ]
+    );
+
+    const response = await POST(
+      jsonRequest({ prompt: 'cozinhas mapeadas 2025' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(422);
+    expect(body.message).toMatch(/recorte diferente do escolhido/);
+  });
+
+  test('answers a 422 when the agent sends filters naming no mapData entry', async () => {
+    mockAgentReply(
+      JSON.stringify({
+        mapData: [
+          {
+            mapDataId: 'municipios_ivs',
+            mapId: 'municipios-boundary',
+            joinKey: 'codarea',
+            data: [],
+          },
+        ],
+        legends: [{ id: 'legend-x', title: 'IVS' }],
+      }),
+      [
+        {
+          mapDataId: 'cozinhas_geolocalizadas_2025',
+          filter: { situacao: 'Mapeada' },
+        },
+      ]
+    );
+
+    const response = await POST(jsonRequest({ prompt: 'mapa do IVS' }));
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(422);
+    expect(body.message).toMatch(/"filters" precisa ser/);
+  });
+
+  test.each([new Error('disk gone'), 'disk gone'])(
+    'answers a fixed 502 when the filter values cannot be read (%p)',
+    async (failure) => {
+      jest
+        .spyOn(gateway, 'getCozinhasSituacaoPorMunicipio')
+        .mockRejectedValue(failure);
+      const logSpy = jest
+        .spyOn(generationLogger, 'logGeneration')
+        .mockImplementation(() => {});
+
+      const response = await POST(jsonRequest({ prompt: 'cozinhas mapeadas' }));
+      const body = (await response.json()) as { message: string };
+
+      expect(response.status).toBe(502);
+      expect(body.message).not.toContain('disk gone');
+      expect(logSpy).toHaveBeenCalledWith({
+        prompt: 'cozinhas mapeadas',
+        reply: { cause: 'disk gone' },
+      });
+    }
+  );
+
+  test('answers a 422 when the agent ignores the dataset the server resolved', async () => {
+    mockAgentReply(
+      JSON.stringify({
+        mapData: [
+          {
+            mapDataId: 'cozinhas_pessoas_atendidas',
+            mapId: 'municipios-boundary',
+            joinKey: 'codarea',
+            data: [],
+          },
+        ],
+        legends: [{ id: 'legend-atendidas', title: 'Atendidas' }],
+      })
+    );
+
+    const response = await POST(
+      jsonRequest({ prompt: 'cozinhas habilitadas por município' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(422);
+    expect(body.message).toMatch(/não usou o dataset escolhido/);
+  });
+
+  test('answers a 422 when the agent returns no mapData at all for the chosen dataset', async () => {
+    mockAgentReply(JSON.stringify({ legends: [] }));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'cozinhas habilitadas por município' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(422);
+    expect(body.message).toMatch(/não usou o dataset escolhido/);
+  });
+
+  test('answers a 422 when the agent places a non-object in mapData instead of the chosen dataset', async () => {
+    mockAgentReply(
+      JSON.stringify({
+        mapData: ['cozinhas_geolocalizadas'],
+        legends: [{ id: 'legend-x', title: 'X' }],
+      })
+    );
+
+    const response = await POST(
+      jsonRequest({ prompt: 'cozinhas habilitadas por município' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(422);
+    expect(body.message).toMatch(/não usou o dataset escolhido/);
+  });
+
+  test('refuses a prompt that combines two cozinhas situations with a 422 and no agent call', async () => {
+    const fetchMock = mockAgentReply(JSON.stringify({ mapData: [] }));
+    const response = await POST(
+      jsonRequest({ prompt: 'cozinhas habilitadas e não habilitadas 2025' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(422);
+    expect(body.message).toMatch(/ainda não é suportado/);
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   test('rejects a datasetId the route cannot render', async () => {
@@ -1979,10 +2376,26 @@ describe('POST /api/ai/spec', () => {
       error: boolean;
     };
 
+    // G-6: the 2026 snapshot holds only habilitadas, so every legend of the
+    // reference spec also states that coverage; the rest is unchanged.
+    const note =
+      'Dados de 2026: apenas situação Habilitada; o snapshot não contém as demais.';
+    const reference = {
+      ...COROPLETICO_SPEC,
+      legends: records(COROPLETICO_SPEC.legends).map((legend) => {
+        const subtitle = legend['subtitle'];
+        return {
+          ...legend,
+          subtitle:
+            typeof subtitle === 'string' ? `${subtitle} · ${note}` : note,
+        };
+      }),
+    };
+
     expect(response.status).toBe(200);
     expect(body.error).toBe(false);
     expect(neutralizeDataDerived(normalizeSpec(body.spec))).toEqual(
-      neutralizeDataDerived(COROPLETICO_SPEC)
+      neutralizeDataDerived(reference)
     );
   }, 10000);
 });
