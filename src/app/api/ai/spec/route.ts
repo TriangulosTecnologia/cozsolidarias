@@ -152,21 +152,20 @@ const validateEnv = ():
 };
 
 /**
- * Turns one of {@link generateSpec}'s thrown errors (reached through {@link generateInSession}) into a Portuguese,
- * cause-specific message — so a 502 never collapses a transport failure, a
- * failed generation, and an unparseable reply into the same generic
- * sentence. Matches on the fixed prefixes that function throws; anything
- * else (e.g. a network-level fetch failure) falls back to the raw
- * `error.message` so it's still legible.
+ * Turns one of {@link generateSpec}'s thrown errors (reached through {@link generateInSession}) into a fixed,
+ * cause-specific pt-BR message — so a 502 never collapses a transport failure,
+ * a failed generation, and an unparseable reply into the same generic
+ * sentence. Matches on the prefixes those functions throw, but never echoes
+ * the error text: upstream and network details stay out of the response body.
  */
 const describeAgentFailure = (error: unknown): string => {
   const message = error instanceof Error ? error.message : String(error);
 
   if (message.startsWith('Naturali generate POST responded with status')) {
-    return `Não foi possível iniciar a geração com o modelo de IA (${message}). Tente novamente em instantes.`;
+    return 'Não foi possível iniciar a geração com o modelo de IA. Tente novamente em instantes.';
   }
   if (message.startsWith('Naturali generation ended with status')) {
-    return `O modelo de IA não concluiu a geração (${message}). Tente reformular o pedido ou tentar novamente.`;
+    return 'O modelo de IA não concluiu a geração. Tente reformular o pedido ou tentar novamente.';
   }
   if (
     message ===
@@ -178,7 +177,7 @@ const describeAgentFailure = (error: unknown): string => {
     return 'O modelo de IA não respondeu dentro do tempo limite. Tente novamente ou simplifique o pedido.';
   }
 
-  return `Falha de comunicação com o modelo de IA: ${message}`;
+  return 'Falha de comunicação com o modelo de IA. Tente novamente em instantes.';
 };
 
 /**

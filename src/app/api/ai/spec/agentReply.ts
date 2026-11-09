@@ -21,10 +21,10 @@ const STOP_REASON_MESSAGE: Record<SpecReplyStopped['reason'], string> = {
 /**
  * The 422 for a validation loop that gave up, carrying its last candidate.
  *
- * Deliberate exception to "MapData append runs before any client sees the
- * spec" (decision A): the candidate is the agent's own output, with its
- * placeholder `mapData`, never served as a map. It is kept so the playground
- * can show what was rejected.
+ * The candidate is the agent's own output, with its placeholder `mapData`:
+ * a 422 may carry it for diagnosis, and it is never served as a map. The
+ * playground shows it behind the JSON toggle so the user can see what was
+ * rejected.
  */
 const stoppedResponse = (reply: SpecReplyStopped): Response => {
   return invalidSpecResponse({
@@ -38,8 +38,9 @@ const stoppedResponse = (reply: SpecReplyStopped): Response => {
  * Resolves the agent's structured reply into the raw spec object
  * (`status: "ok"`), or the 422 `Response` for a declined request
  * (`status: "error"`), a validation loop that gave up (`status: "stopped"`),
- * a non-object spec or one failing the structural checks. Those 422s carry the
- * agent's candidate as-is (decision A, see {@link stoppedResponse}).
+ * a non-object spec or one failing the structural checks. Except for the
+ * declined request, those 422s carry the agent's candidate as-is (see
+ * {@link stoppedResponse}).
  *
  * @param reply - The `reply` of {@link generateInSession}.
  * @returns The spec normalized by `normalizeCandidate`, or the 422 `Response`.

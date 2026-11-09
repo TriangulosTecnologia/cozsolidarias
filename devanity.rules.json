@@ -32,10 +32,10 @@
     "src/app/api/ai/spec/**": {
       "tier": "high-risk",
       "check": "pnpm typecheck && pnpm test",
-      "purpose": "POST /api/ai/spec: calls the Naturali agent, validates its spec and appends real mapData before any client sees it",
+      "purpose": "POST /api/ai/spec: calls the Naturali agent, validates its spec and appends real mapData before serving it as a map",
       "invariants": [
         "NATURALI_* credentials are read only server-side and never serialized to the browser",
-        "MapData Append runs server-side before the spec reaches any client"
+        "MapData Append runs server-side before any spec is served as a map; 422 responses may carry the agent's raw candidate (placeholder mapData) for diagnosis and are never rendered as a map"
       ]
     },
     "next.config.ts": { "tier": "high-risk", "check": "pnpm typecheck" },

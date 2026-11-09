@@ -642,9 +642,8 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as ErrorBody;
 
     expect(response.status).toBe(502);
-    expect(body.message).toMatch(
-      /Falha de comunicação com o modelo de IA: boom/
-    );
+    expect(body.message).toMatch(/Falha de comunicação com o modelo de IA\./);
+    expect(body.message).not.toContain('boom');
   });
 
   test('stringifies a non-Error thrown value for the fallback agent-failure message', async () => {
@@ -656,9 +655,22 @@ describe('POST /api/ai/spec', () => {
     const body = (await response.json()) as ErrorBody;
 
     expect(response.status).toBe(502);
-    expect(body.message).toMatch(
-      /Falha de comunicação com o modelo de IA: boom-string/
+    expect(body.message).toMatch(/Falha de comunicação com o modelo de IA\./);
+    expect(body.message).not.toContain('boom-string');
+  });
+
+  test('never echoes upstream or network error text into the 502 message', async () => {
+    global.fetch = jest
+      .fn()
+      .mockRejectedValue(new Error('upstream-secret-detail'));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de cozinhas por município' })
     );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(502);
+    expect(body.message).not.toContain('upstream-secret-detail');
   });
 
   // ---------------------------------------------------------------------------
