@@ -1,0 +1,16 @@
+{
+  "case": "rule-coverage-partial",
+  "prompt": "Mapa completo de todas as cozinhas solidárias existentes no Brasil.",
+  "httpStatus": 422,
+  "durationMs": 10212,
+  "outcome": "error",
+  "issues": [],
+  "checks": [
+    {
+      "id": "outcome",
+      "passed": false,
+      "note": "expected spec, got error"
+    }
+  ],
+  "passed": false
+}

@@ -209,5 +209,6 @@
         "layers": ["estados-boundary-line"]
       }
     ]
-  }
+  },
+  "metadata": { "sourceUrls": { "cozinhas-bubbles": "/api/cozinhas/bolhas" } }
 }

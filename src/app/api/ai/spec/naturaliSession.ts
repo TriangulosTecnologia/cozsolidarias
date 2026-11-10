@@ -39,10 +39,10 @@ export type SpecReplyStopped = {
 };
 
 /** What the `validate_spec` tool computes for one candidate (see `validateCandidate`). */
-export type ValidateCandidate = (spec: unknown) => {
+export type ValidateCandidate = (spec: unknown) => Promise<{
   spec: unknown;
   issues: SpecIssue[];
-};
+}>;
 
 /** Strips a leading/trailing ` ```json ` fence, if the model added one. */
 const stripCodeFence = (text: string): string => {
@@ -201,13 +201,14 @@ type ToolOutput = { tool_call_id: string; output: unknown };
  * Answers one batch of pending tool calls, or stops the loop on the first
  * `validate_spec` call {@link stopReason} rejects.
  */
-const answerToolCalls = (params: {
+const answerToolCalls = async (params: {
   calls: ToolCall[];
   validateCandidate: ValidateCandidate;
   progress: LoopProgress;
-}):
+}): Promise<
   | { stopped: SpecReplyStopped }
-  | { outputs: ToolOutput[]; progress: LoopProgress } => {
+  | { outputs: ToolOutput[]; progress: LoopProgress }
+> => {
   let progress = params.progress;
   const outputs: ToolOutput[] = [];
 
@@ -220,7 +221,9 @@ const answerToolCalls = (params: {
       continue;
     }
 
-    const checked = params.validateCandidate(candidateFromArgs(call.args));
+    const checked = await params.validateCandidate(
+      candidateFromArgs(call.args)
+    );
     const issueCount = checked.issues.length;
     const attempted = { ...progress, attempts: progress.attempts + 1 };
     const reason = stopReason({ issueCount, progress: attempted });
@@ -316,7 +319,7 @@ export const generateSpec = async (params: {
   };
 
   while (result.status === 'requires_action') {
-    const answered = answerToolCalls({
+    const answered = await answerToolCalls({
       calls: result.required_action?.tool_calls ?? [],
       validateCandidate: params.validateCandidate,
       progress,

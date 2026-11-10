@@ -1,0 +1,18 @@
+{
+  "case": "error-cafs",
+  "prompt": "Mapa dos CAFs (Cadastro Ambiental Rural) no Brasil.",
+  "httpStatus": 422,
+  "durationMs": 12539,
+  "outcome": "error",
+  "issues": [
+    "missing_data"
+  ],
+  "checks": [
+    {
+      "id": "outcome",
+      "passed": true,
+      "note": "expected error, got error"
+    }
+  ],
+  "passed": true
+}

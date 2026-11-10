@@ -1,0 +1,18 @@
+{
+  "case": "error-grain-estado",
+  "prompt": "Mapa da vulnerabilidade social por estado.",
+  "httpStatus": 422,
+  "durationMs": 46,
+  "outcome": "error",
+  "issues": [
+    "unavailable-grain"
+  ],
+  "checks": [
+    {
+      "id": "outcome",
+      "passed": true,
+      "note": "expected error, got error"
+    }
+  ],
+  "passed": true
+}
