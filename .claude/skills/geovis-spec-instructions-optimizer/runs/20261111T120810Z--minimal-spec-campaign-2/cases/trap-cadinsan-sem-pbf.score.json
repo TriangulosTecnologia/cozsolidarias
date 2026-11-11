@@ -1,0 +1,36 @@
+{
+  "case": "trap-cadinsan-sem-pbf",
+  "prompt": "Mapa da insegurança alimentar desconsiderando o efeito do Bolsa Família.",
+  "httpStatus": 200,
+  "durationMs": 9527,
+  "outcome": "spec",
+  "issues": [],
+  "checks": [
+    {
+      "id": "outcome",
+      "passed": true,
+      "note": "expected spec, got spec"
+    },
+    {
+      "id": "dataset",
+      "passed": true,
+      "note": "got municipios_cadinsan_sem_pbf"
+    },
+    {
+      "id": "geometry",
+      "passed": true,
+      "note": "got /geo/geojs-100-mun.json, /geo/estados.json"
+    },
+    {
+      "id": "legend",
+      "passed": false,
+      "note": "shown=0 scale=none"
+    },
+    {
+      "id": "validateSpec",
+      "passed": true,
+      "note": "null"
+    }
+  ],
+  "passed": false
+}

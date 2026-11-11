@@ -1,0 +1,36 @@
+{
+  "case": "nogolden-pontos-ano",
+  "prompt": "Cada cozinha solidária cadastrada em 2025 como um ponto no mapa.",
+  "httpStatus": 200,
+  "durationMs": 12831,
+  "outcome": "spec",
+  "issues": [],
+  "checks": [
+    {
+      "id": "outcome",
+      "passed": true,
+      "note": "expected spec, got spec"
+    },
+    {
+      "id": "dataset",
+      "passed": false,
+      "note": "got cozinhas_geolocalizadas"
+    },
+    {
+      "id": "geometry",
+      "passed": false,
+      "note": "got /api/cozinhas, /geo/geojs-100-mun.json, /geo/estados.json"
+    },
+    {
+      "id": "legend",
+      "passed": true,
+      "note": "shown=0 scale=none"
+    },
+    {
+      "id": "validateSpec",
+      "passed": true,
+      "note": "null"
+    }
+  ],
+  "passed": false
+}

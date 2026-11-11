@@ -1,0 +1,18 @@
+{
+  "case": "rule-dotdensity-absoluto",
+  "prompt": "Mapa de densidade de pontos do número de cozinhas solidárias em cada município.",
+  "httpStatus": 422,
+  "durationMs": 17104,
+  "outcome": "error",
+  "issues": [
+    "point-layer-on-polygon-source"
+  ],
+  "checks": [
+    {
+      "id": "outcome",
+      "passed": true,
+      "note": "expected spec|error, got error"
+    }
+  ],
+  "passed": true
+}

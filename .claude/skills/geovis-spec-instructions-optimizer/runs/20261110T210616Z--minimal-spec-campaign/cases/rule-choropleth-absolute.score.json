@@ -1,0 +1,18 @@
+{
+  "case": "rule-choropleth-absolute",
+  "prompt": "Coroplético do número total de cozinhas em cada município.",
+  "httpStatus": 422,
+  "durationMs": 10484,
+  "outcome": "error",
+  "issues": [
+    "unsupported_map_type"
+  ],
+  "checks": [
+    {
+      "id": "outcome",
+      "passed": true,
+      "note": "expected spec|error, got error"
+    }
+  ],
+  "passed": true
+}
