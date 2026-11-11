@@ -1,0 +1,18 @@
+{
+  "case": "nogolden-cozinhas-2025",
+  "prompt": "Mapa das cozinhas solidárias cadastradas em 2025.",
+  "httpStatus": 422,
+  "durationMs": 15350,
+  "outcome": "error",
+  "issues": [
+    "invalid-size-range"
+  ],
+  "checks": [
+    {
+      "id": "outcome",
+      "passed": false,
+      "note": "expected spec, got error"
+    }
+  ],
+  "passed": false
+}

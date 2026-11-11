@@ -1,0 +1,36 @@
+{
+  "case": "trap-idhm",
+  "prompt": "Mapa do Índice de Desenvolvimento Humano Municipal.",
+  "httpStatus": 200,
+  "durationMs": 5613,
+  "outcome": "spec",
+  "issues": [],
+  "checks": [
+    {
+      "id": "outcome",
+      "passed": true,
+      "note": "expected spec, got spec"
+    },
+    {
+      "id": "dataset",
+      "passed": true,
+      "note": "got municipios_idhm"
+    },
+    {
+      "id": "geometry",
+      "passed": true,
+      "note": "got /geo/geojs-100-mun.json, /geo/estados.json"
+    },
+    {
+      "id": "legend",
+      "passed": false,
+      "note": "shown=0 scale=none"
+    },
+    {
+      "id": "validateSpec",
+      "passed": true,
+      "note": "null"
+    }
+  ],
+  "passed": false
+}

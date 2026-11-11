@@ -6,6 +6,31 @@ import {
 } from 'src/app/api/ai/spec/preflight';
 
 describe('preflightPrompt', () => {
+  test('asks the map type for a kitchen-count choropleth when FORBID_ABSOLUTE_ON_CHOROPLETH is on', () => {
+    process.env['FORBID_ABSOLUTE_ON_CHOROPLETH'] = 'true';
+    try {
+      expect(
+        preflightPrompt({ prompt: 'coroplético do número de cozinhas' })
+      ).toMatchObject({ status: 'ambiguous', clarify: { facet: 'mapType' } });
+    } finally {
+      delete process.env['FORBID_ABSOLUTE_ON_CHOROPLETH'];
+    }
+  });
+
+  test('stops a request for a spatial grain no dataset has', () => {
+    expect(
+      preflightPrompt({ prompt: 'Mapa da vulnerabilidade social por estado.' })
+    ).toEqual({ status: 'unavailable', grain: 'estado' });
+    expect(
+      preflightPrompt({
+        prompt: 'Mapa das cozinhas por bairro na cidade de São Paulo.',
+      })
+    ).toEqual({ status: 'unavailable', grain: 'bairro' });
+    expect(
+      preflightPrompt({ prompt: 'IDHM em cada região do Brasil' })
+    ).toEqual({ status: 'unavailable', grain: 'regiao' });
+  });
+
   test('resolves a family named without a variant to its default dataset', () => {
     expect(
       preflightPrompt({ prompt: 'mapa de cozinhas por município' })

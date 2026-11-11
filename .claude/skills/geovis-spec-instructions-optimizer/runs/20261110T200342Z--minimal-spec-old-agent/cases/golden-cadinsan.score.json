@@ -1,0 +1,18 @@
+{
+  "case": "golden-cadinsan",
+  "prompt": "Mapa da insegurança alimentar das famílias do CadÚnico por município.",
+  "httpStatus": 422,
+  "durationMs": 9496,
+  "outcome": "error",
+  "issues": [
+    "ambiguous_request"
+  ],
+  "checks": [
+    {
+      "id": "outcome",
+      "passed": false,
+      "note": "expected spec, got error"
+    }
+  ],
+  "passed": false
+}

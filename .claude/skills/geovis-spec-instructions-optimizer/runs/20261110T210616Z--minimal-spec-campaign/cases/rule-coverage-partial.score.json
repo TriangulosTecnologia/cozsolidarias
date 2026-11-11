@@ -1,0 +1,26 @@
+{
+  "case": "rule-coverage-partial",
+  "prompt": "Mapa completo de todas as cozinhas solidárias existentes no Brasil.",
+  "httpStatus": 200,
+  "durationMs": 9271,
+  "outcome": "spec",
+  "issues": [],
+  "checks": [
+    {
+      "id": "outcome",
+      "passed": true,
+      "note": "expected spec, got spec"
+    },
+    {
+      "id": "coverage-caveat",
+      "passed": false,
+      "note": "title=Cozinhas Solidárias cadastradas no Brasil (2026) description=undefined"
+    },
+    {
+      "id": "validateSpec",
+      "passed": true,
+      "note": "null"
+    }
+  ],
+  "passed": false
+}

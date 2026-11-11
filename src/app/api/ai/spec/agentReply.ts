@@ -1,5 +1,5 @@
 import {
-  collectStructuralIssues,
+  collectPreResolutionIssues,
   normalizeCandidate,
 } from './candidateValidation';
 import type {
@@ -44,7 +44,9 @@ const stoppedResponse = (reply: SpecReplyStopped): Response => {
  * (`status: "error"`), a validation loop that gave up (`status: "stopped"`),
  * a non-object spec or one failing the structural checks. A non-object spec
  * is carried raw; a structural failure carries it normalized by
- * `normalizeCandidate` (see {@link stoppedResponse}).
+ * `normalizeCandidate` (see {@link stoppedResponse}). Checks that only hold
+ * once the geovis resolver generated layers and legends
+ * (see `collectResolvedIssues`) run on the resolved spec instead.
  *
  * @param reply - The `reply` of {@link generateInSession}.
  * @returns The spec normalized by `normalizeCandidate`, or the 422 `Response`.
@@ -75,7 +77,7 @@ export const resolveAgentReply = (
   }
 
   const spec = normalizeCandidate(reply.spec);
-  const structuralIssues = collectStructuralIssues(spec);
+  const structuralIssues = collectPreResolutionIssues(spec);
   if (structuralIssues.length > 0) {
     return invalidSpecResponse({
       message: `${structuralIssues[0].message} Tente reformular o pedido.`,

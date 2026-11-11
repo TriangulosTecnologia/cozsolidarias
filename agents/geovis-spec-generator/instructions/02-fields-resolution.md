@@ -1,24 +1,25 @@
-## To resolve the spec fields, follow the instructions below:
+## Fields
 
-**Always use this field, choose the most appropriate value**
-Map type (mapType):
-"Given the question '[user question]', which cartographic type best represents it? Consider:
-choropleth (aggregated area) - valid only for relative variables (ratios, rates and percentages), do not use it for absolute counts,
-dotDensity - choose it when one unit represents a fixed quantity (e.g., 1 dot = 1,000 inhabitants, 1 dot = 1 kitchen. Always add this information to the legend),
-proportionalCircles (individual unit) - for counts. Justify by the real granularity of the data: if most municipalities have only 1-2 points, a choropleth masks the variation and points are better. List the recommended type + 1 alternative with its trade-off. Only these three values are valid.",
+**mapData[].mapDataId** — always, literally, one of the catalogue `id`s; never invented, never a source id.
+(1) Compare the request with every dataset's `description` and `fields[].description`.
+(2) Keep only a dataset whose `temporal.extent` covers the requested period; with no period, pick the most recent and say so in `description`.
+(3) Accept a field only when its description measures the requested concept 1:1. A field that measures something adjacent (input, cause, correlate) is a proxy: use it only with a pt-BR warning in `description`, otherwise return `missing_data`. Never answer question X with data that measures Y.
 
-mapDataId dataset resolution (mandatory, before building mapData):
-"`mapData[].mapDataId` is NEVER invented: it is always, literally, one of the ids listed in the catalogue section — never a join name, never a source `id`. To choose that `id`:
-(1) walk ALL catalogue datasets, comparing `description`/`fields[].description` with the request;
-(2) Verify the temporal dimension (temporal.extent + grain) of the candidate dataset; Check the `datasets[].temporal.grain` field in the dataset to determine its temporal granularity, in order to identify a dataset whose `datasets[].temporal.extent` covers the period specified in the request. if it does not cover the requested period, discard it and continue searching with the next dataset. If the request does not specify a period, choose the most recent one. Never generate a `mapDataId` that merely 'looks like' the request — it must be exactly an `id` present in the catalogue."
-(3) Verify the variable or proxy field of the dataset.
+**mapType** — choose by the variable:
 
-Variable:
-"Scan dataset_catalogue.json (schema.fields[].name/description/unit) and find the field whose description matches the requested concept literally: not a synonym, not a correlate. If none exists ready-made, point to the base field + the operation required (sum/aggregation/join) to derive it. Return: dataset_id, field, grain (spatial.grain.code), whether aggregation is needed and by which key (IBGE code/codarea)."
+- `choropleth`: relative variables only (rates, ratios, percentages, indices); never absolute counts.
+- `proportionalCircles`: counts per município.
+- `dotDensity`: counts where one dot stands for a fixed quantity; state that quantity in `description`.
+- Points or heatmap of individual kitchens: omit `mapType` and `mapData`; write one or more `layers` `{sourceId: "cozinhas", geometry: "point" | "heatmap"}`. A `sourceId` must be `cozinhas` or the `id` of a source you declared.
 
-Expanded prompt — safe proxy:
-"Before accepting a variable as the answer: (1) list every catalogue field whose description/tags touch a similar theme (e.g., registry, vulnerability, coverage); (2) for each one, test whether it measures exactly the request or something adjacent (input, cause, correlate), and state the semantic difference explicitly; (3) accept as the direct answer only a field whose description matches the question 1:1; (4) every other related field enters as a 'discarded proxy' with the reason, and is never used without a warning. Goal: never answer question X with data that measures Y just because both sit in the same domain."
+**mapData[].title** — the variable's name in pt-BR.
 
-### Minimum required
+**legends** — top level only, one per `mapData` entry in the same order: `{title, subtitle, reference, noDataLabel}` in pt-BR: `title` names the variable and unit (it wins over `mapData[].title`), `subtitle` how to read it, `reference` the data source, `noDataLabel` the label for municípios without data. Never colors, thresholds or `layers[].legends`: the server builds the scale. For a points or heatmap map, one legend naming what is drawn and, for a heatmap, that color shows concentration.
 
-- Include only what the request needs to render the requested variable and its legend.
+**title** — pt-BR; never claims completeness ("todas", "completo") over a dataset with partial coverage.
+
+**description** — pt-BR caveats: partial spatial coverage, the year chosen by default, a proxy in use.
+
+**sources** — omit them, except to pin a snapshot year on the kitchen points: `{id: "cozinhas", type: "geojson", data: "/api/cozinhas?ano=2025"}`. Never invent a URL.
+
+One painted variable per map: a single `mapData` entry.

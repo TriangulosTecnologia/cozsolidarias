@@ -1,0 +1,18 @@
+{
+  "case": "rule-basemap-inventado",
+  "prompt": "Mapa das cozinhas com imagem de satélite no fundo.",
+  "httpStatus": 422,
+  "durationMs": 7918,
+  "outcome": "error",
+  "issues": [
+    "missing_data"
+  ],
+  "checks": [
+    {
+      "id": "outcome",
+      "passed": true,
+      "note": "expected spec|error, got error"
+    }
+  ],
+  "passed": true
+}

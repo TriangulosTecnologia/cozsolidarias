@@ -1,0 +1,26 @@
+{
+  "case": "rule-coverage-partial",
+  "prompt": "Mapa completo de todas as cozinhas solidárias existentes no Brasil.",
+  "httpStatus": 200,
+  "durationMs": 12489,
+  "outcome": "spec",
+  "issues": [],
+  "checks": [
+    {
+      "id": "outcome",
+      "passed": true,
+      "note": "expected spec, got spec"
+    },
+    {
+      "id": "coverage-caveat",
+      "passed": true,
+      "note": "title=Cozinhas Solidárias cadastradas no Brasil (2026) description=Pontos das cozinhas solidárias do cadastro mais recente (2026), escolhido por padrão porque o pedido não indica um ano. A cobertura é parcial: o recorte inclui apenas as cozinhas habilitadas, e parte dos registros não tem coordenadas, por isso não aparece no mapa. O mapa não mostra todas as cozinhas existentes no país."
+    },
+    {
+      "id": "validateSpec",
+      "passed": true,
+      "note": "null"
+    }
+  ],
+  "passed": true
+}

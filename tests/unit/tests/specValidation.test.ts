@@ -13,8 +13,10 @@ import {
   findInvalidGeojsonSource,
   findMissingLegend,
   findReclassifiedOfficialIndex,
+  findUnresolvableLayerSource,
   hoistLayerLegends,
   invalidSpecResponse,
+  isPointsOnlySpec,
   isRecord,
   KNOWN_BASEMAP_STYLE_URLS,
   KNOWN_SOURCE_URLS,
@@ -80,6 +82,63 @@ describe('invalidSpecResponse', () => {
   });
 });
 
+describe('findUnresolvableLayerSource', () => {
+  test('accepts a declared source and a well-known one the server injects', () => {
+    expect(
+      findUnresolvableLayerSource({
+        sources: [{ id: 'mine', type: 'geojson', data: '/api/cozinhas' }],
+        layers: [
+          { id: 'a', sourceId: 'mine', geometry: 'point' },
+          { sourceId: 'cozinhas', geometry: 'heatmap' },
+        ],
+      })
+    ).toBeNull();
+  });
+
+  test('names the first layer whose source is neither declared nor well-known', () => {
+    expect(
+      findUnresolvableLayerSource({
+        layers: [
+          'not-a-layer',
+          { sourceId: 'cozinhas', geometry: 'point' },
+          { id: 'dots', sourceId: 'bairros-sp', geometry: 'point' },
+        ],
+      })
+    ).toBe('dots');
+    expect(
+      findUnresolvableLayerSource({
+        layers: [{ geometry: 'point' }, { sourceId: 'bairros-sp' }],
+      })
+    ).toBe('desconhecida');
+  });
+
+  test('ignores a spec with no layers', () => {
+    expect(findUnresolvableLayerSource({ sources: [] })).toBeNull();
+  });
+});
+
+describe('isPointsOnlySpec', () => {
+  const points = {
+    sources: [{ id: 'c', type: 'geojson', data: '/api/cozinhas' }],
+    layers: [{ id: 'dots', sourceId: 'c', geometry: 'point' }],
+  };
+
+  test('accepts point or heatmap layers on a Point source', () => {
+    expect(isPointsOnlySpec(points)).toBe(true);
+  });
+
+  test('rejects a spec with a mapType, without layers, or on a polygon source', () => {
+    expect(isPointsOnlySpec({ ...points, mapType: 'choropleth' })).toBe(false);
+    expect(isPointsOnlySpec({})).toBe(false);
+    expect(
+      isPointsOnlySpec({
+        sources: ['x', { id: 'm', data: '/geo/geojs-100-mun.json' }],
+        layers: ['x', { sourceId: 'm', geometry: 'point' }],
+      })
+    ).toBe(false);
+  });
+});
+
 describe('SOURCE_METADATA', () => {
   test('has entries for all KNOWN_SOURCE_URLS', () => {
     for (const url of KNOWN_SOURCE_URLS) {
@@ -113,6 +172,32 @@ describe('SOURCE_METADATA', () => {
 });
 
 describe('findInvalidGeojsonSource', () => {
+  test('accepts a served pathname with an accepted query and rejects an unknown param', () => {
+    expect(
+      findInvalidGeojsonSource({
+        sources: [{ id: 'c', type: 'geojson', data: '/api/cozinhas?ano=2025' }],
+      })
+    ).toBeNull();
+    expect(
+      findInvalidGeojsonSource({
+        sources: [{ id: 'c', type: 'geojson', data: '/api/cozinhas?uf=SP' }],
+      })
+    ).toBe('c');
+  });
+
+  test('rejects a protocol-relative or backslash URL that names another host', () => {
+    for (const data of [
+      '//evil.com/geo/geojs-100-mun.json',
+      '/\\evil.com/geo/estados.json',
+    ]) {
+      expect(
+        findInvalidGeojsonSource({
+          sources: [{ id: 'x', type: 'geojson', data }],
+        })
+      ).toBe('x');
+    }
+  });
+
   test('returns null when spec has no sources', () => {
     expect(findInvalidGeojsonSource({})).toBeNull();
     expect(findInvalidGeojsonSource({ sources: null })).toBeNull();
@@ -362,6 +447,36 @@ describe('appendRealSourceData', () => {
     jest.restoreAllMocks();
   });
 
+  test('forwards an accepted query param to the resolver', async () => {
+    const getCozinhas = jest.spyOn(gateway, 'getCozinhas').mockResolvedValue({
+      type: 'FeatureCollection',
+      features: [{ type: 'Feature' }],
+    } as never);
+
+    const resolved = await appendRealSourceData({
+      sources: [
+        { id: 'cozinhas', type: 'geojson', data: '/api/cozinhas?ano=2025' },
+      ],
+      metadata: { author: 'agent' },
+    });
+
+    expect(getCozinhas).toHaveBeenCalledWith(2025);
+    expect(resolved).toEqual({
+      sources: [
+        {
+          id: 'cozinhas',
+          type: 'geojson',
+          data: { type: 'FeatureCollection', features: [{ type: 'Feature' }] },
+        },
+      ],
+      // The served data replaced the URL; its provenance stays readable.
+      metadata: {
+        author: 'agent',
+        sourceUrls: { cozinhas: '/api/cozinhas?ano=2025' },
+      },
+    });
+  });
+
   test('returns spec unchanged when sources is not an array', async () => {
     const spec = { sources: null };
     expect(await appendRealSourceData(spec)).toEqual(spec);
@@ -420,9 +535,11 @@ describe('appendRealSourceData', () => {
     };
     const result = await appendRealSourceData(spec);
 
-    expect(gateway.getCozinhas).toHaveBeenCalledWith();
+    // No `?ano=` in the URL: the gateway picks its default year.
+    expect(gateway.getCozinhas).toHaveBeenCalledWith(undefined);
     expect(result).toEqual({
       sources: [{ id: 'cozinhas', type: 'geojson', data: resolved }],
+      metadata: { sourceUrls: { cozinhas: '/api/cozinhas' } },
     });
   });
 
@@ -442,9 +559,11 @@ describe('appendRealSourceData', () => {
     };
     const result = await appendRealSourceData(spec);
 
-    expect(gateway.getCozinhasBubbles).toHaveBeenCalledWith();
+    // No `?ano=` in the URL: the gateway picks its default year.
+    expect(gateway.getCozinhasBubbles).toHaveBeenCalledWith(undefined);
     expect(result).toEqual({
       sources: [{ id: 'bolhas', type: 'geojson', data: resolved }],
+      metadata: { sourceUrls: { bolhas: '/api/cozinhas/bolhas' } },
     });
   });
 

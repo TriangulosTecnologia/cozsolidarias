@@ -7,6 +7,10 @@
 - `validate_spec_tool`, a `client` tool. Each call pauses the generation, and the route answers it with `validateCandidate`.
 - `geovis_spec_generator_loop`, the agent bound to that tool, with its `instructions` and the `output_schema` the route parses.
 
+## Reply contract
+
+The agent returns `{status: "ok", spec}` or `{status: "error", error}`. `spec` is a minimal `VisualizationSpec`: `mapType`, `title`, `description`, `mapData[]` (`mapDataId`, `title`), top-level `legends[]` (`title`, `subtitle`, `reference`, `noDataLabel`), optional `sources[]` (a served path, e.g. `/api/cozinhas?ano=2025`) and, for a points or heatmap map without `mapType`, `layers[]` (`sourceId`, `geometry`). It never carries legend scales, colors, sizes or data rows: `resolveCandidate` in [`serveSpec.ts`](../../src/app/api/ai/spec/serveSpec.ts) derives `mapId`, layer ids and well-known sources, fetches the real data, expands `mapType` with the geovis resolver (each generated legend takes the text of the agent legend at its `mapData` position, official IVS/IDHM faixas) and resolves API sources. The `validate_spec` tool runs the same resolution before it reports issues.
+
 ## Commands
 
 The CLI reads `NATURALI_TOKEN` (a `nat_sk_…` key) and `NATURALI_PROJECT_ID`. The app's `.env` holds the same values as `NATURALI_TOKEN` and `NATURALI_PROJECT_ID`. `scripts/update-instructions.mjs` reads `NATURALI_TOKEN` from that `.env`.

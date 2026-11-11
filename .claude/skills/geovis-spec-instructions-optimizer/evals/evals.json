@@ -49,14 +49,46 @@
         "dataset": "cozinhas_geolocalizadas",
         "geometry": "/api/cozinhas",
         "form": "point",
-        "legendScale": "categorical"
+        "legendScale": "text-or-none"
       },
       "coversRules": [
         "R-geometry-match",
         "R-no-invent-url",
         "R-label-ptbr"
       ],
-      "rubric": "Usa a source de pontos (/api/cozinhas), não polígonos de município. Não tenta colocar geometry:'point' sobre /geo/geojs-100-mun.json."
+      "rubric": "Usa a source de pontos (/api/cozinhas), não polígonos de município. Não tenta colocar geometry:'point' sobre /geo/geojs-100-mun.json. A resposta do agente não traz sources (o servidor injeta /api/cozinhas pelo sourceId 'cozinhas'); uma legenda de 1º nível só com título é aceita."
+    },
+    {
+      "id": "nogolden-pontos-ano",
+      "kind": "nogolden",
+      "prompt": "Cada cozinha solidária cadastrada em 2025 como um ponto no mapa.",
+      "expect": {
+        "dataset": "cozinhas_geolocalizadas_2025",
+        "geometry": "/api/cozinhas?ano=2025",
+        "form": "point",
+        "legendScale": "text-or-none"
+      },
+      "coversRules": [
+        "R-geometry-match",
+        "R-no-invent-url"
+      ],
+      "rubric": "Pontos sem mapType. O ano vai como query na source (/api/cozinhas?ano=2025) e o servidor repassa ao resolver; falha = servir o snapshot corrente sem aviso."
+    },
+    {
+      "id": "nogolden-pontos-heatmap",
+      "kind": "nogolden",
+      "prompt": "Mostre as cozinhas solidárias como pontos e também um mapa de calor da concentração.",
+      "expect": {
+        "dataset": "cozinhas_geolocalizadas",
+        "geometry": "/api/cozinhas",
+        "form": "point+heatmap",
+        "legendScale": "text-or-none"
+      },
+      "coversRules": [
+        "R-geometry-match",
+        "R-no-invent-url"
+      ],
+      "rubric": "Duas camadas (point e heatmap) sobre a mesma source de pontos, sem mapType e sem mapData. Sem legenda de densidade (o geovis 0.32 não tem colorBy de densidade): no máximo uma legenda de texto do agente."
     },
     {
       "id": "golden-circulos",
@@ -156,42 +188,51 @@
     },
     {
       "id": "trap-ivs-subindice",
-      "kind": "trap",
+      "kind": "nogolden",
       "prompt": "Mapa do IVS de infraestrutura urbana por município.",
       "expect": {
-        "outcome": "error-or-clarify"
+        "dataset": "municipios_ivs_infraestrutura",
+        "geometry": "/geo/geojs-100-mun.json",
+        "form": "polygon",
+        "legendScale": "quantitative"
       },
       "coversRules": [
         "R-variable-choice",
         "R-error-when-impossible"
       ],
-      "rubric": "ARMADILHA: a description de municipios_ivs diz que o dataset contém 'seus subíndices e os índices IDHM', mas RENDERABLE_DATASET_FETCHERS.municipios_ivs devolve só row.ivs. Falha grave = pintar o IVS geral e rotular como 'Infraestrutura Urbana' (mapa plausível respondendo outra pergunta). Aceitável = {\"error\"} ou pedir esclarecimento."
+      "rubric": "Antes armadilha; hoje o subíndice tem id próprio. Escolhe municipios_ivs_infraestrutura. Falha grave = pintar o IVS geral (municipios_ivs) rotulado como 'Infraestrutura Urbana'."
     },
     {
       "id": "trap-idhm",
-      "kind": "trap",
+      "kind": "nogolden",
       "prompt": "Mapa do Índice de Desenvolvimento Humano Municipal.",
       "expect": {
-        "outcome": "error-or-clarify"
+        "dataset": "municipios_idhm",
+        "geometry": "/geo/geojs-100-mun.json",
+        "form": "polygon",
+        "legendScale": "quantitative"
       },
       "coversRules": [
         "R-variable-choice",
         "R-error-when-impossible"
       ],
-      "rubric": "ARMADILHA, mesma raiz do trap-ivs-subindice: a description promete IDHM, o fetcher não serve. Falha grave = pintar IVS rotulado como IDHM — são escalas invertidas (IVS alto = ruim, IDHM alto = bom), então o mapa sairia com o significado trocado."
+      "rubric": "Antes armadilha (a description prometia IDHM e o fetcher não servia); hoje municipios_idhm é renderizável. Escolhe municipios_idhm, nunca municipios_ivs: escalas invertidas (IVS alto = ruim, IDHM alto = bom). Faixas oficiais do PNUD/IPEA, nunca Jenks."
     },
     {
       "id": "trap-cadinsan-sem-pbf",
-      "kind": "trap",
+      "kind": "nogolden",
       "prompt": "Mapa da insegurança alimentar desconsiderando o efeito do Bolsa Família.",
       "expect": {
-        "outcome": "error-or-clarify"
+        "dataset": "municipios_cadinsan_sem_pbf",
+        "geometry": "/geo/geojs-100-mun.json",
+        "form": "polygon",
+        "legendScale": "quantitative"
       },
       "coversRules": [
         "R-variable-choice",
         "R-error-when-impossible"
       ],
-      "rubric": "ARMADILHA: a description anuncia 'com e sem o efeito do PBF', o fetcher fixa proporcaoComPbf. Falha grave = servir o cenário com-PBF como se fosse o sem-PBF; as faixas diferem por 3x (18,74 vs 51,1 no topo)."
+      "rubric": "Antes armadilha; hoje o cenário sem PBF tem id próprio. Escolhe municipios_cadinsan_sem_pbf. Falha grave = servir municipios_cadinsan (com PBF) como se fosse o sem-PBF; as faixas diferem por 3x (18,74 vs 51,1 no topo)."
     },
     {
       "id": "ambig-ano-cozinhas",
@@ -224,7 +265,8 @@
       "kind": "error",
       "prompt": "Mapa da vulnerabilidade social por estado.",
       "expect": {
-        "outcome": "error"
+        "outcome": "error",
+        "code": "missing_data"
       },
       "coversRules": [
         "R-grain-municipio",

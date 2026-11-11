@@ -1,0 +1,36 @@
+{
+  "case": "nogolden-pontos-heatmap",
+  "prompt": "Mostre as cozinhas solidárias como pontos e também um mapa de calor da concentração.",
+  "httpStatus": 200,
+  "durationMs": 8594,
+  "outcome": "spec",
+  "issues": [],
+  "checks": [
+    {
+      "id": "outcome",
+      "passed": true,
+      "note": "expected spec, got spec"
+    },
+    {
+      "id": "dataset",
+      "passed": true,
+      "note": "got cozinhas_geolocalizadas"
+    },
+    {
+      "id": "geometry",
+      "passed": true,
+      "note": "got /api/cozinhas, /geo/geojs-100-mun.json, /geo/estados.json"
+    },
+    {
+      "id": "legend",
+      "passed": true,
+      "note": "shown=0 scale=none"
+    },
+    {
+      "id": "validateSpec",
+      "passed": true,
+      "note": "null"
+    }
+  ],
+  "passed": true
+}

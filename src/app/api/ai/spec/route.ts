@@ -5,6 +5,7 @@ import { gateway } from '@/gateway';
 import { buildAgentMessage } from './agentMessage';
 import { resolveAgentReply } from './agentReply';
 import {
+  collectResolvedIssues,
   validateCandidate,
   validateWithLocalRepairs,
 } from './candidateValidation';
@@ -15,13 +16,9 @@ import {
 } from './mapDataCatalogue';
 import { MAP_TYPE_OPTIONS } from './mapTypeOptions';
 import { generateInSession, withSessionId } from './naturaliSessionApi';
-import {
-  type Clarification,
-  clarifyResponse,
-  preflightPrompt,
-} from './preflight';
+import { preflightPrompt, preflightResponse } from './preflight';
 import { resolveServedSpec } from './serveSpec';
-import { applyProportionalCirclesDefaults, mergeSpecs } from './specDefaults';
+import { mergeSpecs } from './specDefaults';
 import {
   errorResponse,
   invalidSpecResponse,
@@ -84,12 +81,11 @@ type ParsedRequest = {
   datasetId?: RenderableDatasetId;
 };
 
-/** The clarify question, echoing the client's session so the conversation can continue. */
-const clarifyAnswer = (
-  clarify: Clarification,
+/** Echoes the client's session on a preflight answer, so the conversation can continue. */
+const withOptionalSessionId = (
+  response: Response,
   sessionId?: string
 ): Response => {
-  const response = clarifyResponse(clarify);
   return sessionId ? withSessionId(response, sessionId) : response;
 };
 
@@ -116,9 +112,11 @@ const parseRequest = (rawBody: unknown): ParsedRequest | Response => {
   if (sessionId instanceof Response) {
     return sessionId;
   }
-  const preflight = preflightPrompt({ prompt, mapType, datasetId });
-  return preflight.status === 'ambiguous'
-    ? clarifyAnswer(preflight.clarify, sessionId)
+  const answer = preflightResponse(
+    preflightPrompt({ prompt, mapType, datasetId })
+  );
+  return answer
+    ? withOptionalSessionId(answer, sessionId)
     : { prompt, mapType, datasetId, sessionId };
 };
 
@@ -241,6 +239,28 @@ const getAgentResponse = async (params: {
 };
 
 /**
+ * The last gate before a resolved spec is served: the checks that need the
+ * resolved layers and legends (see {@link collectResolvedIssues}), then
+ * geovis' own validation with its deterministic repairs. Any issue left is a
+ * 422 carrying the spec; otherwise the 200 body.
+ */
+const checkServedSpec = (served: UnknownRecord): Response => {
+  const resolvedIssues = collectResolvedIssues(served);
+  if (resolvedIssues.length > 0) {
+    return invalidSpecResponse({
+      message: `${resolvedIssues[0].message} Tente reformular o pedido.`,
+      issues: resolvedIssues,
+      spec: served,
+    });
+  }
+
+  const { spec, issues } = validateWithLocalRepairs(served);
+  return issues.length > 0
+    ? invalidSpecResponse({ issues, spec })
+    : Response.json({ spec, error: false, mapTypeOptions: MAP_TYPE_OPTIONS });
+};
+
+/**
  * Turns a natural-language prompt into a `VisualizationSpec`, via a Naturali
  * agent running in a session (`POST /sessions/{id}/generate?wait=true`, see
  * {@link generateInSession}) declared by the `geovis-spec-generator-loop`
@@ -304,15 +324,5 @@ export const POST = async (request: Request): Promise<Response> => {
     return withSessionId(servedOrError, sessionId);
   }
 
-  const { spec, issues } = validateWithLocalRepairs(
-    applyProportionalCirclesDefaults(servedOrError)
-  );
-  if (issues.length > 0) {
-    return withSessionId(invalidSpecResponse({ issues, spec }), sessionId);
-  }
-
-  return withSessionId(
-    Response.json({ spec, error: false, mapTypeOptions: MAP_TYPE_OPTIONS }),
-    sessionId
-  );
+  return withSessionId(checkServedSpec(servedOrError), sessionId);
 };

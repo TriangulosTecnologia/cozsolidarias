@@ -1,0 +1,18 @@
+{
+  "case": "nogolden-pessoas-atendidas",
+  "prompt": "Mapa do total de pessoas atendidas pelas cozinhas em cada município.",
+  "httpStatus": 422,
+  "durationMs": 10057,
+  "outcome": "error",
+  "issues": [
+    "point-layer-on-polygon-source"
+  ],
+  "checks": [
+    {
+      "id": "outcome",
+      "passed": false,
+      "note": "expected spec, got error"
+    }
+  ],
+  "passed": false
+}

@@ -4,6 +4,7 @@ import baseVisualizationSpecJson from 'src/app/api/ai/spec/instructions/baseVisu
 import { POST } from 'src/app/api/ai/spec/route';
 import { invalidSpecResponse } from 'src/app/api/ai/spec/specValidation';
 
+import { IVS_FAMILY_THRESHOLDS } from '@/app/(features)/mapas/geovisScoreScales';
 import { gateway } from '@/gateway';
 
 import COROPLETICO_SPEC from '../fixtures/coropleticoSpec.json';
@@ -11,6 +12,52 @@ import COROPLETICO_SPEC from '../fixtures/coropleticoSpec.json';
 jest.mock('@ttoss/geovis', () => {
   return {
     validateSpec: jest.fn().mockReturnValue({ status: 'resolved' }),
+    // The geovis resolver, reduced to what the route reads: layers and
+    // legends the reply wrote are kept, and `mapData[0]` gets a generated
+    // layer when none paints it.
+    resolveSpecFromMapType: jest.fn(
+      (spec: {
+        mapType?: string;
+        layers?: Array<{ mapDataId?: unknown }>;
+        legends?: unknown[];
+        mapData?: Array<{
+          mapDataId?: unknown;
+          mapId?: unknown;
+          title?: unknown;
+        }>;
+      }) => {
+        const entry = spec.mapData?.[0];
+        const layers = spec.layers ?? [];
+        const painted = layers.some((layer) => {
+          return layer.mapDataId === entry?.mapDataId;
+        });
+        if (!spec.mapType || !entry || painted) {
+          return spec;
+        }
+        const legendId = `${String(entry.mapDataId)}-legend`;
+        return {
+          ...spec,
+          layers: [
+            ...layers,
+            {
+              id: `${String(entry.mapId)}-generated`,
+              sourceId: entry.mapId,
+              geometry:
+                spec.mapType === 'proportionalCircles' ? 'point' : 'polygon',
+              mapDataId: entry.mapDataId,
+              activeLegendId: legendId,
+            },
+          ],
+          legends: spec.legends ?? [
+            {
+              id: legendId,
+              title: entry.title,
+              colorBy: { type: 'quantitative', thresholds: [0.25, 0.4] },
+            },
+          ],
+        };
+      }
+    ),
     // Mirrors the documented contract: one GeoJSON source plus one
     // `${id}-line` layer per group, appended after the existing entries.
     createBoundaryGroup: (options: {
@@ -315,6 +362,26 @@ describe('POST /api/ai/spec', () => {
   // ---------------------------------------------------------------------------
   // Preflight - ask before generating, never block
   // ---------------------------------------------------------------------------
+
+  test('answers 422 without calling the agent for a grain no dataset has', async () => {
+    const fetchMock = jest.fn();
+    global.fetch = fetchMock;
+
+    const response = await POST(
+      jsonRequest({ prompt: 'Mapa da vulnerabilidade social por estado.' })
+    );
+    const body = (await response.json()) as {
+      message: string;
+      issues: Array<{ code: string }>;
+    };
+
+    expect(response.status).toBe(422);
+    expect(body.message).toMatch(/município/);
+    expect(body.issues).toEqual([
+      expect.objectContaining({ code: 'unavailable-grain' }),
+    ]);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
 
   test('asks which map type before generating for a choropleth of an absolute total', async () => {
     const fetchMock = jest.fn();
@@ -930,6 +997,36 @@ describe('POST /api/ai/spec', () => {
       reply: { cause: 'gateway down as text' },
     });
   });
+
+  test('serves a minimal IVS choropleth reply with the official IPEA faixas', async () => {
+    jest.spyOn(gateway, 'getIvsPorMunicipio').mockResolvedValue([]);
+    mockAgentReply(
+      JSON.stringify({
+        mapType: 'choropleth',
+        title: 'Vulnerabilidade social',
+        mapData: [{ mapDataId: 'municipios_ivs', title: 'IVS' }],
+      })
+    );
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa da vulnerabilidade social por município' })
+    );
+    const body = (await response.json()) as {
+      spec?: {
+        legends?: Array<{
+          title?: string;
+          colorBy?: { thresholds?: number[] };
+        }>;
+      };
+    };
+
+    expect(response.status).toBe(200);
+    expect(body.spec?.legends).toHaveLength(1);
+    expect(body.spec?.legends?.[0].title).toBe('IVS');
+    expect(body.spec?.legends?.[0].colorBy?.thresholds).toEqual(
+      IVS_FAMILY_THRESHOLDS
+    );
+  }, 10000);
 
   test('replaces placeholder mapData with real gateway data for a renderable dataset', async () => {
     jest.spyOn(gateway, 'getIvsPorMunicipio').mockResolvedValue([

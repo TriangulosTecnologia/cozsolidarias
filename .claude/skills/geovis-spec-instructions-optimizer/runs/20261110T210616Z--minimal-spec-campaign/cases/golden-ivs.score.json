@@ -1,0 +1,36 @@
+{
+  "case": "golden-ivs",
+  "prompt": "Mapa da vulnerabilidade social dos municípios brasileiros.",
+  "httpStatus": 200,
+  "durationMs": 9907,
+  "outcome": "spec",
+  "issues": [],
+  "checks": [
+    {
+      "id": "outcome",
+      "passed": true,
+      "note": "expected spec, got spec"
+    },
+    {
+      "id": "dataset",
+      "passed": true,
+      "note": "got municipios_ivs"
+    },
+    {
+      "id": "geometry",
+      "passed": true,
+      "note": "got /geo/geojs-100-mun.json, /geo/estados.json"
+    },
+    {
+      "id": "legend",
+      "passed": false,
+      "note": "shown=0 scale=none"
+    },
+    {
+      "id": "validateSpec",
+      "passed": true,
+      "note": "null"
+    }
+  ],
+  "passed": false
+}
