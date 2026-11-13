@@ -57,7 +57,7 @@
     "public/llms.txt": { "tier": "trivial" },
     "public/llms-full.txt": { "tier": "trivial" },
     ".vscode/**": { "tier": "trivial" },
-    ".claude/skills/geovis-spec-instructions-optimizer/runs/**": {
+    ".claude/skills/geovis-spec-gate-optimizer/runs/**": {
       "tier": "trivial"
     }
   },

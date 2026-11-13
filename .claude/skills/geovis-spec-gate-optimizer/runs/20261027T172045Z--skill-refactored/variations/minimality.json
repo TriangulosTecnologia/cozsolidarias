@@ -1,0 +1,34 @@
+[
+  {
+    "id": "v-coropletico-cozinhas-referencia",
+    "http": 200,
+    "renderEquivalent": false,
+    "minimal": false,
+    "recall": 0,
+    "missing": [],
+    "extra": [],
+    "orphans": null,
+    "ms": 33
+  },
+  {
+    "id": "v-pessoas-atendidas",
+    "http": 200,
+    "renderEquivalent": false,
+    "minimal": true,
+    "recall": 0.5,
+    "missing": [
+      "point+sizeBy @ inline:geojson | legend=none",
+      "polygon @ /geo/geojs-100-mun.json | legend=none"
+    ],
+    "extra": [
+      "point+sizeBy @ inline:geojson | legend=quantitative/5"
+    ],
+    "orphans": {
+      "sources": [],
+      "mapData": [],
+      "legends": [],
+      "hiddenLayers": []
+    },
+    "ms": 13761
+  }
+]

@@ -1,0 +1,42 @@
+{
+  "id": "v-pessoas-atendidas",
+  "mapMode": "circulos-pessoas",
+  "durationMs": 13761,
+  "kind": "variation",
+  "httpStatus": 200,
+  "ok": true,
+  "renderEquivalent": false,
+  "minimal": true,
+  "bindingRecall": 0.5,
+  "expected": [
+    "line @ /geo/estados.json | legend=none",
+    "line @ /geo/geojs-100-mun.json | legend=none",
+    "point+sizeBy @ inline:geojson | legend=none",
+    "polygon @ /geo/geojs-100-mun.json | legend=none"
+  ],
+  "got": [
+    "line @ /geo/estados.json | legend=none",
+    "line @ /geo/geojs-100-mun.json | legend=none",
+    "point+sizeBy @ inline:geojson | legend=quantitative/5"
+  ],
+  "missing": [
+    "point+sizeBy @ inline:geojson | legend=none",
+    "polygon @ /geo/geojs-100-mun.json | legend=none"
+  ],
+  "extra": [
+    "point+sizeBy @ inline:geojson | legend=quantitative/5"
+  ],
+  "orphans": {
+    "sources": [],
+    "mapData": [],
+    "legends": [],
+    "hiddenLayers": []
+  },
+  "presentationKeys": [
+    "view",
+    "basemap",
+    "attributionControlEnabled",
+    "title",
+    "scaleMaxValue"
+  ]
+}
