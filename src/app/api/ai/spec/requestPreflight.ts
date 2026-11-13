@@ -22,15 +22,18 @@ let cachedConcepts: Promise<ConceptEntry[]> | null = null;
 /**
  * The catalogue index the preflight reads (see {@link loadConceptIndex}), built
  * once and kept for the process lifetime, like the catalogue context the route
- * sends to the agent.
+ * sends to the agent. An empty index means the catalogue read failed, so it is
+ * not kept: the next request reads again.
  */
-const readConcepts = (): Promise<ConceptEntry[]> => {
-  if (!cachedConcepts) {
-    cachedConcepts = loadConceptIndex(() => {
-      return gateway.getCatalogue();
-    });
+const readConcepts = async (): Promise<ConceptEntry[]> => {
+  cachedConcepts ??= loadConceptIndex(() => {
+    return gateway.getCatalogue();
+  });
+  const index = await cachedConcepts;
+  if (index.length === 0) {
+    cachedConcepts = null;
   }
-  return cachedConcepts;
+  return index;
 };
 
 /**
