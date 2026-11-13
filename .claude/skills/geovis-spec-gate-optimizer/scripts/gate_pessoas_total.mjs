@@ -21,6 +21,7 @@
  */
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import process from 'node:process';
 
 const DATASET = 'cozinhas_pessoas_atendidas';
 const REPO = process.cwd();
@@ -83,8 +84,22 @@ const inRing = (point, ring) => {
 const inGeometry = (point, geometry) => {
   const polygons = geometry.type === 'Polygon' ? [geometry.coordinates] : geometry.coordinates;
   return polygons.some((rings) => {
-    return inRing(point, rings[0]) && !rings.slice(1).some((hole) => inRing(point, hole));
+    return inRing(point, rings[0]) && !rings.slice(1).some((hole) => { return inRing(point, hole) });
   });
+};
+
+/** The row's coordinates, or null when either is missing or not finite. */
+const coordinatesOf = (cols, { iLat, iLng }) => {
+  const lat = Number(cols[iLat]);
+  const lng = Number(cols[iLng]);
+  return cols[iLat] && cols[iLng] && Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : null;
+};
+
+/** The municipality a kitchen counts for: polygon match first, then the declared IBGE code. */
+const codeOf = ({ lat, lng, declared, features, codes }) => {
+  const hit = features.find(({ geometry }) => { return inGeometry([lng, lat], geometry) });
+  if (hit) return hit.code;
+  return codes.has(declared) ? declared : undefined;
 };
 
 /** Recomputes `geometryId → total people` the way the gateway aggregates it. */
@@ -92,7 +107,7 @@ const recomputeTotals = () => {
   const features = JSON.parse(readFileSync(GEO, 'utf8')).features.map((f) => {
     return { code: String(f.properties.codarea), geometry: f.geometry };
   });
-  const codes = new Set(features.map(({ code }) => code));
+  const codes = new Set(features.map(({ code }) => { return code }));
   const lines = readFileSync(CSV, 'utf8').split(/\r?\n/).filter(Boolean);
   const header = parseLine(lines[0]);
   const iIbge = header.indexOf('Código IBGE');
@@ -103,12 +118,9 @@ const recomputeTotals = () => {
 
   for (const line of lines.slice(1)) {
     const cols = parseLine(line);
-    const lat = Number(cols[iLat]);
-    const lng = Number(cols[iLng]);
-    if (!cols[iLat] || !cols[iLng] || !Number.isFinite(lat) || !Number.isFinite(lng)) continue;
-    const declared = (cols[iIbge] ?? '').trim();
-    const hit = features.find(({ geometry }) => inGeometry([lng, lat], geometry));
-    const code = hit ? hit.code : codes.has(declared) ? declared : undefined;
+    const point = coordinatesOf(cols, { iLat, iLng });
+    if (!point) continue;
+    const code = codeOf({ ...point, declared: (cols[iIbge] ?? '').trim(), features, codes });
     if (!code) continue;
     const pessoas = parsePessoas(cols[iPub] ?? '');
     if (pessoas !== null) totals.set(code, (totals.get(code) ?? 0) + pessoas);
@@ -116,31 +128,36 @@ const recomputeTotals = () => {
   return totals;
 };
 
+/** C4: a `sizeBy` over the dataset must end its thresholds at the data's max. */
+const checkThresholds = (layers, max) => {
+  return layers.flatMap((layer) => {
+    const thresholds = layer.sizeBy?.thresholds;
+    return thresholds && layer.mapDataId === DATASET && thresholds[1] !== max
+      ? [`C4: sizeBy.thresholds[1] ${thresholds[1]} != max(value) ${max}`]
+      : [];
+  });
+};
+
 /** Contract invariants on the spec alone. Returns a list of failure messages. */
 const checkContract = (spec) => {
   const failures = [];
-  const rows = (spec.mapData ?? []).filter((m) => m.mapDataId === DATASET).flatMap((m) => m.data ?? []);
+  const rows = (spec.mapData ?? []).filter((m) => { return m.mapDataId === DATASET }).flatMap((m) => { return m.data ?? [] });
   if (rows.length === 0) failures.push(`C1: no mapData row for ${DATASET}`);
 
-  const polygonOnTotal = (spec.layers ?? []).some((l) => l.geometry === 'polygon' && l.mapDataId === DATASET);
+  const polygonOnTotal = (spec.layers ?? []).some((l) => { return l.geometry === 'polygon' && l.mapDataId === DATASET });
   if (polygonOnTotal) failures.push(`C2: polygon layer painted with an absolute total (${DATASET})`);
 
-  const max = rows.reduce((m, r) => Math.max(m, r.value), 0);
+  const max = rows.reduce((m, r) => { return Math.max(m, r.value) }, 0);
   if (spec.scaleMaxValue !== max) failures.push(`C3: scaleMaxValue ${spec.scaleMaxValue} != max(value) ${max}`);
 
-  for (const layer of spec.layers ?? []) {
-    const thresholds = layer.sizeBy?.thresholds;
-    if (thresholds && layer.mapDataId === DATASET && thresholds[1] !== max) {
-      failures.push(`C4: sizeBy.thresholds[1] ${thresholds[1]} != max(value) ${max}`);
-    }
-  }
+  failures.push(...checkThresholds(spec.layers ?? [], max));
   return { failures, rows };
 };
 
 /** Total oracle: per-municipality equality with the recomputed gateway totals. */
 const checkTotal = (rows, totals) => {
   const failures = [];
-  const candidate = new Map(rows.map((r) => [String(r.geometryId), r.value]));
+  const candidate = new Map(rows.map((r) => { return [String(r.geometryId), r.value] }));
   let sumRecomputed = 0;
   for (const [code, value] of totals) {
     sumRecomputed += value;
@@ -149,7 +166,7 @@ const checkTotal = (rows, totals) => {
   for (const code of candidate.keys()) {
     if (!totals.has(code)) failures.push(`T2: ${code} not produced by the gateway rule`);
   }
-  const sumCandidate = [...candidate.values()].reduce((a, b) => a + b, 0);
+  const sumCandidate = [...candidate.values()].reduce((a, b) => { return a + b }, 0);
   if (sumCandidate !== sumRecomputed) failures.push(`T3: sum candidate=${sumCandidate} oracle=${sumRecomputed}`);
   return failures;
 };
@@ -163,15 +180,15 @@ const gate = (spec, totals) => {
 
 /** Mutants of the golden. Each must make the gate fail. */
 const mutants = (golden) => {
-  const clone = () => structuredClone(golden);
+  const clone = () => { return JSON.parse(JSON.stringify(golden)) };
   const withRows = (spec, fn) => {
-    spec.mapData = spec.mapData.map((m) => (m.mapDataId === DATASET ? { ...m, data: fn(m.data) } : m));
+    spec.mapData = spec.mapData.map((m) => { return m.mapDataId === DATASET ? { ...m, data: fn(m.data) } : m });
     return spec;
   };
   return {
     'M1 dataset swapped to kitchen count': (() => {
       const s = clone();
-      s.mapData = s.mapData.map((m) => ({ ...m, mapDataId: 'cozinhas_geolocalizadas' }));
+      s.mapData = s.mapData.map((m) => { return { ...m, mapDataId: 'cozinhas_geolocalizadas' } });
       return s;
     })(),
     'M2 polygon over absolute total': (() => {
@@ -184,9 +201,26 @@ const mutants = (golden) => {
       s.scaleMaxValue *= 2;
       return s;
     })(),
-    'M4 one municipality dropped': withRows(clone(), (data) => data.slice(1)),
-    'M5 one value off by one': withRows(clone(), (data) => data.map((r, i) => (i === 0 ? { ...r, value: r.value + 1 } : r))),
+    'M4 one municipality dropped': withRows(clone(), (data) => { return data.slice(1) }),
+    'M5 one value off by one': withRows(clone(), (data) => { return data.map((r, i) => { return i === 0 ? { ...r, value: r.value + 1 } : r }) }),
   };
+};
+
+/** Prints `value` as JSON and exits with 0 when `pass`, else 1. */
+const finish = (value, pass) => {
+  process.stdout.write(`${JSON.stringify(value, null, 2)}\n`);
+  process.exit(pass ? 0 : 1);
+};
+
+/** Regression gate: the golden must pass and every mutant must fail. */
+const runSelfTest = (spec, totals) => {
+  const golden = gate(spec, totals);
+  const results = Object.entries(mutants(spec)).map(([name, mutant]) => {
+    const verdict = gate(mutant, totals);
+    return { name, caught: !verdict.pass, firstFailure: verdict.failures[0] ?? null };
+  });
+  const ok = golden.pass && results.every((r) => { return r.caught });
+  finish({ goldenPass: golden.pass, goldenFailures: golden.failures, mutants: results, pass: ok }, ok);
 };
 
 const main = () => {
@@ -195,26 +229,19 @@ const main = () => {
   const specPath = selfTest && first === '--self-test' ? second : first;
   const target = specPath ?? (selfTest ? GOLDEN_PESSOAS : undefined);
   if (!target) {
-    console.error('usage: gate_pessoas_total.mjs <spec.json> | --self-test [golden.json]');
+    process.stderr.write('usage: gate_pessoas_total.mjs <spec.json> | --self-test [golden.json]\n');
     process.exit(2);
   }
   const spec = JSON.parse(readFileSync(resolve(target), 'utf8'));
   const totals = recomputeTotals();
 
   if (selfTest) {
-    const golden = gate(spec, totals);
-    const results = Object.entries(mutants(spec)).map(([name, mutant]) => {
-      const verdict = gate(mutant, totals);
-      return { name, caught: !verdict.pass, firstFailure: verdict.failures[0] ?? null };
-    });
-    const ok = golden.pass && results.every((r) => r.caught);
-    console.log(JSON.stringify({ goldenPass: golden.pass, goldenFailures: golden.failures, mutants: results, pass: ok }, null, 2));
-    process.exit(ok ? 0 : 1);
+    runSelfTest(spec, totals);
   }
 
   const verdict = gate(spec, totals);
-  console.log(JSON.stringify({ ...verdict, oracle: { municipios: totals.size, sum: [...totals.values()].reduce((a, b) => a + b, 0) } }, null, 2));
-  process.exit(verdict.pass ? 0 : 1);
+  const sum = [...totals.values()].reduce((a, b) => { return a + b }, 0);
+  finish({ ...verdict, oracle: { municipios: totals.size, sum } }, verdict.pass);
 };
 
 main();
