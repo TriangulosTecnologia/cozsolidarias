@@ -21,7 +21,7 @@ import { I18nProvider } from '@ttoss/react-i18n';
 import { BruttalTheme } from '@ttoss/theme/Bruttal';
 import { ThemeUIProvider } from 'theme-ui';
 
-import { ChoiceSection, ErrorAlert } from './ChoicePanel';
+import { ChoiceSection, ErrorAlert, FeedbackSection } from './ChoicePanel';
 import { JsonPanel } from './JsonPanel';
 import { useAiPlaygroundLogic } from './useAiPlaygroundLogic';
 import { withHoverTooltips } from './withHoverTooltips';
@@ -87,6 +87,7 @@ const AiPlayground = () => {
     setShowJson,
     spec,
     clarify,
+    feedback,
     mapTypeOptions,
     handleSubmit,
     choose,
@@ -138,6 +139,8 @@ const AiPlayground = () => {
       )}
 
       {status === 'error' && <ErrorAlert failure={failure} />}
+
+      <FeedbackSection status={status} feedback={feedback} />
 
       <ChoiceSection
         status={status}
