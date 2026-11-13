@@ -1,0 +1,46 @@
+[1/22] golden-coropletico — status 422 (20825ms)
+golden-coropletico: FAIL [outcome: expected spec, got error]
+[2/22] golden-pontos — status 200 (10751ms)
+golden-pontos: PASS
+[3/22] nogolden-pontos-ano — status 200 (11105ms)
+nogolden-pontos-ano: PASS
+[4/22] nogolden-pontos-heatmap — status 200 (9800ms)
+nogolden-pontos-heatmap: PASS
+[5/22] golden-circulos — status 200 (13950ms)
+golden-circulos: PASS
+[6/22] golden-ivs — status 422 (11084ms)
+golden-ivs: FAIL [outcome: expected spec, got error]
+[7/22] golden-cadinsan — status 200 (14912ms)
+golden-cadinsan: PASS
+[8/22] nogolden-cozinhas-2025 — status 200 (8212ms)
+nogolden-cozinhas-2025: PASS
+[9/22] nogolden-pessoas-atendidas — status 200 (10418ms)
+nogolden-pessoas-atendidas: PASS
+[10/22] trap-ivs-subindice — status 422 (10673ms)
+trap-ivs-subindice: FAIL [outcome: expected spec, got error]
+[11/22] trap-idhm — status 422 (10240ms)
+trap-idhm: FAIL [outcome: expected spec, got error]
+[12/22] trap-cadinsan-sem-pbf — status 200 (13576ms)
+trap-cadinsan-sem-pbf: PASS
+[13/22] ambig-ano-cozinhas — status 200 (10367ms)
+ambig-ano-cozinhas: PASS
+[14/22] error-dataset-inexistente — status 422 (20500ms)
+error-dataset-inexistente: PASS
+[15/22] error-grain-estado — status 422 (52ms)
+error-grain-estado: PASS
+[16/22] error-assentamentos — status 422 (13134ms)
+error-assentamentos: PASS
+[17/22] error-cafs — status 422 (10973ms)
+error-cafs: PASS
+[18/22] rule-choropleth-absolute — status 422 (8967ms)
+rule-choropleth-absolute: PASS
+[19/22] rule-coverage-partial — status 200 (12489ms)
+rule-coverage-partial: PASS
+[20/22] rule-basemap-inventado — status 422 (8958ms)
+rule-basemap-inventado: PASS
+[21/22] rule-source-inventada — status 422 (25ms)
+rule-source-inventada: PASS
+[22/22] rule-dotdensity-absoluto — status 200 (12391ms)
+rule-dotdensity-absoluto: PASS
+campanha concluída: 22 casos em /home/triangulos/Documentos/repos/cozsolidarias-feat/.claude/skills/geovis-spec-instructions-optimizer/runs/20261111T122736Z--minimal-spec-new-agent/cases/
+exit 0

@@ -16,6 +16,12 @@ import {
   CAF_PERCENT_THRESHOLDS,
   COLORS,
   flooredBinLabels,
+  PAA_ALIMENTOS_COLORS,
+  PAA_ALIMENTOS_LEGEND_LABELS,
+  PAA_ALIMENTOS_THRESHOLDS,
+  PAA_KG_POR_PESSOA_COLORS,
+  PAA_KG_POR_PESSOA_LEGEND_LABELS,
+  PAA_KG_POR_PESSOA_THRESHOLDS,
   PERCENT_COLORS,
   PERCENT_LEGEND_LABELS,
   PERCENT_THRESHOLDS,
@@ -52,6 +58,8 @@ export {
   colorForCadinsan,
   colorForCadUnico,
   colorForCafPercentual,
+  colorForPaaAlimentos,
+  colorForPaaKgPorPessoa,
   colorForPercentual,
   colorForPessoasPorCozinha,
   colorForQuantidade,
@@ -78,6 +86,15 @@ const IDHM_EDUC_LEGEND_ID = 'legenda-idhm-educacao';
 const IDHM_RENDA_LEGEND_ID = 'legenda-idhm-renda';
 const IDHM_EDUC_ESC_LEGEND_ID = 'legenda-idhm-educacao-escolaridade';
 const IDHM_EDUC_FREQ_LEGEND_ID = 'legenda-idhm-educacao-frequencia';
+const PAA_ALIMENTOS_LEGEND_ID = 'legenda-paa-alimentos';
+const PAA_KG_POR_PESSOA_LEGEND_ID = 'legenda-paa-kg-por-pessoa';
+
+/** Title of the planned-PAA-food legend; also the menu label for that mode. */
+const PAA_ALIMENTOS_LEGEND_TITLE = '% dos alimentos previstos no PAA';
+
+/** Title of the planned-PAA kg-per-person legend; also its menu label. */
+const PAA_KG_POR_PESSOA_LEGEND_TITLE =
+  'kg previstos no PAA por pessoa atendida';
 
 /** Title of the rate legend; also the fill's `activeLegendId` in rate mode. */
 const RATE_LEGEND_TITLE = 'nº coz. no município / 100.000 hab.';
@@ -249,6 +266,34 @@ const LEGEND_CONFIGS: LegendConfig[] = [
       return flooredBinLabels('Sem cozinha', thresholds);
     },
     reference: 'Fontes: © Cozinhas Solidárias · MDS/SAGI (CadÚnico, jun/2026)',
+  },
+  {
+    id: PAA_ALIMENTOS_LEGEND_ID,
+    mode: 'coropletico-paa-alimentos',
+    title: PAA_ALIMENTOS_LEGEND_TITLE,
+    subtitle:
+      'Parcela dos alimentos previstos nas compras do PAA para as Cozinhas Solidárias em 2025 que vem de fornecedores do município. Quanto mais escuro, mais alimento comprado ali.',
+    thresholds: PAA_ALIMENTOS_THRESHOLDS,
+    colors: PAA_ALIMENTOS_COLORS,
+    labels: PAA_ALIMENTOS_LEGEND_LABELS,
+    labelsFrom: (thresholds) => {
+      return flooredBinLabels('Sem compra prevista', thresholds, '%');
+    },
+    reference: 'Fonte dos dados: CONAB — PAA Cozinhas Solidárias 2025',
+  },
+  {
+    id: PAA_KG_POR_PESSOA_LEGEND_ID,
+    mode: 'coropletico-paa-kg-por-pessoa',
+    title: PAA_KG_POR_PESSOA_LEGEND_TITLE,
+    subtitle:
+      'Alimentos previstos no PAA em 2025 por pessoa atendida pelas cozinhas do município: os kg de cada proposta são divididos entre as suas cozinhas conforme as pessoas atendidas. Quanto mais escuro, mais alimento por pessoa.',
+    thresholds: PAA_KG_POR_PESSOA_THRESHOLDS,
+    colors: PAA_KG_POR_PESSOA_COLORS,
+    labels: PAA_KG_POR_PESSOA_LEGEND_LABELS,
+    labelsFrom: (thresholds) => {
+      return flooredBinLabels('Sem cozinha recebedora', thresholds, ' kg');
+    },
+    reference: 'Fonte dos dados: CONAB — PAA Cozinhas Solidárias 2025',
   },
   {
     id: IVS_LEGEND_ID,

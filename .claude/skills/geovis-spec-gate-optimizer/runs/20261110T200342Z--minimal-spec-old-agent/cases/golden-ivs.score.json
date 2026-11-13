@@ -1,0 +1,20 @@
+{
+  "case": "golden-ivs",
+  "prompt": "Mapa da vulnerabilidade social dos municípios brasileiros.",
+  "httpStatus": 422,
+  "durationMs": 13703,
+  "outcome": "error",
+  "issues": [
+    "invalid-schema",
+    "invalid-schema",
+    "invalid-schema"
+  ],
+  "checks": [
+    {
+      "id": "outcome",
+      "passed": false,
+      "note": "expected spec, got error"
+    }
+  ],
+  "passed": false
+}

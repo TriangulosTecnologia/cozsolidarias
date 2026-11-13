@@ -2,9 +2,11 @@ import type { MapMode } from 'src/app/(features)/mapas/geovisSpec';
 import {
   buildLeftSidebar,
   MAP_MODE_VALUES,
+  modeTakes3d,
   modeTakesColorRamp,
   modeTakesOpacity,
   modeUsesHexbinOpacity,
+  view3dFromSelection,
 } from 'src/app/(features)/mapas/mapaLeftSidebar';
 
 const settingsSection = (mode: MapMode) => {
@@ -71,6 +73,50 @@ describe('modeUsesHexbinOpacity', () => {
   });
 });
 
+describe('modeTakes3d', () => {
+  test('is the grid alone', () => {
+    expect(modeTakes3d('cafs-hexbin')).toBe(true);
+    expect(modeTakes3d('coropletico')).toBe(false);
+    expect(modeTakes3d('cafs')).toBe(false);
+  });
+});
+
+describe('view3dFromSelection', () => {
+  test('is flat until the reader picks 3D', () => {
+    expect(
+      view3dFromSelection({ selection: {}, mode: 'cafs-hexbin' })
+    ).toBeUndefined();
+    expect(
+      view3dFromSelection({ selection: { vista: '2d' }, mode: 'cafs-hexbin' })
+    ).toBeUndefined();
+  });
+
+  /*
+   * The 3D choice stays in the selection when the reader moves on, so switching
+   * back to the grid finds it; the other modes must not read it.
+   */
+  test('ignores a 3D left on in a mode that cannot extrude', () => {
+    expect(
+      view3dFromSelection({ selection: { vista: '3d' }, mode: 'coropletico' })
+    ).toBeUndefined();
+  });
+
+  test('opens on the controls own defaults', () => {
+    expect(
+      view3dFromSelection({ selection: { vista: '3d' }, mode: 'cafs-hexbin' })
+    ).toEqual({ extrusionHeight: 60_000, pitch: 45 });
+  });
+
+  test('scales the height by the step and tilts by the choice', () => {
+    expect(
+      view3dFromSelection({
+        selection: { vista: '3d', altura: '5', inclinacao: '60' },
+        mode: 'cafs-hexbin',
+      })
+    ).toEqual({ extrusionHeight: 100_000, pitch: 60 });
+  });
+});
+
 describe('buildLeftSidebar', () => {
   /*
    * `enabledWhen` gates whole sections, not blocks, so the mesh block is
@@ -78,9 +124,62 @@ describe('buildLeftSidebar', () => {
    * rather than declared once.
    */
   test('offers the mesh only where there is a mesh', () => {
-    expect(blockIds('cafs-hexbin')).toEqual(['malha', 'opacidade', 'cores']);
+    expect(blockIds('cafs-hexbin')).toEqual([
+      'vista',
+      'altura',
+      'inclinacao',
+      'malha',
+      'opacidade',
+      'cores',
+    ]);
     expect(blockIds('coropletico')).toEqual(['opacidade', 'cores']);
     expect(blockIds('pontos')).toEqual(['opacidade']);
+  });
+
+  test('offers the 3D view only where the map can extrude', () => {
+    expect(blockIds('coropletico')).not.toContain('vista');
+    expect(blockIds('pontos')).not.toContain('vista');
+  });
+
+  /*
+   * The height and the tilt move nothing on a flat map, so they hide until the
+   * reader picks 3D.
+   */
+  test('shows the 3D adjustments only while the map is extruded', () => {
+    const body = settingsSection('cafs-hexbin')?.body;
+    const blocks = body?.kind === 'settings' ? body.blocks : [];
+    const shownWhen = (id: string) => {
+      return blocks.find((block) => {
+        return block.id === id;
+      })?.shownWhen;
+    };
+
+    expect(shownWhen('vista')).toBeUndefined();
+    expect(shownWhen('altura')).toEqual({ menuId: 'vista', values: ['3d'] });
+    expect(shownWhen('inclinacao')).toEqual({
+      menuId: 'vista',
+      values: ['3d'],
+    });
+  });
+
+  test('tags the grid variation as the one with a 3D view', () => {
+    const body = buildLeftSidebar({ mode: 'cafs-hexbin' }).sections[0].body;
+    const variations =
+      body.kind === 'variations'
+        ? body.groups.flatMap((group) => {
+            return group.variations;
+          })
+        : [];
+
+    const tagged = variations.filter((variation) => {
+      return variation.badge === '3D';
+    });
+
+    expect(
+      tagged.map((variation) => {
+        return variation.value;
+      })
+    ).toEqual(['cafs-hexbin']);
   });
 
   test('offers the ramp only where the fill is a ladder of colours', () => {

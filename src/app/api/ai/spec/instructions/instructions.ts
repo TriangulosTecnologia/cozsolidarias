@@ -1,18 +1,26 @@
-import endpointsDocumentation from './endpointsDocumentation.json';
+import { KNOWN_SOURCE_URLS, SOURCE_METADATA } from '../specValidation';
+
+/** The Point sources an agent spec may name, one line each: id, URL, accepted params. */
+const POINT_SOURCES = KNOWN_SOURCE_URLS.filter((url) => {
+  return SOURCE_METADATA[url].geometry === 'Point';
+}).map((url) => {
+  const { id, description, params } = SOURCE_METADATA[url];
+  const query = params.map((param) => {
+    return `?${param}=`;
+  });
+  return `- \`${id}\` → ${url} (aceita ${query.join(', ')}): ${description}`;
+});
 
 /**
- * System instructions sent to the Naturali agent on every `POST /api/ai/spec`
- * call. Composed from the API endpoints documentation.
+ * Instructions sent to the Naturali agent at the start of every session: the
+ * only sources it may name, generated from `SOURCE_METADATA`. Every other
+ * source (the município polygons, the state outlines) is added by the server.
  * @example
  * const message = [catalogueText, INSTRUCTIONS, prompt].join('\n\n');
  */
-export const INSTRUCTIONS = `
+export const INSTRUCTIONS = `## Fontes de pontos
 
-## Cozinhas Solidárias API routes
+O servidor declara sozinho os polígonos de município e o contorno dos estados. Uma camada de pontos ou de calor usa um destes \`sourceId\` sem declarar \`sources\`; declare a source só para fixar o ano (ex.: \`{"id": "cozinhas", "type": "geojson", "data": "/api/cozinhas?ano=2025"}\`).
 
-Use this to identify which API routes populate sources[].data to include in the JSON output
-
-e.g.: since a proportional-circles map with the number of kitchens per municipality was requested, the correct path is /api/cozinhas/bolhas.
-
-${JSON.stringify(endpointsDocumentation, null, 2)}
+${POINT_SOURCES.join('\n')}
 `;

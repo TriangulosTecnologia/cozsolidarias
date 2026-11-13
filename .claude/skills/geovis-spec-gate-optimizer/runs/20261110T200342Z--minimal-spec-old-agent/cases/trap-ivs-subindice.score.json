@@ -1,0 +1,20 @@
+{
+  "case": "trap-ivs-subindice",
+  "prompt": "Mapa do IVS de infraestrutura urbana por município.",
+  "httpStatus": 422,
+  "durationMs": 10951,
+  "outcome": "error",
+  "issues": [
+    "invalid-schema",
+    "invalid-schema",
+    "invalid-schema"
+  ],
+  "checks": [
+    {
+      "id": "outcome",
+      "passed": false,
+      "note": "expected spec, got error"
+    }
+  ],
+  "passed": false
+}

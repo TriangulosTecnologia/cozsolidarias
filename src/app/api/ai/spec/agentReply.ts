@@ -1,5 +1,5 @@
 import {
-  collectStructuralIssues,
+  collectPreResolutionIssues,
   normalizeCandidate,
 } from './candidateValidation';
 import type {
@@ -13,6 +13,10 @@ import {
   type UnknownRecord,
 } from './specValidation';
 
+/** Fixed text for a declined request: the agent's own message is never sent to the browser. */
+const AGENT_DECLINED_MESSAGE =
+  'O modelo de IA não pôde gerar o mapa com este pedido. Reformule o pedido informando o dataset e o tipo de mapa desejados.';
+
 const STOP_REASON_MESSAGE: Record<SpecReplyStopped['reason'], string> = {
   'max-attempts': 'esgotou as tentativas de validação',
   'no-shrinkage': 'parou de reduzir os problemas entre tentativas',
@@ -21,10 +25,10 @@ const STOP_REASON_MESSAGE: Record<SpecReplyStopped['reason'], string> = {
 /**
  * The 422 for a validation loop that gave up, carrying its last candidate.
  *
- * The candidate is the agent's own output, with its placeholder `mapData`:
- * a 422 may carry it for diagnosis, and it is never served as a map. The
- * playground shows it behind the JSON toggle so the user can see what was
- * rejected.
+ * Carries the candidate as validateCandidate returned it (locally repaired),
+ * before MapData append: the
+ * playground shows it so a rejected spec can be inspected. Never served as a
+ * map (see the `devanity.rules.json` invariant for every 422 form).
  */
 const stoppedResponse = (reply: SpecReplyStopped): Response => {
   return invalidSpecResponse({
@@ -38,9 +42,11 @@ const stoppedResponse = (reply: SpecReplyStopped): Response => {
  * Resolves the agent's structured reply into the raw spec object
  * (`status: "ok"`), or the 422 `Response` for a declined request
  * (`status: "error"`), a validation loop that gave up (`status: "stopped"`),
- * a non-object spec or one failing the structural checks. Except for the
- * declined request, those 422s carry the agent's candidate as-is (see
- * {@link stoppedResponse}).
+ * a non-object spec or one failing the structural checks. A non-object spec
+ * is carried raw; a structural failure carries it normalized by
+ * `normalizeCandidate` (see {@link stoppedResponse}). Checks that only hold
+ * once the geovis resolver generated layers and legends
+ * (see `collectResolvedIssues`) run on the resolved spec instead.
  *
  * @param reply - The `reply` of {@link generateInSession}.
  * @returns The spec normalized by `normalizeCandidate`, or the 422 `Response`.
@@ -57,8 +63,8 @@ export const resolveAgentReply = (
 
   if (reply.status === 'error') {
     return invalidSpecResponse({
-      message: reply.error.message,
-      issues: [{ code: reply.error.code, message: reply.error.message }],
+      message: AGENT_DECLINED_MESSAGE,
+      issues: [{ code: reply.error.code, message: AGENT_DECLINED_MESSAGE }],
     });
   }
 
@@ -71,7 +77,7 @@ export const resolveAgentReply = (
   }
 
   const spec = normalizeCandidate(reply.spec);
-  const structuralIssues = collectStructuralIssues(spec);
+  const structuralIssues = collectPreResolutionIssues(spec);
   if (structuralIssues.length > 0) {
     return invalidSpecResponse({
       message: `${structuralIssues[0].message} Tente reformular o pedido.`,

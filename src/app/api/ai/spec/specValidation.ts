@@ -5,7 +5,7 @@ import {
 import { gateway } from '@/gateway';
 
 import {
-  ABSOLUTE_TOTAL_DATASET_IDS,
+  isAbsoluteTotalDataset,
   isRenderableDatasetId,
   officialFaixasOf,
   RENDERABLE_DATASET_FETCHERS,
@@ -32,8 +32,8 @@ export type SpecIssue = { code: string; message: string; path?: string };
 
 /**
  * Builds every failure body of `POST /api/ai/spec`: `{ error: true, message }`
- * plus the `issues` (with their actionable `requirements`) and the last
- * generated `spec`, when known, so the client can always inspect what the
+ * plus the `issues` (with their actionable `requirements`) and the `spec` at
+ * the stage that failed, when known, so the client can always inspect what the
  * model produced. Always carries `mapTypeOptions`, so another map type is
  * always on offer.
  *
@@ -120,70 +120,135 @@ const unsupportedDatasetResponse = (
   });
 };
 
-/**
- * The only `geojson` source URLs this app actually serves. A source's `data`
- * is never rewritten after generation (unlike `mapData[].data`), so a URL
- * outside this list — or an inline placeholder — silently ships a map with no
- * real data (404, or a literal empty `FeatureCollection`).
- */
-export const KNOWN_SOURCE_URLS = [
-  '/geo/geojs-100-mun.json',
-  '/geo/estados.json',
-  '/geo/assentamentos.json',
-  '/api/cozinhas',
-  '/api/cozinhas/bolhas',
-] as const;
+/** A `/api/*` query param as the agent wrote it, parsed to the gateway's year. */
+const yearParam = (params: URLSearchParams): number | undefined => {
+  const year = Number(params.get('ano'));
+  return Number.isInteger(year) && year > 0 ? year : undefined;
+};
 
 /**
- * Maps each KNOWN_SOURCE_URL to its physical location on disk or endpoint
- * type, and — for an API-backed URL — a `resolver` that fetches the real
- * `data-gateway` value the same way {@link RENDERABLE_DATASET_FETCHERS} does
- * for `mapData` (see {@link appendRealSourceData}). A static file under
- * `public/geo/` has no `resolver`: the client fetches that URL itself, so its
- * `sources[].data` string is left untouched. Used to generate explicit
- * instructions showing both served URL and source path.
+ * Every `geojson` URL this app actually serves, keyed by pathname — the single
+ * list a source's `data` is checked against (see {@link parseSourceUrl}). A
+ * source's `data` is never rewritten from the agent's choice (unlike
+ * `mapData[].data`), so a URL outside this list — or an inline placeholder —
+ * would silently ship a map with no real data (404, or a literal empty
+ * `FeatureCollection`).
+ *
+ * Each entry carries the well-known source `id` the server injects when a
+ * spec references it without declaring it, the feature `geometry`, the query
+ * `params` the URL accepts, and — for an API-backed URL — a `resolver` that
+ * fetches the real `data-gateway` value (see {@link appendRealSourceData}). A
+ * static file under `public/geo/` has no `resolver`: the client fetches it.
+ *
  * @example
- * SOURCE_METADATA['/geo/geojs-100-mun.json']
- * // => { filepath: 'public/geo/geojs-100-mun.json', description: '...', resolver: null }
+ * SOURCE_METADATA['/api/cozinhas'].params; // ['ano']
  */
-export const SOURCE_METADATA: Record<
-  (typeof KNOWN_SOURCE_URLS)[number],
-  {
-    filepath: string | null;
-    description: string;
-    resolver: (() => Promise<UnknownRecord>) | null;
-  }
-> = {
+export const SOURCE_METADATA = {
   '/geo/geojs-100-mun.json': {
     filepath: 'public/geo/geojs-100-mun.json',
+    id: 'municipios',
+    geometry: 'Polygon',
+    params: [],
     description: 'Municípios do Brasil (IBGE, Código IBGE como geometryId)',
     resolver: null,
   },
   '/geo/estados.json': {
     filepath: 'public/geo/estados.json',
+    id: 'estados',
+    geometry: 'Polygon',
+    params: [],
     description:
       'Estados brasileiros (contexto/contorno, não pode pintar dados)',
     resolver: null,
   },
   '/geo/assentamentos.json': {
     filepath: 'public/geo/assentamentos.json',
+    id: 'assentamentos',
+    geometry: 'Polygon',
+    params: [],
     description: 'Assentamentos de reforma agrária',
     resolver: null,
   },
   '/api/cozinhas': {
     filepath: null,
-    description: 'Pontos de cozinhas comunitárias (agregados por município)',
-    resolver: async () => {
-      return (await gateway.getCozinhas()) as unknown as UnknownRecord;
+    id: 'cozinhas',
+    geometry: 'Point',
+    params: ['ano'],
+    description: 'Pontos de cozinhas comunitárias (uma feição por cozinha)',
+    resolver: async (params: URLSearchParams) => {
+      return (await gateway.getCozinhas(
+        yearParam(params)
+      )) as unknown as UnknownRecord;
     },
   },
   '/api/cozinhas/bolhas': {
     filepath: null,
-    description: 'Clusters/bolhas de cozinhas (agregação espacial para zoom)',
-    resolver: async () => {
-      return (await gateway.getCozinhasBubbles()) as unknown as UnknownRecord;
+    id: 'cozinhas-bolhas',
+    geometry: 'Point',
+    params: ['ano'],
+    description: 'Um ponto por município com cozinhas (código IBGE em codarea)',
+    resolver: async (params: URLSearchParams) => {
+      return (await gateway.getCozinhasBubbles(
+        yearParam(params)
+      )) as unknown as UnknownRecord;
     },
   },
+} as const satisfies Record<
+  string,
+  {
+    filepath: string | null;
+    id: string;
+    geometry: 'Point' | 'Polygon';
+    params: readonly string[];
+    description: string;
+    resolver: ((params: URLSearchParams) => Promise<UnknownRecord>) | null;
+  }
+>;
+
+type SourceUrl = keyof typeof SOURCE_METADATA;
+
+/** The pathnames in {@link SOURCE_METADATA}. */
+export const KNOWN_SOURCE_URLS = Object.keys(SOURCE_METADATA) as SourceUrl[];
+
+/**
+ * Splits a source `data` string into its {@link SOURCE_METADATA} entry and its
+ * query params. Answers `null` for anything else: a non-string, an unknown
+ * pathname, or a query param the entry does not accept.
+ *
+ * @param data - A `sources[].data` value.
+ * @returns The served pathname, its metadata and its params, or `null`.
+ *
+ * @example
+ * parseSourceUrl('/api/cozinhas?ano=2025')?.params.get('ano'); // '2025'
+ * parseSourceUrl('/api/cozinhas?uf=SP'); // null
+ */
+export const parseSourceUrl = (
+  data: unknown
+): {
+  url: SourceUrl;
+  metadata: (typeof SOURCE_METADATA)[SourceUrl];
+  params: URLSearchParams;
+} | null => {
+  if (typeof data !== 'string' || !data.startsWith('/')) {
+    return null;
+  }
+  const parsed = new URL(data, 'http://localhost');
+  // `//host/…` and `/\host/…` resolve to another host: the browser would fetch it.
+  if (parsed.host !== 'localhost') {
+    return null;
+  }
+  const url = KNOWN_SOURCE_URLS.find((known) => {
+    return known === parsed.pathname;
+  });
+  if (!url) {
+    return null;
+  }
+  const metadata = SOURCE_METADATA[url];
+  const accepted: readonly string[] = metadata.params;
+  const allAccepted = [...parsed.searchParams.keys()].every((key) => {
+    return accepted.includes(key);
+  });
+  return allAccepted ? { url, metadata, params: parsed.searchParams } : null;
 };
 
 /** An inline, empty `FeatureCollection` — a placeholder the model sometimes emits instead of a real endpoint. */
@@ -196,12 +261,9 @@ const isEmptyInlineFeatureCollection = (data: unknown): boolean => {
   );
 };
 
-/** A URL string outside {@link KNOWN_SOURCE_URLS} — a hallucinated path that 404s client-side. */
+/** A URL string {@link parseSourceUrl} rejects — a hallucinated path or query that the app does not serve. */
 const isUnknownSourceUrl = (data: unknown): boolean => {
-  return (
-    typeof data === 'string' &&
-    !(KNOWN_SOURCE_URLS as readonly string[]).includes(data)
-  );
+  return typeof data === 'string' && parseSourceUrl(data) === null;
 };
 
 /**
@@ -227,6 +289,45 @@ export const findInvalidGeojsonSource = (
   }
 
   return null;
+};
+
+/**
+ * Finds the first layer whose `sourceId` string the server cannot resolve: not a
+ * declared `sources[].id`, and not a well-known source the server injects
+ * (`SOURCE_METADATA[].id`, e.g. `cozinhas`). Such a layer would render
+ * nothing, so the spec is a mistake even when every other field is valid.
+ *
+ * @param spec - The agent spec, before the base spec is merged in.
+ * @returns The layer id (`'desconhecida'` when it has none), or `null`.
+ *
+ * @example
+ * findUnresolvableLayerSource({ layers: [{ id: 'dots', sourceId: 'bairros-sp' }] }); // 'dots'
+ */
+export const findUnresolvableLayerSource = (
+  spec: UnknownRecord
+): string | null => {
+  const resolvable = new Set<unknown>([
+    ...KNOWN_SOURCE_URLS.map((url) => {
+      return SOURCE_METADATA[url].id;
+    }),
+    ...(Array.isArray(spec['sources']) ? spec['sources'] : []).map((source) => {
+      return isRecord(source) ? source['id'] : undefined;
+    }),
+  ]);
+  const offender = (Array.isArray(spec['layers']) ? spec['layers'] : []).find(
+    (layer) => {
+      // A missing `sourceId` is geovis' own `invalid-schema`, not this check's.
+      return (
+        isRecord(layer) &&
+        typeof layer['sourceId'] === 'string' &&
+        !resolvable.has(layer['sourceId'])
+      );
+    }
+  );
+  if (!isRecord(offender)) {
+    return null;
+  }
+  return typeof offender['id'] === 'string' ? offender['id'] : 'desconhecida';
 };
 
 /**
@@ -330,8 +431,7 @@ const hasLegendEntries = (legends: unknown): boolean => {
  * top-level `spec.legends[]` entry to describe it. Only the top-level list
  * counts: `layers[].legends` is folded into it beforehand by
  * {@link hoistLayerLegends}, so the rendered spec always carries its legends
- * in one place. A spec with no `mapData` at all (a bare base map) needs no
- * legend — there is nothing painted to explain.
+ * in one place.
  *
  * @example
  * findMissingLegend({ mapData: [{ mapDataId: 'x' }], legends: [] }); // true
@@ -406,7 +506,7 @@ export const hoistLayerLegends = (spec: UnknownRecord): UnknownRecord => {
 };
 
 /**
- * Finds the first absolute-total dataset (see {@link ABSOLUTE_TOTAL_DATASET_IDS})
+ * Finds the first absolute-total dataset (see `isAbsoluteTotalDataset`)
  * the spec paints as a choropleth — either through the `mapType: 'choropleth'`
  * shorthand (any `mapData` entry) or through a `polygon` layer joined to it by
  * `mapDataId`, which is how a spec without `mapType` fills areas. Bertin's
@@ -424,12 +524,7 @@ export const hoistLayerLegends = (spec: UnknownRecord): UnknownRecord => {
 export const findChoroplethOnAbsoluteTotal = (
   spec: UnknownRecord
 ): string | null => {
-  const isAbsolute = (id: unknown): id is string => {
-    return (
-      typeof id === 'string' &&
-      (ABSOLUTE_TOTAL_DATASET_IDS as readonly string[]).includes(id)
-    );
-  };
+  const isAbsolute = isAbsoluteTotalDataset;
   const polygonIds = (
     Array.isArray(spec['layers']) ? spec['layers'] : []
   ).flatMap((layer) => {
@@ -615,6 +710,40 @@ export const findReclassifiedOfficialIndex = (
 };
 
 /**
+ * Whether a spec is a points or heatmap map, the one shape served with no
+ * `mapData`: no `mapType`, and at least one `point`/`heatmap` layer drawn on a
+ * source that serves Point features (see {@link SOURCE_METADATA}).
+ *
+ * @param spec - The spec, after its sources are declared.
+ * @returns `true` for that shape.
+ *
+ * @example
+ * isPointsOnlySpec({ sources: [{ id: 'c', data: '/api/cozinhas' }], layers: [{ sourceId: 'c', geometry: 'point' }] }); // true
+ */
+export const isPointsOnlySpec = (spec: UnknownRecord): boolean => {
+  if (spec['mapType'] !== undefined) {
+    return false;
+  }
+  const pointSourceIds = new Set(
+    (Array.isArray(spec['sources']) ? spec['sources'] : []).flatMap(
+      (source) => {
+        return isRecord(source) &&
+          parseSourceUrl(source['data'])?.metadata.geometry === 'Point'
+          ? [source['id']]
+          : [];
+      }
+    )
+  );
+  return (Array.isArray(spec['layers']) ? spec['layers'] : []).some((layer) => {
+    return (
+      isRecord(layer) &&
+      (layer['geometry'] === 'point' || layer['geometry'] === 'heatmap') &&
+      pointSourceIds.has(layer['sourceId'])
+    );
+  });
+};
+
+/**
  * MapData Append (ADR-0001): resolves each `mapData[].mapDataId` the agent
  * emitted against {@link RENDERABLE_DATASET_FETCHERS} and replaces its
  * placeholder `data` with real `data-gateway` values. Returns a `Response`
@@ -626,8 +755,17 @@ export const appendRealMapData = async (
   spec: UnknownRecord
 ): Promise<UnknownRecord | Response> => {
   const mapData = spec['mapData'];
-  if (mapData === undefined) {
+  const isEmpty =
+    mapData === undefined || (Array.isArray(mapData) && mapData.length === 0);
+  if (isEmpty && isPointsOnlySpec(spec)) {
     return spec;
+  }
+  if (isEmpty) {
+    return invalidSpecResponse({
+      message:
+        'O campo "mapData" é obrigatório: o modelo não declarou nenhum dado para o mapa.',
+      spec,
+    });
   }
   if (!Array.isArray(mapData)) {
     return invalidSpecResponse({
@@ -664,6 +802,22 @@ export const appendRealMapData = async (
 };
 
 /**
+ * Records, under `metadata.sourceUrls`, the URL each resolved API source was
+ * fetched from (e.g. `/api/cozinhas?ano=2025`): the served `data` replaced it,
+ * and the year it carried is what tells which dataset a points map shows.
+ */
+const withSourceUrls = (
+  spec: UnknownRecord,
+  sourceUrls: Record<string, unknown>
+): UnknownRecord => {
+  if (Object.keys(sourceUrls).length === 0) {
+    return spec;
+  }
+  const metadata = isRecord(spec['metadata']) ? spec['metadata'] : {};
+  return { ...spec, metadata: { ...metadata, sourceUrls } };
+};
+
+/**
  * Sources Append: resolves each `sources[]` entry whose `data` URL carries a
  * {@link SOURCE_METADATA} `resolver` (an API-backed source, e.g.
  * `/api/cozinhas`) against its real `data-gateway` value, replacing the
@@ -673,7 +827,7 @@ export const appendRealMapData = async (
  * that URL itself.
  *
  * Must run after {@link findInvalidGeojsonSource} — that check only knows
- * the URL is one of {@link KNOWN_SOURCE_URLS}; only once the resolver's
+ * the URL is served (see {@link parseSourceUrl}); only once the resolver's
  * promise settles here can an unexpectedly empty real result (e.g. no
  * cozinhas for the requested year) be told apart from the model's own
  * placeholder empty `FeatureCollection`, which is why this returns a 422
@@ -688,6 +842,7 @@ export const appendRealSourceData = async (
   }
 
   const resolvedSources: unknown[] = [];
+  const sourceUrls: Record<string, unknown> = {};
   for (const source of sources) {
     if (!isRecord(source) || source['type'] !== 'geojson') {
       resolvedSources.push(source);
@@ -695,18 +850,15 @@ export const appendRealSourceData = async (
     }
 
     const data = source['data'];
-    const resolver =
-      typeof data === 'string' &&
-      (KNOWN_SOURCE_URLS as readonly string[]).includes(data)
-        ? SOURCE_METADATA[data as (typeof KNOWN_SOURCE_URLS)[number]].resolver
-        : null;
+    const parsed = parseSourceUrl(data);
+    const resolver = parsed?.metadata.resolver;
 
-    if (!resolver) {
+    if (!parsed || !resolver) {
       resolvedSources.push(source);
       continue;
     }
 
-    const resolved = await resolver();
+    const resolved = await resolver(parsed.params);
     if (isEmptyInlineFeatureCollection(resolved)) {
       return invalidSpecResponse({
         message: `A source "${typeof source['id'] === 'string' ? source['id'] : 'desconhecida'}" (${data}) não retornou nenhuma feição para este pedido. Tente reformular ou escolher outro recorte.`,
@@ -715,7 +867,8 @@ export const appendRealSourceData = async (
     }
 
     resolvedSources.push({ ...source, data: resolved });
+    sourceUrls[String(source['id'])] = data;
   }
 
-  return { ...spec, sources: resolvedSources };
+  return withSourceUrls({ ...spec, sources: resolvedSources }, sourceUrls);
 };

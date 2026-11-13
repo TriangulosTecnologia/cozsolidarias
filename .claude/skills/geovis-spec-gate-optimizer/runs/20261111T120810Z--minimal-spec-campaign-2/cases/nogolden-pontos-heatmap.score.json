@@ -1,0 +1,18 @@
+{
+  "case": "nogolden-pontos-heatmap",
+  "prompt": "Mostre as cozinhas solidárias como pontos e também um mapa de calor da concentração.",
+  "httpStatus": 422,
+  "durationMs": 6944,
+  "outcome": "error",
+  "issues": [
+    "invalid-size-range"
+  ],
+  "checks": [
+    {
+      "id": "outcome",
+      "passed": false,
+      "note": "expected spec, got error"
+    }
+  ],
+  "passed": false
+}

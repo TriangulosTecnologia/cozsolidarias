@@ -1,0 +1,18 @@
+{
+  "case": "golden-pontos",
+  "prompt": "Quero ver cada cozinha solidária como um ponto no mapa do Brasil.",
+  "httpStatus": 422,
+  "durationMs": 7337,
+  "outcome": "error",
+  "issues": [
+    "invalid-schema"
+  ],
+  "checks": [
+    {
+      "id": "outcome",
+      "passed": false,
+      "note": "expected spec, got error"
+    }
+  ],
+  "passed": false
+}

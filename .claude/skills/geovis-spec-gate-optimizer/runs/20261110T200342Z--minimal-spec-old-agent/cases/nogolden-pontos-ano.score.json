@@ -1,0 +1,16 @@
+{
+  "case": "nogolden-pontos-ano",
+  "prompt": "Cada cozinha solidária cadastrada em 2025 como um ponto no mapa.",
+  "httpStatus": 422,
+  "durationMs": 12374,
+  "outcome": "error",
+  "issues": [],
+  "checks": [
+    {
+      "id": "outcome",
+      "passed": false,
+      "note": "expected spec, got error"
+    }
+  ],
+  "passed": false
+}

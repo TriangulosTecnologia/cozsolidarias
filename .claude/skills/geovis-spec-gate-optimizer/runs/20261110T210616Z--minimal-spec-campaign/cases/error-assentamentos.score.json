@@ -1,0 +1,18 @@
+{
+  "case": "error-assentamentos",
+  "prompt": "Mapa dos assentamentos de reforma agrária.",
+  "httpStatus": 422,
+  "durationMs": 10619,
+  "outcome": "error",
+  "issues": [
+    "unsupported_map_type"
+  ],
+  "checks": [
+    {
+      "id": "outcome",
+      "passed": true,
+      "note": "expected error, got error"
+    }
+  ],
+  "passed": true
+}

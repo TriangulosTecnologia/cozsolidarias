@@ -1,3 +1,5 @@
+import type { GeoVisIssue, RepairOption } from '@ttoss/geovis';
+
 import { isRecord, type UnknownRecord } from './specValidation';
 
 /** The only point source keyed by município (`codarea`), the join every renderable dataset uses. */
@@ -226,4 +228,85 @@ export const repairMapDataWiring = (spec: UnknownRecord): UnknownRecord => {
   return separateStateKeys(
     alignMapDataJoin(linkOrphanMapData(repointPointLayers(spec)))
   );
+};
+
+const REPAIR_PATH_SEGMENT = /^([^[\]]+)(?:\[([^\]]+)\])?$/;
+
+/**
+ * Immutably writes `value` at a geovis repair path inside `node` —
+ * dot-separated segments, each optionally keyed by an array entry's
+ * `id`/`mapDataId` (`layers[fill].sourceId`, `view.pitch`). A path that does
+ * not resolve leaves the node unchanged.
+ */
+const setInRecord = (
+  node: UnknownRecord,
+  segments: string[],
+  value: unknown
+): UnknownRecord => {
+  const match = REPAIR_PATH_SEGMENT.exec(segments[0]);
+  if (!match) {
+    return node;
+  }
+
+  const [, key, id] = match;
+  const rest = segments.slice(1);
+  const write = (child: unknown): unknown => {
+    if (rest.length === 0) {
+      return value;
+    }
+    return isRecord(child) ? setInRecord(child, rest, value) : child;
+  };
+
+  if (id === undefined) {
+    return { ...node, [key]: write(node[key]) };
+  }
+
+  const list = node[key];
+  if (!Array.isArray(list)) {
+    return node;
+  }
+  return {
+    ...node,
+    [key]: list.map((item) => {
+      return isRecord(item) && (item['id'] === id || item['mapDataId'] === id)
+        ? write(item)
+        : item;
+    }),
+  };
+};
+
+/** The value a repair can apply without asking: a `set-value`, or a single allowed value. */
+const autoRepairValue = (repair: RepairOption): { value: unknown } | null => {
+  if (repair.kind === 'set-value') {
+    return { value: repair.value };
+  }
+  return repair.values.length === 1 ? { value: repair.values[0] } : null;
+};
+
+/**
+ * Applies, without a model round-trip, every geovis repair whose answer is
+ * already known: each `set-value`, and each `allowed-values` with exactly one
+ * candidate. An `allowed-values` with two or more candidates is a genuine
+ * choice and is left for the model.
+ *
+ * @param params.spec - The spec the issues were found in.
+ * @param params.issues - The `validateSpec` issues, carrying their `repair`.
+ * @returns The same reference when nothing was applicable; otherwise the repaired spec.
+ *
+ * @example
+ * applyLocalRepairs({ spec, issues: [{ code: 'unsupported-engine', subject: { path: 'engine' }, message: '', repair: [{ kind: 'set-value', path: 'engine', value: 'maplibre' }] }] });
+ */
+export const applyLocalRepairs = (params: {
+  spec: UnknownRecord;
+  issues: GeoVisIssue[];
+}): UnknownRecord => {
+  return params.issues.reduce<UnknownRecord>((current, issue) => {
+    return (issue.repair ?? []).reduce<UnknownRecord>((acc, repair) => {
+      const applicable = autoRepairValue(repair);
+      if (!applicable) {
+        return acc;
+      }
+      return setInRecord(acc, repair.path.split('.'), applicable.value);
+    }, current);
+  }, params.spec);
 };

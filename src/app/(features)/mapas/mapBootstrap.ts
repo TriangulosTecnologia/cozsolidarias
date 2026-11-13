@@ -5,6 +5,8 @@ import type {
   CafUfFeatureCollection,
   KitchenRateByCity,
   MunicipioIvs,
+  PaaAlimentosByCity,
+  PaaKgPorPessoaByCity,
 } from '@/data-gateway/schema';
 
 import { CAF_HEXBIN_URL } from './geovisCafHexbin';
@@ -34,6 +36,10 @@ export type MapDatasets = {
   cafPontosPorUf?: CafUfFeatureCollection;
   /** Per-município CADINSAN food-insecurity shares for the food-insecurity choropleths. */
   cadinsanByCity: CadinsanByCity[];
+  /** Per-município planned PAA food (kg), behind the `coropletico-paa-alimentos` mode. */
+  paaAlimentosByCity: PaaAlimentosByCity[];
+  /** Per-município planned PAA kg per person served, behind `coropletico-paa-kg-por-pessoa`. */
+  paaKgPorPessoaByCity: PaaKgPorPessoaByCity[];
   /**
    * The H3 hexagon grid with its CAF counts, behind the `cafs-hexbin` mode.
    * Held here rather than left to the map source so the join reads exactly the
@@ -53,6 +59,8 @@ export const EMPTY_DATASETS: MapDatasets = {
   settlements: [],
   cafsByCity: [],
   cadinsanByCity: [],
+  paaAlimentosByCity: [],
+  paaKgPorPessoaByCity: [],
 };
 
 const fetchJson = async <T>(url: string): Promise<T> => {
@@ -87,6 +95,14 @@ const FETCHERS: { [K in MapDatasetKey]: () => Promise<MapDatasets[K]> } = {
   },
   cafHexbin: () => {
     return fetchJson<CafHexbinFeatureCollection>(CAF_HEXBIN_URL);
+  },
+  paaAlimentosByCity: () => {
+    return fetchJson<PaaAlimentosByCity[]>('/api/paa/alimentos-por-municipio');
+  },
+  paaKgPorPessoaByCity: () => {
+    return fetchJson<PaaKgPorPessoaByCity[]>(
+      '/api/paa/kg-por-pessoa-por-municipio'
+    );
   },
 };
 
@@ -149,6 +165,12 @@ export const datasetsForMode = (mode: MapMode): MapDatasetKey[] => {
   }
   if (mode === 'coropletico-cafs-percentual') {
     return [...BASE_DATASETS, 'cafsByCity'];
+  }
+  if (mode === 'coropletico-paa-alimentos') {
+    return [...BASE_DATASETS, 'paaAlimentosByCity'];
+  }
+  if (mode === 'coropletico-paa-kg-por-pessoa') {
+    return [...BASE_DATASETS, 'paaKgPorPessoaByCity'];
   }
   if (mode.startsWith('coropletico-cadinsan')) {
     return [...BASE_DATASETS, 'cadinsanByCity'];

@@ -1,0 +1,18 @@
+{
+  "case": "error-dataset-inexistente",
+  "prompt": "Mapa do saneamento básico por município.",
+  "httpStatus": 422,
+  "durationMs": 9144,
+  "outcome": "error",
+  "issues": [
+    "missing_data"
+  ],
+  "checks": [
+    {
+      "id": "outcome",
+      "passed": true,
+      "note": "expected error, got error"
+    }
+  ],
+  "passed": true
+}

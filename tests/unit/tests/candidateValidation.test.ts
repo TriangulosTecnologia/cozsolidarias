@@ -1,23 +1,58 @@
 import { type GeoVisIssue, validateSpec } from '@ttoss/geovis';
 import {
-  applyLocalRepairs,
+  collectResolvedIssues,
   collectStructuralIssues,
   normalizeCandidate,
   validateCandidate,
   validateWithLocalRepairs,
 } from 'src/app/api/ai/spec/candidateValidation';
+import { RENDERABLE_DATASET_FETCHERS } from 'src/app/api/ai/spec/mapDataCatalogue';
 import {
   alignMapDataJoin,
+  applyLocalRepairs,
   linkOrphanMapData,
   repointPointLayers,
   separateStateKeys,
 } from 'src/app/api/ai/spec/specRepairs';
+
+import { gateway } from '@/gateway';
 
 jest.mock('@ttoss/geovis', () => {
   return {
     validateSpec: jest
       .fn()
       .mockReturnValue({ status: 'resolved', warnings: [] }),
+    // The geovis resolver, reduced to what these checks read: one layer
+    // painting `mapData[0]` and its legend.
+    resolveSpecFromMapType: (spec: {
+      layers: unknown[];
+      mapData: Array<{ mapDataId: string; title?: string }>;
+    }) => {
+      const { mapDataId, title } = spec.mapData[0];
+      return {
+        ...spec,
+        layers: [
+          ...spec.layers,
+          {
+            id: 'municipios-fill',
+            sourceId: 'municipios',
+            geometry: 'polygon',
+            mapDataId,
+            activeLegendId: `${mapDataId}-legend`,
+          },
+        ],
+        legends: [{ id: `${mapDataId}-legend`, title }],
+      };
+    },
+    createBoundaryGroup: (options: { id: string; data: string }) => {
+      return {
+        sources: [{ id: options.id, type: 'geojson', data: options.data }],
+        layers: [],
+      };
+    },
+    appendBoundaryGroup: (spec: unknown) => {
+      return spec;
+    },
   };
 });
 
@@ -46,6 +81,39 @@ describe('collectStructuralIssues', () => {
       ['choropleth-on-absolute-total', 'mapType'],
       ['unsupported-dataset', 'mapData[mun].mapDataId'],
     ]);
+  });
+
+  test('treats kitchen counts as absolute totals only when FORBID_ABSOLUTE_ON_CHOROPLETH is on', () => {
+    const spec = {
+      mapType: 'choropleth',
+      mapData: [{ mapDataId: 'cozinhas_geolocalizadas' }],
+      legends: [{ id: 'l' }],
+    };
+    const codes = () => {
+      return collectStructuralIssues(spec).map((issue) => {
+        return issue.code;
+      });
+    };
+
+    expect(codes()).toEqual([]);
+    process.env['FORBID_ABSOLUTE_ON_CHOROPLETH'] = 'true';
+    try {
+      expect(codes()).toEqual(['choropleth-on-absolute-total']);
+    } finally {
+      delete process.env['FORBID_ABSOLUTE_ON_CHOROPLETH'];
+    }
+  });
+
+  test('flags a layer whose source the server cannot resolve', () => {
+    const issues = collectStructuralIssues({
+      layers: [{ id: 'dots', sourceId: 'bairros-sp', geometry: 'point' }],
+    });
+
+    expect(
+      issues.map((issue) => {
+        return [issue.code, issue.path];
+      })
+    ).toEqual([['unresolvable-layer-source', 'layers[dots].sourceId']]);
   });
 
   test('flags an IVS legend that reclassifies the official faixas', () => {
@@ -183,6 +251,33 @@ const issueWith = (repair: GeoVisIssue['repair']): GeoVisIssue => {
     repair,
   };
 };
+
+describe('collectResolvedIssues', () => {
+  test('flags a generated point layer drawn on the município polygons', () => {
+    const issues = collectResolvedIssues({
+      mapType: 'dotDensity',
+      sources: [
+        { id: 'municipios', type: 'geojson', data: '/geo/geojs-100-mun.json' },
+      ],
+      mapData: [{ mapDataId: 'municipios_ivs' }],
+      layers: [
+        {
+          id: 'municipios-dots',
+          sourceId: 'municipios',
+          geometry: 'point',
+          mapDataId: 'municipios_ivs',
+        },
+      ],
+      legends: [{ id: 'legend-1', title: 'IVS' }],
+    });
+
+    expect(
+      issues.map((issue) => {
+        return issue.code;
+      })
+    ).toEqual(['point-layer-on-polygon-source']);
+  });
+});
 
 describe('alignMapDataJoin', () => {
   const spec = {
@@ -487,8 +582,34 @@ describe('validateWithLocalRepairs', () => {
 });
 
 describe('validateCandidate', () => {
-  test('rejects a non-object candidate', () => {
-    expect(validateCandidate('text')).toEqual({
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  test('resolves the mapType before checking, so a minimal choropleth has its legend', async () => {
+    jest
+      .spyOn(RENDERABLE_DATASET_FETCHERS, 'municipios_ivs')
+      .mockResolvedValue([{ geometryId: '3550308', value: 0.3 }] as never);
+
+    const result = await validateCandidate({
+      mapType: 'choropleth',
+      title: 'Vulnerabilidade social',
+      mapData: [{ mapDataId: 'municipios_ivs', title: 'IVS' }],
+    });
+
+    expect(result.issues).toEqual([]);
+  });
+
+  test('reports a spec that cannot become a map as one issue', async () => {
+    const result = await validateCandidate({ mapType: 'choropleth' });
+
+    expect(result.issues).toEqual([
+      expect.objectContaining({ code: 'unresolvable-spec' }),
+    ]);
+  });
+
+  test('rejects a non-object candidate', async () => {
+    expect(await validateCandidate('text')).toEqual({
       spec: 'text',
       issues: [
         {
@@ -500,8 +621,12 @@ describe('validateCandidate', () => {
     });
   });
 
-  test('hoists layer legends before checking, so they satisfy the legend rule', () => {
-    const result = validateCandidate({
+  test('hoists layer legends before checking, so they satisfy the legend rule', async () => {
+    jest
+      .spyOn(RENDERABLE_DATASET_FETCHERS, 'municipios_ivs')
+      .mockResolvedValue([] as never);
+
+    const result = await validateCandidate({
       mapData: [{ mapDataId: 'municipios_ivs' }],
       layers: [{ id: 'fill', legends: [{ id: 'l' }] }],
     });
@@ -516,8 +641,13 @@ describe('validateCandidate', () => {
     });
   });
 
-  test('repairs a point layer on a polygon source before checking, so the returned spec is already fixed', () => {
-    const result = validateCandidate({
+  test('repairs a point layer on a polygon source before checking, so the returned spec is already fixed', async () => {
+    jest.spyOn(gateway, 'getCozinhasBubbles').mockResolvedValue({
+      type: 'FeatureCollection',
+      features: [{ type: 'Feature' }],
+    } as never);
+
+    const result = await validateCandidate({
       sources: [
         { id: 'mun', type: 'geojson', data: '/geo/geojs-100-mun.json' },
         { id: 'bolhas', type: 'geojson', data: '/api/cozinhas/bolhas' },

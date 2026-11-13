@@ -6,6 +6,12 @@ import AiPlayground from 'src/app/(features)/ia/AiPlayground';
 
 import { renderWithChakra } from './renderWithChakra';
 
+// The worker-URL side effect imports maplibre-gl, which ships ESM only and
+// cannot load under jest; it is covered by its own test.
+jest.mock('@/components/map/maplibreWorker', () => {
+  return {};
+});
+
 // `<GeovisWorkspace>` is a closed, ESM-only 3rd-party component (theme-ui +
 // MapLibre inside). Stub it so the test can assert what spec it received
 // without exercising the real map runtime, which jsdom can't render.

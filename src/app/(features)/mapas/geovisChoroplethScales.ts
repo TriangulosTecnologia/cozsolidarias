@@ -462,6 +462,118 @@ export const PESSOAS_COZINHA_LEGEND_LABELS = flooredBinLabels(
   PESSOAS_COZINHA_THRESHOLDS
 );
 
+/**
+ * Break points (in %) for the "alimentos previstos" choropleth — each supplier
+ * município's share of the food planned in the 2025 PAA purchases for the
+ * cozinhas. Hand-picked from the real distribution of the 197 municípios with a
+ * purchase (min ≈ 0,009%, median ≈ 0,32%, max ≈ 6,7%); the legend swaps them
+ * for Jenks breaks fitted to the same values.
+ *
+ * The leading `0.0001` is a **floor, not a real cutpoint** (see
+ * {@link PERCENT_THRESHOLDS}): every município with a purchase sits above it,
+ * so only municípios with none land in the grey "sem compra prevista" bin.
+ */
+export const PAA_ALIMENTOS_THRESHOLDS = [0.0001, 0.1, 0.2, 0.4, 0.8];
+
+/**
+ * Color ramp for the "alimentos previstos" choropleth —
+ * `PAA_ALIMENTOS_THRESHOLDS.length + 1` steps; index `0` is vestigial (the
+ * below-floor bin uses `defaultColor`).
+ */
+export const PAA_ALIMENTOS_COLORS = sampleRamp(
+  mapTokens.dataviz.color.sequential[1],
+  PAA_ALIMENTOS_THRESHOLDS.length + 1
+);
+
+/**
+ * Resolves the "alimentos previstos" band color for a município's share (%) of
+ * Brazil's planned food (see {@link colorForFlooredScale}). `null` (no planned
+ * purchase) resolves to `WITHOUT_KITCHEN_COLOR`.
+ *
+ * @param percentual - Share (%) of Brazil's planned food, or `null` when none.
+ * @returns The hex color for the value's band.
+ *
+ * @example
+ * colorForPaaAlimentos(null); // WITHOUT_KITCHEN_COLOR ("sem compra prevista")
+ * colorForPaaAlimentos(0.32); // the "0,2 – 0,4%" band
+ */
+export const colorForPaaAlimentos = (
+  percentual: number | null,
+  rampId?: string
+): string => {
+  return colorForFlooredScale(
+    percentual,
+    PAA_ALIMENTOS_THRESHOLDS,
+    rampPalette({ rampId, count: PAA_ALIMENTOS_COLORS.length }) ??
+      PAA_ALIMENTOS_COLORS
+  );
+};
+
+/**
+ * Labels for the "alimentos previstos" legend, one per rendered swatch. The
+ * first is the grey below-floor bin, labelled "Sem compra prevista".
+ */
+export const PAA_ALIMENTOS_LEGEND_LABELS = flooredBinLabels(
+  'Sem compra prevista',
+  PAA_ALIMENTOS_THRESHOLDS,
+  '%'
+);
+
+/**
+ * Break points (in kg per person served) for the "kg por pessoa atendida"
+ * choropleth. Hand-picked from the real distribution of the 152 cozinha
+ * municípios (min ≈ 0,6, median ≈ 14, quintiles ≈ 3,5 / 8 / 18 / 35 kg); the
+ * legend swaps them for Jenks breaks fitted to the same values.
+ *
+ * The leading `0.01` is a **floor, not a real cutpoint**: every município with
+ * a receiving cozinha sits above it, so only municípios with none (or with no
+ * one declared served) land in the grey bin.
+ */
+export const PAA_KG_POR_PESSOA_THRESHOLDS = [0.01, 3.5, 8, 18, 35];
+
+/**
+ * Color ramp for the "kg por pessoa atendida" choropleth —
+ * `PAA_KG_POR_PESSOA_THRESHOLDS.length + 1` steps; index `0` is vestigial.
+ */
+export const PAA_KG_POR_PESSOA_COLORS = sampleRamp(
+  mapTokens.dataviz.color.sequential[1],
+  PAA_KG_POR_PESSOA_THRESHOLDS.length + 1
+);
+
+/**
+ * Resolves the "kg por pessoa atendida" band color (see
+ * {@link colorForFlooredScale}). `null` (no receiving cozinha, or no one
+ * declared served) resolves to `WITHOUT_KITCHEN_COLOR`.
+ *
+ * @param kgPorPessoa - Planned kg per person served, or `null` when unknown.
+ * @returns The hex color for the value's band.
+ *
+ * @example
+ * colorForPaaKgPorPessoa(null); // WITHOUT_KITCHEN_COLOR
+ * colorForPaaKgPorPessoa(13.7); // the "8 – 18 kg" band
+ */
+export const colorForPaaKgPorPessoa = (
+  kgPorPessoa: number | null,
+  rampId?: string
+): string => {
+  return colorForFlooredScale(
+    kgPorPessoa,
+    PAA_KG_POR_PESSOA_THRESHOLDS,
+    rampPalette({ rampId, count: PAA_KG_POR_PESSOA_COLORS.length }) ??
+      PAA_KG_POR_PESSOA_COLORS
+  );
+};
+
+/**
+ * Labels for the "kg por pessoa atendida" legend, one per rendered swatch. The
+ * first is the grey below-floor bin, labelled "Sem cozinha recebedora".
+ */
+export const PAA_KG_POR_PESSOA_LEGEND_LABELS = flooredBinLabels(
+  'Sem cozinha recebedora',
+  PAA_KG_POR_PESSOA_THRESHOLDS,
+  ' kg'
+);
+
 /** A single swatch for the workspace's right-sidebar legend. */
 export type LegendItem = { color: string; label: string };
 

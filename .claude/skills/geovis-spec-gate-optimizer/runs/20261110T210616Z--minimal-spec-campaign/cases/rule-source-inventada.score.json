@@ -1,0 +1,18 @@
+{
+  "case": "rule-source-inventada",
+  "prompt": "Mapa das cozinhas por bairro na cidade de São Paulo.",
+  "httpStatus": 422,
+  "durationMs": 35,
+  "outcome": "error",
+  "issues": [
+    "unavailable-grain"
+  ],
+  "checks": [
+    {
+      "id": "outcome",
+      "passed": true,
+      "note": "expected error, got error"
+    }
+  ],
+  "passed": true
+}

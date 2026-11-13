@@ -5,6 +5,7 @@ import { gateway } from '@/gateway';
 import { buildAgentMessage } from './agentMessage';
 import { resolveAgentReply } from './agentReply';
 import {
+  collectResolvedIssues,
   validateCandidate,
   validateWithLocalRepairs,
 } from './candidateValidation';
@@ -15,13 +16,9 @@ import {
 } from './mapDataCatalogue';
 import { MAP_TYPE_OPTIONS } from './mapTypeOptions';
 import { generateInSession, withSessionId } from './naturaliSessionApi';
-import {
-  type Clarification,
-  clarifyResponse,
-  preflightPrompt,
-} from './preflight';
+import { preflightPrompt, preflightResponse } from './preflight';
 import { resolveServedSpec } from './serveSpec';
-import { applyProportionalCirclesDefaults, mergeSpecs } from './specDefaults';
+import { mergeSpecs } from './specDefaults';
 import {
   errorResponse,
   invalidSpecResponse,
@@ -84,12 +81,11 @@ type ParsedRequest = {
   datasetId?: RenderableDatasetId;
 };
 
-/** The clarify question, echoing the client's session so the conversation can continue. */
-const clarifyAnswer = (
-  clarify: Clarification,
+/** Echoes the client's session on a preflight answer, so the conversation can continue. */
+const withOptionalSessionId = (
+  response: Response,
   sessionId?: string
 ): Response => {
-  const response = clarifyResponse(clarify);
   return sessionId ? withSessionId(response, sessionId) : response;
 };
 
@@ -116,9 +112,11 @@ const parseRequest = (rawBody: unknown): ParsedRequest | Response => {
   if (sessionId instanceof Response) {
     return sessionId;
   }
-  const preflight = preflightPrompt({ prompt, mapType, datasetId });
-  return preflight.status === 'ambiguous'
-    ? clarifyAnswer(preflight.clarify, sessionId)
+  const answer = preflightResponse(
+    preflightPrompt({ prompt, mapType, datasetId })
+  );
+  return answer
+    ? withOptionalSessionId(answer, sessionId)
     : { prompt, mapType, datasetId, sessionId };
 };
 
@@ -129,13 +127,15 @@ const validateEnv = ():
       agentId: string;
     }
   | Response => {
-  const apiKey = process.env['NATURALI_API_KEY'];
+  // deferred: legacy NATURALI_API_KEY fallback, remove once Vercel renames it to NATURALI_TOKEN
+  const apiKey =
+    process.env['NATURALI_TOKEN'] || process.env['NATURALI_API_KEY'];
   const projectId = process.env['NATURALI_PROJECT_ID'];
   const agentId = process.env['NATURALI_AGENT_ID'];
 
   if (!apiKey || !projectId || !agentId) {
     const missing = [
-      !apiKey ? 'NATURALI_API_KEY' : null,
+      !apiKey ? 'NATURALI_TOKEN' : null,
       !projectId ? 'NATURALI_PROJECT_ID' : null,
       !agentId ? 'NATURALI_AGENT_ID' : null,
     ].filter((name): name is string => {
@@ -152,17 +152,17 @@ const validateEnv = ():
 };
 
 /**
- * Turns one of {@link generateSpec}'s thrown errors (reached through {@link generateInSession}) into a fixed,
- * cause-specific pt-BR message — so a 502 never collapses a transport failure,
- * a failed generation, and an unparseable reply into the same generic
- * sentence. Matches on the prefixes those functions throw, but never echoes
- * the error text: upstream and network details stay out of the response body.
+ * Turns one of {@link generateSpec}'s thrown errors (reached through {@link generateInSession}) into a Portuguese,
+ * cause-specific message — so a 502 never collapses a transport failure, a
+ * failed generation, and an unparseable reply into the same generic
+ * sentence. Matches on the fixed prefixes that function throws; anything
+ * else gets a generic message. No upstream text is reflected to the browser.
  */
 const describeAgentFailure = (error: unknown): string => {
   const message = error instanceof Error ? error.message : String(error);
 
   if (message.startsWith('Naturali generate POST responded with status')) {
-    return 'Não foi possível iniciar a geração com o modelo de IA. Tente novamente em instantes.';
+    return `Não foi possível iniciar a geração com o modelo de IA (${message}). Tente novamente em instantes.`;
   }
   if (message.startsWith('Naturali generation ended with status')) {
     return 'O modelo de IA não concluiu a geração. Tente reformular o pedido ou tentar novamente.';
@@ -239,6 +239,28 @@ const getAgentResponse = async (params: {
 };
 
 /**
+ * The last gate before a resolved spec is served: the checks that need the
+ * resolved layers and legends (see {@link collectResolvedIssues}), then
+ * geovis' own validation with its deterministic repairs. Any issue left is a
+ * 422 carrying the spec; otherwise the 200 body.
+ */
+const checkServedSpec = (served: UnknownRecord): Response => {
+  const resolvedIssues = collectResolvedIssues(served);
+  if (resolvedIssues.length > 0) {
+    return invalidSpecResponse({
+      message: `${resolvedIssues[0].message} Tente reformular o pedido.`,
+      issues: resolvedIssues,
+      spec: served,
+    });
+  }
+
+  const { spec, issues } = validateWithLocalRepairs(served);
+  return issues.length > 0
+    ? invalidSpecResponse({ issues, spec })
+    : Response.json({ spec, error: false, mapTypeOptions: MAP_TYPE_OPTIONS });
+};
+
+/**
  * Turns a natural-language prompt into a `VisualizationSpec`, via a Naturali
  * agent running in a session (`POST /sessions/{id}/generate?wait=true`, see
  * {@link generateInSession}) declared by the `geovis-spec-generator-loop`
@@ -258,8 +280,9 @@ const getAgentResponse = async (params: {
  * @returns `{ spec, error: false }` on success; `{ error: true, message,
  * issues?, spec? }` on any failure (missing config, prompt validation,
  * upstream API failure, a declined request, a validation loop that gave up,
- * or an unsupported dataset reference) — `spec` is the last generated
- * candidate whenever one exists.
+ * or an unsupported dataset reference) — `spec`, when present, is the spec at
+ * the stage that failed (see the `src/app/api/ai/spec/**` invariant in
+ * devanity.rules.json).
  */
 export const POST = async (request: Request): Promise<Response> => {
   const rawBody: unknown = await request.json().catch(() => {
@@ -290,25 +313,16 @@ export const POST = async (request: Request): Promise<Response> => {
   }
   const { sessionId } = modelJsonOrError;
 
-  const servedOrError = await resolveServedSpec(
-    mergeSpecs(
+  const servedOrError = await resolveServedSpec({
+    prompt: requestOrError.prompt,
+    spec: mergeSpecs(
       baseVisualizationSpecJson as UnknownRecord,
       modelJsonOrError.spec
-    )
-  );
+    ),
+  });
   if (servedOrError instanceof Response) {
     return withSessionId(servedOrError, sessionId);
   }
 
-  const { spec, issues } = validateWithLocalRepairs(
-    applyProportionalCirclesDefaults(servedOrError)
-  );
-  if (issues.length > 0) {
-    return withSessionId(invalidSpecResponse({ issues, spec }), sessionId);
-  }
-
-  return withSessionId(
-    Response.json({ spec, error: false, mapTypeOptions: MAP_TYPE_OPTIONS }),
-    sessionId
-  );
+  return withSessionId(checkServedSpec(servedOrError), sessionId);
 };

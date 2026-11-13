@@ -49,14 +49,46 @@
         "dataset": "cozinhas_geolocalizadas",
         "geometry": "/api/cozinhas",
         "form": "point",
-        "legendScale": "categorical"
+        "legendScale": "text-or-none"
       },
       "coversRules": [
         "R-geometry-match",
         "R-no-invent-url",
         "R-label-ptbr"
       ],
-      "rubric": "Uses the point source (/api/cozinhas), not municipality polygons. Does not try to place geometry:'point' over /geo/geojs-100-mun.json."
+      "rubric": "Uses the point source (/api/cozinhas), not municipality polygons. Does not try to place geometry:'point' over /geo/geojs-100-mun.json. The agent reply carries no sources (the server injects /api/cozinhas from the sourceId 'cozinhas'); a first-level legend with only a title is accepted."
+    },
+    {
+      "id": "nogolden-pontos-ano",
+      "kind": "nogolden",
+      "prompt": "Cada cozinha solidária cadastrada em 2025 como um ponto no mapa.",
+      "expect": {
+        "dataset": "cozinhas_geolocalizadas_2025",
+        "geometry": "/api/cozinhas?ano=2025",
+        "form": "point",
+        "legendScale": "text-or-none"
+      },
+      "coversRules": [
+        "R-geometry-match",
+        "R-no-invent-url"
+      ],
+      "rubric": "Points with no mapType. The year goes as a query on the source (/api/cozinhas?ano=2025) and the server forwards it to the resolver; failure = serving the current snapshot without warning."
+    },
+    {
+      "id": "nogolden-pontos-heatmap",
+      "kind": "nogolden",
+      "prompt": "Mostre as cozinhas solidárias como pontos e também um mapa de calor da concentração.",
+      "expect": {
+        "dataset": "cozinhas_geolocalizadas",
+        "geometry": "/api/cozinhas",
+        "form": "point+heatmap",
+        "legendScale": "text-or-none"
+      },
+      "coversRules": [
+        "R-geometry-match",
+        "R-no-invent-url"
+      ],
+      "rubric": "Two layers (point and heatmap) over the same point source, with no mapType and no mapData. No density legend (geovis 0.32 has no density colorBy): at most one text legend from the agent."
     },
     {
       "id": "golden-circulos",
@@ -183,42 +215,51 @@
     },
     {
       "id": "trap-ivs-subindice",
-      "kind": "trap",
+      "kind": "nogolden",
       "prompt": "Mapa do IVS de infraestrutura urbana por município.",
       "expect": {
-        "outcome": "error-or-clarify"
+        "dataset": "municipios_ivs_infraestrutura",
+        "geometry": "/geo/geojs-100-mun.json",
+        "form": "polygon",
+        "legendScale": "quantitative"
       },
       "coversRules": [
         "R-variable-choice",
         "R-error-when-impossible"
       ],
-      "rubric": "TRAP: the description of municipios_ivs says the dataset contains 'its sub-indices and the IDHM indices', but RENDERABLE_DATASET_FETCHERS.municipios_ivs only returns row.ivs. Serious failure = painting the general IVS and labeling it 'Infraestrutura Urbana' (a plausible map answering a different question). Acceptable = {\"error\"} or asking for clarification."
+      "rubric": "Formerly a trap; the sub-index now has its own id. Picks municipios_ivs_infraestrutura. Serious failure = painting the general IVS (municipios_ivs) labeled 'Infraestrutura Urbana'."
     },
     {
       "id": "trap-idhm",
-      "kind": "trap",
+      "kind": "nogolden",
       "prompt": "Mapa do Índice de Desenvolvimento Humano Municipal.",
       "expect": {
-        "outcome": "error-or-clarify"
+        "dataset": "municipios_idhm",
+        "geometry": "/geo/geojs-100-mun.json",
+        "form": "polygon",
+        "legendScale": "quantitative"
       },
       "coversRules": [
         "R-variable-choice",
         "R-error-when-impossible"
       ],
-      "rubric": "TRAP, same root as trap-ivs-subindice: the description promises IDHM, the fetcher does not serve it. Serious failure = painting IVS labeled as IDHM — the scales are inverted (high IVS = bad, high IDHM = good), so the map would have its meaning swapped."
+      "rubric": "Formerly a trap (the description promised IDHM and the fetcher did not serve it); municipios_idhm is now renderable. Picks municipios_idhm, never municipios_ivs: the scales are inverted (high IVS = bad, high IDHM = good). Official UNDP/IPEA bands, never Jenks."
     },
     {
       "id": "trap-cadinsan-sem-pbf",
-      "kind": "trap",
+      "kind": "nogolden",
       "prompt": "Mapa da insegurança alimentar desconsiderando o efeito do Bolsa Família.",
       "expect": {
-        "outcome": "error-or-clarify"
+        "dataset": "municipios_cadinsan_sem_pbf",
+        "geometry": "/geo/geojs-100-mun.json",
+        "form": "polygon",
+        "legendScale": "quantitative"
       },
       "coversRules": [
         "R-variable-choice",
         "R-error-when-impossible"
       ],
-      "rubric": "TRAP: the description advertises 'with and without the PBF effect', the fetcher pins proporcaoComPbf. Serious failure = serving the with-PBF scenario as if it were the without-PBF one; the bands differ by 3x (18.74 vs 51.1 at the top)."
+      "rubric": "Formerly a trap; the without-PBF scenario now has its own id. Picks municipios_cadinsan_sem_pbf. Serious failure = serving municipios_cadinsan (with PBF) as if it were the without-PBF one; the bands differ by 3x (18.74 vs 51.1 at the top)."
     },
     {
       "id": "ambig-ano-cozinhas",
@@ -251,7 +292,8 @@
       "kind": "error",
       "prompt": "Mapa da vulnerabilidade social por estado.",
       "expect": {
-        "outcome": "error"
+        "outcome": "error",
+        "code": "missing_data"
       },
       "coversRules": [
         "R-grain-municipio",

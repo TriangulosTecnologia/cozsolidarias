@@ -8,6 +8,12 @@ import type { KitchenRateByCity } from 'src/data-gateway/schema';
 
 import { renderWithChakra } from './renderWithChakra';
 
+// The worker-URL side effect imports maplibre-gl, which ships ESM only and
+// cannot load under jest; it is covered by its own test.
+jest.mock('@/components/map/maplibreWorker', () => {
+  return {};
+});
+
 // MapLibre needs a real canvas/WebGL context that jsdom lacks, so the geovis
 // render layer is stubbed. We only exercise the component's own logic: the
 // visualization mode drives which layers `buildSpec` puts on the map.

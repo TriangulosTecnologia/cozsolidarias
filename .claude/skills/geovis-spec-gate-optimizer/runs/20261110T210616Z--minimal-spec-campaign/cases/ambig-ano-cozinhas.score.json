@@ -1,0 +1,18 @@
+{
+  "case": "ambig-ano-cozinhas",
+  "prompt": "Faz um mapa das cozinhas solidárias.",
+  "httpStatus": 422,
+  "durationMs": 8729,
+  "outcome": "error",
+  "issues": [
+    "invalid-size-range"
+  ],
+  "checks": [
+    {
+      "id": "outcome",
+      "passed": false,
+      "note": "expected clarify|spec, got error"
+    }
+  ],
+  "passed": false
+}

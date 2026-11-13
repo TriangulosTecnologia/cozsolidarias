@@ -85,7 +85,7 @@ describe('toAppCatalogue', () => {
   test('resolves publisher, source and volume for every dataset in the real catalogue', async () => {
     const catalogue = toAppCatalogue(await readStaticDataCatalogue());
 
-    expect(catalogue.datasets).toHaveLength(13);
+    expect(catalogue.datasets).toHaveLength(15);
     const byId = (id: string) => {
       return catalogue.datasets.find((dataset) => {
         return dataset.id === id;
@@ -121,10 +121,7 @@ describe('toAppCatalogue', () => {
     expect(byId('caf_areas')?.sizeBytes).toBeNull();
 
     // Gaps are derived from each dataset's own metadata, not authored.
-    expect(byId('cozinhas_geolocalizadas')?.gaps).toEqual([
-      'temporalUnknown',
-      'precisionUnknown',
-    ]);
+    expect(byId('cozinhas_geolocalizadas')?.gaps).toEqual(['precisionUnknown']);
     expect(byId('caf_areas')?.gaps).toEqual([
       'temporalUnknown',
       'precisionUnknown',

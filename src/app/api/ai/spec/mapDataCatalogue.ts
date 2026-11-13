@@ -19,9 +19,22 @@ import { gateway } from '@/gateway';
  * `findChoroplethOnAbsoluteTotal` in `specValidation.ts` enforces it
  * deterministically instead of relying only on `instructions/instructions.ts`'s `INSTRUCTIONS`.
  */
-export const ABSOLUTE_TOTAL_DATASET_IDS = [
-  'cozinhas_pessoas_atendidas',
-] as const;
+const ABSOLUTE_TOTALS: unknown[] = ['cozinhas_pessoas_atendidas'];
+
+/** Kitchen counts: absolute too, but the `/mapas` choropleth paints them on purpose. */
+const COUNTS = ['cozinhas_geolocalizadas', 'cozinhas_geolocalizadas_2025'];
+
+/**
+ * Whether a choropleth may not paint this dataset id: the absolute totals,
+ * plus the kitchen counts when the server env `FORBID_ABSOLUTE_ON_CHOROPLETH=true`.
+ * @example
+ * isAbsoluteTotalDataset('cozinhas_pessoas_atendidas'); // true
+ */
+export const isAbsoluteTotalDataset = (id: unknown): id is string => {
+  const forbidCounts = process.env['FORBID_ABSOLUTE_ON_CHOROPLETH'] === 'true';
+  const ids = forbidCounts ? [...ABSOLUTE_TOTALS, ...COUNTS] : ABSOLUTE_TOTALS;
+  return typeof id === 'string' && ids.includes(id);
+};
 
 /** One `MapDataRow`-shaped value per município, dropping unscored ones. */
 const toMapDataRows = <T extends { codigoIbge: string }>(

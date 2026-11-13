@@ -1,10 +1,11 @@
 import type { MapType } from '@ttoss/geovis';
 
 import {
-  ABSOLUTE_TOTAL_DATASET_IDS,
+  isAbsoluteTotalDataset,
   type RenderableDatasetId,
 } from './mapDataCatalogue';
 import { MAP_TYPE_OPTIONS } from './mapTypeOptions';
+import { invalidSpecResponse } from './specValidation';
 
 /** One selectable dataset or map type, with its pt-BR label. */
 export type ClarifyOption = { value: string; label: string };
@@ -24,7 +25,8 @@ export type Clarification = {
  */
 export type PreflightResult =
   | { status: 'resolved' | 'unmatched' }
-  | { status: 'ambiguous'; clarify: Clarification };
+  | { status: 'ambiguous'; clarify: Clarification }
+  | { status: 'unavailable'; grain: string };
 
 type Variant = { id: RenderableDatasetId; label: string; match: RegExp };
 
@@ -121,6 +123,15 @@ export const FAMILIES: Family[] = [
   },
 ];
 
+/**
+ * A spatial unit asked for "por/em cada/de cada" that no renderable dataset
+ * has: every one is keyed by município (or by kitchen), so a map by state,
+ * region, neighbourhood or district would answer another question. Matched
+ * on the normalized prompt; the captured group is the unit's stem.
+ */
+const UNAVAILABLE_GRAIN =
+  /\b(?:por|em cada|de cada|entre (?:os|as))\s+(estado|uf|unidade federativa|regiao|regioes|bairro|distrito|setor censitario|microrregiao|mesorregiao)/;
+
 const normalize = (text: string): string => {
   return text
     .normalize('NFD')
@@ -183,10 +194,6 @@ const absoluteTotalClarification = (): Clarification => {
   };
 };
 
-const isAbsoluteTotal = (id: string): boolean => {
-  return (ABSOLUTE_TOTAL_DATASET_IDS as readonly string[]).includes(id);
-};
-
 /** The dataset ids the prompt resolves to: the user's pick, else each family's variant or default. */
 const chosenIds = (params: {
   datasetId?: RenderableDatasetId;
@@ -209,8 +216,34 @@ const choroplethOnAbsoluteTotal = (params: {
   return (
     !params.mapType &&
     /coropl/.test(params.text) &&
-    params.ids.some(isAbsoluteTotal)
+    params.ids.some(isAbsoluteTotalDataset)
   );
+};
+
+const preflightDataset = (params: {
+  text: string;
+  mapType?: MapType;
+  datasetId?: RenderableDatasetId;
+}): PreflightResult => {
+  const { text } = params;
+  const hits = params.datasetId ? [] : familyHits(text);
+  const split = hits.find((hit) => {
+    return hit.variants.length > 1;
+  });
+  if (split) {
+    return {
+      status: 'ambiguous',
+      clarify: datasetClarification(split.variants),
+    };
+  }
+
+  const ids = chosenIds({ datasetId: params.datasetId, hits });
+  if (ids.length === 0) {
+    return { status: 'unmatched' };
+  }
+  return choroplethOnAbsoluteTotal({ ids, text, mapType: params.mapType })
+    ? { status: 'ambiguous', clarify: absoluteTotalClarification() }
+    : { status: 'resolved' };
 };
 
 /**
@@ -237,24 +270,10 @@ export const preflightPrompt = (params: {
   datasetId?: RenderableDatasetId;
 }): PreflightResult => {
   const text = normalize(params.prompt);
-  const hits = params.datasetId ? [] : familyHits(text);
-  const split = hits.find((hit) => {
-    return hit.variants.length > 1;
-  });
-  if (split) {
-    return {
-      status: 'ambiguous',
-      clarify: datasetClarification(split.variants),
-    };
-  }
-
-  const ids = chosenIds({ datasetId: params.datasetId, hits });
-  if (ids.length === 0) {
-    return { status: 'unmatched' };
-  }
-  return choroplethOnAbsoluteTotal({ ids, text, mapType: params.mapType })
-    ? { status: 'ambiguous', clarify: absoluteTotalClarification() }
-    : { status: 'resolved' };
+  const grain = UNAVAILABLE_GRAIN.exec(text)?.[1];
+  return grain
+    ? { status: 'unavailable', grain }
+    : preflightDataset({ text, ...params });
 };
 
 /**
@@ -273,4 +292,31 @@ export const clarifyResponse = (clarify: Clarification): Response => {
     clarify,
     mapTypeOptions: MAP_TYPE_OPTIONS,
   });
+};
+
+/**
+ * What the route answers by itself, before any agent call: the clarify
+ * question for an ambiguous prompt, or a 422 for a spatial unit no dataset
+ * has. `null` lets the request reach the agent.
+ *
+ * @param preflight - The result of {@link preflightPrompt}.
+ * @returns The `Response`, or `null`.
+ *
+ * @example
+ * preflightResponse({ status: 'unavailable', grain: 'estado' })?.status; // 422
+ */
+export const preflightResponse = (
+  preflight: PreflightResult
+): Response | null => {
+  if (preflight.status === 'ambiguous') {
+    return clarifyResponse(preflight.clarify);
+  }
+  if (preflight.status === 'unavailable') {
+    const message = `Não há dados por ${preflight.grain}: os indicadores disponíveis são por município (ou por cozinha). Peça o mapa por município.`;
+    return invalidSpecResponse({
+      message,
+      issues: [{ code: 'unavailable-grain', message }],
+    });
+  }
+  return null;
 };

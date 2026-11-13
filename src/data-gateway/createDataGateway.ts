@@ -13,6 +13,8 @@ import {
 import { readStaticDataCatalogue } from '../data-source-static/readStaticDataCatalogue';
 import { readStaticIvs } from '../data-source-static/readStaticIvs';
 import { readStaticMunicipios } from '../data-source-static/readStaticMunicipios';
+import { readStaticPaaProdutos } from '../data-source-static/readStaticPaaProdutos';
+import { readStaticPaaUnidadesRecebedoras } from '../data-source-static/readStaticPaaUnidadesRecebedoras';
 import { readStaticPopulacao } from '../data-source-static/readStaticPopulacao';
 import type {
   CadinsanByCity,
@@ -26,6 +28,8 @@ import type {
   CozinhasFeatureCollection,
   KitchenRateByCity,
   MunicipioIvs,
+  PaaAlimentosByCity,
+  PaaKgPorPessoaByCity,
 } from './schema';
 import { DEFAULT_CAF_HEXBIN_RESOLUTION } from './schema';
 import { toAppCatalogue } from './transformers/toAppCatalogue';
@@ -42,6 +46,8 @@ import {
   projectComTaxa,
 } from './transformers/toCozinhasPorMunicipio';
 import { toMunicipioIvs } from './transformers/toMunicipioIvs';
+import { toPaaAlimentosPorMunicipio } from './transformers/toPaaAlimentosPorMunicipio';
+import { toPaaKgPorPessoaPorMunicipio } from './transformers/toPaaKgPorPessoaPorMunicipio';
 
 /**
  * Gateway interface exposing canonical read functions. The app reads data only
@@ -143,6 +149,21 @@ export type DataGateway = {
    * snapshot, whether or not it has a cozinha.
    */
   getIvsPorMunicipio: () => Promise<MunicipioIvs[]>;
+  /**
+   * Returns one row per supplier município with the total food (kg) planned in
+   * the 2025 PAA purchases for the Cozinhas Solidárias (CONAB), plus its
+   * distinct product and supplier counts and its share (%) of Brazil's total,
+   * for the "alimentos previstos" choropleth. Only municípios with ≥1 planned
+   * purchase have a row.
+   */
+  getPaaAlimentosPorMunicipio: () => Promise<PaaAlimentosByCity[]>;
+  /**
+   * Returns one row per cozinha município with the planned PAA kg per person
+   * served: each proposal's kg split among its cozinhas by people served, then
+   * summed where the cozinhas are. Only municípios with ≥1 receiving cozinha
+   * have a row.
+   */
+  getPaaKgPorPessoaPorMunicipio: () => Promise<PaaKgPorPessoaByCity[]>;
 };
 
 /**
@@ -157,6 +178,19 @@ const readCafAnchors = async () => {
   ]);
 
   return { anchors, porMunicipio: toCafsPorMunicipio(counts) };
+};
+
+/**
+ * Reads the two CONAB PAA snapshots the kg-per-person aggregation joins through
+ * the proposal: the product rows and the receiving units.
+ */
+const readPaaSources = async () => {
+  const [produtos, unidades] = await Promise.all([
+    readStaticPaaProdutos(),
+    readStaticPaaUnidadesRecebedoras(),
+  ]);
+
+  return { produtos, unidades };
 };
 
 const KNOWN_SOURCES = ['static'] as const;
@@ -239,6 +273,12 @@ const createStaticGateway = (): DataGateway => {
     },
     getIvsPorMunicipio: async () => {
       return toMunicipioIvs(await readStaticIvs());
+    },
+    getPaaAlimentosPorMunicipio: async () => {
+      return toPaaAlimentosPorMunicipio(await readStaticPaaProdutos());
+    },
+    getPaaKgPorPessoaPorMunicipio: async () => {
+      return toPaaKgPorPessoaPorMunicipio(await readPaaSources());
     },
   };
 };

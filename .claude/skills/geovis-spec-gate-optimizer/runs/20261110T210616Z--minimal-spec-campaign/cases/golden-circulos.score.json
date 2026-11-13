@@ -1,0 +1,18 @@
+{
+  "case": "golden-circulos",
+  "prompt": "Mapa com um círculo por município, com o tamanho proporcional ao número de cozinhas solidárias.",
+  "httpStatus": 422,
+  "durationMs": 13803,
+  "outcome": "error",
+  "issues": [
+    "point-layer-on-polygon-source"
+  ],
+  "checks": [
+    {
+      "id": "outcome",
+      "passed": false,
+      "note": "expected spec, got error"
+    }
+  ],
+  "passed": false
+}

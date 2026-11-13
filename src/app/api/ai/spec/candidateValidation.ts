@@ -1,11 +1,10 @@
-import {
-  type GeoVisIssue,
-  type RepairOption,
-  validateSpec,
-} from '@ttoss/geovis';
+import { type GeoVisIssue, validateSpec } from '@ttoss/geovis';
 
+import baseVisualizationSpecJson from './instructions/baseVisualizationSpec.json';
 import { isRenderableDatasetId } from './mapDataCatalogue';
-import { repairMapDataWiring } from './specRepairs';
+import { resolveCandidate } from './serveSpec';
+import { mergeSpecs } from './specDefaults';
+import { applyLocalRepairs, repairMapDataWiring } from './specRepairs';
 import {
   findChoroplethOnAbsoluteTotal,
   findGeometryInMapData,
@@ -14,6 +13,7 @@ import {
   findMissingLegend,
   findPointLayerOnPolygonSource,
   findReclassifiedOfficialIndex,
+  findUnresolvableLayerSource,
   hoistLayerLegends,
   isRecord,
   KNOWN_BASEMAP_STYLE_URLS,
@@ -106,6 +106,15 @@ export const collectStructuralIssues = (spec: UnknownRecord): SpecIssue[] => {
     });
   }
 
+  const unresolvableLayerId = findUnresolvableLayerSource(spec);
+  if (unresolvableLayerId) {
+    issues.push({
+      code: 'unresolvable-layer-source',
+      path: `layers[${unresolvableLayerId}].sourceId`,
+      message: `A layer "${unresolvableLayerId}" aponta para uma source que não foi declarada em "sources" nem é uma das fontes do app (${KNOWN_SOURCE_URLS.join(', ')}). Declare a source ou use o id de uma fonte conhecida.`,
+    });
+  }
+
   const invalidBasemapStyleUrl = findInvalidBasemapStyleUrl(spec);
   if (invalidBasemapStyleUrl) {
     issues.push({
@@ -141,85 +150,43 @@ export const collectStructuralIssues = (spec: UnknownRecord): SpecIssue[] => {
   ];
 };
 
-const REPAIR_PATH_SEGMENT = /^([^[\]]+)(?:\[([^\]]+)\])?$/;
+/** Checks that only hold once `mapType` is resolved: a minimal spec has no legend yet, and the server replaces Jenks breaks by the official faixas. */
+const RESOLUTION_DEPENDENT_CODES = [
+  'missing-legend',
+  'reclassified-official-index',
+];
+
+/** Checked again once resolved: the resolver itself can draw a point layer on polygons (`dotDensity`). */
+const RESOLVED_STAGE_CODES = [
+  ...RESOLUTION_DEPENDENT_CODES,
+  'point-layer-on-polygon-source',
+];
 
 /**
- * Immutably writes `value` at a geovis repair path inside `node` —
- * dot-separated segments, each optionally keyed by an array entry's
- * `id`/`mapDataId` (`layers[fill].sourceId`, `view.pitch`). A path that does
- * not resolve leaves the node unchanged.
- */
-const setInRecord = (
-  node: UnknownRecord,
-  segments: string[],
-  value: unknown
-): UnknownRecord => {
-  const match = REPAIR_PATH_SEGMENT.exec(segments[0]);
-  if (!match) {
-    return node;
-  }
-
-  const [, key, id] = match;
-  const rest = segments.slice(1);
-  const write = (child: unknown): unknown => {
-    if (rest.length === 0) {
-      return value;
-    }
-    return isRecord(child) ? setInRecord(child, rest, value) : child;
-  };
-
-  if (id === undefined) {
-    return { ...node, [key]: write(node[key]) };
-  }
-
-  const list = node[key];
-  if (!Array.isArray(list)) {
-    return node;
-  }
-  return {
-    ...node,
-    [key]: list.map((item) => {
-      return isRecord(item) && (item['id'] === id || item['mapDataId'] === id)
-        ? write(item)
-        : item;
-    }),
-  };
-};
-
-/** The value a repair can apply without asking: a `set-value`, or a single allowed value. */
-const autoRepairValue = (repair: RepairOption): { value: unknown } | null => {
-  if (repair.kind === 'set-value') {
-    return { value: repair.value };
-  }
-  return repair.values.length === 1 ? { value: repair.values[0] } : null;
-};
-
-/**
- * Applies, without a model round-trip, every geovis repair whose answer is
- * already known: each `set-value`, and each `allowed-values` with exactly one
- * candidate. An `allowed-values` with two or more candidates is a genuine
- * choice and is left for the model.
- *
- * @param params.spec - The spec the issues were found in.
- * @param params.issues - The `validateSpec` issues, carrying their `repair`.
- * @returns The same reference when nothing was applicable; otherwise the repaired spec.
- *
+ * {@link collectStructuralIssues} on the agent's own spec, before resolution:
+ * every check except the resolution-dependent ones.
  * @example
- * applyLocalRepairs({ spec, issues: [{ code: 'unsupported-engine', subject: { path: 'engine' }, message: '', repair: [{ kind: 'set-value', path: 'engine', value: 'maplibre' }] }] });
+ * collectPreResolutionIssues({ mapType: 'choropleth', mapData: [{ mapDataId: 'municipios_ivs' }] }); // []
  */
-export const applyLocalRepairs = (params: {
-  spec: UnknownRecord;
-  issues: GeoVisIssue[];
-}): UnknownRecord => {
-  return params.issues.reduce<UnknownRecord>((current, issue) => {
-    return (issue.repair ?? []).reduce<UnknownRecord>((acc, repair) => {
-      const applicable = autoRepairValue(repair);
-      if (!applicable) {
-        return acc;
-      }
-      return setInRecord(acc, repair.path.split('.'), applicable.value);
-    }, current);
-  }, params.spec);
+export const collectPreResolutionIssues = (
+  spec: UnknownRecord
+): SpecIssue[] => {
+  return collectStructuralIssues(spec).filter((issue) => {
+    return !RESOLUTION_DEPENDENT_CODES.includes(issue.code);
+  });
+};
+
+/**
+ * The resolution-dependent checks of {@link collectStructuralIssues}, on the
+ * resolved spec (the others already ran on the agent spec, and would misread
+ * the `/mapas` builder's own `mapDataId`s).
+ * @example
+ * collectResolvedIssues({ mapData: [{ mapDataId: 'municipios_ivs' }], legends: [] }); // [missing-legend]
+ */
+export const collectResolvedIssues = (spec: UnknownRecord): SpecIssue[] => {
+  return collectStructuralIssues(spec).filter((issue) => {
+    return RESOLVED_STAGE_CODES.includes(issue.code);
+  });
 };
 
 const toSpecIssue = (issue: GeoVisIssue): SpecIssue => {
@@ -277,21 +244,21 @@ export const normalizeCandidate = (spec: UnknownRecord): UnknownRecord => {
 };
 
 /**
- * Validates one candidate spec the model proposed: normalizes it with
- * {@link normalizeCandidate}, runs {@link collectStructuralIssues} and
- * {@link validateWithLocalRepairs}. Only what is left needs the model — this
- * is the body of the `validate_spec` tool.
+ * Validates one candidate spec the model proposed — the body of the
+ * `validate_spec` tool. Normalizes it ({@link normalizeCandidate}), runs the
+ * pre-resolution checks, then merges it over the base spec and resolves it
+ * like the route does ({@link resolveCandidate}) before the resolution checks
+ * and {@link validateWithLocalRepairs}.
  *
  * @param spec - The candidate the model proposed.
- * @returns The repaired spec and the issues that remain; `issues` is empty
- * when the candidate is valid.
- *
+ * @returns The normalized candidate (never the resolved one, which carries
+ * every data row) and the issues that remain; empty when it is valid.
  * @example
- * const { spec: repaired, issues } = validateCandidate(modelSpec);
+ * const { spec: repaired, issues } = await validateCandidate(modelSpec);
  */
-export const validateCandidate = (
+export const validateCandidate = async (
   spec: unknown
-): { spec: unknown; issues: SpecIssue[] } => {
+): Promise<{ spec: unknown; issues: SpecIssue[] }> => {
   if (!isRecord(spec)) {
     return {
       spec,
@@ -306,7 +273,25 @@ export const validateCandidate = (
   }
 
   const normalized = normalizeCandidate(spec);
-  const structural = collectStructuralIssues(normalized);
-  const checked = validateWithLocalRepairs(normalized);
-  return { spec: checked.spec, issues: [...structural, ...checked.issues] };
+  const resolved = await resolveCandidate(
+    mergeSpecs(baseVisualizationSpecJson as UnknownRecord, normalized)
+  );
+  // A rejected spec is one issue carrying the route's own 422 message.
+  const resolutionIssues =
+    resolved instanceof Response
+      ? [
+          {
+            code: 'unresolvable-spec',
+            path: '',
+            message: ((await resolved.json()) as { message: string }).message,
+          },
+        ]
+      : [
+          ...collectResolvedIssues(resolved),
+          ...validateWithLocalRepairs(resolved).issues,
+        ];
+  return {
+    spec: normalized,
+    issues: [...collectPreResolutionIssues(normalized), ...resolutionIssues],
+  };
 };

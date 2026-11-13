@@ -13,6 +13,8 @@ import type {
   CozinhasFeatureCollection,
   KitchenRateByCity,
   MunicipioIvs,
+  PaaAlimentosByCity,
+  PaaKgPorPessoaByCity,
 } from '@/data-gateway/schema';
 
 import {
@@ -138,6 +140,10 @@ type UseMapaSpecParams = {
   cafPontosPorUf?: CafUfFeatureCollection;
   /** Per-município CADINSAN food-insecurity shares for the food-insecurity choropleths. */
   cadinsanByCity: CadinsanByCity[];
+  /** Per-município planned PAA food for the "alimentos previstos" choropleth. */
+  paaAlimentosByCity: PaaAlimentosByCity[];
+  /** Per-município planned PAA kg per person served, for its choropleth. */
+  paaKgPorPessoaByCity: PaaKgPorPessoaByCity[];
   /**
    * The H3 hexagon grid with its CAF counts, behind the `cafs-hexbin` mode.
    * `undefined` until it loads, which leaves the source on its URL.
@@ -147,6 +153,14 @@ type UseMapaSpecParams = {
   paintSettings?: {
     fillOpacity?: number;
     colorRamp?: string;
+  };
+  /**
+   * The 3D view, from the settings zone; absent for the flat map. See
+   * `buildSpec`'s `view3d` overlay.
+   */
+  view3d?: {
+    extrusionHeight: number;
+    pitch: number;
   };
   mode: MapMode;
   /**
@@ -196,47 +210,47 @@ const fitToViewport = ({
   };
 };
 
-export const useMapaSpec = ({
-  kitchenByCity,
-  ivsByCity,
-  nomesPorCodigo,
-  assentamentos,
-  cozinhaNames,
-  cozinhaStatus,
-  cafByCity,
-  cafPontosPorUf,
-  cadinsanByCity,
-  cafHexbin,
-  paintSettings,
-  mode,
-  cozinhasPoints,
-}: UseMapaSpecParams) => {
-  const tooltips = useMapaTooltips({
-    kitchenByCity,
-    nomesPorCodigo,
-    assentamentos,
-    cozinhaNames,
-    cozinhaStatus,
-    cafByCity,
-    cadinsanByCity,
-    mode,
-    colorRamp: paintSettings?.colorRamp,
-  });
-
-  /*
-   * Re-read on rotation only (see `subscribeToOrientation`), so the fit below is
-   * a framing applied when the map opens rather than something that fights the
-   * user's own panning and zooming.
-   */
+/**
+ * The container the camera is fitted to, re-read on rotation only (see
+ * `subscribeToOrientation`), so the fit is a framing applied when the map
+ * opens rather than something that fights the user's own panning and zooming.
+ */
+const useOrientationViewport = () => {
   const viewportSize = React.useSyncExternalStore(
     subscribeToOrientation,
     viewportSnapshot,
     emptyViewportSnapshot
   );
 
-  const viewport = React.useMemo(() => {
+  return React.useMemo(() => {
     return parseViewport(viewportSize);
   }, [viewportSize]);
+};
+
+export const useMapaSpec = (params: UseMapaSpecParams) => {
+  const {
+    kitchenByCity,
+    ivsByCity,
+    assentamentos,
+    cozinhaStatus,
+    cafByCity,
+    cafPontosPorUf,
+    cadinsanByCity,
+    paaAlimentosByCity,
+    paaKgPorPessoaByCity,
+    cafHexbin,
+    paintSettings,
+    view3d,
+    mode,
+    cozinhasPoints,
+  } = params;
+  // The tooltips read a subset of the same lookups; the hook picks its own.
+  const tooltips = useMapaTooltips({
+    ...params,
+    colorRamp: paintSettings?.colorRamp,
+  });
+
+  const viewport = useOrientationViewport();
 
   const baseSpec = React.useMemo(() => {
     const spec = buildSpec(
@@ -255,8 +269,11 @@ export const useMapaSpec = ({
         cafPontosPorUf,
         cafUfHoverRender: tooltips.cafUfTooltip,
         cadinsanByCity,
+        paaAlimentosByCity,
+        paaKgPorPessoaByCity,
         cafHexbin,
         paintSettings,
+        view3d,
         cafHexbinHoverRender: tooltips.cafHexbinTooltip,
       }
     );
@@ -275,8 +292,11 @@ export const useMapaSpec = ({
     cafByCity,
     cafPontosPorUf,
     cadinsanByCity,
+    paaAlimentosByCity,
+    paaKgPorPessoaByCity,
     cafHexbin,
     paintSettings,
+    view3d,
     cozinhasPoints,
     viewport,
   ]);

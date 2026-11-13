@@ -5,6 +5,8 @@ import type {
   CadinsanByCity,
   CafByCity,
   KitchenRateByCity,
+  PaaAlimentosByCity,
+  PaaKgPorPessoaByCity,
 } from '@/data-gateway/schema';
 
 import { cozinhaStatusLabel } from './geovisCozinhaStatusScales';
@@ -60,6 +62,10 @@ type UseMapaTooltipsParams = {
   cafByCity: CafByCity[];
   /** Per-município CADINSAN rows, so the food-insecurity hover shows the share + counts. */
   cadinsanByCity: CadinsanByCity[];
+  /** Per-município planned PAA food rows, so its hover shows the kg + counts. */
+  paaAlimentosByCity: PaaAlimentosByCity[];
+  /** Per-município planned PAA kg-per-person rows, so its hover shows the ratio + counts. */
+  paaKgPorPessoaByCity: PaaKgPorPessoaByCity[];
   mode: MapMode;
   /**
    * The ramp the map is being read through, from the settings zone. The hover
@@ -67,6 +73,50 @@ type UseMapaTooltipsParams = {
    * município to its band on the map, so it has to be the same palette.
    */
   colorRamp?: string;
+};
+
+/**
+ * Every hover lookup, indexed in one memo: the datasets are fetched once and
+ * never mutated, so they are never stale relative to each other. The
+ * choropleths join on `codigoIbge`, the assentamentos on `codImovel`.
+ */
+const useHoverLookups = ({
+  kitchenByCity,
+  cafByCity,
+  cadinsanByCity,
+  paaAlimentosByCity,
+  paaKgPorPessoaByCity,
+  assentamentos,
+}: Pick<
+  UseMapaTooltipsParams,
+  | 'kitchenByCity'
+  | 'cafByCity'
+  | 'cadinsanByCity'
+  | 'paaAlimentosByCity'
+  | 'paaKgPorPessoaByCity'
+  | 'assentamentos'
+>) => {
+  return React.useMemo(() => {
+    return {
+      cities: indexByCodigoIbge(kitchenByCity),
+      cafs: indexByCodigoIbge(cafByCity),
+      cadinsan: indexByCodigoIbge(cadinsanByCity),
+      paaAlimentos: indexByCodigoIbge(paaAlimentosByCity),
+      paaKgPorPessoa: indexByCodigoIbge(paaKgPorPessoaByCity),
+      assentamentos: new Map(
+        assentamentos.map((atributo) => {
+          return [atributo.codImovel, atributo];
+        })
+      ),
+    };
+  }, [
+    kitchenByCity,
+    cafByCity,
+    cadinsanByCity,
+    paaAlimentosByCity,
+    paaKgPorPessoaByCity,
+    assentamentos,
+  ]);
 };
 
 /**
@@ -89,24 +139,19 @@ export const useMapaTooltips = ({
   cozinhaStatus,
   cafByCity,
   cadinsanByCity,
+  paaAlimentosByCity,
+  paaKgPorPessoaByCity,
   mode,
   colorRamp,
 }: UseMapaTooltipsParams) => {
-  // Every hover lookup is indexed in one memo: the four datasets all arrive
-  // from the same mount fetch, so they are never stale relative to each other.
-  // The choropleths join on `codigoIbge`, the assentamentos on `codImovel`.
-  const byCode = React.useMemo(() => {
-    return {
-      cities: indexByCodigoIbge(kitchenByCity),
-      cafs: indexByCodigoIbge(cafByCity),
-      cadinsan: indexByCodigoIbge(cadinsanByCity),
-      assentamentos: new Map(
-        assentamentos.map((atributo) => {
-          return [atributo.codImovel, atributo];
-        })
-      ),
-    };
-  }, [kitchenByCity, cafByCity, cadinsanByCity, assentamentos]);
+  const byCode = useHoverLookups({
+    kitchenByCity,
+    cafByCity,
+    cadinsanByCity,
+    paaAlimentosByCity,
+    paaKgPorPessoaByCity,
+    assentamentos,
+  });
 
   const hoverTooltip = React.useCallback(
     (info: MapHoverInfo) => {
@@ -123,6 +168,8 @@ export const useMapaTooltips = ({
         register,
         cafRegister: byCode.cafs.get(code),
         cadinsanRegister: byCode.cadinsan.get(code),
+        paaAlimentosRegister: byCode.paaAlimentos.get(code),
+        paaKgPorPessoaRegister: byCode.paaKgPorPessoa.get(code),
         value: info.value,
         rampId: colorRamp,
       });

@@ -37,6 +37,7 @@ for ID in "${IDS[@]}"; do
     echo "[$i/$TOTAL] $ID — 502 on attempt $attempt (${MS}ms)" >&2
   done
   echo "[$i/$TOTAL] $ID — status $STATUS (${MS}ms)" >&2
+  node "$SKILL_DIR/scripts/score_case.mjs" "$OUT" "$SKILL_DIR/../../.." --case="$ID" >&2 || true
 done
 
 echo "campaign finished: $TOTAL cases in $RUN_DIR/cases/" >&2

@@ -1,0 +1,18 @@
+{
+  "case": "golden-coropletico",
+  "prompt": "Mapa coroplético das cozinhas solidárias por município.",
+  "httpStatus": 422,
+  "durationMs": 32017,
+  "outcome": "error",
+  "issues": [
+    "ambiguous_request"
+  ],
+  "checks": [
+    {
+      "id": "outcome",
+      "passed": false,
+      "note": "expected spec, got error"
+    }
+  ],
+  "passed": false
+}

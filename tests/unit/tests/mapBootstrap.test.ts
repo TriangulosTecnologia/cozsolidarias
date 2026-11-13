@@ -36,6 +36,16 @@ describe('fetchMapDataset', () => {
     await fetchMapDataset('cadinsanByCity');
     expect(global.fetch).toHaveBeenCalledWith('/api/cadinsan/por-municipio');
 
+    await fetchMapDataset('paaAlimentosByCity');
+    expect(global.fetch).toHaveBeenCalledWith(
+      '/api/paa/alimentos-por-municipio'
+    );
+
+    await fetchMapDataset('paaKgPorPessoaByCity');
+    expect(global.fetch).toHaveBeenCalledWith(
+      '/api/paa/kg-por-pessoa-por-municipio'
+    );
+
     // The grid is a GeoJSON snapshot the app fetches like any other, so the
     // route it comes from is the one the map's source would otherwise hold.
     await fetchMapDataset('cafHexbin');
@@ -75,6 +85,16 @@ describe('datasetsForMode', () => {
     expect(datasetsForMode('coropletico-ivs-capital-humano')).toContain('ivs');
     expect(datasetsForMode('coropletico-idhm-educacao')).toContain('ivs');
     expect(datasetsForMode('assentamentos')).toContain('settlements');
+    expect(datasetsForMode('coropletico-paa-alimentos')).toEqual([
+      'data',
+      'nomes',
+      'paaAlimentosByCity',
+    ]);
+    expect(datasetsForMode('coropletico-paa-kg-por-pessoa')).toEqual([
+      'data',
+      'nomes',
+      'paaKgPorPessoaByCity',
+    ]);
 
     // Nothing bleeds across: the IVS family never pulls the CAF or CADINSAN
     // snapshots, which is the whole point of splitting the mount fetch.
