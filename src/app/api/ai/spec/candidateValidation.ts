@@ -273,17 +273,24 @@ export const validateCandidate = async (
   }
 
   const normalized = normalizeCandidate(spec);
+  // A gateway failure is not the model's to repair: it is reported as an
+  // issue, so the generation is not aborted as an agent failure.
   const resolved = await resolveCandidate(
     mergeSpecs(baseVisualizationSpecJson as UnknownRecord, normalized)
-  );
+  ).catch(() => {
+    return null;
+  });
   // A rejected spec is one issue carrying the route's own 422 message.
   const resolutionIssues =
-    resolved instanceof Response
+    resolved === null || resolved instanceof Response
       ? [
           {
             code: 'unresolvable-spec',
             path: '',
-            message: ((await resolved.json()) as { message: string }).message,
+            message:
+              resolved === null
+                ? 'Não foi possível ler os dados para validar o spec agora.'
+                : ((await resolved.json()) as { message: string }).message,
           },
         ]
       : [

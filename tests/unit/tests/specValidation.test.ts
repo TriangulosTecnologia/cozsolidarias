@@ -598,6 +598,10 @@ describe('KNOWN_BASEMAP_STYLE_URLS', () => {
 });
 
 describe('errorResponse', () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   test('always flags the failure and carries the given status, issues and spec', async () => {
     const response = errorResponse({
       status: 502,
@@ -615,6 +619,19 @@ describe('errorResponse', () => {
       spec: { a: 1 },
       mapTypeOptions: MAP_TYPE_OPTIONS,
     });
+  });
+
+  test('omits the spec in production, keeping the rest of the body', async () => {
+    jest.replaceProperty(process.env, 'NODE_ENV', 'production');
+
+    const body = await errorResponse({
+      status: 422,
+      message: 'Falha',
+      spec: { a: 1 },
+    }).json();
+
+    expect(body).not.toHaveProperty('spec');
+    expect(body).toMatchObject({ error: true, message: 'Falha' });
   });
 });
 

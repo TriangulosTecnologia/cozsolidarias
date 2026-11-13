@@ -1,11 +1,18 @@
 import type { MapType } from '@ttoss/geovis';
 
 import {
+  conceptFeedback,
+  type Feedback,
+  findProxy,
+  periodFeedback,
+} from './catalogueFeedback';
+import { type ConceptEntry, normalize } from './conceptIndex';
+import { FAMILIES, type Variant } from './datasetFamilies';
+import {
   isAbsoluteTotalDataset,
   type RenderableDatasetId,
 } from './mapDataCatalogue';
 import { MAP_TYPE_OPTIONS } from './mapTypeOptions';
-import { invalidSpecResponse } from './specValidation';
 
 /** One selectable dataset or map type, with its pt-BR label. */
 export type ClarifyOption = { value: string; label: string };
@@ -19,109 +26,17 @@ export type Clarification = {
 };
 
 /**
- * What {@link preflightPrompt} concluded: `resolved` and `unmatched` both let
- * the generation proceed (its validation loop stays the real gate); only
- * `ambiguous` stops to ask.
+ * What {@link preflightPrompt} concluded: `resolved`, `unmatched` and `proxy`
+ * let the generation proceed (its validation loop stays the real gate; a
+ * `proxy` also names the adjacent dataset and says it is not the exact
+ * measure); `ambiguous` stops to ask and `feedback` stops to explain.
  */
 export type PreflightResult =
   | { status: 'resolved' | 'unmatched' }
   | { status: 'ambiguous'; clarify: Clarification }
-  | { status: 'unavailable'; grain: string };
-
-type Variant = { id: RenderableDatasetId; label: string; match: RegExp };
-
-type Family = {
-  keyword: RegExp;
-  defaultId: RenderableDatasetId;
-  variants: Variant[];
-};
-
-/**
- * Dataset families whose variants a prompt can tell apart. `keyword` and
- * `match` run over the accent-stripped, lower-cased prompt.
- */
-export const FAMILIES: Family[] = [
-  {
-    keyword: /\bivs\b/,
-    defaultId: 'municipios_ivs',
-    variants: [
-      {
-        id: 'municipios_ivs_infraestrutura',
-        label: 'IVS – Infraestrutura urbana',
-        match: /infraestrutura/,
-      },
-      {
-        id: 'municipios_ivs_capital_humano',
-        label: 'IVS – Capital humano',
-        match: /capital humano/,
-      },
-      {
-        id: 'municipios_ivs_renda_trabalho',
-        label: 'IVS – Renda e trabalho',
-        match: /renda|trabalho/,
-      },
-    ],
-  },
-  {
-    keyword: /idhm/,
-    defaultId: 'municipios_idhm',
-    variants: [
-      {
-        id: 'municipios_idhm_longevidade',
-        label: 'IDHM – Longevidade',
-        match: /longevidade/,
-      },
-      {
-        id: 'municipios_idhm_educacao',
-        label: 'IDHM – Educação',
-        match: /educacao/,
-      },
-      {
-        id: 'municipios_idhm_educacao_escolaridade',
-        label: 'IDHM – Educação (escolaridade)',
-        match: /escolaridade/,
-      },
-      {
-        id: 'municipios_idhm_educacao_frequencia',
-        label: 'IDHM – Educação (frequência escolar)',
-        match: /frequencia/,
-      },
-      { id: 'municipios_idhm_renda', label: 'IDHM – Renda', match: /renda/ },
-    ],
-  },
-  {
-    keyword: /cadinsan|cadunico|inseguranca alimentar/,
-    defaultId: 'municipios_cadinsan',
-    variants: [
-      {
-        id: 'municipios_cadinsan',
-        label: 'Insegurança alimentar com Bolsa Família',
-        match: /com (o )?(pbf|bolsa)/,
-      },
-      {
-        id: 'municipios_cadinsan_sem_pbf',
-        label: 'Insegurança alimentar sem Bolsa Família',
-        match: /sem (o )?(pbf|bolsa)/,
-      },
-    ],
-  },
-  {
-    keyword: /cozinha|atendid/,
-    defaultId: 'cozinhas_geolocalizadas',
-    variants: [
-      {
-        id: 'cozinhas_geolocalizadas_2025',
-        label: 'Cozinhas em 2025',
-        match: /2025/,
-      },
-      {
-        id: 'cozinhas_pessoas_atendidas',
-        label: 'Pessoas atendidas pelas cozinhas',
-        match: /atendid/,
-      },
-    ],
-  },
-];
+  | { status: 'unavailable'; grain: string }
+  | { status: 'feedback'; feedback: Feedback }
+  | { status: 'proxy'; datasetId: RenderableDatasetId; note: string };
 
 /**
  * A spatial unit asked for "por/em cada/de cada" that no renderable dataset
@@ -131,13 +46,6 @@ export const FAMILIES: Family[] = [
  */
 const UNAVAILABLE_GRAIN =
   /\b(?:por|em cada|de cada|entre (?:os|as))\s+(estado|uf|unidade federativa|regiao|regioes|bairro|distrito|setor censitario|microrregiao|mesorregiao)/;
-
-const normalize = (text: string): string => {
-  return text
-    .normalize('NFD')
-    .replace(/\p{Diacritic}/gu, '')
-    .toLowerCase();
-};
 
 /**
  * The variants a prompt names, minus any that a more specific hit refines
@@ -246,6 +154,39 @@ const preflightDataset = (params: {
     : { status: 'resolved' };
 };
 
+/** The renderable ids a resolved prompt stands for: the user's pick, else each family's variant or default. */
+const resolvedIds = (params: {
+  text: string;
+  datasetId?: RenderableDatasetId;
+}): string[] => {
+  return chosenIds({
+    datasetId: params.datasetId,
+    hits: params.datasetId ? [] : familyHits(params.text),
+  });
+};
+
+/**
+ * Refines what the dataset preflight concluded with what the catalogue says:
+ * a year the resolved dataset does not cover, or a concept no served dataset
+ * describes. Never refuses what the catalogue cannot judge: that goes on to
+ * generation.
+ */
+const preflightCatalogue = (params: {
+  dataset: PreflightResult;
+  text: string;
+  datasetId?: RenderableDatasetId;
+  concepts: ConceptEntry[];
+}): PreflightResult => {
+  const { dataset, text, concepts } = params;
+  const feedback =
+    dataset.status === 'resolved'
+      ? periodFeedback({ text, ids: resolvedIds(params), concepts })
+      : dataset.status === 'unmatched'
+        ? conceptFeedback({ text, concepts })
+        : null;
+  return feedback ? { status: 'feedback', feedback } : dataset;
+};
+
 /**
  * Classifies a prompt before any model call, without ever refusing it: it
  * only asks when a family's variants are ambiguous or a choropleth targets an
@@ -259,7 +200,9 @@ const preflightDataset = (params: {
  * @param params.prompt - The user's request.
  * @param params.mapType - The map type the user already chose, if any.
  * @param params.datasetId - The dataset the user already chose; replaces the text matching.
- * @returns `resolved`, `unmatched`, or `ambiguous` with the question to ask.
+ * @param params.concepts - The catalogue index (see `buildConceptIndex`); without it the catalogue is not consulted.
+ * @returns `resolved`, `unmatched`, a `proxy`, `feedback` explaining why no
+ * map can be made as asked, or `ambiguous` with the question to ask.
  *
  * @example
  * preflightPrompt({ prompt: 'coroplético de pessoas atendidas' }).status; // 'ambiguous'
@@ -268,55 +211,31 @@ export const preflightPrompt = (params: {
   prompt: string;
   mapType?: MapType;
   datasetId?: RenderableDatasetId;
+  concepts?: ConceptEntry[];
 }): PreflightResult => {
   const text = normalize(params.prompt);
   const grain = UNAVAILABLE_GRAIN.exec(text)?.[1];
-  return grain
-    ? { status: 'unavailable', grain }
-    : preflightDataset({ text, ...params });
+  if (grain) {
+    return { status: 'unavailable', grain };
+  }
+  const dataset = preflightDataset({ text, ...params });
+  const proxy = dataset.status === 'unmatched' ? findProxy(text) : undefined;
+  if (proxy) {
+    return { status: 'proxy', datasetId: proxy.datasetId, note: proxy.note };
+  }
+  return params.concepts
+    ? preflightCatalogue({
+        dataset,
+        text,
+        datasetId: params.datasetId,
+        concepts: params.concepts,
+      })
+    : dataset;
 };
 
-/**
- * The 200 asking the user to choose: `{ error: false, clarify }` with no
- * `spec`, plus the map types on offer.
- *
- * @param clarify - The question from an `ambiguous` {@link PreflightResult}.
- * @returns The JSON `Response`.
- *
- * @example
- * clarifyResponse({ facet: 'mapType', question: '...', options: [], default: 'dotDensity' });
- */
-export const clarifyResponse = (clarify: Clarification): Response => {
-  return Response.json({
-    error: false,
-    clarify,
-    mapTypeOptions: MAP_TYPE_OPTIONS,
-  });
-};
-
-/**
- * What the route answers by itself, before any agent call: the clarify
- * question for an ambiguous prompt, or a 422 for a spatial unit no dataset
- * has. `null` lets the request reach the agent.
- *
- * @param preflight - The result of {@link preflightPrompt}.
- * @returns The `Response`, or `null`.
- *
- * @example
- * preflightResponse({ status: 'unavailable', grain: 'estado' })?.status; // 422
- */
-export const preflightResponse = (
-  preflight: PreflightResult
-): Response | null => {
-  if (preflight.status === 'ambiguous') {
-    return clarifyResponse(preflight.clarify);
-  }
-  if (preflight.status === 'unavailable') {
-    const message = `Não há dados por ${preflight.grain}: os indicadores disponíveis são por município (ou por cozinha). Peça o mapa por município.`;
-    return invalidSpecResponse({
-      message,
-      issues: [{ code: 'unavailable-grain', message }],
-    });
-  }
-  return null;
-};
+export { FAMILIES } from './datasetFamilies';
+export {
+  clarifyResponse,
+  feedbackResponse,
+  preflightResponse,
+} from './preflightResponse';

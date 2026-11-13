@@ -5,6 +5,7 @@ import {
   type ChoiceOption,
   type Choices,
   type Clarification,
+  type Feedback,
   type Issue,
   type Requirement,
   type SubmitOutcome,
@@ -12,7 +13,7 @@ import {
 } from './submitPrompt';
 
 /** Submission lifecycle for the prompt-to-map form. */
-type Status = 'idle' | 'loading' | 'error' | 'success' | 'clarify';
+type Status = 'idle' | 'loading' | 'error' | 'success' | 'clarify' | 'feedback';
 
 /** An answer to a question or a map-type pick, ready to resubmit. */
 export type Choice = { facet: 'dataset' | 'mapType'; value: string };
@@ -40,6 +41,7 @@ export const useAiPlaygroundLogic = () => {
   const [showJson, setShowJson] = React.useState(false);
   const [spec, setSpec] = React.useState<unknown>(null);
   const [clarify, setClarify] = React.useState<Clarification | null>(null);
+  const [feedback, setFeedback] = React.useState<Feedback | null>(null);
   const [mapTypeOptions, setMapTypeOptions] = React.useState<ChoiceOption[]>(
     []
   );
@@ -53,6 +55,9 @@ export const useAiPlaygroundLogic = () => {
     if (outcome.kind === 'clarify') {
       setClarify(outcome.clarify);
       setStatus('clarify');
+    } else if (outcome.kind === 'feedback') {
+      setFeedback(outcome.feedback);
+      setStatus('feedback');
     } else if (outcome.kind === 'failure') {
       setFailure({ ...outcome, spec: outcome.spec ?? null });
       setSpec(outcome.spec ?? null);
@@ -68,6 +73,7 @@ export const useAiPlaygroundLogic = () => {
     setStatus('loading');
     setFailure(NO_FAILURE);
     setClarify(null);
+    setFeedback(null);
     setShowJson(false);
     apply(await submitPrompt({ prompt, ...choices }));
   };
@@ -103,6 +109,7 @@ export const useAiPlaygroundLogic = () => {
     setShowJson,
     spec,
     clarify,
+    feedback,
     mapTypeOptions,
     handleSubmit,
     choose,

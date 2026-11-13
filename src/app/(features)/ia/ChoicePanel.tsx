@@ -5,6 +5,7 @@ import { Alert, Box, Button, Stack, Text } from '@chakra-ui/react';
 import type {
   ChoiceOption,
   Clarification,
+  Feedback,
   Issue,
   Requirement,
 } from './submitPrompt';
@@ -52,6 +53,42 @@ export const ErrorAlert = ({
       </Alert.Content>
     </Alert.Root>
   );
+};
+
+/**
+ * Why the server made no map and how to rewrite the request. Informational,
+ * not an error: the prompt stays in the form for the user to adjust.
+ */
+export const FeedbackAlert = ({ feedback }: { feedback: Feedback }) => {
+  return (
+    <Alert.Root status="info">
+      <Alert.Indicator />
+      <Alert.Content>
+        <Alert.Title>Ajuste o pedido para gerar o mapa</Alert.Title>
+        <Alert.Description>
+          {feedback.reason}
+          <Box as="ul" pl={5} mt={2}>
+            {feedback.suggestions.map((suggestion) => {
+              return <li key={suggestion}>{suggestion}</li>;
+            })}
+          </Box>
+        </Alert.Description>
+      </Alert.Content>
+    </Alert.Root>
+  );
+};
+
+/** The {@link FeedbackAlert} while the submission ended in feedback, nothing otherwise. */
+export const FeedbackSection = ({
+  status,
+  feedback,
+}: {
+  status: string;
+  feedback: Feedback | null;
+}) => {
+  return status === 'feedback' && feedback ? (
+    <FeedbackAlert feedback={feedback} />
+  ) : null;
 };
 
 /**
