@@ -16,7 +16,7 @@ import {
 } from './mapDataCatalogue';
 import { MAP_TYPE_OPTIONS } from './mapTypeOptions';
 import { generateInSession, withSessionId } from './naturaliSessionApi';
-import { preflightPrompt, preflightResponse } from './preflight';
+import { type ParsedRequest, preflightRequest } from './requestPreflight';
 import { resolveServedSpec } from './serveSpec';
 import { mergeSpecs } from './specDefaults';
 import {
@@ -74,27 +74,15 @@ const validatePrompt = (rawBody: unknown): string | Response => {
   return prompt;
 };
 
-type ParsedRequest = {
-  prompt: string;
-  sessionId?: string;
-  mapType?: MapType;
-  datasetId?: RenderableDatasetId;
-};
-
-/** Echoes the client's session on a preflight answer, so the conversation can continue. */
-const withOptionalSessionId = (
-  response: Response,
-  sessionId?: string
-): Response => {
-  return sessionId ? withSessionId(response, sessionId) : response;
-};
-
 /**
  * Validates the whole request body — the `prompt` and the optional `mapType`
- * and `datasetId` — then runs the {@link preflightPrompt}, answering with the
- * question when the request is ambiguous.
+ * and `datasetId` — then runs the preflight (see {@link preflightRequest}), answering with the
+ * question when the request is ambiguous, or the feedback when no served data
+ * answers it. A proxy goes on to the agent with its dataset and warning.
  */
-const parseRequest = (rawBody: unknown): ParsedRequest | Response => {
+const parseRequest = async (
+  rawBody: unknown
+): Promise<ParsedRequest | Response> => {
   const prompt = validatePrompt(rawBody);
   if (prompt instanceof Response) {
     return prompt;
@@ -112,12 +100,7 @@ const parseRequest = (rawBody: unknown): ParsedRequest | Response => {
   if (sessionId instanceof Response) {
     return sessionId;
   }
-  const answer = preflightResponse(
-    preflightPrompt({ prompt, mapType, datasetId })
-  );
-  return answer
-    ? withOptionalSessionId(answer, sessionId)
-    : { prompt, mapType, datasetId, sessionId };
+  return preflightRequest({ prompt, mapType, datasetId, sessionId });
 };
 
 const validateEnv = ():
@@ -198,11 +181,13 @@ const getAgentResponse = async (params: {
   prompt: string;
   mapType?: MapType;
   datasetId?: RenderableDatasetId;
+  note?: string;
 }): Promise<{ spec: UnknownRecord; sessionId: string } | Response> => {
   const choices = {
     prompt: params.prompt,
     mapType: params.mapType,
     datasetId: params.datasetId,
+    note: params.note,
   };
   let generated: Awaited<ReturnType<typeof generateInSession>>;
   try {
@@ -274,7 +259,7 @@ const checkServedSpec = (served: UnknownRecord): Response => {
  * The reply is then resolved into real data (see {@link resolveServedSpec})
  * and validated once more, with the same local repairs. Before any of that,
  * an ambiguous request is answered with a `clarify` question instead (see
- * {@link preflightPrompt}); the session id travels in the `x-session-id`
+ * {@link preflightRequest}); the session id travels in the `x-session-id`
  * response header, and sending it back as `sessionId` continues the session.
  *
  * @returns `{ spec, error: false }` on success; `{ error: true, message,
@@ -289,7 +274,7 @@ export const POST = async (request: Request): Promise<Response> => {
     return null;
   });
 
-  const requestOrError = parseRequest(rawBody);
+  const requestOrError = await parseRequest(rawBody);
   if (requestOrError instanceof Response) {
     return requestOrError;
   }
@@ -307,6 +292,7 @@ export const POST = async (request: Request): Promise<Response> => {
     prompt: requestOrError.prompt,
     mapType: requestOrError.mapType,
     datasetId: requestOrError.datasetId,
+    note: requestOrError.note,
   });
   if (modelJsonOrError instanceof Response) {
     return modelJsonOrError;

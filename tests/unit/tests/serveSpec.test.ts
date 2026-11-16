@@ -129,6 +129,12 @@ describe('deriveAgentStructure', () => {
     });
   });
 
+  test('leaves a layer without sourceId or geometry unnamed, never "undefined-undefined"', () => {
+    const derived = deriveAgentStructure({ layers: [{ type: 'fill' }] });
+
+    expect(recordsOf(derived['layers'])[0]).not.toHaveProperty('id');
+  });
+
   test('declares the município source for a spec with no sources or layers yet', () => {
     expect(
       deriveAgentStructure({ mapData: [{ mapDataId: 'municipios_ivs' }] })

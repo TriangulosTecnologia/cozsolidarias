@@ -89,11 +89,12 @@ export const deriveAgentStructure = (spec: UnknownRecord): UnknownRecord => {
       : entry;
   });
   const layers = arrayOf(spec['layers']).map((layer) => {
-    return isRecord(layer) && layer['id'] === undefined
-      ? {
-          ...layer,
-          id: `${String(layer['sourceId'])}-${String(layer['geometry'])}`,
-        }
+    // Without both parts there is no id to derive: geovis reports the gap.
+    return isRecord(layer) &&
+      layer['id'] === undefined &&
+      typeof layer['sourceId'] === 'string' &&
+      typeof layer['geometry'] === 'string'
+      ? { ...layer, id: `${layer['sourceId']}-${layer['geometry']}` }
       : layer;
   });
   const sources = recordsOf(spec['sources']);

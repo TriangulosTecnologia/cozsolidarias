@@ -1,0 +1,8 @@
+{
+  "pass": true,
+  "failures": [],
+  "oracle": {
+    "municipios": 348,
+    "sum": 789755
+  }
+}

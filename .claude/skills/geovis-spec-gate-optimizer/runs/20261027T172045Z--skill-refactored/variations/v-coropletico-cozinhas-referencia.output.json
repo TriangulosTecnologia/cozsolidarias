@@ -1,0 +1,37 @@
+{
+  "prompt": "Mapa coroplético das cozinhas solidárias por município.",
+  "httpStatus": 200,
+  "durationMs": 33,
+  "response": {
+    "error": false,
+    "clarify": {
+      "facet": "mapType",
+      "question": "Este indicador é um total absoluto; um mapa coroplético distorce a leitura pelo tamanho das áreas. Qual tipo de mapa você prefere?",
+      "options": [
+        {
+          "value": "proportionalCircles",
+          "label": "Círculos proporcionais"
+        },
+        {
+          "value": "dotDensity",
+          "label": "Densidade de pontos"
+        }
+      ],
+      "default": "proportionalCircles"
+    },
+    "mapTypeOptions": [
+      {
+        "value": "choropleth",
+        "label": "Coroplético (áreas coloridas por valor)"
+      },
+      {
+        "value": "dotDensity",
+        "label": "Densidade de pontos"
+      },
+      {
+        "value": "proportionalCircles",
+        "label": "Círculos proporcionais"
+      }
+    ]
+  }
+}
