@@ -1,0 +1,396 @@
+{
+  "runId": "20261117T135727Z--report-of-20261111T122736Z",
+  "decision": "https://flow.ttoss.dev/app/tasks/task_vytdmke1my",
+  "totals": {
+    "cases": 22,
+    "passed": 18,
+    "failed": 4
+  },
+  "cases": [
+    {
+      "case": "ambig-ano-cozinhas",
+      "prompt": "Faz um mapa das cozinhas solidárias.",
+      "httpStatus": 200,
+      "durationMs": 10367,
+      "outcome": "spec",
+      "issues": [],
+      "failedChecks": [],
+      "passed": true,
+      "class": "approved",
+      "scope": null,
+      "issue": null
+    },
+    {
+      "case": "error-assentamentos",
+      "prompt": "Mapa dos assentamentos de reforma agrária.",
+      "httpStatus": 422,
+      "durationMs": 13134,
+      "outcome": "error",
+      "issues": [
+        "missing_data"
+      ],
+      "failedChecks": [],
+      "passed": true,
+      "class": "approved",
+      "scope": null,
+      "issue": null
+    },
+    {
+      "case": "error-cafs",
+      "prompt": "Mapa dos CAFs (Cadastro Ambiental Rural) no Brasil.",
+      "httpStatus": 422,
+      "durationMs": 10973,
+      "outcome": "error",
+      "issues": [
+        "missing_data"
+      ],
+      "failedChecks": [],
+      "passed": true,
+      "class": "approved",
+      "scope": null,
+      "issue": null
+    },
+    {
+      "case": "error-dataset-inexistente",
+      "prompt": "Mapa do saneamento básico por município.",
+      "httpStatus": 422,
+      "durationMs": 20500,
+      "outcome": "error",
+      "issues": [
+        "invalid-schema",
+        "invalid-schema",
+        "invalid-schema"
+      ],
+      "failedChecks": [],
+      "passed": true,
+      "class": "inconclusive",
+      "scope": "evals-gate",
+      "issue": 121
+    },
+    {
+      "case": "error-grain-estado",
+      "prompt": "Mapa da vulnerabilidade social por estado.",
+      "httpStatus": 422,
+      "durationMs": 52,
+      "outcome": "error",
+      "issues": [
+        "unavailable-grain"
+      ],
+      "failedChecks": [],
+      "passed": true,
+      "class": "approved",
+      "scope": null,
+      "issue": null
+    },
+    {
+      "case": "golden-cadinsan",
+      "prompt": "Mapa da insegurança alimentar das famílias do CadÚnico por município.",
+      "httpStatus": 200,
+      "durationMs": 14912,
+      "outcome": "spec",
+      "issues": [],
+      "failedChecks": [],
+      "passed": true,
+      "class": "approved",
+      "scope": null,
+      "issue": null
+    },
+    {
+      "case": "golden-circulos",
+      "prompt": "Mapa com um círculo por município, com o tamanho proporcional ao número de cozinhas solidárias.",
+      "httpStatus": 200,
+      "durationMs": 13950,
+      "outcome": "spec",
+      "issues": [],
+      "failedChecks": [],
+      "passed": true,
+      "class": "approved",
+      "scope": null,
+      "issue": null
+    },
+    {
+      "case": "golden-coropletico",
+      "prompt": "Mapa coroplético das cozinhas solidárias por município.",
+      "httpStatus": 422,
+      "durationMs": 20825,
+      "outcome": "error",
+      "issues": [
+        "missing_data"
+      ],
+      "failedChecks": [
+        "outcome: expected spec, got error"
+      ],
+      "passed": false,
+      "class": "rejected",
+      "scope": "agent-instructions",
+      "issue": 117
+    },
+    {
+      "case": "golden-ivs",
+      "prompt": "Mapa da vulnerabilidade social dos municípios brasileiros.",
+      "httpStatus": 422,
+      "durationMs": 11084,
+      "outcome": "error",
+      "issues": [
+        "invalid-schema",
+        "invalid-schema",
+        "invalid-schema"
+      ],
+      "failedChecks": [
+        "outcome: expected spec, got error"
+      ],
+      "passed": false,
+      "class": "rejected",
+      "scope": "transform",
+      "issue": 115
+    },
+    {
+      "case": "golden-pontos",
+      "prompt": "Quero ver cada cozinha solidária como um ponto no mapa do Brasil.",
+      "httpStatus": 200,
+      "durationMs": 10751,
+      "outcome": "spec",
+      "issues": [],
+      "failedChecks": [],
+      "passed": true,
+      "class": "approved",
+      "scope": null,
+      "issue": null
+    },
+    {
+      "case": "nogolden-cozinhas-2025",
+      "prompt": "Mapa das cozinhas solidárias cadastradas em 2025.",
+      "httpStatus": 200,
+      "durationMs": 8212,
+      "outcome": "spec",
+      "issues": [],
+      "failedChecks": [],
+      "passed": true,
+      "class": "approved",
+      "scope": null,
+      "issue": null
+    },
+    {
+      "case": "nogolden-pessoas-atendidas",
+      "prompt": "Mapa do total de pessoas atendidas pelas cozinhas em cada município.",
+      "httpStatus": 200,
+      "durationMs": 10418,
+      "outcome": "spec",
+      "issues": [],
+      "failedChecks": [],
+      "passed": true,
+      "class": "approved",
+      "scope": null,
+      "issue": null
+    },
+    {
+      "case": "nogolden-pontos-ano",
+      "prompt": "Cada cozinha solidária cadastrada em 2025 como um ponto no mapa.",
+      "httpStatus": 200,
+      "durationMs": 11105,
+      "outcome": "spec",
+      "issues": [],
+      "failedChecks": [],
+      "passed": true,
+      "class": "approved",
+      "scope": null,
+      "issue": null
+    },
+    {
+      "case": "nogolden-pontos-heatmap",
+      "prompt": "Mostre as cozinhas solidárias como pontos e também um mapa de calor da concentração.",
+      "httpStatus": 200,
+      "durationMs": 9800,
+      "outcome": "spec",
+      "issues": [],
+      "failedChecks": [],
+      "passed": true,
+      "class": "approved",
+      "scope": null,
+      "issue": null
+    },
+    {
+      "case": "rule-basemap-inventado",
+      "prompt": "Mapa das cozinhas com imagem de satélite no fundo.",
+      "httpStatus": 422,
+      "durationMs": 8958,
+      "outcome": "error",
+      "issues": [
+        "missing_data"
+      ],
+      "failedChecks": [],
+      "passed": true,
+      "class": "approved",
+      "scope": null,
+      "issue": null
+    },
+    {
+      "case": "rule-choropleth-absolute",
+      "prompt": "Coroplético do número total de cozinhas em cada município.",
+      "httpStatus": 422,
+      "durationMs": 8967,
+      "outcome": "error",
+      "issues": [
+        "missing_data"
+      ],
+      "failedChecks": [],
+      "passed": true,
+      "class": "approved",
+      "scope": null,
+      "issue": null
+    },
+    {
+      "case": "rule-coverage-partial",
+      "prompt": "Mapa completo de todas as cozinhas solidárias existentes no Brasil.",
+      "httpStatus": 200,
+      "durationMs": 12489,
+      "outcome": "spec",
+      "issues": [],
+      "failedChecks": [],
+      "passed": true,
+      "class": "approved",
+      "scope": null,
+      "issue": null
+    },
+    {
+      "case": "rule-dotdensity-absoluto",
+      "prompt": "Mapa de densidade de pontos do número de cozinhas solidárias em cada município.",
+      "httpStatus": 200,
+      "durationMs": 12391,
+      "outcome": "spec",
+      "issues": [],
+      "failedChecks": [],
+      "passed": true,
+      "class": "approved",
+      "scope": null,
+      "issue": null
+    },
+    {
+      "case": "rule-source-inventada",
+      "prompt": "Mapa das cozinhas por bairro na cidade de São Paulo.",
+      "httpStatus": 422,
+      "durationMs": 25,
+      "outcome": "error",
+      "issues": [
+        "unavailable-grain"
+      ],
+      "failedChecks": [],
+      "passed": true,
+      "class": "approved",
+      "scope": null,
+      "issue": null
+    },
+    {
+      "case": "trap-cadinsan-sem-pbf",
+      "prompt": "Mapa da insegurança alimentar desconsiderando o efeito do Bolsa Família.",
+      "httpStatus": 200,
+      "durationMs": 13576,
+      "outcome": "spec",
+      "issues": [],
+      "failedChecks": [],
+      "passed": true,
+      "class": "approved",
+      "scope": null,
+      "issue": null
+    },
+    {
+      "case": "trap-idhm",
+      "prompt": "Mapa do Índice de Desenvolvimento Humano Municipal.",
+      "httpStatus": 422,
+      "durationMs": 10240,
+      "outcome": "error",
+      "issues": [
+        "invalid-schema",
+        "invalid-schema",
+        "invalid-schema"
+      ],
+      "failedChecks": [
+        "outcome: expected spec, got error"
+      ],
+      "passed": false,
+      "class": "rejected",
+      "scope": "transform",
+      "issue": 115
+    },
+    {
+      "case": "trap-ivs-subindice",
+      "prompt": "Mapa do IVS de infraestrutura urbana por município.",
+      "httpStatus": 422,
+      "durationMs": 10673,
+      "outcome": "error",
+      "issues": [
+        "invalid-schema",
+        "invalid-schema",
+        "invalid-schema"
+      ],
+      "failedChecks": [
+        "outcome: expected spec, got error"
+      ],
+      "passed": false,
+      "class": "rejected",
+      "scope": "transform",
+      "issue": 115
+    }
+  ],
+  "declined": [
+    {
+      "cases": [],
+      "class": "inconclusive",
+      "scope": "evals-gate",
+      "declined": true,
+      "note": "stability: nogolden-pontos-heatmap flipped between campaigns"
+    }
+  ],
+  "proposals": [
+    {
+      "scope": "transform",
+      "status": "linked",
+      "issues": [
+        115
+      ],
+      "layer": "server legend",
+      "cases": [
+        "golden-ivs",
+        "trap-ivs-subindice",
+        "trap-idhm"
+      ],
+      "rationale": [
+        "run 20261117T135727Z--report-of-20261111T122736Z",
+        "golden-ivs: outcome: expected spec, got error",
+        "trap-ivs-subindice: outcome: expected spec, got error",
+        "trap-idhm: outcome: expected spec, got error"
+      ]
+    },
+    {
+      "scope": "agent-instructions",
+      "status": "linked",
+      "issues": [
+        117
+      ],
+      "layer": null,
+      "cases": [
+        "golden-coropletico"
+      ],
+      "rationale": [
+        "run 20261117T135727Z--report-of-20261111T122736Z",
+        "golden-coropletico: outcome: expected spec, got error"
+      ]
+    },
+    {
+      "scope": "evals-gate",
+      "status": "linked",
+      "issues": [
+        121
+      ],
+      "layer": null,
+      "cases": [
+        "error-dataset-inexistente"
+      ],
+      "rationale": [
+        "run 20261117T135727Z--report-of-20261111T122736Z",
+        "error-dataset-inexistente: passed",
+        "422 comes from the #115 colorBy bug, not the intended guard"
+      ]
+    }
+  ]
+}

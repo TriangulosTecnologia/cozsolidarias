@@ -31,7 +31,7 @@ Version: 3.1.0 (previously: `geovis-spec-instructions-optimizer` 2.0.0). See `re
 | `evals/evals.json` | Eval cases; the people case appears with two prompts (D2) |
 | `evals/evals.variations.json` | `/mapas` variation cases with corrected `expected` (D6). **Suspended by default** |
 | `scripts/gate_pessoas_total.mjs` | Contract and total gate, with mutant self-test (D1c) |
-| `scripts/score_case.mjs`, `scripts/project_spec.mjs`, `scripts/run_eval_case.sh`, `scripts/run_campaign.sh` | Scoring and case execution |
+| `scripts/score_case.mjs`, `scripts/project_spec.mjs`, `scripts/run_eval_case.sh`, `scripts/run_campaign.sh`, `scripts/report_run.mjs` | Scoring, case execution, and run report |
 | `scripts/run_variations.sh` | Variation runner. Exits unless `GEOVIS_RUN_VARIATIONS=1` |
 | `scripts/dump_golden_specs.mjs` | Generates the `/mapas` UI corpus (does not feed the gate) |
 | `scripts/build_agent_variant.mjs`, `scripts/minimal_spec.mjs`, `scripts/probe_validate_spec.mjs`, `scripts/provision_test_agent.sh` | Agent variants and provisioning |
