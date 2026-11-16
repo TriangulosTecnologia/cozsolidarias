@@ -1,0 +1,32 @@
+{
+  "_comment": "Variations of /mapas used as axis (e) cases. This version fixes v-pessoas-atendidas (decision 6): the real mapMode is circulos-pessoas, and the expected value is the one from the structural golden, not a choropleth. The runs in runs/ are immutable and are not edited.",
+  "cases": [
+    {
+      "id": "v-pessoas-atendidas",
+      "kind": "variation",
+      "prompt": "Quero ver o número total de pessoas atendidas pelas cozinhas solidárias por município",
+      "mapMode": "circulos-pessoas",
+      "golden": "_pessoas-atendidas.json",
+      "expected": [
+        "line @ /geo/geojs-100-mun.json | legend=none",
+        "line @ /geo/estados.json | legend=none",
+        "point @ bolhas | sizeBy=sqrt | mapData=cozinhas_pessoas_atendidas | legend=count"
+      ],
+      "expectedNot": [
+        "polygon @ /geo/geojs-100-mun.json | legend=quantitative"
+      ],
+      "reason_expectedNot": "Absolute total painted by area: violates R-choropleth-not-absolute (see evals.json, case nogolden-pessoas-atendidas)."
+    },
+    {
+      "id": "v-coropletico-cozinhas-referencia",
+      "kind": "clarify",
+      "prompt": "Mapa coroplético das cozinhas solidárias por município.",
+      "mapMode": "coropletico",
+      "golden": "references/goldens/coropletico-cozinhas-clarify.json",
+      "expected": [
+        "clarify facet=mapType default=proportionalCircles (HTTP 200, sem spec)"
+      ],
+      "note": "Decision D4 (option a): a count of kitchens over polygons is an absolute total for the agent's validator; preflight answers with clarify. The polygon map remains valid on the /mapas route, which does not go through this validator."
+    }
+  ]
+}

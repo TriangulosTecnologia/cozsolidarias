@@ -1,0 +1,9 @@
+{
+  "id": "v-coropletico-cozinhas-referencia",
+  "mapMode": "coropletico",
+  "durationMs": 33,
+  "kind": "clarify",
+  "httpStatus": 200,
+  "gotSpec": false,
+  "pass": true
+}
