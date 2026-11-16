@@ -2386,3 +2386,61 @@ describe('invalidSpecResponse', () => {
     expect(body.spec).toBeUndefined();
   });
 });
+
+describe('POST /api/ai/spec preflight against the catalogue', () => {
+  beforeEach(() => {
+    for (const key of ENV_KEYS) {
+      process.env[key] = `test-${key}`;
+    }
+  });
+
+  afterEach(() => {
+    for (const key of ENV_KEYS) {
+      delete process.env[key];
+    }
+    jest.restoreAllMocks();
+  });
+
+  test('answers a request no catalogue dataset describes with 200 feedback, before any model call', async () => {
+    const fetchMock = jest.fn();
+    global.fetch = fetchMock;
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de rodovias e aeroportos' })
+    );
+    const body = (await response.json()) as {
+      error: boolean;
+      spec?: unknown;
+      feedback?: { verdict: string; reason: string; suggestions: string[] };
+    };
+
+    expect(response.status).toBe(200);
+    expect(body.error).toBe(false);
+    expect(body.spec).toBeUndefined();
+    expect(body.feedback).toMatchObject({ verdict: 'absent' });
+    expect(body.feedback?.suggestions.length).toBeGreaterThan(0);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  test('keeps the client session id on a feedback answer', async () => {
+    const response = await POST(
+      jsonRequest({
+        prompt: 'mapa de rodovias e aeroportos',
+        sessionId: 'sess_route0001',
+      })
+    );
+
+    expect(response.headers.get('x-session-id')).toBe('sess_route0001');
+  });
+
+  test('sends a proxy request to the agent with the adjacent dataset and the warning', async () => {
+    const fetchMock = mockAgentReply(JSON.stringify({ mapData: [] }));
+
+    await POST(jsonRequest({ prompt: 'mapa da fome' }));
+
+    const messageCall = fetchMock.mock.calls[1] as [string, { body: string }];
+    const { message } = JSON.parse(messageCall[1].body) as { message: string };
+    expect(message).toContain('(mapDataId): "municipios_cadinsan"');
+    expect(message).toContain('Fome não é medida diretamente');
+  });
+});

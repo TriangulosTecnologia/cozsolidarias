@@ -608,6 +608,21 @@ describe('validateCandidate', () => {
     ]);
   });
 
+  test('reports a gateway failure while resolving as an issue, not as a rejection', async () => {
+    jest
+      .spyOn(RENDERABLE_DATASET_FETCHERS, 'municipios_ivs')
+      .mockRejectedValue(new Error('gateway down'));
+
+    const result = await validateCandidate({
+      mapType: 'choropleth',
+      mapData: [{ mapDataId: 'municipios_ivs', title: 'IVS' }],
+    });
+
+    expect(result.issues).toEqual([
+      expect.objectContaining({ code: 'unresolvable-spec' }),
+    ]);
+  });
+
   test('rejects a non-object candidate', async () => {
     expect(await validateCandidate('text')).toEqual({
       spec: 'text',

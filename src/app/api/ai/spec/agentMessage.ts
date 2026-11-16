@@ -12,6 +12,7 @@ import { INSTRUCTIONS } from './instructions/instructions';
  * @param params.prompt - The user's request.
  * @param params.mapType - The map type the user chose, if any.
  * @param params.datasetId - The dataset the user chose, if any.
+ * @param params.note - A server note about the request, e.g. that the dataset is only a proxy of what was asked.
  * @returns The message, sections separated by blank lines.
  *
  * @example
@@ -22,6 +23,7 @@ export const buildAgentMessage = (params: {
   prompt: string;
   mapType?: MapType;
   datasetId?: string;
+  note?: string;
 }): string => {
   return [
     ...(params.catalogueText === undefined
@@ -39,6 +41,11 @@ export const buildAgentMessage = (params: {
     ...(params.datasetId
       ? [
           `Dataset escolhido pelo usuário (mapDataId): "${params.datasetId}". Use exatamente este dataset no mapData.`,
+        ]
+      : []),
+    ...(params.note
+      ? [
+          `Nota do servidor sobre este pedido: ${params.note} Registre isso na \`description\` do spec, em pt-BR.`,
         ]
       : []),
     params.prompt,

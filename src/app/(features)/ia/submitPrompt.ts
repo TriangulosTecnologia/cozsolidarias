@@ -18,6 +18,16 @@ export type Clarification = {
 };
 
 /**
+ * Why the server made no map for a request and how to rewrite it: sent as a
+ * 200, since the request is incomplete rather than wrong.
+ */
+export type Feedback = {
+  verdict: 'absent' | 'notRenderable' | 'period';
+  reason: string;
+  suggestions: string[];
+};
+
+/**
  * The user's answers to a previous turn, sent with the prompt. The server
  * validates every value; `sessionId` continues the conversation that
  * produced the answer's question.
@@ -36,6 +46,7 @@ type SpecResponseBody = {
   issues?: Issue[];
   requirements?: Requirement[];
   clarify?: Clarification;
+  feedback?: Feedback;
   mapTypeOptions?: ChoiceOption[];
 };
 
@@ -50,6 +61,7 @@ export type SubmitOutcome = {
 } & (
   | { kind: 'success'; result: VisualizationSpec }
   | { kind: 'clarify'; clarify: Clarification }
+  | { kind: 'feedback'; feedback: Feedback }
   | {
       kind: 'failure';
       message: string;
@@ -102,6 +114,20 @@ const baseOf = (params: {
   };
 };
 
+/** The question or the feedback the server answered instead of a spec, if any. */
+const answerOf = (params: {
+  base: Pick<SubmitOutcome, 'sessionId' | 'mapTypeOptions'>;
+  body: SpecResponseBody;
+}): SubmitOutcome | null => {
+  const { base, body } = params;
+  if (body.clarify) {
+    return { ...base, kind: 'clarify', clarify: body.clarify };
+  }
+  return body.feedback
+    ? { ...base, kind: 'feedback', feedback: body.feedback }
+    : null;
+};
+
 const interpret = (params: {
   response: Response;
   body: SpecResponseBody;
@@ -118,8 +144,9 @@ const interpret = (params: {
         `O servidor recusou o pedido (status ${response.status}), sem detalhar o motivo.`,
     });
   }
-  if (body.clarify) {
-    return { ...base, kind: 'clarify', clarify: body.clarify };
+  const answer = answerOf({ base, body });
+  if (answer) {
+    return answer;
   }
   if (!isVisualizationSpec(body.spec)) {
     return serverFailure({
@@ -136,8 +163,8 @@ const interpret = (params: {
  * Calls `POST /api/ai/spec` with `prompt` and the user's `choices`, reducing
  * every failure mode (network failure, non-JSON body, `error: true`, a
  * success with no `spec`) to a `failure` with a single pt-BR message; the
- * server's `clarify` question, `issues`, `requirements` and `spec` are
- * carried through.
+ * server's `clarify` question, `feedback`, `issues`, `requirements` and
+ * `spec` are carried through.
  *
  * @example
  * const outcome = await submitPrompt({ prompt: 'IVS por município', mapType: 'choropleth' });

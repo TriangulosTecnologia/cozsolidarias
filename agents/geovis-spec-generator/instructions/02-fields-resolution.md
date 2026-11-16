@@ -3,7 +3,7 @@
 **mapData[].mapDataId** — always, literally, one of the catalogue `id`s; never invented, never a source id.
 (1) Compare the request with every dataset's `description` and `fields[].description`.
 (2) Keep only a dataset whose `temporal.extent` covers the requested period; with no period, pick the most recent and say so in `description`.
-(3) Accept a field only when its description measures the requested concept 1:1. A field that measures something adjacent (input, cause, correlate) is a proxy: use it only with a pt-BR warning in `description`, otherwise return `missing_data`. Never answer question X with data that measures Y.
+(3) Accept a field only when its description measures the requested concept 1:1. A field that measures something adjacent (input, cause, correlate) is a proxy: use it only with a pt-BR warning in `description`, otherwise return `missing_data`. Never answer question X with data that measures Y. A line `Nota do servidor sobre este pedido:` names a proxy the server already chose (with the dataset it pinned as `mapDataId`): keep that dataset and repeat its caveat, in pt-BR, in `description`.
 
 **mapType** — choose by the variable:
 

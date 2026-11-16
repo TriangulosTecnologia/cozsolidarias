@@ -33,9 +33,9 @@ export type SpecIssue = { code: string; message: string; path?: string };
 /**
  * Builds every failure body of `POST /api/ai/spec`: `{ error: true, message }`
  * plus the `issues` (with their actionable `requirements`) and the `spec` at
- * the stage that failed, when known, so the client can always inspect what the
- * model produced. Always carries `mapTypeOptions`, so another map type is
- * always on offer.
+ * the stage that failed, when known, so the client can inspect what the model
+ * produced; the `spec` is left out when `NODE_ENV` is `production`. Always
+ * carries `mapTypeOptions`, so another map type is always on offer.
  *
  * @param params.status - HTTP status of the failure.
  * @param params.message - pt-BR explanation shown to the user.
@@ -62,7 +62,11 @@ export const errorResponse = (params: {
             requirements: requirementsFrom(params.issues),
           }
         : {}),
-      ...(params.spec !== undefined ? { spec: params.spec } : {}),
+      // The spec is for inspection only, and carries the resolved data rows:
+      // production answers without it.
+      ...(params.spec !== undefined && process.env.NODE_ENV !== 'production'
+        ? { spec: params.spec }
+        : {}),
       mapTypeOptions: MAP_TYPE_OPTIONS,
     },
     { status: params.status }

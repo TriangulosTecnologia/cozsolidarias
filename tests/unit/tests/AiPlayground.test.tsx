@@ -300,6 +300,74 @@ describe('AiPlayground', () => {
     await screen.findByRole('button', { name: 'Gerar mapa' });
   });
 
+  describe('feedback', () => {
+    const FEEDBACK = {
+      verdict: 'absent',
+      reason: 'Não há dados sobre rodovias no catálogo.',
+      suggestions: [
+        'Dados disponíveis para mapa: Índice de Vulnerabilidade Social.',
+        'Diga o que medir, em qual recorte (município) e em qual período.',
+      ],
+    };
+
+    test('explains why no map was made and how to rewrite the request, without an error', async () => {
+      global.fetch = jest
+        .fn()
+        .mockResolvedValueOnce(
+          jsonResponse({ error: false, feedback: FEEDBACK })
+        );
+
+      renderWithChakra(<AiPlayground />);
+      fireEvent.change(screen.getByLabelText('O que você quer ver?'), {
+        target: { value: 'mapa de rodovias' },
+      });
+      fireEvent.click(screen.getByRole('button', { name: 'Gerar mapa' }));
+
+      expect(
+        await screen.findByText('Ajuste o pedido para gerar o mapa')
+      ).toBeInTheDocument();
+      expect(screen.getByText(FEEDBACK.reason)).toBeVisible();
+      for (const suggestion of FEEDBACK.suggestions) {
+        expect(screen.getByText(suggestion)).toBeVisible();
+      }
+      expect(
+        screen.queryByText('Não foi possível gerar o mapa')
+      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('geovis-workspace')).not.toBeInTheDocument();
+      expect(screen.getByLabelText('O que você quer ver?')).toHaveValue(
+        'mapa de rodovias'
+      );
+    });
+
+    test('clears the feedback when the request is sent again', async () => {
+      global.fetch = jest
+        .fn()
+        .mockResolvedValueOnce(
+          jsonResponse({ error: false, feedback: FEEDBACK })
+        )
+        .mockResolvedValueOnce(
+          jsonResponse({ error: false, spec: { layers: [], title: 'IVS' } })
+        );
+
+      renderWithChakra(<AiPlayground />);
+      fireEvent.change(screen.getByLabelText('O que você quer ver?'), {
+        target: { value: 'mapa de rodovias' },
+      });
+      fireEvent.click(screen.getByRole('button', { name: 'Gerar mapa' }));
+      await screen.findByText('Ajuste o pedido para gerar o mapa');
+
+      fireEvent.change(screen.getByLabelText('O que você quer ver?'), {
+        target: { value: 'IVS por município' },
+      });
+      fireEvent.click(screen.getByRole('button', { name: 'Gerar mapa' }));
+
+      expect(await screen.findByTestId('geovis-workspace')).toBeVisible();
+      expect(
+        screen.queryByText('Ajuste o pedido para gerar o mapa')
+      ).not.toBeInTheDocument();
+    });
+  });
+
   describe('choices', () => {
     const MAP_TYPES = [
       { value: 'choropleth', label: 'Coroplético' },
