@@ -1,7 +1,7 @@
 # Human review: criteria and questions
 
-Section 6 (**Human decision**) of `eval-report.md` is filled only by a person. The model drafts the
-questions and the evidence pointers below; it never answers them. Automated gates can pass while the
+The human decision on a run (`classification.json`, see `SKILL.md` § Outputs) is made only by a
+person. The model drafts the questions and the evidence pointers below; it never answers them. Automated gates can pass while the
 map is still wrong, so a passing gate is never a decision.
 
 ## Questions

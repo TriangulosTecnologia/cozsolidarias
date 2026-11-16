@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Runs every eval case in `evals/evals.json` against the local dev server,
-# sequentially, writing one output per case to <run-dir>/cases/.
+# sequentially, writing one output per case to <run-dir>/cases/. Progress goes
+# to stderr and <run-dir>/campaign.log; report_run.mjs then writes
+# eval-report.json and SUMMARY.md.
 #
 # Retries once on timeout (502 "demorou demais"): the route's polling ceiling
 # is 60s (MAX_POLL_ATTEMPTS × POLL_INTERVAL_MS) and typical latency with effort
@@ -16,6 +18,7 @@ SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 EVALS="$SKILL_DIR/evals/evals.json"
 
 mkdir -p "$RUN_DIR/cases"
+exec 2> >(tee -a "$RUN_DIR/campaign.log" >&2)
 
 mapfile -t IDS < <(node -p "require('$EVALS').cases.map(c=>c.id).join('\n')")
 TOTAL=${#IDS[@]}
@@ -41,3 +44,4 @@ for ID in "${IDS[@]}"; do
 done
 
 echo "campaign finished: $TOTAL cases in $RUN_DIR/cases/" >&2
+node "$SKILL_DIR/scripts/report_run.mjs" "$RUN_DIR" >&2
