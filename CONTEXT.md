@@ -13,5 +13,5 @@ A Dataset Catalog entry that has a complete path to real values through `data-ga
 _Avoid_: available dataset, real dataset
 
 **MapData Append**:
-The server-side step that replaces the placeholder `mapData` emitted by the spec-generation agent with real values resolved from `data-gateway`, keyed by Renderable Dataset id. Runs inside `POST /api/ai/spec`, before the spec reaches any client.
+The server-side step that replaces the placeholder `mapData` emitted by the spec-generation agent with real values resolved from `data-gateway`, keyed by Renderable Dataset id. Runs inside `POST /api/ai/spec`, before any spec is served as a map. A 422 may carry the spec at the stage that failed (possibly with its placeholder `mapData`) for diagnosis; it is never served as a map.
 _Avoid_: data injection, data hydration
