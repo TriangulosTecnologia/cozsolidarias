@@ -20,9 +20,45 @@
   "enabledPlugins": {
     "devanity@devanity": true
   },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/skills/flow/scripts/session-run.mjs\" --project proj_n70nb8jc3y",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/skills/flow/scripts/session-run.mjs\" --project proj_n70nb8jc3y",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/skills/flow/scripts/session-run.mjs\" --project proj_n70nb8jc3y",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  },
   "env": {
     "NATURALI_PROJECT_ID": "${NATURALI_PROJECT_ID}",
     "NATURALI_TOKEN": "${NATURALI_TOKEN}",
-    "NATURALI_AGENT_ID": "${NATURALI_AGENT_ID}"
+    "NATURALI_AGENT_ID": "${NATURALI_AGENT_ID}",
+    "FLOW_API_KEY": "${FLOW_API_KEY}"
   }
 }
