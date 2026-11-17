@@ -1,0 +1,9 @@
+{
+  "decision": "https://flow.ttoss.dev/app/tasks/task_vytdmke1my",
+  "groups": [
+    { "cases": ["golden-ivs", "trap-ivs-subindice", "trap-idhm"], "class": "rejected", "scope": "transform", "layer": "server legend", "issue": 115 },
+    { "cases": ["golden-coropletico"], "class": "rejected", "scope": "agent-instructions", "issue": 117 },
+    { "cases": ["error-dataset-inexistente"], "class": "inconclusive", "scope": "evals-gate", "issue": 121, "note": "422 comes from the #115 colorBy bug, not the intended guard" },
+    { "cases": [], "class": "inconclusive", "scope": "evals-gate", "declined": true, "note": "stability: nogolden-pontos-heatmap flipped between campaigns" }
+  ]
+}
