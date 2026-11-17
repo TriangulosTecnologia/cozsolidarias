@@ -1,0 +1,36 @@
+{
+  "prompt": "Mapa da vulnerabilidade social por estado.",
+  "httpStatus": 422,
+  "durationMs": 408,
+  "response": {
+    "error": true,
+    "message": "Não há dados por estado: os indicadores disponíveis são por município (ou por cozinha). Peça o mapa por município.",
+    "issues": [
+      {
+        "code": "unavailable-grain",
+        "message": "Não há dados por estado: os indicadores disponíveis são por município (ou por cozinha). Peça o mapa por município."
+      }
+    ],
+    "requirements": [
+      {
+        "code": "unavailable-grain",
+        "message": "Não há dados por estado: os indicadores disponíveis são por município (ou por cozinha). Peça o mapa por município.",
+        "fix": "Reformule o pedido informando o dataset e o tipo de mapa desejados."
+      }
+    ],
+    "mapTypeOptions": [
+      {
+        "value": "choropleth",
+        "label": "Coroplético (áreas coloridas por valor)"
+      },
+      {
+        "value": "dotDensity",
+        "label": "Densidade de pontos"
+      },
+      {
+        "value": "proportionalCircles",
+        "label": "Círculos proporcionais"
+      }
+    ]
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "prompt": "Mapa do saneamento básico por município.",
+  "httpStatus": 422,
+  "durationMs": 13140,
+  "response": {
+    "error": true,
+    "message": "O modelo retornou uma resposta inválida. Tente reformular o pedido.",
+    "issues": [
+      {
+        "code": "invalid-schema",
+        "path": "/legends/0/colorBy",
+        "message": "/legends/0/colorBy must NOT have additional properties"
+      },
+      {
+        "code": "invalid-schema",
+        "path": "/legends/0/colorBy",
+        "message": "/legends/0/colorBy must NOT have additional properties"
+      },
+      {
+        "code": "invalid-schema",
+        "path": "/legends/0/colorBy",
+        "message": "/legends/0/colorBy must match exactly one schema in oneOf"
+      }
+    ],
+    "requirements": [
+      {
+        "code": "invalid-schema",
+        "path": "/legends/0/colorBy",
+        "message": "/legends/0/colorBy must NOT have additional properties",
+        "fix": "Reformule o pedido informando o dataset e o tipo de mapa desejados."
+      },
+      {
+        "code": "invalid-schema",
+        "path": "/legends/0/colorBy",
+        "message": "/legends/0/colorBy must NOT have additional properties",
+        "fix": "Reformule o pedido informando o dataset e o tipo de mapa desejados."
+      },
+      {
+        "code": "invalid-schema",
+        "path": "/legends/0/colorBy",
+        "message": "/legends/0/colorBy must match exactly one schema in oneOf",
+        "fix": "Reformule o pedido informando o dataset e o tipo de mapa desejados."
+      }
+    ],
+    "mapTypeOptions": [
+      {
+        "value": "choropleth",
+        "label": "Coroplético (áreas coloridas por valor)"
+      },
+      {
+        "value": "dotDensity",
+        "label": "Densidade de pontos"
+      },
+      {
+        "value": "proportionalCircles",
+        "label": "Círculos proporcionais"
+      }
+    ]
+  }
+}
