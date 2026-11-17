@@ -1,0 +1,10 @@
+# What judges or instructs the agents changes only through a merge a person approved (GTF-A6).
+# Takes effect once the `main` ruleset requires code owner review.
+/.github/                @arantespp
+/CLAUDE.md               @arantespp
+/**/CLAUDE.md            @arantespp
+/.claude/                @arantespp
+/skills-lock.json        @arantespp
+/AGENTIC_WORKFLOW.md     @arantespp
+/devanity.rules.json     @arantespp
+/eslint.config.mjs       @arantespp

@@ -28,6 +28,11 @@ export default [
       'out/**',
       'public/**',
       '**/*.example.ts',
+      // Vendored from ttoss/skills, pinned by hash in skills-lock.json; `npx skills update` overwrites local edits.
+      '.claude/skills/flow/**',
+      '.claude/skills/flow-*/**',
+      '.claude/skills/token-audit/**',
+      '.claude/skills/instruction-hygiene/**',
     ],
   },
   {
