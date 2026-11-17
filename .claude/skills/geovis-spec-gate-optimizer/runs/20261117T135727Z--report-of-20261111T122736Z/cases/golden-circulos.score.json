@@ -1,0 +1,36 @@
+{
+  "case": "golden-circulos",
+  "prompt": "Mapa com um círculo por município, com o tamanho proporcional ao número de cozinhas solidárias.",
+  "httpStatus": 200,
+  "durationMs": 13950,
+  "outcome": "spec",
+  "issues": [],
+  "checks": [
+    {
+      "id": "outcome",
+      "passed": true,
+      "note": "expected spec, got spec"
+    },
+    {
+      "id": "dataset",
+      "passed": true,
+      "note": "got cozinhas_geolocalizadas"
+    },
+    {
+      "id": "geometry",
+      "passed": true,
+      "note": "got /api/cozinhas/bolhas, /geo/geojs-100-mun.json, /geo/estados.json"
+    },
+    {
+      "id": "legend",
+      "passed": true,
+      "note": "shown=1 scale=quantitative"
+    },
+    {
+      "id": "validateSpec",
+      "passed": true,
+      "note": "null"
+    }
+  ],
+  "passed": true
+}

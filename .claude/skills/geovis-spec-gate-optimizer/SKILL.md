@@ -1,6 +1,6 @@
 ---
 name: geovis-spec-gate-optimizer
-version: 3.1.0
+version: 3.2.0
 description: |
   Measures the cozsolidarias VisualizationSpec generator with blocking gates and real evals against
   `POST /api/ai/spec`. Uses reviewed structural goldens (env var `GEOVIS_GOLDEN_DIR`, default
@@ -9,7 +9,7 @@ description: |
   const in `src/app/api/ai/spec/route.ts`. Use when the user asks to validate a spec case against the
   golden, prune or optimize instructions without losing robustness, check whether a prompt rule is
   covered by the deterministic validators (`candidateValidation.ts`/`specValidation.ts`), or generate
-  the `eval-report.md` of a run. Also triggers on Portuguese requests such as "valida esse caso contra
+  the `eval-report.json` and `SUMMARY.md` of a run. Also triggers on Portuguese requests such as "valida esse caso contra
   o golden", "poda as instruções", "gera o eval-report". Variation runs (`/mapas` variations) are
   suspended by default and run only when explicitly requested.
 ---
@@ -174,9 +174,11 @@ Sequential, with the coverage gate.
 
 1. Start `pnpm dev` with the credentials from `.env`. If an API key is exported in the shell, it
    overrides `.env` and the route answers 401: start without those variables.
-2. Run each case with `scripts/run_eval_case.sh <prompt> <out.json>` (POST to
-   `http://localhost:3000/api/ai/spec`). Record `httpStatus`, `durationMs`, and the response.
-3. Extract `response.spec` to `*.spec.json` and run V1 on each one.
+2. Run `scripts/run_campaign.sh <run-dir>`: it POSTs each case with `scripts/run_eval_case.sh` to
+   `http://localhost:3000/api/ai/spec`, scores it, logs to `campaign.log`, and ends with
+   `scripts/report_run.mjs`.
+3. `score_case.mjs` reads the served `response.spec` from each case and runs `validateSpec` on it
+   (V1); there is no separate extraction file.
 4. Binary coverage gate: `scripts/score_case.mjs` over every case with `R-*`. A variant only proceeds
    if 100% still pass.
 5. Report the axes separately, never summed:
@@ -203,52 +205,50 @@ Changes under `src/app/api/**` need a decision recorded in devanity before writi
 ## Outputs
 
 Each run writes to `runs/<YYYYMMDDTHHMMSSZ>--<slug>/`. The directory is new for each execution and is
-never edited afterwards.
+never edited afterwards. A classification given after the run is reported in a new run directory:
+copy the `cases/*.score.json`, add `classification.json` and a `SOURCE.md` naming the original run,
+then `node scripts/report_run.mjs <run-dir>`.
 
-| File | Content | State |
+| File | Content | Written by |
 |---|---|---|
-| `versions.json` | `skillVersion`, source hashes, `spec.schemaVersion`, `testAgent.agentVersion`, `golden.dir`, `gate`. Written before the first POST | Implemented as a convention; no generator script |
-| `caso-*.output.json` | Raw route response, with `httpStatus` and `durationMs` | Implemented |
-| `caso-*.spec.json` | Extracted `response.spec`, input to the gate | Implemented |
-| `caso-*.gate.json` | V1 verdict | Implemented |
-| `gate-self-test.json` | V2 output | Implemented |
-| `results.md` | Run table, with HTTP, result, and gate per case | Implemented manually |
-| `eval-report.md` | Per-case report with the seven sections below | Planned, no generator script |
-| `proposed-*.md` / `.diff` | Change proposals, never applied | Planned |
-| `proposed-issues.md` | Issue proposals by scope, with the unconfirmed ones carried over at "end" | Planned |
+| `versions.json` | `skillVersion`, source hashes, `spec.schemaVersion`, `testAgent.agentVersion`, `golden.dir`, `gate`. Written before the first POST | Convention; no script |
+| `cases/<id>.json` | Raw route response, with `httpStatus` and `durationMs`. Not versioned | `run_eval_case.sh` |
+| `cases/<id>.score.json` | Per-case checks and verdict | `score_case.mjs` |
+| `campaign.log` | Campaign progress, one status and one verdict line per case | `run_campaign.sh` |
+| `classification.json` | The classification decision (below) | A person, or the model from a recorded decision |
+| `eval-report.json` | Totals, per-case result with class, scope and issue, declined groups, issue proposals | `report_run.mjs` |
+| `SUMMARY.md` | The same report as tables | `report_run.mjs` |
+| `gate-self-test.json`, `caso-*.gate.json` | V2 and V1 output | `gate_pessoas_total.mjs` |
+| `proposed-*.md` / `.diff` | Change proposals, never applied | Model |
 
-### `eval-report.md` (planned)
+`eval-report.json` and `SUMMARY.md` come from the artifacts only, never from the model's own text.
+The full per-case structure in `references/evals-architecture.md` §5 is not generated yet.
 
-Generated from the run artifacts, never written by the model from its own text. Structure as in
-`references/evals-architecture.md` §5:
+### Classification and issue proposals by scope
 
-1. **Identification and reproduction:** prompt, `caseId`, `runId`, `skillVersion`, formation and agent,
-   `spec.schemaVersion`, catalogue hash, duration, and number of calls.
-2. **Intent interpretation:** metric, unit, operation, period, and filters. Empty when the run has no intent contract.
-3. **Data selection and verification:** selected dataset, discarded candidates, chosen field with
-   justification, API evidence, and coverage.
-4. **Spec audit:** `mapType`, layers, `mapData` ids, legends, `scaleMaxValue`, and classes.
-5. **Test results:** V1 to V5 with state and failure codes. Severity per rule.
-6. **Human decision:** questions Q1 to Q9, decision rules, and record fields in `references/human-review.md`.
-   The model drafts the questions and evidence pointers only. Empty until a person answers.
-7. **Correction plan:** probable cause, responsible layer, proposed change, regression tests, and the
-   issue proposals by scope described below.
+`classification.json` records the decision on each failing or doubtful case. The model drafts it; a
+person decides, and it lands only once recorded (e.g. a Flow `decision`, cited in `decision`):
 
-Possible state for each section: **approved**, **rejected**, **inconclusive**, or **not executed**.
+```json
+{
+  "decision": "https://flow.ttoss.dev/app/tasks/task_vytdmke1my",
+  "groups": [
+    { "cases": ["golden-ivs"], "class": "rejected", "scope": "transform", "layer": "server legend", "issue": 115 },
+    { "cases": [], "class": "inconclusive", "scope": "evals-gate", "declined": true, "note": "stability" }
+  ]
+}
+```
 
-### Issue proposals by scope (user confirms)
+- `class`: `approved`, `rejected`, or `inconclusive`. A passing case no group names is `approved`; a
+  failing one is `unclassified` and gets no proposal.
+- `scope`: one of `SCOPES` in `scripts/report_run.mjs`, the single list of resolution scopes.
+- `issue`: the existing GitHub issue that already covers the group. Search before leaving it empty.
+- `declined: true`: the person declined an issue; listed, never proposed.
 
-Section 7 lists one proposed GitHub issue per scope that has a correction item. Each proposal has:
-
-| Field | Content |
-|---|---|
-| `scope` | One of `catalogue`, `intent`, `data`, `transform`, `agent-instructions`, `validation`, `render`, `evals-gate`, `skill` |
-| `title` | Short English title in the imperative mood |
-| `rationale` | The run ID, the artifact, and the failing check that justify the issue |
-| `layer` | The responsible layer from section 7 |
-| `acceptance` | One or two checks that prove the issue is done |
-
-The round ends with a numbered question to the user, one line per proposal:
+`report_run.mjs` builds one proposal per scope from the other groups, with its cases, layer, existing
+issues, and a rationale (run ID and failing checks). A proposal whose groups all carry an issue is
+`linked`; otherwise it is `new`. The round ends with a numbered question to the user, one line per
+`new` proposal:
 
 ```
 1. create | 2. create with instructions: <text> | 3. skip
@@ -258,10 +258,11 @@ Reply with the numbers to create, "end" to close the round, or "none".
 Rules:
 
 - Nothing is created on the model's own initiative. Only the numbers the user confirms are created,
-  with `gh issue create`, in English, one issue per proposal.
+  with `gh issue create`, in English, one issue per proposal, and its number goes into the group's
+  `issue`.
 - "With instructions" appends the user's text to the issue body, unchanged.
-- "end" closes the round without creating anything. The unconfirmed proposals are written to the
-  run directory as `proposed-issues.md`, so they can be confirmed in a later round.
+- "end" closes the round without creating anything; the `new` proposals stay in `eval-report.json`
+  for a later round.
 - Out-of-scope findings (refactors, missing tests, stale docs) follow the same flow, as separate
   proposals, never bundled into a correction issue.
 
