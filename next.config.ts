@@ -13,6 +13,18 @@ const nextConfig: NextConfig = {
   // sidesteps the broken condition — Route Handlers importing `validateSpec`
   // (e.g. `/api/ai/spec`) need this to not crash at import time.
   serverExternalPackages: ['@ttoss/geovis'],
+  // Keep every response out of search engines, including the non-HTML files
+  // (images, JSON, llms.txt, /api) a robots meta tag cannot reach. Never pair
+  // with a robots.txt Disallow: crawlers that cannot fetch a URL never see its
+  // noindex, so already-indexed URLs would stay in results.
+  headers: async () => {
+    return [
+      {
+        source: '/:path*',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+      },
+    ];
+  },
   // `/dados` reads the data catalogue from `public/` with `fs` at request time.
   // The path is built at runtime, so Next.js cannot trace it — pin the file into
   // the route's bundle or the read fails once deployed.

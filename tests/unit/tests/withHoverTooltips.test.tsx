@@ -32,6 +32,7 @@ const spec: VisualizationSpec = {
     {
       mapDataId: 'pessoas',
       mapId: 'bolhas',
+      joinKey: 'codarea',
       title: 'Pessoas atendidas',
       data: [{ geometryId: '1', value: 10 }],
     },
@@ -61,6 +62,36 @@ describe('withHoverTooltips', () => {
     });
   });
 
+  test('skips point layers whose mapData is not keyed by codarea', () => {
+    const byCodigo = {
+      ...spec,
+      layers: [
+        ...(spec.layers ?? []),
+        {
+          id: 'pts',
+          sourceId: 'bolhas',
+          geometry: 'point',
+          mapDataId: 'status',
+        },
+      ],
+      mapData: [
+        ...(spec.mapData ?? []),
+        {
+          mapDataId: 'status',
+          mapId: 'bolhas',
+          joinKey: 'codigo',
+          data: [{ geometryId: 'CS1', value: 'Em funcionamento' }],
+        },
+      ],
+    } as unknown as VisualizationSpec;
+
+    expect(
+      withHoverTooltips(byCodigo).layers?.map((layer) => {
+        return layer.id;
+      })
+    ).toEqual(['circles-hover', 'circles', 'pts']);
+  });
+
   test('returns the spec untouched without a município boundary source', () => {
     const bare = { ...spec, sources: [spec.sources[1]] };
 
@@ -76,6 +107,40 @@ describe('withHoverTooltips', () => {
     });
     expect(render?.({ ...info, featureId: '9', value: null })).toMatchObject({
       props: { name: 'Município 9', primary: 'Sem dado' },
+    });
+  });
+
+  test('names every município from `nomes`, ahead of the upper-cased inline names, and also on bare polygon tooltips', () => {
+    const withFill = {
+      ...spec,
+      layers: [
+        ...(spec.layers ?? []),
+        {
+          id: 'fill',
+          sourceId: 'mun',
+          geometry: 'polygon',
+          mapDataId: 'pessoas',
+          hoverTooltip: { style: {} },
+        },
+      ],
+    } as unknown as VisualizationSpec;
+    const info = { layerId: 'l', sourceId: 's', point: { x: 0, y: 0 } };
+    const result = withHoverTooltips(withFill, {
+      nomes: { '1': 'Alfa', '2': 'Beta' },
+    });
+    const fillRender = result.layers?.find((layer) => {
+      return layer.id === 'fill';
+    })?.hoverTooltip?.render;
+
+    expect(
+      result.layers?.[0].hoverTooltip?.render?.({
+        ...info,
+        featureId: '2',
+        value: 5,
+      })
+    ).toMatchObject({ props: { name: 'Beta' } });
+    expect(fillRender?.({ ...info, featureId: '1', value: 10 })).toMatchObject({
+      props: { name: 'Alfa', primary: '10 · Pessoas atendidas' },
     });
   });
 
@@ -118,5 +183,90 @@ describe('withHoverTooltips', () => {
     } as unknown as VisualizationSpec;
 
     expect(withHoverTooltips(empty)).toMatchObject({ layers: [], mapData: [] });
+  });
+});
+
+describe('withHoverTooltips on a legend-driven choropleth', () => {
+  test('gives the IVS-style fill layer the /mapas card, named from the spec features', () => {
+    const choropleth = {
+      engine: 'maplibre',
+      sources: [
+        {
+          id: 'mun',
+          type: 'geojson',
+          data: {
+            type: 'FeatureCollection',
+            features: [
+              {
+                type: 'Feature',
+                geometry: { type: 'Point', coordinates: [0, 0] },
+                properties: { codarea: '1', municipio: 'ALFA' },
+              },
+            ],
+          },
+        },
+      ],
+      layers: [
+        {
+          id: 'fill',
+          sourceId: 'mun',
+          geometry: 'polygon',
+          mapDataId: 'ivs',
+          activeLegendId: 'leg',
+        },
+      ],
+      mapData: [{ mapDataId: 'ivs', mapId: 'mun', title: 'IVS', data: [] }],
+      legends: [
+        {
+          id: 'leg',
+          colorBy: {
+            type: 'quantitative',
+            scale: 'threshold',
+            thresholds: [0.001, 0.2],
+            colors: ['#g', '#a', '#b'],
+          },
+          labelFormat: {
+            type: 'labels',
+            labels: ['Sem dado', 'Baixa (≤ 0,200)', 'Alta (≥ 0,201)'],
+          },
+        },
+      ],
+    } as unknown as VisualizationSpec;
+
+    const render =
+      withHoverTooltips(choropleth).layers?.[0].hoverTooltip?.render;
+
+    expect(
+      render?.({
+        layerId: 'l',
+        sourceId: 's',
+        point: { x: 0, y: 0 },
+        featureId: '1',
+        value: 0.3,
+      })
+    ).toMatchObject({
+      props: { name: 'ALFA', swatchColor: '#b', primary: 'IVS 0,3 · Alta' },
+    });
+
+    const bare = {
+      ...choropleth,
+      layers: [
+        { ...(choropleth.layers ?? [])[0], hoverTooltip: { style: {} } },
+      ],
+    } as unknown as VisualizationSpec;
+    const bareRender = withHoverTooltips(bare, { nomes: { '1': 'Alfa' } })
+      .layers?.[0].hoverTooltip?.render;
+
+    expect(
+      bareRender?.({
+        layerId: 'l',
+        sourceId: 's',
+        point: { x: 0, y: 0 },
+        featureId: '1',
+        value: 0.3,
+      })
+    ).toMatchObject({
+      props: { name: 'Alfa', swatchColor: '#b', primary: 'IVS 0,3 · Alta' },
+    });
   });
 });

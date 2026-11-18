@@ -1,0 +1,39 @@
+{
+  "runId": "20261118T043104Z--two-coropletico",
+  "decision": null,
+  "totals": {
+    "cases": 2,
+    "passed": 2,
+    "failed": 0
+  },
+  "cases": [
+    {
+      "case": "golden-coropletico-no-clarify",
+      "prompt": "Mapa coroplético das cozinhas solidárias por município.",
+      "httpStatus": 200,
+      "durationMs": 855,
+      "outcome": "spec",
+      "issues": [],
+      "failedChecks": [],
+      "passed": true,
+      "class": "approved",
+      "scope": null,
+      "issue": null
+    },
+    {
+      "case": "golden-coropletico",
+      "prompt": "Mapa coroplético das cozinhas solidárias por município.",
+      "httpStatus": 200,
+      "durationMs": 105,
+      "outcome": "clarify",
+      "issues": [],
+      "failedChecks": [],
+      "passed": true,
+      "class": "approved",
+      "scope": null,
+      "issue": null
+    }
+  ],
+  "declined": [],
+  "proposals": []
+}

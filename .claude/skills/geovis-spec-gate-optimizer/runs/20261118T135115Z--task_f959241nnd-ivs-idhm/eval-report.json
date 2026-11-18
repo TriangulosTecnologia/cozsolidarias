@@ -1,0 +1,52 @@
+{
+  "runId": "20261118T135115Z--task_f959241nnd-ivs-idhm",
+  "decision": "https://flow.ttoss.dev/app/tasks/task_f959241nnd",
+  "totals": {
+    "cases": 3,
+    "passed": 3,
+    "failed": 0
+  },
+  "cases": [
+    {
+      "case": "golden-ivs",
+      "prompt": "Mapa da vulnerabilidade social dos municípios brasileiros.",
+      "httpStatus": 200,
+      "durationMs": 14348,
+      "outcome": "spec",
+      "issues": [],
+      "failedChecks": [],
+      "passed": true,
+      "class": "approved",
+      "scope": null,
+      "issue": null
+    },
+    {
+      "case": "trap-idhm",
+      "prompt": "Mapa do Índice de Desenvolvimento Humano Municipal.",
+      "httpStatus": 200,
+      "durationMs": 9652,
+      "outcome": "spec",
+      "issues": [],
+      "failedChecks": [],
+      "passed": true,
+      "class": "approved",
+      "scope": null,
+      "issue": null
+    },
+    {
+      "case": "trap-ivs-subindice",
+      "prompt": "Mapa do IVS de infraestrutura urbana por município.",
+      "httpStatus": 200,
+      "durationMs": 10895,
+      "outcome": "spec",
+      "issues": [],
+      "failedChecks": [],
+      "passed": true,
+      "class": "approved",
+      "scope": null,
+      "issue": null
+    }
+  ],
+  "declined": [],
+  "proposals": []
+}
