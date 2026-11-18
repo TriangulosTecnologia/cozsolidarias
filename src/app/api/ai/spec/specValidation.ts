@@ -64,8 +64,7 @@ export const errorResponse = (params: {
         : {}),
       // The spec is for inspection only, and carries the resolved data rows:
       // production answers without it.
-      ...(params.spec !== undefined &&
-      process.env.RETURN_SPEC_ON_ERROR == 'true'
+      ...(params.spec !== undefined && process.env.NODE_ENV !== 'production'
         ? { spec: params.spec }
         : {}),
       mapTypeOptions: MAP_TYPE_OPTIONS,
