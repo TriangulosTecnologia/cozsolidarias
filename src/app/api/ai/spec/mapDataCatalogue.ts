@@ -25,6 +25,18 @@ const ABSOLUTE_TOTALS: unknown[] = ['cozinhas_pessoas_atendidas'];
 const COUNTS = ['cozinhas_geolocalizadas', 'cozinhas_geolocalizadas_2025'];
 
 /**
+ * Catalogue dataset ids a choropleth request is answered for with the `/mapas`
+ * kitchens-per-município choropleth (`buildCozinhasChoroplethSpec`), not the
+ * agent's layers. Kept here, free of the `/mapas` runtime, so the preflight can
+ * read it.
+ * @example
+ * COZINHAS_CHOROPLETH_DATASET_IDS.includes('cozinhas_geolocalizadas'); // true
+ */
+export const COZINHAS_CHOROPLETH_DATASET_IDS: unknown[] = [
+  'cozinhas_geolocalizadas',
+];
+
+/**
  * Whether a choropleth may not paint this dataset id: the absolute totals,
  * plus the kitchen counts when the server env `FORBID_ABSOLUTE_ON_CHOROPLETH=true`.
  * @example

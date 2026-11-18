@@ -6,8 +6,9 @@ import { type ConceptEntry, loadConceptIndex } from './conceptIndex';
 import type { RenderableDatasetId } from './mapDataCatalogue';
 import { withSessionId } from './naturaliSessionApi';
 import { preflightPrompt, preflightResponse } from './preflight';
+import type { UnknownRecord } from './specValidation';
 
-/** A request the preflight let through to the agent. */
+/** A request the preflight let through, to the agent unless it carries `spec`. */
 export type ParsedRequest = {
   prompt: string;
   sessionId?: string;
@@ -15,6 +16,8 @@ export type ParsedRequest = {
   datasetId?: RenderableDatasetId;
   /** The server's warning that the dataset is a proxy of what the prompt asked. */
   note?: string;
+  /** The minimal spec the request settles by itself, served without the agent. */
+  spec?: UnknownRecord;
 };
 
 let cachedConcepts: Promise<ConceptEntry[]> | null = null;
@@ -41,7 +44,7 @@ const readConcepts = async (): Promise<ConceptEntry[]> => {
  * catalogue. It answers by itself with the clarify question, the feedback or
  * the unavailable-grain 422 (echoing the client's session id so the
  * conversation continues), or lets the request through: a proxy carries its
- * dataset and warning to the agent.
+ * dataset and warning to the agent, a settled request its minimal `spec`.
  *
  * @example
  * const parsed = await preflightRequest({ prompt: 'mapa da fome' }); // { datasetId: 'municipios_cadinsan', note, ... }
@@ -61,12 +64,15 @@ export const preflightRequest = async (params: {
   if (answer) {
     return sessionId ? withSessionId(answer, sessionId) : answer;
   }
-  return preflight.status === 'proxy'
-    ? {
-        ...choices,
-        datasetId: choices.datasetId ?? preflight.datasetId,
-        note: preflight.note,
-        sessionId,
-      }
+  if (preflight.status === 'proxy') {
+    return {
+      ...choices,
+      datasetId: choices.datasetId ?? preflight.datasetId,
+      note: preflight.note,
+      sessionId,
+    };
+  }
+  return preflight.status === 'resolved'
+    ? { ...choices, sessionId, spec: preflight.spec }
     : { ...choices, sessionId };
 };
