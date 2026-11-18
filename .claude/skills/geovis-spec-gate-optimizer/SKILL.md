@@ -174,8 +174,9 @@ Sequential, with the coverage gate.
 
 1. Start `pnpm dev` with the credentials from `.env`. If an API key is exported in the shell, it
    overrides `.env` and the route answers 401: start without those variables.
-2. Run `scripts/run_campaign.sh <run-dir>`: it POSTs each case with `scripts/run_eval_case.sh` to
-   `http://localhost:3000/api/ai/spec`, scores it, logs to `campaign.log`, and ends with
+2. Run `scripts/run_campaign.sh [run-dir]` (default `runs/<UTC timestamp>--campaign`): it POSTs each case with `scripts/run_eval_case.sh` to
+   `<base-url>/api/ai/spec` (default `http://localhost:3000`; pass the production host root,
+   `https://cozsolidarias.triangulos.tech`, to measure production), scores it, logs to `campaign.log`, and ends with
    `scripts/report_run.mjs`.
 3. `score_case.mjs` reads the served `response.spec` from each case and runs `validateSpec` on it
    (V1); there is no separate extraction file.
