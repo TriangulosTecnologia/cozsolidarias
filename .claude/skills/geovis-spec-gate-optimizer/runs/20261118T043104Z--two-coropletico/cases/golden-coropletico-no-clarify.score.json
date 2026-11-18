@@ -1,0 +1,31 @@
+{
+  "case": "golden-coropletico-no-clarify",
+  "prompt": "Mapa coroplético das cozinhas solidárias por município.",
+  "httpStatus": 200,
+  "durationMs": 855,
+  "outcome": "spec",
+  "issues": [],
+  "checks": [
+    {
+      "id": "outcome",
+      "passed": true,
+      "note": "expected spec, got spec"
+    },
+    {
+      "id": "geometry",
+      "passed": true,
+      "note": "got /api/cozinhas/bolhas, /geo/geojs-100-mun.json, /geo/estados.json"
+    },
+    {
+      "id": "legend",
+      "passed": true,
+      "note": "shown=1 scale=quantitative"
+    },
+    {
+      "id": "validateSpec",
+      "passed": true,
+      "note": "null"
+    }
+  ],
+  "passed": true
+}

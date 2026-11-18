@@ -32,6 +32,7 @@ const spec: VisualizationSpec = {
     {
       mapDataId: 'pessoas',
       mapId: 'bolhas',
+      joinKey: 'codarea',
       title: 'Pessoas atendidas',
       data: [{ geometryId: '1', value: 10 }],
     },
@@ -61,6 +62,36 @@ describe('withHoverTooltips', () => {
     });
   });
 
+  test('skips point layers whose mapData is not keyed by codarea', () => {
+    const byCodigo = {
+      ...spec,
+      layers: [
+        ...(spec.layers ?? []),
+        {
+          id: 'pts',
+          sourceId: 'bolhas',
+          geometry: 'point',
+          mapDataId: 'status',
+        },
+      ],
+      mapData: [
+        ...(spec.mapData ?? []),
+        {
+          mapDataId: 'status',
+          mapId: 'bolhas',
+          joinKey: 'codigo',
+          data: [{ geometryId: 'CS1', value: 'Em funcionamento' }],
+        },
+      ],
+    } as unknown as VisualizationSpec;
+
+    expect(
+      withHoverTooltips(byCodigo).layers?.map((layer) => {
+        return layer.id;
+      })
+    ).toEqual(['circles-hover', 'circles', 'pts']);
+  });
+
   test('returns the spec untouched without a município boundary source', () => {
     const bare = { ...spec, sources: [spec.sources[1]] };
 
@@ -76,6 +107,40 @@ describe('withHoverTooltips', () => {
     });
     expect(render?.({ ...info, featureId: '9', value: null })).toMatchObject({
       props: { name: 'Município 9', primary: 'Sem dado' },
+    });
+  });
+
+  test('names every município from `nomes`, ahead of the upper-cased inline names, and also on bare polygon tooltips', () => {
+    const withFill = {
+      ...spec,
+      layers: [
+        ...(spec.layers ?? []),
+        {
+          id: 'fill',
+          sourceId: 'mun',
+          geometry: 'polygon',
+          mapDataId: 'pessoas',
+          hoverTooltip: { style: {} },
+        },
+      ],
+    } as unknown as VisualizationSpec;
+    const info = { layerId: 'l', sourceId: 's', point: { x: 0, y: 0 } };
+    const result = withHoverTooltips(withFill, {
+      nomes: { '1': 'Alfa', '2': 'Beta' },
+    });
+    const fillRender = result.layers?.find((layer) => {
+      return layer.id === 'fill';
+    })?.hoverTooltip?.render;
+
+    expect(
+      result.layers?.[0].hoverTooltip?.render?.({
+        ...info,
+        featureId: '2',
+        value: 5,
+      })
+    ).toMatchObject({ props: { name: 'Beta' } });
+    expect(fillRender?.({ ...info, featureId: '1', value: 10 })).toMatchObject({
+      props: { name: 'Alfa', primary: '10 · Pessoas atendidas' },
     });
   });
 
