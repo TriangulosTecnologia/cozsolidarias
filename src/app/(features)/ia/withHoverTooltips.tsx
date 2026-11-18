@@ -76,37 +76,20 @@ const hoverAnchor = (spec: VisualizationSpec) => {
   return boundary && legendId ? { boundary, legendId } : null;
 };
 
-/**
- * Gives the point layers joined to a `mapData` the `/mapas` hover card.
- * geovis only tracks hover on **polygon** layers with an `activeLegendId`, so —
- * like `/mapas` does with `municipios-br-fill` — the card hangs on an invisible
- * município polygon layer fed the same rows. A tooltip is a function and cannot
- * travel in the server's JSON, which is why this runs on the client: the value
- * comes from geovis feature-state, the label from the `mapData` title and the
- * name from the spec's own `codarea`/`municipio` source features.
- *
- * @param spec - The spec served by `/api/ai/spec`.
- * @param options - `nomes`: `codarea → município name` (e.g. `/geo/municipios-nomes.json`),
- * which wins over the names read from the spec's inline features — those cover
- * only municípios with data and arrive upper-cased. Município polygon layers
- * the server left with a bare `hoverTooltip` get the same card.
- * @returns The spec with one hover polygon layer (and its `mapData`) per
- * point layer; unchanged when the spec has no município boundary source.
- *
- * @example
- * withHoverTooltips(spec).layers[0].hoverTooltip?.render({ featureId: '2927408', value: 120, layerId: 'l', sourceId: 's', point: { x: 0, y: 0 } });
- */
-export const withHoverTooltips = (
-  spec: VisualizationSpec,
-  { nomes = {} }: { nomes?: { [codarea: string]: string } } = {}
-): VisualizationSpec => {
+/** The point layers joined to a `mapData`, and the bare polygon `hoverTooltip`s, get the hover card; see {@link withHoverTooltips}. */
+const withPointHoverTooltips = ({
+  spec,
+  names,
+}: {
+  spec: VisualizationSpec;
+  names: Map<string, string>;
+}): VisualizationSpec => {
   const anchor = hoverAnchor(spec);
   if (!anchor) {
     return spec;
   }
   const { boundary, legendId } = anchor;
   const { mapData = [], layers = [] } = spec;
-  const names = new Map([...municipioNames(spec), ...Object.entries(nomes)]);
   const hovered = pointLayersWithData(spec);
   const hoverLayers: VisualizationLayer[] = hovered.map(({ layer, entry }) => {
     return {
@@ -161,21 +144,35 @@ export const withHoverTooltips = (
 };
 
 /**
- * Gives a served spec its hover cards: the point layers joined to a `mapData`
- * (see {@link withPointHoverTooltips}) and the polygon layers painted by a
- * threshold legend, such as IVS and IDHM ({@link withLegendHoverTooltips}).
+ * Gives the point layers joined to a `mapData` the `/mapas` hover card.
+ * geovis only tracks hover on **polygon** layers with an `activeLegendId`, so —
+ * like `/mapas` does with `municipios-br-fill` — the card hangs on an invisible
+ * município polygon layer fed the same rows. A tooltip is a function and cannot
+ * travel in the server's JSON, which is why this runs on the client: the value
+ * comes from geovis feature-state, the label from the `mapData` title and the
+ * name from the spec's own `codarea`/`municipio` source features.
  *
  * @param spec - The spec served by `/api/ai/spec`.
- * @returns The spec with its hover cards.
+ * @param options - `nomes`: `codarea → município name` (e.g. `/geo/municipios-nomes.json`),
+ * which wins over the names read from the spec's inline features — those cover
+ * only municípios with data and arrive upper-cased. Município polygon layers
+ * the server left with a bare `hoverTooltip` get the same card.
+ * Polygon layers painted by a threshold legend, such as IVS and IDHM, get the
+ * `/mapas` band card from {@link withLegendHoverTooltips}.
+ *
+ * @returns The spec with one hover polygon layer (and its `mapData`) per
+ * point layer, and the cards above; unchanged when there is nothing to add.
  *
  * @example
- * withHoverTooltips(spec).layers?.[0].hoverTooltip?.render;
+ * withHoverTooltips(spec).layers[0].hoverTooltip?.render({ featureId: '2927408', value: 120, layerId: 'l', sourceId: 's', point: { x: 0, y: 0 } });
  */
 export const withHoverTooltips = (
-  spec: VisualizationSpec
+  spec: VisualizationSpec,
+  { nomes = {} }: { nomes?: { [codarea: string]: string } } = {}
 ): VisualizationSpec => {
-  return withLegendHoverTooltips({
-    spec: withPointHoverTooltips(spec),
-    names: municipioNames(spec),
+  const names = new Map([...municipioNames(spec), ...Object.entries(nomes)]);
+  return withPointHoverTooltips({
+    spec: withLegendHoverTooltips({ spec, names }),
+    names,
   });
 };

@@ -247,5 +247,26 @@ describe('withHoverTooltips on a legend-driven choropleth', () => {
     ).toMatchObject({
       props: { name: 'ALFA', swatchColor: '#b', primary: 'IVS 0,3 · Alta' },
     });
+
+    const bare = {
+      ...choropleth,
+      layers: [
+        { ...(choropleth.layers ?? [])[0], hoverTooltip: { style: {} } },
+      ],
+    } as unknown as VisualizationSpec;
+    const bareRender = withHoverTooltips(bare, { nomes: { '1': 'Alfa' } })
+      .layers?.[0].hoverTooltip?.render;
+
+    expect(
+      bareRender?.({
+        layerId: 'l',
+        sourceId: 's',
+        point: { x: 0, y: 0 },
+        featureId: '1',
+        value: 0.3,
+      })
+    ).toMatchObject({
+      props: { name: 'Alfa', swatchColor: '#b', primary: 'IVS 0,3 · Alta' },
+    });
   });
 });
