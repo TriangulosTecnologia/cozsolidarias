@@ -59,20 +59,28 @@ export const splitAgentLegends = (
   };
 };
 
-/** The official IPEA scale of an IVS/IDHM `mapDataId`, as a legend `colorBy` patch. */
+/**
+ * The official IPEA scale of an IVS/IDHM `mapDataId`, as a legend patch: the
+ * faixas in `colorBy`, their names in the legend's `labelFormat` (geovis has no
+ * `colorBy.labels`).
+ */
 const officialScalePatch = (mapDataId: unknown): UnknownRecord => {
   // `appendRealMapData` already checked every `mapDataId` is a string.
   const family = officialFaixasOf(String(mapDataId));
-  return family
-    ? {
-        colorBy: {
-          type: 'quantitative',
-          property: 'value',
-          scale: 'threshold',
-          ...OFFICIAL_SCALES[family],
-        },
-      }
-    : {};
+  if (!family) {
+    return {};
+  }
+  const { thresholds, colors, labels } = OFFICIAL_SCALES[family];
+  return {
+    colorBy: {
+      type: 'quantitative',
+      property: 'value',
+      scale: 'threshold',
+      thresholds,
+      colors,
+    },
+    labelFormat: { type: 'labels', labels },
+  };
 };
 
 /**
