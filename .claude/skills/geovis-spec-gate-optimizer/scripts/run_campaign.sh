@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Runs every eval case in `evals/evals.json` against production by default
+# Runs every eval case in `evals/evals.json` against the local dev server by default
 # (base-url: the host root, POST <base-url>/api/ai/spec; /ia is only the UI page),
 # sequentially, writing one output per case to <run-dir>/cases/. Progress goes
 # to stderr and <run-dir>/campaign.log; report_run.mjs then writes
