@@ -22,6 +22,10 @@ export const metadata: Metadata = {
   openGraph: {
     images: [{ url: '/ogimage.webp' }],
   },
+  // Keep the platform out of every search engine. Do not pair this with a
+  // robots.txt Disallow: crawlers that cannot fetch a page never see its
+  // noindex, and already-indexed URLs would stay in results.
+  robots: { index: false, follow: false },
 };
 
 export default function RootLayout({
