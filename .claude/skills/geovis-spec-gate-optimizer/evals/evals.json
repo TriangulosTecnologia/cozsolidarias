@@ -246,6 +246,167 @@
       "rubric": "Formerly a trap (the description promised IDHM and the fetcher did not serve it); municipios_idhm is now renderable. Picks municipios_idhm, never municipios_ivs: the scales are inverted (high IVS = bad, high IDHM = good). Official UNDP/IPEA bands, never Jenks."
     },
     {
+      "id": "nogolden-ivs-capital-humano",
+      "kind": "nogolden",
+      "prompt": "Mapa do IVS de capital humano por município.",
+      "expect": {
+        "dataset": "municipios_ivs_capital_humano",
+        "geometry": "/geo/geojs-100-mun.json",
+        "form": "polygon",
+        "legendScale": "quantitative"
+      },
+      "coversRules": [
+        "R-variable-choice",
+        "R-mapdataid-real",
+        "R-official-faixas",
+        "R-canonical-thresholds",
+        "R-legend-matches-values",
+        "R-threshold-order",
+        "R-legend-arity",
+        "R-nodata-color",
+        "R-active-legend-exists"
+      ],
+      "rubric": "Picks municipios_ivs_capital_humano. Serious failure = painting the general IVS (municipios_ivs) titled 'Capital Humano'. Sub-indices of the IVS use the official IPEA IVS bands (higher = more vulnerable), never Jenks; the route must have normalized them (applyCanonicalScales)."
+    },
+    {
+      "id": "nogolden-ivs-renda-trabalho",
+      "kind": "nogolden",
+      "prompt": "Mapa do IVS de renda e trabalho por município.",
+      "expect": {
+        "dataset": "municipios_ivs_renda_trabalho",
+        "geometry": "/geo/geojs-100-mun.json",
+        "form": "polygon",
+        "legendScale": "quantitative"
+      },
+      "coversRules": [
+        "R-variable-choice",
+        "R-mapdataid-real",
+        "R-official-faixas",
+        "R-canonical-thresholds",
+        "R-legend-matches-values",
+        "R-threshold-order",
+        "R-legend-arity",
+        "R-nodata-color",
+        "R-active-legend-exists"
+      ],
+      "rubric": "Picks municipios_ivs_renda_trabalho, not municipios_idhm_renda: 'renda' also names an IDHM dimension, but the 'IVS' keyword fixes the family and the scales are inverted (high IVS = bad, high IDHM = good). Official IPEA IVS bands, never Jenks."
+    },
+    {
+      "id": "nogolden-idhm-renda",
+      "kind": "nogolden",
+      "prompt": "Mapa do IDHM de renda dos municípios.",
+      "expect": {
+        "dataset": "municipios_idhm_renda",
+        "geometry": "/geo/geojs-100-mun.json",
+        "form": "polygon",
+        "legendScale": "quantitative"
+      },
+      "coversRules": [
+        "R-variable-choice",
+        "R-mapdataid-real",
+        "R-official-faixas",
+        "R-canonical-thresholds",
+        "R-legend-matches-values",
+        "R-threshold-order",
+        "R-legend-arity",
+        "R-nodata-color",
+        "R-active-legend-exists"
+      ],
+      "rubric": "Picks municipios_idhm_renda, never municipios_ivs_renda_trabalho (same word 'renda', inverted scale) nor the general municipios_idhm. Official UNDP/IPEA IDHM bands (≤0,499 … ≥0,800), never Jenks."
+    },
+    {
+      "id": "nogolden-idhm-longevidade",
+      "kind": "nogolden",
+      "prompt": "Mapa do IDHM de longevidade por município.",
+      "expect": {
+        "dataset": "municipios_idhm_longevidade",
+        "geometry": "/geo/geojs-100-mun.json",
+        "form": "polygon",
+        "legendScale": "quantitative"
+      },
+      "coversRules": [
+        "R-variable-choice",
+        "R-mapdataid-real",
+        "R-official-faixas",
+        "R-canonical-thresholds",
+        "R-legend-matches-values",
+        "R-threshold-order",
+        "R-legend-arity",
+        "R-nodata-color",
+        "R-active-legend-exists"
+      ],
+      "rubric": "Picks municipios_idhm_longevidade. Serious failure = painting the general municipios_idhm labeled 'Longevidade'. Official UNDP/IPEA IDHM bands, never Jenks."
+    },
+    {
+      "id": "nogolden-idhm-educacao",
+      "kind": "nogolden",
+      "prompt": "Mapa do IDHM de educação por município.",
+      "expect": {
+        "dataset": "municipios_idhm_educacao",
+        "geometry": "/geo/geojs-100-mun.json",
+        "form": "polygon",
+        "legendScale": "quantitative"
+      },
+      "coversRules": [
+        "R-variable-choice",
+        "R-mapdataid-real",
+        "R-official-faixas",
+        "R-canonical-thresholds",
+        "R-legend-matches-values",
+        "R-threshold-order",
+        "R-legend-arity",
+        "R-nodata-color",
+        "R-active-legend-exists"
+      ],
+      "rubric": "Picks the aggregate municipios_idhm_educacao, not one of its two sub-dimensions (escolaridade, frequência escolar) and not the general municipios_idhm. Official UNDP/IPEA IDHM bands, never Jenks."
+    },
+    {
+      "id": "nogolden-idhm-educacao-escolaridade",
+      "kind": "nogolden",
+      "prompt": "Mapa do IDHM de escolaridade da população adulta por município.",
+      "expect": {
+        "dataset": "municipios_idhm_educacao_escolaridade",
+        "geometry": "/geo/geojs-100-mun.json",
+        "form": "polygon",
+        "legendScale": "quantitative"
+      },
+      "coversRules": [
+        "R-variable-choice",
+        "R-mapdataid-real",
+        "R-official-faixas",
+        "R-canonical-thresholds",
+        "R-legend-matches-values",
+        "R-threshold-order",
+        "R-legend-arity",
+        "R-nodata-color",
+        "R-active-legend-exists"
+      ],
+      "rubric": "Picks municipios_idhm_educacao_escolaridade, the sub-dimension, not the aggregate municipios_idhm_educacao. Official UNDP/IPEA IDHM bands, never Jenks."
+    },
+    {
+      "id": "nogolden-idhm-educacao-frequencia",
+      "kind": "nogolden",
+      "prompt": "Mapa do IDHM de frequência escolar de crianças e jovens por município.",
+      "expect": {
+        "dataset": "municipios_idhm_educacao_frequencia",
+        "geometry": "/geo/geojs-100-mun.json",
+        "form": "polygon",
+        "legendScale": "quantitative"
+      },
+      "coversRules": [
+        "R-variable-choice",
+        "R-mapdataid-real",
+        "R-official-faixas",
+        "R-canonical-thresholds",
+        "R-legend-matches-values",
+        "R-threshold-order",
+        "R-legend-arity",
+        "R-nodata-color",
+        "R-active-legend-exists"
+      ],
+      "rubric": "Picks municipios_idhm_educacao_frequencia, the sub-dimension, not the aggregate municipios_idhm_educacao. Official UNDP/IPEA IDHM bands, never Jenks."
+    },
+    {
       "id": "trap-cadinsan-sem-pbf",
       "kind": "nogolden",
       "prompt": "Mapa da insegurança alimentar desconsiderando o efeito do Bolsa Família.",
