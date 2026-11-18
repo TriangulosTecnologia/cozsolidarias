@@ -28,22 +28,21 @@ change, not from the eval itself; the originating round remains as a record.
 D3. `expect.variable` and `expect.form` in the case. Status: APPLIED. Values: `pessoasAtendidas`,
 `point+sizeBy`, `quantitative`, plus the `total` block (source, field, zero tolerance).
 
-D4. Extend `ABSOLUTE_TOTAL_DATASET_IDS` (choice "a") versus keep the list (`keep`). Status: APPLIED
-and verified. The first `D-src` record came in malformed (`keep && ...`, together with D5); the final
-decision was `D-src extend --path src/app/api/ai/spec/**`, recorded as its own message. The list became
-`cozinhas_pessoas_atendidas`, `cozinhas_geolocalizadas`, `cozinhas_geolocalizadas_2025`, in
-`src/app/api/ai/spec/mapDataCatalogue.ts`. Verification in round
-`runs/20261027T120609Z--pos-extensao-absoluto-lista/`: both people prompts still PASS in the gate.
-Measured effect: the prompt "Mapa coroplético das cozinhas solidárias por município." (English:
-"Choropleth map of solidarity kitchens by municipality.") receives HTTP 200 with a clarify from the
-preflight (facet mapType), with no spec. It is not the 422 predicted before. Accepted regression
-(human decision, option a): the golden becomes `references/goldens/coropletico-cozinhas-clarify.json`,
-and the `golden-coropletico` case expects clarify. Evidence that the current list is enough: in the two
-rounds of today (`runs/20261026T202823Z--...`), the two prompts without a forced `mapMode` produced
-`cozinhas_pessoas_atendidas`, and the gate passed. The failure of
-`runs/20260928T195749Z--final-eval` came from the variation with a nonexistent `mapMode`
-(`coropletico-pessoas-atendidas`), not from the prompt. Count on polygons remains valid in `/mapas`,
-which does not go through the preflight; on the `/api/ai/spec` route it becomes a clarify.
+D4. Kitchen counts as absolute totals on the choropleth. Status: APPLIED, flag-gated (decision of
+2026-11-17, #117). `cozinhas_pessoas_atendidas` is always an absolute total. The kitchen counts
+(`cozinhas_geolocalizadas`, `cozinhas_geolocalizadas_2025`) join it only with the server env
+`FORBID_ABSOLUTE_ON_CHOROPLETH=true` (`isAbsoluteTotalDataset` in
+`src/app/api/ai/spec/mapDataCatalogue.ts`, since #114). For the prompt "Mapa coroplético das cozinhas
+solidárias por município." (English: "Choropleth map of solidarity kitchens by municipality."):
+
+| Flag | Response | Case |
+| --- | --- | --- |
+| `true` | HTTP 200 preflight `clarify` (facet `mapType`, default `proportionalCircles`), no spec | `golden-coropletico`, golden `references/goldens/coropletico-cozinhas-clarify.json` |
+| falsy (unset, the production default) | HTTP 200 with the `/mapas` kitchens choropleth (`buildCozinhasChoroplethSpec`), settled by the preflight and served without the agent | `golden-coropletico-no-clarify`, golden `_coropletico.json` |
+
+History: the first record (option "a", 2026-10-27, round `runs/20261027T120609Z--pos-extensao-absoluto-lista/`)
+extended the list unconditionally; #114 put the counts behind the flag, and with it unset the agent
+answered `missing_data` (#117) until the preflight settled the request itself.
 
 D5. Document `pessoasAtendidas` in `/api/cozinhas/por-municipio`. Status: ACCEPTED and APPLIED in the
 JSDoc of `src/app/api/cozinhas/por-municipio/route.ts`. Decision `D-doc accept` recorded as its own

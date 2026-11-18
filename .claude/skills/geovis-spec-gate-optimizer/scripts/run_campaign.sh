@@ -10,6 +10,10 @@
 # high is ~45s, so an occasional overrun is measurement noise, not signal.
 # A case that overruns TWICE is recorded as a real timeout.
 #
+# A case declaring `env` (e.g. {"FORBID_ABSOLUTE_ON_CHOROPLETH": true}) runs only
+# when this shell carries the same flags as the server ('true' is on, anything
+# else off, as the route reads them); otherwise it is skipped and logged, never scored.
+#
 # Usage: run_campaign.sh [run-dir] [base-url]
 # run-dir defaults to <skill>/runs/<UTC timestamp>--campaign.
 set -uo pipefail
@@ -31,6 +35,10 @@ i=0
 for ID in "${IDS[@]}"; do
   i=$((i + 1))
   OUT="$RUN_DIR/cases/${ID}.json"
+  if ! NEEDS="$(node -e "const env=require('$EVALS').cases.find(c=>c.id==='$ID').env??{};if(!Object.entries(env).every(([k,v])=>(process.env[k]==='true')===v)){console.log(JSON.stringify(env));process.exit(1)}")"; then
+    echo "[$i/$TOTAL] $ID — skipped: needs server env $NEEDS" >&2
+    continue
+  fi
   if [[ -f "$OUT" ]] && node -e "process.exit(require('$OUT').httpStatus===200||require('$OUT').httpStatus===422?0:1)" 2>/dev/null; then
     echo "[$i/$TOTAL] $ID — already exists, skipping" >&2
     continue

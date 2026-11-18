@@ -20,12 +20,27 @@
       "id": "golden-coropletico",
       "kind": "clarify",
       "prompt": "Mapa coroplético das cozinhas solidárias por município.",
+      "env": { "FORBID_ABSOLUTE_ON_CHOROPLETH": true },
       "golden": "references/goldens/coropletico-cozinhas-clarify.json",
       "expect": {
         "outcome": "clarify",
         "facet": "mapType",
         "default": "proportionalCircles",
-        "reason": "absolute total (cozinhas_geolocalizadas, count) is not painted as choropleth; decision D4 (option a)"
+        "reason": "with FORBID_ABSOLUTE_ON_CHOROPLETH=true the kitchen count is an absolute total, not painted as a choropleth; decision D4"
+      },
+      "coversRules": ["R-choropleth-not-absolute"],
+      "rubric": "Asks before generating: HTTP 200 clarify on the mapType facet, default proportionalCircles, with no spec and no agent call."
+    },
+    {
+      "id": "golden-coropletico-no-clarify",
+      "kind": "golden",
+      "prompt": "Mapa coroplético das cozinhas solidárias por município.",
+      "env": { "FORBID_ABSOLUTE_ON_CHOROPLETH": false },
+      "golden": "_coropletico.json",
+      "expect": {
+        "geometry": "/geo/geojs-100-mun.json",
+        "form": "polygon",
+        "legendScale": "quantitative"
       },
       "coversRules": [
         "R-active-legend-exists",
@@ -38,7 +53,7 @@
         "R-no-geometry-in-mapdata",
         "R-nodata-color"
       ],
-      "rubric": "Paints the count of kitchens over municipality polygons, with a quantitative legend and a readable pt-BR label."
+      "rubric": "Paints the count of kitchens over municipality polygons, with a quantitative legend and a readable pt-BR label: the server's /mapas choropleth (buildCozinhasChoroplethSpec), served without the agent; decision D4. Its mapData ids are /mapas's own, so the case checks geometry and legend, not the dataset id."
     },
     {
       "id": "golden-pontos",

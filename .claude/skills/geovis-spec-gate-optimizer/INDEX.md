@@ -21,7 +21,7 @@ Version: 3.1.0 (previously: `geovis-spec-instructions-optimizer` 2.0.0). See `re
 | `references/golden-specs.md` | Structural and semantic goldens, provenance, and validation |
 | `references/evals-architecture.md` | Architecture plan for semantic evaluation (origin: `plan.md`; not tracked by git) |
 | `$GEOVIS_GOLDEN_DIR/_pessoas-atendidas.json` (default `tmp/specs/full/verifield`) | Structural golden of people circles per municipality (348 rows, sum 789,755) |
-| `references/goldens/coropletico-cozinhas-clarify.json` | Clarification response for the count-of-kitchens choropleth (decision D4, option a) |
+| `references/goldens/coropletico-cozinhas-clarify.json` | Clarification response for the count-of-kitchens choropleth with `FORBID_ABSOLUTE_ON_CHOROPLETH=true` (decision D4) |
 | `references/goldens/semantic/` | Semantic goldens (schema in `golden-specs.md`); none approved yet |
 | `references/human-review.md` | Questions Q1 to Q9, decision rules, and record fields for the human decision |
 | `references/determinism-map.md` | Prompt rule → validator that covers it |
