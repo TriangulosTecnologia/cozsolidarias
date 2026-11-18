@@ -24,6 +24,7 @@ import { ThemeUIProvider } from 'theme-ui';
 import { ChoiceSection, ErrorAlert, FeedbackSection } from './ChoicePanel';
 import { JsonPanel } from './JsonPanel';
 import { useAiPlaygroundLogic } from './useAiPlaygroundLogic';
+import { useMunicipioNomes } from './useMunicipioNomes';
 import { withHoverTooltips } from './withHoverTooltips';
 
 const BRAZIL_VIEW = {
@@ -40,6 +41,7 @@ const BRAZIL_VIEW = {
  * the lint threshold.
  */
 const MapResultView = ({ result }: { result: VisualizationSpec }) => {
+  const nomes = useMunicipioNomes();
   return (
     <Box
       position="relative"
@@ -65,10 +67,10 @@ const MapResultView = ({ result }: { result: VisualizationSpec }) => {
         <ThemeUIProvider theme={BruttalTheme}>
           <GeovisWorkspace
             config={{ appearance: 'bare' }}
-            visualizationSpec={withHoverTooltips({
-              ...result,
-              view: result.view ?? BRAZIL_VIEW,
-            })}
+            visualizationSpec={withHoverTooltips(
+              { ...result, view: result.view ?? BRAZIL_VIEW },
+              { nomes }
+            )}
           />
         </ThemeUIProvider>
       </I18nProvider>
