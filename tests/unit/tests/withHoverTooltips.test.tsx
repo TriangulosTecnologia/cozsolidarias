@@ -120,3 +120,67 @@ describe('withHoverTooltips', () => {
     expect(withHoverTooltips(empty)).toMatchObject({ layers: [], mapData: [] });
   });
 });
+
+describe('withHoverTooltips on a legend-driven choropleth', () => {
+  test('gives the IVS-style fill layer the /mapas card, named from the spec features', () => {
+    const choropleth = {
+      engine: 'maplibre',
+      sources: [
+        {
+          id: 'mun',
+          type: 'geojson',
+          data: {
+            type: 'FeatureCollection',
+            features: [
+              {
+                type: 'Feature',
+                geometry: { type: 'Point', coordinates: [0, 0] },
+                properties: { codarea: '1', municipio: 'ALFA' },
+              },
+            ],
+          },
+        },
+      ],
+      layers: [
+        {
+          id: 'fill',
+          sourceId: 'mun',
+          geometry: 'polygon',
+          mapDataId: 'ivs',
+          activeLegendId: 'leg',
+        },
+      ],
+      mapData: [{ mapDataId: 'ivs', mapId: 'mun', title: 'IVS', data: [] }],
+      legends: [
+        {
+          id: 'leg',
+          colorBy: {
+            type: 'quantitative',
+            scale: 'threshold',
+            thresholds: [0.001, 0.2],
+            colors: ['#g', '#a', '#b'],
+          },
+          labelFormat: {
+            type: 'labels',
+            labels: ['Sem dado', 'Baixa (≤ 0,200)', 'Alta (≥ 0,201)'],
+          },
+        },
+      ],
+    } as unknown as VisualizationSpec;
+
+    const render =
+      withHoverTooltips(choropleth).layers?.[0].hoverTooltip?.render;
+
+    expect(
+      render?.({
+        layerId: 'l',
+        sourceId: 's',
+        point: { x: 0, y: 0 },
+        featureId: '1',
+        value: 0.3,
+      })
+    ).toMatchObject({
+      props: { name: 'ALFA', swatchColor: '#b', primary: 'IVS 0,3 · Alta' },
+    });
+  });
+});

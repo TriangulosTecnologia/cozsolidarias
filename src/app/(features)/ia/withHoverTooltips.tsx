@@ -7,12 +7,13 @@ import type {
 
 import { TooltipCard } from '../mapas/mapaTooltipCard';
 import { TOOLTIP_STYLE } from '../mapas/mapaTooltipStyle';
+import { withLegendHoverTooltips } from './legendHoverTooltips';
 
 const MUNICIPIOS_URL = '/geo/geojs-100-mun.json';
 
 /** `codarea → municipio` read from the inline features of the spec's sources. */
 const municipioNames = (spec: VisualizationSpec): Map<string, string> => {
-  const features = spec.sources.flatMap((source) => {
+  const features = (spec.sources ?? []).flatMap((source) => {
     const data = source.type === 'geojson' ? source.data : undefined;
     return typeof data === 'object' && 'features' in data ? data.features : [];
   });
@@ -82,9 +83,7 @@ const hoverAnchor = (spec: VisualizationSpec) => {
  * @example
  * withHoverTooltips(spec).layers[0].hoverTooltip?.render({ featureId: '2927408', value: 120, layerId: 'l', sourceId: 's', point: { x: 0, y: 0 } });
  */
-export const withHoverTooltips = (
-  spec: VisualizationSpec
-): VisualizationSpec => {
+const withPointHoverTooltips = (spec: VisualizationSpec): VisualizationSpec => {
   const anchor = hoverAnchor(spec);
   if (!anchor) {
     return spec;
@@ -124,4 +123,24 @@ export const withHoverTooltips = (
     mapData: [...mapData, ...hoverMapData],
     layers: [...hoverLayers, ...layers],
   };
+};
+
+/**
+ * Gives a served spec its hover cards: the point layers joined to a `mapData`
+ * (see {@link withPointHoverTooltips}) and the polygon layers painted by a
+ * threshold legend, such as IVS and IDHM ({@link withLegendHoverTooltips}).
+ *
+ * @param spec - The spec served by `/api/ai/spec`.
+ * @returns The spec with its hover cards.
+ *
+ * @example
+ * withHoverTooltips(spec).layers?.[0].hoverTooltip?.render;
+ */
+export const withHoverTooltips = (
+  spec: VisualizationSpec
+): VisualizationSpec => {
+  return withLegendHoverTooltips({
+    spec: withPointHoverTooltips(spec),
+    names: municipioNames(spec),
+  });
 };
