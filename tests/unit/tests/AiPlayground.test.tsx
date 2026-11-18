@@ -30,6 +30,16 @@ jest.mock('@ttoss/geovis-workspace', () => {
   };
 });
 
+// The names fetch would consume the `fetch` mock queued for the submit calls;
+// the hook is covered by its own test.
+jest.mock('src/app/(features)/ia/useMunicipioNomes', () => {
+  return {
+    useMunicipioNomes: () => {
+      return {};
+    },
+  };
+});
+
 // The theme/i18n providers are ESM-only and irrelevant to the logic under test.
 jest.mock('@ttoss/react-i18n', () => {
   return {

@@ -1,0 +1,6 @@
+{
+  "decision": "https://flow.ttoss.dev/app/tasks/task_vytdmke1my",
+  "groups": [
+    { "cases": ["golden-ivs", "trap-ivs-subindice", "trap-idhm"], "class": "rejected", "scope": "transform", "layer": "server legend", "issue": 115, "note": "same failing check as run 20261111T122736Z" }
+  ]
+}
