@@ -69,6 +69,7 @@ const legendScaleOf = () => {
 /** Which outcomes satisfy the case: an explicit `expect.outcome`, else a map. */
 const ACCEPTED = {
   error: ['error'],
+  clarify: ['clarify'],
   'error-or-clarify': ['error', 'clarify'],
   'clarify-or-default-with-note': ['clarify', 'spec'],
   'spec-with-rate-or-error': ['spec', 'error'],

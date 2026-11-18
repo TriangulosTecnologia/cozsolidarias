@@ -1,0 +1,36 @@
+{
+  "prompt": "Mapa dos CAFs (Cadastro Ambiental Rural) no Brasil.",
+  "httpStatus": 422,
+  "durationMs": 11977,
+  "response": {
+    "error": true,
+    "message": "O modelo de IA não pôde gerar o mapa com este pedido. Reformule o pedido informando o dataset e o tipo de mapa desejados.",
+    "issues": [
+      {
+        "code": "missing_data",
+        "message": "O modelo de IA não pôde gerar o mapa com este pedido. Reformule o pedido informando o dataset e o tipo de mapa desejados."
+      }
+    ],
+    "requirements": [
+      {
+        "code": "missing_data",
+        "message": "O modelo de IA não pôde gerar o mapa com este pedido. Reformule o pedido informando o dataset e o tipo de mapa desejados.",
+        "fix": "Reformule o pedido informando o dataset e o tipo de mapa desejados."
+      }
+    ],
+    "mapTypeOptions": [
+      {
+        "value": "choropleth",
+        "label": "Coroplético (áreas coloridas por valor)"
+      },
+      {
+        "value": "dotDensity",
+        "label": "Densidade de pontos"
+      },
+      {
+        "value": "proportionalCircles",
+        "label": "Círculos proporcionais"
+      }
+    ]
+  }
+}

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Runs every eval case in `evals/evals.json` against the local dev server,
+# Runs every eval case in `evals/evals.json` against the local dev server by default
+# (base-url: the host root, POST <base-url>/api/ai/spec; /ia is only the UI page),
 # sequentially, writing one output per case to <run-dir>/cases/. Progress goes
 # to stderr and <run-dir>/campaign.log; report_run.mjs then writes
 # eval-report.json and SUMMARY.md.
@@ -9,19 +10,21 @@
 # high is ~45s, so an occasional overrun is measurement noise, not signal.
 # A case that overruns TWICE is recorded as a real timeout.
 #
-# Usage: run_campaign.sh <run-dir> [base-url]
+# Usage: run_campaign.sh [run-dir] [base-url]
+# run-dir defaults to <skill>/runs/<UTC timestamp>--campaign.
 set -uo pipefail
 
-RUN_DIR="${1:?run-dir required}"
-BASE_URL="${2:-http://localhost:3000}"
 SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+RUN_DIR="${1:-$SKILL_DIR/runs/$(date -u +%Y%m%dT%H%M%SZ)--campaign}"
+BASE_URL="${2:-http://localhost:3000}"
 EVALS="$SKILL_DIR/evals/evals.json"
 
 mkdir -p "$RUN_DIR/cases"
 exec 2> >(tee -a "$RUN_DIR/campaign.log" >&2)
 TEE_PID=$!
 
-mapfile -t IDS < <(node -p "require('$EVALS').cases.map(c=>c.id).join('\n')")
+# Here-string, not `< <(...)`: a later process substitution makes bash forget TEE_PID.
+mapfile -t IDS <<< "$(node -p "require('$EVALS').cases.map(c=>c.id).join('\n')")"
 TOTAL=${#IDS[@]}
 i=0
 
