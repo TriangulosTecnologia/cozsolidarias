@@ -43,7 +43,7 @@ const parseLine = (line) => {
 const cadinsanOracle = (numeratorField) => {
   const column = CADINSAN_NUMERATOR_COLUMN[numeratorField];
   if (column === undefined) throw new Error(`unknown CADINSAN numerator field: ${numeratorField}`);
-  const lines = readFileSync(CADINSAN_CSV, 'utf8').replace(/^﻿/, '').trim().split(/\r?\n/).slice(1);
+  const lines = readFileSync(CADINSAN_CSV, 'utf8').trim().split(/\r?\n/).slice(1);
   return lines.map((line) => {
     const cols = parseLine(line);
     return { geometryId: cols[0], numerator: Number(cols[column]), denominator: Number(cols[CADINSAN_DENOMINATOR_COLUMN]) };
@@ -95,11 +95,11 @@ const checkBands = ({ served, oracle, bands }) => {
     band.municipios += 1;
     band.familias += row.numerator;
   }
-  bands.familiesPerBand.forEach((expected, i) => {
+  for (const [i, expected] of bands.familiesPerBand.entries()) {
     if (counted[i].municipios !== expected.municipios || counted[i].familias !== expected.familias) {
       failures.push(`B1: band "${expected.label}" got ${counted[i].municipios} municípios / ${counted[i].familias} familias, expected ${expected.municipios} / ${expected.familias}`);
     }
-  });
+  }
   return failures;
 };
 
