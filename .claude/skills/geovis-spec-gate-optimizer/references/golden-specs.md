@@ -26,7 +26,7 @@ Contents of `tmp/specs/full/verifield` (12 files, verified):
 | File | Dataset | Form | Used by |
 |---|---|---|---|
 | `_pessoas-atendidas.json` | `cozinhas_pessoas_atendidas` (348 rows, sum 789,755) | `point+sizeBy` (circles) | people gate (decision 1c); `nogolden-pessoas-atendidas*` cases; variation `v-pessoas-atendidas` |
-| `_coropletico.json` | `cozinhas_geolocalizadas` (count) | `polygon` | `/mapas` structure; case `golden-coropletico` no longer expects this spec (see decision D4) |
+| `_coropletico.json` | `cozinhas_geolocalizadas` (count) | `polygon` | `/mapas` structure; case `golden-coropletico-no-clarify` (`FORBID_ABSOLUTE_ON_CHOROPLETH` falsy, decision D4) |
 | `_coropletico-ivs.json`, `_coropletico-ivs-capital-humano.json`, `_coropletico-ivs-infraestrutura.json`, `_coropletico-ivs-renda-trabalho.json` | IVS and sub-indices | `polygon` | no eval case in this version |
 | `_coropletico-idhm.json`, `_coropletico-idhm-educacao.json`, `_coropletico-idhm-educacao-escolaridade.json`, `_coropletico-idhm-educacao-frequencia.json`, `_coropletico-idhm-longevidade.json`, `_coropletico-idhm-renda.json` | IDHM and sub-indices | `polygon` | no eval case in this version |
 
@@ -74,9 +74,9 @@ changes, the oracle must change with it.
 
 ### Clarification response (`references/goldens/coropletico-cozinhas-clarify.json`)
 
-For the count-of-kitchens choropleth request, the route answers HTTP 200 without `spec`, with a
-`clarify` (facet `mapType`, default `proportionalCircles`). This is the behavior accepted by decision
-D4 (option a). The file stores that captured response from run
+With `FORBID_ABSOLUTE_ON_CHOROPLETH=true`, the route answers the count-of-kitchens choropleth request
+with HTTP 200 without `spec`, with a `clarify` (facet `mapType`, default `proportionalCircles`), per
+decision D4 (case `golden-coropletico`). The file stores that captured response from run
 `runs/20261027T120609Z--pos-extensao-absoluto-lista`.
 
 ### Excluded cases

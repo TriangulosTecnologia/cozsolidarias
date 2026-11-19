@@ -177,7 +177,9 @@ Sequential, with the coverage gate.
 2. Run `scripts/run_campaign.sh [run-dir]` (default `runs/<UTC timestamp>--campaign`): it POSTs each case with `scripts/run_eval_case.sh` to
    `<base-url>/api/ai/spec` (default `http://localhost:3000`; pass the production host root,
    `https://cozsolidarias.triangulos.tech`, to measure production), scores it, logs to `campaign.log`, and ends with
-   `scripts/report_run.mjs`.
+   `scripts/report_run.mjs`. A case with `env` runs only when the campaign's shell carries the
+   server's flags (export `FORBID_ABSOLUTE_ON_CHOROPLETH=true` for both, or for neither): one
+   campaign judges `golden-coropletico` or `golden-coropletico-no-clarify`, never both.
 3. `score_case.mjs` reads the served `response.spec` from each case and runs `validateSpec` on it
    (V1); there is no separate extraction file.
 4. Binary coverage gate: `scripts/score_case.mjs` over every case with `R-*`. A variant only proceeds

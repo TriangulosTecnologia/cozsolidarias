@@ -6,22 +6,17 @@ import { withMapaBoundaries } from '@/app/(features)/mapas/mapaBoundaries';
 import { DEFAULT_COLOR_RAMP } from '@/app/(features)/mapas/mapaColorRamp';
 import { gateway } from '@/gateway';
 
+import { COZINHAS_CHOROPLETH_DATASET_IDS } from './mapDataCatalogue';
 import { isRecord, type UnknownRecord } from './specValidation';
 
-/**
- * Catalogue dataset ids the agent may emit for "cozinhas por município"; the
- * canonical spec renames them to `/mapas`'s own join id,
- * `cozinhas-por-municipio`.
- */
-const COZINHAS_POR_MUNICIPIO_DATASET_IDS = ['cozinhas_geolocalizadas'];
-
+/** The spec's `mapData` ids the canonical spec answers for; it renames them to `/mapas`'s own join id, `cozinhas-por-municipio`. */
 const cozinhasMapDataIds = (spec: UnknownRecord): Set<string> => {
   const mapData = spec['mapData'];
   return new Set(
     (Array.isArray(mapData) ? mapData : []).flatMap((entry) => {
       const id = isRecord(entry) ? entry['mapDataId'] : undefined;
       return typeof id === 'string' &&
-        COZINHAS_POR_MUNICIPIO_DATASET_IDS.includes(id)
+        COZINHAS_CHOROPLETH_DATASET_IDS.includes(id)
         ? [id]
         : [];
     })

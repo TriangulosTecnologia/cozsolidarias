@@ -1992,7 +1992,8 @@ describe('POST /api/ai/spec', () => {
     expect(body.message).toMatch(/tempo limite/);
   }, 10000);
 
-  test('serves the /mapas cozinhas choropleth for the target prompt, matching the reference spec', async () => {
+  /** The gateway reads behind the /mapas cozinhas choropleth (see `buildCozinhasChoroplethSpec`). */
+  const mockCozinhasChoroplethGateway = () => {
     jest.spyOn(gateway, 'getCozinhasPorMunicipio').mockResolvedValue([
       {
         codigoIbge: '3304557',
@@ -2042,6 +2043,10 @@ describe('POST /api/ai/spec', () => {
         },
       ],
     });
+  };
+
+  test('serves the /mapas cozinhas choropleth when the agent answers one, matching the reference spec', async () => {
+    mockCozinhasChoroplethGateway();
     mockAgentReply(
       JSON.stringify({
         engine: 'maplibre',
@@ -2066,10 +2071,9 @@ describe('POST /api/ai/spec', () => {
       })
     );
 
+    // No choropleth wording: the preflight leaves the map type to the agent.
     const response = await POST(
-      jsonRequest({
-        prompt: 'Quero ver o mapa coroplético de cozinhas por município',
-      })
+      jsonRequest({ prompt: 'Quero ver o mapa de cozinhas por município' })
     );
     const body = (await response.json()) as {
       spec: Record<string, unknown>;
@@ -2082,6 +2086,58 @@ describe('POST /api/ai/spec', () => {
       neutralizeDataDerived(COROPLETICO_SPEC)
     );
   }, 10000);
+
+  describe('a kitchen-count choropleth request follows FORBID_ABSOLUTE_ON_CHOROPLETH (#117)', () => {
+    const PROMPT = 'Mapa coroplético das cozinhas solidárias por município.';
+
+    afterEach(() => {
+      delete process.env['FORBID_ABSOLUTE_ON_CHOROPLETH'];
+    });
+
+    test('unset: serves the /mapas cozinhas choropleth without calling the agent', async () => {
+      mockCozinhasChoroplethGateway();
+      // What the agent answers: its instructions never paint a count as a choropleth.
+      const fetchMock = mockRawAgentReply(
+        JSON.stringify({
+          status: 'error',
+          error: { code: 'missing_data', message: 'contagem absoluta' },
+        })
+      );
+
+      const response = await POST(jsonRequest({ prompt: PROMPT }));
+      const body = (await response.json()) as {
+        spec: Record<string, unknown>;
+        error: boolean;
+      };
+
+      expect(response.status).toBe(200);
+      expect(body.error).toBe(false);
+      expect(neutralizeDataDerived(normalizeSpec(body.spec))).toEqual(
+        neutralizeDataDerived(COROPLETICO_SPEC)
+      );
+      expect(fetchMock).not.toHaveBeenCalled();
+    }, 10000);
+
+    test('true: asks the map type without calling the agent', async () => {
+      process.env['FORBID_ABSOLUTE_ON_CHOROPLETH'] = 'true';
+      const fetchMock = jest.fn();
+      global.fetch = fetchMock;
+
+      const response = await POST(jsonRequest({ prompt: PROMPT }));
+      const body = (await response.json()) as {
+        spec?: unknown;
+        clarify?: { facet: string; default: string };
+      };
+
+      expect(response.status).toBe(200);
+      expect(body.spec).toBeUndefined();
+      expect(body.clarify).toMatchObject({
+        facet: 'mapType',
+        default: 'proportionalCircles',
+      });
+      expect(fetchMock).not.toHaveBeenCalled();
+    });
+  });
 });
 
 // ---------------------------------------------------------------------------

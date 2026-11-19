@@ -9,10 +9,12 @@ import {
 import { type ConceptEntry, normalize } from './conceptIndex';
 import { FAMILIES, type Variant } from './datasetFamilies';
 import {
+  COZINHAS_CHOROPLETH_DATASET_IDS,
   isAbsoluteTotalDataset,
   type RenderableDatasetId,
 } from './mapDataCatalogue';
 import { MAP_TYPE_OPTIONS } from './mapTypeOptions';
+import type { UnknownRecord } from './specValidation';
 
 /** One selectable dataset or map type, with its pt-BR label. */
 export type ClarifyOption = { value: string; label: string };
@@ -29,10 +31,13 @@ export type Clarification = {
  * What {@link preflightPrompt} concluded: `resolved`, `unmatched` and `proxy`
  * let the generation proceed (its validation loop stays the real gate; a
  * `proxy` also names the adjacent dataset and says it is not the exact
- * measure); `ambiguous` stops to ask and `feedback` stops to explain.
+ * measure); `ambiguous` stops to ask and `feedback` stops to explain. A
+ * `resolved` request that carries `spec` settles the map by itself: that
+ * minimal spec is served without the agent.
  */
 export type PreflightResult =
-  | { status: 'resolved' | 'unmatched' }
+  | { status: 'unmatched' }
+  | { status: 'resolved'; spec?: UnknownRecord }
   | { status: 'ambiguous'; clarify: Clarification }
   | { status: 'unavailable'; grain: string }
   | { status: 'feedback'; feedback: Feedback }
@@ -128,6 +133,30 @@ const choroplethOnAbsoluteTotal = (params: {
   );
 };
 
+/**
+ * The minimal spec a request settles without the agent: a choropleth of one
+ * of the {@link COZINHAS_CHOROPLETH_DATASET_IDS}, which the route answers with
+ * the `/mapas` kitchens choropleth (`resolveCandidate`), asked by the chosen
+ * map type or else the prompt's wording, while kitchen counts may be painted
+ * by area (`FORBID_ABSOLUTE_ON_CHOROPLETH` not `true`).
+ */
+const settledSpec = (params: {
+  ids: string[];
+  text: string;
+  mapType?: MapType;
+}): UnknownRecord | undefined => {
+  const [id, ...others] = params.ids;
+  const asksChoropleth = params.mapType
+    ? params.mapType === 'choropleth'
+    : /coropl/.test(params.text);
+  return asksChoropleth &&
+    others.length === 0 &&
+    COZINHAS_CHOROPLETH_DATASET_IDS.includes(id) &&
+    !isAbsoluteTotalDataset(id)
+    ? { mapType: 'choropleth', mapData: [{ mapDataId: id }] }
+    : undefined;
+};
+
 const preflightDataset = (params: {
   text: string;
   mapType?: MapType;
@@ -149,9 +178,11 @@ const preflightDataset = (params: {
   if (ids.length === 0) {
     return { status: 'unmatched' };
   }
-  return choroplethOnAbsoluteTotal({ ids, text, mapType: params.mapType })
-    ? { status: 'ambiguous', clarify: absoluteTotalClarification() }
-    : { status: 'resolved' };
+  if (choroplethOnAbsoluteTotal({ ids, text, mapType: params.mapType })) {
+    return { status: 'ambiguous', clarify: absoluteTotalClarification() };
+  }
+  const spec = settledSpec({ ids, text, mapType: params.mapType });
+  return spec ? { status: 'resolved', spec } : { status: 'resolved' };
 };
 
 /** The renderable ids a resolved prompt stands for: the user's pick, else each family's variant or default. */
@@ -192,7 +223,9 @@ const preflightCatalogue = (params: {
  * only asks when a family's variants are ambiguous or a choropleth targets an
  * absolute total (the pairing `findChoroplethOnAbsoluteTotal` would reject
  * later). A prompt naming no known family is `unmatched` and goes on to
- * generation untouched.
+ * generation untouched. A kitchen-count choropleth the server builds itself
+ * is `resolved` with its minimal `spec` while `FORBID_ABSOLUTE_ON_CHOROPLETH`
+ * is not `true` (with it `true`, the prompt's wording is asked instead).
  *
  * deferred: token matching misses synonyms and typos, revisit when
  * `generationLogger` shows `unmatched` prompts failing generation.
@@ -201,11 +234,13 @@ const preflightCatalogue = (params: {
  * @param params.mapType - The map type the user already chose, if any.
  * @param params.datasetId - The dataset the user already chose; replaces the text matching.
  * @param params.concepts - The catalogue index (see `buildConceptIndex`); without it the catalogue is not consulted.
- * @returns `resolved`, `unmatched`, a `proxy`, `feedback` explaining why no
- * map can be made as asked, or `ambiguous` with the question to ask.
+ * @returns `resolved` (with the `spec` it settles, if any), `unmatched`, a
+ * `proxy`, `feedback` explaining why no map can be made as asked, or
+ * `ambiguous` with the question to ask.
  *
  * @example
  * preflightPrompt({ prompt: 'coroplético de pessoas atendidas' }).status; // 'ambiguous'
+ * preflightPrompt({ prompt: 'coroplético de cozinhas' }); // { status: 'resolved', spec: { mapType: 'choropleth', mapData: [{ mapDataId: 'cozinhas_geolocalizadas' }] } }
  */
 export const preflightPrompt = (params: {
   prompt: string;

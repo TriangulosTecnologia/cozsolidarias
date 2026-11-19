@@ -24,6 +24,7 @@ file, but no script consumes them today.
 | `kind` | string | 21 | `golden` (4), `rubric-only` (3), `trap` (3), `ambiguity` (1), `error` (4), `rule-gate` (5), `clarify` (1) | `run_variations.sh` only distinguishes `refusal`; no script reads the others |
 | `prompt` | string | 21 | Text in pt-BR, as a user would write it. | `run_campaign.sh`, `run_variations.sh`, `score_case.mjs` |
 | `default` | boolean | 1 | `true` only on the default case (`nogolden-pessoas-atendidas-quero-ver`). | **Not read.** Step 0 of `SKILL.md` depends on it, but no script reads it yet. |
+| `env` | object | 2 | Server flags the case needs, as booleans: `{ "FORBID_ABSOLUTE_ON_CHOROPLETH": true }` (`golden-coropletico`) or `false` (`golden-coropletico-no-clarify`). `'true'` is on, anything else off, as the route reads it. | `run_campaign.sh` (skips the case unless its shell carries the same flags as the server) |
 | `golden` | string | 7 | File name relative to `GEOVIS_GOLDEN_DIR` (e.g.: `_pessoas-atendidas.json`). Exception: `references/goldens/coropletico-cozinhas-clarify.json`, which is relative to the skill root. | `run_variations.sh` (with the `goldenCorpus` problem) |
 | `gate` | string | 2 | Path of a gate script (`scripts/gate_pessoas_total.mjs`). | **Not read.** |
 | `expect` | object | 21 | See the `expect` table below. | `score_case.mjs` (`expected-outcome` check and shape checks) |

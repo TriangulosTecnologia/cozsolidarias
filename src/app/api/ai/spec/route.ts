@@ -224,6 +224,31 @@ const getAgentResponse = async (params: {
 };
 
 /**
+ * The spec to resolve: the one the request settles by itself (see
+ * {@link preflightRequest}), with no agent call and so no Naturali config,
+ * else the agent's (see {@link getAgentResponse}).
+ */
+const getRequestedSpec = async (
+  request: ParsedRequest
+): Promise<{ spec: UnknownRecord; sessionId?: string } | Response> => {
+  if (request.spec) {
+    return { spec: request.spec, sessionId: request.sessionId };
+  }
+  const envOrError = validateEnv();
+  if (envOrError instanceof Response) {
+    return envOrError;
+  }
+  return getAgentResponse({
+    ...envOrError,
+    sessionId: request.sessionId,
+    prompt: request.prompt,
+    mapType: request.mapType,
+    datasetId: request.datasetId,
+    note: request.note,
+  });
+};
+
+/**
  * The last gate before a resolved spec is served: the checks that need the
  * resolved layers and legends (see {@link collectResolvedIssues}), then
  * geovis' own validation with its deterministic repairs. Any issue left is a
@@ -259,7 +284,9 @@ const checkServedSpec = (served: UnknownRecord): Response => {
  * The reply is then resolved into real data (see {@link resolveServedSpec})
  * and validated once more, with the same local repairs. Before any of that,
  * an ambiguous request is answered with a `clarify` question instead (see
- * {@link preflightRequest}); the session id travels in the `x-session-id`
+ * {@link preflightRequest}), and a request the preflight settles by itself
+ * (the kitchens choropleth while `FORBID_ABSOLUTE_ON_CHOROPLETH` is not
+ * `true`) skips the agent; the session id travels in the `x-session-id`
  * response header, and sending it back as `sessionId` continues the session.
  *
  * @returns `{ spec, error: false }` on success; `{ error: true, message,
@@ -279,36 +306,22 @@ export const POST = async (request: Request): Promise<Response> => {
     return requestOrError;
   }
 
-  const envOrError = validateEnv();
-  if (envOrError instanceof Response) {
-    return envOrError;
+  const requestedOrError = await getRequestedSpec(requestOrError);
+  if (requestedOrError instanceof Response) {
+    return requestedOrError;
   }
-
-  const modelJsonOrError = await getAgentResponse({
-    apiKey: envOrError.apiKey,
-    projectId: envOrError.projectId,
-    agentId: envOrError.agentId,
-    sessionId: requestOrError.sessionId,
-    prompt: requestOrError.prompt,
-    mapType: requestOrError.mapType,
-    datasetId: requestOrError.datasetId,
-    note: requestOrError.note,
-  });
-  if (modelJsonOrError instanceof Response) {
-    return modelJsonOrError;
-  }
-  const { sessionId } = modelJsonOrError;
+  const { sessionId } = requestedOrError;
 
   const servedOrError = await resolveServedSpec({
     prompt: requestOrError.prompt,
     spec: mergeSpecs(
       baseVisualizationSpecJson as UnknownRecord,
-      modelJsonOrError.spec
+      requestedOrError.spec
     ),
   });
-  if (servedOrError instanceof Response) {
-    return withSessionId(servedOrError, sessionId);
-  }
-
-  return withSessionId(checkServedSpec(servedOrError), sessionId);
+  const answer =
+    servedOrError instanceof Response
+      ? servedOrError
+      : checkServedSpec(servedOrError);
+  return sessionId ? withSessionId(answer, sessionId) : answer;
 };
