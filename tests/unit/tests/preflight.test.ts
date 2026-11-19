@@ -20,9 +20,48 @@ describe('preflightPrompt', () => {
       expect(
         preflightPrompt({ prompt: 'coroplético do número de cozinhas' })
       ).toMatchObject({ status: 'ambiguous', clarify: { facet: 'mapType' } });
+      // An explicit choice is not asked again, nor served by the server.
+      expect(
+        preflightPrompt({
+          prompt: 'mapa',
+          datasetId: 'cozinhas_geolocalizadas',
+          mapType: 'choropleth',
+        })
+      ).toEqual({ status: 'resolved' });
     } finally {
       delete process.env['FORBID_ABSOLUTE_ON_CHOROPLETH'];
     }
+  });
+
+  test('settles a kitchen-count choropleth by itself when FORBID_ABSOLUTE_ON_CHOROPLETH is off', () => {
+    const settled = {
+      status: 'resolved',
+      spec: {
+        mapType: 'choropleth',
+        mapData: [{ mapDataId: 'cozinhas_geolocalizadas' }],
+      },
+    };
+
+    expect(
+      preflightPrompt({ prompt: 'coroplético do número de cozinhas' })
+    ).toEqual(settled);
+    expect(
+      preflightPrompt({
+        prompt: 'mapa',
+        datasetId: 'cozinhas_geolocalizadas',
+        mapType: 'choropleth',
+      })
+    ).toEqual(settled);
+    // Another map type or another year is left to the agent.
+    expect(
+      preflightPrompt({
+        prompt: 'coroplético de cozinhas',
+        mapType: 'proportionalCircles',
+      })
+    ).toEqual({ status: 'resolved' });
+    expect(
+      preflightPrompt({ prompt: 'coroplético de cozinhas em 2025' })
+    ).toEqual({ status: 'resolved' });
   });
 
   test('stops a request for a spatial grain no dataset has', () => {
