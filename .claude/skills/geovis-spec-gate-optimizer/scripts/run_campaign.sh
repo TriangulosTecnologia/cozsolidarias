@@ -10,14 +10,14 @@
 # high is ~45s, so an occasional overrun is measurement noise, not signal.
 # A case that overruns TWICE is recorded as a real timeout.
 #
-# A case declaring `env` (e.g. {"FORBID_ABSOLUTE_ON_CHOROPLETH": true}) runs only
-# when this shell carries the same flags as the server ('true' is on, anything
-# else off, as the route reads them); otherwise it is skipped and logged, never scored.
+# Optional filter: comma-separated case ids or globs (`*` wildcard), taken from
+# the third argument or $CASES. Empty or `*` runs every case.
 #
-# Usage: run_campaign.sh [run-dir] [base-url]
-# run-dir defaults to <skill>/runs/<UTC timestamp>--campaign.
+# Usage: run_campaign.sh <run-dir> [base-url] [filter]
+# Example: run_campaign.sh runs/ivs-idhm https://host '*ivs*,*idhm*'
 set -uo pipefail
 
+FILTER="${3:-${CASES:-*}}"
 SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 RUN_DIR="${1:-$SKILL_DIR/runs/$(date -u +%Y%m%dT%H%M%SZ)--campaign}"
 BASE_URL="${2:-http://localhost:3000}"
@@ -28,8 +28,17 @@ exec 2> >(tee -a "$RUN_DIR/campaign.log" >&2)
 TEE_PID=$!
 
 # Here-string, not `< <(...)`: a later process substitution makes bash forget TEE_PID.
-mapfile -t IDS <<< "$(node -p "require('$EVALS').cases.map(c=>c.id).join('\n')")"
+mapfile -t IDS <<< "$(node -e "
+  const globs = process.argv[1].split(',').map((g) => g.trim()).filter(Boolean);
+  const res = globs.map((g) => new RegExp('^' + g.split('*').map((s) => s.replace(/[.+?^\${}()|[\]\\\\]/g, '\\\\$&')).join('.*') + '$'));
+  require('$EVALS').cases.map((c) => c.id).filter((id) => res.some((r) => r.test(id))).forEach((id) => console.log(id));
+" "$FILTER")"
+[[ -z "${IDS[*]}" ]] && IDS=()
 TOTAL=${#IDS[@]}
+if [[ "$TOTAL" -eq 0 ]]; then
+  echo "no case matches filter '$FILTER'" >&2
+  exit 1
+fi
 i=0
 
 for ID in "${IDS[@]}"; do

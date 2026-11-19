@@ -1,0 +1,143 @@
+{
+  "runId": "20261118T200750Z--ivs-idhm-family",
+  "decision": null,
+  "totals": {
+    "cases": 10,
+    "passed": 10,
+    "failed": 0
+  },
+  "cases": [
+    {
+      "case": "golden-ivs",
+      "prompt": "Mapa da vulnerabilidade social dos municípios brasileiros.",
+      "httpStatus": 200,
+      "durationMs": 12030,
+      "outcome": "spec",
+      "issues": [],
+      "failedChecks": [],
+      "passed": true,
+      "class": "approved",
+      "scope": null,
+      "issue": null
+    },
+    {
+      "case": "nogolden-idhm-educacao-escolaridade",
+      "prompt": "Mapa do IDHM de escolaridade da população adulta por município.",
+      "httpStatus": 200,
+      "durationMs": 10342,
+      "outcome": "spec",
+      "issues": [],
+      "failedChecks": [],
+      "passed": true,
+      "class": "approved",
+      "scope": null,
+      "issue": null
+    },
+    {
+      "case": "nogolden-idhm-educacao-frequencia",
+      "prompt": "Mapa do IDHM de frequência escolar de crianças e jovens por município.",
+      "httpStatus": 200,
+      "durationMs": 9879,
+      "outcome": "spec",
+      "issues": [],
+      "failedChecks": [],
+      "passed": true,
+      "class": "approved",
+      "scope": null,
+      "issue": null
+    },
+    {
+      "case": "nogolden-idhm-educacao",
+      "prompt": "Mapa do IDHM de educação por município.",
+      "httpStatus": 200,
+      "durationMs": 9713,
+      "outcome": "spec",
+      "issues": [],
+      "failedChecks": [],
+      "passed": true,
+      "class": "approved",
+      "scope": null,
+      "issue": null
+    },
+    {
+      "case": "nogolden-idhm-longevidade",
+      "prompt": "Mapa do IDHM de longevidade por município.",
+      "httpStatus": 200,
+      "durationMs": 9258,
+      "outcome": "spec",
+      "issues": [],
+      "failedChecks": [],
+      "passed": true,
+      "class": "approved",
+      "scope": null,
+      "issue": null
+    },
+    {
+      "case": "nogolden-idhm-renda",
+      "prompt": "Mapa do IDHM de renda dos municípios.",
+      "httpStatus": 200,
+      "durationMs": 8555,
+      "outcome": "spec",
+      "issues": [],
+      "failedChecks": [],
+      "passed": true,
+      "class": "approved",
+      "scope": null,
+      "issue": null
+    },
+    {
+      "case": "nogolden-ivs-capital-humano",
+      "prompt": "Mapa do IVS de capital humano por município.",
+      "httpStatus": 200,
+      "durationMs": 9506,
+      "outcome": "spec",
+      "issues": [],
+      "failedChecks": [],
+      "passed": true,
+      "class": "approved",
+      "scope": null,
+      "issue": null
+    },
+    {
+      "case": "nogolden-ivs-renda-trabalho",
+      "prompt": "Mapa do IVS de renda e trabalho por município.",
+      "httpStatus": 200,
+      "durationMs": 11371,
+      "outcome": "spec",
+      "issues": [],
+      "failedChecks": [],
+      "passed": true,
+      "class": "approved",
+      "scope": null,
+      "issue": null
+    },
+    {
+      "case": "trap-idhm",
+      "prompt": "Mapa do Índice de Desenvolvimento Humano Municipal.",
+      "httpStatus": 200,
+      "durationMs": 9229,
+      "outcome": "spec",
+      "issues": [],
+      "failedChecks": [],
+      "passed": true,
+      "class": "approved",
+      "scope": null,
+      "issue": null
+    },
+    {
+      "case": "trap-ivs-subindice",
+      "prompt": "Mapa do IVS de infraestrutura urbana por município.",
+      "httpStatus": 200,
+      "durationMs": 11058,
+      "outcome": "spec",
+      "issues": [],
+      "failedChecks": [],
+      "passed": true,
+      "class": "approved",
+      "scope": null,
+      "issue": null
+    }
+  ],
+  "declined": [],
+  "proposals": []
+}
