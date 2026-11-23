@@ -36,7 +36,7 @@ const CADINSAN_DENOMINATOR_COLUMN = 6;
 
 /** Splits one CSV line, honouring double-quoted fields. */
 const parseLine = (line) => {
-  return (line.match(/("[^"]*"|[^,]*)(,|$)/g) ?? []).map((s) => { return s.replace(/,$/, '').replace(/^"|"$/g, '') });
+  return (line.match(/("[^"]*"|[^,]*)(,|$)/g) ?? []).map((s) => { return s.replace(/,$/, '').replace(/^\uFEFF/g, '') });
 };
 
 /** `[{ geometryId, numerator, denominator }]` recomputed from the CADINSAN CSV. */
