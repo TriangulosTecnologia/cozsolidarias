@@ -4,6 +4,7 @@
   "createdAt": "2026-09-18",
   "goldenCorpus": "tmp/specs/full/verifield",
   "notes": [
+    "family/variable/variableDescription: family = key of FAMILIES in src/app/api/ai/spec/datasetFamilies.ts (ivs, idhm, cadinsan, cozinhas); variable = name of the data field the case paints (null when there is no numeric field); variableDescription = what that field means in the prompt's context. expect.dataset is set only where a spec is expected and the dataset id is deterministic (score_case checks it only when a spec comes back).",
     "Prompts are in pt-BR because that is how the app's users write.",
     "Only the 5 reachable modes have a golden. The remaining 18 depend on ids that do not exist in RENDERABLE_DATASET_FETCHERS — see the corpus README. Do not add eval cases for them: they fail by construction and contaminate the gate.",
     "The traps (trap-*) come from real divergence between the catalog description and what the fetcher delivers. They are the highest-value cases: the description promises more than the route can serve, and the model has no way to discover that on its own."
@@ -18,9 +19,14 @@
   "cases": [
     {
       "id": "golden-coropletico",
+      "family": "cozinhas",
+      "variable": "quantidade",
+      "variableDescription": "Número de cozinhas solidárias por município",
       "kind": "clarify",
       "prompt": "Mapa coroplético das cozinhas solidárias por município.",
-      "env": { "FORBID_ABSOLUTE_ON_CHOROPLETH": true },
+      "env": {
+        "FORBID_ABSOLUTE_ON_CHOROPLETH": true
+      },
       "golden": "references/goldens/coropletico-cozinhas-clarify.json",
       "expect": {
         "outcome": "clarify",
@@ -28,14 +34,21 @@
         "default": "proportionalCircles",
         "reason": "with FORBID_ABSOLUTE_ON_CHOROPLETH=true the kitchen count is an absolute total, not painted as a choropleth; decision D4"
       },
-      "coversRules": ["R-choropleth-not-absolute"],
+      "coversRules": [
+        "R-choropleth-not-absolute"
+      ],
       "rubric": "Asks before generating: HTTP 200 clarify on the mapType facet, default proportionalCircles, with no spec and no agent call."
     },
     {
       "id": "golden-coropletico-no-clarify",
+      "family": "cozinhas",
+      "variable": "quantidade",
+      "variableDescription": "Número de cozinhas solidárias por município",
       "kind": "golden",
       "prompt": "Mapa coroplético das cozinhas solidárias por município.",
-      "env": { "FORBID_ABSOLUTE_ON_CHOROPLETH": false },
+      "env": {
+        "FORBID_ABSOLUTE_ON_CHOROPLETH": false
+      },
       "golden": "_coropletico.json",
       "expect": {
         "geometry": "/geo/geojs-100-mun.json",
@@ -57,6 +70,9 @@
     },
     {
       "id": "golden-pontos",
+      "family": "cozinhas",
+      "variable": null,
+      "variableDescription": "Sem campo numérico: cada cozinha é um ponto (lat/lon) do endpoint /api/cozinhas",
       "kind": "golden",
       "prompt": "Quero ver cada cozinha solidária como um ponto no mapa do Brasil.",
       "golden": "pontos.json",
@@ -75,6 +91,9 @@
     },
     {
       "id": "nogolden-pontos-ano",
+      "family": "cozinhas",
+      "variable": null,
+      "variableDescription": "Sem campo numérico: cada cozinha cadastrada em 2025 é um ponto do endpoint /api/cozinhas?ano=2025",
       "kind": "nogolden",
       "prompt": "Cada cozinha solidária cadastrada em 2025 como um ponto no mapa.",
       "expect": {
@@ -91,6 +110,9 @@
     },
     {
       "id": "nogolden-pontos-heatmap",
+      "family": "cozinhas",
+      "variable": null,
+      "variableDescription": "Sem campo numérico: a concentração espacial dos pontos de cozinhas alimenta o mapa de calor",
       "kind": "nogolden",
       "prompt": "Mostre as cozinhas solidárias como pontos e também um mapa de calor da concentração.",
       "expect": {
@@ -107,6 +129,9 @@
     },
     {
       "id": "golden-circulos",
+      "family": "cozinhas",
+      "variable": "quantidade",
+      "variableDescription": "Número de cozinhas solidárias por município, que define o tamanho proporcional de cada círculo",
       "kind": "golden",
       "prompt": "Mapa com um círculo por município, com o tamanho proporcional ao número de cozinhas solidárias.",
       "golden": "circulos.json",
@@ -129,6 +154,9 @@
     },
     {
       "id": "golden-ivs",
+      "family": "ivs",
+      "variable": "ivs",
+      "variableDescription": "Índice de Vulnerabilidade Social (IPEA) geral do município; maior = mais vulnerável",
       "kind": "golden",
       "prompt": "Mapa da vulnerabilidade social dos municípios brasileiros.",
       "golden": "coropletico-ivs.json",
@@ -154,6 +182,9 @@
     },
     {
       "id": "golden-cadinsan",
+      "family": "cadinsan",
+      "variable": "proporcaoComPbf",
+      "variableDescription": "Proporção (%) de famílias do CadÚnico em insegurança alimentar, cenário com Bolsa Família",
       "kind": "golden",
       "prompt": "Mapa da insegurança alimentar das famílias do CadÚnico por município.",
       "golden": "coropletico-cadinsan-com-pbf.json",
@@ -161,7 +192,69 @@
         "dataset": "municipios_cadinsan",
         "geometry": "/geo/geojs-100-mun.json",
         "form": "polygon",
-        "legendScale": "quantitative"
+        "legendScale": "quantitative",
+        "numerator": {
+          "source": "gateway.getCadinsanPorMunicipio",
+          "field": "absolutoComPbf",
+          "meaning": "famílias do CadÚnico em insegurança alimentar no município"
+        },
+        "denominator": {
+          "source": "gateway.getCadinsanPorMunicipio",
+          "field": "cadastrosCadunico",
+          "meaning": "total de cadastros (famílias) do CadÚnico no município"
+        },
+        "rate": {
+          "source": "gateway.getCadinsanPorMunicipio",
+          "field": "proporcaoComPbf",
+          "formula": "(absolutoComPbf / cadastrosCadunico) * 100",
+          "unit": "%",
+          "rounding": "2 decimals",
+          "nullWhen": "cadastrosCadunico = 0",
+          "tolerance": 0.01,
+          "per": 100
+        },
+        "bands": {
+          "thresholds": [
+            0,
+            10,
+            20,
+            30,
+            40
+          ],
+          "rule": "value >= threshold; 0 is a real cutpoint; null (sem dado) is a separate grey bin",
+          "familiesPerBand": [
+            {
+              "label": "0 a <10%",
+              "municipios": 3821,
+              "familias": 670252
+            },
+            {
+              "label": "10 a <20%",
+              "municipios": 1585,
+              "familias": 1437324
+            },
+            {
+              "label": "20 a <30%",
+              "municipios": 156,
+              "familias": 273862
+            },
+            {
+              "label": "30 a <40%",
+              "municipios": 8,
+              "familias": 9499
+            },
+            {
+              "label": ">=40%",
+              "municipios": 0,
+              "familias": 0
+            }
+          ],
+          "semDado": 0,
+          "totalFamilias": 2390937,
+          "totalCadastros": 21236683,
+          "municipios": 5570,
+          "note": "Computed from CADINSAN_2025_dados_municipais.csv: municipios/familias per band of the município share (%); sums of familias per band equal totalFamilias."
+        }
       },
       "coversRules": [
         "R-active-legend-exists",
@@ -172,10 +265,14 @@
         "R-mapdataid-real",
         "R-nodata-color"
       ],
-      "rubric": "Picks municipios_cadinsan. The fetcher serves the WITH Bolsa Família scenario; a neutral request like this one should accept it without inventing the other scenario."
+      "rubric": "Picks municipios_cadinsan. The fetcher serves the WITH Bolsa Família scenario; a neutral request like this one should accept it without inventing the other scenario.",
+      "gate": "scripts/gate_ratio.mjs"
     },
     {
       "id": "nogolden-cozinhas-2025",
+      "family": "cozinhas",
+      "variable": "quantidade",
+      "variableDescription": "Número de cozinhas solidárias cadastradas em 2025 por município",
       "kind": "rubric-only",
       "prompt": "Mapa das cozinhas solidárias cadastradas em 2025.",
       "expect": {
@@ -189,6 +286,9 @@
     },
     {
       "id": "nogolden-pessoas-atendidas",
+      "family": "cozinhas",
+      "variable": "pessoasAtendidas",
+      "variableDescription": "Total absoluto de pessoas atendidas pelas cozinhas em cada município",
       "kind": "rubric-only",
       "prompt": "Mapa do total de pessoas atendidas pelas cozinhas em cada município.",
       "expect": {
@@ -196,7 +296,11 @@
         "variable": "pessoasAtendidas",
         "form": "point+sizeBy",
         "legendScale": "quantitative",
-        "total": { "source": "gateway.getCozinhasPorMunicipio", "field": "pessoasAtendidas", "tolerance": 0 }
+        "total": {
+          "source": "gateway.getCozinhasPorMunicipio",
+          "field": "pessoasAtendidas",
+          "tolerance": 0
+        }
       },
       "golden": "_pessoas-atendidas.json",
       "gate": "scripts/gate_pessoas_total.mjs",
@@ -209,6 +313,9 @@
     },
     {
       "id": "nogolden-pessoas-atendidas-quero-ver",
+      "family": "cozinhas",
+      "variable": "pessoasAtendidas",
+      "variableDescription": "Total absoluto de pessoas atendidas pelas cozinhas em cada município",
       "kind": "rubric-only",
       "default": true,
       "prompt": "Quero ver o número total de pessoas atendidas pelas cozinhas solidárias por município",
@@ -217,7 +324,11 @@
         "variable": "pessoasAtendidas",
         "form": "point+sizeBy",
         "legendScale": "quantitative",
-        "total": { "source": "gateway.getCozinhasPorMunicipio", "field": "pessoasAtendidas", "tolerance": 0 }
+        "total": {
+          "source": "gateway.getCozinhasPorMunicipio",
+          "field": "pessoasAtendidas",
+          "tolerance": 0
+        }
       },
       "golden": "_pessoas-atendidas.json",
       "gate": "scripts/gate_pessoas_total.mjs",
@@ -230,6 +341,9 @@
     },
     {
       "id": "trap-ivs-subindice",
+      "family": "ivs",
+      "variable": "ivsInfraestruturaUrbana",
+      "variableDescription": "Subíndice de infraestrutura urbana do IVS; maior = mais vulnerável",
       "kind": "nogolden",
       "prompt": "Mapa do IVS de infraestrutura urbana por município.",
       "expect": {
@@ -246,6 +360,9 @@
     },
     {
       "id": "trap-idhm",
+      "family": "idhm",
+      "variable": "idhm",
+      "variableDescription": "Índice de Desenvolvimento Humano Municipal; maior = melhor (escala oposta à do IVS)",
       "kind": "nogolden",
       "prompt": "Mapa do Índice de Desenvolvimento Humano Municipal.",
       "expect": {
@@ -263,6 +380,9 @@
     {
       "id": "nogolden-ivs-capital-humano",
       "kind": "nogolden",
+      "family": "ivs",
+      "variable": "ivsCapitalHumano",
+      "variableDescription": "Subíndice de capital humano do IVS (IPEA); maior = mais vulnerável",
       "prompt": "Mapa do IVS de capital humano por município.",
       "expect": {
         "dataset": "municipios_ivs_capital_humano",
@@ -286,6 +406,9 @@
     {
       "id": "nogolden-ivs-renda-trabalho",
       "kind": "nogolden",
+      "family": "ivs",
+      "variable": "ivsRendaETrabalho",
+      "variableDescription": "Subíndice de renda e trabalho do IVS (IPEA); maior = mais vulnerável",
       "prompt": "Mapa do IVS de renda e trabalho por município.",
       "expect": {
         "dataset": "municipios_ivs_renda_trabalho",
@@ -309,6 +432,9 @@
     {
       "id": "nogolden-idhm-renda",
       "kind": "nogolden",
+      "family": "idhm",
+      "variable": "idhmRenda",
+      "variableDescription": "IDHM Renda; maior = melhor",
       "prompt": "Mapa do IDHM de renda dos municípios.",
       "expect": {
         "dataset": "municipios_idhm_renda",
@@ -332,6 +458,9 @@
     {
       "id": "nogolden-idhm-longevidade",
       "kind": "nogolden",
+      "family": "idhm",
+      "variable": "idhmLongevidade",
+      "variableDescription": "IDHM Longevidade; maior = melhor",
       "prompt": "Mapa do IDHM de longevidade por município.",
       "expect": {
         "dataset": "municipios_idhm_longevidade",
@@ -355,6 +484,9 @@
     {
       "id": "nogolden-idhm-educacao",
       "kind": "nogolden",
+      "family": "idhm",
+      "variable": "idhmEducacao",
+      "variableDescription": "IDHM Educação (dimensão agregada); maior = melhor",
       "prompt": "Mapa do IDHM de educação por município.",
       "expect": {
         "dataset": "municipios_idhm_educacao",
@@ -378,6 +510,9 @@
     {
       "id": "nogolden-idhm-educacao-escolaridade",
       "kind": "nogolden",
+      "family": "idhm",
+      "variable": "idhmEducacaoEscolaridade",
+      "variableDescription": "IDHM Educação, subíndice de escolaridade da população adulta; maior = melhor",
       "prompt": "Mapa do IDHM de escolaridade da população adulta por município.",
       "expect": {
         "dataset": "municipios_idhm_educacao_escolaridade",
@@ -401,6 +536,9 @@
     {
       "id": "nogolden-idhm-educacao-frequencia",
       "kind": "nogolden",
+      "family": "idhm",
+      "variable": "idhmEducacaoFrequencia",
+      "variableDescription": "IDHM Educação, subíndice de frequência escolar de crianças e jovens; maior = melhor",
       "prompt": "Mapa do IDHM de frequência escolar de crianças e jovens por município.",
       "expect": {
         "dataset": "municipios_idhm_educacao_frequencia",
@@ -423,25 +561,95 @@
     },
     {
       "id": "trap-cadinsan-sem-pbf",
+      "family": "cadinsan",
+      "variable": "proporcaoSemPbf",
+      "variableDescription": "Proporção (%) de famílias do CadÚnico em insegurança alimentar, cenário sem o efeito do Bolsa Família",
       "kind": "nogolden",
       "prompt": "Mapa da insegurança alimentar desconsiderando o efeito do Bolsa Família.",
       "expect": {
         "dataset": "municipios_cadinsan_sem_pbf",
         "geometry": "/geo/geojs-100-mun.json",
         "form": "polygon",
-        "legendScale": "quantitative"
+        "legendScale": "quantitative",
+        "numerator": {
+          "source": "gateway.getCadinsanPorMunicipio",
+          "field": "absolutoSemPbf",
+          "meaning": "famílias do CadÚnico em insegurança alimentar no município"
+        },
+        "denominator": {
+          "source": "gateway.getCadinsanPorMunicipio",
+          "field": "cadastrosCadunico",
+          "meaning": "total de cadastros (famílias) do CadÚnico no município"
+        },
+        "rate": {
+          "source": "gateway.getCadinsanPorMunicipio",
+          "field": "proporcaoSemPbf",
+          "formula": "(absolutoSemPbf / cadastrosCadunico) * 100",
+          "unit": "%",
+          "rounding": "2 decimals",
+          "nullWhen": "cadastrosCadunico = 0",
+          "tolerance": 0.01,
+          "per": 100
+        },
+        "bands": {
+          "thresholds": [
+            0,
+            10,
+            20,
+            30,
+            40
+          ],
+          "rule": "value >= threshold; 0 is a real cutpoint; null (sem dado) is a separate grey bin",
+          "familiesPerBand": [
+            {
+              "label": "0 a <10%",
+              "municipios": 1072,
+              "familias": 140271
+            },
+            {
+              "label": "10 a <20%",
+              "municipios": 2567,
+              "familias": 1482763
+            },
+            {
+              "label": "20 a <30%",
+              "municipios": 1306,
+              "familias": 1589105
+            },
+            {
+              "label": "30 a <40%",
+              "municipios": 307,
+              "familias": 328102
+            },
+            {
+              "label": ">=40%",
+              "municipios": 318,
+              "familias": 1228820
+            }
+          ],
+          "semDado": 0,
+          "totalFamilias": 4769061,
+          "totalCadastros": 21236683,
+          "municipios": 5570,
+          "note": "Computed from CADINSAN_2025_dados_municipais.csv: municipios/familias per band of the município share (%); sums of familias per band equal totalFamilias."
+        }
       },
       "coversRules": [
         "R-variable-choice",
         "R-error-when-impossible"
       ],
-      "rubric": "Formerly a trap; the without-PBF scenario now has its own id. Picks municipios_cadinsan_sem_pbf. Serious failure = serving municipios_cadinsan (with PBF) as if it were the without-PBF one; the bands differ by 3x (18.74 vs 51.1 at the top)."
+      "rubric": "Formerly a trap; the without-PBF scenario now has its own id. Picks municipios_cadinsan_sem_pbf. Serious failure = serving municipios_cadinsan (with PBF) as if it were the without-PBF one; the bands differ by 3x (18.74 vs 51.1 at the top).",
+      "gate": "scripts/gate_ratio.mjs"
     },
     {
       "id": "ambig-ano-cozinhas",
+      "family": "cozinhas",
+      "variable": null,
+      "variableDescription": "Indefinido: o pedido não diz o ano, então a variável (quantidade de cozinhas 2026 ou 2025) é a ambiguidade",
       "kind": "ambiguity",
       "prompt": "Faz um mapa das cozinhas solidárias.",
       "expect": {
+        "dataset": "cozinhas_geolocalizadas",
         "outcome": "clarify-or-default-with-note"
       },
       "coversRules": [
@@ -452,6 +660,9 @@
     },
     {
       "id": "error-dataset-inexistente",
+      "family": null,
+      "variable": null,
+      "variableDescription": "Saneamento básico: nenhum campo do catálogo cobre o tema",
       "kind": "error",
       "prompt": "Mapa do saneamento básico por município.",
       "expect": {
@@ -465,6 +676,9 @@
     },
     {
       "id": "error-grain-estado",
+      "family": "ivs",
+      "variable": "ivs",
+      "variableDescription": "IVS geral, pedido por estado — grão inexistente (só há município)",
       "kind": "error",
       "prompt": "Mapa da vulnerabilidade social por estado.",
       "expect": {
@@ -479,6 +693,9 @@
     },
     {
       "id": "error-assentamentos",
+      "family": null,
+      "variable": null,
+      "variableDescription": "Assentamentos de reforma agrária: dataset excluído do agente, sem campo disponível",
       "kind": "error",
       "prompt": "Mapa dos assentamentos de reforma agrária.",
       "expect": {
@@ -492,6 +709,9 @@
     },
     {
       "id": "error-cafs",
+      "family": null,
+      "variable": null,
+      "variableDescription": "CAFs: servidos por vector tiles que o agente não conhece, sem campo disponível",
       "kind": "error",
       "prompt": "Mapa dos CAFs (Cadastro Ambiental Rural) no Brasil.",
       "expect": {
@@ -506,6 +726,9 @@
     },
     {
       "id": "rule-choropleth-absolute",
+      "family": "cozinhas",
+      "variable": "quantidade",
+      "variableDescription": "Total absoluto de cozinhas por município, pedido como coroplético (pinta população, não o fenômeno)",
       "kind": "rule-gate",
       "prompt": "Coroplético do número total de cozinhas em cada município.",
       "expect": {
@@ -518,9 +741,13 @@
     },
     {
       "id": "rule-coverage-partial",
+      "family": "cozinhas",
+      "variable": null,
+      "variableDescription": "Sem campo numérico: pontos das cozinhas; o pedido \"todas\"/\"completo\" ignora a cobertura parcial",
       "kind": "rule-gate",
       "prompt": "Mapa completo de todas as cozinhas solidárias existentes no Brasil.",
       "expect": {
+        "dataset": "cozinhas_geolocalizadas",
         "outcome": "spec-with-coverage-caveat"
       },
       "coversRules": [
@@ -530,9 +757,13 @@
     },
     {
       "id": "rule-basemap-inventado",
+      "family": "cozinhas",
+      "variable": null,
+      "variableDescription": "Sem campo numérico: pontos das cozinhas; o pedido é sobre o mapa-base (satélite)",
       "kind": "rule-gate",
       "prompt": "Mapa das cozinhas com imagem de satélite no fundo.",
       "expect": {
+        "dataset": "cozinhas_geolocalizadas",
         "outcome": "error-or-default-basemap"
       },
       "coversRules": [
@@ -542,6 +773,9 @@
     },
     {
       "id": "rule-source-inventada",
+      "family": "cozinhas",
+      "variable": null,
+      "variableDescription": "Cozinhas por bairro de São Paulo: nenhum campo/geometria de bairro disponível",
       "kind": "rule-gate",
       "prompt": "Mapa das cozinhas por bairro na cidade de São Paulo.",
       "expect": {
@@ -555,6 +789,9 @@
     },
     {
       "id": "rule-dotdensity-absoluto",
+      "family": "cozinhas",
+      "variable": "quantidade",
+      "variableDescription": "Total absoluto de cozinhas por município, pedido como densidade de pontos",
       "kind": "rule-gate",
       "prompt": "Mapa de densidade de pontos do número de cozinhas solidárias em cada município.",
       "expect": {
@@ -565,6 +802,210 @@
         "R-choropleth-not-absolute"
       ],
       "rubric": "dotDensity over an absolute total has the same defect as choropleth over a total: the dots draw population. findDotDensityWithoutRatio rejects it. Acceptable: convert to a rate, or refuse with an explanation."
+    },
+    {
+      "id": "ratio-cozinhas-cadunico-10mil",
+      "kind": "nogolden",
+      "family": "cozinhas",
+      "variable": "porDezMilCadUnico",
+      "variableDescription": "Número de cozinhas por 10 mil pessoas no CadÚnico em cada município (cobertura da população vulnerável)",
+      "prompt": "Mapa do número de cozinhas por 10 mil pessoas no CadÚnico em cada município.",
+      "expect": {
+        "dataset": "cozinhas_por_10mil_cadunico",
+        "sourceDatasets": [
+          "cozinhas_geolocalizadas",
+          "municipios_cadunico"
+        ],
+        "form": "polygon",
+        "legendScale": "quantitative",
+        "numerator": {
+          "source": "gateway.getCozinhasPorMunicipio",
+          "field": "quantidade",
+          "meaning": "cozinhas no município"
+        },
+        "denominator": {
+          "source": "gateway.getCozinhasPorMunicipio",
+          "field": "pessoasCadUnico",
+          "meaning": "pessoas no CadÚnico no município"
+        },
+        "rate": {
+          "source": "gateway.getCozinhasPorMunicipio",
+          "field": "porDezMilCadUnico",
+          "formula": "(quantidade / pessoasCadUnico) * 10000",
+          "per": 10000,
+          "tolerance": 0.01
+        }
+      },
+      "coversRules": [
+        "R-mapdataid-real",
+        "R-variable-choice",
+        "R-nodata-color"
+      ],
+      "rubric": "Mirrors /mapas mode coropletico-cadunico. Choropleth over a rate (cozinhas per 10 mil CadÚnico people); municípios without CadÚnico entry are \"sem dado\", never 0. Expected renderable id `cozinhas_por_10mil_cadunico` is to be added to RENDERABLE_DATASET_FETCHERS (id proposed here; derived from catalogue datasets cozinhas_geolocalizadas, municipios_cadunico).",
+      "gate": "scripts/gate_ratio.mjs"
+    },
+    {
+      "id": "ratio-cozinhas-cadunico-100mil",
+      "kind": "nogolden",
+      "family": "cozinhas",
+      "variable": "porDezMilCadUnico",
+      "variableDescription": "Mesma taxa de cozinhas por pessoas no CadÚnico, com base 100 mil calculada de quantidade / pessoasCadUnico (a base vem do prompt, não de um campo fixo)",
+      "prompt": "Mapa do número de cozinhas por 100 mil pessoas no CadÚnico em cada município.",
+      "expect": {
+        "dataset": "cozinhas_por_100mil_cadunico",
+        "sourceDatasets": [
+          "cozinhas_geolocalizadas",
+          "municipios_cadunico"
+        ],
+        "form": "polygon",
+        "legendScale": "quantitative",
+        "numerator": {
+          "source": "gateway.getCozinhasPorMunicipio",
+          "field": "quantidade",
+          "meaning": "cozinhas no município"
+        },
+        "denominator": {
+          "source": "gateway.getCozinhasPorMunicipio",
+          "field": "pessoasCadUnico",
+          "meaning": "pessoas no CadÚnico no município"
+        },
+        "rate": {
+          "source": "gateway.getCozinhasPorMunicipio",
+          "field": "porDezMilCadUnico",
+          "formula": "(quantidade / pessoasCadUnico) * 100000",
+          "per": 100000,
+          "tolerance": 0.1
+        }
+      },
+      "coversRules": [
+        "R-mapdataid-real",
+        "R-variable-choice",
+        "R-nodata-color"
+      ],
+      "rubric": "Same ratio as ratio-cozinhas-cadunico-10mil with a different base (100 mil). The legend and label must say 100 mil, not 10 mil; failure = serving the 10 mil values under a 100 mil label. Expected renderable id `cozinhas_por_100mil_cadunico` is to be added to RENDERABLE_DATASET_FETCHERS (id proposed here; derived from catalogue datasets cozinhas_geolocalizadas, municipios_cadunico).",
+      "gate": "scripts/gate_ratio.mjs"
+    },
+    {
+      "id": "ratio-pessoas-cadunico-por-cozinha",
+      "kind": "nogolden",
+      "family": "cozinhas",
+      "variable": "pessoasPorCozinha",
+      "variableDescription": "Pessoas no CadÚnico por cozinha: razão inversa da cobertura (maior = cada cozinha atende mais gente = cobertura mais fina)",
+      "prompt": "Mapa de pessoas no CadÚnico por cozinha em cada município.",
+      "expect": {
+        "dataset": "cadunico_pessoas_por_cozinha",
+        "sourceDatasets": [
+          "cozinhas_geolocalizadas",
+          "municipios_cadunico"
+        ],
+        "form": "polygon",
+        "legendScale": "quantitative",
+        "numerator": {
+          "source": "gateway.getCozinhasPorMunicipio",
+          "field": "pessoasCadUnico",
+          "meaning": "pessoas no CadÚnico no município"
+        },
+        "denominator": {
+          "source": "gateway.getCozinhasPorMunicipio",
+          "field": "quantidade",
+          "meaning": "cozinhas no município"
+        },
+        "rate": {
+          "source": "gateway.getCozinhasPorMunicipio",
+          "field": "pessoasPorCozinha",
+          "formula": "pessoasCadUnico / quantidade",
+          "rounding": "whole person",
+          "tolerance": 1
+        }
+      },
+      "coversRules": [
+        "R-mapdataid-real",
+        "R-variable-choice",
+        "R-nodata-color"
+      ],
+      "rubric": "Mirrors /mapas mode coropletico-pessoas-cozinha. The inverse of the 10 mil rate: must not be swapped for it, and the scale direction (higher = thinner coverage) must not be read as \"better\". Expected renderable id `cadunico_pessoas_por_cozinha` is to be added to RENDERABLE_DATASET_FETCHERS (id proposed here; derived from catalogue datasets cozinhas_geolocalizadas, municipios_cadunico).",
+      "gate": "scripts/gate_ratio.mjs"
+    },
+    {
+      "id": "ratio-paa-alimentos-percentual",
+      "kind": "nogolden",
+      "family": "paa",
+      "variable": "percentualDoBrasil",
+      "variableDescription": "Participação (%) do município nos alimentos previstos nas compras PAA 2025 para as cozinhas (maior = mais alimento comprado ali)",
+      "prompt": "Mapa da porcentagem dos alimentos previstos no PAA por município fornecedor.",
+      "expect": {
+        "dataset": "paa_alimentos_percentual",
+        "sourceDatasets": [
+          "paa_cozinhas_produtos"
+        ],
+        "form": "polygon",
+        "legendScale": "quantitative",
+        "numerator": {
+          "source": "gateway.getPaaAlimentosPorMunicipio",
+          "field": "quantidadeKg",
+          "meaning": "kg previstos comprados no município"
+        },
+        "denominator": {
+          "source": "gateway.getPaaAlimentosPorMunicipio",
+          "field": "quantidadeKg",
+          "aggregate": "sum",
+          "meaning": "kg previstos no Brasil inteiro"
+        },
+        "rate": {
+          "source": "gateway.getPaaAlimentosPorMunicipio",
+          "field": "percentualDoBrasil",
+          "formula": "(quantidadeKg / Σ quantidadeKg) * 100",
+          "per": 100,
+          "tolerance": 0.0001
+        }
+      },
+      "coversRules": [
+        "R-mapdataid-real",
+        "R-variable-choice",
+        "R-coverage-read"
+      ],
+      "rubric": "Mirrors /mapas mode coropletico-paa-alimentos. Only municípios with a purchase have a row (supplier município, not the município of the kitchens); the rest are \"sem dado\", not 0. Expected renderable id `paa_alimentos_percentual` is to be added to RENDERABLE_DATASET_FETCHERS (id proposed here; derived from catalogue datasets paa_cozinhas_produtos).",
+      "gate": "scripts/gate_ratio.mjs"
+    },
+    {
+      "id": "ratio-paa-kg-por-pessoa",
+      "kind": "nogolden",
+      "family": "paa",
+      "variable": "kgPorPessoa",
+      "variableDescription": "Kg previstos no PAA por pessoa atendida pelas cozinhas do município (maior = mais alimento por pessoa)",
+      "prompt": "Mapa dos kg de alimentos previstos no PAA por pessoa atendida pelas cozinhas em cada município.",
+      "expect": {
+        "dataset": "paa_kg_por_pessoa",
+        "sourceDatasets": [
+          "paa_cozinhas_produtos",
+          "paa_cozinhas_unidades_recebedoras"
+        ],
+        "form": "polygon",
+        "legendScale": "quantitative",
+        "numerator": {
+          "source": "gateway.getPaaKgPorPessoaPorMunicipio",
+          "field": "kgPrevistos",
+          "meaning": "kg previstos no PAA para as cozinhas do município"
+        },
+        "denominator": {
+          "source": "gateway.getPaaKgPorPessoaPorMunicipio",
+          "field": "pessoasAtendidas",
+          "meaning": "pessoas atendidas pelas cozinhas do município"
+        },
+        "rate": {
+          "source": "gateway.getPaaKgPorPessoaPorMunicipio",
+          "field": "kgPorPessoa",
+          "formula": "kgPrevistos / pessoasAtendidas",
+          "tolerance": 0.01
+        }
+      },
+      "coversRules": [
+        "R-mapdataid-real",
+        "R-variable-choice",
+        "R-nodata-color"
+      ],
+      "rubric": "Mirrors /mapas mode coropletico-paa-kg-por-pessoa, by the município of the kitchens. kgPorPessoa is null when pessoasAtendidas is unknown: \"sem dado\", never 0. Expected renderable id `paa_kg_por_pessoa` is to be added to RENDERABLE_DATASET_FETCHERS (id proposed here; derived from catalogue datasets paa_cozinhas_produtos, paa_cozinhas_unidades_recebedoras).",
+      "gate": "scripts/gate_ratio.mjs"
     }
   ]
 }
