@@ -78,8 +78,8 @@ describe('applyAppLegendRules', () => {
   test('carries the agent reference and no-data label onto the resolver legend', () => {
     const spec = applyAppLegendRules({
       spec: {
-        mapData: [{ mapDataId: 'municipios_cadinsan', title: 'InSAN' }],
-        layers: [{ mapDataId: 'municipios_cadinsan', activeLegendId: 'l' }],
+        mapData: [{ mapDataId: 'cozinhas_geolocalizadas', title: 'InSAN' }],
+        layers: [{ mapDataId: 'cozinhas_geolocalizadas', activeLegendId: 'l' }],
         legends: [{ id: 'l', title: 'InSAN', reference: 'geovis' }],
       },
       agentLegends: [

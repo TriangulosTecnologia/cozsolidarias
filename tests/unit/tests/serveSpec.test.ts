@@ -312,13 +312,13 @@ describe('resolveCandidate', () => {
 
   test('keeps the resolver legend title when the mapData entry has none', async () => {
     jest
-      .spyOn(RENDERABLE_DATASET_FETCHERS, 'municipios_cadinsan')
+      .spyOn(RENDERABLE_DATASET_FETCHERS, 'cozinhas_geolocalizadas_2025')
       .mockResolvedValue(ROWS as never);
 
     const resolved = await resolveCandidate(
       withBase({
         mapType: 'choropleth',
-        mapData: [{ mapDataId: 'municipios_cadinsan' }],
+        mapData: [{ mapDataId: 'cozinhas_geolocalizadas_2025' }],
         layers: [{ id: 'context', sourceId: 'municipios', geometry: 'line' }],
       })
     );
