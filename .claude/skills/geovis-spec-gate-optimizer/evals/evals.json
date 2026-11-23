@@ -849,7 +849,7 @@
       "kind": "nogolden",
       "family": "cozinhas",
       "variable": "porDezMilCadUnico",
-      "variableDescription": "Mesma taxa de cozinhas por pessoas no CadÚnico, reescalada para 100 mil (porDezMilCadUnico * 10)",
+      "variableDescription": "Mesma taxa de cozinhas por pessoas no CadÚnico, com base 100 mil calculada de quantidade / pessoasCadUnico (a base vem do prompt, não de um campo fixo)",
       "prompt": "Mapa do número de cozinhas por 100 mil pessoas no CadÚnico em cada município.",
       "expect": {
         "dataset": "cozinhas_por_100mil_cadunico",
@@ -874,7 +874,6 @@
           "field": "porDezMilCadUnico",
           "formula": "(quantidade / pessoasCadUnico) * 100000",
           "per": 100000,
-          "scaleFromField": 10,
           "tolerance": 0.1
         }
       },
