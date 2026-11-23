@@ -9,9 +9,11 @@
  *   3. Bands: when `expect.bands` is set, municípios and numerator totals per
  *      band (the served values banded by `thresholds`) equal `familiesPerBand`.
  *
- * Oracles are recomputed from the static source, never read from the golden.
- * Only the CadinSan oracle exists so far (CADINSAN CSV); the CadÚnico and PAA
- * oracles land with their family PRs, and until then the gate fails loudly.
+ * Oracles are recomputed from the source, never read from the golden: CadinSan
+ * from the CADINSAN CSV; CadÚnico coverage from the gateway's per-município rows
+ * (`<GATE_BASE_URL>/api/cozinhas/por-municipio`, default the local dev server),
+ * whose numerator and denominator fields the case names. The PAA oracle lands
+ * with its family PR, and until then the gate fails loudly.
  *
  * Usage, from the cozsolidarias repo root:
  *
@@ -50,15 +52,31 @@ const cadinsanOracle = (numeratorField) => {
   });
 };
 
+/** `[{ geometryId, numerator, denominator }]` from the gateway's per-município cozinha rows. */
+const cozinhasOracle = async ({ numerator, denominator }) => {
+  const url = `${process.env.GATE_BASE_URL ?? 'http://localhost:3000'}/api/cozinhas/por-municipio`;
+  const response = await globalThis.fetch(url);
+  if (!response.ok) throw new Error(`${url} answered ${response.status}`);
+  return (await response.json()).map((row) => {
+    return { geometryId: row.codigoIbge, numerator: row[numerator.field], denominator: row[denominator.field] };
+  });
+};
+
 /** The oracle rows for a case, or a loud error when its source has no oracle yet. */
-const oracleFor = (expect) => {
+const oracleFor = async (expect) => {
   if (expect.rate?.source === 'gateway.getCadinsanPorMunicipio') return cadinsanOracle(expect.numerator.field);
+  if (expect.rate?.source === 'gateway.getCozinhasPorMunicipio') return cozinhasOracle(expect);
   throw new Error(`no oracle for ${expect.rate?.source}: it lands with the family PR`);
 };
 
-/** The rate the gateway serves: two decimals, null without denominator. */
-const rateOf = ({ numerator, denominator }, per) => {
-  return denominator > 0 ? Math.round((numerator / denominator) * per * 100) / 100 : null;
+/**
+ * The rate the gateway serves: `numerator / denominator * per` (`per` 1 when
+ * absent), to two decimals or a whole person; null without either term.
+ */
+const rateOf = ({ numerator, denominator }, rate) => {
+  if (numerator === null || !(denominator > 0)) return null;
+  const value = (numerator / denominator) * (rate.per ?? 1);
+  return rate.rounding === 'whole person' ? Math.round(value) : Math.round(value * 100) / 100;
 };
 
 /** Index of the band a value falls in: `value >= threshold`, so 0 is a real cutpoint. */
@@ -70,7 +88,7 @@ const bandIndex = (value, thresholds) => {
 const checkRates = ({ served, oracle, rate }) => {
   const failures = [];
   const expected = new Map(oracle.flatMap((row) => {
-    const value = rateOf(row, rate.per);
+    const value = rateOf(row, rate);
     return value === null ? [] : [[row.geometryId, value]];
   }));
   for (const [code, value] of expected) {
@@ -117,14 +135,14 @@ const gate = ({ spec, expect, oracle }) => {
 /** A spec that serves exactly the oracle, the self-test's golden. */
 const specFromOracle = ({ expect, oracle }) => {
   const data = oracle.flatMap((row) => {
-    const value = rateOf(row, expect.rate.per);
+    const value = rateOf(row, expect.rate);
     return value === null ? [] : [{ geometryId: row.geometryId, value }];
   });
   return { mapData: [{ mapDataId: expect.dataset, data }] };
 };
 
-/** Mutants of the oracle spec. Each must make the gate fail. */
-const mutants = (golden) => {
+/** Mutants of the oracle spec, each off by more than the case's tolerance. Each must make the gate fail. */
+const mutants = ({ golden, tolerance }) => {
   const clone = () => { return JSON.parse(JSON.stringify(golden)) };
   const mutate = (fn) => {
     const spec = clone();
@@ -136,7 +154,7 @@ const mutants = (golden) => {
   return {
     'M1 wrong dataset': wrongDataset,
     'M2 one município dropped': mutate((data) => { return data.slice(1) }),
-    'M3 one value off by one': mutate((data) => { return data.map((r, i) => { return i === 0 ? { ...r, value: r.value + 1 } : r }) }),
+    'M3 one value off by more than the tolerance': mutate((data) => { return data.map((r, i) => { return i === 0 ? { ...r, value: r.value + tolerance + 1 } : r }) }),
     'M4 extra município': mutate((data) => { return [...data, { geometryId: '0000000', value: 1 }] }),
     'M5 values scaled (wrong base)': mutate((data) => { return data.map((r) => { return { ...r, value: r.value * 10 } }) }),
   };
@@ -148,7 +166,7 @@ const finish = (value, pass) => {
   process.exit(pass ? 0 : 1);
 };
 
-const main = () => {
+const main = async () => {
   const args = process.argv.slice(2);
   const caseId = args.find((a) => { return a.startsWith('--case=') })?.slice('--case='.length);
   const selfTest = args.includes('--self-test');
@@ -159,12 +177,12 @@ const main = () => {
     process.exit(2);
   }
   const { expect } = evalCase;
-  const oracle = oracleFor(expect);
+  const oracle = await oracleFor(expect);
 
   if (selfTest) {
     const golden = specFromOracle({ expect, oracle });
     const base = gate({ spec: golden, expect, oracle });
-    const results = Object.entries(mutants(golden)).map(([name, mutant]) => {
+    const results = Object.entries(mutants({ golden, tolerance: expect.rate.tolerance })).map(([name, mutant]) => {
       const verdict = gate({ spec: mutant, expect, oracle });
       return { name, caught: !verdict.pass, firstFailure: verdict.failures[0] ?? null };
     });
@@ -176,4 +194,4 @@ const main = () => {
   finish({ ...verdict, failures: verdict.failures.slice(0, 20) }, verdict.pass);
 };
 
-main();
+await main();

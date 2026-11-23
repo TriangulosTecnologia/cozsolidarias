@@ -1,0 +1,31 @@
+{
+  "case": "ratio-cozinhas-cadunico-10mil",
+  "prompt": "Mapa do número de cozinhas por 10 mil pessoas no CadÚnico em cada município.",
+  "httpStatus": 200,
+  "durationMs": 14265,
+  "outcome": "spec",
+  "issues": [],
+  "checks": [
+    {
+      "id": "outcome",
+      "passed": true,
+      "note": "expected spec, got spec"
+    },
+    {
+      "id": "dataset",
+      "passed": true,
+      "note": "got cozinhas_por_10mil_cadunico"
+    },
+    {
+      "id": "legend",
+      "passed": true,
+      "note": "shown=1 scale=quantitative"
+    },
+    {
+      "id": "validateSpec",
+      "passed": true,
+      "note": "null"
+    }
+  ],
+  "passed": true
+}
