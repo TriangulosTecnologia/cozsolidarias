@@ -14,6 +14,25 @@ The browser never knows whether data came from static files, an API, a database,
 
 `public/llms.txt` and `public/llms-full.txt` are machine-curated entry points for AI agents/crawlers (per the [llms.txt spec](https://llmstxt.org/)), generated from this repo's structure. Regenerate them (via the `create-llms` skill) whenever the top-level layout or documentation surfaces change meaningfully; they are not hand-maintained day to day.
 
+## Commands
+
+```bash
+pnpm dev                                  # next dev --webpack
+pnpm build                                # next build --webpack
+pnpm test --testPathPatterns=myFile.test  # single file (plural flag; never npx jest)
+pnpm test --testNamePattern="name"        # single test
+```
+
+`scripts/` holds one-off data generators (`generate*.mjs`/`.ts`) that write into `src/data-source-static/data` and `public/`; they are not part of the build.
+
+## Where Context Lives
+
+- Nested `CLAUDE.md`: `src/`, `src/app/`, `src/app/api/ai/spec/`, `src/data-gateway/`, `src/data-source-static/`, `tests/`. Read the one covering the path you edit.
+- `CONTEXT.md`: domain glossary (Dataset Catalog, Renderable Dataset, MapData Append). Use its terms.
+- `devanity.rules.json`: high-risk paths with invariants and per-path `check`; enforced in CI (`.github/workflows/devanity-rules.yml`, PR body needs a `devanity-proof:` block). Owned by `@arantespp`.
+- `public/marca/brand-spec.json`: single source of brand values; never copy them elsewhere.
+- `.github/instructions/*.instructions.md`: Copilot-era path guidance mirrored by the nested `CLAUDE.md` files.
+
 ## Constraints
 
 - **No new dependencies** without explicit request.
