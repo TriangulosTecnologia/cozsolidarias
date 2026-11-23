@@ -36,14 +36,14 @@ const CADINSAN_DENOMINATOR_COLUMN = 6;
 
 /** Splits one CSV line, honouring double-quoted fields. */
 const parseLine = (line) => {
-  return (line.match(/("[^"]*"|[^,]*)(,|$)/g) ?? []).map((s) => { return s.replace(/,$/, '').replace(/^\uFEFF/g, '') });
+  return (line.match(/("[^"]*"|[^,]*)(,|$)/g) ?? []).map((s) => { return s.replace(/,$/, '').replace(/^"|"$/g, '') });
 };
 
 /** `[{ geometryId, numerator, denominator }]` recomputed from the CADINSAN CSV. */
 const cadinsanOracle = (numeratorField) => {
   const column = CADINSAN_NUMERATOR_COLUMN[numeratorField];
   if (column === undefined) throw new Error(`unknown CADINSAN numerator field: ${numeratorField}`);
-  const lines = readFileSync(CADINSAN_CSV, 'utf8').replace(/^﻿/, '').trim().split(/\r?\n/).slice(1);
+  const lines = readFileSync(CADINSAN_CSV, 'utf8').replace(/^\uFEFF/, '').trim().split(/\r?\n/).slice(1);
   return lines.map((line) => {
     const cols = parseLine(line);
     return { geometryId: cols[0], numerator: Number(cols[column]), denominator: Number(cols[CADINSAN_DENOMINATOR_COLUMN]) };
