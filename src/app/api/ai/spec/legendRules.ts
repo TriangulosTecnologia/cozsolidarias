@@ -2,8 +2,13 @@ import {
   CADINSAN_COLORS,
   CADINSAN_LEGEND_LABELS,
   CADINSAN_THRESHOLDS,
+  CADUNICO_COLORS,
+  flooredBinLabels,
+  PESSOAS_COZINHA_COLORS,
   WITHOUT_KITCHEN_COLOR,
 } from '@/app/(features)/mapas/geovisChoroplethScales';
+import type { MapMode } from '@/app/(features)/mapas/geovisMapMode';
+import { jenksBreaksForMode } from '@/app/(features)/mapas/geovisScales';
 import {
   IDHM_FAMILY_COLORS,
   IDHM_FAMILY_THRESHOLDS,
@@ -143,6 +148,62 @@ const fixedScalePatch = (mapDataId: unknown): UnknownRecord => {
 };
 
 /**
+ * The `/mapas` mode whose data-driven (Jenks) legend each CadÚnico coverage id
+ * gets, with that mode's colors. The 100 mil id shares the 10 mil mode, but its
+ * breaks are fitted to its own values, so its labels never repeat the 10 mil ones.
+ */
+const JENKS_SCALES: Record<string, { mode: MapMode; colors: string[] }> = {
+  cozinhas_por_10mil_cadunico: {
+    mode: 'coropletico-cadunico',
+    colors: CADUNICO_COLORS,
+  },
+  cozinhas_por_100mil_cadunico: {
+    mode: 'coropletico-cadunico',
+    colors: CADUNICO_COLORS,
+  },
+  cadunico_pessoas_por_cozinha: {
+    mode: 'coropletico-pessoas-cozinha',
+    colors: PESSOAS_COZINHA_COLORS,
+  },
+};
+
+/**
+ * A coverage id's legend as `/mapas` draws it: the Jenks breaks of the painted
+ * values (`jenksBreaksForMode`), the mode's colors and its "Sem cozinha"
+ * labels. Nothing when the values are too few to split: the resolver's legend stays.
+ */
+const jenksScalePatch = (entry: UnknownRecord): UnknownRecord => {
+  const id = String(entry['mapDataId']);
+  if (!Object.hasOwn(JENKS_SCALES, id)) {
+    return {};
+  }
+  const { mode, colors } = JENKS_SCALES[id];
+  const thresholds = jenksBreaksForMode(
+    mode,
+    recordsOf(entry['data']).map((row) => {
+      return typeof row['value'] === 'number' ? row['value'] : null;
+    })
+  );
+  if (!thresholds) {
+    return {};
+  }
+  return {
+    colorBy: {
+      type: 'quantitative',
+      property: 'value',
+      scale: 'threshold',
+      thresholds,
+      colors,
+      defaultColor: WITHOUT_KITCHEN_COLOR,
+    },
+    labelFormat: {
+      type: 'labels',
+      labels: flooredBinLabels('Sem cozinha', thresholds),
+    },
+  };
+};
+
+/**
  * Where a legend without one is mounted: `GeoVisProvider` only renders a
  * legend that has a `position`, and the choropleth resolver sets none.
  */
@@ -170,6 +231,7 @@ const withAppText = (params: {
     position: legend['position'] ?? LEGEND_POSITION,
     ...agentText,
     ...fixedScalePatch(entry['mapDataId']),
+    ...jenksScalePatch(entry),
   };
 };
 

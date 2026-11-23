@@ -25,7 +25,11 @@ import {
   SOURCE_METADATA,
 } from 'src/app/api/ai/spec/specValidation';
 
-import type { CadinsanByCity, MunicipioIvs } from '@/data-gateway/schema';
+import type {
+  CadinsanByCity,
+  KitchenRateByCity,
+  MunicipioIvs,
+} from '@/data-gateway/schema';
 import { gateway } from '@/gateway';
 
 describe('isRecord', () => {
@@ -815,6 +819,22 @@ describe('buildCatalogueContext', () => {
     expect(byId.municipios_idhm.description).toMatch(/escala oposta à do IVS/);
     expect(byId.municipios_idhm.fields).toHaveLength(1);
   });
+
+  test('describes each CadÚnico coverage id with its own base and direction', async () => {
+    const byId = await projectedEntries((dataset) => {
+      return dataset.id === 'municipios_cadunico';
+    });
+
+    expect(byId.cozinhas_por_10mil_cadunico.description).toMatch(
+      /cozinhas por 10 mil pessoas no CadÚnico/
+    );
+    expect(byId.cozinhas_por_100mil_cadunico.description).toMatch(
+      /cozinhas por 100 mil pessoas no CadÚnico/
+    );
+    expect(byId.cadunico_pessoas_por_cozinha.description).toMatch(
+      /pessoas no CadÚnico por cozinha/
+    );
+  });
 });
 
 describe('appendRealMapData', () => {
@@ -901,6 +921,46 @@ describe('appendRealMapData', () => {
       mapData: [{ mapDataId, data: [{ geometryId: '2927408', value }] }],
     });
   });
+
+  const SALVADOR_RATE: KitchenRateByCity = {
+    codigoIbge: '2927408',
+    municipio: 'SALVADOR',
+    quantidade: 26,
+    pessoasAtendidas: 45897,
+    populacao: 2417678,
+    porCemMil: 1.08,
+    percentualDoBrasil: 1.87,
+    pessoasCadUnico: 1157799,
+    porDezMilCadUnico: 0.22,
+    pessoasPorCozinha: 44531,
+  };
+
+  test.each([
+    // 26 / 1157799 * 10_000 = 0.2246; * 100_000 = 2.2456 (two decimals).
+    ['cozinhas_por_10mil_cadunico', 0.22],
+    ['cozinhas_por_100mil_cadunico', 2.25],
+    ['cadunico_pessoas_por_cozinha', 44531],
+  ])(
+    '%s paints its CadÚnico coverage ratio, dropping municípios without CadÚnico',
+    async (mapDataId, value) => {
+      jest.spyOn(gateway, 'getCozinhasPorMunicipio').mockResolvedValue([
+        SALVADOR_RATE,
+        {
+          ...SALVADOR_RATE,
+          codigoIbge: '1100015',
+          pessoasCadUnico: null,
+          porDezMilCadUnico: null,
+          pessoasPorCozinha: null,
+        },
+      ]);
+
+      const result = await appendRealMapData({ mapData: [{ mapDataId }] });
+
+      expect(result).toEqual({
+        mapData: [{ mapDataId, data: [{ geometryId: '2927408', value }] }],
+      });
+    }
+  );
 
   test('drops a município with a null share instead of painting 0', async () => {
     jest.spyOn(gateway, 'getCadinsanPorMunicipio').mockResolvedValue([

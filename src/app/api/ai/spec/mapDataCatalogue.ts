@@ -8,6 +8,8 @@ import type {
 } from '@/data-gateway/schema';
 import { gateway } from '@/gateway';
 
+import { CATALOGUE_VARIANTS, variantBase } from './datasetFamilies';
+
 /**
  * Renderable datasets whose value is an absolute total (a raw sum), never a
  * relative variable (rate/ratio/percentage) — per Bertin's graphic semiology
@@ -84,6 +86,23 @@ const cadinsanField = (field: 'proporcaoComPbf' | 'proporcaoSemPbf') => {
 };
 
 /**
+ * Fetcher painting cozinhas per `base` CadÚnico people, `base` taken from the
+ * id's prompt variant (see `variantBase`), to two decimals as the gateway's
+ * `porDezMilCadUnico`; "sem dado" without CadÚnico people.
+ */
+const cozinhasPorCadUnico = (id: string) => {
+  return async () => {
+    const base = variantBase(id);
+    const rows: KitchenRateByCity[] = await gateway.getCozinhasPorMunicipio();
+    return toMapDataRows(rows, (row) => {
+      return row.pessoasCadUnico
+        ? Math.round((row.quantidade / row.pessoasCadUnico) * base * 100) / 100
+        : null;
+    });
+  };
+};
+
+/**
  * Resolves each renderable dataset id to real `mapData` rows via
  * `data-gateway` — the registry `appendRealMapData` looks up to replace the
  * agent's placeholder `data` (see ADR-0001).
@@ -120,6 +139,18 @@ export const RENDERABLE_DATASET_FETCHERS = {
   municipios_idhm_educacao_frequencia: ivsField('idhmEducacaoFrequencia'),
   municipios_cadinsan: cadinsanField('proporcaoComPbf'),
   municipios_cadinsan_sem_pbf: cadinsanField('proporcaoSemPbf'),
+  cozinhas_por_10mil_cadunico: cozinhasPorCadUnico(
+    'cozinhas_por_10mil_cadunico'
+  ),
+  cozinhas_por_100mil_cadunico: cozinhasPorCadUnico(
+    'cozinhas_por_100mil_cadunico'
+  ),
+  cadunico_pessoas_por_cozinha: async () => {
+    const rows: KitchenRateByCity[] = await gateway.getCozinhasPorMunicipio();
+    return toMapDataRows(rows, (row) => {
+      return row.pessoasPorCozinha;
+    });
+  },
 } as const;
 
 export type RenderableDatasetId = keyof typeof RENDERABLE_DATASET_FETCHERS;
@@ -192,90 +223,6 @@ const toAiDatasetProjection = (
         };
       }),
   };
-};
-
-/**
- * Renderable ids that paint one field of a catalogue dataset: each is exposed
- * to the agent as its own entry whose `description` is that field's own
- * `description` (plus `note` when the field text omits what the id's scale
- * means), so the agent can tell IVS from IDHM and "com PBF" from "sem PBF".
- * A variant whose id equals its dataset's id replaces that dataset's entry.
- * `officialFaixas` marks an official IPEA index whose legend thresholds the
- * model must not reclassify (see {@link officialFaixasOf}).
- */
-const CATALOGUE_VARIANTS: Record<
-  string,
-  {
-    datasetId: string;
-    fieldName: string;
-    note?: string;
-    officialFaixas?: 'ivs' | 'idhm';
-  }
-> = {
-  municipios_ivs: {
-    datasetId: 'municipios_ivs',
-    fieldName: 'ivs',
-    officialFaixas: 'ivs',
-  },
-  municipios_ivs_infraestrutura: {
-    datasetId: 'municipios_ivs',
-    fieldName: 'ivs_infraestrutura_urbana',
-    officialFaixas: 'ivs',
-    note: 'Maior = mais vulnerável',
-  },
-  municipios_ivs_capital_humano: {
-    datasetId: 'municipios_ivs',
-    fieldName: 'ivs_capital_humano',
-    officialFaixas: 'ivs',
-    note: 'Maior = mais vulnerável',
-  },
-  municipios_ivs_renda_trabalho: {
-    datasetId: 'municipios_ivs',
-    fieldName: 'ivs_renda_e_trabalho',
-    officialFaixas: 'ivs',
-    note: 'Maior = mais vulnerável',
-  },
-  municipios_idhm: {
-    datasetId: 'municipios_ivs',
-    fieldName: 'idhm',
-    officialFaixas: 'idhm',
-    note: 'Maior = melhor desenvolvimento humano (escala oposta à do IVS)',
-  },
-  municipios_idhm_longevidade: {
-    datasetId: 'municipios_ivs',
-    fieldName: 'idhm_long',
-    officialFaixas: 'idhm',
-    note: 'Maior = melhor',
-  },
-  municipios_idhm_educacao: {
-    datasetId: 'municipios_ivs',
-    fieldName: 'idhm_educ',
-    officialFaixas: 'idhm',
-    note: 'Maior = melhor',
-  },
-  municipios_idhm_renda: {
-    datasetId: 'municipios_ivs',
-    fieldName: 'idhm_renda',
-    officialFaixas: 'idhm',
-    note: 'Maior = melhor',
-  },
-  municipios_idhm_educacao_escolaridade: {
-    datasetId: 'municipios_ivs',
-    fieldName: 'idhm_educ_sub_esc',
-    officialFaixas: 'idhm',
-    note: 'Maior = melhor',
-  },
-  municipios_idhm_educacao_frequencia: {
-    datasetId: 'municipios_ivs',
-    fieldName: 'idhm_educ_sub_freq',
-    officialFaixas: 'idhm',
-    note: 'Maior = melhor',
-  },
-  municipios_cadinsan_sem_pbf: {
-    datasetId: 'municipios_cadinsan',
-    fieldName: 'Cadinsan_absoluto_sem_PBF',
-    note: 'O mapa pinta a proporção (%) sobre o total de cadastros do CadÚnico, não a contagem',
-  },
 };
 
 /**

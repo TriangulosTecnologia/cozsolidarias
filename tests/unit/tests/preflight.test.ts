@@ -2,6 +2,7 @@ import {
   buildConceptIndex,
   type ConceptEntry,
 } from 'src/app/api/ai/spec/conceptIndex';
+import { variantBase } from 'src/app/api/ai/spec/datasetFamilies';
 import { RENDERABLE_DATASET_IDS } from 'src/app/api/ai/spec/mapDataCatalogue';
 import {
   clarifyResponse,
@@ -172,6 +173,38 @@ describe('preflightPrompt', () => {
     ).toEqual({ status: 'resolved' });
   });
 
+  test('routes a CadÚnico coverage ratio to its own family, not to the kitchen count or CadinSan', () => {
+    process.env['FORBID_ABSOLUTE_ON_CHOROPLETH'] = 'true';
+    try {
+      for (const prompt of [
+        'Mapa coroplético do número de cozinhas por 10 mil pessoas no CadÚnico em cada município.',
+        'Mapa coroplético de cozinhas por 100 mil pessoas no CadÚnico.',
+        'Mapa coroplético de pessoas no CadÚnico por cozinha em cada município.',
+      ]) {
+        expect(preflightPrompt({ prompt })).toEqual({ status: 'resolved' });
+      }
+    } finally {
+      delete process.env['FORBID_ABSOLUTE_ON_CHOROPLETH'];
+    }
+  });
+
+  test('asks which base when a coverage prompt names 10 mil and 100 mil', () => {
+    expect(
+      preflightPrompt({
+        prompt: 'cozinhas por 10 mil e por 100 mil pessoas no CadÚnico',
+      })
+    ).toMatchObject({
+      status: 'ambiguous',
+      clarify: {
+        facet: 'dataset',
+        options: [
+          { value: 'cozinhas_por_10mil_cadunico' },
+          { value: 'cozinhas_por_100mil_cadunico' },
+        ],
+      },
+    });
+  });
+
   test('never blocks a prompt it does not recognise', () => {
     expect(preflightPrompt({ prompt: 'algo totalmente diferente' })).toEqual({
       status: 'unmatched',
@@ -193,6 +226,14 @@ describe('FAMILIES', () => {
     for (const id of ids) {
       expect(RENDERABLE_DATASET_IDS).toContain(id);
     }
+  });
+
+  test('a CadÚnico coverage rate takes the base its variant carries', () => {
+    expect(variantBase('cozinhas_por_10mil_cadunico')).toBe(10_000);
+    expect(variantBase('cozinhas_por_100mil_cadunico')).toBe(100_000);
+    expect(() => {
+      return variantBase('cadunico_pessoas_por_cozinha');
+    }).toThrow(/cadunico_pessoas_por_cozinha/);
   });
 });
 
