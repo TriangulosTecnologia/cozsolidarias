@@ -43,7 +43,7 @@ const parseLine = (line) => {
 const cadinsanOracle = (numeratorField) => {
   const column = CADINSAN_NUMERATOR_COLUMN[numeratorField];
   if (column === undefined) throw new Error(`unknown CADINSAN numerator field: ${numeratorField}`);
-  const lines = readFileSync(CADINSAN_CSV, 'utf8').trim().split(/\r?\n/).slice(1);
+  const lines = readFileSync(CADINSAN_CSV, 'utf8').replace(/^﻿/, '').trim().split(/\r?\n/).slice(1);
   return lines.map((line) => {
     const cols = parseLine(line);
     return { geometryId: cols[0], numerator: Number(cols[column]), denominator: Number(cols[CADINSAN_DENOMINATOR_COLUMN]) };
