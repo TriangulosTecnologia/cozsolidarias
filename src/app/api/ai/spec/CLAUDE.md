@@ -21,7 +21,7 @@ Source of truth for what exists: `public/dataset_catalogue.json`. A catalogued d
 ## Verify
 
 - Unit test: the fetcher maps gateway rows to `{ geometryId, value }` and drops `null`s (`tests/unit/tests/aiSpecRoute.test.ts` is the nearest home).
-- Eval: add a case to `.claude/skills/geovis-spec-gate-optimizer/evals/evals.json` with `family`, `variable` (field name), `variableDescription`, and `expect.dataset` set to the new id. Ratio cases also carry `expect.numerator`, `denominator` and `rate`. Remove the case's "no renderable id" caveat once the fetcher lands.
+- Eval: add a case to `.claude/skills/geovis-spec-gate-optimizer/evals/evals.json`; its fields are described in the file's `notes`. Remove the case's "to be added" rubric caveat once the fetcher lands.
 - Run the quality gates from the root `CLAUDE.md`.
 
 ## Do not
