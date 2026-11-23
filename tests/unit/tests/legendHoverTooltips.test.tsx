@@ -1,5 +1,9 @@
 import type { VisualizationSpec } from '@ttoss/geovis';
-import { withLegendHoverTooltips } from 'src/app/(features)/ia/legendHoverTooltips';
+import {
+  paintsCadinsan,
+  withLegendHoverTooltips,
+} from 'src/app/(features)/ia/legendHoverTooltips';
+import type { CadinsanByCity } from 'src/data-gateway/schema';
 
 const info = { layerId: 'l', sourceId: 's', point: { x: 0, y: 0 } };
 
@@ -210,5 +214,139 @@ describe('withLegendHoverTooltips', () => {
     expect(
       layer?.hoverTooltip?.render?.({ ...info, featureId: '5300108', value: 0 })
     ).toMatchObject({ props: { primary: 'Sem dado' } });
+  });
+});
+
+/** Altamira/PA, as `/api/cadinsan/por-municipio` serves it. */
+const ALTAMIRA: CadinsanByCity = {
+  codigoIbge: '1500602',
+  municipio: 'Altamira',
+  uf: 'Pará',
+  regiao: 'Norte',
+  absolutoComPbf: 2616,
+  absolutoSemPbf: 5779,
+  cadastrosCadunico: 14656,
+  proporcaoComPbf: 17.85,
+  proporcaoSemPbf: 39.43,
+};
+
+/** The shape `/api/ai/spec` serves for a CADINSAN share: the `/mapas` ruler and labels on the legend. */
+const cadinsanSpec = (mapDataId: string) => {
+  return {
+    engine: 'maplibre',
+    sources: [
+      { id: 'municipios', type: 'geojson', data: '/geo/geojs-100-mun.json' },
+    ],
+    layers: [
+      {
+        id: 'municipios-fill',
+        sourceId: 'municipios',
+        geometry: 'polygon',
+        mapDataId,
+        activeLegendId: 'l',
+      },
+    ],
+    mapData: [{ mapDataId, mapId: 'municipios', title: 'Insegurança' }],
+    legends: [
+      {
+        id: 'l',
+        colorBy: {
+          type: 'quantitative',
+          scale: 'threshold',
+          thresholds: [0, 10, 20, 30, 40],
+          colors: ['#v0', '#c1', '#c2', '#c3', '#c4', '#c5'],
+        },
+        labelFormat: {
+          type: 'labels',
+          labels: [
+            'Sem dado',
+            '< 10%',
+            '10 – 20%',
+            '20 – 30%',
+            '30 – 40%',
+            '40%+',
+          ],
+        },
+      },
+    ],
+  } as unknown as VisualizationSpec;
+};
+
+const cadinsanRender = (params: {
+  mapDataId: string;
+  cadinsan?: Map<string, CadinsanByCity>;
+}) => {
+  const render = withLegendHoverTooltips({
+    spec: cadinsanSpec(params.mapDataId),
+    names: new Map([['1500602', 'Altamira']]),
+    cadinsan: params.cadinsan,
+  }).layers?.[0].hoverTooltip?.render;
+  if (!render) {
+    throw new Error('the fill layer got no hoverTooltip.render');
+  }
+  return render;
+};
+
+describe('withLegendHoverTooltips on a CADINSAN share', () => {
+  const cadinsan = new Map([['1500602', ALTAMIRA]]);
+
+  test('reads the /mapas CADINSAN lines with the faixa after the share', () => {
+    expect(
+      cadinsanRender({ mapDataId: 'municipios_cadinsan_sem_pbf', cadinsan })({
+        ...info,
+        featureId: '1500602',
+        value: 39.43,
+      })
+    ).toMatchObject({
+      props: {
+        name: 'Altamira',
+        swatchColor: '#c4',
+        primary:
+          '39,4% em insegurança alimentar (sem o Bolsa Família) · 30 – 40%',
+        secondary: '5.779 de 14.656 famílias do CadÚnico neste cenário',
+        details: ['Com o Bolsa Família, cai para 17,9% (2.616 famílias)'],
+      },
+    });
+    expect(
+      cadinsanRender({ mapDataId: 'municipios_cadinsan', cadinsan })({
+        ...info,
+        featureId: '1500602',
+        value: 17.85,
+      })
+    ).toMatchObject({
+      props: {
+        swatchColor: '#c2',
+        primary:
+          '17,9% em insegurança alimentar (com o Bolsa Família) · 10 – 20%',
+        details: ['Sem o Bolsa Família, seria 39,4% (5.779 famílias)'],
+      },
+    });
+  });
+
+  test('keeps the plain band card without the município row, and "Sem dado" for no value', () => {
+    const render = cadinsanRender({ mapDataId: 'municipios_cadinsan' });
+
+    expect(render({ ...info, featureId: '1500602', value: 0 })).toMatchObject({
+      props: { swatchColor: '#c1', primary: 'Insegurança 0 · < 10%' },
+    });
+    expect(
+      cadinsanRender({ mapDataId: 'municipios_cadinsan', cadinsan })({
+        ...info,
+        featureId: '1500602',
+        value: undefined,
+      })
+    ).toMatchObject({
+      props: { swatchColor: '#v0', primary: 'Sem dado de Insegurança' },
+    });
+  });
+});
+
+describe('paintsCadinsan', () => {
+  test('is true only for a spec whose mapData paints a CADINSAN share', () => {
+    expect(paintsCadinsan(cadinsanSpec('municipios_cadinsan_sem_pbf'))).toBe(
+      true
+    );
+    expect(paintsCadinsan(ivsSpec)).toBe(false);
+    expect(paintsCadinsan({ ...ivsSpec, mapData: undefined })).toBe(false);
   });
 });

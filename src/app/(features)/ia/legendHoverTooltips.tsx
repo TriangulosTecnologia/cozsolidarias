@@ -5,8 +5,37 @@ import type {
   VisualizationSpec,
 } from '@ttoss/geovis';
 
+import type { CadinsanByCity } from '@/data-gateway/schema';
+
+import { cadinsanCardLines } from '../mapas/mapaCadinsanTooltips';
 import { TooltipCard } from '../mapas/mapaTooltipCard';
 import { TOOLTIP_STYLE } from '../mapas/mapaTooltipStyle';
+
+/**
+ * The CADINSAN scenario each food-insecurity `mapDataId` paints: the route's
+ * renderable ids, repeated here because the client cannot import the route
+ * catalogue (it reaches the gateway).
+ */
+const CADINSAN_VARIANTS = new Map<string, 'com' | 'sem'>([
+  ['municipios_cadinsan', 'com'],
+  ['municipios_cadinsan_sem_pbf', 'sem'],
+]);
+
+/**
+ * Whether a spec paints a CADINSAN share, the one case whose hover card needs
+ * the CADINSAN rows (see {@link withLegendHoverTooltips}).
+ *
+ * @param spec - The spec served by `/api/ai/spec`.
+ * @returns `true` when a `mapData` entry is `municipios_cadinsan` or `municipios_cadinsan_sem_pbf`.
+ *
+ * @example
+ * paintsCadinsan({ mapData: [{ mapDataId: 'municipios_cadinsan_sem_pbf' }] }); // true
+ */
+export const paintsCadinsan = (spec: VisualizationSpec): boolean => {
+  return (spec.mapData ?? []).some(({ mapDataId }) => {
+    return CADINSAN_VARIANTS.has(mapDataId);
+  });
+};
 
 /** A legend read as bands: band `i` is painted `colors[i]` and named `labels[i]`; `thresholds` are the cut points. */
 type BandScale = { thresholds: number[]; colors: string[]; labels: string[] };
@@ -44,21 +73,34 @@ const primaryOf = (params: {
   return `${title ? `${title} ` : ''}${value.toLocaleString('pt-BR')} · ${faixa}`;
 };
 
+/** The `/mapas` CADINSAN lines of a painted band of a CADINSAN layer, else `null`. */
+const cadinsanLinesOf = (params: {
+  band: number;
+  variant: 'com' | 'sem' | undefined;
+  register: CadinsanByCity | undefined;
+}) => {
+  const { band, variant, register } = params;
+  return band > 0 && variant ? cadinsanCardLines({ register, variant }) : null;
+};
+
 /**
  * The hover card of a polygon layer painted by a threshold legend, the one
  * `/mapas` shows for IVS and IDHM: the município name, a swatch with the band's
  * color and "<title> <value> · <faixa>". The band follows geovis' step rule (the
  * count of thresholds at or under the value), so the swatch is the color on the
  * map; the first band is the "Sem dado" floor, which also takes a value that is
- * not a number.
+ * not a number. A CADINSAN layer whose município has a row reads the `/mapas`
+ * CADINSAN lines instead, with the faixa after the share.
  */
 const bandCard = (params: {
   names: Map<string, string>;
   title: string | undefined;
   scale: BandScale;
   info: MapHoverInfo;
+  variant: 'com' | 'sem' | undefined;
+  cadinsan: Map<string, CadinsanByCity>;
 }) => {
-  const { names, title, scale, info } = params;
+  const { names, title, scale, info, variant, cadinsan } = params;
   const value =
     typeof info.value === 'number' ? info.value : Number.NEGATIVE_INFINITY;
   const band = scale.thresholds.filter((threshold) => {
@@ -66,14 +108,31 @@ const bandCard = (params: {
   }).length;
   // The range in parentheses stays in the legend; the card keeps the faixa name, as `/mapas` does.
   const faixa = scale.labels[band].replace(/\s*\(.*\)$/, '');
-  return (
+  const name =
+    names.get(String(info.featureId)) ?? `Município ${info.featureId}`;
+  const lines = cadinsanLinesOf({
+    band,
+    variant,
+    register: cadinsan.get(String(info.featureId)),
+  });
+  return lines ? (
     <TooltipCard
-      name={names.get(String(info.featureId)) ?? `Município ${info.featureId}`}
+      name={name}
+      swatchColor={scale.colors[band]}
+      primary={`${lines.primary} · ${faixa}`}
+      secondary={lines.secondary}
+      details={lines.details}
+    />
+  ) : (
+    <TooltipCard
+      name={name}
       swatchColor={scale.colors[band]}
       primary={primaryOf({ title, band, value, faixa })}
     />
   );
 };
+
+const NO_CADINSAN_ROWS = new Map<string, CadinsanByCity>();
 
 const isTippable = (layer: VisualizationLayer) => {
   return (
@@ -87,8 +146,9 @@ const withTooltip = (params: {
   spec: VisualizationSpec;
   layer: VisualizationLayer;
   names: Map<string, string>;
+  cadinsan: Map<string, CadinsanByCity>;
 }): VisualizationLayer => {
-  const { spec, layer, names } = params;
+  const { spec, layer, names, cadinsan } = params;
   const scale = bandScaleOf(
     spec.legends?.find(({ id }) => {
       return id === layer.activeLegendId;
@@ -100,13 +160,15 @@ const withTooltip = (params: {
   const title = spec.mapData?.find(({ mapDataId }) => {
     return mapDataId === layer.mapDataId;
   })?.title;
+  // `isTippable` only lets through layers with a `mapDataId`.
+  const variant = CADINSAN_VARIANTS.get(String(layer.mapDataId));
   return {
     ...layer,
     hoverTooltip: {
       style: TOOLTIP_STYLE,
       ...layer.hoverTooltip,
       render: (info: MapHoverInfo) => {
-        return bandCard({ names, title, scale, info });
+        return bandCard({ names, title, scale, info, variant, cadinsan });
       },
     },
   };
@@ -121,10 +183,14 @@ const withTooltip = (params: {
  * label (`mapData[].title`). A layer that already has a `render`, has no
  * `mapDataId`, or whose legend is not a threshold scale with named bins is left
  * as it is, and a spec with none to change comes back as the same object. A
- * `hoverTooltip` without `render` keeps its `style`.
+ * `hoverTooltip` without `render` keeps its `style`. A CADINSAN share
+ * (`municipios_cadinsan`, `municipios_cadinsan_sem_pbf`) gets the `/mapas`
+ * CADINSAN lines (share, "N de M famílias", the other scenario) from its row in
+ * `cadinsan`; without that row it keeps the plain band card.
  *
  * @param params.spec - The spec served by `/api/ai/spec`.
  * @param params.names - `codarea → município name`; a município missing from it shows as `Município <codarea>`.
+ * @param params.cadinsan - `codarea → CADINSAN row` (`/api/cadinsan/por-municipio`); defaults to none.
  * @returns The spec with the hover card on its legend-driven polygon layers.
  *
  * @example
@@ -134,10 +200,13 @@ const withTooltip = (params: {
 export const withLegendHoverTooltips = (params: {
   spec: VisualizationSpec;
   names: Map<string, string>;
+  cadinsan?: Map<string, CadinsanByCity>;
 }): VisualizationSpec => {
-  const { spec, names } = params;
+  const { spec, names, cadinsan = NO_CADINSAN_ROWS } = params;
   const layers = spec.layers?.map((layer) => {
-    return isTippable(layer) ? withTooltip({ spec, layer, names }) : layer;
+    return isTippable(layer)
+      ? withTooltip({ spec, layer, names, cadinsan })
+      : layer;
   });
   return layers?.some((layer, index) => {
     return layer !== spec.layers?.[index];

@@ -47,12 +47,71 @@ const cadinsanEffectLine = ({
 };
 
 /**
+ * The text of the CADINSAN card for a município under one scenario: the share
+ * in food insecurity (`primary`), "N de M famílias do CadÚnico neste cenário"
+ * (`secondary`) and, when the opposite scenario has a share, the line
+ * comparing the two (`details`). Shared by the `/mapas` card and the `/ia`
+ * one, so both read the same copy.
+ *
+ * @param params.register - The município's CADINSAN row, if any.
+ * @param params.variant - The active scenario: `'com'` or `'sem'` o Bolsa Família.
+ * @returns The lines and the active share, or `null` when the município has no
+ * row or no CadÚnico denominator in that scenario ("Sem dado do CadÚnico").
+ *
+ * @example
+ * cadinsanCardLines({ register, variant: 'sem' });
+ * // { activeProporcao: 32.5, primary: '32,5% em insegurança alimentar (sem o Bolsa Família)', secondary: '…', details: ['Com o Bolsa Família, cai para …'] }
+ */
+export const cadinsanCardLines = ({
+  register,
+  variant,
+}: {
+  register?: CadinsanByCity;
+  variant: 'com' | 'sem';
+}): {
+  activeProporcao: number;
+  primary: string;
+  secondary: string;
+  details?: string[];
+} | null => {
+  if (register === undefined) {
+    return null;
+  }
+
+  const isCom = variant === 'com';
+  const activeProporcao = isCom
+    ? register.proporcaoComPbf
+    : register.proporcaoSemPbf;
+  if (activeProporcao === null) {
+    return null;
+  }
+
+  const activeAbsoluto = isCom
+    ? register.absolutoComPbf
+    : register.absolutoSemPbf;
+  const qualifier = isCom ? 'com o Bolsa Família' : 'sem o Bolsa Família';
+
+  const effect = cadinsanEffectLine({
+    variant,
+    proporcao: isCom ? register.proporcaoSemPbf : register.proporcaoComPbf,
+    absoluto: isCom ? register.absolutoSemPbf : register.absolutoComPbf,
+  });
+
+  return {
+    activeProporcao,
+    primary: `${formatPercent(activeProporcao)} em insegurança alimentar (${qualifier})`,
+    secondary: `${formatFamilias(activeAbsoluto)} de ${formatFamilias(register.cadastrosCadunico)} famílias do CadÚnico neste cenário`,
+    details: effect === undefined ? undefined : [effect],
+  };
+};
+
+/**
  * CADINSAN-mode tooltip. Destaca a proporção do cenário ativo (com/sem o efeito
  * do Bolsa Família) com a cor da faixa do mapa, a linha "N de M famílias do
  * CadÚnico neste cenário", e — como cada município carrega os dois cenários — uma
- * linha de efeito com a proporção do cenário oposto. Assim o leitor lê os dois
- * números como o mesmo indicador sob dois cenários, nunca como "quem recebe
- * Bolsa Família". Municípios sem denominador do CadÚnico (`proporcao === null`)
+ * linha de efeito com a proporção do cenário oposto (see {@link cadinsanCardLines}).
+ * Assim o leitor lê os dois números como o mesmo indicador sob dois cenários,
+ * nunca como "quem recebe Bolsa Família". Municípios sem denominador do CadÚnico (`proporcao === null`)
  * leem apenas "Sem dado do CadÚnico". `variant` escolhe a métrica ativa; as duas
  * dividem a mesma escala de cor.
  */
@@ -67,43 +126,25 @@ export const renderCadinsanTooltip = ({
   variant: 'com' | 'sem';
   rampId?: string;
 }) => {
-  const semDado = (
-    <TooltipCard
-      name={name}
-      swatchColor={colorForCadinsan(null, rampId)}
-      primary="Sem dado do CadÚnico"
-    />
-  );
-  if (register === undefined) {
-    return semDado;
+  const lines = cadinsanCardLines({ register, variant });
+  if (lines === null) {
+    return (
+      <TooltipCard
+        name={name}
+        swatchColor={colorForCadinsan(null, rampId)}
+        primary="Sem dado do CadÚnico"
+      />
+    );
   }
 
-  const isCom = variant === 'com';
-  const activeProporcao = isCom
-    ? register.proporcaoComPbf
-    : register.proporcaoSemPbf;
-  if (activeProporcao === null) {
-    return semDado;
-  }
-
-  const activeAbsoluto = isCom
-    ? register.absolutoComPbf
-    : register.absolutoSemPbf;
-  const qualifier = isCom ? 'com o Bolsa Família' : 'sem o Bolsa Família';
-
-  const effect = cadinsanEffectLine({
-    variant,
-    proporcao: isCom ? register.proporcaoSemPbf : register.proporcaoComPbf,
-    absoluto: isCom ? register.absolutoSemPbf : register.absolutoComPbf,
-  });
-
+  const { activeProporcao, primary, secondary, details } = lines;
   return (
     <TooltipCard
       name={name}
       swatchColor={colorForCadinsan(activeProporcao, rampId)}
-      primary={`${formatPercent(activeProporcao)} em insegurança alimentar (${qualifier})`}
-      secondary={`${formatFamilias(activeAbsoluto)} de ${formatFamilias(register.cadastrosCadunico)} famílias do CadÚnico neste cenário`}
-      details={effect === undefined ? undefined : [effect]}
+      primary={primary}
+      secondary={secondary}
+      details={details}
     />
   );
 };
