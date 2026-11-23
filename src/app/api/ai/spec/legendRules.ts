@@ -1,4 +1,10 @@
 import {
+  CADINSAN_COLORS,
+  CADINSAN_LEGEND_LABELS,
+  CADINSAN_THRESHOLDS,
+  WITHOUT_KITCHEN_COLOR,
+} from '@/app/(features)/mapas/geovisChoroplethScales';
+import {
   IDHM_FAMILY_COLORS,
   IDHM_FAMILY_THRESHOLDS,
   IDHM_LEGEND_LABELS,
@@ -7,14 +13,27 @@ import {
   IVS_LEGEND_LABELS,
 } from '@/app/(features)/mapas/geovisScoreScales';
 
-import { officialFaixasOf } from './mapDataCatalogue';
+import { fixedScaleOf } from './mapDataCatalogue';
 import { isRecord, type UnknownRecord } from './specValidation';
 
 const recordsOf = (value: unknown): UnknownRecord[] => {
   return Array.isArray(value) ? value.filter(isRecord) : [];
 };
 
-const OFFICIAL_SCALES = {
+/**
+ * The fixed scale of each family, as `/mapas` paints it. CADINSAN carries
+ * `/mapas`'s grey `defaultColor`: its first color is a vestigial ramp step,
+ * not the "Sem dado" grey the IVS/IDHM colors start with.
+ */
+const FIXED_SCALES: Record<
+  'ivs' | 'idhm' | 'cadinsan',
+  {
+    thresholds: readonly number[];
+    colors: readonly string[];
+    labels: readonly string[];
+    defaultColor?: string;
+  }
+> = {
   ivs: {
     thresholds: IVS_FAMILY_THRESHOLDS,
     colors: IVS_FAMILY_COLORS,
@@ -24,6 +43,12 @@ const OFFICIAL_SCALES = {
     thresholds: IDHM_FAMILY_THRESHOLDS,
     colors: IDHM_FAMILY_COLORS,
     labels: IDHM_LEGEND_LABELS,
+  },
+  cadinsan: {
+    thresholds: CADINSAN_THRESHOLDS,
+    colors: CADINSAN_COLORS,
+    labels: CADINSAN_LEGEND_LABELS,
+    defaultColor: WITHOUT_KITCHEN_COLOR,
   },
 };
 
@@ -60,17 +85,17 @@ export const splitAgentLegends = (
 };
 
 /**
- * The official IPEA scale of an IVS/IDHM `mapDataId`, as a legend patch: the
- * faixas in `colorBy`, their names in the legend's `labelFormat` (geovis has no
- * `colorBy.labels`).
+ * The fixed scale of a `mapDataId` (official IVS/IDHM faixas, the CADINSAN
+ * ruler), as a legend patch: the bands in `colorBy`, their names in the
+ * legend's `labelFormat` (geovis has no `colorBy.labels`).
  */
-const officialScalePatch = (mapDataId: unknown): UnknownRecord => {
+const fixedScalePatch = (mapDataId: unknown): UnknownRecord => {
   // `appendRealMapData` already checked every `mapDataId` is a string.
-  const family = officialFaixasOf(String(mapDataId));
+  const family = fixedScaleOf(String(mapDataId));
   if (!family) {
     return {};
   }
-  const { thresholds, colors, labels } = OFFICIAL_SCALES[family];
+  const { thresholds, colors, labels, defaultColor } = FIXED_SCALES[family];
   return {
     colorBy: {
       type: 'quantitative',
@@ -78,6 +103,7 @@ const officialScalePatch = (mapDataId: unknown): UnknownRecord => {
       scale: 'threshold',
       thresholds,
       colors,
+      ...(defaultColor === undefined ? {} : { defaultColor }),
     },
     labelFormat: { type: 'labels', labels },
   };
@@ -92,7 +118,7 @@ const LEGEND_POSITION = 'bottom-right';
 /** The legend fields the agent writes: text only, never the scale. */
 const AGENT_TEXT_KEYS = ['title', 'subtitle', 'reference', 'noDataLabel'];
 
-/** A resolver legend with the agent's text (its `title` wins over the `mapData` title) and the official scale. */
+/** A resolver legend with the agent's text (its `title` wins over the `mapData` title) and the fixed scale. */
 const withAppText = (params: {
   legend: UnknownRecord;
   entry: UnknownRecord;
@@ -110,7 +136,7 @@ const withAppText = (params: {
     title: entry['title'] ?? legend['title'],
     position: legend['position'] ?? LEGEND_POSITION,
     ...agentText,
-    ...officialScalePatch(entry['mapDataId']),
+    ...fixedScalePatch(entry['mapDataId']),
   };
 };
 
@@ -119,7 +145,8 @@ const withAppText = (params: {
  * resolver legend takes the text of the agent legend at the position of the
  * `mapData` entry it paints (else that entry's `title`, replacing the English
  * `Circle size =` of proportional circles); an IVS/IDHM legend gets the
- * official IPEA faixas instead of Jenks breaks. Agent legends no resolver
+ * official IPEA faixas, and a CADINSAN one the `/mapas` ruler
+ * (`CADINSAN_THRESHOLDS`, `CADINSAN_LEGEND_LABELS`), instead of Jenks breaks. Agent legends no resolver
  * legend takes (a points map, a map type with no generated legend) are kept
  * with the id `legend-<n>`. Every legend these rules touch gets a
  * `position` when it has none, so the map shows it.
