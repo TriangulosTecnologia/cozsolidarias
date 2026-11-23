@@ -1,6 +1,6 @@
+import { fixedScaleOf } from 'src/app/api/ai/spec/legendRules';
 import {
   buildCatalogueContext,
-  fixedScaleOf,
   officialFaixasOf,
   RENDERABLE_DATASET_IDS,
 } from 'src/app/api/ai/spec/mapDataCatalogue';

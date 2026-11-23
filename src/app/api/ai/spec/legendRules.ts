@@ -13,8 +13,41 @@ import {
   IVS_LEGEND_LABELS,
 } from '@/app/(features)/mapas/geovisScoreScales';
 
-import { fixedScaleOf } from './mapDataCatalogue';
+import { officialFaixasOf } from './mapDataCatalogue';
 import { isRecord, type UnknownRecord } from './specValidation';
+
+/**
+ * The ids `/mapas` paints on its fixed CADINSAN ruler (`CADINSAN_THRESHOLDS`).
+ * A fixed scale, not an official index: `findReclassifiedOfficialIndex` leaves
+ * them out, and the legend rules put the ruler back whatever the agent wrote.
+ */
+const CADINSAN_SCALE_IDS: readonly string[] = [
+  'municipios_cadinsan',
+  'municipios_cadinsan_sem_pbf',
+];
+
+/**
+ * The fixed legend scale a renderable id is painted on: its official faixa
+ * family (see {@link officialFaixasOf}), else `'cadinsan'` for the two
+ * food-insecurity shares. Read by the legend rules, which replace the
+ * resolver's Jenks breaks with that scale.
+ *
+ * @param mapDataId - A `mapData[].mapDataId`.
+ * @returns `'ivs'`, `'idhm'`, `'cadinsan'` or `undefined` when the scale is free.
+ *
+ * @example
+ * fixedScaleOf('municipios_cadinsan_sem_pbf'); // 'cadinsan'
+ * fixedScaleOf('municipios_ivs'); // 'ivs'
+ * fixedScaleOf('cozinhas_geolocalizadas'); // undefined
+ */
+export const fixedScaleOf = (
+  mapDataId: string
+): 'ivs' | 'idhm' | 'cadinsan' | undefined => {
+  return (
+    officialFaixasOf(mapDataId) ??
+    (CADINSAN_SCALE_IDS.includes(mapDataId) ? 'cadinsan' : undefined)
+  );
+};
 
 const recordsOf = (value: unknown): UnknownRecord[] => {
   return Array.isArray(value) ? value.filter(isRecord) : [];
