@@ -10,7 +10,7 @@ Source of truth for what exists: `public/dataset_catalogue.json`. A catalogued d
 2. **Reach the data through the gateway** — add or reuse a `gateway.get*` member (see [`src/data-gateway/CLAUDE.md`](../../../data-gateway/CLAUDE.md)). Never read files or sources from the route.
 3. **Register the fetcher** in `RENDERABLE_DATASET_FETCHERS`:
    - One id per painted value. Reuse `toMapDataRows(rows, pick)`; return `null` from `pick` for "sem dado" (never `0`).
-   - A ratio gets its own id (e.g. one id per base: per 10 mil and per 100 mil are two ids), named after the measure, `snake_case`.
+   - A ratio gets its own id (e.g. one id per base: per 10 mil and per 100 mil are two ids), named after the measure, `snake_case`. A CadÚnico coverage rate on any base is derived, not registered: its id is `cozinhas_por_<N>mil_cadunico` (`cadunicoRateId.ts`), `fetcherOf` builds the fetcher from the base the id names, and a base the prompt names renames the served id (`rateBaseFromPrompt`).
    - Ids that paint one field of a shared catalogue dataset also need a `CATALOGUE_VARIANTS` entry (`datasetId`, `fieldName`, optional `note` stating scale direction, optional `officialFaixas`).
 4. **Classify the value kind** — an absolute total goes in `ABSOLUTE_TOTALS` (so `findChoroplethOnAbsoluteTotal` rejects a choropleth over it); counts in `COUNTS`; rates and shares need nothing.
 5. **Official scales** — only for indexes with published bands (IVS, IDHM): set `officialFaixas`, so `applyCanonicalScales` and `findReclassifiedOfficialIndex` apply. Everything else keeps free scales.
