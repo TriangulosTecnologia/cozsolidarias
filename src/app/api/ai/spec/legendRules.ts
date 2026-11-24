@@ -19,11 +19,8 @@ import {
   IVS_LEGEND_LABELS,
 } from '@/app/(features)/mapas/geovisScoreScales';
 
-import {
-  isCadunicoRateId,
-  officialFaixasOf,
-  rateBaseOf,
-} from './mapDataCatalogue';
+import { isCadunicoRateId, rateBaseOf } from './cadunicoRateId';
+import { officialFaixasOf } from './mapDataCatalogue';
 import { isRecord, type UnknownRecord } from './specValidation';
 
 /** A fixed legend scale: an official IPEA faixa family or a `/mapas` ruler. */

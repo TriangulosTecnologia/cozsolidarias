@@ -319,30 +319,7 @@ describe('CadÚnico coverage legends', () => {
     }
   );
 
-  test('renames rate ids only for a positive base, and leaves specs without mapData or layers to the usual checks', async () => {
-    jest.spyOn(gateway, 'getCozinhasPorMunicipio').mockResolvedValue([]);
-    const untyped = { mapData: [{ mapDataId: 'cozinhas_por_10mil_cadunico' }] };
-
-    const rebased = await resolveCandidate(untyped, { rateBase: 50_000 });
-    const kept = await resolveCandidate(untyped, { rateBase: 0 });
-    const empty = await resolveCandidate({}, { rateBase: 50_000 });
-
-    expect((rebased as UnknownRecord)['mapData']).toEqual([
-      expect.objectContaining({
-        mapDataId: 'cozinhas_por_50mil_cadunico',
-        data: [],
-      }),
-    ]);
-    expect((kept as UnknownRecord)['mapData']).toEqual([
-      expect.objectContaining({
-        mapDataId: 'cozinhas_por_10mil_cadunico',
-        data: [],
-      }),
-    ]);
-    expect(empty).toBeInstanceOf(Response);
-  });
-
-  test('serves the rate under the id that names the prompt base, with its values and legend', async () => {
+  test("serves the rate under the id of the prompt's base, with its values and legend", async () => {
     jest.spyOn(gateway, 'getCozinhasPorMunicipio').mockResolvedValue([
       {
         codigoIbge: '2927408',

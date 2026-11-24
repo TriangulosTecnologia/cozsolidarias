@@ -1,13 +1,15 @@
 import {
+  cadunicoRateId,
+  isCadunicoRateId,
+  rateBaseOf,
+} from 'src/app/api/ai/spec/cadunicoRateId';
+import {
   buildConceptIndex,
   type ConceptEntry,
 } from 'src/app/api/ai/spec/conceptIndex';
 import { rateBaseFromPrompt } from 'src/app/api/ai/spec/datasetFamilies';
 import {
-  cadunicoRateId,
-  isCadunicoRateId,
   isRenderableDatasetId,
-  rateBaseOf,
   RENDERABLE_DATASET_IDS,
 } from 'src/app/api/ai/spec/mapDataCatalogue';
 import {
@@ -177,6 +179,38 @@ describe('preflightPrompt', () => {
         mapType: 'choropleth',
       })
     ).toEqual({ status: 'resolved' });
+  });
+
+  test('routes a CadÚnico coverage ratio to its own family, not to the kitchen count or CadinSan', () => {
+    process.env['FORBID_ABSOLUTE_ON_CHOROPLETH'] = 'true';
+    try {
+      for (const prompt of [
+        'Mapa coroplético do número de cozinhas por 10 mil pessoas no CadÚnico em cada município.',
+        'Mapa coroplético de cozinhas por 100 mil pessoas no CadÚnico.',
+        'Mapa coroplético de pessoas no CadÚnico por cozinha em cada município.',
+      ]) {
+        expect(preflightPrompt({ prompt })).toEqual({ status: 'resolved' });
+      }
+    } finally {
+      delete process.env['FORBID_ABSOLUTE_ON_CHOROPLETH'];
+    }
+  });
+
+  test('asks which base when a coverage prompt names 10 mil and 100 mil', () => {
+    expect(
+      preflightPrompt({
+        prompt: 'cozinhas por 10 mil e por 100 mil pessoas no CadÚnico',
+      })
+    ).toMatchObject({
+      status: 'ambiguous',
+      clarify: {
+        facet: 'dataset',
+        options: [
+          { value: 'cozinhas_por_10mil_cadunico' },
+          { value: 'cozinhas_por_100mil_cadunico' },
+        ],
+      },
+    });
   });
 
   test('never blocks a prompt it does not recognise', () => {

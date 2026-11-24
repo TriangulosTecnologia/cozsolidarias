@@ -1,5 +1,6 @@
 import { resolveSpecFromMapType, type VisualizationSpec } from '@ttoss/geovis';
 
+import { cadunicoRateId, isCadunicoRateId } from './cadunicoRateId';
 import {
   buildCozinhasChoroplethSpec,
   isCozinhasChoroplethRequest,
@@ -8,7 +9,6 @@ import { normalize } from './conceptIndex';
 import { rateBaseFromPrompt } from './datasetFamilies';
 import { logGeneration } from './generationLogger';
 import { applyAppLegendRules, splitAgentLegends } from './legendRules';
-import { cadunicoRateId, isCadunicoRateId } from './mapDataCatalogue';
 import { applyProportionalCirclesDefaults } from './specDefaults';
 import {
   appendRealMapData,

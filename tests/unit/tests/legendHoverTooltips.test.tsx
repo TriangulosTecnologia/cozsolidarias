@@ -1,9 +1,10 @@
 import type { VisualizationSpec } from '@ttoss/geovis';
+import { paintsCadunicoCoverage } from 'src/app/(features)/ia/coverageTooltipLines';
 import {
   paintsCadinsan,
-  paintsCadunicoCoverage,
   withLegendHoverTooltips,
 } from 'src/app/(features)/ia/legendHoverTooltips';
+import { isCadunicoRateId } from 'src/app/api/ai/spec/cadunicoRateId';
 import type {
   CadinsanByCity,
   KitchenRateByCity,
@@ -490,12 +491,12 @@ describe('withLegendHoverTooltips on a CadÚnico coverage', () => {
     expect(
       coverageRender({
         mapDataId: 'cozinhas_por_1mil_cadunico',
-        rateBase: 1_000,
+        rateBase: 1000,
         cozinhas: new Map([['2927408', { ...SALVADOR, quantidade: 1 }]]),
-      })({ ...info, featureId: '2927408', value: 0.02 })
+      })({ ...info, featureId: '2927408', value: 0.22 })
     ).toMatchObject({
       props: {
-        primary: '0,02 por mil no CadÚnico · < 0,2',
+        primary: '0,22 por mil no CadÚnico · 0,2 – 0,5',
         secondary: '1 cozinha · 1.157.799 no CadÚnico',
       },
     });
@@ -563,6 +564,24 @@ describe('paintsCadunicoCoverage', () => {
     ).toBe(true);
     expect(paintsCadunicoCoverage({ ...ivsSpec, mapData: undefined })).toBe(
       false
+    );
+  });
+
+  // The client cannot import the route's id grammar, so it repeats it: the two
+  // must agree on which ids are a CadÚnico rate.
+  test.each([
+    'cozinhas_por_10mil_cadunico',
+    'cozinhas_por_2_5mil_cadunico',
+    'cozinhas_por_0_5mil_cadunico',
+    'cozinhas_por_1_0mil_cadunico',
+    'cozinhas_por_0mil_cadunico',
+    'cozinhas_por_00mil_cadunico',
+    'cozinhas_por_0_0mil_cadunico',
+    'cozinhas_por_mil_cadunico',
+    'cozinhas_por_10mil_cadunico_x',
+  ])('agrees with isCadunicoRateId on %s', (mapDataId) => {
+    expect(paintsCadunicoCoverage(coverageSpec(mapDataId))).toBe(
+      isCadunicoRateId(mapDataId)
     );
   });
 });

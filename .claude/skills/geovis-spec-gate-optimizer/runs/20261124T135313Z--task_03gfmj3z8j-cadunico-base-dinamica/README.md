@@ -4,7 +4,7 @@ CadÚnico cases against the local dev server (real `POST`, no mock) after D-src 
 rate base lives in the id (`cozinhas_por_<N>mil_cadunico`), and the base a prompt names
 renames the served id before the data is fetched.
 
-- `cases/<id>.json`: full response; `specs/<id>.spec.json`: the served spec.
+- `cases/<id>.json` (full response) and `specs/<id>.spec.json` (the served spec) are not committed, per `.claude/flow.md`; the handoff lists where they are kept.
 - `cases/<id>.score.json`, `eval-report.json`, `SUMMARY.md`: 5/5 pass.
 - `cases/<id>.gate.json`: `gate_ratio.mjs` passes on all 5 (independent oracle, 348 municípios).
 

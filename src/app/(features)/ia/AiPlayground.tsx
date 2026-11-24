@@ -22,8 +22,9 @@ import { BruttalTheme } from '@ttoss/theme/Bruttal';
 import { ThemeUIProvider } from 'theme-ui';
 
 import { ChoiceSection, ErrorAlert, FeedbackSection } from './ChoicePanel';
+import { paintsCadunicoCoverage } from './coverageTooltipLines';
 import { JsonPanel } from './JsonPanel';
-import { paintsCadinsan, paintsCadunicoCoverage } from './legendHoverTooltips';
+import { paintsCadinsan } from './legendHoverTooltips';
 import { useAiPlaygroundLogic } from './useAiPlaygroundLogic';
 import { useCadinsanPorMunicipio } from './useCadinsanPorMunicipio';
 import { useCozinhasPorMunicipio } from './useCozinhasPorMunicipio';

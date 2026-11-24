@@ -1,0 +1,12 @@
+[1/5] ratio-cozinhas-cadunico-10mil — status 200 (14162ms)
+ratio-cozinhas-cadunico-10mil: PASS
+[2/5] ratio-cozinhas-cadunico-100mil — status 200 (11695ms)
+ratio-cozinhas-cadunico-100mil: PASS
+[3/5] ratio-cozinhas-cadunico-50mil — status 200 (11846ms)
+ratio-cozinhas-cadunico-50mil: PASS
+[4/5] ratio-cozinhas-cadunico-50k — status 200 (11497ms)
+ratio-cozinhas-cadunico-50k: PASS
+[5/5] ratio-pessoas-cadunico-por-cozinha — status 200 (11446ms)
+ratio-pessoas-cadunico-por-cozinha: PASS
+campaign finished: 5 cases in /home/triangulos/Documentos/repos/cozsolidarias/.claude/worktrees/agent-ab0563db54acc33f9/tmp/20261124T135313Z--task_03gfmj3z8j-cadunico-base-dinamica/cases/
+report: 5/5 pass, 0 proposal(s), 0 unclassified

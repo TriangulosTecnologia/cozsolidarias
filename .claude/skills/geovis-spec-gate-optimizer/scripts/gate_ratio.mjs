@@ -57,33 +57,38 @@ const COZINHAS_CSV = resolve(process.cwd(), 'src/data-source-static/data/cozinha
 const MUNICIPIOS_GEOJSON = resolve(process.cwd(), 'public/geo/geojs-100-mun.json');
 const CADUNICO_JSON = resolve(process.cwd(), 'public/geo/municipios-cadunico.json');
 
-const endField = (state) => { state.row.push(state.field); state.field = '' };
-const endRow = (state) => { endField(state); state.rows.push(state.row); state.row = [] };
-
-/** One character inside quotes; 1 when it also took the next one (an escaped quote). */
-const quotedStep = (state, char, next) => {
-  if (char !== '"') { state.field += char; return 0 }
-  if (next === '"') { state.field += '"'; return 1 }
-  state.quoted = false;
-  return 0;
-};
-
-/** One character of the CSV text; 1 when it also took the next one. */
-const csvStep = (state, char, next) => {
-  if (state.quoted) return quotedStep(state, char, next);
-  if (char === '"') state.quoted = true;
-  else if (char === ',') endField(state);
-  else if (char === '\n') endRow(state);
-  else if (char !== '\r') state.field += char;
-  return 0;
+/** A quoted field starting after its opening quote: its text (`""` is a quote) and the index after the closing quote. */
+const readQuoted = (text, start) => {
+  let value = '';
+  let i = start;
+  for (; i < text.length; i += 1) {
+    if (text[i] !== '"') { value += text[i]; continue }
+    if (text[i + 1] !== '"') break;
+    value += '"';
+    i += 1;
+  }
+  return { value, next: i + 1 };
 };
 
 /** Rows of a whole CSV text, honouring quoted fields with commas, quotes and newlines. */
 const parseCsv = (text) => {
-  const state = { rows: [], row: [], field: '', quoted: false };
-  for (let i = 0; i < text.length; i += 1) i += csvStep(state, text[i], text[i + 1]);
-  if (state.field !== '' || state.row.length > 0) endRow(state);
-  return state.rows;
+  const rows = [];
+  let row = [];
+  let field = '';
+  let i = 0;
+  while (i < text.length) {
+    const char = text[i];
+    i += 1;
+    if (char === '"') {
+      const quoted = readQuoted(text, i);
+      field += quoted.value;
+      i = quoted.next;
+    } else if (char === ',') { row.push(field); field = '' }
+    else if (char === '\n') { row.push(field); rows.push(row); row = []; field = '' }
+    else if (char !== '\r') field += char;
+  }
+  if (field !== '' || row.length > 0) { row.push(field); rows.push(row) }
+  return rows;
 };
 
 /** A coordinate cell as a number, or null when blank, `---` or not a number. */
@@ -158,7 +163,7 @@ const cadunicoOracle = (expect) => {
 };
 
 /** The oracle rows for a case, or a loud error when its source has no oracle yet. */
-const oracleFor = (expect) => {
+const oracleFor = async (expect) => {
   if (expect.rate?.source === 'gateway.getCadinsanPorMunicipio') return cadinsanOracle(expect.numerator.field);
   if (expect.rate?.source === 'gateway.getCozinhasPorMunicipio') return cadunicoOracle(expect);
   throw new Error(`no oracle for ${expect.rate?.source}: it lands with the family PR`);
@@ -237,8 +242,8 @@ const specFromOracle = ({ expect, oracle }) => {
   return { mapData: [{ mapDataId: expect.dataset, data }] };
 };
 
-/** Mutants of the oracle spec. Each must make the gate fail. */
-const mutants = (golden) => {
+/** Mutants of the oracle spec, each off by more than the case's tolerance. Each must make the gate fail. */
+const mutants = ({ golden, tolerance }) => {
   const clone = () => { return JSON.parse(JSON.stringify(golden)) };
   const mutate = (fn) => {
     const spec = clone();
@@ -250,7 +255,7 @@ const mutants = (golden) => {
   return {
     'M1 wrong dataset': wrongDataset,
     'M2 one município dropped': mutate((data) => { return data.slice(1) }),
-    'M3 one value off by one': mutate((data) => { return data.map((r, i) => { return i === 0 ? { ...r, value: r.value + 1 } : r }) }),
+    'M3 one value off by more than the tolerance': mutate((data) => { return data.map((r, i) => { return i === 0 ? { ...r, value: r.value + tolerance + 1 } : r }) }),
     'M4 extra município': mutate((data) => { return [...data, { geometryId: '0000000', value: 1 }] }),
     'M5 values scaled (wrong base)': mutate((data) => { return data.map((r) => { return { ...r, value: r.value * 10 } }) }),
   };
@@ -262,7 +267,7 @@ const finish = (value, pass) => {
   process.exit(pass ? 0 : 1);
 };
 
-const main = () => {
+const main = async () => {
   const args = process.argv.slice(2);
   const caseId = args.find((a) => { return a.startsWith('--case=') })?.slice('--case='.length);
   const selfTest = args.includes('--self-test');
@@ -273,12 +278,12 @@ const main = () => {
     process.exit(2);
   }
   const { expect } = evalCase;
-  const oracle = oracleFor(expect);
+  const oracle = await oracleFor(expect);
 
   if (selfTest) {
     const golden = specFromOracle({ expect, oracle });
     const base = gate({ spec: golden, expect, oracle });
-    const results = Object.entries(mutants(golden)).map(([name, mutant]) => {
+    const results = Object.entries(mutants({ golden, tolerance: expect.rate.tolerance })).map(([name, mutant]) => {
       const verdict = gate({ spec: mutant, expect, oracle });
       return { name, caught: !verdict.pass, firstFailure: verdict.failures[0] ?? null };
     });
@@ -290,4 +295,4 @@ const main = () => {
   finish({ ...verdict, failures: verdict.failures.slice(0, 20) }, verdict.pass);
 };
 
-main();
+await main();

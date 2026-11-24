@@ -1,6 +1,11 @@
 import type { RenderableDatasetId } from './mapDataCatalogue';
 
-export type Variant = { id: RenderableDatasetId; label: string; match: RegExp };
+/** A dataset a prompt can name within its family. */
+export type Variant = {
+  id: RenderableDatasetId;
+  label: string;
+  match: RegExp;
+};
 
 type Family = {
   keyword: RegExp;
@@ -138,18 +143,13 @@ const BASE_IN_K = /\b(?:por|a cada|para cada) (?:cada )?(\d+(?:,\d+)?) ?k\b/;
 const BASE_IN_UNITS =
   /\b(?:por|a cada|para cada) (?:cada )?(\d{1,3}(?:\.\d{3})+|\d{4,})\b/;
 
-/** The count of thousands a base names: "dez", "cem", "2,5", or 1 for a bare "mil". */
-const thousandsCount = (amount: string | undefined): number => {
+/** The thousands a "por N mil" amount names: a number, "dez", "cem", or none ("por mil"). */
+const countOf = (amount: string | undefined): number => {
   if (amount === undefined) {
     return 1;
   }
-  if (amount === 'dez') {
-    return 10;
-  }
-  if (amount === 'cem') {
-    return 100;
-  }
-  return Number(amount.replace(',', '.'));
+  const words: Record<string, number> = { dez: 10, cem: 100 };
+  return words[amount] ?? Number(amount.replace(',', '.'));
 };
 
 /**
@@ -166,9 +166,13 @@ const thousandsCount = (amount: string | undefined): number => {
  * rateBaseFromPrompt('pessoas no cadunico por cozinha'); // undefined
  */
 export const rateBaseFromPrompt = (text: string): number | undefined => {
-  const thousands = BASE_IN_THOUSANDS.exec(text) ?? BASE_IN_K.exec(text);
+  const thousands = BASE_IN_THOUSANDS.exec(text);
   if (thousands) {
-    return Math.round(thousandsCount(thousands[1]) * 1000);
+    return Math.round(countOf(thousands[1]) * 1000);
+  }
+  const k = BASE_IN_K.exec(text)?.[1];
+  if (k !== undefined) {
+    return Math.round(Number(k.replace(',', '.')) * 1000);
   }
   const units = BASE_IN_UNITS.exec(text)?.[1];
   return units === undefined ? undefined : Number(units.replaceAll('.', ''));
