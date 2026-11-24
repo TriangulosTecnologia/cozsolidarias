@@ -5,6 +5,7 @@ import {
   withLegendHoverTooltips,
 } from 'src/app/(features)/ia/legendHoverTooltips';
 import { isCadunicoRateId } from 'src/app/api/ai/spec/cadunicoRateId';
+import { fixedScaleOf } from 'src/app/api/ai/spec/legendRules';
 import type {
   CadinsanByCity,
   KitchenRateByCity,
