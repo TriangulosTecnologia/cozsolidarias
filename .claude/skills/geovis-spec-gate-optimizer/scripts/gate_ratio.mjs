@@ -9,11 +9,12 @@
  *   3. Bands: when `expect.bands` is set, municípios and numerator totals per
  *      band (the served values banded by `thresholds`) equal `familiesPerBand`.
  *
- * Oracles are recomputed from the source, never read from the golden: CadinSan
- * from the CADINSAN CSV; CadÚnico coverage from the gateway's per-município rows
- * (`<GATE_BASE_URL>/api/cozinhas/por-municipio`, default the local dev server),
- * whose numerator and denominator fields the case names. The PAA oracle lands
- * with its family PR, and until then the gate fails loudly.
+ * Oracles are recomputed from the static source, never read from the golden or
+ * the gateway. CadinSan reads the CADINSAN CSV; CadÚnico re-places every
+ * cozinha of the latest CSV in its município (point in polygon over the
+ * `/geo/geojs-100-mun.json` boundaries, else the declared code) and divides by
+ * `/geo/municipios-cadunico.json`. The PAA oracle lands with its family PR,
+ * and until then the gate fails loudly.
  *
  * Usage, from the cozsolidarias repo root:
  *
@@ -52,26 +53,121 @@ const cadinsanOracle = (numeratorField) => {
   });
 };
 
-/** `[{ geometryId, numerator, denominator }]` from the gateway's per-município cozinha rows. */
-const cozinhasOracle = async ({ numerator, denominator }) => {
-  const url = `${process.env.GATE_BASE_URL ?? 'http://localhost:3000'}/api/cozinhas/por-municipio`;
-  const response = await globalThis.fetch(url);
-  if (!response.ok) throw new Error(`${url} answered ${response.status}`);
-  return (await response.json()).map((row) => {
-    return { geometryId: row.codigoIbge, numerator: row[numerator.field], denominator: row[denominator.field] };
+const COZINHAS_CSV = resolve(process.cwd(), 'src/data-source-static/data/cozinhas_com_geolocalizacao_all.csv');
+const MUNICIPIOS_GEOJSON = resolve(process.cwd(), 'public/geo/geojs-100-mun.json');
+const CADUNICO_JSON = resolve(process.cwd(), 'public/geo/municipios-cadunico.json');
+
+const endField = (state) => { state.row.push(state.field); state.field = '' };
+const endRow = (state) => { endField(state); state.rows.push(state.row); state.row = [] };
+
+/** One character inside quotes; 1 when it also took the next one (an escaped quote). */
+const quotedStep = (state, char, next) => {
+  if (char !== '"') { state.field += char; return 0 }
+  if (next === '"') { state.field += '"'; return 1 }
+  state.quoted = false;
+  return 0;
+};
+
+/** One character of the CSV text; 1 when it also took the next one. */
+const csvStep = (state, char, next) => {
+  if (state.quoted) return quotedStep(state, char, next);
+  if (char === '"') state.quoted = true;
+  else if (char === ',') endField(state);
+  else if (char === '\n') endRow(state);
+  else if (char !== '\r') state.field += char;
+  return 0;
+};
+
+/** Rows of a whole CSV text, honouring quoted fields with commas, quotes and newlines. */
+const parseCsv = (text) => {
+  const state = { rows: [], row: [], field: '', quoted: false };
+  for (let i = 0; i < text.length; i += 1) i += csvStep(state, text[i], text[i + 1]);
+  if (state.field !== '' || state.row.length > 0) endRow(state);
+  return state.rows;
+};
+
+/** A coordinate cell as a number, or null when blank, `---` or not a number. */
+const coordinate = (cell) => {
+  const text = (cell ?? '').trim();
+  const value = Number(text);
+  return text === '' || text === '---' || Number.isNaN(value) ? null : value;
+};
+
+/** Even-odd ray cast of `[x, y]` against one ring. */
+const inRing = ([x, y], ring) => {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i, i += 1) {
+    const [xi, yi] = ring[i];
+    const [xj, yj] = ring[j];
+    if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
+};
+
+/** Each município polygon with its bbox, in file order (the first match wins). */
+const indexMunicipios = () => {
+  const { features } = JSON.parse(readFileSync(MUNICIPIOS_GEOJSON, 'utf8'));
+  return features.flatMap((feature) => {
+    const { geometry } = feature;
+    const code = String(feature.properties?.codarea ?? '');
+    if (!code || (geometry?.type !== 'Polygon' && geometry?.type !== 'MultiPolygon')) return [];
+    const polygons = geometry.type === 'Polygon' ? [geometry.coordinates] : geometry.coordinates;
+    const bbox = polygons.flat(2).reduce(([minX, minY, maxX, maxY], [x, y]) => {
+      return [Math.min(minX, x), Math.min(minY, y), Math.max(maxX, x), Math.max(maxY, y)];
+    }, [Infinity, Infinity, -Infinity, -Infinity]);
+    return [{ code, polygons, bbox }];
+  });
+};
+
+/** The município a point falls in: inside an outer ring and no hole of one polygon. */
+const placeOf = (index, point) => {
+  const [x, y] = point;
+  return index.find(({ bbox, polygons }) => {
+    return x >= bbox[0] && x <= bbox[2] && y >= bbox[1] && y <= bbox[3] &&
+      polygons.some(([outer, ...holes]) => { return inRing(point, outer) && !holes.some((hole) => { return inRing(point, hole) }) });
+  })?.code;
+};
+
+/** Cozinhas per município: each one placed by its coordinates, else by its declared code when that código is a município. */
+const cozinhasPorMunicipio = () => {
+  const [header, ...rows] = parseCsv(readFileSync(COZINHAS_CSV, 'utf8').replace(/^\uFEFF/, ''));
+  const col = (name) => { return header.indexOf(name) };
+  const [declaredCol, latCol, lngCol] = [col('Código IBGE'), col('Latitude'), col('Longitude')];
+  const index = indexMunicipios();
+  const codes = new Set(index.map(({ code }) => { return code }));
+  const counts = new Map();
+  for (const cells of rows) {
+    const [lat, lng] = [coordinate(cells[latCol]), coordinate(cells[lngCol])];
+    if (lat === null || lng === null) continue;
+    const declared = (cells[declaredCol] ?? '').trim();
+    const code = placeOf(index, [lng, lat]) ?? (codes.has(declared) ? declared : undefined);
+    if (code) counts.set(code, (counts.get(code) ?? 0) + 1);
+  }
+  return counts;
+};
+
+/** `[{ geometryId, numerator, denominator }]` per município with a cozinha, from the counts and the CadÚnico people. */
+const cadunicoOracle = (expect) => {
+  const pessoas = JSON.parse(readFileSync(CADUNICO_JSON, 'utf8'));
+  const fieldOf = { quantidade: (q) => { return q }, pessoasCadUnico: (_, code) => { return pessoas[code] ?? null } };
+  const [numerator, denominator] = [fieldOf[expect.numerator.field], fieldOf[expect.denominator.field]];
+  if (!numerator || !denominator) throw new Error(`unknown CadÚnico field: ${expect.numerator.field} / ${expect.denominator.field}`);
+  return [...cozinhasPorMunicipio()].map(([code, quantidade]) => {
+    return { geometryId: code, numerator: numerator(quantidade, code), denominator: denominator(quantidade, code) };
   });
 };
 
 /** The oracle rows for a case, or a loud error when its source has no oracle yet. */
-const oracleFor = async (expect) => {
+const oracleFor = (expect) => {
   if (expect.rate?.source === 'gateway.getCadinsanPorMunicipio') return cadinsanOracle(expect.numerator.field);
-  if (expect.rate?.source === 'gateway.getCozinhasPorMunicipio') return cozinhasOracle(expect);
+  if (expect.rate?.source === 'gateway.getCozinhasPorMunicipio') return cadunicoOracle(expect);
   throw new Error(`no oracle for ${expect.rate?.source}: it lands with the family PR`);
 };
 
 /**
  * The rate the gateway serves: `numerator / denominator * per` (`per` 1 when
- * absent), to two decimals or a whole person; null without either term.
+ * absent), two decimals or a whole number (`rounding: 'whole person'`); null
+ * without a numerator or a positive denominator.
  */
 const rateOf = ({ numerator, denominator }, rate) => {
   if (numerator === null || !(denominator > 0)) return null;
@@ -141,8 +237,8 @@ const specFromOracle = ({ expect, oracle }) => {
   return { mapData: [{ mapDataId: expect.dataset, data }] };
 };
 
-/** Mutants of the oracle spec, each off by more than the case's tolerance. Each must make the gate fail. */
-const mutants = ({ golden, tolerance }) => {
+/** Mutants of the oracle spec. Each must make the gate fail. */
+const mutants = (golden) => {
   const clone = () => { return JSON.parse(JSON.stringify(golden)) };
   const mutate = (fn) => {
     const spec = clone();
@@ -154,7 +250,7 @@ const mutants = ({ golden, tolerance }) => {
   return {
     'M1 wrong dataset': wrongDataset,
     'M2 one município dropped': mutate((data) => { return data.slice(1) }),
-    'M3 one value off by more than the tolerance': mutate((data) => { return data.map((r, i) => { return i === 0 ? { ...r, value: r.value + tolerance + 1 } : r }) }),
+    'M3 one value off by one': mutate((data) => { return data.map((r, i) => { return i === 0 ? { ...r, value: r.value + 1 } : r }) }),
     'M4 extra município': mutate((data) => { return [...data, { geometryId: '0000000', value: 1 }] }),
     'M5 values scaled (wrong base)': mutate((data) => { return data.map((r) => { return { ...r, value: r.value * 10 } }) }),
   };
@@ -166,7 +262,7 @@ const finish = (value, pass) => {
   process.exit(pass ? 0 : 1);
 };
 
-const main = async () => {
+const main = () => {
   const args = process.argv.slice(2);
   const caseId = args.find((a) => { return a.startsWith('--case=') })?.slice('--case='.length);
   const selfTest = args.includes('--self-test');
@@ -177,12 +273,12 @@ const main = async () => {
     process.exit(2);
   }
   const { expect } = evalCase;
-  const oracle = await oracleFor(expect);
+  const oracle = oracleFor(expect);
 
   if (selfTest) {
     const golden = specFromOracle({ expect, oracle });
     const base = gate({ spec: golden, expect, oracle });
-    const results = Object.entries(mutants({ golden, tolerance: expect.rate.tolerance })).map(([name, mutant]) => {
+    const results = Object.entries(mutants(golden)).map(([name, mutant]) => {
       const verdict = gate({ spec: mutant, expect, oracle });
       return { name, caught: !verdict.pass, firstFailure: verdict.failures[0] ?? null };
     });
@@ -194,4 +290,4 @@ const main = async () => {
   finish({ ...verdict, failures: verdict.failures.slice(0, 20) }, verdict.pass);
 };
 
-await main();
+main();

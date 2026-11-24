@@ -1,0 +1,31 @@
+{
+  "case": "ratio-pessoas-cadunico-por-cozinha",
+  "prompt": "Mapa de pessoas no CadÚnico por cozinha em cada município.",
+  "httpStatus": 200,
+  "durationMs": 11446,
+  "outcome": "spec",
+  "issues": [],
+  "checks": [
+    {
+      "id": "outcome",
+      "passed": true,
+      "note": "expected spec, got spec"
+    },
+    {
+      "id": "dataset",
+      "passed": true,
+      "note": "got cadunico_pessoas_por_cozinha"
+    },
+    {
+      "id": "legend",
+      "passed": true,
+      "note": "shown=1 scale=quantitative"
+    },
+    {
+      "id": "validateSpec",
+      "passed": true,
+      "note": "null"
+    }
+  ],
+  "passed": true
+}

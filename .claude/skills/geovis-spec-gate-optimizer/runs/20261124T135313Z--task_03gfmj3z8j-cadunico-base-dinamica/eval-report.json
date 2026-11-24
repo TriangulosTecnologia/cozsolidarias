@@ -1,0 +1,78 @@
+{
+  "runId": "20261124T135313Z--task_03gfmj3z8j-cadunico-base-dinamica",
+  "decision": null,
+  "totals": {
+    "cases": 5,
+    "passed": 5,
+    "failed": 0
+  },
+  "cases": [
+    {
+      "case": "ratio-cozinhas-cadunico-100mil",
+      "prompt": "Mapa do número de cozinhas por 100 mil pessoas no CadÚnico em cada município.",
+      "httpStatus": 200,
+      "durationMs": 11695,
+      "outcome": "spec",
+      "issues": [],
+      "failedChecks": [],
+      "passed": true,
+      "class": "approved",
+      "scope": null,
+      "issue": null
+    },
+    {
+      "case": "ratio-cozinhas-cadunico-10mil",
+      "prompt": "Mapa do número de cozinhas por 10 mil pessoas no CadÚnico em cada município.",
+      "httpStatus": 200,
+      "durationMs": 14162,
+      "outcome": "spec",
+      "issues": [],
+      "failedChecks": [],
+      "passed": true,
+      "class": "approved",
+      "scope": null,
+      "issue": null
+    },
+    {
+      "case": "ratio-cozinhas-cadunico-50k",
+      "prompt": "Mapa do número de cozinhas por 50k pessoas no CadÚnico em cada município.",
+      "httpStatus": 200,
+      "durationMs": 11497,
+      "outcome": "spec",
+      "issues": [],
+      "failedChecks": [],
+      "passed": true,
+      "class": "approved",
+      "scope": null,
+      "issue": null
+    },
+    {
+      "case": "ratio-cozinhas-cadunico-50mil",
+      "prompt": "Mapa do número de cozinhas por 50 mil pessoas no CadÚnico em cada município.",
+      "httpStatus": 200,
+      "durationMs": 11846,
+      "outcome": "spec",
+      "issues": [],
+      "failedChecks": [],
+      "passed": true,
+      "class": "approved",
+      "scope": null,
+      "issue": null
+    },
+    {
+      "case": "ratio-pessoas-cadunico-por-cozinha",
+      "prompt": "Mapa de pessoas no CadÚnico por cozinha em cada município.",
+      "httpStatus": 200,
+      "durationMs": 11446,
+      "outcome": "spec",
+      "issues": [],
+      "failedChecks": [],
+      "passed": true,
+      "class": "approved",
+      "scope": null,
+      "issue": null
+    }
+  ],
+  "declined": [],
+  "proposals": []
+}
