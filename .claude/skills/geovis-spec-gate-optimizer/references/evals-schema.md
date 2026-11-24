@@ -42,6 +42,8 @@ file, but no script consumes them today.
 | `geometry` | string | 4 | Expected geometry source (e.g.: `/geo/geojs-100-mun.json`). |
 | `legendScale` | string | 6 | `quantitative` or `categorical`. |
 | `total` | object | 2 | `{ source, field, tolerance }`. Defines the total oracle: `gateway.getCozinhasPorMunicipio`, field `pessoasAtendidas`, tolerance `0`. |
+| `numerator`, `denominator` | object | 9 | `{ source, field, meaning }`: the gateway member and field behind each term of a ratio case. |
+| `rate` | object | 9 | `{ source, field, formula, tolerance, … }` (`per` on a CadÚnico case): the value `scripts/gate_ratio.mjs` checks for every município. `source` also picks the gate's oracle (`oracleFor`); it names the gateway member the served values come from, and the oracle recomputes the terms from the static source, never from that member. |
 | `facet` | string | 1 | Expected clarification facet: `mapType`. Only in the `golden-coropletico` case. |
 | `default` | string | 1 | Default value of the clarification facet: `proportionalCircles`. Not to be confused with the `default` field of `cases[]`. |
 | `reason` | string | 1 | Textual reason for the expectation. Only in the `golden-coropletico` case. |
