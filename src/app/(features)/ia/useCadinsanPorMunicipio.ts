@@ -30,9 +30,12 @@ export const useCadinsanPorMunicipio = (
     }
     fetch('/api/cadinsan/por-municipio')
       .then((response) => {
-        return response.json() as Promise<CadinsanByCity[]>;
+        if (!response.ok) {
+          throw new Error(`CADINSAN rows: HTTP ${response.status}`);
+        }
+        return response.json();
       })
-      .then((list) => {
+      .then((list: CadinsanByCity[]) => {
         setRows(
           new Map(
             list.map((row) => {
@@ -42,6 +45,7 @@ export const useCadinsanPorMunicipio = (
         );
       })
       .catch(() => {
+        // The hover card degrades to the plain band card; nothing else needs the rows.
         return undefined;
       });
   }, [enabled]);
