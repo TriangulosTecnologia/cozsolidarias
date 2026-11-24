@@ -3,6 +3,7 @@ import {
   paintsCadinsan,
   withLegendHoverTooltips,
 } from 'src/app/(features)/ia/legendHoverTooltips';
+import { fixedScaleOf } from 'src/app/api/ai/spec/legendRules';
 import type { CadinsanByCity } from 'src/data-gateway/schema';
 
 const info = { layerId: 'l', sourceId: 's', point: { x: 0, y: 0 } };
@@ -342,6 +343,13 @@ describe('withLegendHoverTooltips on a CADINSAN share', () => {
 });
 
 describe('paintsCadinsan', () => {
+  test('agrees with the server on which ids sit on the CADINSAN ruler', () => {
+    for (const id of ['municipios_cadinsan', 'municipios_cadinsan_sem_pbf']) {
+      expect(paintsCadinsan(cadinsanSpec(id))).toBe(true);
+      expect(fixedScaleOf(id)).toBe('cadinsan');
+    }
+  });
+
   test('is true only for a spec whose mapData paints a CADINSAN share', () => {
     expect(paintsCadinsan(cadinsanSpec('municipios_cadinsan_sem_pbf'))).toBe(
       true

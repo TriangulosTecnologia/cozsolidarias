@@ -20,6 +20,7 @@ describe('useCadinsanPorMunicipio', () => {
 
   test('loads the CADINSAN rows keyed by codigoIbge once enabled', async () => {
     global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
       json: () => {
         return Promise.resolve([ALTAMIRA]);
       },
@@ -48,6 +49,19 @@ describe('useCadinsanPorMunicipio', () => {
 
   test('stays empty when the rows fail to load', async () => {
     global.fetch = jest.fn().mockRejectedValue(new Error('offline'));
+
+    const { result } = renderHook(() => {
+      return useCadinsanPorMunicipio(true);
+    });
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+    });
+    expect(result.current.size).toBe(0);
+  });
+
+  test('stays empty when the endpoint answers with an error status', async () => {
+    global.fetch = jest.fn().mockResolvedValue({ ok: false, status: 500 });
 
     const { result } = renderHook(() => {
       return useCadinsanPorMunicipio(true);
