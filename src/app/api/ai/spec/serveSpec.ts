@@ -4,8 +4,11 @@ import {
   buildCozinhasChoroplethSpec,
   isCozinhasChoroplethRequest,
 } from './canonicalChoropleth';
+import { normalize } from './conceptIndex';
+import { rateBaseFromPrompt } from './datasetFamilies';
 import { logGeneration } from './generationLogger';
 import { applyAppLegendRules, splitAgentLegends } from './legendRules';
+import { cadunicoRateId, isCadunicoRateId } from './mapDataCatalogue';
 import { applyProportionalCirclesDefaults } from './specDefaults';
 import {
   appendRealMapData,
@@ -179,6 +182,36 @@ const finishResolution = async (params: {
 };
 
 /**
+ * Serves every CadÚnico rate the spec paints under the id of `rateBase`, the
+ * base the prompt named: its `mapData` entries and the layers that paint them
+ * take `cozinhas_por_<N>mil_cadunico`, so the id, the values, the legend and
+ * the hover card share one base. No positive base → the spec as it is.
+ */
+const withRateBase = (params: {
+  spec: UnknownRecord;
+  rateBase: number | undefined;
+}): UnknownRecord => {
+  const { spec, rateBase } = params;
+  if (rateBase === undefined || rateBase <= 0) {
+    return spec;
+  }
+  const rebase = (entry: unknown) => {
+    return isRecord(entry) && isCadunicoRateId(entry['mapDataId'])
+      ? { ...entry, mapDataId: cadunicoRateId(rateBase) }
+      : entry;
+  };
+  return {
+    ...spec,
+    ...(Array.isArray(spec['mapData'])
+      ? { mapData: spec['mapData'].map(rebase) }
+      : {}),
+    ...(Array.isArray(spec['layers'])
+      ? { layers: spec['layers'].map(rebase) }
+      : {}),
+  };
+};
+
+/**
  * Turns a base-merged agent spec into the spec that is validated and served:
  * {@link deriveAgentStructure}; real `mapData` (or the `/mapas` cozinhas
  * choropleth, see {@link buildCozinhasChoroplethSpec}); `mapType` resolved by
@@ -188,15 +221,21 @@ const finishResolution = async (params: {
  * unknown `mapData`, a `mapData` entry no layer paints, an empty source).
  *
  * @param spec - The agent spec merged over the base spec.
+ * @param context - What the request tells beyond the spec: the rate base the
+ * prompt named, which a CadÚnico rate is served on ({@link withRateBase}). @default {}
  * @returns The resolved spec, or the 422 `Response`.
  *
  * @example
- * const served = await resolveCandidate(mergeSpecs(base, agentSpec));
+ * const served = await resolveCandidate(mergeSpecs(base, agentSpec), { rateBase: 50_000 });
  */
 export const resolveCandidate = async (
-  spec: UnknownRecord
+  spec: UnknownRecord,
+  context: { rateBase?: number } = {}
 ): Promise<UnknownRecord | Response> => {
-  const derived = deriveAgentStructure(spec);
+  const derived = withRateBase({
+    spec: deriveAgentStructure(spec),
+    rateBase: context.rateBase,
+  });
   if (isCozinhasChoroplethRequest(derived)) {
     return appendRealSourceData(await buildCozinhasChoroplethSpec());
   }
@@ -212,15 +251,18 @@ export const resolveCandidate = async (
 };
 
 /**
- * {@link resolveCandidate} for the route: a gateway failure is logged with its
- * cause (see {@link logGeneration}) and answered with a fixed 502.
+ * {@link resolveCandidate} for the route, on the rate base the prompt names
+ * (see `rateBaseFromPrompt`): a gateway failure is logged with its cause (see
+ * {@link logGeneration}) and answered with a fixed 502.
  */
 export const resolveServedSpec = async (params: {
   prompt: string;
   spec: UnknownRecord;
 }): Promise<UnknownRecord | Response> => {
   try {
-    return await resolveCandidate(params.spec);
+    return await resolveCandidate(params.spec, {
+      rateBase: rateBaseFromPrompt(normalize(params.prompt)),
+    });
   } catch (error) {
     logGeneration({
       prompt: params.prompt,

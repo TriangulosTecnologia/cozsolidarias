@@ -8,7 +8,7 @@ import type {
 } from '@/data-gateway/schema';
 import { gateway } from '@/gateway';
 
-import { CATALOGUE_VARIANTS, variantBase } from './datasetFamilies';
+import { CATALOGUE_VARIANTS } from './catalogueVariants';
 
 /**
  * Renderable datasets whose value is an absolute total (a raw sum), never a
@@ -85,14 +85,86 @@ const cadinsanField = (field: 'proporcaoComPbf' | 'proporcaoSemPbf') => {
   };
 };
 
+/** A renderable id's fetcher: its `mapData` rows. */
+export type MapDataFetcher = () => Promise<
+  Array<{ geometryId: string; value: number }>
+>;
+
+/** A CadÚnico rate id: its base, in thousands, in the name (`2_5mil` is 2,5 mil). */
+const CADUNICO_RATE_ID = /^cozinhas_por_(\d+(?:_\d+)?)mil_cadunico$/;
+
 /**
- * Fetcher painting cozinhas per `base` CadÚnico people, `base` taken from the
- * id's prompt variant (see `variantBase`), to two decimals as the gateway's
- * `porDezMilCadUnico`; "sem dado" without CadÚnico people.
+ * A CadÚnico rate id, `cozinhas_por_<N>mil_cadunico`: cozinhas per N mil
+ * people in the CadÚnico, any base. `cozinhas_por_10mil_cadunico` and
+ * `cozinhas_por_100mil_cadunico` are two of them.
  */
-const cozinhasPorCadUnico = (id: string) => {
+export type CadunicoRateId = `cozinhas_por_${string}mil_cadunico`;
+
+/** The base a well-formed rate id names, in people, or `undefined`. */
+const baseInId = (id: string): number | undefined => {
+  const thousands = CADUNICO_RATE_ID.exec(id)?.[1];
+  const base =
+    thousands === undefined
+      ? undefined
+      : Math.round(Number(thousands.replace('_', '.')) * 1000);
+  return base !== undefined && base > 0 ? base : undefined;
+};
+
+/**
+ * Whether `id` is a CadÚnico rate id with a positive base.
+ *
+ * @example
+ * isCadunicoRateId('cozinhas_por_50mil_cadunico'); // true
+ * isCadunicoRateId('cozinhas_por_0mil_cadunico'); // false
+ */
+export const isCadunicoRateId = (id: unknown): id is CadunicoRateId => {
+  return typeof id === 'string' && baseInId(id) !== undefined;
+};
+
+/**
+ * The rate base a CadÚnico rate id names: the one source of the base, from the
+ * prompt to the fetcher, the legend and the hover card.
+ *
+ * @param id - A CadÚnico rate id.
+ * @returns The base, in people.
+ * @throws When `id` is not a CadÚnico rate id: it names no base.
+ *
+ * @example
+ * rateBaseOf('cozinhas_por_50mil_cadunico'); // 50_000
+ * rateBaseOf('cozinhas_por_2_5mil_cadunico'); // 2_500
+ */
+export const rateBaseOf = (id: string): number => {
+  const base = baseInId(id);
+  if (base === undefined) {
+    throw new Error(`no rate base for "${id}": it is not a CadÚnico rate id`);
+  }
+  return base;
+};
+
+/**
+ * The CadÚnico rate id for a base: the id a prompt that names `base` is served
+ * under.
+ *
+ * @param base - The base, in people (positive).
+ * @returns `cozinhas_por_<base / 1000>mil_cadunico`, a decimal written with `_`.
+ *
+ * @example
+ * cadunicoRateId(50_000); // 'cozinhas_por_50mil_cadunico'
+ * cadunicoRateId(2_500); // 'cozinhas_por_2_5mil_cadunico'
+ */
+export const cadunicoRateId = (base: number): CadunicoRateId => {
+  return `cozinhas_por_${String(base / 1000).replace('.', '_')}mil_cadunico`;
+};
+
+/**
+ * Fetcher painting cozinhas per CadÚnico people on the base its id names
+ * ({@link rateBaseOf}): `quantidade / pessoasCadUnico * base`, two decimals, as
+ * the gateway rounds `porDezMilCadUnico`. The base is computed here, never a
+ * gateway field per denominator. No CadÚnico denominator → dropped, never `0`.
+ */
+const cadunicoRate = (id: string): MapDataFetcher => {
   return async () => {
-    const base = variantBase(id);
+    const base = rateBaseOf(id);
     const rows: KitchenRateByCity[] = await gateway.getCozinhasPorMunicipio();
     return toMapDataRows(rows, (row) => {
       return row.pessoasCadUnico
@@ -139,12 +211,8 @@ export const RENDERABLE_DATASET_FETCHERS = {
   municipios_idhm_educacao_frequencia: ivsField('idhmEducacaoFrequencia'),
   municipios_cadinsan: cadinsanField('proporcaoComPbf'),
   municipios_cadinsan_sem_pbf: cadinsanField('proporcaoSemPbf'),
-  cozinhas_por_10mil_cadunico: cozinhasPorCadUnico(
-    'cozinhas_por_10mil_cadunico'
-  ),
-  cozinhas_por_100mil_cadunico: cozinhasPorCadUnico(
-    'cozinhas_por_100mil_cadunico'
-  ),
+  cozinhas_por_10mil_cadunico: cadunicoRate('cozinhas_por_10mil_cadunico'),
+  cozinhas_por_100mil_cadunico: cadunicoRate('cozinhas_por_100mil_cadunico'),
   cadunico_pessoas_por_cozinha: async () => {
     const rows: KitchenRateByCity[] = await gateway.getCozinhasPorMunicipio();
     return toMapDataRows(rows, (row) => {
@@ -153,20 +221,45 @@ export const RENDERABLE_DATASET_FETCHERS = {
   },
 } as const;
 
-export type RenderableDatasetId = keyof typeof RENDERABLE_DATASET_FETCHERS;
+export type RenderableDatasetId =
+  | keyof typeof RENDERABLE_DATASET_FETCHERS
+  | CadunicoRateId;
 
 /** List of dataset IDs that the agent may reference in `mapData`. */
 export const RENDERABLE_DATASET_IDS = Object.keys(
   RENDERABLE_DATASET_FETCHERS
 ) as RenderableDatasetId[];
 
-/** Type guard: check if a dataset ID is renderable. */
-export const isRenderableDatasetId = (
+/** A listed renderable id: one {@link RENDERABLE_DATASET_FETCHERS} holds. */
+const isListedDatasetId = (
   id: unknown
-): id is RenderableDatasetId => {
+): id is keyof typeof RENDERABLE_DATASET_FETCHERS => {
   return (
     typeof id === 'string' && Object.hasOwn(RENDERABLE_DATASET_FETCHERS, id)
   );
+};
+
+/** Type guard: check if a dataset ID is renderable (a listed id, or a CadÚnico rate id on any base). */
+export const isRenderableDatasetId = (
+  id: unknown
+): id is RenderableDatasetId => {
+  return isListedDatasetId(id) || isCadunicoRateId(id);
+};
+
+/**
+ * The fetcher of a renderable id: its listed one, else the CadÚnico rate on
+ * the base the id names.
+ *
+ * @param id - A renderable id ({@link isRenderableDatasetId}).
+ * @returns Its {@link MapDataFetcher}.
+ *
+ * @example
+ * await fetcherOf('cozinhas_por_50mil_cadunico')(); // rows on the 50 mil base
+ */
+export const fetcherOf = (id: RenderableDatasetId): MapDataFetcher => {
+  return isListedDatasetId(id)
+    ? RENDERABLE_DATASET_FETCHERS[id]
+    : cadunicoRate(id);
 };
 
 /** The index-only shape a non-renderable dataset is reduced to — enough for
@@ -258,10 +351,12 @@ const toAiDatasetEntries = (
         {
           ...projection,
           id,
-          title: `${dataset.title} — ${field.name}`,
-          description: variant.note
-            ? `${field.description}. ${variant.note}.`
-            : field.description,
+          title: variant.title ?? `${dataset.title} — ${field.name}`,
+          description:
+            variant.description ??
+            (variant.note
+              ? `${field.description}. ${variant.note}.`
+              : field.description),
           fields: [
             {
               name: field.name,

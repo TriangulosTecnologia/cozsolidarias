@@ -4,23 +4,26 @@ import {
   CADINSAN_LEGEND_LABELS,
   CADINSAN_THRESHOLDS,
   CADUNICO_COLORS,
-  flooredBinLabels,
+  CADUNICO_LEGEND_LABELS,
+  CADUNICO_THRESHOLDS,
   PESSOAS_COZINHA_COLORS,
+  PESSOAS_COZINHA_LEGEND_LABELS,
+  PESSOAS_COZINHA_THRESHOLDS,
   WITHOUT_KITCHEN_COLOR,
 } from 'src/app/(features)/mapas/geovisChoroplethScales';
-import type { MapMode } from 'src/app/(features)/mapas/geovisMapMode';
-import { jenksBreaksForMode } from 'src/app/(features)/mapas/geovisScales';
 import baseVisualizationSpecJson from 'src/app/api/ai/spec/instructions/baseVisualizationSpec.json';
 import {
   applyAppLegendRules,
   splitAgentLegends,
 } from 'src/app/api/ai/spec/legendRules';
 import { RENDERABLE_DATASET_FETCHERS } from 'src/app/api/ai/spec/mapDataCatalogue';
-import { resolveCandidate } from 'src/app/api/ai/spec/serveSpec';
+import {
+  resolveCandidate,
+  resolveServedSpec,
+} from 'src/app/api/ai/spec/serveSpec';
 import { mergeSpecs } from 'src/app/api/ai/spec/specDefaults';
 import type { UnknownRecord } from 'src/app/api/ai/spec/specValidation';
 
-import type { KitchenRateByCity } from '@/data-gateway/schema';
 import { gateway } from '@/gateway';
 
 // The real `validateSpec` and resolver: Jest does not transform the ESM entry
@@ -212,81 +215,94 @@ describe('CADINSAN legend', () => {
   );
 });
 
-describe('CadÚnico coverage legend', () => {
+describe('CadÚnico coverage legends', () => {
   afterEach(() => {
     jest.restoreAllMocks();
   });
 
-  /** Eight municípios with 100 mil CadÚnico people and 1 to 8 cozinhas. */
-  const ROWS: KitchenRateByCity[] = [
-    '3550308',
-    '3304557',
-    '5300108',
-    '2927408',
-    '1302603',
-    '2304400',
-    '4106902',
-    '1501402',
-  ].map((codigoIbge, index) => {
+  /** The rate `normalization` a CadÚnico rate legend carries, on `rateBase`. */
+  const rateOn = (rateBase: number) => {
+    return {
+      type: 'rate',
+      numeratorLabel: 'cozinhas',
+      denominatorLabel: 'pessoas no CadÚnico',
+      rateBase,
+    };
+  };
+
+  /** Kitchen rows for three municípios, as `/api/cozinhas/por-municipio` serves them. */
+  const kitchenRow = (codigoIbge: string, quantidade: number) => {
     return {
       codigoIbge,
       municipio: codigoIbge,
-      quantidade: index + 1,
+      quantidade,
       pessoasAtendidas: null,
       populacao: null,
       porCemMil: null,
       percentualDoBrasil: 0,
       pessoasCadUnico: 100_000,
       porDezMilCadUnico: null,
-      pessoasPorCozinha: Math.round(100_000 / (index + 1)),
+      pessoasPorCozinha: Math.round(100_000 / quantidade),
     };
-  });
-
-  const legendOf = async (mapDataId: string): Promise<UnknownRecord> => {
-    jest.spyOn(gateway, 'getCozinhasPorMunicipio').mockResolvedValue(ROWS);
-    const resolved = await resolveCandidate(
-      mergeSpecs(baseVisualizationSpecJson as UnknownRecord, {
-        mapType: 'choropleth',
-        mapData: [{ mapDataId, title: 'Cobertura do CadÚnico' }],
-      })
-    );
-    expect(validateSpec(resolved)).toEqual(
-      expect.objectContaining({ status: 'resolved' })
-    );
-    const [legend] = (resolved as UnknownRecord)['legends'] as UnknownRecord[];
-    return legend;
   };
 
   test.each([
     [
       'cozinhas_por_10mil_cadunico',
-      'coropletico-cadunico',
+      CADUNICO_THRESHOLDS,
       CADUNICO_COLORS,
-      [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8],
+      CADUNICO_LEGEND_LABELS,
+      rateOn(10_000),
     ],
     [
+      // The /mapas 10 mil ruler on a 100 mil base: every cutpoint × 10, so the
+      // labels read in the base the map paints, never the 10 mil values.
       'cozinhas_por_100mil_cadunico',
-      'coropletico-cadunico',
+      [0.1, 2, 5, 10, 20, 40],
       CADUNICO_COLORS,
-      [1, 2, 3, 4, 5, 6, 7, 8],
+      ['Sem cozinha', '< 2', '2 – 5', '5 – 10', '10 – 20', '20 – 40', '40+'],
+      rateOn(100_000),
+    ],
+    [
+      // Any base its id names: the ruler × 5.
+      'cozinhas_por_50mil_cadunico',
+      [0.05, 1, 2.5, 5, 10, 20],
+      CADUNICO_COLORS,
+      ['Sem cozinha', '< 1', '1 – 2,5', '2,5 – 5', '5 – 10', '10 – 20', '20+'],
+      rateOn(50_000),
     ],
     [
       'cadunico_pessoas_por_cozinha',
-      'coropletico-pessoas-cozinha',
+      PESSOAS_COZINHA_THRESHOLDS,
       PESSOAS_COZINHA_COLORS,
-      ROWS.map((row) => {
-        return row.pessoasPorCozinha;
-      }),
+      PESSOAS_COZINHA_LEGEND_LABELS,
+      undefined,
     ],
   ] as const)(
-    '%s gets the /mapas %s legend: its Jenks breaks, colors and labels',
-    async (mapDataId, mode: MapMode, colors, values) => {
-      const thresholds = jenksBreaksForMode(mode, values);
-      if (!thresholds) {
-        throw new Error('expected Jenks breaks for the fixture');
-      }
+    'resolves %s onto its /mapas ruler and labels, not Jenks breaks',
+    async (mapDataId, thresholds, colors, labels, normalization) => {
+      jest
+        .spyOn(gateway, 'getCozinhasPorMunicipio')
+        .mockResolvedValue([
+          kitchenRow('3550308', 3),
+          kitchenRow('3304557', 8),
+          kitchenRow('2927408', 26),
+        ]);
 
-      expect(await legendOf(mapDataId)).toEqual(
+      const resolved = await resolveCandidate(
+        mergeSpecs(baseVisualizationSpecJson as UnknownRecord, {
+          mapType: 'choropleth',
+          mapData: [{ mapDataId, title: 'Cobertura das cozinhas' }],
+        })
+      );
+
+      expect(validateSpec(resolved)).toEqual(
+        expect.objectContaining({ status: 'resolved' })
+      );
+      const [legend] = (resolved as UnknownRecord)[
+        'legends'
+      ] as UnknownRecord[];
+      expect(legend).toEqual(
         expect.objectContaining({
           colorBy: {
             type: 'quantitative',
@@ -296,43 +312,71 @@ describe('CadÚnico coverage legend', () => {
             colors,
             defaultColor: WITHOUT_KITCHEN_COLOR,
           },
-          labelFormat: {
-            type: 'labels',
-            labels: flooredBinLabels('Sem cozinha', thresholds),
-          },
+          labelFormat: { type: 'labels', labels },
         })
       );
+      expect(legend['normalization']).toEqual(normalization);
     }
   );
 
-  test('the 100 mil legend does not reuse the 10 mil values', async () => {
-    const perTenThousand = await legendOf('cozinhas_por_10mil_cadunico');
-    const perHundredThousand = await legendOf('cozinhas_por_100mil_cadunico');
+  test('renames rate ids only for a positive base, and leaves specs without mapData or layers to the usual checks', async () => {
+    jest.spyOn(gateway, 'getCozinhasPorMunicipio').mockResolvedValue([]);
+    const untyped = { mapData: [{ mapDataId: 'cozinhas_por_10mil_cadunico' }] };
 
-    expect(perHundredThousand['labelFormat']).not.toEqual(
-      perTenThousand['labelFormat']
-    );
+    const rebased = await resolveCandidate(untyped, { rateBase: 50_000 });
+    const kept = await resolveCandidate(untyped, { rateBase: 0 });
+    const empty = await resolveCandidate({}, { rateBase: 50_000 });
+
+    expect((rebased as UnknownRecord)['mapData']).toEqual([
+      expect.objectContaining({
+        mapDataId: 'cozinhas_por_50mil_cadunico',
+        data: [],
+      }),
+    ]);
+    expect((kept as UnknownRecord)['mapData']).toEqual([
+      expect.objectContaining({
+        mapDataId: 'cozinhas_por_10mil_cadunico',
+        data: [],
+      }),
+    ]);
+    expect(empty).toBeInstanceOf(Response);
   });
 
-  test('keeps the resolver legend when the values are too few to split', () => {
-    const legend = { id: 'l', colorBy: { thresholds: [1] } };
+  test('serves the rate under the id that names the prompt base, with its values and legend', async () => {
+    jest.spyOn(gateway, 'getCozinhasPorMunicipio').mockResolvedValue([
+      {
+        codigoIbge: '2927408',
+        municipio: 'SALVADOR',
+        quantidade: 26,
+        pessoasAtendidas: 45897,
+        populacao: 2417678,
+        porCemMil: 1.08,
+        percentualDoBrasil: 1.87,
+        pessoasCadUnico: 1157799,
+        porDezMilCadUnico: 0.22,
+        pessoasPorCozinha: 44531,
+      },
+    ]);
 
-    expect(
-      applyAppLegendRules({
-        spec: {
-          mapData: [
-            {
-              mapDataId: 'cozinhas_por_10mil_cadunico',
-              data: [{ value: 0.4 }, { value: 'sem dado' }],
-            },
-          ],
-          layers: [
-            { mapDataId: 'cozinhas_por_10mil_cadunico', activeLegendId: 'l' },
-          ],
-          legends: [legend],
-        },
-        agentLegends: [],
-      })['legends']
-    ).toEqual([expect.objectContaining({ colorBy: legend.colorBy })]);
+    const served = await resolveServedSpec({
+      prompt:
+        'Mapa de cozinhas por 50 mil pessoas no CadÚnico em cada município',
+      spec: mergeSpecs(baseVisualizationSpecJson as UnknownRecord, {
+        mapType: 'choropleth',
+        mapData: [{ mapDataId: 'cozinhas_por_10mil_cadunico' }],
+      }),
+    });
+
+    const spec = served as UnknownRecord;
+    const [entry] = spec['mapData'] as UnknownRecord[];
+    const [layer] = (spec['layers'] as UnknownRecord[]).filter((candidate) => {
+      return candidate['mapDataId'] !== undefined;
+    });
+    const [legend] = spec['legends'] as UnknownRecord[];
+    // The agent picked the 10 mil id; the prompt's base renames it.
+    expect(entry['mapDataId']).toBe('cozinhas_por_50mil_cadunico');
+    expect(layer['mapDataId']).toBe('cozinhas_por_50mil_cadunico');
+    expect(entry['data']).toEqual([{ geometryId: '2927408', value: 1.12 }]);
+    expect(legend['normalization']).toEqual(rateOn(50_000));
   });
 });

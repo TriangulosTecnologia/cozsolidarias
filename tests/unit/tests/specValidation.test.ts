@@ -820,19 +820,15 @@ describe('buildCatalogueContext', () => {
     expect(byId.municipios_idhm.fields).toHaveLength(1);
   });
 
-  test('describes each CadÚnico coverage id with its own base and direction', async () => {
+  test('describes each CadÚnico coverage id by its own base and scale direction', async () => {
     const byId = await projectedEntries((dataset) => {
       return dataset.id === 'municipios_cadunico';
     });
 
-    expect(byId.cozinhas_por_10mil_cadunico.description).toMatch(
-      /cozinhas por 10 mil pessoas no CadÚnico/
-    );
-    expect(byId.cozinhas_por_100mil_cadunico.description).toMatch(
-      /cozinhas por 100 mil pessoas no CadÚnico/
-    );
+    expect(byId.cozinhas_por_10mil_cadunico.description).toMatch(/10 mil/);
+    expect(byId.cozinhas_por_100mil_cadunico.description).toMatch(/100 mil/);
     expect(byId.cadunico_pessoas_por_cozinha.description).toMatch(
-      /pessoas no CadÚnico por cozinha/
+      /maior = cada cozinha atende mais pessoas/i
     );
   });
 });
@@ -922,7 +918,7 @@ describe('appendRealMapData', () => {
     });
   });
 
-  const SALVADOR_RATE: KitchenRateByCity = {
+  const KITCHEN_ROW: KitchenRateByCity = {
     codigoIbge: '2927408',
     municipio: 'SALVADOR',
     quantidade: 26,
@@ -936,18 +932,53 @@ describe('appendRealMapData', () => {
   };
 
   test.each([
-    // 26 / 1157799 * 10_000 = 0.2246; * 100_000 = 2.2456 (two decimals).
+    // 26 / 1157799 * 10_000 = 0.2246, rounded to two decimals.
     ['cozinhas_por_10mil_cadunico', 0.22],
+    // Same rate on a 100 mil base, computed from the counts, not 10 × 0.22.
     ['cozinhas_por_100mil_cadunico', 2.25],
     ['cadunico_pessoas_por_cozinha', 44531],
+  ])('%s paints its CadÚnico coverage value', async (mapDataId, value) => {
+    jest
+      .spyOn(gateway, 'getCozinhasPorMunicipio')
+      .mockResolvedValue([KITCHEN_ROW]);
+
+    const result = await appendRealMapData({ mapData: [{ mapDataId }] });
+
+    expect(result).toEqual({
+      mapData: [{ mapDataId, data: [{ geometryId: '2927408', value }] }],
+    });
+  });
+
+  test.each([
+    // 26 / 1157799 * 50_000 = 1.1228; any base an id names is computed.
+    ['cozinhas_por_50mil_cadunico', 1.12],
+    // 26 / 1157799 * 2_500 = 0.0561.
+    ['cozinhas_por_2_5mil_cadunico', 0.06],
   ])(
-    '%s paints its CadÚnico coverage ratio, dropping municípios without CadÚnico',
+    '%s paints the rate on the base its id names',
     async (mapDataId, value) => {
+      jest
+        .spyOn(gateway, 'getCozinhasPorMunicipio')
+        .mockResolvedValue([KITCHEN_ROW]);
+
+      const result = await appendRealMapData({ mapData: [{ mapDataId }] });
+
+      expect(result).toEqual({
+        mapData: [{ mapDataId, data: [{ geometryId: '2927408', value }] }],
+      });
+    }
+  );
+
+  test.each([
+    'cozinhas_por_10mil_cadunico',
+    'cozinhas_por_100mil_cadunico',
+    'cadunico_pessoas_por_cozinha',
+  ])(
+    '%s drops a município with no CadÚnico denominator instead of painting 0',
+    async (mapDataId) => {
       jest.spyOn(gateway, 'getCozinhasPorMunicipio').mockResolvedValue([
-        SALVADOR_RATE,
         {
-          ...SALVADOR_RATE,
-          codigoIbge: '1100015',
+          ...KITCHEN_ROW,
           pessoasCadUnico: null,
           porDezMilCadUnico: null,
           pessoasPorCozinha: null,
@@ -956,9 +987,7 @@ describe('appendRealMapData', () => {
 
       const result = await appendRealMapData({ mapData: [{ mapDataId }] });
 
-      expect(result).toEqual({
-        mapData: [{ mapDataId, data: [{ geometryId: '2927408', value }] }],
-      });
+      expect(result).toEqual({ mapData: [{ mapDataId, data: [] }] });
     }
   );
 

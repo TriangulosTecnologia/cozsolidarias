@@ -2,8 +2,14 @@ import {
   buildConceptIndex,
   type ConceptEntry,
 } from 'src/app/api/ai/spec/conceptIndex';
-import { variantBase } from 'src/app/api/ai/spec/datasetFamilies';
-import { RENDERABLE_DATASET_IDS } from 'src/app/api/ai/spec/mapDataCatalogue';
+import { rateBaseFromPrompt } from 'src/app/api/ai/spec/datasetFamilies';
+import {
+  cadunicoRateId,
+  isCadunicoRateId,
+  isRenderableDatasetId,
+  rateBaseOf,
+  RENDERABLE_DATASET_IDS,
+} from 'src/app/api/ai/spec/mapDataCatalogue';
 import {
   clarifyResponse,
   FAMILIES,
@@ -173,38 +179,6 @@ describe('preflightPrompt', () => {
     ).toEqual({ status: 'resolved' });
   });
 
-  test('routes a CadÚnico coverage ratio to its own family, not to the kitchen count or CadinSan', () => {
-    process.env['FORBID_ABSOLUTE_ON_CHOROPLETH'] = 'true';
-    try {
-      for (const prompt of [
-        'Mapa coroplético do número de cozinhas por 10 mil pessoas no CadÚnico em cada município.',
-        'Mapa coroplético de cozinhas por 100 mil pessoas no CadÚnico.',
-        'Mapa coroplético de pessoas no CadÚnico por cozinha em cada município.',
-      ]) {
-        expect(preflightPrompt({ prompt })).toEqual({ status: 'resolved' });
-      }
-    } finally {
-      delete process.env['FORBID_ABSOLUTE_ON_CHOROPLETH'];
-    }
-  });
-
-  test('asks which base when a coverage prompt names 10 mil and 100 mil', () => {
-    expect(
-      preflightPrompt({
-        prompt: 'cozinhas por 10 mil e por 100 mil pessoas no CadÚnico',
-      })
-    ).toMatchObject({
-      status: 'ambiguous',
-      clarify: {
-        facet: 'dataset',
-        options: [
-          { value: 'cozinhas_por_10mil_cadunico' },
-          { value: 'cozinhas_por_100mil_cadunico' },
-        ],
-      },
-    });
-  });
-
   test('never blocks a prompt it does not recognise', () => {
     expect(preflightPrompt({ prompt: 'algo totalmente diferente' })).toEqual({
       status: 'unmatched',
@@ -228,12 +202,104 @@ describe('FAMILIES', () => {
     }
   });
 
-  test('a CadÚnico coverage rate takes the base its variant carries', () => {
-    expect(variantBase('cozinhas_por_10mil_cadunico')).toBe(10_000);
-    expect(variantBase('cozinhas_por_100mil_cadunico')).toBe(100_000);
+  /** The id each family the (normalized) prompt names resolves to. */
+  const resolvedFamilyIds = (text: string): string[] => {
+    return FAMILIES.filter((family) => {
+      return family.keyword.test(text);
+    }).map((family) => {
+      const variants = family.variants.filter((variant) => {
+        return variant.match.test(text);
+      });
+      expect(variants.length).toBeLessThanOrEqual(1);
+      return variants[0]?.id ?? family.defaultId;
+    });
+  };
+
+  test.each([
+    [
+      'mapa do numero de cozinhas por 10 mil pessoas no cadunico em cada municipio.',
+      'cozinhas_por_10mil_cadunico',
+    ],
+    [
+      'mapa do numero de cozinhas por 100 mil pessoas no cadunico em cada municipio.',
+      'cozinhas_por_100mil_cadunico',
+    ],
+    [
+      'mapa de pessoas no cadunico por cozinha em cada municipio.',
+      'cadunico_pessoas_por_cozinha',
+    ],
+  ])(
+    'routes a CadÚnico coverage prompt to its own id, not CADINSAN or the kitchen count: %s',
+    (text, id) => {
+      expect(resolvedFamilyIds(text)).toEqual([id]);
+    }
+  );
+
+  test.each([
+    [
+      'mapa da inseguranca alimentar das familias do cadunico por municipio.',
+      'municipios_cadinsan',
+    ],
+    ['coropletico de cozinhas', 'cozinhas_geolocalizadas'],
+    ['pessoas atendidas pelas cozinhas', 'cozinhas_pessoas_atendidas'],
+  ])(
+    'keeps the CADINSAN and kitchen prompts where they were: %s',
+    (text, id) => {
+      expect(resolvedFamilyIds(text)).toEqual([id]);
+    }
+  );
+});
+
+describe('rateBaseFromPrompt', () => {
+  test.each([
+    ['mapa do numero de cozinhas por 10 mil pessoas no cadunico', 10_000],
+    ['cozinhas por 100 mil pessoas no cadunico', 100_000],
+    ['cozinhas por 50 mil pessoas no cadunico', 50_000],
+    ['cozinhas a cada 2,5 mil pessoas no cadunico', 2_500],
+    ['cozinhas por mil pessoas no cadunico', 1_000],
+    ['cozinhas por dez mil pessoas no cadunico', 10_000],
+    ['cozinhas por cem mil pessoas no cadunico', 100_000],
+    ['cozinhas por 100.000 pessoas no cadunico', 100_000],
+    ['cozinhas para cada 20000 pessoas no cadunico', 20_000],
+    ['cozinhas por 50k pessoas no cadunico', 50_000],
+    ['cozinhas por 50 k pessoas no cadunico', 50_000],
+    ['cozinhas por 50mil pessoas no cadunico', 50_000],
+  ])('reads the base "%s" names', (text, base) => {
+    expect(rateBaseFromPrompt(text)).toBe(base);
+  });
+
+  test.each([
+    'mapa de pessoas no cadunico por cozinha',
+    'familias do cadunico em inseguranca alimentar',
+    'cozinhas por municipio em 2025',
+  ])('names no base in "%s"', (text) => {
+    expect(rateBaseFromPrompt(text)).toBeUndefined();
+  });
+});
+
+describe('CadÚnico rate ids', () => {
+  test('name their base: any base is a renderable id', () => {
+    expect(rateBaseOf('cozinhas_por_10mil_cadunico')).toBe(10_000);
+    expect(rateBaseOf('cozinhas_por_100mil_cadunico')).toBe(100_000);
+    expect(rateBaseOf('cozinhas_por_50mil_cadunico')).toBe(50_000);
+    expect(rateBaseOf('cozinhas_por_2_5mil_cadunico')).toBe(2_500);
+    expect(isRenderableDatasetId('cozinhas_por_50mil_cadunico')).toBe(true);
+  });
+
+  test('round-trip a base through its id', () => {
+    for (const base of [1_000, 2_500, 1_234, 10_000, 50_000, 100_000]) {
+      expect(rateBaseOf(cadunicoRateId(base))).toBe(base);
+    }
+    expect(cadunicoRateId(50_000)).toBe('cozinhas_por_50mil_cadunico');
+  });
+
+  test('reject an id with no positive base', () => {
+    expect(isCadunicoRateId('cozinhas_por_0mil_cadunico')).toBe(false);
+    expect(isCadunicoRateId('cozinhas_por_mil_cadunico')).toBe(false);
+    expect(isRenderableDatasetId('cozinhas_por_0mil_cadunico')).toBe(false);
     expect(() => {
-      return variantBase('cadunico_pessoas_por_cozinha');
-    }).toThrow(/cadunico_pessoas_por_cozinha/);
+      return rateBaseOf('cadunico_pessoas_por_cozinha');
+    }).toThrow(/no rate base/);
   });
 });
 

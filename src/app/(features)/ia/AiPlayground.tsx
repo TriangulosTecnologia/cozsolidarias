@@ -23,9 +23,10 @@ import { ThemeUIProvider } from 'theme-ui';
 
 import { ChoiceSection, ErrorAlert, FeedbackSection } from './ChoicePanel';
 import { JsonPanel } from './JsonPanel';
-import { paintsCadinsan } from './legendHoverTooltips';
+import { paintsCadinsan, paintsCadunicoCoverage } from './legendHoverTooltips';
 import { useAiPlaygroundLogic } from './useAiPlaygroundLogic';
 import { useCadinsanPorMunicipio } from './useCadinsanPorMunicipio';
+import { useCozinhasPorMunicipio } from './useCozinhasPorMunicipio';
 import { useMunicipioNomes } from './useMunicipioNomes';
 import { withHoverTooltips } from './withHoverTooltips';
 
@@ -45,6 +46,7 @@ const BRAZIL_VIEW = {
 const MapResultView = ({ result }: { result: VisualizationSpec }) => {
   const nomes = useMunicipioNomes();
   const cadinsan = useCadinsanPorMunicipio(paintsCadinsan(result));
+  const cozinhas = useCozinhasPorMunicipio(paintsCadunicoCoverage(result));
   return (
     <Box
       position="relative"
@@ -72,7 +74,7 @@ const MapResultView = ({ result }: { result: VisualizationSpec }) => {
             config={{ appearance: 'bare' }}
             visualizationSpec={withHoverTooltips(
               { ...result, view: result.view ?? BRAZIL_VIEW },
-              { nomes, cadinsan }
+              { nomes, cadinsan, cozinhas }
             )}
           />
         </ThemeUIProvider>

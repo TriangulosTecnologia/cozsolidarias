@@ -5,7 +5,7 @@ import type {
   VisualizationSpec,
 } from '@ttoss/geovis';
 
-import type { CadinsanByCity } from '@/data-gateway/schema';
+import type { CadinsanByCity, KitchenRateByCity } from '@/data-gateway/schema';
 
 import { TooltipCard } from '../mapas/mapaTooltipCard';
 import { TOOLTIP_STYLE } from '../mapas/mapaTooltipStyle';
@@ -161,7 +161,8 @@ const withPointHoverTooltips = ({
  * the server left with a bare `hoverTooltip` get the same card.
  * Polygon layers painted by a threshold legend, such as IVS and IDHM, get the
  * `/mapas` band card from {@link withLegendHoverTooltips}; `cadinsan`
- * (`codarea → CADINSAN row`) gives a CADINSAN share its `/mapas` lines.
+ * (`codarea → CADINSAN row`) gives a CADINSAN share its `/mapas` lines, and
+ * `cozinhas` (`codarea → kitchen row`) a CadÚnico coverage its counts.
  *
  * @returns The spec with one hover polygon layer (and its `mapData`) per
  * point layer, and the cards above; unchanged when there is nothing to add.
@@ -174,14 +175,16 @@ export const withHoverTooltips = (
   {
     nomes = {},
     cadinsan,
+    cozinhas,
   }: {
     nomes?: { [codarea: string]: string };
     cadinsan?: Map<string, CadinsanByCity>;
+    cozinhas?: Map<string, KitchenRateByCity>;
   } = {}
 ): VisualizationSpec => {
   const names = new Map([...municipioNames(spec), ...Object.entries(nomes)]);
   return withPointHoverTooltips({
-    spec: withLegendHoverTooltips({ spec, names, cadinsan }),
+    spec: withLegendHoverTooltips({ spec, names, cadinsan, cozinhas }),
     names,
   });
 };

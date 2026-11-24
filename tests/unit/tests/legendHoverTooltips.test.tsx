@@ -1,9 +1,13 @@
 import type { VisualizationSpec } from '@ttoss/geovis';
 import {
   paintsCadinsan,
+  paintsCadunicoCoverage,
   withLegendHoverTooltips,
 } from 'src/app/(features)/ia/legendHoverTooltips';
-import type { CadinsanByCity } from 'src/data-gateway/schema';
+import type {
+  CadinsanByCity,
+  KitchenRateByCity,
+} from 'src/data-gateway/schema';
 
 const info = { layerId: 'l', sourceId: 's', point: { x: 0, y: 0 } };
 
@@ -348,5 +352,217 @@ describe('paintsCadinsan', () => {
     );
     expect(paintsCadinsan(ivsSpec)).toBe(false);
     expect(paintsCadinsan({ ...ivsSpec, mapData: undefined })).toBe(false);
+  });
+});
+
+/** Salvador/BA, as `/api/cozinhas/por-municipio` serves it. */
+const SALVADOR: KitchenRateByCity = {
+  codigoIbge: '2927408',
+  municipio: 'SALVADOR',
+  quantidade: 26,
+  pessoasAtendidas: 45897,
+  populacao: 2417678,
+  porCemMil: 1.08,
+  percentualDoBrasil: 1.87,
+  pessoasCadUnico: 1157799,
+  porDezMilCadUnico: 0.22,
+  pessoasPorCozinha: 44531,
+};
+
+/**
+ * A CadÚnico coverage spec: the CADINSAN shape on the `/mapas` 10 mil ruler,
+ * with the rate `normalization` the route writes when `rateBase` is given.
+ */
+const coverageSpec = (
+  mapDataId: string,
+  rateBase?: number
+): VisualizationSpec => {
+  const spec = cadinsanSpec(mapDataId);
+  return {
+    ...spec,
+    mapData: [{ mapDataId, mapId: 'municipios', title: 'Cobertura' }],
+    legends: [
+      {
+        id: 'l',
+        ...(rateBase === undefined
+          ? {}
+          : {
+              normalization: {
+                type: 'rate' as const,
+                numeratorLabel: 'cozinhas',
+                denominatorLabel: 'pessoas no CadÚnico',
+                rateBase,
+              },
+            }),
+        colorBy: {
+          type: 'quantitative',
+          scale: 'threshold',
+          thresholds: [0.01, 0.2, 0.5, 1, 2, 4],
+          colors: ['#v0', '#c1', '#c2', '#c3', '#c4', '#c5', '#c6'],
+        },
+        labelFormat: {
+          type: 'labels',
+          labels: [
+            'Sem cozinha',
+            '< 0,2',
+            '0,2 – 0,5',
+            '0,5 – 1',
+            '1 – 2',
+            '2 – 4',
+            '4+',
+          ],
+        },
+      },
+    ],
+  };
+};
+
+const coverageRender = (params: {
+  mapDataId: string;
+  rateBase?: number;
+  cozinhas?: Map<string, KitchenRateByCity>;
+}) => {
+  const render = withLegendHoverTooltips({
+    spec: coverageSpec(params.mapDataId, params.rateBase),
+    names: new Map([['2927408', 'Salvador']]),
+    cozinhas: params.cozinhas,
+  }).layers?.[0].hoverTooltip?.render;
+  if (!render) {
+    throw new Error('the fill layer got no hoverTooltip.render');
+  }
+  return render;
+};
+
+describe('withLegendHoverTooltips on a CadÚnico coverage', () => {
+  const cozinhas = new Map([['2927408', SALVADOR]]);
+
+  test.each([
+    [
+      'cozinhas_por_10mil_cadunico',
+      10_000,
+      0.22,
+      '#c2',
+      '0,22 por 10 mil no CadÚnico · 0,2 – 0,5',
+    ],
+    [
+      'cozinhas_por_100mil_cadunico',
+      100_000,
+      2.25,
+      '#c5',
+      '2,25 por 100 mil no CadÚnico · 2 – 4',
+    ],
+    [
+      // Any base: the one the legend carries.
+      'cozinhas_por_50mil_cadunico',
+      50_000,
+      1.12,
+      '#c4',
+      '1,12 por 50 mil no CadÚnico · 1 – 2',
+    ],
+    [
+      'cadunico_pessoas_por_cozinha',
+      undefined,
+      44531,
+      '#c6',
+      '44.531 pessoas por cozinha · 4+',
+    ],
+  ])(
+    'reads %s (base %s) with the /mapas lines and the faixa after the value',
+    (mapDataId, rateBase, value, swatchColor, primary) => {
+      expect(
+        coverageRender({ mapDataId, rateBase, cozinhas })({
+          ...info,
+          featureId: '2927408',
+          value,
+        })
+      ).toMatchObject({
+        props: {
+          name: 'Salvador',
+          swatchColor,
+          primary,
+          secondary: '26 cozinhas · 1.157.799 no CadÚnico',
+        },
+      });
+    }
+  );
+
+  test('writes a base of one thousand as "mil" and a single cozinha in the singular', () => {
+    expect(
+      coverageRender({
+        mapDataId: 'cozinhas_por_1mil_cadunico',
+        rateBase: 1_000,
+        cozinhas: new Map([['2927408', { ...SALVADOR, quantidade: 1 }]]),
+      })({ ...info, featureId: '2927408', value: 0.02 })
+    ).toMatchObject({
+      props: {
+        primary: '0,02 por mil no CadÚnico · < 0,2',
+        secondary: '1 cozinha · 1.157.799 no CadÚnico',
+      },
+    });
+  });
+
+  test('keeps the plain band card for a rate whose legend carries no base', () => {
+    expect(
+      coverageRender({ mapDataId: 'cozinhas_por_10mil_cadunico', cozinhas })({
+        ...info,
+        featureId: '2927408',
+        value: 0.22,
+      })
+    ).toMatchObject({ props: { primary: 'Cobertura 0,22 · 0,2 – 0,5' } });
+  });
+
+  test('says "Sem cozinha registrada" for a município with no value, as /mapas does', () => {
+    expect(
+      coverageRender({
+        mapDataId: 'cozinhas_por_10mil_cadunico',
+        rateBase: 10_000,
+        cozinhas,
+      })({
+        ...info,
+        featureId: '2927408',
+        value: undefined,
+      })
+    ).toMatchObject({
+      props: {
+        swatchColor: '#v0',
+        primary: 'Sem cozinha registrada',
+        secondary: undefined,
+      },
+    });
+  });
+
+  test('keeps the value line without the município row', () => {
+    expect(
+      coverageRender({
+        mapDataId: 'cozinhas_por_10mil_cadunico',
+        rateBase: 10_000,
+      })({
+        ...info,
+        featureId: '2927408',
+        value: 0.22,
+      })
+    ).toMatchObject({
+      props: {
+        primary: '0,22 por 10 mil no CadÚnico · 0,2 – 0,5',
+        secondary: undefined,
+      },
+    });
+  });
+});
+
+describe('paintsCadunicoCoverage', () => {
+  test('is true only for a spec whose mapData paints a CadÚnico coverage', () => {
+    expect(
+      paintsCadunicoCoverage(coverageSpec('cadunico_pessoas_por_cozinha'))
+    ).toBe(true);
+    expect(
+      paintsCadunicoCoverage(cadinsanSpec('municipios_cadinsan_sem_pbf'))
+    ).toBe(false);
+    expect(
+      paintsCadunicoCoverage(coverageSpec('cozinhas_por_50mil_cadunico'))
+    ).toBe(true);
+    expect(paintsCadunicoCoverage({ ...ivsSpec, mapData: undefined })).toBe(
+      false
+    );
   });
 });
