@@ -139,9 +139,13 @@ const BASE_IN_THOUSANDS =
 /** "por 50k", "por 50 k": thousands written with `k`. */
 const BASE_IN_K = /\b(?:por|a cada|para cada) (?:cada )?(\d+(?:,\d+)?) ?k\b/;
 
-/** "por 100.000", "para cada 20000": a base written in full. */
+/**
+ * "por 100.000", "para cada 20000", "por 5000 pessoas": a base written in full.
+ * Four digits count only when followed by the people they count, so a year
+ * ("por 2025") is not read as a base.
+ */
 const BASE_IN_UNITS =
-  /\b(?:por|a cada|para cada) (?:cada )?(\d{1,3}(?:\.\d{3})+|\d{4,})\b/;
+  /\b(?:por|a cada|para cada) (?:cada )?(\d{1,3}(?:\.\d{3})+|\d{5,}|\d{4}(?= (?:pessoas|habitantes)\b))\b/;
 
 /** The thousands a "por N mil" amount names: a number, "dez", "cem", or none ("por mil"). */
 const countOf = (amount: string | undefined): number => {

@@ -298,6 +298,8 @@ describe('rateBaseFromPrompt', () => {
     ['cozinhas por 50k pessoas no cadunico', 50_000],
     ['cozinhas por 50 k pessoas no cadunico', 50_000],
     ['cozinhas por 50mil pessoas no cadunico', 50_000],
+    ['cozinhas por 5000 pessoas no cadunico', 5_000],
+    ['cozinhas a cada 2025 pessoas no cadunico', 2_025],
   ])('reads the base "%s" names', (text, base) => {
     expect(rateBaseFromPrompt(text)).toBe(base);
   });
@@ -306,6 +308,9 @@ describe('rateBaseFromPrompt', () => {
     'mapa de pessoas no cadunico por cozinha',
     'familias do cadunico em inseguranca alimentar',
     'cozinhas por municipio em 2025',
+    // A four-digit number is a base only when it counts people: not a year.
+    'cozinhas no cadunico por 2025',
+    'cozinhas por 2025 no cadunico',
   ])('names no base in "%s"', (text) => {
     expect(rateBaseFromPrompt(text)).toBeUndefined();
   });
