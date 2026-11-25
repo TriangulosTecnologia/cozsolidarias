@@ -2,7 +2,7 @@
 
 ### Requirement: Recovery trigger
 
-When the validation loop exhausts — the fifth validation still reports issues, or a validation reports at least as many issues as the previous one — the server SHALL answer that validation call with a recovery signal instead of ending the turn, so the agent can propose one more candidate in the same turn. The signal SHALL carry the trigger, the attempt count, the last candidate, its issues, a per-attempt history and fixed recovery instructions.
+When the validation loop exhausts — the fifth validation still reports issues, or a validation before the sixth reports at least as many issues as the previous one — the server SHALL answer that validation call with a recovery signal instead of ending the turn, so the agent can propose one more candidate in the same turn. The signal SHALL carry the trigger, the attempt count, the last candidate, its issues, a per-attempt history and fixed recovery instructions.
 
 #### Scenario: Fifth validation still has issues
 
@@ -32,7 +32,7 @@ The server SHALL allow at most one recovery per generation and at most 6 validat
 
 ### Requirement: Budget overrun and deadline end the generation
 
-A validation call that would be the seventh of the generation SHALL NOT be validated and SHALL end the generation with a 422. An exhaustion at the sixth validation, which leaves no validation for a recovery candidate, SHALL end the generation with a 422 without a recovery signal. A deadline that passes after the recovery signal SHALL end the generation with that 422, carrying the candidate and issues that exhausted the loop; before the signal, a deadline stays an upstream failure (502).
+A validation call that would be the seventh of the generation SHALL NOT be validated and SHALL end the generation with a 422. An exhaustion at the sixth validation, which leaves no validation for a recovery candidate, SHALL end the generation with a 422 without a recovery signal. A deadline that passes after the recovery signal SHALL end the generation with a 422, carrying the candidate and issues that exhausted the loop; before the signal, a deadline stays an upstream failure (502).
 
 #### Scenario: Seventh validation call
 
