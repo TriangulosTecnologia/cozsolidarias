@@ -8,6 +8,7 @@ import {
   type SpecReplyStopped,
   type ValidateCandidate,
 } from './naturaliSession';
+import type { RecoverySnapshot } from './specRecovery';
 
 /** Name every session this app creates carries; a reused session must match it. */
 const SESSION_NAME = 'cozsolidarias-ai-spec';
@@ -156,7 +157,8 @@ export const openSession = async (params: {
 /**
  * Runs {@link generateSpec} inside a session: opens (or reuses) it, sends the
  * full `message` to a new session and only the `followUpMessage` to a reused
- * one, which already holds the catalogue and instructions.
+ * one, which already holds the catalogue and instructions. `onRecovery` is
+ * passed through to {@link generateSpec}.
  *
  * @returns The agent's reply and the id of the session it ran in, or the error
  * {@link generateSpec} threw together with that id (the session exists even
@@ -174,6 +176,7 @@ export const generateInSession = async (params: {
   message: string;
   followUpMessage: string;
   validateCandidate: ValidateCandidate;
+  onRecovery?: (snapshot: RecoverySnapshot) => void;
 }): Promise<
   | {
       sessionId: string;
@@ -190,6 +193,7 @@ export const generateInSession = async (params: {
       sessionId: session.sessionId,
       message: session.reused ? params.followUpMessage : params.message,
       validateCandidate: params.validateCandidate,
+      onRecovery: params.onRecovery,
       signal,
     });
     return { reply, sessionId: session.sessionId };

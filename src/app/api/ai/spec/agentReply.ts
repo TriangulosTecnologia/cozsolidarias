@@ -9,6 +9,7 @@ import type {
   SpecReplyStopped,
 } from './naturaliSession';
 import { collectRequestIssues, type SpecRequest } from './requestChecks';
+import { MAX_TOTAL_VALIDATIONS } from './specRecovery';
 import {
   invalidSpecResponse,
   isRecord,
@@ -20,12 +21,13 @@ const AGENT_DECLINED_MESSAGE =
   'O modelo de IA não pôde gerar o mapa com este pedido. Reformule o pedido informando o dataset e o tipo de mapa desejados.';
 
 const STOP_REASON_MESSAGE: Record<SpecReplyStopped['reason'], string> = {
-  'max-attempts': 'esgotou as tentativas de validação',
-  'no-shrinkage': 'parou de reduzir os problemas entre tentativas',
+  'recovery-failed':
+    'não corrigiu os problemas nem com a tentativa de recuperação',
+  'budget-exhausted': 'esgotou o limite de validações',
 };
 
 /**
- * The 422 for a validation loop that gave up, carrying its last candidate.
+ * The 422 for a turn the server stopped, carrying the candidate it refers to.
  *
  * Carries the candidate as validateCandidate returned it (locally repaired),
  * before MapData append: the
@@ -34,7 +36,7 @@ const STOP_REASON_MESSAGE: Record<SpecReplyStopped['reason'], string> = {
  */
 const stoppedResponse = (reply: SpecReplyStopped): Response => {
   return invalidSpecResponse({
-    message: `A spec gerada não passou na validação: o modelo ${STOP_REASON_MESSAGE[reply.reason]} (${reply.attempts} de até 5). Tente reformular o pedido.`,
+    message: `A spec gerada não passou na validação: o modelo ${STOP_REASON_MESSAGE[reply.reason]} (${reply.attempts} de até ${MAX_TOTAL_VALIDATIONS} validações). Tente reformular o pedido.`,
     issues: reply.issues,
     spec: reply.spec,
   });
@@ -43,7 +45,7 @@ const stoppedResponse = (reply: SpecReplyStopped): Response => {
 /**
  * Resolves the agent's structured reply into the raw spec object
  * (`status: "ok"`), or the 422 `Response` for a declined request
- * (`status: "error"`), a validation loop that gave up (`status: "stopped"`),
+ * (`status: "error"`), a turn the server stopped (`status: "stopped"`),
  * a non-object spec or one failing the structural checks. A non-object spec
  * is carried raw; a structural failure carries it normalized by
  * `normalizeCandidate` (see {@link stoppedResponse}). Checks that only hold

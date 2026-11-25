@@ -2053,36 +2053,46 @@ describe('POST /api/ai/spec', () => {
   // validate_spec loop and the canonical cozinhas choropleth
   // ---------------------------------------------------------------------------
 
-  test('returns the last candidate and its issues when the validation loop gives up', async () => {
-    jest.mocked(validateSpec).mockReturnValue({
-      status: 'invalid',
-      issues: [
-        {
-          code: 'invalid-schema',
-          subject: { path: 'layers' },
-          message: 'layers is required',
-        },
-      ],
+  /** A generation paused on one `validate_spec` call with `spec`. */
+  const pausedOn = (callId: string, spec: unknown) => {
+    return jsonResponse({
+      generation_id: 'gen_1',
+      status: 'requires_action',
+      required_action: {
+        type: 'submit_tool_outputs',
+        tool_calls: [
+          { id: callId, tool_name: 'validate_spec', args: { spec } },
+        ],
+      },
     });
-    const paused = (callId: string) => {
-      return jsonResponse({
-        generation_id: 'gen_1',
-        status: 'requires_action',
-        required_action: {
-          type: 'submit_tool_outputs',
-          tool_calls: [
-            {
-              id: callId,
-              tool_name: 'validate_spec',
-              args: { spec: { legends: A_LEGEND } },
-            },
-          ],
-        },
-      });
-    };
+  };
+
+  const completedWith = (reply: unknown) => {
+    return jsonResponse({
+      generation_id: 'gen_1',
+      status: 'completed',
+      content: JSON.stringify(reply),
+    });
+  };
+
+  /** An IVS choropleth with one legend too many: one structural issue. */
+  const TWO_LEGENDS_IVS = {
+    mapType: 'choropleth',
+    title: 'Vulnerabilidade social',
+    mapData: [{ mapDataId: 'municipios_ivs', title: 'IVS' }],
+    legends: [{ title: 'IVS' }, { title: 'Outra' }],
+  };
+  const CLEAN_IVS = { ...TWO_LEGENDS_IVS, legends: [{ title: 'IVS' }] };
+
+  test('answers 422 saying recovery was attempted when the recovery candidate is still invalid, and logs the snapshot', async () => {
+    const logSpy = jest
+      .spyOn(generationLogger, 'logGeneration')
+      .mockImplementation(() => {});
+    const candidate = { legends: A_LEGEND };
     global.fetch = mockSessionOpening()
-      .mockResolvedValueOnce(paused('call_1'))
-      .mockResolvedValueOnce(paused('call_2'));
+      .mockResolvedValueOnce(pausedOn('call_1', candidate))
+      .mockResolvedValueOnce(pausedOn('call_2', candidate))
+      .mockResolvedValueOnce(pausedOn('call_3', candidate));
 
     const response = await POST(
       jsonRequest({ prompt: 'mapa de cozinhas por município' })
@@ -2094,13 +2104,105 @@ describe('POST /api/ai/spec', () => {
 
     expect(response.status).toBe(422);
     expect(body.error).toBe(true);
-    expect(body.message).toMatch(/parou de reduzir os problemas/);
-    expect(body.spec).toEqual({ legends: A_LEGEND });
+    expect(body.message).toMatch(/recuperação.*\(3 de até 6 validações\)/);
+    expect(body.spec).toEqual(candidate);
     expect(body.issues).toHaveLength(1);
-    jest
-      .mocked(validateSpec)
-      .mockReturnValue({ status: 'resolved', warnings: [] });
+    expect(logSpy).toHaveBeenCalledWith({
+      prompt: 'mapa de cozinhas por município',
+      reply: {
+        recovery: expect.objectContaining({
+          trigger: 'no-shrinkage',
+          attempts: 3,
+          outcome: 'recovery-failed',
+        }),
+        budget: 6,
+      },
+    });
   }, 10000);
+
+  test('serves the recovery candidate the last validation cleared, when the reply repeats it', async () => {
+    jest.spyOn(gateway, 'getIvsPorMunicipio').mockResolvedValue([]);
+    jest.spyOn(generationLogger, 'logGeneration').mockImplementation(() => {});
+    global.fetch = mockSessionOpening()
+      .mockResolvedValueOnce(pausedOn('call_1', TWO_LEGENDS_IVS))
+      .mockResolvedValueOnce(pausedOn('call_2', TWO_LEGENDS_IVS))
+      .mockResolvedValueOnce(pausedOn('call_3', CLEAN_IVS))
+      .mockResolvedValueOnce(completedWith({ status: 'ok', spec: CLEAN_IVS }));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa do IVS por município' })
+    );
+
+    expect(response.status).toBe(200);
+  }, 10000);
+
+  test('answers the declined-request 422, serving no map, when the agent replies missing_data after recovery', async () => {
+    jest.spyOn(gateway, 'getIvsPorMunicipio').mockResolvedValue([]);
+    jest.spyOn(generationLogger, 'logGeneration').mockImplementation(() => {});
+    global.fetch = mockSessionOpening()
+      .mockResolvedValueOnce(pausedOn('call_1', TWO_LEGENDS_IVS))
+      .mockResolvedValueOnce(pausedOn('call_2', TWO_LEGENDS_IVS))
+      .mockResolvedValueOnce(
+        completedWith({
+          status: 'error',
+          error: { code: 'missing_data', message: 'sem dado' },
+        })
+      );
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa do IVS por município' })
+    );
+    const body = (await response.json()) as ErrorBody & { spec?: unknown };
+
+    expect(response.status).toBe(422);
+    expect(body.message).toMatch(/não pôde gerar o mapa/);
+    expect(body.spec).toBeUndefined();
+  }, 10000);
+
+  test('answers 422 with the exhausting candidate, not a 502, when the deadline passes during recovery', async () => {
+    jest.spyOn(gateway, 'getIvsPorMunicipio').mockResolvedValue([]);
+    jest.spyOn(generationLogger, 'logGeneration').mockImplementation(() => {});
+    const timeout = new Error('The operation was aborted due to timeout');
+    timeout.name = 'TimeoutError';
+    global.fetch = mockSessionOpening()
+      .mockResolvedValueOnce(pausedOn('call_1', TWO_LEGENDS_IVS))
+      .mockResolvedValueOnce(pausedOn('call_2', TWO_LEGENDS_IVS))
+      .mockRejectedValueOnce(timeout);
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa do IVS por município' })
+    );
+    const body = (await response.json()) as ErrorBody & {
+      issues?: Array<{ code: string }>;
+      spec?: unknown;
+    };
+
+    expect(response.status).toBe(422);
+    expect(body.message).toMatch(/recuperação/);
+    expect(body.spec).toEqual(TWO_LEGENDS_IVS);
+    expect(body.issues).toEqual([
+      expect.objectContaining({ code: 'legend-count-mismatch' }),
+    ]);
+  }, 10000);
+
+  test('answers 422 when the agent calls validation a 7th time in a generation that never needed recovery', async () => {
+    jest.spyOn(gateway, 'getIvsPorMunicipio').mockResolvedValue([]);
+    const fetchMock = mockSessionOpening();
+    for (let call = 1; call <= 7; call += 1) {
+      fetchMock.mockResolvedValueOnce(pausedOn(`call_${call}`, CLEAN_IVS));
+    }
+    global.fetch = fetchMock;
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa do IVS por município' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(422);
+    expect(body.message).toMatch(
+      /esgotou o limite de validações \(6 de até 6 validações\)/
+    );
+  }, 20000);
 
   test('explains a request that ran past the generation deadline', async () => {
     const timeout = new Error('The operation was aborted due to timeout');

@@ -33,6 +33,31 @@ describe('logGeneration', () => {
     expect(appendFileSync).not.toHaveBeenCalled();
   });
 
+  test('keeps the recovery snapshot of a generation in development only', () => {
+    const reply = {
+      recovery: {
+        trigger: 'no-shrinkage',
+        attempts: 3,
+        firstCandidate: { mapType: 'choropleth' },
+        lastCandidate: { mapType: 'dotDensity' },
+        issues: [{ code: 'semantic-drift', message: 'm' }],
+        outcome: 'recovery-failed',
+      },
+      budget: 6,
+    };
+
+    logGeneration({ prompt: 'mapa do ivs', reply, timestamp: TIMESTAMP });
+    process.env.NODE_ENV = 'production';
+    logGeneration({ prompt: 'mapa do ivs', reply, timestamp: TIMESTAMP });
+
+    expect(appendFileSync).toHaveBeenCalledTimes(1);
+    const [, line] = jest.mocked(appendFileSync).mock.calls[0] as [
+      string,
+      string,
+    ];
+    expect(JSON.parse(line)).toMatchObject({ prompt: 'mapa do ivs', reply });
+  });
+
   test('creates the logs directory recursively before writing', () => {
     logGeneration({ prompt: 'mapa', reply: {}, timestamp: TIMESTAMP });
 

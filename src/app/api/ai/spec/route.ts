@@ -8,6 +8,7 @@ import {
   validateWithLocalRepairs,
   VALIDATION_DATA_UNAVAILABLE,
 } from './candidateValidation';
+import { logGeneration } from './generationLogger';
 import baseVisualizationSpecJson from './instructions/baseVisualizationSpec.json';
 import { buildCatalogueContext } from './mapDataCatalogue';
 import { MAP_TYPE_OPTIONS } from './mapTypeOptions';
@@ -20,6 +21,7 @@ import {
 } from './requestPreflight';
 import { DATA_UNAVAILABLE_MESSAGE, resolveServedSpec } from './serveSpec';
 import { mergeSpecs } from './specDefaults';
+import { MAX_TOTAL_VALIDATIONS } from './specRecovery';
 import {
   errorResponse,
   invalidSpecResponse,
@@ -189,12 +191,6 @@ const getAgentResponse = async (params: {
   request: SpecRequest;
 }): Promise<{ spec: UnknownRecord; sessionId: string } | Response> => {
   const { request } = params;
-  const choices = {
-    prompt: request.prompt,
-    mapType: request.mapType,
-    datasetId: request.datasetId,
-    note: request.note,
-  };
   let generated: Awaited<ReturnType<typeof generateInSession>>;
   try {
     generated = await generateInSession({
@@ -203,11 +199,17 @@ const getAgentResponse = async (params: {
       agentId: params.agentId,
       sessionId: params.sessionId,
       message: buildAgentMessage({
-        ...choices,
+        ...request,
         catalogueText: await readCatalogueContext(),
       }),
-      followUpMessage: buildAgentMessage(choices),
+      followUpMessage: buildAgentMessage(request),
       validateCandidate: validateCandidateFor(request),
+      onRecovery: (snapshot) => {
+        logGeneration({
+          prompt: request.prompt,
+          reply: { recovery: snapshot, budget: MAX_TOTAL_VALIDATIONS },
+        });
+      },
     });
   } catch (error) {
     return errorResponse({ status: 502, message: describeAgentFailure(error) });
@@ -251,14 +253,7 @@ const getRequestedSpec = async (
   return getAgentResponse({
     ...envOrError,
     sessionId: request.sessionId,
-    request: {
-      prompt: request.prompt,
-      mapType: request.mapType,
-      datasetId: request.datasetId,
-      note: request.note,
-      conceptIds: request.conceptIds,
-      concepts: await readConcepts(),
-    },
+    request: { ...request, concepts: await readConcepts() },
   });
 };
 
@@ -290,13 +285,15 @@ const checkServedSpec = (served: UnknownRecord): Response => {
  * {@link generateInSession}) declared by the `geovis-spec-generator-loop`
  * formation (`agents/geovis-spec-generator/formation.json`, deployed by that
  * folder's scripts) and referenced here only by ID. The agent validates its candidate
- * with the client-side `validate_spec` tool — repaired locally first, at most
- * 5 calls, stopping when issues stop shrinking or the 55s deadline passes —
- * and returns a structured `{status: "ok", spec}` or `{status: "error",
- * error}` reply.
+ * with the client-side `validate_spec` tool, bound to the request — repaired
+ * locally first, at most 5 loop calls plus one recovery candidate once the
+ * loop exhausts (6 in all, within the 55s deadline) — and returns a
+ * structured `{status: "ok", spec}` or `{status: "error", error}` reply; a
+ * generation that entered recovery is logged in development only.
  *
- * The reply is then resolved into real data (see {@link resolveServedSpec})
- * and validated once more, with the same local repairs. Before any of that,
+ * The reply is held to the request again (see {@link checkRequestContract}),
+ * resolved into real data (see {@link resolveServedSpec}) and validated once
+ * more, with the same local repairs. Before any of that,
  * an ambiguous request is answered with a `clarify` question instead (see
  * {@link preflightRequest}), and a request the preflight settles by itself
  * (the kitchens choropleth while `FORBID_ABSOLUTE_ON_CHOROPLETH` is not
@@ -305,8 +302,8 @@ const checkServedSpec = (served: UnknownRecord): Response => {
  *
  * @returns `{ spec, error: false }` on success; `{ error: true, message,
  * issues?, spec? }` on any failure (missing config, prompt validation,
- * upstream API failure, a declined request, a validation loop that gave up,
- * or an unsupported dataset reference) — `spec`, when present, is the spec at
+ * upstream API failure, a declined request, a turn the server stopped, a
+ * request-contract issue, or an unsupported dataset reference) — `spec`, when present, is the spec at
  * the stage that failed (see the `src/app/api/ai/spec/**` invariant in
  * devanity.rules.json).
  */
