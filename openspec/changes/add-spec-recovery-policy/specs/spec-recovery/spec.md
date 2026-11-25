@@ -17,7 +17,7 @@ When the validation loop exhausts — the fifth validation still reports issues,
 
 ### Requirement: Server-side recovery budget
 
-The server SHALL allow at most one recovery per generation and at most 6 validations in total, inside the generation's existing deadline. The server SHALL end the generation with a 422 whose message says recovery was attempted when the first validation after recovery still reports issues, when a validation call would be the seventh of the generation (that call is not validated), or when the deadline passes after the recovery signal (the 422 then carries the candidate and issues that exhausted the loop).
+The server SHALL allow at most one recovery per generation and at most 6 validations in total, inside the generation's existing deadline. The first validation after recovery that still reports issues SHALL end the generation with a 422 whose message says recovery was attempted.
 
 #### Scenario: Recovery candidate still invalid
 
@@ -29,6 +29,10 @@ The server SHALL allow at most one recovery per generation and at most 6 validat
 
 - **WHEN** a generation that already used its recovery exhausts again
 - **THEN** no second recovery signal is sent and the response is 422
+
+### Requirement: Budget overrun and deadline end the generation
+
+A validation call that would be the seventh of the generation SHALL NOT be validated and SHALL end the generation with a 422 whose message says recovery was attempted. A deadline that passes after the recovery signal SHALL end the generation with that 422, carrying the candidate and issues that exhausted the loop; before the signal, a deadline stays an upstream failure (502).
 
 #### Scenario: Seventh validation call
 
