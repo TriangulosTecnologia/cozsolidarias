@@ -743,6 +743,47 @@ describe('validateCandidateFor', () => {
   });
 });
 
+// Rules of the determinism map that the agent can still break under the
+// formation's output_schema: each must already yield an issue, so none needs
+// a new validator.
+describe('validateCandidate on rules the output_schema still lets the agent break', () => {
+  const codesOf = async (candidate: unknown): Promise<string[]> => {
+    return (await validateCandidate(candidate)).issues.map((issue) => {
+      return issue.code;
+    });
+  };
+
+  test('a mapType without mapData', async () => {
+    expect(await codesOf({ mapType: 'choropleth', title: 'IVS' })).not.toEqual(
+      []
+    );
+  });
+
+  test('a point layer over a /geo polygon source, with no point source to move it to', async () => {
+    expect(
+      await codesOf({
+        title: 'Cozinhas',
+        sources: [
+          { id: 'mun', type: 'geojson', data: '/geo/geojs-100-mun.json' },
+        ],
+        layers: [{ sourceId: 'mun', geometry: 'point' }],
+      })
+    ).toContain('point-layer-on-polygon-source');
+  });
+
+  test('a heatmap layer over a /geo polygon source', async () => {
+    expect(
+      await codesOf({
+        title: 'Cozinhas',
+        sources: [
+          { id: 'mun', type: 'geojson', data: '/geo/geojs-100-mun.json' },
+        ],
+        layers: [{ sourceId: 'mun', geometry: 'heatmap' }],
+      })
+    ).not.toEqual([]);
+  });
+});
+
 describe('normalizeCandidate', () => {
   test('hoists layer legends and repoints a point layer off a polygon source in one pass', () => {
     const sources = [
