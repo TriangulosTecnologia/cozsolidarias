@@ -12,7 +12,7 @@ A generated spec SHALL be valid only when it passes the structural checks, the r
 
 ### Requirement: Issue categories and stable order
 
-Every validation issue SHALL belong to exactly one category: `structural`, `data-resolution`, `semantic`, `capability` or `operational`. Issues SHALL be deduplicated by code and path and ordered by category, code and path, so the same candidate and request always yield the same list. The category SHALL NOT appear in the route's response body.
+Every validation issue SHALL belong to exactly one category: `structural`, `data-resolution`, `semantic` or `capability`. Issues SHALL be deduplicated by code, path and message and ordered by category, code, path and message, so the same candidate and request always yield the same list. The category SHALL NOT appear in any field of the route's response body.
 
 #### Scenario: Same issues in another order
 
@@ -22,7 +22,8 @@ Every validation issue SHALL belong to exactly one category: `structural`, `data
 #### Scenario: Category stays internal
 
 - **WHEN** the route answers 422 with issues
-- **THEN** each issue in the body has `code`, `message` and, when known, `path`, and no `category`
+- **THEN** each issue in the body has `code`, `message` and, when known, `path`
+- **AND** no field of the body, `requirements` included, carries `category`
 
 ### Requirement: User's map type is kept
 
@@ -95,7 +96,7 @@ A spec drawing point or heatmap layers SHALL NOT also carry a map type or `mapDa
 
 ### Requirement: Painted dataset measures the requested concept
 
-When the server resolved the prompt to known dataset families, a spec painting a dataset outside those families and other than the proxy the server noted SHALL be reported as `concept-drift` (`semantic`). A prompt the server could not resolve SHALL NOT be judged by this check.
+When the server resolved the prompt to known dataset families, a spec painting a dataset outside those families SHALL be reported as `concept-drift` (`semantic`). A prompt the server could not resolve SHALL NOT be judged by this check.
 
 #### Scenario: Another concept painted
 
@@ -137,11 +138,11 @@ When the server noted that the dataset is a proxy of what the prompt asked, a sp
 
 ### Requirement: Default period is stated
 
-When the prompt names no year and the painted dataset has several editions, a spec whose description does not name a year the dataset covers SHALL be reported as `missing-default-period-caveat` (`semantic`).
+When the prompt names no year and the catalogue's temporal extent for the painted dataset covers more than one year, a spec whose description does not name a year the dataset covers SHALL be reported as `missing-default-period-caveat` (`semantic`).
 
 #### Scenario: Default year not stated
 
-- **WHEN** the prompt names no year, the dataset has editions for several years and the description names none
+- **WHEN** the prompt names no year, the dataset's temporal extent covers several years and the description names none
 - **THEN** validation reports `missing-default-period-caveat`
 
 #### Scenario: Default year stated

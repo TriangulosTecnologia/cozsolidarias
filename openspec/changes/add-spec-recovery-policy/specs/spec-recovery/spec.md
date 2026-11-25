@@ -17,7 +17,7 @@ When the validation loop exhausts — the fifth validation still reports issues,
 
 ### Requirement: Server-side recovery budget
 
-The server SHALL allow at most one recovery per generation and at most 6 validations in total, inside the generation's existing deadline. The first validation after recovery that still reports issues SHALL end the generation with a 422 whose message says recovery was attempted.
+The server SHALL allow at most one recovery per generation and at most 6 validations in total, inside the generation's existing deadline. The server SHALL end the generation with a 422 whose message says recovery was attempted when the first validation after recovery still reports issues, when a validation call would be the seventh of the generation (that call is not validated), or when the deadline passes after the recovery signal (the 422 then carries the candidate and issues that exhausted the loop).
 
 #### Scenario: Recovery candidate still invalid
 
@@ -29,6 +29,16 @@ The server SHALL allow at most one recovery per generation and at most 6 validat
 
 - **WHEN** a generation that already used its recovery exhausts again
 - **THEN** no second recovery signal is sent and the response is 422
+
+#### Scenario: Seventh validation call
+
+- **WHEN** the agent calls validation a seventh time in one generation, even after a clean sixth validation
+- **THEN** the seventh candidate is not validated and the response is 422
+
+#### Scenario: Deadline passes during recovery
+
+- **WHEN** the generation deadline passes after the recovery signal and before the agent's reply
+- **THEN** the response is 422 with the candidate and issues that exhausted the loop, not an upstream failure
 
 ### Requirement: Semantic invariance
 
@@ -65,12 +75,17 @@ When no candidate can meet the request with the available data, the agent SHALL 
 
 ### Requirement: Success only after validation
 
-A spec SHALL be served (200) after recovery only when its validation reports no issues and the route's final checks pass.
+After a recovery signal, the route SHALL serve (200) only the spec that the last validation of the generation cleared with no issues, and only when the route's final checks pass. An `ok` reply with any other spec, or with no cleared candidate after the signal, SHALL end the generation with a 422 whose message says recovery was attempted.
 
 #### Scenario: Recovery candidate valid
 
 - **WHEN** the candidate validated after a recovery signal reports no issues and the agent replies `ok` with it
 - **THEN** the route resolves the data, runs its final checks and answers 200
+
+#### Scenario: Reply differs from the cleared candidate
+
+- **WHEN** after a recovery signal the agent replies `ok` with a spec that differs from the candidate the last validation cleared
+- **THEN** the response is 422 and its message says recovery was attempted
 
 ### Requirement: Auditable recovery snapshot
 
