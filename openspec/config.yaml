@@ -1,0 +1,7 @@
+schema: spec-driven
+
+context: |
+  User-facing text (issue messages, fixes, error messages, spec titles and descriptions) is pt-BR; every repository artifact, these included, is English.
+  Validation and recovery budgets are enforced by the server (`src/app/api/ai/spec/`); agent instructions only describe them.
+  Recovery runs inside the existing `geovis-spec-generator-loop` Naturali agent; a new Naturali agent is created only on explicit request.
+  The public contract of `POST /api/ai/spec` (status codes and body fields) changes only through an explicit decision recorded in the change.
