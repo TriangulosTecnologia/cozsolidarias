@@ -623,6 +623,24 @@ describe('validateCandidate', () => {
     ]);
   });
 
+  test('categorizes, deduplicates and orders the issues it reports', async () => {
+    const result = await validateCandidate({
+      mapType: 'choropleth',
+      basemap: { styleUrl: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png' },
+      mapData: [{ mapDataId: 'caf_areas' }],
+    });
+
+    expect(
+      result.issues.map((issue) => {
+        return [issue.code, 'category' in issue ? issue.category : undefined];
+      })
+    ).toEqual([
+      ['unknown-basemap-style', 'structural'],
+      ['unresolvable-spec', 'data-resolution'],
+      ['unsupported-dataset', 'capability'],
+    ]);
+  });
+
   test('rejects a non-object candidate', async () => {
     expect(await validateCandidate('text')).toEqual({
       spec: 'text',
@@ -631,6 +649,7 @@ describe('validateCandidate', () => {
           code: 'invalid-spec-shape',
           path: '',
           message: 'A spec precisa ser um objeto JSON.',
+          category: 'structural',
         },
       ],
     });

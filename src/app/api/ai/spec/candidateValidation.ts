@@ -1,6 +1,7 @@
 import { type GeoVisIssue, validateSpec } from '@ttoss/geovis';
 
 import baseVisualizationSpecJson from './instructions/baseVisualizationSpec.json';
+import { type CategorizedIssue, normalizeIssues } from './issueCategories';
 import { isRenderableDatasetId } from './mapDataCatalogue';
 import { resolveCandidate } from './serveSpec';
 import { mergeSpecs } from './specDefaults';
@@ -252,23 +253,24 @@ export const normalizeCandidate = (spec: UnknownRecord): UnknownRecord => {
  *
  * @param spec - The candidate the model proposed.
  * @returns The normalized candidate (never the resolved one, which carries
- * every data row) and the issues that remain; empty when it is valid.
+ * every data row) and the issues that remain, categorized, deduplicated and
+ * ordered ({@link normalizeIssues}); empty when it is valid.
  * @example
  * const { spec: repaired, issues } = await validateCandidate(modelSpec);
  */
 export const validateCandidate = async (
   spec: unknown
-): Promise<{ spec: unknown; issues: SpecIssue[] }> => {
+): Promise<{ spec: unknown; issues: CategorizedIssue[] }> => {
   if (!isRecord(spec)) {
     return {
       spec,
-      issues: [
+      issues: normalizeIssues([
         {
           code: 'invalid-spec-shape',
           path: '',
           message: 'A spec precisa ser um objeto JSON.',
         },
-      ],
+      ]),
     };
   }
 
@@ -299,6 +301,9 @@ export const validateCandidate = async (
         ];
   return {
     spec: normalized,
-    issues: [...collectPreResolutionIssues(normalized), ...resolutionIssues],
+    issues: normalizeIssues([
+      ...collectPreResolutionIssues(normalized),
+      ...resolutionIssues,
+    ]),
   };
 };
