@@ -2,11 +2,13 @@ import {
   collectPreResolutionIssues,
   normalizeCandidate,
 } from './candidateValidation';
+import { normalizeIssues } from './issueCategories';
 import type {
   SpecReplyError,
   SpecReplyOk,
   SpecReplyStopped,
 } from './naturaliSession';
+import { collectRequestIssues, type SpecRequest } from './requestChecks';
 import {
   invalidSpecResponse,
   isRecord,
@@ -87,4 +89,32 @@ export const resolveAgentReply = (
   }
 
   return spec;
+};
+
+/**
+ * The final gate on the agent's reply, right after {@link resolveAgentReply}:
+ * the request checks (`collectRequestIssues`, the same ones `validate_spec`
+ * ran) on the agent's normalized spec. Never run on a spec the preflight
+ * settled or on a resolved spec.
+ *
+ * @param params.spec - The spec {@link resolveAgentReply} returned.
+ * @param params.request - The request it answers.
+ * @returns The same spec, or the 422 carrying it, its normalized issues and
+ * the first issue's message.
+ *
+ * @example
+ * const checked = checkRequestContract({ spec, request }); // spec, or a 422 Response
+ */
+export const checkRequestContract = (params: {
+  spec: UnknownRecord;
+  request: SpecRequest;
+}): UnknownRecord | Response => {
+  const issues = normalizeIssues(collectRequestIssues(params));
+  return issues.length > 0
+    ? invalidSpecResponse({
+        message: `${issues[0].message} Tente reformular o pedido.`,
+        issues,
+        spec: params.spec,
+      })
+    : params.spec;
 };

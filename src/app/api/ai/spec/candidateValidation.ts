@@ -1,8 +1,10 @@
 import { type GeoVisIssue, validateSpec } from '@ttoss/geovis';
 
 import baseVisualizationSpecJson from './instructions/baseVisualizationSpec.json';
-import { type CategorizedIssue, normalizeIssues } from './issueCategories';
+import { normalizeIssues } from './issueCategories';
 import { isRenderableDatasetId } from './mapDataCatalogue';
+import type { ValidateCandidate } from './naturaliSession';
+import { collectRequestIssues, type SpecRequest } from './requestChecks';
 import { resolveCandidate } from './serveSpec';
 import { mergeSpecs } from './specDefaults';
 import { applyLocalRepairs, repairMapDataWiring } from './specRepairs';
@@ -255,39 +257,10 @@ export const normalizeCandidate = (spec: UnknownRecord): UnknownRecord => {
 export const VALIDATION_DATA_UNAVAILABLE =
   'Validation could not read the data to resolve the candidate';
 
-/**
- * Validates one candidate spec the model proposed — the body of the
- * `validate_spec` tool. Normalizes it ({@link normalizeCandidate}), runs the
- * pre-resolution checks, then merges it over the base spec and resolves it
- * like the route does ({@link resolveCandidate}) before the resolution checks
- * and {@link validateWithLocalRepairs}.
- *
- * @param spec - The candidate the model proposed.
- * @returns The normalized candidate (never the resolved one, which carries
- * every data row) and the issues that remain, categorized, deduplicated and
- * ordered ({@link normalizeIssues}); empty when it is valid.
- * @throws `Error(VALIDATION_DATA_UNAVAILABLE)` when reading the data fails
- * (the gateway rejects): no attempt should be counted for it.
- * @example
- * const { spec: repaired, issues } = await validateCandidate(modelSpec);
- */
-export const validateCandidate = async (
-  spec: unknown
-): Promise<{ spec: unknown; issues: CategorizedIssue[] }> => {
-  if (!isRecord(spec)) {
-    return {
-      spec,
-      issues: normalizeIssues([
-        {
-          code: 'invalid-spec-shape',
-          path: '',
-          message: 'A spec precisa ser um objeto JSON.',
-        },
-      ]),
-    };
-  }
-
-  const normalized = normalizeCandidate(spec);
+/** The issues resolving a normalized candidate leaves (see {@link validateCandidateFor}). */
+const resolutionIssuesOf = async (
+  normalized: UnknownRecord
+): Promise<SpecIssue[]> => {
   // A gateway failure is not the model's to repair: it ends the generation.
   const resolved = await resolveCandidate(
     mergeSpecs(baseVisualizationSpecJson as UnknownRecord, normalized)
@@ -295,24 +268,74 @@ export const validateCandidate = async (
     throw new Error(VALIDATION_DATA_UNAVAILABLE, { cause: error });
   });
   // A rejected spec is one issue carrying the route's own 422 message.
-  const resolutionIssues =
-    resolved instanceof Response
-      ? [
+  if (resolved instanceof Response) {
+    return [
+      {
+        code: 'unresolvable-spec',
+        path: '',
+        message: ((await resolved.json()) as { message: string }).message,
+      },
+    ];
+  }
+  return [
+    ...collectResolvedIssues(resolved),
+    ...validateWithLocalRepairs(resolved).issues,
+  ];
+};
+
+/**
+ * Builds the body of the `validate_spec` tool for one request: validates a
+ * candidate spec the model proposed. Normalizes it ({@link normalizeCandidate}),
+ * runs the pre-resolution checks and, with a `request`, the request checks
+ * (`collectRequestIssues`) on it, then merges it over the base spec and
+ * resolves it like the route does ({@link resolveCandidate}) before the
+ * resolution checks and {@link validateWithLocalRepairs}.
+ *
+ * @param request - The request the candidate must keep; without it, no request check runs.
+ * @returns The validator. It answers the normalized candidate (never the
+ * resolved one, which carries every data row) and the issues that remain,
+ * categorized, deduplicated and ordered ({@link normalizeIssues}); empty when
+ * it is valid. It throws `Error(VALIDATION_DATA_UNAVAILABLE)` when reading the
+ * data fails (the gateway rejects): no attempt should be counted for it.
+ *
+ * @example
+ * const validate = validateCandidateFor({ prompt, mapType, concepts });
+ * const { spec: repaired, issues } = await validate(modelSpec);
+ */
+export const validateCandidateFor = (
+  request?: SpecRequest
+): ValidateCandidate => {
+  return async (spec) => {
+    if (!isRecord(spec)) {
+      return {
+        spec,
+        issues: normalizeIssues([
           {
-            code: 'unresolvable-spec',
+            code: 'invalid-spec-shape',
             path: '',
-            message: ((await resolved.json()) as { message: string }).message,
+            message: 'A spec precisa ser um objeto JSON.',
           },
-        ]
-      : [
-          ...collectResolvedIssues(resolved),
-          ...validateWithLocalRepairs(resolved).issues,
-        ];
-  return {
-    spec: normalized,
-    issues: normalizeIssues([
-      ...collectPreResolutionIssues(normalized),
-      ...resolutionIssues,
-    ]),
+        ]),
+      };
+    }
+
+    const normalized = normalizeCandidate(spec);
+    return {
+      spec: normalized,
+      issues: normalizeIssues([
+        ...collectPreResolutionIssues(normalized),
+        ...(await resolutionIssuesOf(normalized)),
+        ...(request ? collectRequestIssues({ spec: normalized, request }) : []),
+      ]),
+    };
   };
 };
+
+/**
+ * {@link validateCandidateFor} with no request: the structural and
+ * resolution checks only.
+ *
+ * @example
+ * const { spec: repaired, issues } = await validateCandidate(modelSpec);
+ */
+export const validateCandidate = validateCandidateFor();

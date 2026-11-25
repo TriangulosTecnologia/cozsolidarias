@@ -2,7 +2,11 @@ import { validateSpec } from '@ttoss/geovis';
 import * as generationLogger from 'src/app/api/ai/spec/generationLogger';
 import baseVisualizationSpecJson from 'src/app/api/ai/spec/instructions/baseVisualizationSpec.json';
 import { POST } from 'src/app/api/ai/spec/route';
-import { DATA_UNAVAILABLE_MESSAGE } from 'src/app/api/ai/spec/serveSpec';
+import {
+  DATA_UNAVAILABLE_MESSAGE,
+  resolveServedSpec,
+} from 'src/app/api/ai/spec/serveSpec';
+import { mergeSpecs } from 'src/app/api/ai/spec/specDefaults';
 import { invalidSpecResponse } from 'src/app/api/ai/spec/specValidation';
 
 import { IVS_FAMILY_THRESHOLDS } from '@/app/(features)/mapas/geovisScoreScales';
@@ -358,6 +362,88 @@ describe('POST /api/ai/spec', () => {
       (fetchMock.mock.calls[1][1] as { body: string }).body
     ) as { message: string };
     expect(sent.message).toMatch(/mapType.*dotDensity/);
+  });
+
+  test('answers 422 with ignored-user-map-type when the agent reply drops the chosen map type, in the usual 422 body', async () => {
+    jest.spyOn(gateway, 'getIvsPorMunicipio').mockResolvedValue([]);
+    const reply = {
+      mapType: 'choropleth',
+      title: 'Vulnerabilidade social',
+      mapData: [{ mapDataId: 'municipios_ivs', title: 'IVS' }],
+    };
+    mockAgentReply(JSON.stringify(reply));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa do IVS', mapType: 'dotDensity' })
+    );
+    const body = (await response.json()) as Record<string, unknown>;
+
+    expect(response.status).toBe(422);
+    expect(response.headers.get('x-session-id')).toBe('sess_route0001');
+    expect(Object.keys(body).sort()).toEqual([
+      'error',
+      'issues',
+      'mapTypeOptions',
+      'message',
+      'requirements',
+      'spec',
+    ]);
+    expect(body['message']).toMatch(/dotDensity.*Tente reformular o pedido\.$/);
+    expect(body['issues']).toEqual([
+      expect.objectContaining({ code: 'ignored-user-map-type' }),
+    ]);
+    expect(body['spec']).toEqual(reply);
+    expect(JSON.stringify(body)).not.toContain('category');
+  });
+
+  test('validates each candidate against the request the user sent', async () => {
+    jest.spyOn(gateway, 'getIvsPorMunicipio').mockResolvedValue([]);
+    const candidate = {
+      mapType: 'choropleth',
+      title: 'Vulnerabilidade social',
+      mapData: [{ mapDataId: 'municipios_ivs', title: 'IVS' }],
+    };
+    const fetchMock = mockSessionOpening()
+      .mockResolvedValueOnce(
+        jsonResponse({
+          generation_id: 'gen_1',
+          status: 'requires_action',
+          required_action: {
+            type: 'submit_tool_outputs',
+            tool_calls: [
+              {
+                id: 'call_1',
+                tool_name: 'validate_spec',
+                args: { spec: candidate },
+              },
+            ],
+          },
+        })
+      )
+      .mockResolvedValueOnce(
+        jsonResponse({
+          generation_id: 'gen_1',
+          status: 'completed',
+          content: JSON.stringify({
+            status: 'error',
+            error: { code: 'missing_data', message: 'x' },
+          }),
+        })
+      );
+    global.fetch = fetchMock;
+
+    await POST(jsonRequest({ prompt: 'mapa do IVS', mapType: 'dotDensity' }));
+
+    const submitted = JSON.parse(
+      (fetchMock.mock.calls[3][1] as { body: string }).body
+    ) as {
+      tool_outputs: Array<{ output: { issues: Array<{ code: string }> } }>;
+    };
+    expect(
+      submitted.tool_outputs[0].output.issues.map((issue) => {
+        return issue.code;
+      })
+    ).toEqual(['ignored-user-map-type']);
   });
 
   // ---------------------------------------------------------------------------
@@ -799,7 +885,7 @@ describe('POST /api/ai/spec', () => {
     mockAgentReply(JSON.stringify(spec));
 
     const response = await POST(
-      jsonRequest({ prompt: 'mapa de cozinhas por município' })
+      jsonRequest({ prompt: 'mapa do IVS por município' })
     );
     const body = (await response.json()) as { spec?: unknown };
 
@@ -862,7 +948,7 @@ describe('POST /api/ai/spec', () => {
     );
 
     const response = await POST(
-      jsonRequest({ prompt: 'mapa de cozinhas por município' })
+      jsonRequest({ prompt: 'mapa do IVS por município' })
     );
     const body = (await response.json()) as { spec?: unknown };
 
@@ -1166,7 +1252,6 @@ describe('POST /api/ai/spec', () => {
           { id: 'bolhas', type: 'geojson', data: '/api/cozinhas/bolhas' },
         ],
         legends: A_LEGEND,
-        mapData: ONE_MAP_DATA,
         layers: [{ id: 'dots', sourceId: 'mun', geometry: 'point' }],
       })
     );
@@ -1182,7 +1267,6 @@ describe('POST /api/ai/spec', () => {
       id: 'dots',
       sourceId: 'bolhas',
       geometry: 'point',
-      mapDataId: 'municipios_ivs',
     });
   }, 10000);
 
@@ -1872,7 +1956,7 @@ describe('POST /api/ai/spec', () => {
     );
 
     const response = await POST(
-      jsonRequest({ prompt: 'mapa de cozinhas por município' })
+      jsonRequest({ prompt: 'mapa do IVS por município' })
     );
     const body = (await response.json()) as ErrorBody & {
       issues?: Array<{ code: string; message: string }>;
@@ -2257,16 +2341,31 @@ describe('POST /api/ai/spec: base merge and proportionalCircles defaults', () =>
     };
   };
 
+  // A prompt naming no dataset family: the IVS replies below answer it.
   const servedSpec = async (spec: SpecRecord): Promise<SpecRecord> => {
     mockAgentReply(JSON.stringify(spec));
 
-    const response = await POST(
-      jsonRequest({ prompt: 'mapa de pessoas atendidas por município' })
-    );
+    const response = await POST(jsonRequest({ prompt: 'mapa por município' }));
     expect(response.status).toBe(200);
 
     const body = (await response.json()) as { spec: SpecRecord };
     return body.spec;
+  };
+
+  /**
+   * The resolution stage of the route, on the base-merged spec. An agent
+   * reply can no longer carry explicit point layers next to a `mapType`
+   * (`points-spec-with-map-data`), so the defaults are checked here.
+   */
+  const resolvedSpec = async (spec: SpecRecord): Promise<SpecRecord> => {
+    const resolved = await resolveServedSpec({
+      prompt: 'mapa de pessoas atendidas por município',
+      spec: mergeSpecs(baseVisualizationSpecJson as SpecRecord, spec),
+    });
+    if (resolved instanceof Response) {
+      throw new Error(`expected a resolved spec, got ${resolved.status}`);
+    }
+    return resolved;
   };
 
   const layerOf = (spec: SpecRecord, id: string): SpecRecord | undefined => {
@@ -2380,13 +2479,13 @@ describe('POST /api/ai/spec: base merge and proportionalCircles defaults', () =>
 
   describe('applyProportionalCirclesDefaults', () => {
     test('sets scaleMaxValue to the largest value of the size dataset', async () => {
-      const spec = await servedSpec(proportionalSpec());
+      const spec = await resolvedSpec(proportionalSpec());
 
       expect(spec['scaleMaxValue']).toBe(4000);
     });
 
     test('sets the bound point layer sizeBy range to [6, 28]', async () => {
-      const spec = await servedSpec(proportionalSpec());
+      const spec = await resolvedSpec(proportionalSpec());
 
       expect(layerOf(spec, 'cozinhas-bolhas')?.['sizeBy']).toMatchObject({
         range: [6, 28],
@@ -2394,7 +2493,7 @@ describe('POST /api/ai/spec: base merge and proportionalCircles defaults', () =>
     });
 
     test('sets the bound point layer sizeBy transform to sqrt', async () => {
-      const spec = await servedSpec(proportionalSpec());
+      const spec = await resolvedSpec(proportionalSpec());
 
       expect(layerOf(spec, 'cozinhas-bolhas')?.['sizeBy']).toMatchObject({
         transform: 'sqrt',
@@ -2402,7 +2501,7 @@ describe('POST /api/ai/spec: base merge and proportionalCircles defaults', () =>
     });
 
     test('sets the bound point layer sizeBy thresholds to [0, max]', async () => {
-      const spec = await servedSpec(proportionalSpec());
+      const spec = await resolvedSpec(proportionalSpec());
 
       expect(layerOf(spec, 'cozinhas-bolhas')?.['sizeBy']).toMatchObject({
         thresholds: [0, 4000],
@@ -2410,13 +2509,13 @@ describe('POST /api/ai/spec: base merge and proportionalCircles defaults', () =>
     });
 
     test('leaves point layers without that mapDataId untouched', async () => {
-      const spec = await servedSpec(proportionalSpec());
+      const spec = await resolvedSpec(proportionalSpec());
 
       expect(layerOf(spec, 'cozinhas-pontos')?.['sizeBy']).toBeUndefined();
     });
 
     test('leaves the spec unchanged when mapType is not proportionalCircles', async () => {
-      const spec = await servedSpec(proportionalSpec({ mapType: undefined }));
+      const spec = await resolvedSpec(proportionalSpec({ mapType: undefined }));
 
       expect(spec['scaleMaxValue']).toBeUndefined();
       expect(layerOf(spec, 'cozinhas-bolhas')?.['sizeBy']).toEqual({
@@ -2430,7 +2529,7 @@ describe('POST /api/ai/spec: base merge and proportionalCircles defaults', () =>
         .spyOn(gateway, 'getCozinhasPorMunicipio')
         .mockResolvedValue(pessoasRows([0, 0, 0]));
 
-      const spec = await servedSpec(proportionalSpec());
+      const spec = await resolvedSpec(proportionalSpec());
 
       expect(spec['scaleMaxValue']).toBeUndefined();
       expect(layerOf(spec, 'cozinhas-bolhas')?.['sizeBy']).toEqual({
@@ -2444,7 +2543,7 @@ describe('POST /api/ai/spec: base merge and proportionalCircles defaults', () =>
         .spyOn(gateway, 'getCozinhasPorMunicipio')
         .mockResolvedValue(pessoasRows([]));
 
-      const spec = await servedSpec(proportionalSpec());
+      const spec = await resolvedSpec(proportionalSpec());
 
       expect(spec['scaleMaxValue']).toBeUndefined();
       expect(layerOf(spec, 'cozinhas-bolhas')?.['sizeBy']).toEqual({
@@ -2454,13 +2553,16 @@ describe('POST /api/ai/spec: base merge and proportionalCircles defaults', () =>
     });
 
     test('answers 422 when no mapData is declared, instead of leaving the spec unchanged', async () => {
-      mockAgentReply(JSON.stringify(proportionalSpec({ mapData: undefined })));
+      const response = await resolveServedSpec({
+        prompt: 'mapa de pessoas atendidas por município',
+        spec: mergeSpecs(
+          baseVisualizationSpecJson as SpecRecord,
+          proportionalSpec({ mapData: undefined })
+        ),
+      });
 
-      const response = await POST(
-        jsonRequest({ prompt: 'mapa de pessoas atendidas por município' })
-      );
-
-      expect(response.status).toBe(422);
+      expect(response).toBeInstanceOf(Response);
+      expect((response as Response).status).toBe(422);
     });
   });
 });

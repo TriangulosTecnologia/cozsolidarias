@@ -1,23 +1,23 @@
-import type { MapType } from '@ttoss/geovis';
-
 import { gateway } from '@/gateway';
 
 import { buildAgentMessage } from './agentMessage';
-import { resolveAgentReply } from './agentReply';
+import { checkRequestContract, resolveAgentReply } from './agentReply';
 import {
   collectResolvedIssues,
-  validateCandidate,
+  validateCandidateFor,
   validateWithLocalRepairs,
   VALIDATION_DATA_UNAVAILABLE,
 } from './candidateValidation';
 import baseVisualizationSpecJson from './instructions/baseVisualizationSpec.json';
-import {
-  buildCatalogueContext,
-  type RenderableDatasetId,
-} from './mapDataCatalogue';
+import { buildCatalogueContext } from './mapDataCatalogue';
 import { MAP_TYPE_OPTIONS } from './mapTypeOptions';
 import { generateInSession, withSessionId } from './naturaliSessionApi';
-import { type ParsedRequest, preflightRequest } from './requestPreflight';
+import type { SpecRequest } from './requestChecks';
+import {
+  type ParsedRequest,
+  preflightRequest,
+  readConcepts,
+} from './requestPreflight';
 import { DATA_UNAVAILABLE_MESSAGE, resolveServedSpec } from './serveSpec';
 import { mergeSpecs } from './specDefaults';
 import {
@@ -172,9 +172,10 @@ const describeAgentFailure = (error: unknown): string => {
 
 /**
  * Runs one turn in a Naturali session — serving the agent's `validate_spec`
- * tool with {@link validateCandidate} — and resolves the reply (see
- * {@link resolveAgentReply}). Extracted out of {@link POST} purely to keep its
- * own branching under the lint complexity budget.
+ * tool with {@link validateCandidateFor} bound to the request — and resolves
+ * the reply (see {@link resolveAgentReply}), then holds its spec to the
+ * request (see {@link checkRequestContract}). Extracted out of {@link POST}
+ * purely to keep its own branching under the lint complexity budget.
  *
  * @returns The spec object and the id of the session it ran in, or a
  * `Response` for a transport failure (502) or a rejected spec (422; stamped
@@ -185,16 +186,14 @@ const getAgentResponse = async (params: {
   projectId: string;
   agentId: string;
   sessionId?: string;
-  prompt: string;
-  mapType?: MapType;
-  datasetId?: RenderableDatasetId;
-  note?: string;
+  request: SpecRequest;
 }): Promise<{ spec: UnknownRecord; sessionId: string } | Response> => {
+  const { request } = params;
   const choices = {
-    prompt: params.prompt,
-    mapType: params.mapType,
-    datasetId: params.datasetId,
-    note: params.note,
+    prompt: request.prompt,
+    mapType: request.mapType,
+    datasetId: request.datasetId,
+    note: request.note,
   };
   let generated: Awaited<ReturnType<typeof generateInSession>>;
   try {
@@ -208,7 +207,7 @@ const getAgentResponse = async (params: {
         catalogueText: await readCatalogueContext(),
       }),
       followUpMessage: buildAgentMessage(choices),
-      validateCandidate,
+      validateCandidate: validateCandidateFor(request),
     });
   } catch (error) {
     return errorResponse({ status: 502, message: describeAgentFailure(error) });
@@ -224,7 +223,11 @@ const getAgentResponse = async (params: {
     );
   }
 
-  const spec = resolveAgentReply(generated.reply);
+  const reply = resolveAgentReply(generated.reply);
+  const spec =
+    reply instanceof Response
+      ? reply
+      : checkRequestContract({ spec: reply, request });
   return spec instanceof Response
     ? withSessionId(spec, generated.sessionId)
     : { spec, sessionId: generated.sessionId };
@@ -248,10 +251,14 @@ const getRequestedSpec = async (
   return getAgentResponse({
     ...envOrError,
     sessionId: request.sessionId,
-    prompt: request.prompt,
-    mapType: request.mapType,
-    datasetId: request.datasetId,
-    note: request.note,
+    request: {
+      prompt: request.prompt,
+      mapType: request.mapType,
+      datasetId: request.datasetId,
+      note: request.note,
+      conceptIds: request.conceptIds,
+      concepts: await readConcepts(),
+    },
   });
 };
 

@@ -4,6 +4,7 @@ import {
   collectStructuralIssues,
   normalizeCandidate,
   validateCandidate,
+  validateCandidateFor,
   validateWithLocalRepairs,
   VALIDATION_DATA_UNAVAILABLE,
 } from 'src/app/api/ai/spec/candidateValidation';
@@ -693,6 +694,52 @@ describe('validateCandidate', () => {
     expect(result.spec).toMatchObject({
       layers: [{ id: 'dots', sourceId: 'bolhas', geometry: 'point' }],
     });
+  });
+});
+
+describe('validateCandidateFor', () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  const candidate = {
+    mapType: 'choropleth',
+    title: 'Vulnerabilidade social',
+    mapData: [{ mapDataId: 'municipios_ivs', title: 'IVS' }],
+  };
+
+  test('adds the request checks to the issues, on the normalized candidate', async () => {
+    jest
+      .spyOn(RENDERABLE_DATASET_FETCHERS, 'municipios_ivs')
+      .mockResolvedValue([{ geometryId: '3550308', value: 0.3 }] as never);
+
+    const validate = validateCandidateFor({
+      prompt: 'mapa do ivs',
+      mapType: 'dotDensity',
+      concepts: [],
+    });
+
+    expect((await validate(candidate)).issues).toEqual([
+      expect.objectContaining({
+        code: 'ignored-user-map-type',
+        category: 'semantic',
+      }),
+    ]);
+    expect((await validateCandidate(candidate)).issues).toEqual([]);
+  });
+
+  test('reports a non-object candidate by its shape alone', async () => {
+    const validate = validateCandidateFor({
+      prompt: 'mapa do ivs',
+      mapType: 'dotDensity',
+      concepts: [],
+    });
+
+    expect(
+      (await validate('text')).issues.map((issue) => {
+        return issue.code;
+      })
+    ).toEqual(['invalid-spec-shape']);
   });
 });
 
