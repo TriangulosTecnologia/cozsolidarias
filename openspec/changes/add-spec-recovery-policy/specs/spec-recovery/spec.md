@@ -32,12 +32,17 @@ The server SHALL allow at most one recovery per generation and at most 6 validat
 
 ### Requirement: Budget overrun and deadline end the generation
 
-A validation call that would be the seventh of the generation SHALL NOT be validated and SHALL end the generation with a 422 whose message says recovery was attempted. A deadline that passes after the recovery signal SHALL end the generation with that 422, carrying the candidate and issues that exhausted the loop; before the signal, a deadline stays an upstream failure (502).
+A validation call that would be the seventh of the generation SHALL NOT be validated and SHALL end the generation with a 422. An exhaustion at the sixth validation, which leaves no validation for a recovery candidate, SHALL end the generation with a 422 without a recovery signal. A deadline that passes after the recovery signal SHALL end the generation with that 422, carrying the candidate and issues that exhausted the loop; before the signal, a deadline stays an upstream failure (502).
 
 #### Scenario: Seventh validation call
 
 - **WHEN** the agent calls validation a seventh time in one generation, even after a clean sixth validation
 - **THEN** the seventh candidate is not validated and the response is 422
+
+#### Scenario: Exhaustion at the sixth validation
+
+- **WHEN** the fifth validation is clean and the sixth reports issues
+- **THEN** no recovery signal is sent and the response is 422
 
 #### Scenario: Deadline passes during recovery
 
@@ -46,16 +51,16 @@ A validation call that would be the seventh of the generation SHALL NOT be valid
 
 ### Requirement: Semantic invariance
 
-A recovery candidate SHALL keep the request: the measured concept, filters, geographic grain, period and the user's chosen map type and dataset. It MAY change the dataset only after an issue on the dataset that the data or the app cannot serve, and the map type only after an issue the app cannot render and only when the user did not choose it. Any other change of dataset or map type SHALL be reported as a validation issue.
+A recovery candidate SHALL keep the request: concept, filters, grain, period and the user's chosen map type and dataset. It MAY change the dataset only when the exhausting candidate's issues include a `data-resolution` or `capability` issue, and the map type only when they include a `capability` issue and the user did not choose the map type. Any other dataset or map type change SHALL be reported as `semantic-drift`.
 
 #### Scenario: Dataset swapped without cause
 
-- **WHEN** the recovery candidate paints a different dataset and no earlier issue concerned the dataset
+- **WHEN** the recovery candidate paints a different dataset and the exhausting candidate's issues include no `data-resolution` or `capability` issue
 - **THEN** its validation reports a `semantic-drift` issue
 
 #### Scenario: Dataset swapped after an unservable dataset
 
-- **WHEN** an earlier issue said the chosen dataset cannot be served and the recovery candidate paints another dataset for the same concept
+- **WHEN** the exhausting candidate's issues include `unsupported-dataset` and the recovery candidate paints another dataset for the same concept
 - **THEN** no `semantic-drift` issue is reported
 
 ### Requirement: Operational failures do not trigger recovery

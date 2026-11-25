@@ -25,7 +25,8 @@ See proposal.md for motivation. Today `generateSpec` (`naturaliSession.ts`) serv
 ```mermaid
 flowchart TD
   A[validate_spec call] --> N{7th call?}
-  N -- yes --> F[stopped: recovery-failed, 422]
+  N -- "yes, signal sent" --> F[stopped: recovery-failed, 422]
+  N -- "yes, no signal" --> Z[stopped: budget-exhausted, 422]
   N -- no --> B{operational failure?}
   B -- yes --> X[throw: turn ends, 502]
   B -- no --> C{issues?}
@@ -34,7 +35,9 @@ flowchart TD
   D -- yes --> F
   D -- no --> E{max-attempts or no-shrinkage?}
   E -- no --> R[tool output ok:false, issues]
-  E -- yes --> S[tool output recovery_required]
+  E -- yes --> L{6th validation?}
+  L -- yes --> Z
+  L -- no --> S[tool output recovery_required]
   S --> T[agent: one recovery candidate or error reply]
   T --> A
   OK --> G[agent reply]
@@ -72,9 +75,10 @@ Alternative rejected: raising `max_steps` alone. The agent still never sees the 
 `MAX_VALIDATION_ATTEMPTS = 5` loop calls plus `MAX_RECOVERY_ATTEMPTS = 1`: at most 6 `validate_spec` calls, inside `GENERATE_TIMEOUT_MS` (55 s). Both triggers (`max-attempts`, `no-shrinkage`) start recovery; an operational failure never does. The server ends the turn with `stopped` / `reason: "recovery-failed"` (422, whose message says recovery was attempted) when:
 
 - the first validation after recovery still has issues;
-- a call would be the 7th validation of the generation, whatever earlier calls returned (it is not validated);
-- after recovery, the agent replies `ok` with a spec other than the candidate the last post-recovery validation cleared (deep equality with that call's `spec`), or with no cleared candidate;
+- after recovery, the agent replies `ok` with a spec other than the candidate the last post-recovery validation cleared, or with no cleared candidate;
 - the deadline passes after the recovery signal: the 422 carries the exhausting candidate and its issues, as today's exhausted loop does. Before the signal, a timeout stays the 502 it is today.
+
+A generation that never sent the signal ends with `stopped` / `reason: "budget-exhausted"` (422, no claim of recovery) when a call would be the 7th validation (it is not validated), or when the loop exhausts at the 6th validation, which leaves no validation for a recovery candidate.
 
 Formation `max_steps` goes from 7 to 8 (6 validations, the reply and one spare step for an `error` reply).
 
