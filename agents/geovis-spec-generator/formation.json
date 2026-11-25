@@ -154,7 +154,8 @@
             }
           }
         ],
-        "ai_provider_id": "aip_5KV4WtG2DrKSbgbB",
+        "ai_provider_id": "aip_rFbk9Rse6ebxjPDh",
+        "model": "claude-opus-5.5",
         "trace_content_mode": "full"
       }
     }
