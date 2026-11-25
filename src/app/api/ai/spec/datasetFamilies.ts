@@ -132,6 +132,31 @@ export const FAMILIES: Family[] = [
   },
 ];
 
+/**
+ * Every id of every family a prompt names: each family's default and all its
+ * variants, once each, in {@link FAMILIES} order. The concept a prompt asks
+ * for, as far as the families can tell it.
+ *
+ * @param text - The normalized prompt (see `normalize`).
+ * @returns The ids; empty when the prompt names no family.
+ *
+ * @example
+ * familyIdsOf('inseguranca alimentar'); // ['municipios_cadinsan', 'municipios_cadinsan_sem_pbf']
+ */
+export const familyIdsOf = (text: string): string[] => {
+  const ids = FAMILIES.filter((family) => {
+    return family.keyword.test(text);
+  }).flatMap((family) => {
+    return [
+      family.defaultId,
+      ...family.variants.map((variant) => {
+        return variant.id;
+      }),
+    ];
+  });
+  return [...new Set(ids)];
+};
+
 /** "por N mil", "por 50mil", "a cada dez mil", "por mil": the thousands a prompt names. */
 const BASE_IN_THOUSANDS =
   /\b(?:por|a cada|para cada) (?:cada )?(?:(\d+(?:,\d+)?|dez|cem) ?)?mil\b/;

@@ -30,12 +30,19 @@ export const isRecord = (value: unknown): value is UnknownRecord => {
  */
 export type SpecIssue = { code: string; message: string; path?: string };
 
+/** An issue as the response body carries it: never its server-side category. */
+const publicIssue = ({ code, message, path }: SpecIssue): SpecIssue => {
+  return { code, message, path };
+};
+
 /**
  * Builds every failure body of `POST /api/ai/spec`: `{ error: true, message }`
  * plus the `issues` (with their actionable `requirements`) and the `spec` at
  * the stage that failed, when known, so the client can inspect what the model
  * produced; the `spec` is left out when `NODE_ENV` is `production`. Always
- * carries `mapTypeOptions`, so another map type is always on offer.
+ * carries `mapTypeOptions`, so another map type is always on offer. Each
+ * issue keeps only `code`, `message` and `path`: an issue's category stays
+ * server-side (see `normalizeIssues`).
  *
  * @param params.status - HTTP status of the failure.
  * @param params.message - pt-BR explanation shown to the user.
@@ -52,16 +59,12 @@ export const errorResponse = (params: {
   issues?: SpecIssue[];
   spec?: unknown;
 }): Response => {
+  const issues = params.issues?.map(publicIssue);
   return Response.json(
     {
       error: true,
       message: params.message,
-      ...(params.issues
-        ? {
-            issues: params.issues,
-            requirements: requirementsFrom(params.issues),
-          }
-        : {}),
+      ...(issues ? { issues, requirements: requirementsFrom(issues) } : {}),
       // The spec is for inspection only, and carries the resolved data rows:
       // production answers without it.
       ...(params.spec !== undefined && process.env.NODE_ENV !== 'production'

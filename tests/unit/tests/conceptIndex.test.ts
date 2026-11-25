@@ -47,6 +47,19 @@ describe('buildConceptIndex', () => {
     expect(byId['municipios_contorno']?.years).toEqual([]);
   });
 
+  test('marks a dataset partial when its described spatial coverage is not exhaustive', async () => {
+    const index = await loadIndex();
+    const byId = Object.fromEntries(
+      index.map((entry) => {
+        return [entry.datasetId, entry];
+      })
+    );
+
+    expect(byId['cozinhas_geolocalizadas']?.partialCoverage).toBe(true);
+    expect(byId['municipios_ivs']?.partialCoverage).toBe(false);
+    expect(byId['caf_areas']?.partialCoverage).toBe(false);
+  });
+
   test('keeps an open-ended extent open, with a missing start or end', () => {
     const catalogue = {
       datasets: [
@@ -62,6 +75,7 @@ describe('buildConceptIndex', () => {
               { start: null, end: '2019-12-31' },
             ],
           },
+          spatial: { status: 'unknown' },
         },
       ],
     } as unknown as CatalogueContract;
@@ -93,6 +107,7 @@ describe('coversYear', () => {
           description: 'famílias',
           fields: [],
           temporal: { status: 'unknown' },
+          spatial: { status: 'unknown' },
         },
       ],
     } as unknown as CatalogueContract;

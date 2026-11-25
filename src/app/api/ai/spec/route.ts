@@ -1,24 +1,27 @@
-import type { MapType } from '@ttoss/geovis';
-
 import { gateway } from '@/gateway';
 
 import { buildAgentMessage } from './agentMessage';
-import { resolveAgentReply } from './agentReply';
+import { checkRequestContract, resolveAgentReply } from './agentReply';
 import {
   collectResolvedIssues,
-  validateCandidate,
+  validateCandidateFor,
   validateWithLocalRepairs,
+  VALIDATION_DATA_UNAVAILABLE,
 } from './candidateValidation';
+import { logGeneration } from './generationLogger';
 import baseVisualizationSpecJson from './instructions/baseVisualizationSpec.json';
-import {
-  buildCatalogueContext,
-  type RenderableDatasetId,
-} from './mapDataCatalogue';
+import { buildCatalogueContext } from './mapDataCatalogue';
 import { MAP_TYPE_OPTIONS } from './mapTypeOptions';
 import { generateInSession, withSessionId } from './naturaliSessionApi';
-import { type ParsedRequest, preflightRequest } from './requestPreflight';
-import { resolveServedSpec } from './serveSpec';
+import type { SpecRequest } from './requestChecks';
+import {
+  type ParsedRequest,
+  preflightRequest,
+  readConcepts,
+} from './requestPreflight';
+import { DATA_UNAVAILABLE_MESSAGE, resolveServedSpec } from './serveSpec';
 import { mergeSpecs } from './specDefaults';
+import { MAX_TOTAL_VALIDATIONS } from './specRecovery';
 import {
   errorResponse,
   invalidSpecResponse,
@@ -140,9 +143,15 @@ const validateEnv = ():
  * failed generation, and an unparseable reply into the same generic
  * sentence. Matches on the fixed prefixes that function throws; anything
  * else gets a generic message. No upstream text is reflected to the browser.
+ * Data that could not be read while validating a candidate gets the same
+ * message as data that could not be read while serving the spec.
  */
 const describeAgentFailure = (error: unknown): string => {
   const message = error instanceof Error ? error.message : String(error);
+
+  if (message === VALIDATION_DATA_UNAVAILABLE) {
+    return DATA_UNAVAILABLE_MESSAGE;
+  }
 
   if (message.startsWith('Naturali generate POST responded with status')) {
     return `Não foi possível iniciar a geração com o modelo de IA (${message}). Tente novamente em instantes.`;
@@ -165,9 +174,10 @@ const describeAgentFailure = (error: unknown): string => {
 
 /**
  * Runs one turn in a Naturali session — serving the agent's `validate_spec`
- * tool with {@link validateCandidate} — and resolves the reply (see
- * {@link resolveAgentReply}). Extracted out of {@link POST} purely to keep its
- * own branching under the lint complexity budget.
+ * tool with {@link validateCandidateFor} bound to the request — and resolves
+ * the reply (see {@link resolveAgentReply}), then holds its spec to the
+ * request (see {@link checkRequestContract}). Extracted out of {@link POST}
+ * purely to keep its own branching under the lint complexity budget.
  *
  * @returns The spec object and the id of the session it ran in, or a
  * `Response` for a transport failure (502) or a rejected spec (422; stamped
@@ -178,17 +188,9 @@ const getAgentResponse = async (params: {
   projectId: string;
   agentId: string;
   sessionId?: string;
-  prompt: string;
-  mapType?: MapType;
-  datasetId?: RenderableDatasetId;
-  note?: string;
+  request: SpecRequest;
 }): Promise<{ spec: UnknownRecord; sessionId: string } | Response> => {
-  const choices = {
-    prompt: params.prompt,
-    mapType: params.mapType,
-    datasetId: params.datasetId,
-    note: params.note,
-  };
+  const { request } = params;
   let generated: Awaited<ReturnType<typeof generateInSession>>;
   try {
     generated = await generateInSession({
@@ -197,11 +199,17 @@ const getAgentResponse = async (params: {
       agentId: params.agentId,
       sessionId: params.sessionId,
       message: buildAgentMessage({
-        ...choices,
+        ...request,
         catalogueText: await readCatalogueContext(),
       }),
-      followUpMessage: buildAgentMessage(choices),
-      validateCandidate,
+      followUpMessage: buildAgentMessage(request),
+      validateCandidate: validateCandidateFor(request),
+      onRecovery: (snapshot) => {
+        logGeneration({
+          prompt: request.prompt,
+          reply: { recovery: snapshot, budget: MAX_TOTAL_VALIDATIONS },
+        });
+      },
     });
   } catch (error) {
     return errorResponse({ status: 502, message: describeAgentFailure(error) });
@@ -217,7 +225,11 @@ const getAgentResponse = async (params: {
     );
   }
 
-  const spec = resolveAgentReply(generated.reply);
+  const reply = resolveAgentReply(generated.reply);
+  const spec =
+    reply instanceof Response
+      ? reply
+      : checkRequestContract({ spec: reply, request });
   return spec instanceof Response
     ? withSessionId(spec, generated.sessionId)
     : { spec, sessionId: generated.sessionId };
@@ -241,10 +253,7 @@ const getRequestedSpec = async (
   return getAgentResponse({
     ...envOrError,
     sessionId: request.sessionId,
-    prompt: request.prompt,
-    mapType: request.mapType,
-    datasetId: request.datasetId,
-    note: request.note,
+    request: { ...request, concepts: await readConcepts() },
   });
 };
 
@@ -276,13 +285,15 @@ const checkServedSpec = (served: UnknownRecord): Response => {
  * {@link generateInSession}) declared by the `geovis-spec-generator-loop`
  * formation (`agents/geovis-spec-generator/formation.json`, deployed by that
  * folder's scripts) and referenced here only by ID. The agent validates its candidate
- * with the client-side `validate_spec` tool — repaired locally first, at most
- * 5 calls, stopping when issues stop shrinking or the 55s deadline passes —
- * and returns a structured `{status: "ok", spec}` or `{status: "error",
- * error}` reply.
+ * with the client-side `validate_spec` tool, bound to the request — repaired
+ * locally first, at most 5 loop calls plus one recovery candidate once the
+ * loop exhausts (6 in all, within the 55s deadline) — and returns a
+ * structured `{status: "ok", spec}` or `{status: "error", error}` reply; a
+ * generation that entered recovery is logged in development only.
  *
- * The reply is then resolved into real data (see {@link resolveServedSpec})
- * and validated once more, with the same local repairs. Before any of that,
+ * The reply is held to the request again (see {@link checkRequestContract}),
+ * resolved into real data (see {@link resolveServedSpec}) and validated once
+ * more, with the same local repairs. Before any of that,
  * an ambiguous request is answered with a `clarify` question instead (see
  * {@link preflightRequest}), and a request the preflight settles by itself
  * (the kitchens choropleth while `FORBID_ABSOLUTE_ON_CHOROPLETH` is not
@@ -291,8 +302,8 @@ const checkServedSpec = (served: UnknownRecord): Response => {
  *
  * @returns `{ spec, error: false }` on success; `{ error: true, message,
  * issues?, spec? }` on any failure (missing config, prompt validation,
- * upstream API failure, a declined request, a validation loop that gave up,
- * or an unsupported dataset reference) — `spec`, when present, is the spec at
+ * upstream API failure, a declined request, a turn the server stopped, a
+ * request-contract issue, or an unsupported dataset reference) — `spec`, when present, is the spec at
  * the stage that failed (see the `src/app/api/ai/spec/**` invariant in
  * devanity.rules.json).
  */

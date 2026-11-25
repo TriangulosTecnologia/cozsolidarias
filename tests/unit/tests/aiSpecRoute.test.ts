@@ -2,6 +2,11 @@ import { validateSpec } from '@ttoss/geovis';
 import * as generationLogger from 'src/app/api/ai/spec/generationLogger';
 import baseVisualizationSpecJson from 'src/app/api/ai/spec/instructions/baseVisualizationSpec.json';
 import { POST } from 'src/app/api/ai/spec/route';
+import {
+  DATA_UNAVAILABLE_MESSAGE,
+  resolveServedSpec,
+} from 'src/app/api/ai/spec/serveSpec';
+import { mergeSpecs } from 'src/app/api/ai/spec/specDefaults';
 import { invalidSpecResponse } from 'src/app/api/ai/spec/specValidation';
 
 import { IVS_FAMILY_THRESHOLDS } from '@/app/(features)/mapas/geovisScoreScales';
@@ -357,6 +362,88 @@ describe('POST /api/ai/spec', () => {
       (fetchMock.mock.calls[1][1] as { body: string }).body
     ) as { message: string };
     expect(sent.message).toMatch(/mapType.*dotDensity/);
+  });
+
+  test('answers 422 with ignored-user-map-type when the agent reply drops the chosen map type, in the usual 422 body', async () => {
+    jest.spyOn(gateway, 'getIvsPorMunicipio').mockResolvedValue([]);
+    const reply = {
+      mapType: 'choropleth',
+      title: 'Vulnerabilidade social',
+      mapData: [{ mapDataId: 'municipios_ivs', title: 'IVS' }],
+    };
+    mockAgentReply(JSON.stringify(reply));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa do IVS', mapType: 'dotDensity' })
+    );
+    const body = (await response.json()) as Record<string, unknown>;
+
+    expect(response.status).toBe(422);
+    expect(response.headers.get('x-session-id')).toBe('sess_route0001');
+    expect(Object.keys(body).sort()).toEqual([
+      'error',
+      'issues',
+      'mapTypeOptions',
+      'message',
+      'requirements',
+      'spec',
+    ]);
+    expect(body['message']).toMatch(/dotDensity.*Tente reformular o pedido\.$/);
+    expect(body['issues']).toEqual([
+      expect.objectContaining({ code: 'ignored-user-map-type' }),
+    ]);
+    expect(body['spec']).toEqual(reply);
+    expect(JSON.stringify(body)).not.toContain('category');
+  });
+
+  test('validates each candidate against the request the user sent', async () => {
+    jest.spyOn(gateway, 'getIvsPorMunicipio').mockResolvedValue([]);
+    const candidate = {
+      mapType: 'choropleth',
+      title: 'Vulnerabilidade social',
+      mapData: [{ mapDataId: 'municipios_ivs', title: 'IVS' }],
+    };
+    const fetchMock = mockSessionOpening()
+      .mockResolvedValueOnce(
+        jsonResponse({
+          generation_id: 'gen_1',
+          status: 'requires_action',
+          required_action: {
+            type: 'submit_tool_outputs',
+            tool_calls: [
+              {
+                id: 'call_1',
+                tool_name: 'validate_spec',
+                args: { spec: candidate },
+              },
+            ],
+          },
+        })
+      )
+      .mockResolvedValueOnce(
+        jsonResponse({
+          generation_id: 'gen_1',
+          status: 'completed',
+          content: JSON.stringify({
+            status: 'error',
+            error: { code: 'missing_data', message: 'x' },
+          }),
+        })
+      );
+    global.fetch = fetchMock;
+
+    await POST(jsonRequest({ prompt: 'mapa do IVS', mapType: 'dotDensity' }));
+
+    const submitted = JSON.parse(
+      (fetchMock.mock.calls[3][1] as { body: string }).body
+    ) as {
+      tool_outputs: Array<{ output: { issues: Array<{ code: string }> } }>;
+    };
+    expect(
+      submitted.tool_outputs[0].output.issues.map((issue) => {
+        return issue.code;
+      })
+    ).toEqual(['ignored-user-map-type']);
   });
 
   // ---------------------------------------------------------------------------
@@ -798,7 +885,7 @@ describe('POST /api/ai/spec', () => {
     mockAgentReply(JSON.stringify(spec));
 
     const response = await POST(
-      jsonRequest({ prompt: 'mapa de cozinhas por município' })
+      jsonRequest({ prompt: 'mapa do IVS por município' })
     );
     const body = (await response.json()) as { spec?: unknown };
 
@@ -861,7 +948,7 @@ describe('POST /api/ai/spec', () => {
     );
 
     const response = await POST(
-      jsonRequest({ prompt: 'mapa de cozinhas por município' })
+      jsonRequest({ prompt: 'mapa do IVS por município' })
     );
     const body = (await response.json()) as { spec?: unknown };
 
@@ -963,6 +1050,45 @@ describe('POST /api/ai/spec', () => {
       prompt: 'mapa de IVS por município',
       reply: { cause: 'gateway down' },
     });
+  });
+
+  test('answers a gateway failure while validating a candidate with the data-failure 502, never as an issue for the agent', async () => {
+    jest
+      .spyOn(gateway, 'getIvsPorMunicipio')
+      .mockRejectedValue(new Error('gateway down'));
+    const fetchMock = mockSessionOpening().mockResolvedValueOnce(
+      jsonResponse({
+        generation_id: 'gen_1',
+        status: 'requires_action',
+        required_action: {
+          type: 'submit_tool_outputs',
+          tool_calls: [
+            {
+              id: 'call_1',
+              tool_name: 'validate_spec',
+              args: {
+                spec: {
+                  mapType: 'choropleth',
+                  mapData: [{ mapDataId: 'municipios_ivs', title: 'IVS' }],
+                },
+              },
+            },
+          ],
+        },
+      })
+    );
+    global.fetch = fetchMock;
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de IVS por município' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(502);
+    expect(body.message).toBe(DATA_UNAVAILABLE_MESSAGE);
+    expect(response.headers.get('x-session-id')).toBe('sess_route0001');
+    // Session, message, generate: no tool output reaches the agent.
+    expect(fetchMock).toHaveBeenCalledTimes(3);
   });
 
   test('logs a gateway rejection that is not an Error by its string value', async () => {
@@ -1126,7 +1252,6 @@ describe('POST /api/ai/spec', () => {
           { id: 'bolhas', type: 'geojson', data: '/api/cozinhas/bolhas' },
         ],
         legends: A_LEGEND,
-        mapData: ONE_MAP_DATA,
         layers: [{ id: 'dots', sourceId: 'mun', geometry: 'point' }],
       })
     );
@@ -1142,7 +1267,6 @@ describe('POST /api/ai/spec', () => {
       id: 'dots',
       sourceId: 'bolhas',
       geometry: 'point',
-      mapDataId: 'municipios_ivs',
     });
   }, 10000);
 
@@ -1832,7 +1956,7 @@ describe('POST /api/ai/spec', () => {
     );
 
     const response = await POST(
-      jsonRequest({ prompt: 'mapa de cozinhas por município' })
+      jsonRequest({ prompt: 'mapa do IVS por município' })
     );
     const body = (await response.json()) as ErrorBody & {
       issues?: Array<{ code: string; message: string }>;
@@ -1929,36 +2053,46 @@ describe('POST /api/ai/spec', () => {
   // validate_spec loop and the canonical cozinhas choropleth
   // ---------------------------------------------------------------------------
 
-  test('returns the last candidate and its issues when the validation loop gives up', async () => {
-    jest.mocked(validateSpec).mockReturnValue({
-      status: 'invalid',
-      issues: [
-        {
-          code: 'invalid-schema',
-          subject: { path: 'layers' },
-          message: 'layers is required',
-        },
-      ],
+  /** A generation paused on one `validate_spec` call with `spec`. */
+  const pausedOn = (callId: string, spec: unknown) => {
+    return jsonResponse({
+      generation_id: 'gen_1',
+      status: 'requires_action',
+      required_action: {
+        type: 'submit_tool_outputs',
+        tool_calls: [
+          { id: callId, tool_name: 'validate_spec', args: { spec } },
+        ],
+      },
     });
-    const paused = (callId: string) => {
-      return jsonResponse({
-        generation_id: 'gen_1',
-        status: 'requires_action',
-        required_action: {
-          type: 'submit_tool_outputs',
-          tool_calls: [
-            {
-              id: callId,
-              tool_name: 'validate_spec',
-              args: { spec: { legends: A_LEGEND } },
-            },
-          ],
-        },
-      });
-    };
+  };
+
+  const completedWith = (reply: unknown) => {
+    return jsonResponse({
+      generation_id: 'gen_1',
+      status: 'completed',
+      content: JSON.stringify(reply),
+    });
+  };
+
+  /** An IVS choropleth with one legend too many: one structural issue. */
+  const TWO_LEGENDS_IVS = {
+    mapType: 'choropleth',
+    title: 'Vulnerabilidade social',
+    mapData: [{ mapDataId: 'municipios_ivs', title: 'IVS' }],
+    legends: [{ title: 'IVS' }, { title: 'Outra' }],
+  };
+  const CLEAN_IVS = { ...TWO_LEGENDS_IVS, legends: [{ title: 'IVS' }] };
+
+  test('answers 422 saying recovery was attempted when the recovery candidate is still invalid, and logs the snapshot', async () => {
+    const logSpy = jest
+      .spyOn(generationLogger, 'logGeneration')
+      .mockImplementation(() => {});
+    const candidate = { legends: A_LEGEND };
     global.fetch = mockSessionOpening()
-      .mockResolvedValueOnce(paused('call_1'))
-      .mockResolvedValueOnce(paused('call_2'));
+      .mockResolvedValueOnce(pausedOn('call_1', candidate))
+      .mockResolvedValueOnce(pausedOn('call_2', candidate))
+      .mockResolvedValueOnce(pausedOn('call_3', candidate));
 
     const response = await POST(
       jsonRequest({ prompt: 'mapa de cozinhas por município' })
@@ -1970,13 +2104,105 @@ describe('POST /api/ai/spec', () => {
 
     expect(response.status).toBe(422);
     expect(body.error).toBe(true);
-    expect(body.message).toMatch(/parou de reduzir os problemas/);
-    expect(body.spec).toEqual({ legends: A_LEGEND });
+    expect(body.message).toMatch(/recuperação.*\(3 de até 6 validações\)/);
+    expect(body.spec).toEqual(candidate);
     expect(body.issues).toHaveLength(1);
-    jest
-      .mocked(validateSpec)
-      .mockReturnValue({ status: 'resolved', warnings: [] });
+    expect(logSpy).toHaveBeenCalledWith({
+      prompt: 'mapa de cozinhas por município',
+      reply: {
+        recovery: expect.objectContaining({
+          trigger: 'no-shrinkage',
+          attempts: 3,
+          outcome: 'recovery-failed',
+        }),
+        budget: 6,
+      },
+    });
   }, 10000);
+
+  test('serves the recovery candidate the last validation cleared, when the reply repeats it', async () => {
+    jest.spyOn(gateway, 'getIvsPorMunicipio').mockResolvedValue([]);
+    jest.spyOn(generationLogger, 'logGeneration').mockImplementation(() => {});
+    global.fetch = mockSessionOpening()
+      .mockResolvedValueOnce(pausedOn('call_1', TWO_LEGENDS_IVS))
+      .mockResolvedValueOnce(pausedOn('call_2', TWO_LEGENDS_IVS))
+      .mockResolvedValueOnce(pausedOn('call_3', CLEAN_IVS))
+      .mockResolvedValueOnce(completedWith({ status: 'ok', spec: CLEAN_IVS }));
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa do IVS por município' })
+    );
+
+    expect(response.status).toBe(200);
+  }, 10000);
+
+  test('answers the declined-request 422, serving no map, when the agent replies missing_data after recovery', async () => {
+    jest.spyOn(gateway, 'getIvsPorMunicipio').mockResolvedValue([]);
+    jest.spyOn(generationLogger, 'logGeneration').mockImplementation(() => {});
+    global.fetch = mockSessionOpening()
+      .mockResolvedValueOnce(pausedOn('call_1', TWO_LEGENDS_IVS))
+      .mockResolvedValueOnce(pausedOn('call_2', TWO_LEGENDS_IVS))
+      .mockResolvedValueOnce(
+        completedWith({
+          status: 'error',
+          error: { code: 'missing_data', message: 'sem dado' },
+        })
+      );
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa do IVS por município' })
+    );
+    const body = (await response.json()) as ErrorBody & { spec?: unknown };
+
+    expect(response.status).toBe(422);
+    expect(body.message).toMatch(/não pôde gerar o mapa/);
+    expect(body.spec).toBeUndefined();
+  }, 10000);
+
+  test('answers 422 with the exhausting candidate, not a 502, when the deadline passes during recovery', async () => {
+    jest.spyOn(gateway, 'getIvsPorMunicipio').mockResolvedValue([]);
+    jest.spyOn(generationLogger, 'logGeneration').mockImplementation(() => {});
+    const timeout = new Error('The operation was aborted due to timeout');
+    timeout.name = 'TimeoutError';
+    global.fetch = mockSessionOpening()
+      .mockResolvedValueOnce(pausedOn('call_1', TWO_LEGENDS_IVS))
+      .mockResolvedValueOnce(pausedOn('call_2', TWO_LEGENDS_IVS))
+      .mockRejectedValueOnce(timeout);
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa do IVS por município' })
+    );
+    const body = (await response.json()) as ErrorBody & {
+      issues?: Array<{ code: string }>;
+      spec?: unknown;
+    };
+
+    expect(response.status).toBe(422);
+    expect(body.message).toMatch(/recuperação/);
+    expect(body.spec).toEqual(TWO_LEGENDS_IVS);
+    expect(body.issues).toEqual([
+      expect.objectContaining({ code: 'legend-count-mismatch' }),
+    ]);
+  }, 10000);
+
+  test('answers 422 when the agent calls validation a 7th time in a generation that never needed recovery', async () => {
+    jest.spyOn(gateway, 'getIvsPorMunicipio').mockResolvedValue([]);
+    const fetchMock = mockSessionOpening();
+    for (let call = 1; call <= 7; call += 1) {
+      fetchMock.mockResolvedValueOnce(pausedOn(`call_${call}`, CLEAN_IVS));
+    }
+    global.fetch = fetchMock;
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa do IVS por município' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(422);
+    expect(body.message).toMatch(
+      /esgotou o limite de validações \(6 de até 6 validações\)/
+    );
+  }, 20000);
 
   test('explains a request that ran past the generation deadline', async () => {
     const timeout = new Error('The operation was aborted due to timeout');
@@ -2217,16 +2443,31 @@ describe('POST /api/ai/spec: base merge and proportionalCircles defaults', () =>
     };
   };
 
+  // A prompt naming no dataset family: the IVS replies below answer it.
   const servedSpec = async (spec: SpecRecord): Promise<SpecRecord> => {
     mockAgentReply(JSON.stringify(spec));
 
-    const response = await POST(
-      jsonRequest({ prompt: 'mapa de pessoas atendidas por município' })
-    );
+    const response = await POST(jsonRequest({ prompt: 'mapa por município' }));
     expect(response.status).toBe(200);
 
     const body = (await response.json()) as { spec: SpecRecord };
     return body.spec;
+  };
+
+  /**
+   * The resolution stage of the route, on the base-merged spec. An agent
+   * reply can no longer carry explicit point layers next to a `mapType`
+   * (`points-spec-with-map-data`), so the defaults are checked here.
+   */
+  const resolvedSpec = async (spec: SpecRecord): Promise<SpecRecord> => {
+    const resolved = await resolveServedSpec({
+      prompt: 'mapa de pessoas atendidas por município',
+      spec: mergeSpecs(baseVisualizationSpecJson as SpecRecord, spec),
+    });
+    if (resolved instanceof Response) {
+      throw new Error(`expected a resolved spec, got ${resolved.status}`);
+    }
+    return resolved;
   };
 
   const layerOf = (spec: SpecRecord, id: string): SpecRecord | undefined => {
@@ -2340,13 +2581,13 @@ describe('POST /api/ai/spec: base merge and proportionalCircles defaults', () =>
 
   describe('applyProportionalCirclesDefaults', () => {
     test('sets scaleMaxValue to the largest value of the size dataset', async () => {
-      const spec = await servedSpec(proportionalSpec());
+      const spec = await resolvedSpec(proportionalSpec());
 
       expect(spec['scaleMaxValue']).toBe(4000);
     });
 
     test('sets the bound point layer sizeBy range to [6, 28]', async () => {
-      const spec = await servedSpec(proportionalSpec());
+      const spec = await resolvedSpec(proportionalSpec());
 
       expect(layerOf(spec, 'cozinhas-bolhas')?.['sizeBy']).toMatchObject({
         range: [6, 28],
@@ -2354,7 +2595,7 @@ describe('POST /api/ai/spec: base merge and proportionalCircles defaults', () =>
     });
 
     test('sets the bound point layer sizeBy transform to sqrt', async () => {
-      const spec = await servedSpec(proportionalSpec());
+      const spec = await resolvedSpec(proportionalSpec());
 
       expect(layerOf(spec, 'cozinhas-bolhas')?.['sizeBy']).toMatchObject({
         transform: 'sqrt',
@@ -2362,7 +2603,7 @@ describe('POST /api/ai/spec: base merge and proportionalCircles defaults', () =>
     });
 
     test('sets the bound point layer sizeBy thresholds to [0, max]', async () => {
-      const spec = await servedSpec(proportionalSpec());
+      const spec = await resolvedSpec(proportionalSpec());
 
       expect(layerOf(spec, 'cozinhas-bolhas')?.['sizeBy']).toMatchObject({
         thresholds: [0, 4000],
@@ -2370,13 +2611,13 @@ describe('POST /api/ai/spec: base merge and proportionalCircles defaults', () =>
     });
 
     test('leaves point layers without that mapDataId untouched', async () => {
-      const spec = await servedSpec(proportionalSpec());
+      const spec = await resolvedSpec(proportionalSpec());
 
       expect(layerOf(spec, 'cozinhas-pontos')?.['sizeBy']).toBeUndefined();
     });
 
     test('leaves the spec unchanged when mapType is not proportionalCircles', async () => {
-      const spec = await servedSpec(proportionalSpec({ mapType: undefined }));
+      const spec = await resolvedSpec(proportionalSpec({ mapType: undefined }));
 
       expect(spec['scaleMaxValue']).toBeUndefined();
       expect(layerOf(spec, 'cozinhas-bolhas')?.['sizeBy']).toEqual({
@@ -2390,7 +2631,7 @@ describe('POST /api/ai/spec: base merge and proportionalCircles defaults', () =>
         .spyOn(gateway, 'getCozinhasPorMunicipio')
         .mockResolvedValue(pessoasRows([0, 0, 0]));
 
-      const spec = await servedSpec(proportionalSpec());
+      const spec = await resolvedSpec(proportionalSpec());
 
       expect(spec['scaleMaxValue']).toBeUndefined();
       expect(layerOf(spec, 'cozinhas-bolhas')?.['sizeBy']).toEqual({
@@ -2404,7 +2645,7 @@ describe('POST /api/ai/spec: base merge and proportionalCircles defaults', () =>
         .spyOn(gateway, 'getCozinhasPorMunicipio')
         .mockResolvedValue(pessoasRows([]));
 
-      const spec = await servedSpec(proportionalSpec());
+      const spec = await resolvedSpec(proportionalSpec());
 
       expect(spec['scaleMaxValue']).toBeUndefined();
       expect(layerOf(spec, 'cozinhas-bolhas')?.['sizeBy']).toEqual({
@@ -2414,13 +2655,16 @@ describe('POST /api/ai/spec: base merge and proportionalCircles defaults', () =>
     });
 
     test('answers 422 when no mapData is declared, instead of leaving the spec unchanged', async () => {
-      mockAgentReply(JSON.stringify(proportionalSpec({ mapData: undefined })));
+      const response = await resolveServedSpec({
+        prompt: 'mapa de pessoas atendidas por município',
+        spec: mergeSpecs(
+          baseVisualizationSpecJson as SpecRecord,
+          proportionalSpec({ mapData: undefined })
+        ),
+      });
 
-      const response = await POST(
-        jsonRequest({ prompt: 'mapa de pessoas atendidas por município' })
-      );
-
-      expect(response.status).toBe(422);
+      expect(response).toBeInstanceOf(Response);
+      expect((response as Response).status).toBe(422);
     });
   });
 });

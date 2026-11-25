@@ -1,15 +1,24 @@
+import {
+  bindReply,
+  INITIAL_LOOP_STATE,
+  type LoopState,
+  type RecoverySnapshot,
+  recoverySnapshot,
+  type RecoveryTrigger,
+  stoppedByDeadline,
+} from './specRecovery';
 import type { SpecIssue } from './specValidation';
+import { answerToolCalls, type ToolCall } from './validationLoop';
+
+export {
+  MAX_RECOVERY_ATTEMPTS,
+  MAX_TOTAL_VALIDATIONS,
+  MAX_VALIDATION_ATTEMPTS,
+  RECOVERY_INSTRUCTIONS,
+} from './specRecovery';
 
 /** Shared deadline of one generation, session opening included. */
 export const GENERATE_TIMEOUT_MS = 55_000;
-
-/**
- * Upper bound on `validate_spec` tool calls per generation. The 5th call's
- * issues end the loop even when they shrank — see {@link generateSpec}.
- */
-export const MAX_VALIDATION_ATTEMPTS = 5;
-
-const VALIDATE_SPEC_TOOL = 'validate_spec';
 
 /** Base URL of a project's Naturali API. */
 export const projectUrl = (projectId: string): string => {
@@ -26,13 +35,18 @@ export type SpecReplyError = {
 };
 
 /**
- * The loop gave up before the agent answered: the `validate_spec` budget ran
- * out, or a round left as many issues as the previous one (no shrinkage).
- * Carries the last candidate (already locally repaired) and its issues.
+ * The server ended the turn instead of the agent: `recovery-failed` after a
+ * recovery signal (the recovery candidate still had issues, a 7th call came,
+ * the reply was not the cleared candidate, or the deadline passed), with the
+ * `trigger` that exhausted the loop; `budget-exhausted` when the budget ran
+ * out with no signal sent. Carries the candidate it refers to (already
+ * locally repaired) and its issues.
  */
 export type SpecReplyStopped = {
   status: 'stopped';
-  reason: 'max-attempts' | 'no-shrinkage';
+  reason: 'recovery-failed' | 'budget-exhausted';
+  /** What exhausted the loop; set for `recovery-failed`. */
+  trigger?: RecoveryTrigger;
   attempts: number;
   spec: unknown;
   issues: SpecIssue[];
@@ -86,8 +100,6 @@ const isSpecReply = (value: unknown): value is SpecReplyOk | SpecReplyError => {
  * once it settles — this route always waits inline rather than polling, since
  * `wait=true` blocks for the result (see the Naturali sessions docs).
  */
-type ToolCall = { id: string; tool_name: string; args?: unknown };
-
 type GenerationResult = {
   generation_id?: string;
   status: string;
@@ -157,97 +169,6 @@ export const postJson = async <T>(params: {
   return (await response.json()) as T;
 };
 
-/** Tool output for a call to a tool this route does not implement. */
-const unknownToolOutput = (toolName: string): unknown => {
-  return {
-    ok: false,
-    issues: [
-      {
-        code: 'unknown-tool',
-        message: `O tool "${toolName}" não existe; use apenas "${VALIDATE_SPEC_TOOL}".`,
-      },
-    ],
-  };
-};
-
-const candidateFromArgs = (args: unknown): unknown => {
-  return typeof args === 'object' && args !== null && 'spec' in args
-    ? args.spec
-    : args;
-};
-
-/** How far the loop got: `validate_spec` calls served and the last call's issue count. */
-type LoopProgress = { attempts: number; previousIssueCount: number };
-
-/** Why a validated candidate ends the loop, or `null` to keep going. */
-const stopReason = (params: {
-  issueCount: number;
-  progress: LoopProgress;
-}): SpecReplyStopped['reason'] | null => {
-  if (params.issueCount === 0) {
-    return null;
-  }
-  if (params.progress.attempts >= MAX_VALIDATION_ATTEMPTS) {
-    return 'max-attempts';
-  }
-  return params.issueCount >= params.progress.previousIssueCount
-    ? 'no-shrinkage'
-    : null;
-};
-
-type ToolOutput = { tool_call_id: string; output: unknown };
-
-/**
- * Answers one batch of pending tool calls, or stops the loop on the first
- * `validate_spec` call {@link stopReason} rejects.
- */
-const answerToolCalls = async (params: {
-  calls: ToolCall[];
-  validateCandidate: ValidateCandidate;
-  progress: LoopProgress;
-}): Promise<
-  | { stopped: SpecReplyStopped }
-  | { outputs: ToolOutput[]; progress: LoopProgress }
-> => {
-  let progress = params.progress;
-  const outputs: ToolOutput[] = [];
-
-  for (const call of params.calls) {
-    if (call.tool_name !== VALIDATE_SPEC_TOOL) {
-      outputs.push({
-        tool_call_id: call.id,
-        output: unknownToolOutput(call.tool_name),
-      });
-      continue;
-    }
-
-    const checked = await params.validateCandidate(
-      candidateFromArgs(call.args)
-    );
-    const issueCount = checked.issues.length;
-    const attempted = { ...progress, attempts: progress.attempts + 1 };
-    const reason = stopReason({ issueCount, progress: attempted });
-    if (reason) {
-      return {
-        stopped: {
-          status: 'stopped',
-          reason,
-          attempts: attempted.attempts,
-          ...checked,
-        },
-      };
-    }
-
-    progress = { attempts: attempted.attempts, previousIssueCount: issueCount };
-    outputs.push({
-      tool_call_id: call.id,
-      output: { ok: issueCount === 0, ...checked },
-    });
-  }
-
-  return { outputs, progress };
-};
-
 /** The structured reply of a generation that is no longer paused. */
 const settledReply = (
   result: GenerationResult
@@ -261,43 +182,20 @@ const settledReply = (
   return parseSpecReply(result);
 };
 
-/**
- * Runs one turn inside a Naturali session of the `geovis-spec-generator-loop`
- * agent, serving its client-side `validate_spec` tool calls in between.
- *
- * The turn saves `message` into the session, then `generate?wait=true` either
- * settles (`completed`/`failed`) or pauses with `status: "requires_action"`
- * and the pending `required_action.tool_calls`; each `validate_spec` call is
- * answered with `validateCandidate`'s repaired spec and remaining issues via
- * `.../sessions/{id}/tool-outputs`, which blocks and returns the next state
- * in the same shape. The session keeps the history, so a later turn only
- * sends what changed.
- *
- * Stops, without answering the pending call, when:
- * - the call is the {@link MAX_VALIDATION_ATTEMPTS}th and still has issues;
- * - a call leaves at least as many issues as the previous call (no shrinkage);
- * - the `signal` deadline aborts any request (thrown).
- *
- * @param params.signal - Deadline shared by every request of the turn (see {@link GENERATE_TIMEOUT_MS}).
- * @returns The agent's structured `{status: "ok", spec}` or
- * `{status: "error", error}` reply, or `{status: "stopped", ...}` when the
- * loop gave up.
- * @throws If an HTTP call fails, the deadline passes, the generation reports
- * a status other than `completed`/`requires_action`, or the reply carries no
- * parseable structured content.
- *
- * @example
- * const reply = await generateSpec({ apiKey, projectId, sessionId, message, validateCandidate, signal: AbortSignal.timeout(GENERATE_TIMEOUT_MS) });
- */
-export const generateSpec = async (params: {
+type GenerateParams = {
   apiKey: string;
   projectId: string;
   sessionId: string;
   message: string;
   validateCandidate: ValidateCandidate;
   signal: AbortSignal;
-}): Promise<SpecReplyOk | SpecReplyError | SpecReplyStopped> => {
-  const { signal } = params;
+};
+
+/** The turn itself: the message, the generation and its tool calls, until it settles or the loop stops it. */
+const runTurn = async (
+  params: GenerateParams & { loop: { state: LoopState } }
+): Promise<SpecReplyOk | SpecReplyError | SpecReplyStopped> => {
+  const { signal, loop } = params;
   const baseUrl = `${projectUrl(params.projectId)}/sessions/${params.sessionId}`;
 
   await postJson({
@@ -313,21 +211,16 @@ export const generateSpec = async (params: {
     signal,
   });
 
-  let progress: LoopProgress = {
-    attempts: 0,
-    previousIssueCount: Number.POSITIVE_INFINITY,
-  };
-
   while (result.status === 'requires_action') {
     const answered = await answerToolCalls({
       calls: result.required_action?.tool_calls ?? [],
       validateCandidate: params.validateCandidate,
-      progress,
+      state: loop.state,
     });
+    loop.state = answered.state;
     if ('stopped' in answered) {
       return answered.stopped;
     }
-    progress = answered.progress;
 
     if (!result.generation_id) {
       throw new Error(
@@ -346,5 +239,65 @@ export const generateSpec = async (params: {
     });
   }
 
-  return settledReply(result);
+  return bindReply({ reply: settledReply(result), state: loop.state });
+};
+
+/**
+ * Runs one turn inside a Naturali session of the `geovis-spec-generator-loop`
+ * agent, serving its client-side `validate_spec` tool calls in between.
+ *
+ * The turn saves `message` into the session, then `generate?wait=true` either
+ * settles (`completed`/`failed`) or pauses with `status: "requires_action"`
+ * and the pending `required_action.tool_calls`; they are answered by
+ * `answerToolCalls` (`validateCandidate`'s repaired spec and remaining issues,
+ * or the recovery signal) via `.../sessions/{id}/tool-outputs`, which blocks
+ * and returns the next state in the same shape. The session keeps the
+ * history, so a later turn only sends what changed.
+ *
+ * Once the loop exhausts (`MAX_VALIDATION_ATTEMPTS` validations, or no
+ * shrinkage), the agent gets one recovery candidate within
+ * `MAX_TOTAL_VALIDATIONS` validations; the turn then ends as `stopped`
+ * (`recovery-failed` or `budget-exhausted`) instead of the agent's reply when
+ * the server's budget or rules are broken (see `answerToolCalls`,
+ * `bindReply`), including a deadline that passes after the recovery signal.
+ *
+ * @param params.signal - Deadline shared by every request of the turn (see {@link GENERATE_TIMEOUT_MS}).
+ * @param params.onRecovery - Called once when a generation that entered
+ * recovery ends, with its {@link RecoverySnapshot}; never for one that did not.
+ * @returns The agent's structured `{status: "ok", spec}` or
+ * `{status: "error", error}` reply, or `{status: "stopped", ...}`.
+ * @throws If an HTTP call fails, the deadline passes before any recovery
+ * signal, the generation reports a status other than
+ * `completed`/`requires_action`, the reply carries no parseable structured
+ * content, or `validateCandidate` rejects (the data could not be read).
+ *
+ * @example
+ * const reply = await generateSpec({ apiKey, projectId, sessionId, message, validateCandidate, signal: AbortSignal.timeout(GENERATE_TIMEOUT_MS) });
+ */
+export const generateSpec = async (
+  params: GenerateParams & {
+    onRecovery?: (snapshot: RecoverySnapshot) => void;
+  }
+): Promise<SpecReplyOk | SpecReplyError | SpecReplyStopped> => {
+  const loop = { state: INITIAL_LOOP_STATE };
+  const report = (outcome: RecoverySnapshot['outcome']) => {
+    const snapshot = recoverySnapshot({ state: loop.state, outcome });
+    if (snapshot && params.onRecovery) {
+      params.onRecovery(snapshot);
+    }
+  };
+
+  let reply: SpecReplyOk | SpecReplyError | SpecReplyStopped;
+  try {
+    reply = await runTurn({ ...params, loop });
+  } catch (error) {
+    const stopped = stoppedByDeadline({ state: loop.state, error });
+    if (!stopped) {
+      report('error');
+      throw error;
+    }
+    reply = stopped;
+  }
+  report(reply.status === 'stopped' ? 'recovery-failed' : reply.status);
+  return reply;
 };

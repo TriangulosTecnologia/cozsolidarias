@@ -7,7 +7,10 @@ import {
   buildConceptIndex,
   type ConceptEntry,
 } from 'src/app/api/ai/spec/conceptIndex';
-import { rateBaseFromPrompt } from 'src/app/api/ai/spec/datasetFamilies';
+import {
+  familyIdsOf,
+  rateBaseFromPrompt,
+} from 'src/app/api/ai/spec/datasetFamilies';
 import {
   isRenderableDatasetId,
   RENDERABLE_DATASET_IDS,
@@ -282,6 +285,28 @@ describe('FAMILIES', () => {
       expect(resolvedFamilyIds(text)).toEqual([id]);
     }
   );
+});
+
+describe('familyIdsOf', () => {
+  test('lists every id of every family a normalized prompt names, once each', () => {
+    expect(familyIdsOf('ivs e idhm por municipio')).toEqual([
+      'municipios_ivs',
+      'municipios_ivs_infraestrutura',
+      'municipios_ivs_capital_humano',
+      'municipios_ivs_renda_trabalho',
+      'municipios_idhm',
+      'municipios_idhm_longevidade',
+      'municipios_idhm_educacao',
+      'municipios_idhm_educacao_escolaridade',
+      'municipios_idhm_educacao_frequencia',
+      'municipios_idhm_renda',
+    ]);
+    expect(familyIdsOf('inseguranca alimentar')).toEqual([
+      'municipios_cadinsan',
+      'municipios_cadinsan_sem_pbf',
+    ]);
+    expect(familyIdsOf('um mapa qualquer')).toEqual([]);
+  });
 });
 
 describe('rateBaseFromPrompt', () => {

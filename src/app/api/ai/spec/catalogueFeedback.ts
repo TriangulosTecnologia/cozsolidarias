@@ -38,7 +38,22 @@ const PROXIES: Array<{
   },
 ];
 
-const YEAR = /\b(?:19|20)\d{2}\b/;
+const YEAR = /\b(?:19|20)\d{2}\b/g;
+
+/**
+ * Every year (1900–2099) a text names, in order of appearance.
+ *
+ * @param text - A normalized text (prompt, title, description).
+ * @returns The years, as numbers; empty when it names none.
+ *
+ * @example
+ * namedYears('ivs de 2010 e de 2022'); // [2010, 2022]
+ */
+export const namedYears = (text: string): number[] => {
+  return [...text.matchAll(YEAR)].map((match) => {
+    return Number(match[0]);
+  });
+};
 
 const DETAIL_TIP =
   'Diga o que medir, em qual recorte (município) e em qual período.';
@@ -82,11 +97,11 @@ export const periodFeedback = (params: {
   ids: string[];
   concepts: ConceptEntry[];
 }): Feedback | null => {
-  const year = YEAR.exec(params.text)?.[0];
+  const [year] = namedYears(params.text);
   const uncovered =
-    year &&
+    year !== undefined &&
     !params.ids.every((id) => {
-      return coversYear({ index: params.concepts, id, year: Number(year) });
+      return coversYear({ index: params.concepts, id, year });
     });
   return uncovered
     ? {

@@ -17,6 +17,8 @@ export type ConceptEntry = {
   stems: Set<string>;
   /** Inclusive year ranges of its temporal extent; empty when undocumented. */
   years: Array<[number, number]>;
+  /** Whether its described spatial coverage is not exhaustive (partial, sample, unknown). */
+  partialCoverage: boolean;
 };
 
 /** What {@link classifyConcepts} concluded about a prompt's concepts. */
@@ -183,7 +185,8 @@ const yearOf = (date: string): number => {
 /**
  * Indexes the catalogue for the preflight: per dataset, the words that
  * describe it (title, description, field descriptions), the renderable ids it
- * feeds and the years it covers. Pure and deterministic.
+ * feeds, the years it covers and whether its spatial coverage is partial.
+ * Pure and deterministic.
  *
  * @param catalogue - The catalogue from `gateway.getCatalogue()`.
  * @returns One {@link ConceptEntry} per dataset.
@@ -223,6 +226,9 @@ export const buildConceptIndex = (
               ];
             })
           : [],
+      partialCoverage:
+        dataset.spatial.status === 'described' &&
+        dataset.spatial.coverage !== 'exhaustive',
     };
   });
 };

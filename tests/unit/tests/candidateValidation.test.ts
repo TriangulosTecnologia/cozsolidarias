@@ -4,7 +4,9 @@ import {
   collectStructuralIssues,
   normalizeCandidate,
   validateCandidate,
+  validateCandidateFor,
   validateWithLocalRepairs,
+  VALIDATION_DATA_UNAVAILABLE,
 } from 'src/app/api/ai/spec/candidateValidation';
 import { RENDERABLE_DATASET_FETCHERS } from 'src/app/api/ai/spec/mapDataCatalogue';
 import {
@@ -608,18 +610,34 @@ describe('validateCandidate', () => {
     ]);
   });
 
-  test('reports a gateway failure while resolving as an issue, not as a rejection', async () => {
+  test('rejects with VALIDATION_DATA_UNAVAILABLE when the gateway fails while resolving, never reporting it as an issue', async () => {
     jest
       .spyOn(RENDERABLE_DATASET_FETCHERS, 'municipios_ivs')
       .mockRejectedValue(new Error('gateway down'));
 
+    await expect(
+      validateCandidate({
+        mapType: 'choropleth',
+        mapData: [{ mapDataId: 'municipios_ivs', title: 'IVS' }],
+      })
+    ).rejects.toThrow(VALIDATION_DATA_UNAVAILABLE);
+  });
+
+  test('categorizes, deduplicates and orders the issues it reports', async () => {
     const result = await validateCandidate({
       mapType: 'choropleth',
-      mapData: [{ mapDataId: 'municipios_ivs', title: 'IVS' }],
+      basemap: { styleUrl: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png' },
+      mapData: [{ mapDataId: 'caf_areas' }],
     });
 
-    expect(result.issues).toEqual([
-      expect.objectContaining({ code: 'unresolvable-spec' }),
+    expect(
+      result.issues.map((issue) => {
+        return [issue.code, 'category' in issue ? issue.category : undefined];
+      })
+    ).toEqual([
+      ['unknown-basemap-style', 'structural'],
+      ['unresolvable-spec', 'data-resolution'],
+      ['unsupported-dataset', 'capability'],
     ]);
   });
 
@@ -631,6 +649,7 @@ describe('validateCandidate', () => {
           code: 'invalid-spec-shape',
           path: '',
           message: 'A spec precisa ser um objeto JSON.',
+          category: 'structural',
         },
       ],
     });
@@ -675,6 +694,93 @@ describe('validateCandidate', () => {
     expect(result.spec).toMatchObject({
       layers: [{ id: 'dots', sourceId: 'bolhas', geometry: 'point' }],
     });
+  });
+});
+
+describe('validateCandidateFor', () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  const candidate = {
+    mapType: 'choropleth',
+    title: 'Vulnerabilidade social',
+    mapData: [{ mapDataId: 'municipios_ivs', title: 'IVS' }],
+  };
+
+  test('adds the request checks to the issues, on the normalized candidate', async () => {
+    jest
+      .spyOn(RENDERABLE_DATASET_FETCHERS, 'municipios_ivs')
+      .mockResolvedValue([{ geometryId: '3550308', value: 0.3 }] as never);
+
+    const validate = validateCandidateFor({
+      prompt: 'mapa do ivs',
+      mapType: 'dotDensity',
+      concepts: [],
+    });
+
+    expect((await validate(candidate)).issues).toEqual([
+      expect.objectContaining({
+        code: 'ignored-user-map-type',
+        category: 'semantic',
+      }),
+    ]);
+    expect((await validateCandidate(candidate)).issues).toEqual([]);
+  });
+
+  test('reports a non-object candidate by its shape alone', async () => {
+    const validate = validateCandidateFor({
+      prompt: 'mapa do ivs',
+      mapType: 'dotDensity',
+      concepts: [],
+    });
+
+    expect(
+      (await validate('text')).issues.map((issue) => {
+        return issue.code;
+      })
+    ).toEqual(['invalid-spec-shape']);
+  });
+});
+
+// Rules of the determinism map that the agent can still break under the
+// formation's output_schema: each must already yield an issue, so none needs
+// a new validator.
+describe('validateCandidate on rules the output_schema still lets the agent break', () => {
+  const codesOf = async (candidate: unknown): Promise<string[]> => {
+    return (await validateCandidate(candidate)).issues.map((issue) => {
+      return issue.code;
+    });
+  };
+
+  test('a mapType without mapData', async () => {
+    expect(await codesOf({ mapType: 'choropleth', title: 'IVS' })).not.toEqual(
+      []
+    );
+  });
+
+  test('a point layer over a /geo polygon source, with no point source to move it to', async () => {
+    expect(
+      await codesOf({
+        title: 'Cozinhas',
+        sources: [
+          { id: 'mun', type: 'geojson', data: '/geo/geojs-100-mun.json' },
+        ],
+        layers: [{ sourceId: 'mun', geometry: 'point' }],
+      })
+    ).toContain('point-layer-on-polygon-source');
+  });
+
+  test('a heatmap layer over a /geo polygon source', async () => {
+    expect(
+      await codesOf({
+        title: 'Cozinhas',
+        sources: [
+          { id: 'mun', type: 'geojson', data: '/geo/geojs-100-mun.json' },
+        ],
+        layers: [{ sourceId: 'mun', geometry: 'heatmap' }],
+      })
+    ).not.toEqual([]);
   });
 });
 

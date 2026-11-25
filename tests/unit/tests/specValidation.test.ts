@@ -1,3 +1,4 @@
+import { normalizeIssues } from 'src/app/api/ai/spec/issueCategories';
 import { fixedScaleOf } from 'src/app/api/ai/spec/legendRules';
 import {
   buildCatalogueContext,
@@ -624,6 +625,28 @@ describe('errorResponse', () => {
       spec: { a: 1 },
       mapTypeOptions: MAP_TYPE_OPTIONS,
     });
+  });
+
+  test('keeps the issue category out of the body, in issues and requirements alike', async () => {
+    const body = await errorResponse({
+      status: 422,
+      message: 'Falha',
+      issues: normalizeIssues([
+        { code: 'semantic-drift', path: 'mapData', message: 'y' },
+      ]),
+    }).json();
+
+    expect(body.issues).toEqual([
+      { code: 'semantic-drift', path: 'mapData', message: 'y' },
+    ]);
+    expect(body.requirements).toEqual([
+      {
+        code: 'semantic-drift',
+        path: 'mapData',
+        message: 'y',
+        fix: expect.any(String),
+      },
+    ]);
   });
 
   test('omits the spec in production, keeping the rest of the body', async () => {

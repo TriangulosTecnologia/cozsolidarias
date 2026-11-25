@@ -21,6 +21,27 @@ const FIX_BY_CODE: Record<string, string> = {
   'unknown-source-url':
     'Use apenas as fontes geográficas do projeto (municípios, estados).',
   'unknown-basemap-style': 'Use o mapa base padrão do projeto.',
+  'ignored-user-map-type':
+    'Tente de novo mantendo o tipo de mapa escolhido, ou escolha outro tipo de mapa.',
+  'ignored-user-dataset':
+    'Tente de novo mantendo o dataset escolhido, ou escolha outro dataset.',
+  'period-not-covered':
+    'Retire o ano do pedido para usar o período disponível, ou consulte a página de dados para ver a cobertura de cada indicador.',
+  'multiple-painted-variables': 'Peça uma variável por mapa.',
+  'legend-count-mismatch':
+    'Tente de novo: o mapa precisa de uma legenda para cada variável pintada.',
+  'points-spec-with-map-data':
+    'Peça um mapa de pontos (ou de calor) das cozinhas, ou um mapa de uma variável por município, não os dois.',
+  'concept-drift':
+    'Reformule o pedido nomeando o indicador que você quer ver no mapa.',
+  'semantic-drift':
+    'Tente de novo mantendo o pedido; se o dataset ou o tipo de mapa não servem, escolha outro.',
+  'completeness-claim-on-partial-coverage':
+    'Tente de novo: os dados cobrem só parte dos municípios, e o título não pode dizer que o mapa mostra tudo.',
+  'missing-proxy-caveat':
+    'Tente de novo: o mapa usa um indicador aproximado e precisa avisar isso na descrição.',
+  'missing-default-period-caveat':
+    'Informe o ano no pedido, ou tente de novo para que a descrição diga o ano mostrado.',
 };
 
 /**

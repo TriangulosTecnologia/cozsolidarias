@@ -60,6 +60,25 @@ describe('requirementsFrom', () => {
     expect(requirement.fix).toMatch(/Reformule/);
   });
 
+  test.each([
+    'ignored-user-map-type',
+    'ignored-user-dataset',
+    'period-not-covered',
+    'multiple-painted-variables',
+    'legend-count-mismatch',
+    'points-spec-with-map-data',
+    'concept-drift',
+    'semantic-drift',
+    'completeness-claim-on-partial-coverage',
+    'missing-proxy-caveat',
+    'missing-default-period-caveat',
+  ])('gives %s its own fix, not the generic one', (code) => {
+    const [requirement] = requirementsFrom([{ code, message: 'x' }]);
+    const [generic] = requirementsFrom([{ code: 'whatever', message: 'x' }]);
+
+    expect(requirement.fix).not.toBe(generic.fix);
+  });
+
   test('falls back to a generic fix for an unknown code', () => {
     const [requirement] = requirementsFrom([
       { code: 'whatever', message: 'x' },
