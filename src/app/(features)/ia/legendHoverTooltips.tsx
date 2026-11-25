@@ -43,32 +43,6 @@ export const paintsCadinsan = (spec: VisualizationSpec): boolean => {
   });
 };
 
-/**
- * The CADINSAN scenario each food-insecurity `mapDataId` paints: the route's
- * renderable ids, repeated here because the client cannot import the route
- * catalogue (it reaches the gateway).
- */
-const CADINSAN_VARIANTS = new Map<string, 'com' | 'sem'>([
-  ['municipios_cadinsan', 'com'],
-  ['municipios_cadinsan_sem_pbf', 'sem'],
-]);
-
-/**
- * Whether a spec paints a CADINSAN share, the one case whose hover card needs
- * the CADINSAN rows (see {@link withLegendHoverTooltips}).
- *
- * @param spec - The spec served by `/api/ai/spec`.
- * @returns `true` when a `mapData` entry is `municipios_cadinsan` or `municipios_cadinsan_sem_pbf`.
- *
- * @example
- * paintsCadinsan({ mapData: [{ mapDataId: 'municipios_cadinsan_sem_pbf' }] }); // true
- */
-export const paintsCadinsan = (spec: VisualizationSpec): boolean => {
-  return (spec.mapData ?? []).some(({ mapDataId }) => {
-    return CADINSAN_VARIANTS.has(mapDataId);
-  });
-};
-
 /** A legend read as bands: band `i` is painted `colors[i]` and named `labels[i]`; `thresholds` are the cut points. */
 type BandScale = { thresholds: number[]; colors: string[]; labels: string[] };
 
