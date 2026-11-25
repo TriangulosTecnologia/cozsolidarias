@@ -8,6 +8,13 @@ import type {
 } from '@/data-gateway/schema';
 import { gateway } from '@/gateway';
 
+import {
+  type CadunicoRateId,
+  isCadunicoRateId,
+  rateBaseOf,
+} from './cadunicoRateId';
+import { CATALOGUE_VARIANTS } from './catalogueVariants';
+
 /**
  * Renderable datasets whose value is an absolute total (a raw sum), never a
  * relative variable (rate/ratio/percentage) — per Bertin's graphic semiology
@@ -83,6 +90,29 @@ const cadinsanField = (field: 'proporcaoComPbf' | 'proporcaoSemPbf') => {
   };
 };
 
+/** A renderable id's fetcher: its `mapData` rows. */
+export type MapDataFetcher = () => Promise<
+  Array<{ geometryId: string; value: number }>
+>;
+
+/**
+ * Fetcher painting cozinhas per CadÚnico people on the base its id names
+ * ({@link rateBaseOf}): `quantidade / pessoasCadUnico * base`, two decimals, as
+ * the gateway rounds `porDezMilCadUnico`. The base is computed here, never a
+ * gateway field per denominator. No CadÚnico denominator → dropped, never `0`.
+ */
+const cadunicoRate = (id: string): MapDataFetcher => {
+  return async () => {
+    const base = rateBaseOf(id);
+    const rows: KitchenRateByCity[] = await gateway.getCozinhasPorMunicipio();
+    return toMapDataRows(rows, (row) => {
+      return row.pessoasCadUnico
+        ? Math.round((row.quantidade / row.pessoasCadUnico) * base * 100) / 100
+        : null;
+    });
+  };
+};
+
 /**
  * Resolves each renderable dataset id to real `mapData` rows via
  * `data-gateway` — the registry `appendRealMapData` looks up to replace the
@@ -120,22 +150,55 @@ export const RENDERABLE_DATASET_FETCHERS = {
   municipios_idhm_educacao_frequencia: ivsField('idhmEducacaoFrequencia'),
   municipios_cadinsan: cadinsanField('proporcaoComPbf'),
   municipios_cadinsan_sem_pbf: cadinsanField('proporcaoSemPbf'),
+  cozinhas_por_10mil_cadunico: cadunicoRate('cozinhas_por_10mil_cadunico'),
+  cozinhas_por_100mil_cadunico: cadunicoRate('cozinhas_por_100mil_cadunico'),
+  cadunico_pessoas_por_cozinha: async () => {
+    const rows: KitchenRateByCity[] = await gateway.getCozinhasPorMunicipio();
+    return toMapDataRows(rows, (row) => {
+      return row.pessoasPorCozinha;
+    });
+  },
 } as const;
 
-export type RenderableDatasetId = keyof typeof RENDERABLE_DATASET_FETCHERS;
+export type RenderableDatasetId =
+  | keyof typeof RENDERABLE_DATASET_FETCHERS
+  | CadunicoRateId;
 
 /** List of dataset IDs that the agent may reference in `mapData`. */
 export const RENDERABLE_DATASET_IDS = Object.keys(
   RENDERABLE_DATASET_FETCHERS
 ) as RenderableDatasetId[];
 
-/** Type guard: check if a dataset ID is renderable. */
-export const isRenderableDatasetId = (
+/** A listed renderable id: one {@link RENDERABLE_DATASET_FETCHERS} holds. */
+const isListedDatasetId = (
   id: unknown
-): id is RenderableDatasetId => {
+): id is keyof typeof RENDERABLE_DATASET_FETCHERS => {
   return (
     typeof id === 'string' && Object.hasOwn(RENDERABLE_DATASET_FETCHERS, id)
   );
+};
+
+/** Type guard: check if a dataset ID is renderable (a listed id, or a CadÚnico rate id on any base). */
+export const isRenderableDatasetId = (
+  id: unknown
+): id is RenderableDatasetId => {
+  return isListedDatasetId(id) || isCadunicoRateId(id);
+};
+
+/**
+ * The fetcher of a renderable id: its listed one, else the CadÚnico rate on
+ * the base the id names.
+ *
+ * @param id - A renderable id ({@link isRenderableDatasetId}).
+ * @returns Its {@link MapDataFetcher}.
+ *
+ * @example
+ * await fetcherOf('cozinhas_por_50mil_cadunico')(); // rows on the 50 mil base
+ */
+export const fetcherOf = (id: RenderableDatasetId): MapDataFetcher => {
+  return isListedDatasetId(id)
+    ? RENDERABLE_DATASET_FETCHERS[id]
+    : cadunicoRate(id);
 };
 
 /** The index-only shape a non-renderable dataset is reduced to — enough for
@@ -195,90 +258,6 @@ const toAiDatasetProjection = (
 };
 
 /**
- * Renderable ids that paint one field of a catalogue dataset: each is exposed
- * to the agent as its own entry whose `description` is that field's own
- * `description` (plus `note` when the field text omits what the id's scale
- * means), so the agent can tell IVS from IDHM and "com PBF" from "sem PBF".
- * A variant whose id equals its dataset's id replaces that dataset's entry.
- * `officialFaixas` marks an official IPEA index whose legend thresholds the
- * model must not reclassify (see {@link officialFaixasOf}).
- */
-const CATALOGUE_VARIANTS: Record<
-  string,
-  {
-    datasetId: string;
-    fieldName: string;
-    note?: string;
-    officialFaixas?: 'ivs' | 'idhm';
-  }
-> = {
-  municipios_ivs: {
-    datasetId: 'municipios_ivs',
-    fieldName: 'ivs',
-    officialFaixas: 'ivs',
-  },
-  municipios_ivs_infraestrutura: {
-    datasetId: 'municipios_ivs',
-    fieldName: 'ivs_infraestrutura_urbana',
-    officialFaixas: 'ivs',
-    note: 'Maior = mais vulnerável',
-  },
-  municipios_ivs_capital_humano: {
-    datasetId: 'municipios_ivs',
-    fieldName: 'ivs_capital_humano',
-    officialFaixas: 'ivs',
-    note: 'Maior = mais vulnerável',
-  },
-  municipios_ivs_renda_trabalho: {
-    datasetId: 'municipios_ivs',
-    fieldName: 'ivs_renda_e_trabalho',
-    officialFaixas: 'ivs',
-    note: 'Maior = mais vulnerável',
-  },
-  municipios_idhm: {
-    datasetId: 'municipios_ivs',
-    fieldName: 'idhm',
-    officialFaixas: 'idhm',
-    note: 'Maior = melhor desenvolvimento humano (escala oposta à do IVS)',
-  },
-  municipios_idhm_longevidade: {
-    datasetId: 'municipios_ivs',
-    fieldName: 'idhm_long',
-    officialFaixas: 'idhm',
-    note: 'Maior = melhor',
-  },
-  municipios_idhm_educacao: {
-    datasetId: 'municipios_ivs',
-    fieldName: 'idhm_educ',
-    officialFaixas: 'idhm',
-    note: 'Maior = melhor',
-  },
-  municipios_idhm_renda: {
-    datasetId: 'municipios_ivs',
-    fieldName: 'idhm_renda',
-    officialFaixas: 'idhm',
-    note: 'Maior = melhor',
-  },
-  municipios_idhm_educacao_escolaridade: {
-    datasetId: 'municipios_ivs',
-    fieldName: 'idhm_educ_sub_esc',
-    officialFaixas: 'idhm',
-    note: 'Maior = melhor',
-  },
-  municipios_idhm_educacao_frequencia: {
-    datasetId: 'municipios_ivs',
-    fieldName: 'idhm_educ_sub_freq',
-    officialFaixas: 'idhm',
-    note: 'Maior = melhor',
-  },
-  municipios_cadinsan_sem_pbf: {
-    datasetId: 'municipios_cadinsan',
-    fieldName: 'Cadinsan_absoluto_sem_PBF',
-    note: 'O mapa pinta a proporção (%) sobre o total de cadastros do CadÚnico, não a contagem',
-  },
-};
-
-/**
  * The official faixa family (IPEA) a renderable id paints, or `undefined` when
  * its scale is free to be chosen. Read by `findReclassifiedOfficialIndex`.
  *
@@ -311,10 +290,12 @@ const toAiDatasetEntries = (
         {
           ...projection,
           id,
-          title: `${dataset.title} — ${field.name}`,
-          description: variant.note
-            ? `${field.description}. ${variant.note}.`
-            : field.description,
+          title: variant.title ?? `${dataset.title} — ${field.name}`,
+          description:
+            variant.description ??
+            (variant.note
+              ? `${field.description}. ${variant.note}.`
+              : field.description),
           fields: [
             {
               name: field.name,

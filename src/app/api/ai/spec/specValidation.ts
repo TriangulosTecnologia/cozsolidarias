@@ -5,10 +5,10 @@ import {
 import { gateway } from '@/gateway';
 
 import {
+  fetcherOf,
   isAbsoluteTotalDataset,
   isRenderableDatasetId,
   officialFaixasOf,
-  RENDERABLE_DATASET_FETCHERS,
   RENDERABLE_DATASET_IDS,
 } from './mapDataCatalogue';
 import { MAP_TYPE_OPTIONS } from './mapTypeOptions';
@@ -749,11 +749,12 @@ export const isPointsOnlySpec = (spec: UnknownRecord): boolean => {
 
 /**
  * MapData Append (ADR-0001): resolves each `mapData[].mapDataId` the agent
- * emitted against {@link RENDERABLE_DATASET_FETCHERS} and replaces its
+ * emitted against `RENDERABLE_DATASET_FETCHERS` and replaces its
  * placeholder `data` with real `data-gateway` values. Returns a `Response`
  * (422) instead of the spec when an entry references a dataset outside
  * {@link RENDERABLE_DATASET_IDS} or the shape is malformed — never a spec
- * with stale/fictitious `data` reaches the client.
+ * with stale/fictitious `data` reaches the client. A CadÚnico rate id on any
+ * base resolves to the rate on that base ({@link fetcherOf}).
  */
 export const appendRealMapData = async (
   spec: UnknownRecord
@@ -798,7 +799,7 @@ export const appendRealMapData = async (
       return unsupportedDatasetResponse(mapDataId, spec);
     }
 
-    const data = await RENDERABLE_DATASET_FETCHERS[mapDataId]();
+    const data = await fetcherOf(mapDataId)();
     resolvedMapData.push({ ...entry, data });
   }
 

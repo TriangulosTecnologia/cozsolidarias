@@ -2,6 +2,12 @@ import {
   CADINSAN_COLORS,
   CADINSAN_LEGEND_LABELS,
   CADINSAN_THRESHOLDS,
+  CADUNICO_COLORS,
+  CADUNICO_THRESHOLDS,
+  flooredBinLabels,
+  PESSOAS_COZINHA_COLORS,
+  PESSOAS_COZINHA_LEGEND_LABELS,
+  PESSOAS_COZINHA_THRESHOLDS,
   WITHOUT_KITCHEN_COLOR,
 } from '@/app/(features)/mapas/geovisChoroplethScales';
 import {
@@ -13,40 +19,82 @@ import {
   IVS_LEGEND_LABELS,
 } from '@/app/(features)/mapas/geovisScoreScales';
 
+import { isCadunicoRateId, rateBaseOf } from './cadunicoRateId';
 import { officialFaixasOf } from './mapDataCatalogue';
 import { isRecord, type UnknownRecord } from './specValidation';
 
+/** A fixed legend scale: an official IPEA faixa family or a `/mapas` ruler. */
+type FixedScale =
+  | 'ivs'
+  | 'idhm'
+  | 'cadinsan'
+  | 'cadunicoRate'
+  | 'pessoasCozinha';
+
 /**
- * The ids `/mapas` paints on its fixed CADINSAN ruler (`CADINSAN_THRESHOLDS`).
- * A fixed scale, not an official index: `findReclassifiedOfficialIndex` leaves
- * them out, and the legend rules put the ruler back whatever the agent wrote.
+ * The ids `/mapas` paints on a fixed ruler of its own (`CADINSAN_THRESHOLDS`,
+ * `PESSOAS_COZINHA_THRESHOLDS`); a CadÚnico rate id, on any base, takes
+ * `CADUNICO_THRESHOLDS` moved to its base. Fixed scales, not
+ * official indexes: `findReclassifiedOfficialIndex` leaves them out, and the
+ * legend rules put the ruler back whatever the agent wrote.
  */
-const CADINSAN_SCALE_IDS: readonly string[] = [
-  'municipios_cadinsan',
-  'municipios_cadinsan_sem_pbf',
-];
+const APP_SCALE_IDS: Record<string, FixedScale> = {
+  municipios_cadinsan: 'cadinsan',
+  municipios_cadinsan_sem_pbf: 'cadinsan',
+  cadunico_pessoas_por_cozinha: 'pessoasCozinha',
+};
 
 /**
  * The fixed legend scale a renderable id is painted on: its official faixa
- * family (see {@link officialFaixasOf}), else `'cadinsan'` for the two
- * food-insecurity shares. Read by the legend rules, which replace the
- * resolver's Jenks breaks with that scale.
+ * family (see {@link officialFaixasOf}), else the `/mapas` ruler of the
+ * food-insecurity shares and the CadÚnico coverage ids. Read by the legend
+ * rules, which replace the resolver's Jenks breaks with that scale.
  *
  * @param mapDataId - A `mapData[].mapDataId`.
- * @returns `'ivs'`, `'idhm'`, `'cadinsan'` or `undefined` when the scale is free.
+ * @returns The {@link FixedScale}, or `undefined` when the scale is free.
  *
  * @example
  * fixedScaleOf('municipios_cadinsan_sem_pbf'); // 'cadinsan'
+ * fixedScaleOf('cozinhas_por_100mil_cadunico'); // 'cadunicoRate'
  * fixedScaleOf('municipios_ivs'); // 'ivs'
  * fixedScaleOf('cozinhas_geolocalizadas'); // undefined
  */
-export const fixedScaleOf = (
-  mapDataId: string
-): 'ivs' | 'idhm' | 'cadinsan' | undefined => {
+export const fixedScaleOf = (mapDataId: string): FixedScale | undefined => {
+  if (isCadunicoRateId(mapDataId)) {
+    return 'cadunicoRate';
+  }
   return (
     officialFaixasOf(mapDataId) ??
-    (CADINSAN_SCALE_IDS.includes(mapDataId) ? 'cadinsan' : undefined)
+    (Object.hasOwn(APP_SCALE_IDS, mapDataId)
+      ? APP_SCALE_IDS[mapDataId]
+      : undefined)
   );
+};
+
+/** A legend scale: bands in `colorBy`, their names in `labelFormat`. */
+type Scale = {
+  thresholds: readonly number[];
+  colors: readonly string[];
+  labels: readonly string[];
+  defaultColor?: string;
+};
+
+/**
+ * The `/mapas` CadÚnico ruler (cozinhas per 10 mil) moved to `base`, the one
+ * the map is computed on: each cutpoint × base / 10 mil (rounded off the float
+ * noise), labels rebuilt from them, so the legend reads in the base the map
+ * paints. On the 10 mil base it is the `/mapas` ruler itself.
+ */
+const cadunicoRateScale = (base: number): Scale => {
+  const thresholds = CADUNICO_THRESHOLDS.map((threshold) => {
+    return Math.round(((threshold * base) / 10_000) * 1e6) / 1e6;
+  });
+  return {
+    thresholds,
+    colors: CADUNICO_COLORS,
+    labels: flooredBinLabels('Sem cozinha', thresholds),
+    defaultColor: WITHOUT_KITCHEN_COLOR,
+  };
 };
 
 const recordsOf = (value: unknown): UnknownRecord[] => {
@@ -54,19 +102,11 @@ const recordsOf = (value: unknown): UnknownRecord[] => {
 };
 
 /**
- * The fixed scale of each family, as `/mapas` paints it. CADINSAN carries
- * `/mapas`'s grey `defaultColor`: its first color is a vestigial ramp step,
+ * The fixed scale of each family, as `/mapas` paints it. The `/mapas` rulers
+ * carry its grey `defaultColor`: their first color is a vestigial ramp step,
  * not the "Sem dado" grey the IVS/IDHM colors start with.
  */
-const FIXED_SCALES: Record<
-  'ivs' | 'idhm' | 'cadinsan',
-  {
-    thresholds: readonly number[];
-    colors: readonly string[];
-    labels: readonly string[];
-    defaultColor?: string;
-  }
-> = {
+const FIXED_SCALES: Record<Exclude<FixedScale, 'cadunicoRate'>, Scale> = {
   ivs: {
     thresholds: IVS_FAMILY_THRESHOLDS,
     colors: IVS_FAMILY_COLORS,
@@ -81,6 +121,12 @@ const FIXED_SCALES: Record<
     thresholds: CADINSAN_THRESHOLDS,
     colors: CADINSAN_COLORS,
     labels: CADINSAN_LEGEND_LABELS,
+    defaultColor: WITHOUT_KITCHEN_COLOR,
+  },
+  pessoasCozinha: {
+    thresholds: PESSOAS_COZINHA_THRESHOLDS,
+    colors: PESSOAS_COZINHA_COLORS,
+    labels: PESSOAS_COZINHA_LEGEND_LABELS,
     defaultColor: WITHOUT_KITCHEN_COLOR,
   },
 };
@@ -117,18 +163,9 @@ export const splitAgentLegends = (
   };
 };
 
-/**
- * The fixed scale of a `mapDataId` (official IVS/IDHM faixas, the CADINSAN
- * ruler), as a legend patch: the bands in `colorBy`, their names in the
- * legend's `labelFormat` (geovis has no `colorBy.labels`).
- */
-const fixedScalePatch = (mapDataId: unknown): UnknownRecord => {
-  // `appendRealMapData` already checked every `mapDataId` is a string.
-  const family = fixedScaleOf(String(mapDataId));
-  if (!family) {
-    return {};
-  }
-  const { thresholds, colors, labels, defaultColor } = FIXED_SCALES[family];
+/** A scale as a legend patch: the bands in `colorBy`, their names in `labelFormat` (geovis has no `colorBy.labels`). */
+const scalePatch = (scale: Scale): UnknownRecord => {
+  const { thresholds, colors, labels, defaultColor } = scale;
   return {
     colorBy: {
       type: 'quantitative',
@@ -139,6 +176,35 @@ const fixedScalePatch = (mapDataId: unknown): UnknownRecord => {
       ...(defaultColor === undefined ? {} : { defaultColor }),
     },
     labelFormat: { type: 'labels', labels },
+  };
+};
+
+/**
+ * The fixed scale of a `mapDataId` (official IVS/IDHM faixas, a `/mapas`
+ * ruler) as a legend patch. A CadÚnico rate takes the ruler on the base its
+ * id names ({@link rateBaseOf}), the one its values were computed on, and
+ * carries that base as the legend's geovis `normalization`, where the `/ia`
+ * hover card reads it.
+ */
+const fixedScalePatch = (rawMapDataId: unknown): UnknownRecord => {
+  // `appendRealMapData` already checked every `mapDataId` is a string.
+  const mapDataId = String(rawMapDataId);
+  const family = fixedScaleOf(mapDataId);
+  if (!family) {
+    return {};
+  }
+  if (family !== 'cadunicoRate') {
+    return scalePatch(FIXED_SCALES[family]);
+  }
+  const base = rateBaseOf(mapDataId);
+  return {
+    normalization: {
+      type: 'rate',
+      numeratorLabel: 'cozinhas',
+      denominatorLabel: 'pessoas no CadÚnico',
+      rateBase: base,
+    },
+    ...scalePatch(cadunicoRateScale(base)),
   };
 };
 
@@ -178,8 +244,8 @@ const withAppText = (params: {
  * resolver legend takes the text of the agent legend at the position of the
  * `mapData` entry it paints (else that entry's `title`, replacing the English
  * `Circle size =` of proportional circles); an IVS/IDHM legend gets the
- * official IPEA faixas, and a CADINSAN one the `/mapas` ruler
- * (`CADINSAN_THRESHOLDS`, `CADINSAN_LEGEND_LABELS`), instead of Jenks breaks. Agent legends no resolver
+ * official IPEA faixas, a CADINSAN or CadÚnico one its `/mapas` ruler (a
+ * CadÚnico rate on the base its id names), instead of Jenks breaks. Agent legends no resolver
  * legend takes (a points map, a map type with no generated legend) are kept
  * with the id `legend-<n>`. Every legend these rules touch gets a
  * `position` when it has none, so the map shows it.

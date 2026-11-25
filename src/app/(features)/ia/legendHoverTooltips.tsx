@@ -5,11 +5,17 @@ import type {
   VisualizationSpec,
 } from '@ttoss/geovis';
 
-import type { CadinsanByCity } from '@/data-gateway/schema';
+import type { CadinsanByCity, KitchenRateByCity } from '@/data-gateway/schema';
 
 import { cadinsanCardLines } from '../mapas/mapaCadinsanTooltips';
 import { TooltipCard } from '../mapas/mapaTooltipCard';
 import { TOOLTIP_STYLE } from '../mapas/mapaTooltipStyle';
+import {
+  type CardLines,
+  type Coverage,
+  coverageLinesOf,
+  coverageOf,
+} from './coverageTooltipLines';
 
 /**
  * The CADINSAN scenario each food-insecurity `mapDataId` paints: the route's
@@ -78,9 +84,32 @@ const cadinsanLinesOf = (params: {
   band: number;
   variant: 'com' | 'sem' | undefined;
   register: CadinsanByCity | undefined;
-}) => {
+}): CardLines | null => {
   const { band, variant, register } = params;
   return band > 0 && variant ? cadinsanCardLines({ register, variant }) : null;
+};
+
+/**
+ * The lines a card shows: the CADINSAN or coverage lines with the faixa after
+ * the value, else the plain "<title> <value> · <faixa>" line.
+ */
+const cardLinesOf = (params: {
+  band: number;
+  value: number;
+  faixa: string;
+  title: string | undefined;
+  cadinsan: CardLines | null;
+  coverage: CardLines | null;
+}): CardLines => {
+  const { band, value, faixa, title, cadinsan, coverage } = params;
+  const lines = cadinsan ?? coverage;
+  if (!lines) {
+    return { primary: primaryOf({ title, band, value, faixa }) };
+  }
+  return {
+    ...lines,
+    primary: band > 0 ? `${lines.primary} · ${faixa}` : lines.primary,
+  };
 };
 
 /**
@@ -90,7 +119,8 @@ const cadinsanLinesOf = (params: {
  * count of thresholds at or under the value), so the swatch is the color on the
  * map; the first band is the "Sem dado" floor, which also takes a value that is
  * not a number. A CADINSAN layer whose município has a row reads the `/mapas`
- * CADINSAN lines instead, with the faixa after the share.
+ * CADINSAN lines instead, and a CadÚnico coverage layer the `/mapas` coverage
+ * lines, each with the faixa after the value.
  */
 const bandCard = (params: {
   names: Map<string, string>;
@@ -99,8 +129,11 @@ const bandCard = (params: {
   info: MapHoverInfo;
   variant: 'com' | 'sem' | undefined;
   cadinsan: Map<string, CadinsanByCity>;
+  coverage: Coverage | undefined;
+  cozinhas: Map<string, KitchenRateByCity>;
 }) => {
-  const { names, title, scale, info, variant, cadinsan } = params;
+  const { names, title, scale, info } = params;
+  const id = String(info.featureId);
   const value =
     typeof info.value === 'number' ? info.value : Number.NEGATIVE_INFINITY;
   const band = scale.thresholds.filter((threshold) => {
@@ -108,31 +141,37 @@ const bandCard = (params: {
   }).length;
   // The range in parentheses stays in the legend; the card keeps the faixa name, as `/mapas` does.
   const faixa = scale.labels[band].replace(/\s*\(.*\)$/, '');
-  const name =
-    names.get(String(info.featureId)) ?? `Município ${info.featureId}`;
-  const lines = cadinsanLinesOf({
+  const lines = cardLinesOf({
     band,
-    variant,
-    register: cadinsan.get(String(info.featureId)),
+    value,
+    faixa,
+    title,
+    cadinsan: cadinsanLinesOf({
+      band,
+      variant: params.variant,
+      register: params.cadinsan.get(id),
+    }),
+    coverage: coverageLinesOf({
+      band,
+      value,
+      coverage: params.coverage,
+      register: params.cozinhas.get(id),
+    }),
   });
-  return lines ? (
+  return (
     <TooltipCard
-      name={name}
+      name={names.get(id) ?? `Município ${info.featureId}`}
       swatchColor={scale.colors[band]}
-      primary={`${lines.primary} · ${faixa}`}
+      primary={lines.primary}
       secondary={lines.secondary}
       details={lines.details}
-    />
-  ) : (
-    <TooltipCard
-      name={name}
-      swatchColor={scale.colors[band]}
-      primary={primaryOf({ title, band, value, faixa })}
     />
   );
 };
 
 const NO_CADINSAN_ROWS = new Map<string, CadinsanByCity>();
+
+const NO_KITCHEN_ROWS = new Map<string, KitchenRateByCity>();
 
 const isTippable = (layer: VisualizationLayer) => {
   return (
@@ -147,13 +186,13 @@ const withTooltip = (params: {
   layer: VisualizationLayer;
   names: Map<string, string>;
   cadinsan: Map<string, CadinsanByCity>;
+  cozinhas: Map<string, KitchenRateByCity>;
 }): VisualizationLayer => {
-  const { spec, layer, names, cadinsan } = params;
-  const scale = bandScaleOf(
-    spec.legends?.find(({ id }) => {
-      return id === layer.activeLegendId;
-    })
-  );
+  const { spec, layer, names, cadinsan, cozinhas } = params;
+  const legend = spec.legends?.find(({ id }) => {
+    return id === layer.activeLegendId;
+  });
+  const scale = bandScaleOf(legend);
   if (!scale) {
     return layer;
   }
@@ -162,13 +201,23 @@ const withTooltip = (params: {
   })?.title;
   // `isTippable` only lets through layers with a `mapDataId`.
   const variant = CADINSAN_VARIANTS.get(String(layer.mapDataId));
+  const coverage = coverageOf({ mapDataId: String(layer.mapDataId), legend });
   return {
     ...layer,
     hoverTooltip: {
       style: TOOLTIP_STYLE,
       ...layer.hoverTooltip,
       render: (info: MapHoverInfo) => {
-        return bandCard({ names, title, scale, info, variant, cadinsan });
+        return bandCard({
+          names,
+          title,
+          scale,
+          info,
+          variant,
+          cadinsan,
+          coverage,
+          cozinhas,
+        });
       },
     },
   };
@@ -186,11 +235,15 @@ const withTooltip = (params: {
  * `hoverTooltip` without `render` keeps its `style`. A CADINSAN share
  * (`municipios_cadinsan`, `municipios_cadinsan_sem_pbf`) gets the `/mapas`
  * CADINSAN lines (share, "N de M famílias", the other scenario) from its row in
- * `cadinsan`; without that row it keeps the plain band card.
+ * `cadinsan`; without that row it keeps the plain band card. A CadÚnico
+ * coverage (`cozinhas_por_10mil_cadunico`, `cozinhas_por_100mil_cadunico`,
+ * `cadunico_pessoas_por_cozinha`) gets the `/mapas` coverage lines, with the
+ * kitchen and CadÚnico counts from its row in `cozinhas` when there is one.
  *
  * @param params.spec - The spec served by `/api/ai/spec`.
  * @param params.names - `codarea → município name`; a município missing from it shows as `Município <codarea>`.
  * @param params.cadinsan - `codarea → CADINSAN row` (`/api/cadinsan/por-municipio`); defaults to none.
+ * @param params.cozinhas - `codarea → kitchen row` (`/api/cozinhas/por-municipio`); defaults to none.
  * @returns The spec with the hover card on its legend-driven polygon layers.
  *
  * @example
@@ -201,11 +254,17 @@ export const withLegendHoverTooltips = (params: {
   spec: VisualizationSpec;
   names: Map<string, string>;
   cadinsan?: Map<string, CadinsanByCity>;
+  cozinhas?: Map<string, KitchenRateByCity>;
 }): VisualizationSpec => {
-  const { spec, names, cadinsan = NO_CADINSAN_ROWS } = params;
+  const {
+    spec,
+    names,
+    cadinsan = NO_CADINSAN_ROWS,
+    cozinhas = NO_KITCHEN_ROWS,
+  } = params;
   const layers = spec.layers?.map((layer) => {
     return isTippable(layer)
-      ? withTooltip({ spec, layer, names, cadinsan })
+      ? withTooltip({ spec, layer, names, cadinsan, cozinhas })
       : layer;
   });
   return layers?.some((layer, index) => {

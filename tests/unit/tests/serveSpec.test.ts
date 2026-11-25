@@ -201,6 +201,16 @@ describe('deriveAgentStructure', () => {
 });
 
 describe('resolveCandidate', () => {
+  test('answers 422 for a spec with no mapData or layers, whatever rate base the prompt named', async () => {
+    const resolved = await resolveCandidate(
+      { ...withBase({}), layers: undefined },
+      { rateBase: 50_000 }
+    );
+
+    expect(resolved).toBeInstanceOf(Response);
+    expect((resolved as Response).status).toBe(422);
+  });
+
   test('resolves a minimal IVS choropleth with the official faixas and no structural issue', async () => {
     jest
       .spyOn(RENDERABLE_DATASET_FETCHERS, 'municipios_ivs')

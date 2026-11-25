@@ -841,7 +841,7 @@
         "R-variable-choice",
         "R-nodata-color"
       ],
-      "rubric": "Mirrors /mapas mode coropletico-cadunico. Choropleth over a rate (cozinhas per 10 mil CadÚnico people); municípios without CadÚnico entry are \"sem dado\", never 0. Expected renderable id `cozinhas_por_10mil_cadunico` is to be added to RENDERABLE_DATASET_FETCHERS (id proposed here; derived from catalogue datasets cozinhas_geolocalizadas, municipios_cadunico).",
+      "rubric": "Mirrors /mapas mode coropletico-cadunico. Choropleth over a rate (cozinhas per 10 mil CadÚnico people); municípios without CadÚnico entry are \"sem dado\", never 0.",
       "gate": "scripts/gate_ratio.mjs"
     },
     {
@@ -882,7 +882,89 @@
         "R-variable-choice",
         "R-nodata-color"
       ],
-      "rubric": "Same ratio as ratio-cozinhas-cadunico-10mil with a different base (100 mil). The legend and label must say 100 mil, not 10 mil; failure = serving the 10 mil values under a 100 mil label. Expected renderable id `cozinhas_por_100mil_cadunico` is to be added to RENDERABLE_DATASET_FETCHERS (id proposed here; derived from catalogue datasets cozinhas_geolocalizadas, municipios_cadunico).",
+      "rubric": "Same ratio as ratio-cozinhas-cadunico-10mil with a different base (100 mil). The legend and label must say 100 mil, not 10 mil; failure = serving the 10 mil values under a 100 mil label.",
+      "gate": "scripts/gate_ratio.mjs"
+    },
+    {
+      "id": "ratio-cozinhas-cadunico-50mil",
+      "kind": "nogolden",
+      "family": "cozinhas",
+      "variable": "porDezMilCadUnico",
+      "variableDescription": "Mesma taxa de cozinhas por pessoas no CadÚnico, na base que o prompt nomeia (50 mil), servida sob o id que nomeia a base",
+      "prompt": "Mapa do número de cozinhas por 50 mil pessoas no CadÚnico em cada município.",
+      "expect": {
+        "dataset": "cozinhas_por_50mil_cadunico",
+        "sourceDatasets": [
+          "cozinhas_geolocalizadas",
+          "municipios_cadunico"
+        ],
+        "form": "polygon",
+        "legendScale": "quantitative",
+        "numerator": {
+          "source": "gateway.getCozinhasPorMunicipio",
+          "field": "quantidade",
+          "meaning": "cozinhas no município"
+        },
+        "denominator": {
+          "source": "gateway.getCozinhasPorMunicipio",
+          "field": "pessoasCadUnico",
+          "meaning": "pessoas no CadÚnico no município"
+        },
+        "rate": {
+          "source": "gateway.getCozinhasPorMunicipio",
+          "field": "porDezMilCadUnico",
+          "formula": "(quantidade / pessoasCadUnico) * 50000",
+          "per": 50000,
+          "tolerance": 0.01
+        }
+      },
+      "coversRules": [
+        "R-mapdataid-real",
+        "R-variable-choice",
+        "R-nodata-color"
+      ],
+      "rubric": "Same ratio on the base the prompt names, here 50 mil. Served as cozinhas_por_50mil_cadunico whatever id the agent picked; legend and hover card say 50 mil. Failure = the 10 mil or 100 mil values, or an id naming another base.",
+      "gate": "scripts/gate_ratio.mjs"
+    },
+    {
+      "id": "ratio-cozinhas-cadunico-50k",
+      "kind": "nogolden",
+      "family": "cozinhas",
+      "variable": "porDezMilCadUnico",
+      "variableDescription": "Mesma taxa de cozinhas por pessoas no CadÚnico, na base que o prompt nomeia (50 mil), servida sob o id que nomeia a base",
+      "prompt": "Mapa do número de cozinhas por 50k pessoas no CadÚnico em cada município.",
+      "expect": {
+        "dataset": "cozinhas_por_50mil_cadunico",
+        "sourceDatasets": [
+          "cozinhas_geolocalizadas",
+          "municipios_cadunico"
+        ],
+        "form": "polygon",
+        "legendScale": "quantitative",
+        "numerator": {
+          "source": "gateway.getCozinhasPorMunicipio",
+          "field": "quantidade",
+          "meaning": "cozinhas no município"
+        },
+        "denominator": {
+          "source": "gateway.getCozinhasPorMunicipio",
+          "field": "pessoasCadUnico",
+          "meaning": "pessoas no CadÚnico no município"
+        },
+        "rate": {
+          "source": "gateway.getCozinhasPorMunicipio",
+          "field": "porDezMilCadUnico",
+          "formula": "(quantidade / pessoasCadUnico) * 50000",
+          "per": 50000,
+          "tolerance": 0.01
+        }
+      },
+      "coversRules": [
+        "R-mapdataid-real",
+        "R-variable-choice",
+        "R-nodata-color"
+      ],
+      "rubric": "Same ratio on the base the prompt names, here 50 mil written as \"50k\". Served as cozinhas_por_50mil_cadunico whatever id the agent picked; legend and hover card say 50 mil. Failure = the 10 mil or 100 mil values, or an id naming another base.",
       "gate": "scripts/gate_ratio.mjs"
     },
     {
@@ -915,7 +997,7 @@
           "field": "pessoasPorCozinha",
           "formula": "pessoasCadUnico / quantidade",
           "rounding": "whole person",
-          "tolerance": 1
+          "tolerance": 0
         }
       },
       "coversRules": [
@@ -923,7 +1005,7 @@
         "R-variable-choice",
         "R-nodata-color"
       ],
-      "rubric": "Mirrors /mapas mode coropletico-pessoas-cozinha. The inverse of the 10 mil rate: must not be swapped for it, and the scale direction (higher = thinner coverage) must not be read as \"better\". Expected renderable id `cadunico_pessoas_por_cozinha` is to be added to RENDERABLE_DATASET_FETCHERS (id proposed here; derived from catalogue datasets cozinhas_geolocalizadas, municipios_cadunico).",
+      "rubric": "Mirrors /mapas mode coropletico-pessoas-cozinha. The inverse of the 10 mil rate: must not be swapped for it, and the scale direction (higher = thinner coverage) must not be read as \"better\".",
       "gate": "scripts/gate_ratio.mjs"
     },
     {

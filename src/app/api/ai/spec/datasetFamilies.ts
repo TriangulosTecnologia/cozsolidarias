@@ -1,12 +1,25 @@
 import type { RenderableDatasetId } from './mapDataCatalogue';
 
-export type Variant = { id: RenderableDatasetId; label: string; match: RegExp };
+/** A dataset a prompt can name within its family. */
+export type Variant = {
+  id: RenderableDatasetId;
+  label: string;
+  match: RegExp;
+};
 
 type Family = {
   keyword: RegExp;
   defaultId: RenderableDatasetId;
   variants: Variant[];
 };
+
+/**
+ * A prompt about how the cozinhas cover the CadÚnico population: it names both
+ * and not food insecurity. Its family takes such a prompt from the CADINSAN
+ * (`cadunico`) and kitchen (`cozinha`) families, which would both match it.
+ */
+const CADUNICO_COVERAGE =
+  '(?=.*cozinha)(?=.*cadunico)(?!.*(?:inseguranca|cadinsan))';
 
 /**
  * Dataset families whose variants a prompt can tell apart. `keyword` and
@@ -62,7 +75,10 @@ export const FAMILIES: Family[] = [
     ],
   },
   {
-    keyword: /cadinsan|cadunico|inseguranca alimentar/,
+    keyword: new RegExp(
+      `^(?!${CADUNICO_COVERAGE}).*(?:cadinsan|cadunico|inseguranca alimentar)`,
+      's'
+    ),
     defaultId: 'municipios_cadinsan',
     variants: [
       {
@@ -78,7 +94,28 @@ export const FAMILIES: Family[] = [
     ],
   },
   {
-    keyword: /cozinha|atendid/,
+    keyword: new RegExp(`^${CADUNICO_COVERAGE}`, 's'),
+    defaultId: 'cozinhas_por_10mil_cadunico',
+    variants: [
+      {
+        id: 'cozinhas_por_10mil_cadunico',
+        label: 'Cozinhas por 10 mil pessoas no CadÚnico',
+        match: /\b(?:10 mil|dez mil|10\.?000)\b/,
+      },
+      {
+        id: 'cozinhas_por_100mil_cadunico',
+        label: 'Cozinhas por 100 mil pessoas no CadÚnico',
+        match: /\b(?:100 mil|cem mil|100\.?000)\b/,
+      },
+      {
+        id: 'cadunico_pessoas_por_cozinha',
+        label: 'Pessoas no CadÚnico por cozinha',
+        match: /pessoas[\s\S]*\b(?:por|para cada) cozinha\b/,
+      },
+    ],
+  },
+  {
+    keyword: new RegExp(`^(?!${CADUNICO_COVERAGE}).*(?:cozinha|atendid)`, 's'),
     defaultId: 'cozinhas_geolocalizadas',
     variants: [
       {
@@ -94,3 +131,53 @@ export const FAMILIES: Family[] = [
     ],
   },
 ];
+
+/** "por N mil", "por 50mil", "a cada dez mil", "por mil": the thousands a prompt names. */
+const BASE_IN_THOUSANDS =
+  /\b(?:por|a cada|para cada) (?:cada )?(?:(\d+(?:,\d+)?|dez|cem) ?)?mil\b/;
+
+/** "por 50k", "por 50 k": thousands written with `k`. */
+const BASE_IN_K = /\b(?:por|a cada|para cada) (?:cada )?(\d+(?:,\d+)?) ?k\b/;
+
+/**
+ * "por 100.000", "para cada 20000", "por 5000 pessoas": a base written in full.
+ * Four digits count only when followed by the people they count, so a year
+ * ("por 2025") is not read as a base.
+ */
+const BASE_IN_UNITS =
+  /\b(?:por|a cada|para cada) (?:cada )?(\d{1,3}(?:\.\d{3})+|\d{5,}|\d{4}(?= (?:pessoas|habitantes)\b))\b/;
+
+/** The thousands a "por N mil" amount names: a number, "dez", "cem", or none ("por mil"). */
+const countOf = (amount: string | undefined): number => {
+  if (amount === undefined) {
+    return 1;
+  }
+  const words: Record<string, number> = { dez: 10, cem: 100 };
+  return words[amount] ?? Number(amount.replace(',', '.'));
+};
+
+/**
+ * The rate base a prompt names ("por 50 mil pessoas" → `50_000`), read from
+ * the accent-stripped, lower-cased prompt. It is the base a rate is computed
+ * on when the prompt names one, whatever the id the agent picked: the route
+ * serves the rate under the id that names it (`cadunicoRateId`).
+ *
+ * @param text - The normalized prompt.
+ * @returns The base, in people, or `undefined` when the prompt names none.
+ *
+ * @example
+ * rateBaseFromPrompt('cozinhas por 50 mil pessoas no cadunico'); // 50_000
+ * rateBaseFromPrompt('pessoas no cadunico por cozinha'); // undefined
+ */
+export const rateBaseFromPrompt = (text: string): number | undefined => {
+  const thousands = BASE_IN_THOUSANDS.exec(text);
+  if (thousands) {
+    return Math.round(countOf(thousands[1]) * 1000);
+  }
+  const k = BASE_IN_K.exec(text)?.[1];
+  if (k !== undefined) {
+    return Math.round(Number(k.replace(',', '.')) * 1000);
+  }
+  const units = BASE_IN_UNITS.exec(text)?.[1];
+  return units === undefined ? undefined : Number(units.replaceAll('.', ''));
+};

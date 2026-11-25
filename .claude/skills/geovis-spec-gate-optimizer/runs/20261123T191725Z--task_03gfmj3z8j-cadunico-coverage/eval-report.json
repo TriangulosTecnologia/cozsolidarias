@@ -1,0 +1,52 @@
+{
+  "runId": "20261123T191725Z--task_03gfmj3z8j-cadunico-coverage",
+  "decision": null,
+  "totals": {
+    "cases": 3,
+    "passed": 3,
+    "failed": 0
+  },
+  "cases": [
+    {
+      "case": "ratio-cozinhas-cadunico-100mil",
+      "prompt": "Mapa do número de cozinhas por 100 mil pessoas no CadÚnico em cada município.",
+      "httpStatus": 200,
+      "durationMs": 9981,
+      "outcome": "spec",
+      "issues": [],
+      "failedChecks": [],
+      "passed": true,
+      "class": "approved",
+      "scope": null,
+      "issue": null
+    },
+    {
+      "case": "ratio-cozinhas-cadunico-10mil",
+      "prompt": "Mapa do número de cozinhas por 10 mil pessoas no CadÚnico em cada município.",
+      "httpStatus": 200,
+      "durationMs": 14265,
+      "outcome": "spec",
+      "issues": [],
+      "failedChecks": [],
+      "passed": true,
+      "class": "approved",
+      "scope": null,
+      "issue": null
+    },
+    {
+      "case": "ratio-pessoas-cadunico-por-cozinha",
+      "prompt": "Mapa de pessoas no CadÚnico por cozinha em cada município.",
+      "httpStatus": 200,
+      "durationMs": 14681,
+      "outcome": "spec",
+      "issues": [],
+      "failedChecks": [],
+      "passed": true,
+      "class": "approved",
+      "scope": null,
+      "issue": null
+    }
+  ],
+  "declined": [],
+  "proposals": []
+}
