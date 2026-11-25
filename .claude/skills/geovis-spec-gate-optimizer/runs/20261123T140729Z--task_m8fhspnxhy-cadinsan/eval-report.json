@@ -1,0 +1,39 @@
+{
+  "runId": "20261123T140729Z--task_m8fhspnxhy-cadinsan",
+  "decision": null,
+  "totals": {
+    "cases": 2,
+    "passed": 2,
+    "failed": 0
+  },
+  "cases": [
+    {
+      "case": "golden-cadinsan",
+      "prompt": "Mapa da insegurança alimentar das famílias do CadÚnico por município.",
+      "httpStatus": 200,
+      "durationMs": 18556,
+      "outcome": "spec",
+      "issues": [],
+      "failedChecks": [],
+      "passed": true,
+      "class": "approved",
+      "scope": null,
+      "issue": null
+    },
+    {
+      "case": "trap-cadinsan-sem-pbf",
+      "prompt": "Mapa da insegurança alimentar desconsiderando o efeito do Bolsa Família.",
+      "httpStatus": 200,
+      "durationMs": 9976,
+      "outcome": "spec",
+      "issues": [],
+      "failedChecks": [],
+      "passed": true,
+      "class": "approved",
+      "scope": null,
+      "issue": null
+    }
+  ],
+  "declined": [],
+  "proposals": []
+}

@@ -1,4 +1,10 @@
 import { validateSpec } from '@ttoss/geovis';
+import {
+  CADINSAN_COLORS,
+  CADINSAN_LEGEND_LABELS,
+  CADINSAN_THRESHOLDS,
+  WITHOUT_KITCHEN_COLOR,
+} from 'src/app/(features)/mapas/geovisChoroplethScales';
 import baseVisualizationSpecJson from 'src/app/api/ai/spec/instructions/baseVisualizationSpec.json';
 import {
   applyAppLegendRules,
@@ -72,8 +78,8 @@ describe('applyAppLegendRules', () => {
   test('carries the agent reference and no-data label onto the resolver legend', () => {
     const spec = applyAppLegendRules({
       spec: {
-        mapData: [{ mapDataId: 'municipios_cadinsan', title: 'InSAN' }],
-        layers: [{ mapDataId: 'municipios_cadinsan', activeLegendId: 'l' }],
+        mapData: [{ mapDataId: 'cozinhas_geolocalizadas', title: 'InSAN' }],
+        layers: [{ mapDataId: 'cozinhas_geolocalizadas', activeLegendId: 'l' }],
         legends: [{ id: 'l', title: 'InSAN', reference: 'geovis' }],
       },
       agentLegends: [
@@ -148,6 +154,50 @@ describe('official IVS/IDHM legend', () => {
       expect((resolved as UnknownRecord)['legends']).toEqual([
         expect.objectContaining({
           labelFormat: { type: 'labels', labels: expect.any(Array) },
+        }),
+      ]);
+    }
+  );
+});
+
+describe('CADINSAN legend', () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  test.each(['municipios_cadinsan', 'municipios_cadinsan_sem_pbf'] as const)(
+    'resolves %s onto the /mapas ruler and labels, not Jenks breaks',
+    async (mapDataId) => {
+      jest.spyOn(RENDERABLE_DATASET_FETCHERS, mapDataId).mockResolvedValue([
+        { geometryId: '3550308', value: 3.2 },
+        { geometryId: '3304557', value: 7.9 },
+        { geometryId: '5300108', value: 12.4 },
+        { geometryId: '2927408', value: 18.1 },
+        { geometryId: '1302603', value: 26.5 },
+        { geometryId: '2304400', value: 33.7 },
+      ] as never);
+
+      const resolved = await resolveCandidate(
+        mergeSpecs(baseVisualizationSpecJson as UnknownRecord, {
+          mapType: 'choropleth',
+          mapData: [{ mapDataId, title: 'Insegurança alimentar' }],
+        })
+      );
+
+      expect(validateSpec(resolved)).toEqual(
+        expect.objectContaining({ status: 'resolved' })
+      );
+      expect((resolved as UnknownRecord)['legends']).toEqual([
+        expect.objectContaining({
+          colorBy: {
+            type: 'quantitative',
+            property: 'value',
+            scale: 'threshold',
+            thresholds: CADINSAN_THRESHOLDS,
+            colors: CADINSAN_COLORS,
+            defaultColor: WITHOUT_KITCHEN_COLOR,
+          },
+          labelFormat: { type: 'labels', labels: CADINSAN_LEGEND_LABELS },
         }),
       ]);
     }

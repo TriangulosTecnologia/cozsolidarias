@@ -1,3 +1,4 @@
+import { fixedScaleOf } from 'src/app/api/ai/spec/legendRules';
 import {
   buildCatalogueContext,
   officialFaixasOf,
@@ -729,6 +730,18 @@ describe('findReclassifiedOfficialIndex', () => {
         id
       );
     }
+  });
+
+  test('leaves the CADINSAN shares out: a fixed ruler, not an official index', () => {
+    for (const id of ['municipios_cadinsan', 'municipios_cadinsan_sem_pbf']) {
+      expect(officialFaixasOf(id)).toBeUndefined();
+      expect(fixedScaleOf(id)).toBe('cadinsan');
+      expect(
+        findReclassifiedOfficialIndex(specWith(id, [3, 7, 12]))
+      ).toBeNull();
+    }
+    expect(fixedScaleOf('municipios_ivs')).toBe('ivs');
+    expect(fixedScaleOf('cozinhas_geolocalizadas')).toBeUndefined();
   });
 
   test('ignores a spec without layers, legends or numeric thresholds', () => {
