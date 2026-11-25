@@ -251,6 +251,17 @@ export const resolveCandidate = async (
 };
 
 /**
+ * The fixed pt-BR 502 message for data the server could not read, whether
+ * while serving the spec ({@link resolveServedSpec}) or while validating a
+ * candidate (`VALIDATION_DATA_UNAVAILABLE`). It carries no internal detail.
+ *
+ * @example
+ * errorResponse({ status: 502, message: DATA_UNAVAILABLE_MESSAGE });
+ */
+export const DATA_UNAVAILABLE_MESSAGE =
+  'Não foi possível carregar os dados do mapa. Tente novamente em instantes.';
+
+/**
  * {@link resolveCandidate} for the route, on the rate base the prompt names
  * (see `rateBaseFromPrompt`): a gateway failure is logged with its cause (see
  * {@link logGeneration}) and answered with a fixed 502.
@@ -272,10 +283,6 @@ export const resolveServedSpec = async (params: {
     });
     // A gateway rejection after the session exists is a 502, with the session
     // id attached by the caller; the message is fixed so no internal detail leaks.
-    return errorResponse({
-      status: 502,
-      message:
-        'Não foi possível carregar os dados do mapa. Tente novamente em instantes.',
-    });
+    return errorResponse({ status: 502, message: DATA_UNAVAILABLE_MESSAGE });
   }
 };

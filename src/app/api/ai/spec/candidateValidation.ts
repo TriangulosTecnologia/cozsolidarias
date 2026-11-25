@@ -245,6 +245,17 @@ export const normalizeCandidate = (spec: UnknownRecord): UnknownRecord => {
 };
 
 /**
+ * The message {@link validateCandidate} rejects with when the server cannot
+ * read the data to resolve a candidate: an operational failure, never an
+ * issue for the model. The route answers it with `DATA_UNAVAILABLE_MESSAGE`.
+ *
+ * @example
+ * error instanceof Error && error.message === VALIDATION_DATA_UNAVAILABLE;
+ */
+export const VALIDATION_DATA_UNAVAILABLE =
+  'Validation could not read the data to resolve the candidate';
+
+/**
  * Validates one candidate spec the model proposed — the body of the
  * `validate_spec` tool. Normalizes it ({@link normalizeCandidate}), runs the
  * pre-resolution checks, then merges it over the base spec and resolves it
@@ -255,6 +266,8 @@ export const normalizeCandidate = (spec: UnknownRecord): UnknownRecord => {
  * @returns The normalized candidate (never the resolved one, which carries
  * every data row) and the issues that remain, categorized, deduplicated and
  * ordered ({@link normalizeIssues}); empty when it is valid.
+ * @throws `Error(VALIDATION_DATA_UNAVAILABLE)` when reading the data fails
+ * (the gateway rejects): no attempt should be counted for it.
  * @example
  * const { spec: repaired, issues } = await validateCandidate(modelSpec);
  */
@@ -275,24 +288,20 @@ export const validateCandidate = async (
   }
 
   const normalized = normalizeCandidate(spec);
-  // A gateway failure is not the model's to repair: it is reported as an
-  // issue, so the generation is not aborted as an agent failure.
+  // A gateway failure is not the model's to repair: it ends the generation.
   const resolved = await resolveCandidate(
     mergeSpecs(baseVisualizationSpecJson as UnknownRecord, normalized)
-  ).catch(() => {
-    return null;
+  ).catch((error: unknown) => {
+    throw new Error(VALIDATION_DATA_UNAVAILABLE, { cause: error });
   });
   // A rejected spec is one issue carrying the route's own 422 message.
   const resolutionIssues =
-    resolved === null || resolved instanceof Response
+    resolved instanceof Response
       ? [
           {
             code: 'unresolvable-spec',
             path: '',
-            message:
-              resolved === null
-                ? 'Não foi possível ler os dados para validar o spec agora.'
-                : ((await resolved.json()) as { message: string }).message,
+            message: ((await resolved.json()) as { message: string }).message,
           },
         ]
       : [

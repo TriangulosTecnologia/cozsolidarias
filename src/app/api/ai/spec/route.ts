@@ -8,6 +8,7 @@ import {
   collectResolvedIssues,
   validateCandidate,
   validateWithLocalRepairs,
+  VALIDATION_DATA_UNAVAILABLE,
 } from './candidateValidation';
 import baseVisualizationSpecJson from './instructions/baseVisualizationSpec.json';
 import {
@@ -17,7 +18,7 @@ import {
 import { MAP_TYPE_OPTIONS } from './mapTypeOptions';
 import { generateInSession, withSessionId } from './naturaliSessionApi';
 import { type ParsedRequest, preflightRequest } from './requestPreflight';
-import { resolveServedSpec } from './serveSpec';
+import { DATA_UNAVAILABLE_MESSAGE, resolveServedSpec } from './serveSpec';
 import { mergeSpecs } from './specDefaults';
 import {
   errorResponse,
@@ -140,9 +141,15 @@ const validateEnv = ():
  * failed generation, and an unparseable reply into the same generic
  * sentence. Matches on the fixed prefixes that function throws; anything
  * else gets a generic message. No upstream text is reflected to the browser.
+ * Data that could not be read while validating a candidate gets the same
+ * message as data that could not be read while serving the spec.
  */
 const describeAgentFailure = (error: unknown): string => {
   const message = error instanceof Error ? error.message : String(error);
+
+  if (message === VALIDATION_DATA_UNAVAILABLE) {
+    return DATA_UNAVAILABLE_MESSAGE;
+  }
 
   if (message.startsWith('Naturali generate POST responded with status')) {
     return `Não foi possível iniciar a geração com o modelo de IA (${message}). Tente novamente em instantes.`;

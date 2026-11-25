@@ -2,6 +2,7 @@ import { validateSpec } from '@ttoss/geovis';
 import * as generationLogger from 'src/app/api/ai/spec/generationLogger';
 import baseVisualizationSpecJson from 'src/app/api/ai/spec/instructions/baseVisualizationSpec.json';
 import { POST } from 'src/app/api/ai/spec/route';
+import { DATA_UNAVAILABLE_MESSAGE } from 'src/app/api/ai/spec/serveSpec';
 import { invalidSpecResponse } from 'src/app/api/ai/spec/specValidation';
 
 import { IVS_FAMILY_THRESHOLDS } from '@/app/(features)/mapas/geovisScoreScales';
@@ -963,6 +964,45 @@ describe('POST /api/ai/spec', () => {
       prompt: 'mapa de IVS por município',
       reply: { cause: 'gateway down' },
     });
+  });
+
+  test('answers a gateway failure while validating a candidate with the data-failure 502, never as an issue for the agent', async () => {
+    jest
+      .spyOn(gateway, 'getIvsPorMunicipio')
+      .mockRejectedValue(new Error('gateway down'));
+    const fetchMock = mockSessionOpening().mockResolvedValueOnce(
+      jsonResponse({
+        generation_id: 'gen_1',
+        status: 'requires_action',
+        required_action: {
+          type: 'submit_tool_outputs',
+          tool_calls: [
+            {
+              id: 'call_1',
+              tool_name: 'validate_spec',
+              args: {
+                spec: {
+                  mapType: 'choropleth',
+                  mapData: [{ mapDataId: 'municipios_ivs', title: 'IVS' }],
+                },
+              },
+            },
+          ],
+        },
+      })
+    );
+    global.fetch = fetchMock;
+
+    const response = await POST(
+      jsonRequest({ prompt: 'mapa de IVS por município' })
+    );
+    const body = (await response.json()) as ErrorBody;
+
+    expect(response.status).toBe(502);
+    expect(body.message).toBe(DATA_UNAVAILABLE_MESSAGE);
+    expect(response.headers.get('x-session-id')).toBe('sess_route0001');
+    // Session, message, generate: no tool output reaches the agent.
+    expect(fetchMock).toHaveBeenCalledTimes(3);
   });
 
   test('logs a gateway rejection that is not an Error by its string value', async () => {

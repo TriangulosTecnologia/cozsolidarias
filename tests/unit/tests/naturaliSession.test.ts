@@ -154,6 +154,22 @@ describe('generateSpec', () => {
     expect(fetchMock).toHaveBeenCalledTimes(3);
   });
 
+  test('lets a validation failure end the turn, sending the agent no tool output and counting no attempt', async () => {
+    const fetchMock = jest
+      .fn()
+      .mockResolvedValueOnce(messageSaved())
+      .mockResolvedValueOnce(pausedOn('call_1', { round: 1 }));
+    global.fetch = fetchMock;
+    const validateCandidate = jest
+      .fn()
+      .mockRejectedValue(new Error('data unavailable'));
+
+    await expect(
+      generateSpec({ ...BASE_PARAMS, validateCandidate })
+    ).rejects.toThrow('data unavailable');
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
   test('answers a call to an unknown tool with an error output instead of validating', async () => {
     const fetchMock = jest
       .fn()

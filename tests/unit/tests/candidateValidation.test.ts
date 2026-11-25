@@ -5,6 +5,7 @@ import {
   normalizeCandidate,
   validateCandidate,
   validateWithLocalRepairs,
+  VALIDATION_DATA_UNAVAILABLE,
 } from 'src/app/api/ai/spec/candidateValidation';
 import { RENDERABLE_DATASET_FETCHERS } from 'src/app/api/ai/spec/mapDataCatalogue';
 import {
@@ -608,19 +609,17 @@ describe('validateCandidate', () => {
     ]);
   });
 
-  test('reports a gateway failure while resolving as an issue, not as a rejection', async () => {
+  test('rejects with VALIDATION_DATA_UNAVAILABLE when the gateway fails while resolving, never reporting it as an issue', async () => {
     jest
       .spyOn(RENDERABLE_DATASET_FETCHERS, 'municipios_ivs')
       .mockRejectedValue(new Error('gateway down'));
 
-    const result = await validateCandidate({
-      mapType: 'choropleth',
-      mapData: [{ mapDataId: 'municipios_ivs', title: 'IVS' }],
-    });
-
-    expect(result.issues).toEqual([
-      expect.objectContaining({ code: 'unresolvable-spec' }),
-    ]);
+    await expect(
+      validateCandidate({
+        mapType: 'choropleth',
+        mapData: [{ mapDataId: 'municipios_ivs', title: 'IVS' }],
+      })
+    ).rejects.toThrow(VALIDATION_DATA_UNAVAILABLE);
   });
 
   test('categorizes, deduplicates and orders the issues it reports', async () => {
